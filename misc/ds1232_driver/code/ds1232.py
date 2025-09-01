@@ -1,9 +1,14 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
+# -*coding: utf-8 -*       
 # @Time    : 2025/8/25 下午6:46   
 # @Author  : 李清水            
 # @File    : ds1232.py       
 # @Description : 外部DS1232看门狗模块驱动程序
+
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
@@ -31,10 +36,10 @@ class DS1232:
         kick() -> None: 手动喂狗，立即翻转一次 WDI 引脚。
 
     Notes:
-        - 初始化时会创建 Timer 对象以定时翻转 WDI。
-        - _feed 为内部回调方法，不建议直接调用。
-        - 该类方法大多非 ISR-safe，Timer 回调 _feed 是 ISR-safe。
-        - stop() 后 WDI 引脚保持低电平，DS1232 将在超时后复位 MCU。
+        初始化时会创建 Timer 对象以定时翻转 WDI。
+        _feed 为内部回调方法，不建议直接调用。
+        该类方法大多非 ISR-safe，Timer 回调 _feed 是 ISR-safe。
+        stop() 后 WDI 引脚保持低电平，DS1232 将在超时后复位 MCU。
 
     ==========================================
 
@@ -52,10 +57,10 @@ class DS1232:
         kick() -> None: Manually feed the watchdog by toggling WDI once.
 
     Notes:
-        - Initializes a Timer to periodically toggle WDI.
-        - _feed is an internal callback method, not recommended for direct user call.
-        - Most methods are not ISR-safe; _feed callback is ISR-safe.
-        - After stop(), WDI remains low; DS1232 will reset MCU on timeout.
+        Initializes a Timer to periodically toggle WDI.
+        _feed is an internal callback method, not recommended for direct user call.
+        Most methods are not ISR-safe; _feed callback is ISR-safe.
+        After stop(), WDI remains low; DS1232 will reset MCU on timeout.
     """
 
     def __init__(self, wdi_pin: int, feed_interval: int = 1000) -> None:
