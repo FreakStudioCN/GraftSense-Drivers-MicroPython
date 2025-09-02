@@ -6,6 +6,11 @@
 # @Description : 单总线通信类
 # 参考代码：https://github.com/robert-hh/Onewire_DS18X20/blob/master/onewire.py
 
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 ========================================
 
 # 导入时间相关的模块
@@ -28,24 +33,53 @@ class OneWire:
 
     Attributes:
         pin (Pin): 用于 OneWire 通信的 GPIO 引脚实例。
-        crctab1 (bytes): CRC校验查表法需要的第一个字节表。
-        crctab2 (bytes): CRC校验查表法需要的第二个字节表。
+        crctab1 (bytes): CRC 校验查表法需要的第一个字节表。
+        crctab2 (bytes): CRC 校验查表法需要的第二个字节表。
         disable_irq (function): 禁用中断的函数。
         enable_irq (function): 使能中断的函数。
 
     Methods:
-        reset(required: bool = False) -> bool: 重置单总线。
-        readbit() -> int: 读取单总线上的一个数据位。
-        readbyte() -> int: 读取单总线上的一个字节。
-        readbytes(count: int) -> bytearray: 读取单总线上的多个字节。
-        readinto(buf: bytearray) -> None: 读取单总线上的多个字节放到一个buf数组中。
-        writebit(value: int, powerpin: machine.Pin = None) -> None: 向单总线写入一个数据位。
-        writebyte(value: int, powerpin: machine.Pin = None) -> None: 向单总线写入一个字节。
-        write(buf: bytearray) -> None: 将buf数组中的数据写入单总线。
-        select_rom(rom: bytearray) -> None: 发送匹配ROM ID命令。
-        crc8(data: bytearray) -> int: CRC校验，基于查表法实现。
-        scan() -> list[bytearray]: 扫描单总线上的所有器件，返回所有匹配的ROM ID。
-        _search_rom(l_rom: bytearray, diff: int) -> tuple[bytearray, int]: 搜索单总线上的对应ROM ID的器件。
+        __init__(pin: Pin) -> None: 初始化 OneWire 总线。
+        reset(required: bool = False) -> bool: 复位总线。
+        readbit() -> int: 读取一个比特。
+        readbyte() -> int: 读取一个字节。
+        readbytes(count: int) -> bytearray: 读取多个字节。
+        readinto(buf: bytearray) -> None: 读取到指定缓冲区。
+        writebit(value: int, powerpin: Pin = None) -> None: 写入一个比特。
+        writebyte(value: int, powerpin: Pin = None) -> None: 写入一个字节。
+        write(buf: bytearray) -> None: 写入多个字节。
+        select_rom(rom: bytearray) -> None: 发送匹配 ROM 命令。
+        crc8(data: bytearray) -> int: 执行 CRC 校验。
+        scan() -> list[bytearray]: 扫描并返回所有 ROM ID。
+        _search_rom(l_rom: bytearray, diff: int) -> tuple[bytearray, int]: 搜索 ROM 设备。
+    
+    ==========================================
+
+    OneWire class for communication via the OneWire protocol,
+    supporting devices such as the DS18B20 temperature sensor.
+    Provides basic bus operations, data transfer, and device search.
+
+    Attributes:
+        pin (Pin): GPIO pin instance for OneWire communication.
+        crctab1 (bytes): First lookup table for CRC check.
+        crctab2 (bytes): Second lookup table for CRC check.
+        disable_irq (function): Function to disable interrupts.
+        enable_irq (function): Function to enable interrupts.
+
+    Methods:
+        __init__(pin: Pin) -> None: Initialize OneWire bus.
+        reset(required: bool = False) -> bool: Reset bus.
+        readbit() -> int: Read one bit.
+        readbyte() -> int: Read one byte.
+        readbytes(count: int) -> bytearray: Read multiple bytes.
+        readinto(buf: bytearray) -> None: Read into buffer.
+        writebit(value: int, powerpin: Pin = None) -> None: Write one bit.
+        writebyte(value: int, powerpin: Pin = None) -> None: Write one byte.
+        write(buf: bytearray) -> None: Write multiple bytes.
+        select_rom(rom: bytearray) -> None: Send ROM match command.
+        crc8(data: bytearray) -> int: Perform CRC check.
+        scan() -> list[bytearray]: Scan and return all ROM IDs.
+        _search_rom(l_rom: bytearray, diff: int) -> tuple[bytearray, int]: Search for ROM devices.
     """
     # 单总线通信的ROM命令
     CMD_SEARCHROM   = const(0xf0)  # 搜索命令
@@ -57,13 +91,17 @@ class OneWire:
 
     def __init__(self, pin: machine.Pin) -> None:
         """
-        初始化单总线类，传入使用的数据引脚对象。
+        初始化 OneWire 类。
 
         Args:
-            pin (machine.Pin): 数据引脚对象。
+            pin (machine.Pin): 用于通信的数据引脚对象。
 
-        Returns:
-            None
+        ==========================================
+
+        Initialize OneWire class.
+
+        Args:
+            pin (machine.Pin): Pin object used for communication.
         """
         self.pin = pin
         # 初始化引脚为上拉、开漏模式
@@ -82,13 +120,26 @@ class OneWire:
         重置单总线。
 
         Args:
-            required (bool): 是否需要手动触发断言，默认为 False。
+            required (bool): 是否强制断言未响应情况，默认为 False。
 
         Returns:
-            bool: 如果设备发出了响应脉冲，返回 True；反之返回 False 表示失败。
+            bool: 如果有设备响应复位脉冲，返回 True；否则返回 False。
 
         Raises:
-            AssertionError: 如果 required 为 True 且设备未响应复位脉冲。
+            AssertionError: 当 required=True 且设备未响应时抛出。
+
+        ==========================================
+
+        Reset the OneWire bus.
+
+        Args:
+            required (bool): Whether to assert on missing response. Default is False.
+
+        Returns:
+            bool: True if device responded to reset pulse, False otherwise.
+
+        Raises:
+            AssertionError: Raised if required=True and no response received.
         """
         sleep_us = time.sleep_us
         pin = self.pin
@@ -116,11 +167,15 @@ class OneWire:
         """
         读取单总线上的一个数据位。
 
-        Args:
-            None
-
         Returns:
             int: 读取的数据位（0 或 1）。
+
+        ==========================================
+
+        Read one bit from the OneWire bus.
+
+        Returns:
+            int: The read bit (0 or 1).
         """
         sleep_us = time.sleep_us
         pin = self.pin
@@ -145,13 +200,17 @@ class OneWire:
 
     def readbyte(self) -> int:
         """
-        读取单总线上的一个字节，通过调用8次readbit方法实现。
-
-        Args:
-            None
+        读取单总线上的一个字节。
 
         Returns:
             int: 读取的字节（0~255）。
+
+        ==========================================
+
+        Read one byte from the OneWire bus.
+
+        Returns:
+            int: The read byte (0–255).
         """
         value = 0
         for i in range(8):
@@ -162,13 +221,23 @@ class OneWire:
 
     def readbytes(self, count: int) -> bytearray:
         """
-        读取单总线上的多个字节，通过调用多次readbyte方法实现。
+        读取单总线上的多个字节。
 
         Args:
             count (int): 读取的字节数。
 
         Returns:
             bytearray: 读取的二进制字节数组。
+
+        ==========================================
+
+        Read multiple bytes from the OneWire bus.
+
+        Args:
+            count (int): Number of bytes to read.
+
+        Returns:
+            bytearray: Read bytes as a bytearray.
         """
         buf = bytearray(count)
         for i in range(count):
@@ -177,13 +246,17 @@ class OneWire:
 
     def readinto(self, buf: bytearray) -> None:
         """
-        读取单总线上的多个字节放到一个buf数组中。
+        读取多个字节并写入缓冲区。
 
         Args:
-            buf (bytearray): 放置需要读取数据的二进制数组。
+            buf (bytearray): 用于存放读取数据的缓冲区。
 
-        Returns:
-            None
+        ==========================================
+
+        Read multiple bytes into a buffer.
+
+        Args:
+            buf (bytearray): Buffer to store the read data.
         """
         for i in range(len(buf)):
             buf[i] = self.readbyte()
@@ -194,11 +267,15 @@ class OneWire:
 
         Args:
             value (int): 要写入的数据位，0 或 1。
-            powerpin (machine.Pin): 供电引脚，采用寄生供电方式时需要传入此对象。
-                                   默认采用独立供电，无需此引脚。
+            powerpin (machine.Pin, optional): 供电引脚，用于寄生供电方式。
 
-        Returns:
-            None
+        ==========================================
+
+        Write one bit to the OneWire bus.
+
+        Args:
+            value (int): Bit value to write (0 or 1).
+            powerpin (machine.Pin, optional): Power pin for parasitic power mode.
         """
         sleep_us = time.sleep_us
         pin = self.pin
@@ -227,14 +304,19 @@ class OneWire:
 
     def writebyte(self, value: int, powerpin: machine.Pin = None) -> None:
         """
-        向单总线写入一个字节，通过连续调用8次writebit方法实现。
+        向单总线写入一个字节。
 
         Args:
-            value (int): 需要写入的值，0~255。
-            powerpin (machine.Pin): 供电引脚，采用寄生供电方式时需要传入此对象。
+            value (int): 要写入的字节值（0~255）。
+            powerpin (machine.Pin, optional): 供电引脚，用于寄生供电方式。
 
-        Returns:
-            None
+        ==========================================
+
+        Write one byte to the OneWire bus.
+
+        Args:
+            value (int): Byte value to write (0–255).
+            powerpin (machine.Pin, optional): Power pin for parasitic power mode.
         """
         for i in range(7):
             self.writebit(value & 1)
@@ -243,26 +325,34 @@ class OneWire:
 
     def write(self, buf: bytearray) -> None:
         """
-        将buf数组中的数据写入单总线，通过调用多次writebyte方法实现。
+        向单总线写入多个字节。
 
         Args:
-            buf (bytearray): 放置需要发送数据的二进制数组。
+            buf (bytearray): 需要写入的数据数组。
 
-        Returns:
-            None
+        ==========================================
+
+        Write multiple bytes to the OneWire bus.
+
+        Args:
+            buf (bytearray): Data buffer to write.
         """
         for b in buf:
             self.writebyte(b)
 
     def select_rom(self, rom: bytearray) -> None:
         """
-        发送匹配ROM ID命令。
+        发送匹配 ROM 命令。
 
         Args:
-            rom (bytearray): ROM ID，8个字节的bytearray，8 bytes x 8 bits = 64 bits。
+            rom (bytearray): 目标设备的 ROM ID（8 字节）。
 
-        Returns:
-            None
+        ==========================================
+
+        Send ROM match command.
+
+        Args:
+            rom (bytearray): ROM ID of target device (8 bytes).
         """
         # 初始化总线
         self.reset()
@@ -273,13 +363,23 @@ class OneWire:
 
     def crc8(self, data: bytearray) -> int:
         """
-        CRC校验，基于查表法实现。
+        执行 CRC 校验。
 
         Args:
             data (bytearray): 需要校验的数据。
 
         Returns:
-            int: CRC校验值，为0则匹配成功。
+            int: CRC 校验结果，0 表示通过。
+
+        ==========================================
+
+        Perform CRC check.
+
+        Args:
+            data (bytearray): Data to check.
+
+        Returns:
+            int: CRC result (0 means valid).
         """
 
         # 初始化crc变量为0
@@ -297,14 +397,17 @@ class OneWire:
 
     def scan(self) -> list[bytearray]:
         """
-        扫描单总线上的所有器件，返回所有匹配的ROM ID。
-
-        Args:
-            None
+        扫描总线上所有设备。
 
         Returns:
-            list[bytearray]: 返回所有连接设备的 ROM 列表。
-                              每个 ROM 以 8 字节的字节对象形式返回。
+            list[bytearray]: 所有设备的 ROM ID 列表，每个 ROM 为 8 字节。
+
+        ==========================================
+
+        Scan all devices on the bus.
+
+        Returns:
+            list[bytearray]: List of device ROM IDs, each 8 bytes.
         """
         # 存放设备ROM ID的列表
         devices = []
@@ -324,14 +427,25 @@ class OneWire:
 
     def _search_rom(self, l_rom: bytearray, diff: int) -> tuple[bytearray, int]:
         """
-        搜索单总线上的对应ROM ID的器件。
+        搜索总线上的设备 ROM。
 
         Args:
-            l_rom (bytearray): 上次搜索到的 ROM ID。
-            diff (int): 上次搜索的差异位置。
+            l_rom (bytearray): 上一次搜索到的 ROM ID。
+            diff (int): 上一次的差异位置。
 
         Returns:
-            tuple[bytearray, int]: 若是搜索成功，返回 ROM ID 和更新后的 diff 值。
+            tuple[bytearray, int]: 搜索到的 ROM ID 和新的差异位置。
+
+        ==========================================
+
+        Search device ROM on the bus.
+
+        Args:
+            l_rom (bytearray): Previously found ROM ID.
+            diff (int): Previous difference position.
+
+        Returns:
+            tuple[bytearray, int]: Found ROM ID and updated diff value.
         """
 
         # 重置总线，判断是否有从机响应

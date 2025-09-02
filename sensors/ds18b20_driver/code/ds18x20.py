@@ -6,6 +6,11 @@
 # @Description : ds18x20温度传感器类
 # 参考代码：https://github.com/robert-hh/Onewire_DS18X20/blob/master/ds18x20.py
 
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 ========================================
 
 # 导入硬件相关的模块
@@ -20,29 +25,51 @@ from onewire import OneWire
 
 # ======================================== 自定义类 ============================================
 
-# 定义DS18X20温度传感器类
 class DS18X20:
     """
-    DS18X20 温度传感器类，用于与 DS18B20、DS18S20 等单总线温度传感器进行通信。
-    该类封装了温度传感器的功能，包括温度转换、读取温度、设置分辨率等。
+    DS18X20 温度传感器类，用于与 DS18B20、DS18S20 等单总线温度传感器通信。
 
     Attributes:
-        ow (OneWire): 单总线通信类的实例。
-        buf (bytearray): 用于存储暂存器数据的缓冲区（9 字节）。
-        config (bytearray): 用于存储用户配置数据的缓冲区（3 字节）。
-        power (int): 电源模式，1 为独立供电，0 为寄生供电。
-        powerpin (machine.Pin): 供电引脚对象（用于寄生供电模式）。
+        ow (OneWire): 单总线通信类实例。
+        buf (bytearray): 暂存器数据缓冲区（9 字节）。
+        config (bytearray): 用户配置数据缓冲区（3 字节）。
+        power (int): 电源模式，1 表示独立供电，0 表示寄生供电。
+        powerpin (Pin): 供电引脚对象（用于寄生供电模式）。
 
     Methods:
-        powermode(powerpin: machine.Pin) -> int: 设置 DS18X20 的供电模式。
-        scan() -> list[bytearray]: 扫描单总线上的 DS18X20 传感器，返回 ROM 地址列表。
-        convert_temp(rom: bytearray) -> None: 启动传感器温度转换。
-        read_scratch(rom: bytearray) -> bytearray: 读取传感器暂存器数据。
-        write_scratch(rom: bytearray, buf: bytearray) -> None: 写入传感器暂存器数据。
-        read_temp(rom: bytearray) -> float: 读取传感器温度。
-        resolution(rom: bytearray, bits: int) -> int: 设置或读取传感器温度转换分辨率。
-        fahrenheit(celsius: float) -> float: 将摄氏度转换为华氏度。
-        kelvin(celsius: float) -> float: 将摄氏度转换为开氏度。
+        __init__(onewire: OneWire) -> None: 初始化传感器。
+        powermode(powerpin: Pin = None) -> int: 设置并返回电源模式。
+        scan() -> list[bytearray]: 扫描并返回 ROM 地址列表。
+        convert_temp(rom: bytearray = None) -> None: 启动温度转换。
+        read_scratch(rom: bytearray) -> bytearray: 读取暂存器数据。
+        write_scratch(rom: bytearray, buf: bytearray) -> None: 写入暂存器数据。
+        read_temp(rom: bytearray) -> float: 读取温度（摄氏度）。
+        resolution(rom: bytearray, bits: int = None) -> int: 设置或获取分辨率。
+        fahrenheit(celsius: float) -> float: 摄氏度转华氏度。
+        kelvin(celsius: float) -> float: 摄氏度转开氏度。
+
+    ==========================================
+
+    DS18X20 temperature sensor class for DS18B20, DS18S20, etc.
+
+    Attributes:
+        ow (OneWire): OneWire communication instance.
+        buf (bytearray): Scratchpad data buffer (9 bytes).
+        config (bytearray): User configuration buffer (3 bytes).
+        power (int): Power mode (1=external, 0=parasitic).
+        powerpin (Pin): Power supply pin for parasitic mode.
+
+    Methods:
+        __init__(onewire: OneWire) -> None: Initialize sensor.
+        powermode(powerpin: Pin = None) -> int: Set and return power mode.
+        scan() -> list[bytearray]: Scan bus and return ROM list.
+        convert_temp(rom: bytearray = None) -> None: Start temperature conversion.
+        read_scratch(rom: bytearray) -> bytearray: Read scratchpad data.
+        write_scratch(rom: bytearray, buf: bytearray) -> None: Write scratchpad data.
+        read_temp(rom: bytearray) -> float: Read temperature (°C).
+        resolution(rom: bytearray, bits: int = None) -> int: Set or get resolution.
+        fahrenheit(celsius: float) -> float: Convert Celsius to Fahrenheit.
+        kelvin(celsius: float) -> float: Convert Celsius to Kelvin.
     """
 
     # DS18X20 功能命令
@@ -58,10 +85,17 @@ class DS18X20:
 
     def __init__(self, onewire: OneWire) -> None:
         """
-        初始化 DS18X20 类，传入使用的单总线通信类。
+        初始化 DS18X20。
 
         Args:
-            onewire (OneWire): 单总线通信类的实例。
+            onewire (OneWire): 单总线通信类实例。
+
+        ==========================================
+
+        Initialize DS18X20.
+
+        Args:
+            onewire (OneWire): OneWire communication instance.
         """
         self.ow = onewire
         # 存储暂存器的9个字节数据
@@ -74,13 +108,23 @@ class DS18X20:
 
     def powermode(self, powerpin: Pin = None) -> int:
         """
-        设置 DS18X20 的供电模式。
+        设置并返回电源模式。
 
         Args:
-            powerpin (machine.Pin): 供电引脚对象（用于寄生供电模式）。如果为 None，则使用默认模式。
+            powerpin (Pin): 寄生供电模式下的供电引脚。默认为 None。
 
         Returns:
-            int: 电源模式，1 为独立供电，0 为寄生供电。
+            int: 电源模式，1=独立供电，0=寄生供电。
+
+        ==========================================
+
+        Set and return power mode.
+
+        Args:
+            powerpin (Pin): Pin for parasitic power. Defaults to None.
+
+        Returns:
+            int: Power mode (1=external, 0=parasitic).
         """
         # 如果已经设置了 powerpin,则将其拉低,关闭上拉电阻
         if self.powerpin is not None:
@@ -104,13 +148,17 @@ class DS18X20:
 
     def scan(self) -> list[bytearray]:
         """
-        扫描单总线上的 DS18X20 传感器，返回 ROM 地址列表。
-
-        Args:
-            None
+        扫描总线并返回 ROM 地址列表。
 
         Returns:
-            list[bytearray]: 传感器 ROM 列表，每个 ROM 为 8 字节的 bytearray。
+            list[bytearray]: ROM 地址列表（每个 8 字节）。
+
+        ==========================================
+
+        Scan bus and return ROM list.
+
+        Returns:
+            list[bytearray]: List of ROM addresses (8 bytes each).
         """
         if self.powerpin is not None:
             self.powerpin(DS18X20.PULLUP_OFF)
@@ -120,13 +168,17 @@ class DS18X20:
 
     def convert_temp(self, rom: bytearray = None) -> None:
         """
-        启动传感器温度转换。
+        启动温度转换。
 
         Args:
-            rom (bytearray): 目标温度传感器的 ROM 地址。如果为 None，则对所有传感器广播。
+            rom (bytearray): 目标传感器的 ROM 地址。若为 None，则广播给所有传感器。
 
-        Returns:
-            None
+        ==========================================
+
+        Start temperature conversion.
+
+        Args:
+            rom (bytearray): ROM address of target sensor. If None, broadcast to all.
         """
         if self.powerpin is not None:
             self.powerpin(DS18X20.PULLUP_OFF)
@@ -144,16 +196,41 @@ class DS18X20:
 
     def read_scratch(self, rom: bytearray) -> bytearray:
         """
-        读取传感器暂存器数据。
+        启动温度转换。
 
         Args:
-            rom (bytearray): 目标温度传感器的 ROM 地址。
+            rom (bytearray): 目标传感器的 ROM 地址。若为 None，则广播给所有传感器。
+
+        ==========================================
+
+        Start temperature conversion.
+
+        Args:
+            rom (bytearray): ROM address of target sensor. If None, broadcast to all.
+        """        """
+        读取暂存器数据。
+
+        Args:
+            rom (bytearray): ROM 地址。
 
         Returns:
             bytearray: 暂存器数据（9 字节）。
 
         Raises:
-            AssertionError: 如果 CRC 校验失败。
+            AssertionError: CRC 校验失败。
+
+        ==========================================
+
+        Read scratchpad data.
+
+        Args:
+            rom (bytearray): ROM address.
+
+        Returns:
+            bytearray: Scratchpad data (9 bytes).
+
+        Raises:
+            AssertionError: CRC validation failed.
         """
         if self.powerpin is not None:
             self.powerpin(DS18X20.PULLUP_OFF)
@@ -171,14 +248,19 @@ class DS18X20:
 
     def write_scratch(self, rom: bytearray, buf: bytearray) -> None:
         """
-        写入传感器暂存器数据。
+        写入暂存器数据。
 
         Args:
-            rom (bytearray): 目标温度传感器的 ROM 地址。
-            buf (bytearray): 写入暂存器的数据（9 字节）。
+            rom (bytearray): ROM 地址。
+            buf (bytearray): 要写入的数据（9 字节）。
 
-        Returns:
-            None
+        ==========================================
+
+        Write scratchpad data.
+
+        Args:
+            rom (bytearray): ROM address.
+            buf (bytearray): Data to write (9 bytes).
         """
         if self.powerpin is not None:
             self.powerpin(DS18X20.PULLUP_OFF)
@@ -193,13 +275,23 @@ class DS18X20:
 
     def read_temp(self, rom: bytearray) -> float:
         """
-        读取传感器温度。
+        读取温度（摄氏度）。
 
         Args:
-            rom (bytearray): 目标温度传感器的 ROM 地址。
+            rom (bytearray): ROM 地址。
 
         Returns:
-            float: 温度值（摄氏度）。如果读取失败，返回 None。
+            float: 温度值（℃）。读取失败返回 None。
+
+        ==========================================
+
+        Read temperature (°C).
+
+        Args:
+            rom (bytearray): ROM address.
+
+        Returns:
+            float: Temperature in Celsius, or None if failed.
         """
         try:
             # 读取暂存器数据
@@ -233,14 +325,25 @@ class DS18X20:
 
     def resolution(self, rom: bytearray, bits: int = None) -> int:
         """
-        设置或读取传感器温度转换分辨率。
+        设置或读取分辨率。
 
         Args:
-            rom (bytearray): 目标温度传感器的 ROM 地址。
-            bits (int): 温度转换分辨率（9~12 位）。如果为 None，则读取当前分辨率。
+            rom (bytearray): ROM 地址。
+            bits (int): 分辨率（9~12 位）。为 None 时读取当前值。
 
         Returns:
-            int: 设置或读取的分辨率位数。
+            int: 分辨率位数。
+
+        ==========================================
+
+        Set or get resolution.
+
+        Args:
+            rom (bytearray): ROM address.
+            bits (int): Resolution (9–12 bits). If None, read current.
+
+        Returns:
+            int: Resolution bits.
         """
         if bits is not None and 9 <= bits <= 12:
             # 将分辨率信息设置为bits变量的值
@@ -254,25 +357,45 @@ class DS18X20:
 
     def fahrenheit(self, celsius: float) -> float:
         """
-        将摄氏度转换为华氏度。
+        摄氏度转华氏度。
 
         Args:
             celsius (float): 摄氏度。
 
         Returns:
-            float: 华氏度。如果输入为 None，返回 None。
+            float: 华氏度。如果输入 None，返回 None。
+
+        ==========================================
+
+        Convert Celsius to Fahrenheit.
+
+        Args:
+            celsius (float): Celsius value.
+
+        Returns:
+            float: Fahrenheit value, or None if input is None.
         """
         return celsius * 1.8 + 32 if celsius is not None else None
 
     def kelvin(self, celsius: float) -> float:
         """
-        将摄氏度转换为开氏度。
+        摄氏度转开氏度。
 
         Args:
             celsius (float): 摄氏度。
 
         Returns:
-            float: 开氏度。如果输入为 None，返回 None。
+            float: 开氏度。如果输入 None，返回 None。
+
+        ==========================================
+
+        Convert Celsius to Kelvin.
+
+        Args:
+            celsius (float): Celsius value.
+
+        Returns:
+            float: Kelvin value, or None if input is None.
         """
         return celsius + 273.15 if celsius is not None else None
 

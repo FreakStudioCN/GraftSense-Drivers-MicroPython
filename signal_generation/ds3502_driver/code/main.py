@@ -13,8 +13,6 @@ from machine import ADC, Timer, Pin, I2C, UART
 import time
 # 导入访问和控制 MicroPython 内部结构的模块
 import micropython
-# 导入数学库用于计算正弦波
-import math
 # 导入ds3502模块用于控制数字电位器芯片
 from ds3502 import DS3502
 # 导入波形生成模块
