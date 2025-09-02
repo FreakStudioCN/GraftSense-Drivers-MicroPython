@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-        
 # @Time    : 2024/7/3 下午9:34   
 # @Author  : 李清水            
-# @File    : SSD1306.py.py       
+# @File    : SSD1306.py
 # @Description : 主要定义了SSD 1306类
 
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 ========================================
 
@@ -43,47 +47,91 @@ SET_CHARGE_PUMP     = const(0x8D)  # 设置电荷泵
 # SSD1306 OLED屏幕类
 class SSD1306(framebuf.FrameBuffer):
     """
-    SSD1306 OLED屏幕类，用于控制和显示数据在OLED屏幕上。
+    SSD1306 OLED 显示驱动类，用于在 OLED 屏幕上绘制和显示数据。
 
-    该类继承自 `framebuf.FrameBuffer` 类，能够通过I2C或SPI与OLED屏幕通信，
-    并执行各种显示操作，包括初始化、开关显示、调整对比度、绘制图形等。
+    该类继承自 `framebuf.FrameBuffer`，通过 I2C 或 SPI 与 SSD1306 OLED 控制器通信，
+    支持基本的显示控制操作，包括开关机、对比度调整、反显模式和图形绘制。
 
     Attributes:
-        width (int): 屏幕的宽度（像素）。
-        height (int): 屏幕的高度（像素）。
-        external_vcc (bool): 是否使用外部电源。
-        buffer (bytearray): 存储屏幕显示数据的缓冲区。
-        pages (int): 屏幕的页数，通常为height // 8。
+        width (int): 屏幕宽度（像素）。
+        height (int): 屏幕高度（像素）。
+        external_vcc (bool): 是否使用外部电源供电。
+        buffer (bytearray): 屏幕显存缓冲区，用于存储要显示的数据。
+        pages (int): 屏幕页数，等于 height // 8。
 
     Methods:
-        __init__(width: int, height: int, external_vcc: bool) -> None:
-            初始化OLED屏幕并配置显示参数。
-        init_display() -> None:
-            初始化显示设置。
-        poweroff() -> None:
-            关闭OLED显示。
-        poweron() -> None:
-            打开OLED显示。
-        contrast(contrast: int) -> None:
-            设置OLED屏幕对比度。
-        invert(invert: bool) -> None:
-            设置OLED显示反相或正常显示模式。
-        show() -> None:
-            将缓存中的数据更新到屏幕上。
-        write_cmd(cmd: int) -> None:
-            向OLED发送命令字节。
-        write_data(buf: bytearray) -> None:
-            向OLED发送数据字节。
+        __init__(width: int, height: int, external_vcc: bool) -> None: 初始化屏幕参数。
+        init_display() -> None: 发送初始化命令并清屏。
+        poweroff() -> None: 关闭显示屏以节省功耗。
+        poweron() -> None: 打开显示屏。
+        contrast(contrast: int) -> None: 设置屏幕对比度 (0–255)。
+        invert(invert: bool) -> None: 设置反相显示或正常显示。
+        show() -> None: 将缓冲区数据刷新到屏幕。
+        write_cmd(cmd: int) -> None: 向屏幕发送命令字节（需子类实现）。
+        write_data(buf: bytearray) -> None: 向屏幕发送数据字节（需子类实现）。
+
+    Notes:
+        SSD1306 常见分辨率为 128x64 或 128x32。
+        显示缓冲区大小等于 width × height ÷ 8。
+        `write_cmd` 和 `write_data` 由具体子类实现（I2C 或 SPI）。
+        `framebuf.MONO_VLSB` 模式：单色显示，最低位在前（小端位序）。
+
+    ==========================================
+
+    SSD1306 OLED driver class for rendering graphics and text on OLED screens.
+
+    This class inherits from `framebuf.FrameBuffer`, providing communication
+    with SSD1306 OLED controller via I2C or SPI. Supports display operations
+    such as power control, contrast adjustment, inversion, and framebuffer drawing.
+
+    Attributes:
+        width (int): Screen width in pixels.
+        height (int): Screen height in pixels.
+        external_vcc (bool): Whether to use external VCC supply.
+        buffer (bytearray): Framebuffer storing screen data.
+        pages (int): Number of display pages (height // 8).
+
+    Methods:
+        __init__(width: int, height: int, external_vcc: bool) -> None: Initialize display parameters.
+        init_display() -> None: Send initialization sequence and clear screen.
+        poweroff() -> None: Turn display OFF (save power).
+        poweron() -> None: Turn display ON.
+        contrast(contrast: int) -> None: Set display contrast (0–255).
+        invert(invert: bool) -> None: Set inverted or normal display mode.
+        show() -> None: Update display with framebuffer content.
+        write_cmd(cmd: int) -> None: Send command byte to display (must be implemented in subclass).
+        write_data(buf: bytearray) -> None: Send data buffer to display (must be implemented in subclass).
+
+    Notes:
+        Common resolutions: 128x64, 128x32.
+        Framebuffer size = width × height ÷ 8.
+        `write_cmd` and `write_data` are hardware-specific (I2C/SPI).
+        `framebuf.MONO_VLSB`: monochrome mode, least significant bit first.
     """
 
     def __init__(self, width: int, height: int, external_vcc: bool) -> None:
         """
-        初始化OLED屏幕显示。
+        初始化 SSD1306 OLED 显示。
 
         Args:
             width (int): 屏幕宽度（像素）。
             height (int): 屏幕高度（像素）。
-            external_vcc (bool): 是否使用外部电源。
+            external_vcc (bool): 是否使用外部电源供电。
+
+        Notes:
+            初始化时会创建显示缓冲区，并自动调用 `init_display()` 完成硬件设置。
+
+        ==========================================
+
+        Initialize SSD1306 OLED display.
+
+        Args:
+            width (int): Screen width in pixels.
+            height (int): Screen height in pixels.
+            external_vcc (bool): Whether to use external VCC supply.
+
+        Notes:
+            A framebuffer is allocated, and `init_display()` is called automatically.
         """
         self.width = width
         self.height = height
@@ -101,9 +149,26 @@ class SSD1306(framebuf.FrameBuffer):
 
     def init_display(self) -> None:
         """
-        初始化OLED屏幕的显示设置。
+        初始化屏幕显示。
 
-        初始化屏幕时会发送一系列命令来设置显示模式、行数、对比度等显示参数。
+        执行一系列命令以配置 SSD1306 的显示模式、时钟分频、对比度、充电泵等参数。
+        初始化后会清空屏幕并刷新显示。
+
+        Notes:
+            `write_cmd()` 必须由子类实现（I2C 或 SPI）。
+            初始化完成后屏幕点亮并显示空白内容。
+
+        ==========================================
+
+        Initialize display settings.
+
+        Sends a sequence of commands to configure SSD1306 controller
+        (addressing mode, scan direction, contrast, charge pump, etc.).
+        Clears screen and refreshes display.
+
+        Notes:
+            `write_cmd()` must be implemented by subclass (I2C or SPI).
+            Screen is turned ON and cleared after initialization.
         """
         for cmd in (
             SET_DISP | 0x00,            # 关屏
@@ -147,28 +212,56 @@ class SSD1306(framebuf.FrameBuffer):
 
     def poweroff(self) -> None:
         """
-        关闭OLED显示。
+        关闭显示屏。
 
-        将屏幕显示关闭以节省功耗。
+        Notes:
+            屏幕关闭以节省功耗，但缓冲区内容仍然保留。
+
+        ==========================================
+
+        Turn display OFF.
+
+        Notes:
+            Saves power. Framebuffer content is preserved.
         """
-
         self.write_cmd(SET_DISP | 0x00)
 
     def poweron(self) -> None:
         """
-        打开OLED显示。
+        打开显示屏。
 
-        重新激活OLED显示屏。
+        Notes:
+            屏幕重新点亮并显示缓冲区中的数据。
+
+        ==========================================
+
+        Turn display ON.
+
+        Notes:
+            Restores display content from framebuffer.
         """
 
         self.write_cmd(SET_DISP | 0x01)
 
     def contrast(self, contrast: int) -> None:
         """
-        设置OLED屏幕的对比度。
+        设置屏幕对比度。
 
         Args:
-            contrast (int): 对比度值，范围0到255。
+            contrast (int): 对比度值，范围 0–255。
+
+        Notes:
+            较高的值使显示更亮，但可能缩短使用寿命。
+
+        ==========================================
+
+        Set display contrast.
+
+        Args:
+            contrast (int): Contrast value (0–255).
+
+        Notes:
+            Higher values increase brightness but may reduce lifespan.
         """
 
         self.write_cmd(SET_CONTRAST)
@@ -176,19 +269,42 @@ class SSD1306(framebuf.FrameBuffer):
 
     def invert(self, invert: bool) -> None:
         """
-        设置OLED屏幕为正常或反相显示模式。
+        设置屏幕反显模式。
 
         Args:
-            invert (bool): 如果为True，则显示模式为反相；否则为正常显示。
+            invert (bool): True → 反显模式，False → 正常模式。
+
+        ==========================================
+
+        Set inverted display mode.
+
+        Args:
+            invert (bool): True → inverted mode, False → normal mode.
         """
 
         self.write_cmd(SET_NORM_INV | (invert & 1))
 
     def show(self) -> None:
         """
-        将缓冲区中的数据更新到屏幕上。
+        刷新屏幕显示。
 
-        将存储在缓存中的图形数据发送到OLED屏幕显示出来。
+        将缓冲区中的数据写入 SSD1306 并更新屏幕。
+        若修改了缓冲区内容，必须调用此方法才能生效。
+
+        Notes:
+            - 宽度为 64 的屏幕需要偏移列地址。
+            - `write_data()` 必须由子类实现。
+
+        ==========================================
+
+        Update display.
+
+        Transfers framebuffer content to SSD1306.
+        Must be called after modifying the buffer to apply changes.
+
+        Notes:
+            - For width=64 displays, column address is shifted.
+            - `write_data()` must be implemented by subclass.
         """
 
         # 计算显示区域的起始列和结束列
@@ -214,53 +330,117 @@ class SSD1306(framebuf.FrameBuffer):
 
     def write_cmd(self, cmd: int) -> None:
         """
-        向OLED屏幕发送命令。
+        向 SSD1306 发送命令。
 
         Args:
             cmd (int): 要发送的命令字节。
+
+        Raises:
+            NotImplementedError: 该方法需由子类实现（I2C 或 SPI）。
+
+        ==========================================
+
+        Send command byte to SSD1306.
+
+        Args:
+            cmd (int): Command byte to send.
+
+        Raises:
+            NotImplementedError: Must be implemented in subclass (I2C or SPI).
         """
 
         pass
 
     def write_data(self, buf: bytearray) -> None:
         """
-        向OLED屏幕发送数据。
+        向 SSD1306 发送数据。
 
         Args:
-            buf (bytearray): 要发送的数据字节。
+            buf (bytearray): 要发送的数据缓冲区。
+
+        Raises:
+            NotImplementedError: 该方法需由子类实现（I2C 或 SPI）。
+
+        ==========================================
+
+        Send data buffer to SSD1306.
+
+        Args:
+            buf (bytearray): Data buffer to send.
+
+        Raises:
+            NotImplementedError: Must be implemented in subclass (I2C or SPI).
         """
 
         pass
 
 class SSD1306_I2C(SSD1306):
     """
-    基于I2C接口的SSD1306 OLED屏幕类，继承自 `SSD1306` 类。
+    基于 I2C 接口的 SSD1306 OLED 显示类。
 
-    使用I2C总线与SSD1306 OLED屏幕进行通信，提供显示控制和图形绘制功能。
+    继承自 `SSD1306`，通过 I2C 总线与 OLED 屏幕通信，提供显示控制和绘图功能。
 
     Attributes:
-        i2c (I2C): 用于与屏幕通信的I2C对象。
-        addr (int): OLED屏幕的I2C地址。
+        i2c (I2C): I2C 总线对象，用于屏幕通信。
+        addr (int): OLED 屏幕的 I2C 地址。
+        temp (bytearray): 临时缓冲区，用于发送命令。
+        write_list (list): I2C 写入缓冲区列表（包含数据控制字节和数据缓冲区）。
 
     Methods:
-        __init__(i2c: I2C, addr: int, width: int, height: int, external_vcc: bool) -> None:
-            初始化I2C接口并配置OLED屏幕。
-        write_cmd(cmd: int) -> None:
-            向OLED发送命令。
-        write_data(buf: bytearray) -> None:
-            向OLED发送数据。
+        __init__(i2c: I2C, addr: int, width: int, height: int, external_vcc: bool) -> None: 初始化 I2C 接口和屏幕。
+        write_cmd(cmd: int) -> None: 发送命令字节到屏幕。
+        write_data(buf: bytearray) -> None: 发送数据缓冲区到屏幕。
+
+    ==========================================
+
+    SSD1306 OLED display class using I2C interface.
+
+    Inherits from `SSD1306`, communicates with OLED display via I2C bus,
+    provides display control and drawing functionalities.
+
+    Attributes:
+        i2c (I2C): I2C bus object for communication.
+        addr (int): OLED display I2C address.
+        temp (bytearray): Temporary buffer for command transmission.
+        write_list (list): I2C write list containing control byte and data buffer.
+
+    Methods:
+        __init__(i2c: I2C, addr: int, width: int, height: int, external_vcc: bool) -> None: Initialize I2C interface and display.
+        write_cmd(cmd: int) -> None: Send command byte to display.
+        write_data(buf: bytearray) -> None: Send data buffer to display.
     """
 
     def __init__(self, i2c: I2C, addr: int, width: int, height: int, external_vcc: bool) -> None:
         """
-        初始化I2C接口和OLED屏幕。
+        初始化 I2C 接口与 SSD1306 显示屏。
 
         Args:
-            i2c (I2C): 用于与屏幕通信的I2C对象。
-            addr (int): OLED屏幕的I2C地址。
+            i2c (I2C): I2C 总线对象。
+            addr (int): OLED 屏幕 I2C 地址。
             width (int): 屏幕宽度（像素）。
             height (int): 屏幕高度（像素）。
-            external_vcc (bool): 是否使用外部电源。
+            external_vcc (bool): 是否使用外部电源供电。
+
+        Notes:
+            - `temp` 用于发送命令（带有控制字节 0x80）。
+            - `write_list` 用于发送数据（控制字节 0x40 + 数据缓冲区）。
+            - 初始化完成后，会自动调用父类构造函数并完成显示设置。
+
+        ==========================================
+
+        Initialize I2C interface and SSD1306 display.
+
+        Args:
+            i2c (I2C): I2C bus object.
+            addr (int): OLED display I2C address.
+            width (int): Screen width in pixels.
+            height (int): Screen height in pixels.
+            external_vcc (bool): Whether to use external VCC.
+
+        Notes:
+            - `temp` is used for command transfer (with control byte 0x80).
+            - `write_list` is used for data transfer (control byte 0x40 + data buffer).
+            - Calls parent constructor to complete initialization.
         """
 
         self.i2c = i2c
@@ -272,10 +452,25 @@ class SSD1306_I2C(SSD1306):
 
     def write_cmd(self, cmd: int) -> None:
         """
-        向OLED屏幕发送命令字节。
+        发送命令字节到 SSD1306 显示屏。
 
         Args:
             cmd (int): 要发送的命令字节。
+
+        Notes:
+            - 使用控制字节 `0x80` 表示写入命令。
+            - 通过 `i2c.writeto()` 发送。
+
+        ==========================================
+
+        Send command byte to SSD1306 display.
+
+        Args:
+            cmd (int): Command byte to send.
+
+        Notes:
+            - Uses control byte `0x80` for command transfer.
+            - Sent via `i2c.writeto()`.
         """
 
         # 0x80表示写入的数据是命令
@@ -285,10 +480,25 @@ class SSD1306_I2C(SSD1306):
 
     def write_data(self, buf: bytearray) -> None:
         """
-        向OLED屏幕发送数据字节。
+        发送数据缓冲区到 SSD1306 显示屏。
 
         Args:
             buf (bytearray): 要发送的数据字节。
+
+        Notes:
+            - 使用控制字节 `0x40` 表示写入数据。
+            - 通过 `i2c.writevto()` 发送。
+
+        ==========================================
+
+        Send data buffer to SSD1306 display.
+
+        Args:
+            buf (bytearray): Data buffer to send.
+
+        Notes:
+            - Uses control byte `0x40` for data transfer.
+            - Sent via `i2c.writevto()`.
         """
 
         self.write_list[1] = buf

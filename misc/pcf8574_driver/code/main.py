@@ -38,10 +38,28 @@ def display_key(name: str) -> None:
     在 OLED 屏幕上显示当前按下的按键名称。
 
     Args:
-        name (str): 按键名称，如 'UP', 'DOWN', 'SET' 等。
+        name (str): 按键名称，例如 'UP', 'DOWN', 'SET' 等。
 
     Returns:
         None
+
+    Notes:
+        调用后会清空屏幕并更新显示。
+        仅适用于已初始化的 OLED 对象。
+
+    ==========================================
+
+    Display the currently pressed key name on the OLED screen.
+
+    Args:
+        name (str): Key name, e.g., 'UP', 'DOWN', 'SET'.
+
+    Returns:
+        None
+
+    Notes:
+        Clears the OLED screen before updating.
+        Only works with an initialized OLED object.
     """
     oled.fill(0)
     oled.text("Key:", 0, 0)
@@ -50,14 +68,35 @@ def display_key(name: str) -> None:
 
 def handle_keys(port_value: int) -> None:
     """
-    处理从 PCF8574 读取到的按键端口值，判断哪个按键被按下并执行相应操作。
-    优先处理普通按键；若未检测到普通按键，则检查 SET 和 RST 键。
+    处理 PCF8574 读取到的按键端口值，判断按键状态并执行相应操作。
+    优先检测普通方向键；若未检测到则检查 SET 和 RST 按键。
 
     Args:
         port_value (int): 从 PCF8574 读取的端口值，每一位对应一个引脚电平。
 
     Returns:
         None
+
+    Notes:
+        - 按键为高电平时表示按下。
+        - SET 键会点亮 LED，RST 键会熄灭 LED。
+        - 执行完成后会将所有按键引脚复位为低电平。
+
+    ==========================================
+
+    Handle key events from PCF8574 by checking pressed keys and executing actions.
+    Normal keys have higher priority; if none pressed, check SET and RST keys.
+
+    Args:
+        port_value (int): Port value read from PCF8574, each bit maps to a pin level.
+
+    Returns:
+        None
+
+    Notes:
+        - Keys are active high (pressed when logic HIGH).
+        - SET key turns on LED, RST key turns off LED.
+        - All key pins are reset to LOW after handling.
     """
     # 按键为高电平表示按下
     for name, pin in keys.items():
