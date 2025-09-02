@@ -4,14 +4,13 @@
 # @Author  : 缪贵成
 # @File    : main.py
 # @Description : 测试MQ系列电化学传感器模块驱动程序
-# @License : MIT
 
 # ======================================== 导入相关模块 =========================================
 
 from machine import Pin, ADC
 import time
 from time import sleep
-from mqx import MQX
+from mgx import MGX
 
 # ======================================== 全局变量 ============================================
 
@@ -60,25 +59,26 @@ print("Measuring Gas Concentration with MQ Series Gas Sensor Modules")
 adc = ADC(Pin(26))
 # Comparator output (GPIO15, optional)
 comp = Pin(15, Pin.IN)
-mq = MQX(adc, comp, mq_callback, rl_ohm=10000, vref=3.3)
+mg = MGX(adc, comp, mq_callback, rl_ohm=10000, vref=3.3)
 
-# 选择内置多项式（MQ2、MQ4、MQ7）
-mq.select_builtin("MQ2")
+# 选择内置多项式（MG811,MG812）
+mg.select_builtin("MQ2")
 
 # # 传入自定义的多项式
 # mq.set_custom_polynomial([1.0, -2.5, 3.3])
 
 # ========================================  主程序  ===========================================
-def main():
-    print("===== MQ Sensor Test Program Started =====")
+
+if __name__ == "__main__":
+    print("===== MG Sensor Test Program Started =====")
     try:
         while True:
             # 读取电压
-            v = mq.read_voltage()
+            v = mg.read_voltage()
             print("Voltage: {:.3f} V".format(v))
 
             # 读取 ppm（5 次采样，间隔 200 ms）
-            ppm = mq.read_ppm(samples=5, delay_ms=200)
+            ppm = mg.read_ppm(samples=5, delay_ms=200)
             print("Gas concentration: {:.2f} ppm".format(ppm))
 
             print("-" * 40)
@@ -87,9 +87,5 @@ def main():
     except KeyboardInterrupt:
         print("User interrupted, exiting program...")
     finally:
-        mq.deinit()
+        mg.deinit()
         print("Sensor resources released.")
-
-# ======================================== 主程序入口===========================================
-if __name__ == "__main__":
-    main()

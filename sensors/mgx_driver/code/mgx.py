@@ -2,15 +2,20 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/08/20 10:21
 # @Author  : 缪贵成
-# @File    : mqx.py
-# @Description : MQ系列电化学传感器模块驱动程序
+# @File    : mgx.py
+# @Description : MG系列电化学传感器模块驱动程序
 # @License : CC BY-NC 4.0
+
+__version__ = "0.1.0"
+__author__ = "缪贵成"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
 from micropython import schedule
 from time import sleep_ms
-from machine import Pin, ADC
+from machine import Pin
 
 # ======================================== 全局变量 ============================================
 
@@ -18,9 +23,9 @@ from machine import Pin, ADC
 
 # ======================================== 自定义类 ============================================
 
-class MQX:
+class MGX:
     """
-    MQ 系列气体传感器驱动（安全版），支持 ADC 读取、电压转换、ppm 计算和中断回调。
+    MG 系列气体传感器驱动（安全版），支持 ADC 读取、电压转换、ppm 计算和中断回调。
 
     Attributes:
         adc (ADC): machine.ADC 实例，用于模拟输入。
@@ -46,7 +51,7 @@ class MQX:
 
     ==========================================
 
-    Safe driver for MQ gas sensors with ADC reading and comparator IRQ.
+    Safe driver for MG gas sensors with ADC reading and comparator IRQ.
 
     Attributes:
         adc (ADC): machine.ADC instance for analog input.
@@ -72,14 +77,13 @@ class MQX:
     """
 
     _builtin_polys = {
-        "MQ2": [0.0, 100.0, -20.0],
-        "MQ4": [0.0, 200.0, -40.0],
-        "MQ7": [0.0, 50.0, -8.0],
+        "MG811": [0.0, 100.0, -20.0],
+        "MG812": [0.0, 200.0, -40.0],
     }
 
     def __init__(self, adc, comp_pin, user_cb, rl_ohm=10000, vref=3.3, irq_trigger=None):
         """
-        初始化 MQX 传感器对象。
+        初始化 MGX 传感器对象。
 
         Args:
             adc (ADC): machine.ADC 实例，用于模拟输入。
@@ -98,7 +102,7 @@ class MQX:
 
         ==========================================
 
-        Initialize MQX sensor object.
+        Initialize MGX sensor object.
 
         Args:
             adc (ADC): machine.ADC instance for analog input.
@@ -271,7 +275,7 @@ class MQX:
         选择内置传感器多项式。
 
         Args:
-            name (str): 传感器类型，如 'MQ2'、'MQ4'、'MQ7'。
+            name (str): 传感器类型，如 'MG811'、'MG812'
 
         Raises:
             ValueError: 当输入的名称未知时。
@@ -281,7 +285,7 @@ class MQX:
         Select builtin polynomial by name.
 
         Args:
-            name (str): Sensor type, e.g. 'MQ2','MQ4','MQ7'.
+            name (str): Sensor type, e.g. 'MG811'、'MG812'
 
         Raises:
             ValueError: If unknown name is provided.

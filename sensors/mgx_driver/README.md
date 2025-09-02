@@ -1,4 +1,4 @@
-# MQ系列气体传感器驱动 - MicroPython版本
+# MG系列气体传感器驱动 - MicroPython版本
 
 ## 目录
 - [简介](#简介)
@@ -15,166 +15,141 @@
 ---
 
 ## 简介
-MQ系列气体传感器是一类基于电化学原理的气体检测设备，可用于检测多种可燃性气体、有毒有害气体浓度。该系列传感器具有灵敏度高、响应速度快、成本低等特点，广泛应用于家庭安全监测、工业环境检测、智能家居等场景。
 
-> **注意**：不能应用于高精度安全监测等特殊场合，仅作为参考性气体浓度指示。
+MG811 和 MG812 系列气体传感器是一类基于固态电化学/氧化物原理的气体检测设备，主要用于检测二氧化碳（CO₂）浓度。该系列传感器具有高灵敏度、快速响应、耐用性强等特点，广泛应用于室内空气质量监测、温室环境检测、科研实验等场景。
 
-本项目提供了基于 MicroPython 的驱动代码及示例程序，方便开发者快速接入 MQ 系列气体传感器，实现气体浓度检测功能。
+> **注意**：MG811/MG812 适用于参考性 CO₂ 浓度检测，不能替代精密工业级 CO₂ 测量仪器。
+
+本项目提供了基于 MicroPython 的驱动代码及示例程序，方便开发者快速接入 MG811/MG812 传感器，实现 CO₂ 浓度检测功能。
 
 ---
 
 ## 主要功能
-- **多种传感器支持**：
-  - MQ2（可燃气体、烟雾）
-  - MQ4（甲烷、天然气）
-  - MQ7（一氧化碳）
-  - 支持自定义传感器多项式校准
-- **核心检测指标**：
-  - 电压值（V）
-  - 气体浓度（ppm）
-- **中断支持**：通过比较器输出实现中断触发，支持上升沿/下降沿检测
-- **数据处理**：
-  - 多采样平均滤波
-  - 多项式浓度转换
-- **统一接口**：提供 `read_voltage()` 和 `read_ppm()` 标准接口，便于快速集成
-- **跨平台支持**：兼容多种硬件平台（树莓派Pico等MicroPython兼容开发板）
+
+* **传感器支持**：
+
+  * MG811（高灵敏 CO₂ 检测，适用于 0–10,000 ppm 范围）
+  * MG812（高灵敏 CO₂ 检测，适用于 0–5,000 ppm 范围，可用于低浓度环境）
+  * 支持自定义传感器标定曲线
+* **核心检测指标**：
+
+  * 电压值（V）
+  * CO₂ 浓度（ppm）
+* **中断支持**：通过外接比较器可实现阈值报警（可选）
+* **数据处理**：
+
+  * 多采样平均滤波
+  * 多项式或对数浓度转换
+* **统一接口**：提供 `read_voltage()` 和 `read_ppm()` 标准接口，便于快速集成
+* **跨平台支持**：兼容多种 MicroPython 开发板（树莓派 Pico 等）
 
 ---
 
 ## 硬件要求
 ### 推荐测试硬件
-- 树莓派 Pico/Pico W
-- MQ系列气体传感器（MQ2/MQ4/MQ7等）
-- 杜邦线若干
-- 10kΩ负载电阻（可选，部分模块已集成）
+
+* 树莓派 Pico/Pico W
+* MG811 或 MG812 CO₂ 传感器模块
+* 杜邦线若干
+* 10kΩ 电阻（用于分压或模块外接负载，部分模块已集成）
 
 ### 模块引脚说明
-| MQ传感器引脚 | 功能描述 |
-|--------------|----------|
-| VCC          | 电源正极（3.3V-5V，具体参考传感器规格） |
-| GND          | 电源负极 |
-| AOUT         | 模拟输出（连接ADC） |
-| DOUT         | 数字输出（比较器输出，可选） |
+
+| 传感器引脚 | 功能描述                           |
+| ----- | ------------------------------ |
+| VCC   | 电源正极（5V 推荐，部分模块可用 3.3V，但性能略下降） |
+| GND   | 电源负极                           |
+| AOUT  | 模拟输出（连接 ADC 读取电压）              |
+| DOUT  | 数字输出（阈值报警，可选）                  |
 
 ---
 
 ## 文件说明
-### mqx.py
-实现了 MQ 系列气体传感器的驱动，核心类 `MQX` 提供统一接口。
 
-#### 类定义
-```python
-class MQX:
-    """
-    MQ 系列气体传感器驱动（安全版），支持 ADC 读取、电压转换、ppm 计算和中断回调。
+### mgx.py
 
-    Attributes:
-        adc (ADC): machine.ADC 实例，用于模拟输入。
-        comp_pin (Pin): machine.Pin 实例，用于比较器数字输出。
-        user_cb (Callable): 用户回调函数，参数为电压 (float)。
-        rl (float): 负载电阻值，单位 Ω。
-        vref (float): 参考电压，单位 V。
-        _custom_poly (list[float]): 用户自定义多项式系数。
-        _selected_builtin (str): 当前选择的内置传感器模型。
-        last_raw (int): 最近一次 ADC 原始值。
-        last_voltage (float): 最近一次电压值 (V)。
+实现了 MG811/MG812 CO₂ 传感器的驱动功能，核心类 `MGX` 提供完整控制接口。
 
-    Methods:
-        read_voltage() -> float: 读取电压值 (V)。
-        read_ppm(samples=1, delay_ms=0, sensor=None) -> float: 读取 ppm 浓度。
-        select_builtin(name: str) -> None: 选择内置传感器模型。
-        set_custom_polynomial(coeffs: list[float]) -> None: 设置用户自定义多项式。
-        deinit() -> None: 释放传感器资源，取消中断。
+#### 类定义：`MGX`
 
-    Notes:
-        - 本类使用 micropython.schedule 保证中断安全。
-        - 用户必须根据具体传感器环境自行标定多项式。
+* **`__init__(adc_pin: int, comp_pin: int = None, callback: callable = None, rl_ohm: float = 10000, vref: float = 3.3) -> None`**
+  初始化传感器，参数包括 ADC 引脚编号、可选比较器引脚、可选中断回调函数、负载电阻和参考电压。
 
-    ==========================================
+* **`read_voltage() -> float`**
+  读取当前传感器模拟电压值（V）。
 
-    Safe driver for MQ gas sensors with ADC reading and comparator IRQ.
+* **`read_ppm(samples: int = 1, delay_ms: int = 0) -> float`**
+  读取 CO₂ 浓度（ppm），支持多次采样平均和延时。
 
-    Attributes:
-        adc (ADC): machine.ADC instance for analog input.
-        comp_pin (Pin): machine.Pin instance for digital comparator output.
-        user_cb (Callable): user callback function, called with voltage (float).
-        rl (float): Load resistor value in ohms.
-        vref (float): Reference voltage in volts.
-        _custom_poly (list[float]): User-defined polynomial coefficients.
-        _selected_builtin (str): Currently selected builtin sensor model.
-        last_raw (int): Last ADC raw value.
-        last_voltage (float): Last measured voltage.
+* **`select_builtin(sensor_name: str) -> None`**
+  选择内置标定模型（MG811 或 MG812）。
 
-    Methods:
-        read_voltage() -> float: Read voltage in volts.
-        read_ppm(samples=1, delay_ms=0, sensor=None) -> float: Read gas concentration in ppm.
-        select_builtin(name: str) -> None: Select builtin sensor polynomial.
-        set_custom_polynomial(coeffs: list[float]) -> None: Set user-defined polynomial.
-        deinit() -> None: Deinitialize sensor and disable IRQ.
+* **`set_custom_polynomial(coeffs: list[float]) -> None`**
+  设置用户自定义多项式，用于电压→ppm 转换。
 
-    Notes:
-        - Uses micropython.schedule to ensure IRQ safety.
-        - Polynomial coefficients must be calibrated for actual environment.
-    """
-```  
+* **`enable_interrupt() -> None`** / **`disable_interrupt() -> None`**
+  启用或禁用比较器中断，并在触发时调用回调函数。
+
+* **`deinit() -> None`**
+  释放传感器资源，取消中断。
+
+---
+
 ### main.py
-示例主程序，初始化传感器并循环读取气体浓度数据。
+
+示例程序，演示 MG811/MG812 传感器功能，包括电压读取、CO₂ 浓度计算和中断回调。
+---
 
 ## 软件设计核心思想
+
 ### 模块化设计
-- 将不同功能封装在独立方法中
-- 通过统一接口 `read_voltage()` 和 `read_ppm()` 调用
-- 支持灵活扩展新传感器类型（通过多项式系数扩展）
 
-### 浓度计算原理
-- 通过 ADC 读取传感器模拟输出电压
-- 基于多项式拟合模型将电压转换为气体浓度（ppm）
-- 支持多采样平均以提高数据稳定性
+* 将传感器操作封装为独立类，职责单一
+* 分离硬件控制与业务逻辑，便于维护
+* 提供统一接口，简化集成难度
 
-### 中断安全设计
-- 使用 `micropython.schedule` 确保中断处理安全
-- 中断回调仅执行最小操作，避免阻塞系统
-- 提供资源释放机制（`deinit()` 方法）
+### 中断驱动机制
 
-### 跨平台兼容
-- 仅依赖 MicroPython 标准库，减少硬件耦合
-- 通过抽象层设计屏蔽不同硬件平台的 ADC 差异
-- 支持不同参考电压和负载电阻配置
+* 支持比较器引脚中断，快速响应阈值变化
+* 使用 `micropython.schedule` 调度回调，避免中断中执行复杂操作
+* 可启用/禁用中断，灵活控制
 
-### 灵活的校准机制
-- 内置常见传感器多项式模型
-- 支持用户自定义多项式校准
-- 允许临时切换传感器类型进行测量
+### 状态管理
+
+* 保存最新电压和 ppm 值，提供查询接口
+* 支持阻塞/非阻塞读取
+* 避免重复触发回调
+
+### 易用性设计
+
+* 默认延时和负载电阻配置，简化初始化
+* 可选中断回调，支持用户自定义逻辑
+* 完善异常处理，提高稳定性
+
+---
 
 ## 使用说明
+
 ### 硬件接线（树莓派 Pico 示例）
 
-| MQ 传感器引脚 | Pico GPIO 引脚 |
-|---------------|----------------|
-| VCC           | 3.3V 或 5V（根据传感器规格） |
-| GND           | GND            |
-| AOUT          | GP26 (ADC0)    |
-| DOUT          | GP15           |
+| 传感器引脚 | Pico GPIO 引脚         |
+| ----- | -------------------- |
+| VCC   | 5V 或 3.3V（MG811推荐5V） |
+| GND   | GND                  |
+| AOUT  | GP26 (ADC0)          |
+| DOUT  | GP15 (可选，中断比较器输出)    |
 
-> **注意：**
-> - 确保 VCC 和 GND 接线正确，避免反向连接
-> - AOUT 连接到 ADC 引脚，DOUT 为可选的数字输出引脚
-> - 部分传感器需要预热时间（通常几分钟）
+> **注意**：MG811/MG812 传感器上电后需预热（通常 1\~3 分钟），并确保负载电阻接入正确。
+
+---
 
 ### 软件依赖
-- **固件版本**：MicroPython v1.19+  
-- **内置库**：
-  - `machine`（用于 ADC、Pin 控制）
-  - `time`（用于延时与时间测量）
-  - `micropython`（用于中断调度）
-- **开发工具**：PyCharm 或 Thonny（推荐）
 
-### 安装步骤
-1. 将 MicroPython 固件烧录到树莓派 Pico  
-2. 上传 `mqx.py` 和 `main.py` 到 Pico  
-3. 根据硬件连接修改 `main.py` 中的引脚配置  
-4. 在开发工具中运行 `main.py`，开始气体检测
+* **固件版本**：MicroPython v1.23+
+* **内置库**：`machine`, `time`, `micropython`
+* **开发工具**：Thonny 或 PyCharm
 
+---
 ## 示例程序
 ```python
 # Python env   : MicroPython v1.23.0
@@ -183,17 +158,13 @@ class MQX:
 # @Author  : 缪贵成
 # @File    : main.py
 # @Description : 测试MQ系列电化学传感器模块驱动程序
-# @License : MIT
 
-__version__ = "0.1.0"         # 语义化版本规范：主版本.次版本.修订号
-__author__ = "缪贵成"          # 运行时可获取的作者信息
-__license__ = "MIT"           # 程序化许可证校验
-__platform__ = "MicroPython v1.23"  # 明确兼容性边界
+# ======================================== 导入相关模块 =========================================
 
 from machine import Pin, ADC
 import time
 from time import sleep
-from mqx import MQX
+from mgx import MGX
 
 # ======================================== 全局变量 ============================================
 
@@ -242,25 +213,26 @@ print("Measuring Gas Concentration with MQ Series Gas Sensor Modules")
 adc = ADC(Pin(26))
 # Comparator output (GPIO15, optional)
 comp = Pin(15, Pin.IN)
-mq = MQX(adc, comp, mq_callback, rl_ohm=10000, vref=3.3)
+mg = MGX(adc, comp, mq_callback, rl_ohm=10000, vref=3.3)
 
-# 选择内置多项式（MQ2、MQ4、MQ7）
-mq.select_builtin("MQ2")
+# 选择内置多项式（MG811,MG812）
+mg.select_builtin("MQ2")
 
 # # 传入自定义的多项式
 # mq.set_custom_polynomial([1.0, -2.5, 3.3])
 
 # ========================================  主程序  ===========================================
-def main():
-    print("===== MQ Sensor Test Program Started =====")
+
+if __name__ == "__main__":
+    print("===== MG Sensor Test Program Started =====")
     try:
         while True:
             # 读取电压
-            v = mq.read_voltage()
+            v = mg.read_voltage()
             print("Voltage: {:.3f} V".format(v))
 
             # 读取 ppm（5 次采样，间隔 200 ms）
-            ppm = mq.read_ppm(samples=5, delay_ms=200)
+            ppm = mg.read_ppm(samples=5, delay_ms=200)
             print("Gas concentration: {:.2f} ppm".format(ppm))
 
             print("-" * 40)
@@ -269,29 +241,58 @@ def main():
     except KeyboardInterrupt:
         print("User interrupted, exiting program...")
     finally:
-        mq.deinit()
+        mg.deinit()
         print("Sensor resources released.")
-
-# ======================================== 主程序入口===========================================
-if __name__ == "__main__":
-    main()
 ```
+---
+
 ## 注意事项
+### 传感器特性
 
-- **RL（负载电阻）**  
-  会影响传感器输出电压，避免使用过低阻值以防传感器损坏。
+* **检测气体**：主要检测 CO₂ 浓度
+* **检测范围**：0–5,000 ppm（MG812）或 0–10,000 ppm（MG811），具体取决于型号
+* **响应特性**：
 
-- **中断回调**  
-  回调函数中避免耗时操作，可使用 `micropython.schedule` 调度耗时任务，确保 ISR 不阻塞。
+  * 响应时间：约 10–30 秒达到 90% 浓度变化
+  * 恢复时间：约 30–60 秒从高浓度恢复到基线
+* **温湿度影响**：高温高湿环境可能影响测量精度
 
-- **内置 MQ 多项式**  
-  仅供参考，实际环境下需根据传感器和气体浓度进行标定。
+---
 
-- **采样频率**  
-  建议 1~2 秒一次，高频采样可能导致 ADC 噪声增加。
+### 安装注意事项
 
-- **高浓度有毒气体环境**  
-  请使用专业设备进行检测，本驱动仅用于实验、教学或开发。
+* 避免将传感器安装在热源附近（如空调出风口、加热器）
+* 避免阳光直射或强光源直接照射
+* 安装高度建议 1–2 米，以获得较均匀的空气采样
+* 确保空气流通，避免密闭角落导致 CO₂ 浓度积累影响读数
+
+---
+
+### 使用限制
+
+* 仅用于参考性 CO₂ 浓度测量，不能替代精密仪器
+* 对快速瞬时浓度变化的响应有限
+* 不适合检测其他气体（非 CO₂）
+* 不适用于高精度安全监测或工业排放控制
+
+---
+
+### 电源要求
+
+* 确保供电稳定，避免电压波动导致测量异常
+* MG811/MG812 推荐 5V 供电（部分模块可用 3.3V，但灵敏度下降）
+* 电源电流应满足传感器要求（通常 < 150 mA，模块化通常 < 50 mA）
+
+---
+
+### 软件使用建议
+
+* 传感器初次上电后，建议预热 1–3 分钟以稳定读数
+* 回调函数应尽量简短，避免在中断中执行复杂操作
+* 长时间不使用时，可通过 `deinit()` 或禁用中断降低功耗
+* 可根据应用场景调整采样次数、延时和多项式校准参数
+
+---
 ## 联系方式
 如有任何问题或需要帮助，请通过以下方式联系开发者：  
 📧 **邮箱**：10696531183@qq.com  
