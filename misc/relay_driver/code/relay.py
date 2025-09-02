@@ -2,8 +2,13 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2024/7/28 下午3:00
 # @Author  : 李清水
-# @File    : main.py
+# @File    : relay.py
 # @Description : 单通道继电器控制类 RelayController，支持普通继电器和磁保持继电器两种类型，提供开关控制方法
+
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 ========================================
 
