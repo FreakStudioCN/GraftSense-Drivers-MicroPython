@@ -5,6 +5,11 @@
 # @File    : ds3502.py
 # @Description : 数字电位器芯片DS3502驱动模块
 
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 =========================================
 
 # 导入时间相关模块
@@ -23,26 +28,38 @@ from machine import I2C
 # DS3502数字电位器自定义类
 class DS3502:
     """
-    DS3502 类，用于通过 I2C 总线操作 DS3502 数字电位器芯片，实现电阻值的调节。
-    该类封装了对 DS3502 芯片的 I2C 通信，提供了设置滑动寄存器（WR）值、读取当前滑动位置、
-    设置控制寄存器（CR）模式等功能。
+    DS3502 类，用于通过 I2C 总线操作 DS3502 数字电位器芯片，实现电阻值调节。
+    封装了对 DS3502 芯片的 I2C 通信，提供写入/读取滑动寄存器（WR）、读取/设置控制寄存器（CR）等功能。
 
     Attributes:
-        i2c (I2C): I2C 实例，用于与 DS3502 进行通信。
-        addr (int): DS3502 的 I2C 地址（0x28 到 0x2B 之间）。
-        mode (int): 当前工作模式（0 或 1），用于控制写入速度和非易失性存储行为。
+        i2c (I2C): I2C 实例，用于与 DS3502 通信。
+        addr (int): DS3502 的 I2C 地址（0x28–0x2B）。
+        mode (int): 当前工作模式（0 或 1）。
 
     Methods:
-        __init__(self, i2c: I2C, addr: int):
-            初始化 DS3502 类实例。
-        write_wiper(self, value: int) -> None:
-            写入滑动寄存器（WR）以设置滑动位置。
-        read_control_register(self) -> int:
-            读取控制寄存器（CR）的值，以确定当前控制寄存器的写入模式。
-        set_mode(self, mode: int) -> None:
-            设置控制寄存器的写入模式。
-        read_wiper(self) -> int:
-            读取滑动寄存器（WR）的值。
+        __init__(i2c: I2C, addr: int) -> None: 初始化 DS3502。
+        write_wiper(value: int) -> None: 写入滑动寄存器（WR）设置滑动位置。
+        read_control_register() -> int: 读取控制寄存器（CR）的模式值。
+        set_mode(mode: int) -> None: 设置控制寄存器写入模式。
+        read_wiper() -> int: 读取滑动寄存器（WR）的值。
+
+    ==========================================
+
+    DS3502 driver class for controlling DS3502 digital potentiometer via I2C.
+    Provides I2C communication methods for writing/reading wiper register (WR),
+    and reading/setting control register (CR).
+
+    Attributes:
+        i2c (I2C): I2C instance for DS3502 communication.
+        addr (int): DS3502 I2C address (0x28–0x2B).
+        mode (int): Current mode (0 or 1).
+
+    Methods:
+        __init__(i2c: I2C, addr: int) -> None: Initialize DS3502.
+        write_wiper(value: int) -> None: Write wiper register (WR) to set position.
+        read_control_register() -> int: Read control register (CR) mode.
+        set_mode(mode: int) -> None: Set control register write mode.
+        read_wiper() -> int: Read wiper register (WR) value.
     """
 
     # 定义类变量：寄存器地址
@@ -56,11 +73,22 @@ class DS3502:
         初始化 DS3502 类。
 
         Args:
-            i2c (machine.I2C): I2C 对象，用于与 DS3502 通信。
-            addr (int): DS3502 的 I2C 地址（0x28 到 0x2B 之间）。
+            i2c (I2C): I2C 对象，用于与 DS3502 通信。
+            addr (int): DS3502 的 I2C 地址（0x28–0x2B）。
 
         Raises:
-            ValueError: 如果地址不在 0x28 到 0x2B 之间。
+            ValueError: 如果地址不在有效范围内。
+
+        ==========================================
+
+        Initialize DS3502 class.
+
+        Args:
+            i2c (I2C): I2C instance for DS3502 communication.
+            addr (int): DS3502 I2C address (0x28–0x2B).
+
+        Raises:
+            ValueError: If address is out of valid range.
         """
         # 判断I2C地址是否在0x28到0x2B之间
         if addr < 0x28 or addr > 0x2B:
@@ -80,10 +108,26 @@ class DS3502:
         写入滑动寄存器（WR）以设置滑动位置。
 
         Args:
-            value (int): 要写入的滑动寄存器值（0 到 127）。
+            value (int): 滑动寄存器值（0–127）。
 
         Raises:
-            ValueError: 如果值不在 0 到 127 之间。
+            ValueError: 如果值超出范围。
+
+        Notes:
+            模式 0 下写入后需延时 100ms。
+
+        ==========================================
+
+        Write wiper register (WR) to set wiper position.
+
+        Args:
+            value (int): Wiper value (0–127).
+
+        Raises:
+            ValueError: If value is out of range.
+
+        Notes:
+            In mode 0, requires 100ms delay after write.
         """
 
         # 检查输入值是否在有效范围内
@@ -100,13 +144,17 @@ class DS3502:
 
     def read_control_register(self) -> int:
         """
-        读取控制寄存器（CR）的值，以确定当前控制寄存器的写入模式。
-
-        Args:
-            None: 无。
+        读取控制寄存器（CR）值。
 
         Returns:
-            int: 控制寄存器的值（0 或 1，表示当前模式）。
+            int: 控制寄存器模式（0 或 1）。
+
+        ==========================================
+
+        Read control register (CR) value.
+
+        Returns:
+            int: Control register mode (0 or 1).
         """
         # 发送从设备地址，设置R/W位为0，进行假写操作
         # 写入CR的地址
@@ -125,13 +173,23 @@ class DS3502:
 
     def set_mode(self, mode: int) -> None:
         """
-        设置控制寄存器的写入模式。
+        设置控制寄存器写入模式。
 
         Args:
-            mode (int): 模式选择，0 或 1。
+            mode (int): 模式选择（0 或 1）。
 
         Raises:
-            ValueError: 如果模式值不是 0 或 1。
+            ValueError: 如果 mode 不合法。
+
+        ==========================================
+
+        Set control register write mode.
+
+        Args:
+            mode (int): Mode selection (0 or 1).
+
+        Raises:
+            ValueError: If mode is invalid.
         """
         if mode not in (0, 1):
             raise ValueError("Mode must be 0 or 1")
@@ -152,11 +210,15 @@ class DS3502:
         """
         读取滑动寄存器（WR）的值。
 
-        Args:
-            None: 无。
+        Returns:
+            int: 当前滑动位置（0–127）。
+
+        ==========================================
+
+        Read wiper register (WR) value.
 
         Returns:
-            int: 当前滑动位置的值（0 到 127）。
+            int: Current wiper position (0–127).
         """
         # 发送从设备地址，进行假写操作，准备读取WR寄存器
         # 写入WR的地址
