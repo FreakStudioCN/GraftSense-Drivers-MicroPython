@@ -157,7 +157,7 @@ MG811 和 MG812 系列气体传感器是一类基于固态电化学/氧化物原
 # @Time    : 2025/08/20 10:21
 # @Author  : 缪贵成
 # @File    : main.py
-# @Description : 测试MQ系列电化学传感器模块驱动程序
+# @Description : 测试MG系列气体传感器模块驱动程序
 
 # ======================================== 导入相关模块 =========================================
 
@@ -171,18 +171,12 @@ from mgx import MGX
 # ======================================== 功能函数 ============================================
 
 # 用户回调函数
-def mq_callback(voltage: float) -> None:
+def mg_callback(voltage: float) -> None:
     """
     当比较器引脚触发中断时调用该函数，打印当前电压值。
 
     Args:
         voltage (float): 电压值 (单位: V)。
-
-    Returns:
-        None: 无返回值。
-
-    Raises:
-        None: 本函数不抛出异常。
 
     ==========================================
 
@@ -192,11 +186,6 @@ def mq_callback(voltage: float) -> None:
     Args:
         voltage (float): Voltage value in volts.
 
-    Returns:
-        None: No return value.
-
-    Raises:
-        None: This function does not raise exceptions.
     """
     print("[IRQ] Voltage: {:.3f} V".format(voltage))
 
@@ -207,42 +196,42 @@ def mq_callback(voltage: float) -> None:
 # 上电延时3s
 time.sleep(3)
 # 打印调试消息
-print("Measuring Gas Concentration with MQ Series Gas Sensor Modules")
+print("Measuring Gas Concentration with MG Series Gas Sensor Modules")
 
 # Pico ADC0 (GPIO26)
 adc = ADC(Pin(26))
 # Comparator output (GPIO15, optional)
 comp = Pin(15, Pin.IN)
-mg = MGX(adc, comp, mq_callback, rl_ohm=10000, vref=3.3)
+mg = MGX(adc, comp, mg_callback, rl_ohm=10000, vref=3.3)
 
 # 选择内置多项式（MG811,MG812）
-mg.select_builtin("MQ2")
+mg.select_builtin("MG811")
 
-# # 传入自定义的多项式
+# 传入自定义的多项式
 # mq.set_custom_polynomial([1.0, -2.5, 3.3])
 
 # ========================================  主程序  ===========================================
 
-if __name__ == "__main__":
-    print("===== MG Sensor Test Program Started =====")
-    try:
-        while True:
-            # 读取电压
-            v = mg.read_voltage()
-            print("Voltage: {:.3f} V".format(v))
+print("===== MG Sensor Test Program Started =====")
+try:
+    while True:
+        # 读取电压
+        v = mg.read_voltage()
+        print("Voltage: {:.3f} V".format(v))
 
-            # 读取 ppm（5 次采样，间隔 200 ms）
-            ppm = mg.read_ppm(samples=5, delay_ms=200)
-            print("Gas concentration: {:.2f} ppm".format(ppm))
+        # 读取 ppm（5 次采样，间隔 200 ms）
+        ppm = mg.read_ppm(samples=5, delay_ms=200)
+        print("Gas concentration: {:.2f} ppm".format(ppm))
 
-            print("-" * 40)
-            # 主循环间隔
-            sleep(2)
-    except KeyboardInterrupt:
-        print("User interrupted, exiting program...")
-    finally:
-        mg.deinit()
-        print("Sensor resources released.")
+        print("-" * 40)
+        # 主循环间隔
+        sleep(2)
+except KeyboardInterrupt:
+    print("User interrupted, exiting program...")
+finally:
+    mg.deinit()
+    print("Sensor resources released.")
+
 ```
 ---
 
@@ -296,7 +285,7 @@ if __name__ == "__main__":
 ## 联系方式
 如有任何问题或需要帮助，请通过以下方式联系开发者：  
 📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/yourusername](https://github.com/yourusername)  
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
 
 ---
 

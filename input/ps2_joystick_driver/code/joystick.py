@@ -93,7 +93,7 @@ class Joystick:
     # 电压转换系数
     conversion_factor = 3.3 / (65535)
 
-    def __init__(self, vrx_pin: int, vry_pin: int, vsw_pin: int, freq: int = 100, callback: callable[[tuple], None] = None) -> None:
+    def __init__(self, vrx_pin: int, vry_pin: int, vsw_pin: int = None, freq: int = 100, callback: callable[[tuple], None] = None) -> None:
         """
         初始化 Joystick 实例。
 
