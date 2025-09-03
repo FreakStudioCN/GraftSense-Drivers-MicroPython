@@ -23,42 +23,86 @@ import micropython
 
 # ======================================== 自定义类 ============================================
 
-# 自定义PCF8574类
 class PCF8574:
     """
-    基于 I2C 总线的 PCF8574 GPIO 扩展芯片操作类。
+    PCF8574 I/O 扩展芯片 I2C 驱动类，用于扩展微控制器的 GPIO 引脚。
 
-    该类封装了 PCF8574 的 I2C 通信接口，提供以下功能：
-    - 设置和读取 8 个 GPIO 引脚状态
-    - 单独操作或翻转指定引脚
-    - 支持外部中断触发，并可注册回调函数处理事件
+    该类通过 I2C 总线与 PCF8574 芯片通信，支持 8 位 GPIO 的输入与输出控制，
+    并提供端口级和引脚级操作接口。可选支持外部中断引脚，用于检测引脚状态变化。
 
     Attributes:
         _i2c (I2C): I2C 总线对象。
-        _address (int): 设备 I2C 地址，范围 0x20~0x27。
-        _port (bytearray): 存储端口当前状态的缓存。
-        _callback (callable): 可选，外部中断回调函数。
-        _int_pin (Pin): 可选，中断引脚对象。
+        _address (int): 设备 I2C 地址，范围 0x20–0x27。
+        _port (bytearray): 当前端口状态缓存（8 位）。
+        _callback (callable): 可选，外部中断触发时执行的用户回调函数。
+        _int_pin (Pin): 可选，中断引脚对象，用于硬件事件检测。
 
     Methods:
-        __init__(i2c, address=0x20, int_pin=None, callback=None, trigger=Pin.IRQ_FALLING):
-            初始化 PCF8574 实例，配置 I2C 地址及可选中断。
+        __init__(i2c, address=0x20, int_pin=None, callback=None, trigger=Pin.IRQ_FALLING) -> None:
+            初始化 PCF8574 实例，配置 I2C 地址、中断引脚及回调函数。
         check() -> bool:
-            检查设备是否存在于 I2C 总线上。
+            检测设备是否在 I2C 总线上响应。
         port (property):
-            获取或设置 8 位端口值。
-        pin(pin, value=None) -> int:
-            获取或设置指定引脚的状态。
-        toggle(pin) -> None:
-            翻转指定引脚的状态。
-        _validate_pin(pin) -> int:
-            验证引脚编号是否合法（0~7）。
+            获取或设置整个 8 位端口的值。
+        pin(pin: int, value: Optional[int] = None) -> int:
+            读取或设置指定引脚的电平状态。
+        toggle(pin: int) -> None:
+            翻转指定引脚的当前状态。
+        _validate_pin(pin: int) -> int:
+            验证引脚编号是否合法（0–7）。
         _read() -> None:
-            从设备读取端口状态。
+            从设备读取端口状态并更新缓存。
         _write() -> None:
-            将当前端口状态写入设备。
+            将缓存中的端口状态写入设备。
         _scheduled_handler(_) -> None:
-            在中断调度中调用用户回调。
+            在中断调度时调用用户定义的回调函数。
+
+    Notes:
+        - PCF8574 提供 8 位 GPIO，通过 I2C 控制。
+        - 地址范围通常为 0x20–0x27，取决于 A0–A2 引脚配置。
+        - 输出为开漏结构，需外接上拉电阻。
+        - 可结合外部中断引脚实现事件驱动的 GPIO 检测。
+
+    ==========================================
+
+    PCF8574 I/O expander driver class for I2C communication.
+
+    This class provides GPIO expansion via the PCF8574 chip, allowing control
+    of 8 input/output pins over I2C. Supports port-wide and per-pin operations,
+    with optional interrupt pin handling for event-driven applications.
+
+    Attributes:
+        _i2c (I2C): I2C bus object.
+        _address (int): Device I2C address (0x20–0x27).
+        _port (bytearray): Cached port state (8 bits).
+        _callback (callable): Optional user callback triggered by external interrupt.
+        _int_pin (Pin): Optional interrupt pin for hardware event detection.
+
+    Methods:
+        __init__(i2c, address=0x20, int_pin=None, callback=None, trigger=Pin.IRQ_FALLING) -> None:
+            Initialize PCF8574 instance with I2C address, optional interrupt pin and callback.
+        check() -> bool:
+            Verify device presence on the I2C bus.
+        port (property):
+            Get or set the full 8-bit port value.
+        pin(pin: int, value: Optional[int] = None) -> int:
+            Read or set the state of a specific GPIO pin.
+        toggle(pin: int) -> None:
+            Toggle the state of a given GPIO pin.
+        _validate_pin(pin: int) -> int:
+            Ensure pin number is valid (0–7).
+        _read() -> None:
+            Read current port state from device into cache.
+        _write() -> None:
+            Write cached port state to device.
+        _scheduled_handler(_) -> None:
+            Dispatch user-defined callback during interrupt scheduling.
+
+    Notes:
+        - Provides 8 GPIO pins via I2C control.
+        - Address range typically 0x20–0x27 (set by A0–A2).
+        - Outputs are open-drain, external pull-up resistors required.
+        - External interrupt pin enables event-driven GPIO monitoring.
     """
 
     def __init__(self, i2c: I2C, address: int = 0x20,
