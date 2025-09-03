@@ -271,7 +271,6 @@ class EC11Encoder:
 
         Returns:
             int: 当前旋转的计数值。
-# ========================================  主程序  ===========================================
         ==========================================
 
         Get total rotation count (positive = clockwise, negative = counter-clockwise).
