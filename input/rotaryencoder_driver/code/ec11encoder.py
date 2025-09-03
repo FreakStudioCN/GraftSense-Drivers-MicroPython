@@ -91,7 +91,7 @@ class EC11Encoder:
         - Debounce delay: 1ms for phase A, 5ms for button.
     """
 
-    def __init__(self, pin_a: int, pin_b: int, pin_btn: int) -> None:
+    def __init__(self, pin_a: int, pin_b: int, pin_btn: int = None) -> None:
         """
         初始化 EC11 旋转编码器类。
 
@@ -271,7 +271,6 @@ class EC11Encoder:
 
         Returns:
             int: 当前旋转的计数值。
-# ========================================  主程序  ===========================================
         ==========================================
 
         Get total rotation count (positive = clockwise, negative = counter-clockwise).

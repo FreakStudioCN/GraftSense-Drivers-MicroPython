@@ -10,7 +10,7 @@
 
 import dht22
 from machine import Pin
-from utime import sleep
+from time import sleep
 
 # ======================================== 全局变量 ============================================
 
@@ -20,12 +20,25 @@ from utime import sleep
 
 # ======================================== 初始化配置 ===========================================
 
+# 延时等待设备初始化
+time.sleep(3)
+# 打印调试信息
+print('FreakStudio : Using OneWire to read DHT22 sensor')
+
+# 延时1s，等待DHT22传感器上电完成
+time.sleep(1)
+# 初始化单总线通信引脚，下拉输出
+DHT22_PIN = Pin(13, Pin.OUT, Pin.PULL_DOWN)
+# 初始化DHT11实例
+dht22 = dht22.DHT22(DHT22_PIN)
+
 # ========================================  主程序  ============================================
 
-if __name__ == '__main__':
-    sleep(2)
-    dht_pin = Pin(0)
-    d = dht22.DHT(dht_pin)
-    while True:
-        print('Temperature: {}. Humidity: {}'.format(d.get_temperature(), d.get_humidity()))
-        sleep(2)
+while True:
+    # 读取温湿度数据
+    temperature = dht22.get_temperature()
+    humidity = dht22.get_humidity()
+    # 打印温湿度数据
+    print("temperature: {}℃, humidity: {}%".format(temperature, humidity))
+    # 等待2秒
+    time.sleep(2)

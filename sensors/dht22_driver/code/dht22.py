@@ -14,9 +14,9 @@ __chip__ = "RP2040"
 
 # ======================================== 导入相关模块 =========================================
 
-import utime
+import time
 from machine import Pin
-from utime import *
+from time import *
 from math import fabs
 from rp2 import asm_pio, StateMachine, PIO
 
@@ -136,7 +136,7 @@ def handle_dht_irq(sm):
 
 # ======================================== 自定义类 ============================================
 
-class DHT(object):
+class DHT22(object):
     def __init__(self, pin: Pin, state_machine_id: int = 0, min_interval: int = 2000):
         """
         DHT 传感器驱动，用于通过状态机读取温湿度数据。
@@ -239,7 +239,7 @@ class DHT(object):
             self._sm.put(0)
             
             # 等待状态机工作完成
-            utime.sleep_ms(20)
+            time.sleep_ms(20)
             
             if _irq_count != 5:
                 print("Didn't receive enough data. Received {} byte(s).".format(len(temp_data)))

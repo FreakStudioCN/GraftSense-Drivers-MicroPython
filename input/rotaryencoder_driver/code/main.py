@@ -29,7 +29,7 @@ print("FreakStudio : Using GPIO read Rotary Encoder value, use software debounce
 # 创建EC11旋转编码器对象，使用GPIO10和GPIO11作为A相和B相，使用GPIO12作为按键
 # 如果你想改变编码器计数值变大的旋转方向（例如原本是逆时针变大，想改成顺时针变大）
 # 只需要在初始化编码器对象时，将参数 pin_a 和 pin_b 的值互换即可
-encoder = EC11Encoder(pin_a=26, pin_b=27, pin_btn=28)
+encoder = EC11Encoder(pin_a=26, pin_b=27)
 # 创建终端进度条对象，用于显示进度，旋转20次达到100%
 progress_bar = ProgressBar(max_value=20)
 

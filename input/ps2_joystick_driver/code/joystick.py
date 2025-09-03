@@ -21,26 +21,6 @@ import micropython
 
 # ======================================== 功能函数 ============================================
 
-def user_callback(data: tuple) -> None:
-    """
-    用户自定义的回调函数，用于处理采集到的摇杆数据。
-
-    Args:
-        data (tuple): 包含摇杆的X轴、Y轴电压值和按键状态的元组，格式为 (x_value, y_value, sw_value)。
-
-    Returns:
-        None
-    """
-    # 声明全局变量
-    global ball
-
-    # 打印摇杆数据值
-    x_value, y_value, sw_value = data
-    print("X: {:.2f}, Y: {:.2f}, Switch: {}".format(x_value, y_value, sw_value))
-
-    # 移动小球
-    ball.move_ball(x_value,y_value)
-
 # ======================================== 自定义类 ============================================
 
 class Joystick:
@@ -113,7 +93,7 @@ class Joystick:
     # 电压转换系数
     conversion_factor = 3.3 / (65535)
 
-    def __init__(self, vrx_pin: int, vry_pin: int, vsw_pin: int, freq: int = 100, callback: callable[[tuple], None] = None) -> None:
+    def __init__(self, vrx_pin: int, vry_pin: int, vsw_pin: int = None, freq: int = 100, callback: callable[[tuple], None] = None) -> None:
         """
         初始化 Joystick 实例。
 
