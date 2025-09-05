@@ -443,7 +443,7 @@ except Exception as e:
 ## 联系方式
 如有任何问题或需要帮助，请通过以下方式联系开发者：  
 📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/leezisheng](https://github.com/leezisheng)  
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
 ---
 ## 许可协议
 本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (CC BY-NC 4.0)** 许可协议发布。  
