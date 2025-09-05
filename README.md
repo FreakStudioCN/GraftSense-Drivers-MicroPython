@@ -14,6 +14,7 @@ GraftSense-Drivers-MicroPython/
 ├── input/                # 输入类 (按键, 摇杆 ...)
 ├── signal_acquisition/   # 信号采集类 (MCP3008, ADS1115 ...)
 ├── signal_generation/    # 信号发生类 (MCP4725, AD9833 ...)
+├── storage/              # 存储类 (W25Q128, AT24C256 ...)
 ├── misc/                 # 杂项类 (继电器, 蜂鸣器 ...)
 └── docs/                 # 详细文档和应用说明
 ```
