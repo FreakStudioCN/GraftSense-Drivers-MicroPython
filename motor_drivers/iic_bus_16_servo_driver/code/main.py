@@ -6,12 +6,14 @@
 # @Description : PCA968516路PWM驱动板示例程序
 
 # ======================================== 导入相关模块 =========================================
-
+#导入时间模块
 import time
+# 导入MicroPython标准库模块
 from machine import Pin, I2C
-from pca9685 import PCA9685
+# 导入总线舵机控制器模块
 from bus_servo import BusPWMServoController
-
+# 导入PCA9685模块
+from pca9685 import PCA9685
 # ======================================== 全局变量 ============================================
 
 # 自动扫描 PCA9685 地址（0x40~0x4F）

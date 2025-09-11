@@ -6,14 +6,14 @@
 # @Description : DY-SV19T的语音播放模块串口示例
 
 # ======================================== 导入相关模块 =========================================
-
+# 导入MicroPython标准库模块
 from machine import Pin, UART
+# 导入时间模块
 import time
+# 导入DY-SV19T模块
 from dy_sv19t import DYSV19T
 
 # ======================================== 全局变量 ============================================
-# 初始化 UART 通信
-uart = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
 
 # ======================================== 功能函数 ============================================
 
@@ -25,8 +25,12 @@ time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Test DY-SV19T Module")
 
+# 初始化 UART 通信
+uart = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
+
 # 创建一个 DYSV19T 播放器的实例
 player = DYSV19T(uart)
+
 # 将音量设为 25
 player.set_volume(25)
 

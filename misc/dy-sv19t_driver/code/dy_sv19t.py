@@ -3,19 +3,17 @@
 # @Time    : 2025/09/08 10:00
 # @Author  : 侯钧瀚
 # @File    : dy_sv19t.py
-# @Description : DY-SV19T的语音播放模块驱动
+# @Description : DY-SV19T 语音播放模块驱动
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CCBYNC
+# @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
-__license__ = "CCBYNC"
+__license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.19+"
-
 # ======================================== 导入相关模块 =========================================
-
+#导入常量模块
 from micropython import const
-
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
@@ -24,54 +22,51 @@ from micropython import const
 
 class DYSV19T:
     """
-    DYSV19T 音频模块控制类
-    ================================
-    该类通过 UART 与 DYSV19T 音频模块进行通信，控制播放、音量、磁盘选择，并查询模块状态。
+    DYSV19T 音频模块控制类，通过 UART 实现播放、音量、磁盘选择、状态查询等功能。
 
-    公共方法:
-    - play(): 开始音频播放。
-    - stop(): 停止音频播放。
-    - pause(): 暂停音频播放。
-    - set_volume(volume: int): 设置音量。
-    - query_status(): 查询当前状态。
-    - query_current_disk(): 查询当前使用的磁盘。
+    Attributes:
+        DISK_USB, DISK_SD, DISK_FLASH, DISK_NONE: 磁盘常量
+        PLAY_STOP, PLAY_PLAY, PLAY_PAUSE: 播放状态常量
+        MODE_*, EQ_*, CH_*: 播放模式、均衡器、通道常量
+        VOLUME_MIN, VOLUME_MAX, DEFAULT_BAUD: 音量与波特率常量
 
-    常量:
-    - PLAY_STOP, PLAY_PLAY, PLAY_PAUSE: 播放状态。
-    - MODE_*: 各种播放模式。
-    - EQ_*: 均衡器预设。
-    - CH_*: DAC 通道选项。
-    DYSV19T Audio Module Control Class
-    ================================
-    This class communicates with the DYSV19T audio module via UART to control playback, volume, disk selection, and query the module status.
+    Methods:
+        __init__(uart, ...): 初始化
+        play(): 播放
+        stop(): 停止
+        pause(): 暂停
+        set_volume(volume): 设置音量
+        query_status(): 查询播放状态
+        query_current_disk(): 查询当前磁盘
+    ==========================================
 
-    Public Methods:
-    - play(): Starts audio playback.
-    - stop(): Stops audio playback.
-    - pause(): Pauses audio playback.
-    - set_volume(volume: int): Sets the volume.
-    - query_status(): Queries the current status.
-    - query_current_disk(): Queries the currently used disk.
+    DYSV19T audio module controller via UART, supports playback, volume, disk selection, status query, etc.
 
-    Constants:
-    - PLAY_STOP, PLAY_PLAY, PLAY_PAUSE: Playback statuses.
-    - MODE_*: Various playback modes.
-    - EQ_*: Equalizer presets.
-    - CH_*: DAC channel options.
+    Attributes:
+        DISK_USB, DISK_SD, DISK_FLASH, DISK_NONE: Disk constants
+        PLAY_STOP, PLAY_PLAY, PLAY_PAUSE: Playback status
+        MODE_*, EQ_*, CH_*: Play mode, EQ, channel constants
+        VOLUME_MIN, VOLUME_MAX, DEFAULT_BAUD: Volume and baudrate
+
+    Methods:
+        __init__(uart, ...): Initialize
+        play(): Play
+        stop(): Stop
+        pause(): Pause
+        set_volume(volume): Set volume
+        query_status(): Query playback status
+        query_current_disk(): Query current disk
     """
 
-    # 磁盘常量
     DISK_USB = const(0x00)
     DISK_SD = const(0x01)
     DISK_FLASH = const(0x02)
     DISK_NONE = const(0xFF)
 
-    # 播放状态常量
     PLAY_STOP = const(0x00)
     PLAY_PLAY = const(0x01)
     PLAY_PAUSE = const(0x02)
 
-    # 播放模式常量
     MODE_FULL_LOOP = const(0x00)
     MODE_SINGLE_LOOP = const(0x01)
     MODE_SINGLE_STOP = const(0x02)
@@ -81,19 +76,16 @@ class DYSV19T:
     MODE_DIR_SEQUENCE = const(0x06)
     MODE_SEQUENCE = const(0x07)
 
-    # 均衡器常量
     EQ_NORMAL = const(0x00)
     EQ_POP = const(0x01)
     EQ_ROCK = const(0x02)
     EQ_JAZZ = const(0x03)
     EQ_CLASSIC = const(0x04)
 
-    # DAC 通道常量
     CH_MP3 = const(0x00)
     CH_AUX = const(0x01)
     CH_MP3_AUX = const(0x02)
 
-    # 音量常量
     VOLUME_MIN = const(0)
     VOLUME_MAX = const(30)
     DEFAULT_BAUD = const(9600)
@@ -107,32 +99,34 @@ class DYSV19T:
         """
         初始化 DYSV19T 类。
 
-        参数:
-            uart (UART): 用于通信的 UART 实例。
-            default_volume (int): 默认音量级别（0-30）。
-            default_disk (int): 默认磁盘源。
-            default_play_mode (int): 默认播放模式。
-            default_dac_channel (int): 默认 DAC 通道。
-            timeout_ms (int): UART 操作超时（单位：毫秒）。
+        Args:
+            uart: UART 实例
+            default_volume (int): 默认音量 0-30
+            default_disk (int): 默认磁盘
+            default_play_mode (int): 默认播放模式
+            default_dac_channel (int): 默认 DAC 通道
+            timeout_ms (int): UART 超时 ms
 
-        异常:
-        ================================
-            ValueError: 如果 uart 为 None。
-            Initialize the DYSV19T class.
+        Raises:
+            ValueError: uart 不能为空
 
-        Parameters:
-            uart (UART): UART instance used for communication.
-            default_volume (int): Default volume level (0-30).
-            default_disk (int): Default disk source.
-            default_play_mode (int): Default play mode.
-            default_dac_channel (int): Default DAC channel.
-            timeout_ms (int): Timeout for UART operations (in milliseconds).
+        ==========================================
 
-        Exceptions:
-            ValueError: If uart is None.
+        Initialize DYSV19T class.
+
+        Args:
+            uart: UART instance
+            default_volume (int): Default volume 0-30
+            default_disk (int): Default disk
+            default_play_mode (int): Default play mode
+            default_dac_channel (int): Default DAC channel
+            timeout_ms (int): UART timeout ms
+
+        Raises:
+            ValueError: If uart is None
         """
         if not uart:
-            raise ValueError("UART 实例不能为空")
+            raise ValueError("UART 实例不能为空 / UART instance required")
         self.uart = uart
         self.volume = default_volume
         self.current_disk = default_disk
@@ -145,22 +139,23 @@ class DYSV19T:
         """
         构建带校验和的帧。
 
-        参数:
-            cmd (int): 命令字节。
-            data (bytes): 包含的数据。
-
-        返回:
-            bytes: 完整的帧，包括校验和。
-        ================================
-            Construct a frame with a checksum.
-
-        Parameters:
-            cmd (int): Command byte.
-            data (bytes): Included data.
+        Args:
+            cmd (int): 命令字节
+            data (bytes): 数据
 
         Returns:
-            bytes: Complete frame, including the checksum.
+            bytes: 完整帧
 
+        ==========================================
+
+        Build frame with checksum.
+
+        Args:
+            cmd (int): Command byte
+            data (bytes): Data
+
+        Returns:
+            bytes: Complete frame
         """
         frame = bytearray([0xAA, cmd, len(data)] + list(data))
         checksum = sum(frame) & 0xFF
@@ -171,44 +166,50 @@ class DYSV19T:
         """
         通过 UART 发送帧。
 
-        参数:
-            frame (bytes): 要发送的帧。
-        ================================
-        Send frames via UART.
+        Args:
+            frame (bytes): 要发送的帧
 
-        Parameters:
-            frame (bytes): The frame to be sent.
+        ==========================================
+
+        Send frame via UART.
+
+        Args:
+            frame (bytes): Frame to send
         """
         self.uart.write(frame)
 
     def recv_response(self, expected_cmd: int = None) -> bytes:
         """
-        接收模块的响应。
+        接收模块响应。
 
-        参数:
-            expected_cmd (int, 可选): 用于过滤响应的命令字节。
-
-        返回:
-            bytes: 模块的响应字节，若无响应则返回 None。
-        ================================
-        Receive the response from the module.
-
-        Parameters:
-            expected_cmd (int, optional): The command byte used to filter the response.
+        Args:
+            expected_cmd (int, optional): 期望命令字节
 
         Returns:
-            bytes: The response bytes from the module; returns None if there is no response.
+            bytes: 响应数据，未匹配返回 None
+
+        ==========================================
+
+        Receive module response.
+
+        Args:
+            expected_cmd (int, optional): Expected command byte
+
+        Returns:
+            bytes: Response data, None if not matched
         """
         response = self.uart.read(256)
-        if response and (response[1] == expected_cmd or expected_cmd is None):
+        if response and (expected_cmd is None or response[1] == expected_cmd):
             return response
         return None
 
     def play(self):
         """
-        发送播放命令开始播放音频。
-        ================================
-        Send a play command to start playing the audio.
+        播放音频。
+
+        ==========================================
+
+        Start audio playback.
         """
         frame = self.build_frame(0x02, b'\x00')
         self.send_frame(frame)
@@ -216,9 +217,11 @@ class DYSV19T:
 
     def stop(self):
         """
-        发送停止命令停止音频播放。
-        ================================
-        Send a stop command to stop audio playback.
+        停止播放。
+
+        ==========================================
+
+        Stop audio playback.
         """
         frame = self.build_frame(0x04, b'\x00')
         self.send_frame(frame)
@@ -226,9 +229,11 @@ class DYSV19T:
 
     def pause(self):
         """
-        发送暂停命令暂停音频播放。
-        ================================
-        Send a pause command to pause audio playback.
+        暂停播放。
+
+        ==========================================
+
+        Pause audio playback.
         """
         frame = self.build_frame(0x03, b'\x00')
         self.send_frame(frame)
@@ -238,36 +243,41 @@ class DYSV19T:
         """
         设置音量。
 
-        参数:
-            volume (int): 音量级别，范围是 0 到 30。
+        Args:
+            volume (int): 音量 0-30
 
-        异常:
-            ValueError: 如果音量超出范围（0-30）。
-            Set the volume.
-        ================================
-        Parameters:
-            volume (int): The volume level, ranging from 0 to 30.
+        Raises:
+            ValueError: 音量超范围
 
-        Exceptions:
-            ValueError: If the volume is out of the range (0-30).
+        ==========================================
+
+        Set volume.
+
+        Args:
+            volume (int): Volume 0-30
+
+        Raises:
+            ValueError: If out of range
         """
-        if volume < self.VOLUME_MIN or volume > self.VOLUME_MAX:
-            raise ValueError("音量必须在 0 到 30 之间。")
+        if not (self.VOLUME_MIN <= volume <= self.VOLUME_MAX):
+            raise ValueError("音量必须在 0 到 30 之间 / Volume must be 0-30")
         frame = self.build_frame(0x13, bytes([volume]))
         self.send_frame(frame)
         self.volume = volume
 
     def query_status(self):
         """
-        查询当前模块的播放状态。
-
-        返回:
-            bytes: 模块的响应，指示当前状态。
-        ================================
-            Query the playback status of the current module.
+        查询播放状态。
 
         Returns:
-            bytes: The module's response indicating the current status.
+            int: 当前状态，未响应返回 None
+
+        ==========================================
+
+        Query playback status.
+
+        Returns:
+            int: Current status, None if no response
         """
         frame = self.build_frame(0x01, b'\x00')
         self.send_frame(frame)
@@ -276,15 +286,17 @@ class DYSV19T:
 
     def query_current_disk(self):
         """
-        查询当前使用的磁盘。
-
-        返回:
-            bytes: 模块的响应，指示当前使用的磁盘。
-        ================================
-              Query the currently used disk.
+        查询当前磁盘。
 
         Returns:
-            bytes: The response of the module, indicating the currently used disk.
+            int: 当前磁盘，未响应返回 None
+
+        ==========================================
+
+        Query current disk.
+
+        Returns:
+            int: Current disk, None if no response
         """
         frame = self.build_frame(0x0A, b'\x00')
         self.send_frame(frame)
