@@ -84,7 +84,7 @@ class HeartRateMonitor:
             address (int): I2C 地址
 
         Raises:
-            ValueError: 参数非法
+            ValueError: 如果sample_rate <= 0 or window_size <= 0 or smoothing_window <= 0
 
         ==========================================
 
@@ -98,7 +98,7 @@ class HeartRateMonitor:
             address (int): I2C address
 
         Raises:
-            ValueError: If parameters invalid
+            ValueError: if sample_rate <= 0 or window_size <= 0 or smoothing_window <= 0
         """
         if sample_rate <= 0 or window_size <= 0 or smoothing_window <= 0:
             raise ValueError("Sample rate, window size, and smoothing window must be greater than 0.")

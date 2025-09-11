@@ -44,6 +44,21 @@ class BusPWMServoController:
         to_pwm_ticks(pulse_us): µs 转 tick。
     ==========================================
     16-channel PWM servo controller based on PCA9685. Supports 180°/360° servos and direct pulse write.
+
+    Attributes:
+        _pca: An instance of PCA9685, which needs to support the freq(hz) and duty(channel, value) methods.
+        _freq (int): PWM output frequency (Hz).
+        _cfg (dict): Channel configuration dictionary.
+
+    Methods:
+        __init__(pca, freq=50): Initialize and set the frequency.
+        attach_servo(...): Register the channel and calibration parameters.
+        detach_servo(channel): Unregister and stop the output.
+        set_angle(...): Set the angle of a 180° servo.
+        set_speed(...): Set the speed of a 360° servo.
+        set_pulse_us(channel, pulse_us): Directly write the pulse width.
+        stop(channel): Return to the middle position or turn off the output.
+        to_pwm_ticks(pulse_us): Convert µs to ticks.
     """
 
     SERVO_180 = const(0x00)
@@ -94,7 +109,7 @@ class BusPWMServoController:
             channel (int): 通道号。
 
         Raises:
-            ValueError: 非法通道。
+            ValueError: 通道号不是0–15通道。
 
         ==========================================
         Ensure channel index in 0–15.
@@ -103,7 +118,7 @@ class BusPWMServoController:
             channel (int): Channel index.
 
         Raises:
-            ValueError: If out of range.
+            ValueError: The channel number is not in the 0–15 range.
         """
         if not isinstance(channel, int) or not (0 <= channel <= 15):
             raise ValueError("channel must be int in 0..15")
@@ -116,7 +131,7 @@ class BusPWMServoController:
             channel (int): 通道号。
 
         Raises:
-            ValueError: 未注册。
+            ValueError: 未注册的通道号。
 
         ==========================================
         Ensure channel is attached.
@@ -125,7 +140,7 @@ class BusPWMServoController:
             channel (int): Channel index.
 
         Raises:
-            ValueError: If not attached.
+            ValueError: Unregistered channel number.
         """
         if channel not in self._cfg:
             raise ValueError("channel {} not attached; call attach_servo() first".format(channel))
@@ -166,7 +181,7 @@ class BusPWMServoController:
             int: tick 值。
 
         Raises:
-            ValueError: 非法脉宽。
+            ValueError: pulse_us 为非正数（≤ 0）。
 
         ==========================================
         Convert pulse width (µs) to ticks.
@@ -178,7 +193,7 @@ class BusPWMServoController:
             int: Tick value.
 
         Raises:
-            ValueError: If invalid.
+            ValueError: pulse_us is a non-positive number (≤ 0).
         """
         if not isinstance(pulse_us, int) or pulse_us <= 0:
             raise ValueError("pulse_us must be positive int")
@@ -189,25 +204,31 @@ class BusPWMServoController:
 
     def _write_pulse(self, channel, pulse_us):
         """
-        写脉宽到通道。
+        写脉宽到指定通道。
 
         Args:
             channel (int): 通道号。
-            pulse_us (int): 脉宽（µs）。
+            pulse_us (int): 脉宽（微秒，µs）。必须为正数。
 
         Raises:
-            RuntimeError: 写入失败。
+            ValueError:  pulse_us 为非正数（≤ 0）。
+            RuntimeError: PCA9685 IIC 操作失败。
 
         ==========================================
-        Write pulse width to channel.
+        Write pulse width to the specified channel.
 
         Args:
-            channel (int): Channel.
-            pulse_us (int): Pulse width.
+            channel (int): Channel number.
+            pulse_us (int): Pulse width in microseconds (µs). Must be a positive number.
 
         Raises:
-            RuntimeError: If write fails.
+            ValueError: pulse_us is non-positive (≤ 0).
+            RuntimeError: PCA9685 I/O operation fails.
         """
+        # 显式检查 pulse_us 是否为正数
+        if pulse_us <= 0:
+            raise ValueError("pulse_us must be a positive number (greater than 0).")
+
         try:
             ticks = self.to_pwm_ticks(pulse_us)
             self._pca.duty(channel, ticks)
@@ -220,36 +241,57 @@ class BusPWMServoController:
 
         Args:
             channel (int): 通道号。
-            servo_type (int): 舵机类型。
-            min_us (int): 最小脉宽。
-            max_us (int): 最大脉宽。
-            neutral_us (int|None): 中立脉宽。
-            reversed (bool): 反向。
+            servo_type (int): 舵机类型。应为 `SERVO_180` 或 `SERVO_360`。
+            min_us (int): 最小脉宽，必须是正整数且小于最大脉宽。
+            max_us (int): 最大脉宽，必须是正整数且大于最小脉宽。
+            neutral_us (int|None): 中立脉宽，必须是 `min_us` 和 `max_us` 之间的整数，或者为 `None`。
+            reversed (bool): 是否反向控制。
 
         Raises:
-            ValueError: 参数非法。
+            ValueError: 如果参数无效，详细错误信息如下：
+                - servo_type 不是 `SERVO_180` 或 `SERVO_360`。
+                - min_us 和 max_us 必须为正整数，并且 min_us 小于 max_us。
+                - neutral_us 必须是整数，且在 `min_us` 和 `max_us` 之间，或者为 `None`。
 
         ==========================================
         Attach servo and calibration.
 
         Args:
-            channel (int): Channel.
-            servo_type (int): Servo type.
-            min_us (int): Min pulse.
-            max_us (int): Max pulse.
-            neutral_us (int|None): Neutral.
-            reversed (bool): Reverse.
+            channel (int): Channel number.
+            servo_type (int): Servo type. Must be `SERVO_180` or `SERVO_360`.
+            min_us (int): Min pulse width, must be a positive integer and less than max_us.
+            max_us (int): Max pulse width, must be a positive integer and greater than min_us.
+            neutral_us (int|None): Neutral pulse width, must be an integer within [min_us, max_us] or None.
+            reversed (bool): Reverse control.
 
         Raises:
-            ValueError: If invalid.
+            ValueError: If invalid parameters are provided, detailed error messages as follows:
+                - `servo_type` must be `SERVO_180` or `SERVO_360`.
+                - `min_us` and `max_us` must be positive integers, and `min_us` must be less than `max_us`.
+                - `neutral_us` must be an integer within the range of [min_us, max_us] or None.
         """
         self._ensure_channel(channel)
+
+        # 检查舵机类型
         if servo_type not in (self.SERVO_180, self.SERVO_360):
-            raise ValueError("servo_type must be SERVO_180 or SERVO_360")
+            raise ValueError("servo_type must be either SERVO_180 or SERVO_360, got {}".format(servo_type))
+
+        # 检查 min_us 和 max_us
         if not (isinstance(min_us, int) and isinstance(max_us, int) and min_us > 0 and max_us > 0 and min_us < max_us):
-            raise ValueError("min_us/max_us must be positive ints and min_us < max_us")
-        if neutral_us is not None and (not isinstance(neutral_us, int) or not (min_us <= neutral_us <= max_us)):
-            raise ValueError("neutral_us must be int in [min_us, max_us] or None")
+            raise ValueError(
+                "min_us and max_us must be positive integers and min_us must be less than max_us. Got min_us={}, max_us={}".format(
+                    min_us, max_us))
+
+        # 检查 neutral_us
+        if neutral_us is not None:
+            if not isinstance(neutral_us, int):
+                raise ValueError("neutral_us must be an integer if specified. Got neutral_us={}".format(neutral_us))
+            if not (min_us <= neutral_us <= max_us):
+                raise ValueError(
+                    "neutral_us must be in the range [min_us, max_us]. Got neutral_us={}, min_us={}, max_us={}".format(
+                        neutral_us, min_us, max_us))
+
+        # 配置舵机
         self._cfg[channel] = {
             "type": servo_type,
             "min": min_us,
@@ -267,24 +309,32 @@ class BusPWMServoController:
             channel (int): 通道号。
 
         Raises:
-            RuntimeError: 写入失败。
-            ValueError: 非法通道。
+            RuntimeError: 如果写入 PCA9685 时失败。
+            ValueError: 如果给定的通道无效（不存在或未注册）。
 
         ==========================================
         Detach and stop output.
 
         Args:
-            channel (int): Channel.
+            channel (int): Channel number.
 
         Raises:
-            RuntimeError: If write fails.
-            ValueError: If invalid.
+            RuntimeError: If writing to PCA9685 fails.
+            ValueError: If the provided channel is invalid (not registered or does not exist).
         """
+        # 确保通道有效
         self._ensure_channel(channel)
+
         try:
+            # 停止输出，通过将 duty 设置为 0
             self._pca.duty(channel, 0)
         except Exception as e:
-            raise RuntimeError("PCA9685 I/O failed") from e
+            raise RuntimeError("PCA9685 I/O failed while stopping output on channel {}".format(channel)) from e
+
+        # 移除通道的配置
+        if channel not in self._cfg:
+            raise ValueError("Channel {} is not registered or invalid.".format(channel))
+
         self._cfg.pop(channel, None)
 
     def set_angle(self, channel, angle, *, speed_deg_per_s=None):
@@ -297,44 +347,60 @@ class BusPWMServoController:
             speed_deg_per_s (float|None): 平滑速度。
 
         Raises:
-            ValueError: 参数非法或未注册。
-            RuntimeError: 类型不符或写入失败。
+            ValueError: 如果参数非法（如角度不在0–180范围内，或非数值类型）。
+            RuntimeError: 如果类型不符（如非 SERVO_180 类型的舵机）或写入失败。
 
         ==========================================
         Set 180° servo angle.
 
         Args:
-            channel (int): Channel.
+            channel (int): Channel number.
             angle (float): Angle 0–180.
             speed_deg_per_s (float|None): Smoothing speed.
 
         Raises:
-            ValueError: If invalid.
-            RuntimeError: If not SERVO_180 or write fails.
+            ValueError: If invalid parameters are provided (e.g., angle out of range, or not a number).
+            RuntimeError: If the type is not `SERVO_180` or write fails.
         """
         self._ensure_channel(channel)
         self._ensure_attached(channel)
         cfg = self._cfg[channel]
+
+        # 确保舵机类型是 SERVO_180
         if cfg["type"] != self.SERVO_180:
-            raise RuntimeError("channel {} is not SERVO_180".format(channel))
+            raise RuntimeError("Channel {} is not SERVO_180, it is {}".format(channel, cfg["type"]))
+
+        # 检查 angle 是否为有效的数值
         if not isinstance(angle, (int, float)):
-            raise ValueError("angle must be a number")
+            raise ValueError("Angle must be a number, got {}".format(type(angle)))
+
+        # 限制角度范围
         angle = self._clip(float(angle), 0.0, 180.0)
         min_us, max_us = cfg["min"], cfg["max"]
+
+        # 如果是反向，调整角度
         if cfg["rev"]:
             angle = 180.0 - angle
+
         pulse = int(round(min_us + (max_us - min_us) * (angle / 180.0)))
+
+        # 如果没有平滑速度，直接设置脉宽
         if speed_deg_per_s is None or cfg.get("angle") is None or speed_deg_per_s <= 0:
             self._write_pulse(channel, pulse)
             cfg["angle"] = 180.0 - angle if cfg["rev"] else angle
             return
+
+        # 处理平滑角度变化
         current = cfg.get("angle", angle)
         target = 180.0 - angle if cfg["rev"] else angle
+
         if current == target:
             return
+
         step = max(0.5, float(speed_deg_per_s) * 0.02)
         direction = 1.0 if target > current else -1.0
         a = current
+
         while (direction > 0 and a < target) or (direction < 0 and a > target):
             a += direction * step
             tmp_angle = self._clip(a, 0.0, 180.0)
@@ -342,6 +408,8 @@ class BusPWMServoController:
             pulse_i = int(round(min_us + (max_us - min_us) * (phys_angle / 180.0)))
             self._write_pulse(channel, pulse_i)
             time.sleep_ms(20)
+
+        # 最后一次脉宽写入
         self._write_pulse(channel, pulse)
         cfg["angle"] = target
 
@@ -354,38 +422,50 @@ class BusPWMServoController:
             speed (float): 速度 -1.0~1.0。
 
         Raises:
-            ValueError: 参数非法或未注册。
-            RuntimeError: 类型不符或写入失败。
+            ValueError: 如果速度不在有效范围内或参数非法。
+            RuntimeError: 如果舵机类型不符或写入失败。
 
         ==========================================
         Set 360° servo speed.
 
         Args:
-            channel (int): Channel.
+            channel (int): Channel number.
             speed (float): Speed -1.0~1.0.
 
         Raises:
-            ValueError: If invalid.
-            RuntimeError: If not SERVO_360 or write fails.
+            ValueError: If the speed is not in the valid range or invalid parameters are provided.
+            RuntimeError: If the servo type is not `SERVO_360` or writing to the servo fails.
         """
         self._ensure_channel(channel)
         self._ensure_attached(channel)
         cfg = self._cfg[channel]
+
+        # 确保舵机类型是 SERVO_360
         if cfg["type"] != self.SERVO_360:
-            raise RuntimeError("channel {} is not SERVO_360".format(channel))
+            raise RuntimeError("Channel {} is not a 360° servo (SERVO_360)".format(channel))
+
+        # 检查 speed 是否为有效数值
         if not isinstance(speed, (int, float)):
-            raise ValueError("speed must be a number")
+            raise ValueError("Speed must be a number, got {}".format(type(speed)))
+
+        # 限制速度范围
         speed = self._clip(float(speed), -1.0, 1.0)
+
+        # 如果是反向舵机，改变速度符号
         if cfg["rev"]:
             speed = -speed
+
         min_us, max_us = cfg["min"], cfg["max"]
         neutral = cfg["neutral"] if cfg["neutral"] is not None else (min_us + max_us) // 2
+
+        # 根据速度计算脉宽
         if speed == 0.0:
             pulse = int(neutral)
         elif speed > 0.0:
             pulse = int(round(neutral + (max_us - neutral) * speed))
         else:
             pulse = int(round(neutral + (neutral - min_us) * speed))
+
         self._write_pulse(channel, pulse)
 
     def set_pulse_us(self, channel, pulse_us):
@@ -397,26 +477,33 @@ class BusPWMServoController:
             pulse_us (int): 脉宽。
 
         Raises:
-            ValueError: 参数非法或未注册。
-            RuntimeError: 写入失败。
+            ValueError: pulse_us 为非正数（≤ 0）。
+            RuntimeError: 未注册的通道号或写入失败。
 
         ==========================================
         Write pulse width (µs) directly.
 
         Args:
-            channel (int): Channel.
+            channel (int): pulse_us is a non-positive number (≤ 0).
             pulse_us (int): Pulse width.
 
         Raises:
-            ValueError: If invalid.
-            RuntimeError: If write fails.
+            ValueError: pulse_us is a non-positive number (≤ 0).
+            RuntimeError: Unregistered channel number.
         """
         self._ensure_channel(channel)
         self._ensure_attached(channel)
+
+        # 检查 pulse_us 是否为正整数
         if not isinstance(pulse_us, int) or pulse_us <= 0:
-            raise ValueError("pulse_us must be positive int")
+            raise ValueError("pulse_us must be a positive integer, got {}".format(pulse_us))
+
         cfg = self._cfg[channel]
+
+        # 限制脉宽在最小和最大值范围内
         pulse_us = int(self._clip(pulse_us, cfg["min"], cfg["max"]))
+
+        # 写入脉宽
         self._write_pulse(channel, pulse_us)
 
     def stop(self, channel):
@@ -427,30 +514,33 @@ class BusPWMServoController:
             channel (int): 通道号。
 
         Raises:
-            ValueError: 未注册或非法通道。
+            ValueError: 通道未注册或非法。
             RuntimeError: 写入失败。
 
         ==========================================
         Stop output or set to neutral.
 
         Args:
-            channel (int): Channel.
+            channel (int): Channel number.
 
         Raises:
-            ValueError: If not attached or invalid.
-            RuntimeError: If write fails.
+            ValueError: not attached or invalid.
+            RuntimeError: writing to the PCA9685 fails.
         """
         self._ensure_channel(channel)
         self._ensure_attached(channel)
         cfg = self._cfg[channel]
         neutral = cfg.get("neutral")
+
         try:
             if neutral is None:
+                # 如果没有中立脉宽，停止输出
                 self._pca.duty(channel, 0)
             else:
+                # 设置为中立脉宽
                 self._write_pulse(channel, int(neutral))
         except Exception as e:
-            raise RuntimeError("PCA9685 I/O failed") from e
+            raise RuntimeError("PCA9685 I/O failed while stopping output on channel {}".format(channel)) from e
 
 # ======================================== 初始化配置 ==========================================
 

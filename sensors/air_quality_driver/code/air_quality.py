@@ -121,7 +121,7 @@ class PCA9546ADR:
             ch (int): 通道编号，0~3。
 
         Raises:
-            ValueError: 通道号无效。
+            ValueError: 通道号不是0~3。
 
         ==========================================
 
@@ -131,7 +131,7 @@ class PCA9546ADR:
             ch (int): Channel number, 0~3.
 
         Raises:
-            ValueError: If channel is invalid.
+            ValueError: The channel number is not in the range of 0~3
         """
         if ch < 0 or ch >= self.MAX_CH:
             raise ValueError("Invalid channel")
