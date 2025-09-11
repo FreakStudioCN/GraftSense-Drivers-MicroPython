@@ -478,7 +478,6 @@ class BusPWMServoController:
 
         Raises:
             ValueError: pulse_us 为非正数（≤ 0）。
-            RuntimeError: 未注册的通道号或写入失败。
 
         ==========================================
         Write pulse width (µs) directly.
@@ -489,7 +488,6 @@ class BusPWMServoController:
 
         Raises:
             ValueError: pulse_us is a non-positive number (≤ 0).
-            RuntimeError: Unregistered channel number.
         """
         self._ensure_channel(channel)
         self._ensure_attached(channel)
@@ -514,7 +512,6 @@ class BusPWMServoController:
             channel (int): 通道号。
 
         Raises:
-            ValueError: 通道未注册或非法。
             RuntimeError: 写入失败。
 
         ==========================================
@@ -524,7 +521,6 @@ class BusPWMServoController:
             channel (int): Channel number.
 
         Raises:
-            ValueError: not attached or invalid.
             RuntimeError: writing to the PCA9685 fails.
         """
         self._ensure_channel(channel)

@@ -61,7 +61,6 @@ class LEDBar:
 
         Raises:
             ValueError: 如果未提供 write 方法。
-            RuntimeError: 底层写入失败。
 
         ==========================================
 
@@ -72,7 +71,6 @@ class LEDBar:
 
         Raises:
             ValueError: If no compatible write method is found.
-            RuntimeError: If low-level write fails.
         """
         if not hasattr(pcf8574, "write"):
             raise ValueError("pcf8574 must provide write(value:int)")
@@ -88,9 +86,6 @@ class LEDBar:
             index (int): 0..7
             value (bool): True=点亮，False=熄灭
 
-        Raises:
-            ValueError: 索引越界
-
         ==========================================
 
         Turn one LED (0..7) ON/OFF and flush to hardware.
@@ -99,8 +94,6 @@ class LEDBar:
             index (int): 0..7
             value (bool): True=ON, False=OFF
 
-        Raises:
-            ValueError: If index is out of range.
         """
         self._ensure_index(index)
         self._state = (self._state | (1 << index)) if value else (self._state & ~(1 << index))
