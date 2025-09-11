@@ -28,10 +28,10 @@ import _thread
 # ======================================== 全局变量 ============================================
 
 # 常量定义
-PCA9546ADR_ADDR7 = const(0x70)  # PCA9546ADR 的 7 位地址
-MEMS_SENSOR_ADDR7 = const(0x2A)  # MEMS 传感器默认 I2C 地址
-OP_DELAY_MS = const(20)  # 操作延时，20ms
-RESTART_DELAY_MS = const(5000)  # 重启延时，5秒
+PCA9546ADR_ADDR7 = const(0x70)
+MEMS_SENSOR_ADDR7 = const(0x2A)
+OP_DELAY_MS = const(20)
+RESTART_DELAY_MS = const(5000)
 
 
 # ======================================== 功能函数 ============================================
@@ -485,7 +485,6 @@ class AirQualityMonitor:
         """
         self.pca.disable_all()
         time.sleep_ms(RESTART_DELAY_MS)
-        # 可选：恢复通道
 
     def deinit(self):
         """

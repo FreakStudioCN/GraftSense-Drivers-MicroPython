@@ -28,10 +28,6 @@ class BusPWMServoController:
     """
     基于 PCA9685 的 16 路 PWM 舵机控制器，支持 180° 舵机角度控制、360° 连续舵机速度控制，以及脉宽直接写入。
 
-    Class Variables:
-        SERVO_180 (int): 180° 舵机类型常量。
-        SERVO_360 (int): 360° 连续旋转舵机类型常量。
-
     Attributes:
         _pca: PCA9685 实例，需支持 freq(hz)、duty(channel, value) 方法。
         _freq (int): PWM 输出频率（Hz）。

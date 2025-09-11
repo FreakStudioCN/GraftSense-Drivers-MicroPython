@@ -23,8 +23,6 @@ class LEDBar:
     LEDBar 类，用于通过 PCF8574 芯片控制 8 段 LED 光条数码管，实现单独或批量点亮/熄灭 LED。
 
     Attributes:
-        NUM_LEDS (int): LED 数量，固定为 8。
-        _ACTIVE_LOW (bool): 是否为低电平点亮，默认为 True。
         _pcf: 提供 write(value:int) 方法的 PCF8574 实例。
         _state (int): 当前 8 位 LED 逻辑状态，bit1=点亮。
 
@@ -40,8 +38,6 @@ class LEDBar:
     Provides methods for single LED control, batch control, and level display.
 
     Attributes:
-        NUM_LEDS (int): Number of LEDs, fixed to 8.
-        _ACTIVE_LOW (bool): Whether active-low logic is used (default True).
         _pcf: PCF8574 instance providing write(value:int).
         _state (int): Current 8-bit logical LED state, bit1=ON.
 

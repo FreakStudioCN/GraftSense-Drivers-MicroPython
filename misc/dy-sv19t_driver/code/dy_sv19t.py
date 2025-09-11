@@ -25,6 +25,13 @@ class DYSV19T:
     DYSV19T 音频模块控制类，通过 UART 实现播放、音量、磁盘选择、状态查询等功能。
 
     Attributes:
+        uart: UART 实例
+        volume (int): 当前音量
+        current_disk (int): 当前磁盘
+        play_mode (int): 当前播放模式
+        dac_channel (int): 当前 DAC 通道
+        play_state (int): 当前播放状态
+        timeout_ms (int): UART 超时时间（毫秒）
         DISK_USB, DISK_SD, DISK_FLASH, DISK_NONE: 磁盘常量
         PLAY_STOP, PLAY_PLAY, PLAY_PAUSE: 播放状态常量
         MODE_*, EQ_*, CH_*: 播放模式、均衡器、通道常量
@@ -43,6 +50,13 @@ class DYSV19T:
     DYSV19T audio module controller via UART, supports playback, volume, disk selection, status query, etc.
 
     Attributes:
+        uart: UART instance
+        volume (int): Current volume
+        current_disk (int): Current disk
+        play_mode (int): Current play mode
+        dac_channel (int): Current DAC channel
+        play_state (int): Current play state
+        timeout_ms (int): UART timeout (ms)
         DISK_USB, DISK_SD, DISK_FLASH, DISK_NONE: Disk constants
         PLAY_STOP, PLAY_PLAY, PLAY_PAUSE: Playback status
         MODE_*, EQ_*, CH_*: Play mode, EQ, channel constants
