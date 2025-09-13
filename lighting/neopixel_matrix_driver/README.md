@@ -170,21 +170,24 @@ import json
 # ======================================== 全局变量 ============================================
 
 json_img1 = json.dumps({
-    "pixels": [0xF800, 0x07E0, 0x001F, 0xF81F] * 4,  # 4x4 图片数据示例，循环红绿蓝紫
+    # 4x4 图片数据示例，循环红绿蓝紫
+    "pixels": [0xF800, 0x07E0, 0x001F, 0xF81F] * 4,  
     "width": 4,
     "description": "test image1"
 })
 
 json_img2 = json.dumps({
-    "pixels": [0x001F, 0xF81F, 0x07E0, 0xF800] * 4,  # 4x4 图片数据示例，颜色顺序倒转
+    # 4x4 图片数据示例，颜色顺序倒转
+    "pixels": [0x001F, 0xF81F, 0x07E0, 0xF800] * 4,  
     "width": 4,
-    "description": "图像2"
+    "description": "test image2"
 })
 
 json_img3 = json.dumps({
-    "pixels": [0x07E0, 0xF800, 0xF81F, 0x001F] * 4,  # 4x4 图片数据示例，另一种排列
+    # 4x4 图片数据示例，另一种排列
+    "pixels": [0x07E0, 0xF800, 0xF81F, 0x001F] * 4,  
     "width": 4,
-    "description": "图像3"
+    "description": "test image3"
 })
 
 # 将图片数据放入列表
@@ -249,7 +252,8 @@ def optimized_scrolling_lines():
     # 1. 蓝色横线从上向下滚动
     matrix.fill(0)
     matrix.show()
-    matrix.hline(0, 0, 4, NeopixelMatrix.COLOR_BLUE)  # 顶部蓝线
+    # 顶部蓝线
+    matrix.hline(0, 0, 4, NeopixelMatrix.COLOR_BLUE)  
     matrix.show()
     time.sleep(0.5)
 
@@ -394,7 +398,8 @@ def play_animation(matrix, frames, fps=30):
             time.sleep_ms(int(remaining))
 
             # 调试用帧率输出（可选）
-            if False:  # 设为True可打印实际帧率
+            if False: 
+                # 设为True可打印实际帧率
                 current_time = time.ticks_ms()
                 actual_fps = 1000 / max(1, time.ticks_diff(current_time, last_time))
                 print("FPS: {:.1f}".format(actual_fps))
