@@ -25,7 +25,8 @@ print("FreakStudio: Test NFC module functionality")
 # UART 初始化 (根据硬件实际引脚调整)
 # 示例：TX=P4, RX=P5
 uart = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
-reset_pin = Pin(15, Pin.OUT)  # 可选：Reset引脚
+# 可选：Reset引脚
+reset_pin = Pin(15, Pin.OUT)
 nfc = PN532_UART(uart, reset=reset_pin, debug=True)
 
 # 复位并唤醒 PN532

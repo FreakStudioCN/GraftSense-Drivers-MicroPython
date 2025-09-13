@@ -196,7 +196,8 @@ try:
         # 打印当前所有按键状态
         all_states = keys.read_all()
         print("status:", {k: "press" if v else "release" for k, v in all_states.items()})
-        time.sleep(0.5)  # 500ms刷新一次状态显示
+        # 500ms刷新一次状态显示
+        time.sleep(0.5)  
 except KeyboardInterrupt:
     print("test stop")
 finally:
