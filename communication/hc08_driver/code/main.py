@@ -3,13 +3,13 @@
 # @Time    : 2025/9/5 下午10:11
 # @Author  : ben0i0d
 # @File    : main.py
-# @Description : hc14_lora测试文件
+# @Description : hc08测试文件
 
 # ======================================== 导入相关模块 =========================================
 
 import time
 from machine import Pin
-from hc14_lora import HC14_Lora
+from hc08 import HC08
 
 # ======================================== 全局变量 ============================================
 
@@ -22,16 +22,6 @@ from hc14_lora import HC14_Lora
 # 上电延时3s
 time.sleep(3)
 print("FreakStudio:Infrared transceiver test")
-
-# 发射管接 GP15
-TX_PIN = Pin(15, Pin.OUT)
-# 接收头接 GP14
-RX_PIN = Pin(14, Pin.IN)
-# 38kHz 发射
-ir_tx = NEC(TX_PIN, freq=38000)
-# 接收 NEC
-ir_rx = NEC_16(RX_PIN, ir_callback)
-print("[System] Ready... TX=GP15, RX=GP14")
 
 # ========================================  主程序  ===========================================
 while True:
