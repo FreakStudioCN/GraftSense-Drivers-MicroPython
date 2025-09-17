@@ -74,11 +74,12 @@ try:
         print("\n--- Temperature Statistics ---")
         print(f"Min: {min_temp:.2f} °C | Max: {max_temp:.2f} °C | Avg: {avg_temp:.2f} °C")
 
-        # Print a few pixels (top-left 4x4 area)
+        # Print a few pixels (top-left 4*4 area)
         print("--- Sample Pixels (Top-Left 4x4) ---")
         # 打印左上角4*4像素
         for row in range(4):
             row_data = [
+                # 这里row*32因为一行是32个像素点，所以这个row*32表示每一行的索引，第0行索引是0
                 f"{temperature_frame[row*32 + col]:5.1f}"
                 for col in range(4)
             ]

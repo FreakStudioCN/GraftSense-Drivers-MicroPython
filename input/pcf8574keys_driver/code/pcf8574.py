@@ -85,7 +85,7 @@ class PCF8574:
             callback (callable, optional): 中断回调函数。
 
         Raises:
-            TypeError: i2c 不是 I2C 或 callback 非可调用对象。
+            TypeError: i2c 不是 I2C , callback 非可调用对象 , int_pin非引脚编号 。
             ValueError: 地址不在 0x20~0x27 范围内。
 
         Notes:
@@ -104,7 +104,7 @@ class PCF8574:
             trigger (int, optional): Trigger type, default falling edge.
 
         Raises:
-            TypeError: If i2c is not I2C or callback not callable.
+            TypeError: If i2c is not I2C or callback not callable，int_pin isn't number.
             ValueError: If address not in 0x20~0x27.
 
         Notes:
@@ -157,6 +157,7 @@ class PCF8574:
         Notes:
             - 在 micropython.schedule 调度下执行，非 ISR-safe。
             - 回调函数接收当前 port 状态。
+            - 不抛出异常，防止中断调度器
 
         ==========================================
 
@@ -168,6 +169,7 @@ class PCF8574:
         Notes:
             - Executed under micropython.schedule, not ISR-safe.
             - Callback receives current port state.
+            - Do not throw exceptions to prevent interrupting the scheduler.
         """
         # 读取当前端口值，清除中断标志
         self._read()
@@ -272,10 +274,6 @@ class PCF8574:
         Returns:
             int: 读取时返回。当前引脚状态；写入时返回 None
 
-        Raises:
-            ValueError: 引脚编号不合法。
-            OSError: I2C 写操作失败。
-
         Notes:
             - I2C 操作非 ISR-safe。
 
@@ -289,10 +287,6 @@ class PCF8574:
 
         Returns:
             int: Pin state when reading; None when writing.
-
-        Raises:
-            ValueError: Invalid pin number.
-            OSError: I2C write failed.
 
         Notes:
             - I2C operations are not ISR-safe.
@@ -318,10 +312,6 @@ class PCF8574:
         Args:
             pin (int): 引脚编号 0~7。
 
-        Raises:
-            ValueError: 引脚编号不合法。
-            OSError: I2C 写操作失败。
-
         Notes:
             - I2C 操作非 ISR-safe。
 
@@ -331,10 +321,6 @@ class PCF8574:
 
         Args:
             pin (int): Pin number 0~7.
-
-        Raises:
-            ValueError: Invalid pin number.
-            OSError: I2C write failed.
 
         Notes:
             - I2C operations are not ISR-safe.

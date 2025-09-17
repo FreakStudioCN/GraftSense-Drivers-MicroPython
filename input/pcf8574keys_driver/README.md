@@ -226,7 +226,7 @@ finally:
 ## 联系方式
 如有任何问题或需要帮助，请通过以下方式联系开发者：  
 📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：https://github.com/leezisheng
+💻 **GitHub**：https://github.com/FreakStudioCN
 
 ---
 

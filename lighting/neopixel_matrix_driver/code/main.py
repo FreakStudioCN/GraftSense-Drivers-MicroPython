@@ -124,7 +124,7 @@ def optimized_scrolling_lines():
 
     # 向右循环滚动8次(完整循环两次)
     for _ in range(8):
-        matrix.scroll(1, 0,wrap=True)
+        matrix.scroll(1, 0, wrap=True)
         matrix.show()
         time.sleep(0.2)
 
@@ -201,7 +201,7 @@ def load_animation_frames():
         except Exception as e:
             print("Error loading frame {}: {}".format(filename, e))
             # 如果加载失败，插入一个空白帧
-            frames.append({"pixels":[0]*16, "width":4, "height":4})
+            frames.append({"pixels": [0]*16, "width": 4, "height": 4})
     return frames
 
 def play_animation(matrix, frames, fps=30):
@@ -262,7 +262,7 @@ def play_animation(matrix, frames, fps=30):
 
 time.sleep(3)
 print("FreakStudio:WS2812 LED Matrix Test")
-matrix = NeopixelMatrix(4, 4, Pin(22), layout=NeopixelMatrix.LAYOUT_ROW, brightness=0.2, order=NeopixelMatrix.ORDER_BRG, flip_v = True)
+matrix = NeopixelMatrix(4, 4, Pin(22), layout=NeopixelMatrix.LAYOUT_ROW, brightness=0.2, order=NeopixelMatrix.ORDER_BRG, flip_v=True)
 matrix.fill(0)
 matrix.show()
 

@@ -23,7 +23,7 @@ time.sleep(3)
 print("FreakStudio: Testing VL53L0X Time-of-Flight sensor")
 
 # 初始化 I2C (Raspberry Pi Pico 使用 I2C0，默认引脚 GP8=SDA, GP9=SCL)
-i2c = machine.I2C(0, scl=machine.Pin(9), sda=machine.Pin(8), freq=400000)
+i2c = machine.I2C(0, scl=machine.Pin(9), sda=machine.Pin(8), freq=100000)
 
 # 扫描 I2C 设备，确保传感器存在
 devices = i2c.scan()
@@ -44,7 +44,7 @@ try:
     while True:
         # 读取距离，单位 mm
         distance = tof.read()
-        if distance > 0:
+        if distance > 0 and distance < 2000:
             print("Distance: %d mm" % distance)
         else:
             print("Out of range or read error")

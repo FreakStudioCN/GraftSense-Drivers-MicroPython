@@ -77,10 +77,6 @@ class TCR5000:
             pin (int): 传感器信号脚连接的 GPIO 引脚编号。
             trigger (int): 中断触发方式，默认为下降沿和上升沿。
 
-        Raises:
-            ValueError: 当指定引脚无效时。
-            RuntimeError: 当中断注册失败时。
-
         Notes:
             本方法会配置 GPIO 并注册硬件中断。
 
@@ -91,10 +87,6 @@ class TCR5000:
         Args:
             pin (int): GPIO pin number connected to sensor output.
             trigger (int): Interrupt trigger mode, default rising and falling edges.
-
-        Raises:
-            ValueError: If pin number is invalid.
-            RuntimeError: If IRQ registration fails.
 
         Notes:
             This method configures GPIO and attaches interrupt.

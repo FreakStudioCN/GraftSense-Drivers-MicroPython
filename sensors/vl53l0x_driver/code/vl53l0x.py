@@ -124,16 +124,6 @@ ALGO_PHASECAL_CONFIG_TIMEOUT = 0x30
 
 # ======================================== 自定义类 ============================================
 
-class TimeoutError(RuntimeError):
-    """
-    超时错误，当VL53L0X操作超时时触发。
-
-    ====================================
-
-    Timeout error, triggered when the VL53L0X times out.
-    """
-    pass
-
 class VL53L0X:
     """
     该类控制VL53L0X激光测距传感器，提供初始化、测距和参数配置功能。
@@ -224,6 +214,10 @@ class VL53L0X:
             i2c (I2C): machine.I2C实例，用于与传感器通信。
             address (int): 传感器的I2C地址，默认值为0x29。
 
+        Raises:
+            TypeError: 如果i2c不是machine.I2C实例。
+            ValueError: 如果I2C地址不是整数或不在0x00到0x7F的范围内。
+
         Notes:
             初始化过程会调用init()方法进行硬件配置。
 
@@ -234,6 +228,10 @@ class VL53L0X:
         Args:
             i2c (I2C): machine.I2C instance for communication with the sensor.
             address (int): I2C address of the sensor, default is 0x29.
+
+        Raises:
+            TypeError: "i2c must be a machine.I2C instance."
+            ValueError: If the I2C address is not an integer or not within the range of 0x00 to 0x7F.
 
         Notes:
             The initialization process will call the init() method for hardware configuration.
@@ -268,14 +266,14 @@ class VL53L0X:
                          }
         self.vcsel_period_type = ["VcselPeriodPreRange", "VcselPeriodFinalRange"]
 
-    def _registers(self, register, values=None, struct='B'):
+    def _registers(self, register, values=None, _struct='B') -> tuple:
         """
         读写传感器寄存器（内部方法）。
 
         Args:
             register (int): 寄存器地址。
             values (tuple, optional): 要写入的值，为None时执行读取操作。
-            struct (str, optional): 用于打包/解包数据的格式字符串，默认'B'。
+            _struct (str, optional): 用于打包/解包数据的格式字符串，默认'B'。
 
         Returns:
             tuple: 读取时返回解包后的值；写入时无返回。
@@ -290,7 +288,7 @@ class VL53L0X:
         Args:
             register (int): Register address.
             values (tuple, optional): Values to write, perform read operation when None.
-            struct (str, optional): Format string for packing/unpacking data, default 'B'.
+            _struct (str, optional): Format string for packing/unpacking data, default 'B'.
 
         Returns:
             tuple: Unpacked values when reading; no return when writing.
@@ -299,21 +297,21 @@ class VL53L0X:
             Internal register operation method, not recommended for direct call.
         """
         if values is None:
-            size = struct.calcsize(struct)
+            size = struct.calcsize(_struct)
             data = self.i2c.readfrom_mem(self.address, register, size)
-            values = struct.unpack(struct, data)
+            values = struct.unpack(_struct, data)
             return values
-        data = struct.pack(struct, *values)
+        data = struct.pack(_struct, *values)
         self.i2c.writeto_mem(self.address, register, data)
 
-    def _register(self, register, value=None, struct='B'):
+    def _register(self, register, value=None, _struct='B') -> int:
         """
         读写单个传感器寄存器（内部方法）。
 
         Args:
             register (int): 寄存器地址。
             value (int, optional): 要写入的值，为None时执行读取操作。
-            struct (str, optional): 用于打包/解包数据的格式字符串，默认'B'。
+            _struct (str, optional): 用于打包/解包数据的格式字符串，默认'B'。
 
         Returns:
             int: 读取时返回寄存器值；写入时无返回。
@@ -328,7 +326,7 @@ class VL53L0X:
         Args:
             register (int): Register address.
             value (int, optional): Value to write, perform read operation when None.
-            struct (str, optional): Format string for packing/unpacking data, default 'B'.
+            _struct (str, optional): Format string for packing/unpacking data, default 'B'.
 
         Returns:
             int: Register value when reading; no return when writing.
@@ -337,10 +335,10 @@ class VL53L0X:
             Internal register operation method, not recommended for direct call.
         """
         if value is None:
-            return self._registers(register, struct=struct)[0]
-        self._registers(register, (value,), struct=struct)
+            return self._registers(register, _struct=_struct)[0]
+        self._registers(register, (value,), _struct=_struct)
 
-    def _flag(self, register=0x00, bit=0, value=None):
+    def _flag(self, register=0x00, bit=0, value=None) -> bool:
         """
         操作寄存器的特定位（内部方法）。
 
@@ -410,9 +408,6 @@ class VL53L0X:
         Args:
             power2v8 (bool, optional): 是否使用2.8V电源，默认True。
 
-        Raises:
-            TimeoutError: 传感器初始化超时。
-
         Notes:
             执行传感器硬件复位、SPAD配置和校准等初始化操作。
 
@@ -422,9 +417,6 @@ class VL53L0X:
 
         Args:
             power2v8 (bool, optional): Whether to use 2.8V power supply, default True.
-
-        Raises:
-            TimeoutError: Sensor initialization timeout.
 
         Notes:
             Performs sensor hardware reset, SPAD configuration and calibration.
@@ -452,12 +444,12 @@ class VL53L0X:
 
         # rate_limit = 0.25
         self._register(_FINAL_RATE_RTN_LIMIT, int(0.1 * (1 << 7)),
-                       struct='>H')
+                       _struct='>H')
 
         self._register(_SYSTEM_SEQUENCE, 0xff)
 
         spad_count, is_aperture = self._spad_info()
-        spad_map = bytearray(self._registers(_SPAD_ENABLES, struct='6B'))
+        spad_map = bytearray(self._registers(_SPAD_ENABLES, _struct='6B'))
 
         # set reference spads
         self._config(
@@ -475,7 +467,7 @@ class VL53L0X:
             elif spad_map[i // 8] & (1 << (i >> 2)):
                 spads_enabled += 1
 
-        self._registers(_SPAD_ENABLES, spad_map, struct='6B')
+        self._registers(_SPAD_ENABLES, spad_map, _struct='6B')
 
         self._config(
             (0xff, 0x01),
@@ -589,7 +581,7 @@ class VL53L0X:
 
         self._register(_SYSTEM_SEQUENCE, 0xe8)
 
-    def _spad_info(self):
+    def _spad_info(self) -> tuple:
         """
         获取SPAD（单光子雪崩二极管）信息（内部方法）。
 
@@ -597,7 +589,7 @@ class VL53L0X:
             tuple: (count, is_aperture)，SPAD数量和是否为孔径类型。
 
         Raises:
-            TimeoutError: 获取SPAD信息超时。
+            RuntimeError: 获取SPAD信息超时。
 
         Notes:
             用于初始化过程中配置SPAD参数。
@@ -610,7 +602,7 @@ class VL53L0X:
             tuple: (count, is_aperture), SPAD count and whether it is aperture type.
 
         Raises:
-            TimeoutError: Timeout when getting SPAD information.
+            RuntimeError: Timeout when getting SPAD information.
 
         Notes:
             Used to configure SPAD parameters during initialization.
@@ -637,7 +629,7 @@ class VL53L0X:
                 break
             time.sleep_ms(1)
         else:
-            raise TimeoutError()
+            raise RuntimeError("Timeout")
         self._config(
             (0x83, 0x01),
         )
@@ -666,7 +658,7 @@ class VL53L0X:
             vhv_init_byte (int): VHV初始化字节参数。
 
         Raises:
-            TimeoutError: 校准超时。
+            RuntimeError: 校准超时。
 
         Notes:
             用于传感器初始化过程中的校准操作。
@@ -679,7 +671,7 @@ class VL53L0X:
             vhv_init_byte (int): VHV initialization byte parameter.
 
         Raises:
-            TimeoutError: Calibration timeout.
+            RuntimeError: Calibration timeout.
 
         Notes:
             Used for calibration during sensor initialization.
@@ -690,7 +682,7 @@ class VL53L0X:
                 break
             time.sleep_ms(1)
         else:
-            raise TimeoutError()
+            raise RuntimeError("timeout")
         self._register(_INTERRUPT_CLEAR, 0x01)
         self._register(_SYSRANGE_START, 0x00)
 
@@ -724,10 +716,10 @@ class VL53L0X:
             (0x80, 0x00),
         )
         if period:
-            oscilator = self._register(_OSC_CALIBRATE, struct='>H')
+            oscilator = self._register(_OSC_CALIBRATE, _struct='>H')
             if oscilator:
                 period *= oscilator
-            self._register(_MEASURE_PERIOD, period, struct='>H')
+            self._register(_MEASURE_PERIOD, period, _struct='>H')
             self._register(_SYSRANGE_START, 0x04)
         else:
             self._register(_SYSRANGE_START, 0x02)
@@ -765,7 +757,7 @@ class VL53L0X:
             int: 测距结果，单位为毫米（mm）。
 
         Raises:
-            TimeoutError: 读取测量结果超时。
+            RuntimeError: 读取测量结果超时。
 
         Notes:
             如果传感器未启动，将先启动单次测量再读取结果。
@@ -778,7 +770,7 @@ class VL53L0X:
             int: Ranging result in millimeters (mm).
 
         Raises:
-            TimeoutError: Timeout when reading measurement result.
+            RuntimeError: Timeout when reading measurement result.
 
         Notes:
             If the sensor is not started, it will first start a single measurement and then read the result.
@@ -799,18 +791,18 @@ class VL53L0X:
                     break
                 time.sleep_ms(1)
             else:
-                raise TimeoutError()
+                raise RuntimeError("timeout")
         for timeout in range(_IO_TIMEOUT):
             if self._register(_RESULT_INTERRUPT_STATUS) & 0x07:
                 break
             time.sleep_ms(1)
         else:
-            raise TimeoutError()
-        value = self._register(_RESULT_RANGE_STATUS + 10, struct='>H')
+            raise RuntimeError("timeout")
+        value = self._register(_RESULT_RANGE_STATUS + 10, _struct='>H')
         self._register(_INTERRUPT_CLEAR, 0x01)
         return value
 
-    def set_signal_rate_limit(self, limit_Mcps):
+    def set_signal_rate_limit(self, limit_Mcps) -> bool:
         """
         设置信号速率限制。
 
@@ -841,7 +833,7 @@ class VL53L0X:
         self._register(0x44, limit_Mcps * (1 << 7))
         return True
 
-    def decode_Vcsel_period(self, reg_val):
+    def decode_Vcsel_period(self, reg_val) ->int:
         """
         解码VCSEL周期寄存器值。
 
@@ -869,7 +861,7 @@ class VL53L0X:
         """
         return ((reg_val + 1) << 1)
 
-    def encode_Vcsel_period(self, period_pclks):
+    def encode_Vcsel_period(self, period_pclks) -> int:
         """
         编码VCSEL周期为寄存器值。
 
@@ -897,7 +889,7 @@ class VL53L0X:
         """
         return (((period_pclks) >> 1) - 1)
 
-    def set_Vcsel_pulse_period(self, type, period_pclks):
+    def set_Vcsel_pulse_period(self, type, period_pclks) -> bool:
         """
         设置VCSEL脉冲周期。
 
@@ -1027,7 +1019,7 @@ class VL53L0X:
         self.enables["pre_range"] = (sequence_config >> 6) & 0x1
         self.enables["final_range"] = (sequence_config >> 7) & 0x1
 
-    def get_vcsel_pulse_period(self, type):
+    def get_vcsel_pulse_period(self, type) -> int:
         """
         获取VCSEL脉冲周期。
 
@@ -1086,7 +1078,7 @@ class VL53L0X:
             self.timeouts["final_range_mclks"] -= self.timeouts["pre_range_mclks"]
         self.timeouts["final_range_us"] = int(self.timeout_Mclks_to_microseconds(self.timeouts["final_range_mclks"],self.timeouts["final_range_vcsel_period_pclks"]))
 
-    def timeout_Mclks_to_microseconds(self, timeout_period_mclks, vcsel_period_pclks):
+    def timeout_Mclks_to_microseconds(self, timeout_period_mclks, vcsel_period_pclks) -> float:
         """
         将Mclks单位的超时转换为微秒。
 
@@ -1117,7 +1109,7 @@ class VL53L0X:
         macro_period_ns = self.calc_macro_period(vcsel_period_pclks)
         return ((timeout_period_mclks * macro_period_ns) + (macro_period_ns / 2)) / 1000
 
-    def timeout_microseconds_to_Mclks(self, timeout_period_us, vcsel_period_pclks):
+    def timeout_microseconds_to_Mclks(self, timeout_period_us, vcsel_period_pclks) -> float:
         """
         将微秒单位的超时转换为Mclks。
 
@@ -1148,7 +1140,7 @@ class VL53L0X:
         macro_period_ns = self.calc_macro_period(vcsel_period_pclks)
         return (((timeout_period_us * 1000) + (macro_period_ns / 2)) / macro_period_ns)
 
-    def calc_macro_period(self, vcsel_period_pclks):
+    def calc_macro_period(self, vcsel_period_pclks) -> float:
         """
         计算宏周期（纳秒）。
 
@@ -1176,7 +1168,7 @@ class VL53L0X:
         """
         return (((2304 * (vcsel_period_pclks) * 1655) + 500) / 1000)
 
-    def decode_timeout(self, reg_val):
+    def decode_timeout(self, reg_val) -> int:
         """
         解码超时寄存器值。
 
@@ -1204,7 +1196,7 @@ class VL53L0X:
         """
         return ((reg_val & 0x00FF) << ((reg_val & 0xFF00) >> 8)) + 1
 
-    def encode_timeout(self, timeout_mclks):
+    def encode_timeout(self, timeout_mclks) -> int:
         """
         编码超时值为寄存器格式。
 
@@ -1244,7 +1236,7 @@ class VL53L0X:
         else:
             return 0
 
-    def set_measurement_timing_budget(self, budget_us):
+    def set_measurement_timing_budget(self, budget_us) -> bool:
         """
         设置测量时间预算。
 
@@ -1309,7 +1301,7 @@ class VL53L0X:
             self.measurement_timing_budget_us = budget_us
         return True
 
-    def perform_single_ref_calibration(self, vhv_init_byte):
+    def perform_single_ref_calibration(self, vhv_init_byte) -> bool:
         """
         执行单次参考校准。
 

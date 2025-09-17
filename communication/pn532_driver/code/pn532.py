@@ -132,25 +132,6 @@ _FRAME_START = b"\x00\x00\xFF"
 
 # ======================================== 自定义类 ============================================
 
-# 异常
-class BusyError(Exception):
-    """
-    该异常用于 PN532 模块忙碌或超时的情况。
-
-    Notes:
-        当高层 PN532 方法调用时模块忙碌或超时时，会抛出此异常。
-        不应在 ISR 中捕获或处理 I/O，属于非 ISR-safe 操作。
-
-    ==========================================
-
-    PN532 Busy or Timeout Exception.
-
-    Notes:
-        Raised when the PN532 NFC module is busy or does not respond
-        within the expected timeout.
-        This exception is not ISR-safe.
-    """
-    pass
 # PN532 基类
 class PN532:
     """
@@ -285,6 +266,9 @@ class PN532:
         """
         唤醒 PN532 模块，子类必须实现此方法。
 
+        Raises:
+            NotImplementedError: 子类未实现该方法时抛出。
+
         Notes:
             非 ISR-safe。
             必须由子类实现，具体 I2C/SPI/UART 方式由子类定义。
@@ -293,18 +277,24 @@ class PN532:
 
         Wake up the PN532 module. Must be implemented by subclass.
 
+        Raises:
+            NotImplementedError: Raised if the subclass does not implement this method.
+
         Notes:
             Not ISR-safe.
             Subclass must implement low-level wakeup via I2C/SPI/UART.
         """
         raise NotImplementedError
 
-    def _wait_ready(self, timeout):
+    def _wait_ready(self, timeout) -> bool:
         """
         等待 PN532 就绪或超时，子类必须实现。
 
         Args:
             timeout (int): 最大等待时间，单位毫秒(ms)。
+
+        Raises:
+            NotImplementedError: 子类未实现该方法时抛出。
 
         Returns:
             bool: 就绪返回 True，超时返回 False。
@@ -320,6 +310,9 @@ class PN532:
         Args:
             timeout (int): maximum wait time in milliseconds (ms).
 
+        Raises:
+            NotImplementedError: Raised if the subclass does not implement this method.
+
         Returns:
             bool: True if ready, False if timeout.
 
@@ -329,12 +322,15 @@ class PN532:
         """
         raise NotImplementedError
 
-    def _read_data(self, count):
+    def _read_data(self, count) -> bytes:
         """
         从 PN532 读取原始字节数据，子类必须实现。
 
         Args:
             count (int): 需要读取的字节数。
+
+        Raises:
+            NotImplementedError: 子类未实现该方法时抛出。
 
         Returns:
             bytes: 读取到的数据。
@@ -349,6 +345,9 @@ class PN532:
 
         Args:
             count (int): number of bytes to read.
+
+        Raises:
+             NotImplementedError: Raised if the subclass does not implement this method.
 
         Returns:
             bytes: data read from PN532.
@@ -366,6 +365,9 @@ class PN532:
         Args:
             framebytes (bytes): 待写入的数据字节。
 
+        Raises:
+            NotImplementedError: 子类未实现该方法时抛出。
+
         Notes:
             非 ISR-safe。
             子类必须实现低层写入逻辑。
@@ -376,6 +378,9 @@ class PN532:
 
         Args:
             framebytes (bytes): bytes to write.
+
+        Raises:
+            NotImplementedError: Raised if the subclass does not implement this method.
 
         Notes:
             Not ISR-safe.
@@ -392,7 +397,7 @@ class PN532:
             data (bytearray): 待发送的数据字节，长度必须在 2-254 字节之间。
 
         Raises:
-            AssertionError: 数据长度不符合要求时抛出。
+            ValueError: 当数据长度不在 2-254 字节范围内时抛出。
 
         Notes:
             非 ISR-safe。
@@ -407,30 +412,33 @@ class PN532:
             data (bytearray): data bytes to send, length must be 2-254 bytes.
 
         Raises:
-            AssertionError: if data length is not within 2-254 bytes.
+            ValueError: if data length is not within 2-254 bytes.
 
         Notes:
             Not ISR-safe.
             Calls low-level _write_data to send bytes on bus.
             Constructs complete frame: PREAMBLE + STARTCODE + LEN + LCS + DATA + DCS + POSTAMBLE.
         """
-        assert 1 < len(data) < 255, "Data must be 2-254 bytes"
+        if not (2 <= len(data) <= 254):
+            raise ValueError("Data length must be between 2 and 254 bytes")
         length = len(data)
         frame = bytearray(length + 8)
         frame[0] = _PREAMBLE
         frame[1] = _STARTCODE1
         frame[2] = _STARTCODE2
+        checksum = sum(frame[0:3])
         frame[3] = length & 0xFF
         frame[4] = (~length + 1) & 0xFF
         frame[5:-2] = data
-        checksum = sum(data) & 0xFF
-        frame[-2] = (~checksum) & 0xFF
+        checksum += sum(data)
+        frame[-2] = ~checksum & 0xFF
         frame[-1] = _POSTAMBLE
+        # Send frame.
         if self.debug:
-            print("TX frame:", [hex(b) for b in frame])
+            print("Write frame: ", [hex(i) for i in frame])
         self._write_data(bytes(frame))
 
-    def _read_frame(self, length):
+    def _read_frame(self, length) -> bytes:
         """
         从 PN532 读取响应帧并返回有效数据，自动校验帧头、长度和数据校验和。
 
@@ -477,32 +485,36 @@ class PN532:
         """
         response = self._read_data(length + 7)
         if self.debug:
-            print("RX frame:", [hex(b) for b in response])
+            print("Read frame:", [hex(i) for i in response])
 
+        # Swallow all the 0x00 values that preceed 0xFF.
         offset = 0
         while response[offset] == 0x00:
             offset += 1
             if offset >= len(response):
-                raise RuntimeError("No valid preamble found")
+                raise RuntimeError("Response frame preamble does not contain 0x00FF!")
         if response[offset] != 0xFF:
-            raise RuntimeError("Invalid start code")
+            raise RuntimeError("Response frame preamble does not contain 0x00FF!")
         offset += 1
+        if offset >= len(response):
+            raise RuntimeError("Response contains no data!")
+        # Check length & length checksum match.
         frame_len = response[offset]
-        lcs = response[offset + 1]
-        if (frame_len + lcs) & 0xFF != 0:
-            raise RuntimeError("Length checksum mismatch")
+        if (frame_len + response[offset + 1]) & 0xFF != 0:
+            raise RuntimeError("Response length checksum did not match length!")
+        # Check frame checksum value matches bytes.
         checksum = sum(response[offset + 2 : offset + 2 + frame_len + 1]) & 0xFF
         if checksum != 0:
-            raise RuntimeError("Data checksum mismatch")
+            raise RuntimeError(
+                "Response checksum did not match expected value: ", checksum
+            )
+        # Return frame data.
         return response[offset + 2 : offset + 2 + frame_len]
 
     # ============================ 高层方法 ============================
     def reset(self):
         """
         对 PN532 执行硬件复位（如果提供了 reset 引脚）并唤醒设备。
-
-        Raises:
-            RuntimeError: 如果硬件复位失败或唤醒异常。
 
         Notes:
             调用会操作 GPIO 引脚和 I2C/SPI/UART，非 ISR-safe。
@@ -511,9 +523,6 @@ class PN532:
         ==========================================
 
         Perform hardware reset on PN532 (if reset pin provided) and wakeup.
-
-        Raises:
-            RuntimeError: If reset or wakeup fails.
 
         Notes:
             Performs GPIO and I2C/SPI/UART operations, not ISR-safe.
@@ -529,7 +538,7 @@ class PN532:
             time.sleep(0.1)
         self._wakeup()
 
-    def call_function(self, command, response_length=0, params=[] , timeout=1000):
+    def call_function(self, command, response_length=0, params=[], timeout=1000) -> bytes | None:
         """
         发送命令到 PN532 并等待返回的数据。
 
@@ -541,9 +550,6 @@ class PN532:
 
         Returns:
             bytes 或 None: 返回响应数据，如果命令发送失败则返回 None。
-
-        Raises:
-            RuntimeError: 响应无效或超时。
 
         Notes:
             调用会进行 I2C/SPI/UART 写操作，非 ISR-safe。
@@ -561,17 +567,16 @@ class PN532:
         Returns:
             bytes or None: Response data or None if failed.
 
-        Raises:
-            RuntimeError: On invalid or timed-out response.
-
         Notes:
             Calling will perform I2C/SPI/UART write operation,Not ISR-safe.
         """
         if not self.send_command(command, params=params, timeout=timeout):
             return None
-        return self.process_response(command, response_length=response_length, timeout=timeout)
+        return self.process_response(
+            command, response_length=response_length, timeout=timeout
+        )
 
-    def send_command(self, command, params=[], timeout=1000):
+    def send_command(self, command, params=[], timeout=1000) -> bool:
         """
         向 PN532 发送命令并等待 ACK 确认。
 
@@ -609,18 +614,26 @@ class PN532:
         """
         if self.low_power:
             self._wakeup()
-        data = bytearray([_HOSTTOPN532, command] + list(params))
+
+        # Build frame data with command and parameters.
+        data = bytearray(2 + len(params))
+        data[0] = _HOSTTOPN532
+        data[1] = command & 0xFF
+        for i, val in enumerate(params):
+            data[2 + i] = val
+        # Send frame and wait for response.
         try:
             self._write_frame(data)
         except OSError:
             return False
         if not self._wait_ready(timeout):
             return False
+        # Verify ACK response and wait to be ready for function response.
         if not _ACK == self._read_data(len(_ACK)):
-            raise RuntimeError("No ACK received from PN532")
+            raise RuntimeError("Did not receive expected ACK from PN532!")
         return True
 
-    def process_response(self, command, response_length=0, timeout=1000):
+    def process_response(self, command, response_length=0, timeout=1000) -> bytes | None:
         """
         读取命令的响应数据。
 
@@ -658,12 +671,15 @@ class PN532:
         """
         if not self._wait_ready(timeout):
             return None
+        # Read response bytes.
         response = self._read_frame(response_length + 2)
+        # Check that response is for the called function.
         if not (response[0] == _PN532TOHOST and response[1] == (command + 1)):
-            raise RuntimeError("Unexpected response")
+            raise RuntimeError("Received unexpected command response!")
+        # Return response data.
         return response[2:]
 
-    def power_down(self):
+    def power_down(self) -> bool:
         """
         将 PN532 置于低功耗状态。
 
@@ -671,9 +687,6 @@ class PN532:
 
         Returns:
             bool: 如果成功进入低功耗状态返回 True，否则返回 False。
-
-        Raises:
-            RuntimeError: 断电失败。
 
         Notes:
             调用会操作 GPIO/I2C/SPI/UART。
@@ -688,13 +701,11 @@ class PN532:
         Returns:
             bool: True if powered down successfully, False otherwise.
 
-        Raises:
-            RuntimeError: If power down fails.
-
         Notes:
             Soft power down sends POWERDOWN command.
         """
-        if self._reset_pin:  # Hard Power Down if the reset pin is connected
+        # Hard Power Down if the reset pin is connected
+        if self._reset_pin:
             self._reset_pin.value = False
             self.low_power = True
         else:
@@ -705,7 +716,7 @@ class PN532:
         return self.low_power
 
     @property
-    def firmware_version(self):
+    def firmware_version(self) -> bytes:
         """
         获取 PN532 固件版本。
 
@@ -733,8 +744,8 @@ class PN532:
         """
         response = self.call_function(_COMMAND_GETFIRMWAREVERSION, 4, timeout=500)
         if response is None:
-            raise RuntimeError("Failed to detect PN532")
-        return tuple(response)
+            raise RuntimeError("Failed to detect the PN532")
+        return response
 
     def SAM_configuration(self):
         """
@@ -753,7 +764,7 @@ class PN532:
         self.call_function(_COMMAND_SAMCONFIGURATION, params=[0x01, 0x14, 0x01])
 
     # ------------- 读卡 / Mifare -------------
-    def read_passive_target(self, card_baud=_MIFARE_ISO14443A, timeout=1000):
+    def read_passive_target(self, card_baud=_MIFARE_ISO14443A, timeout=1000) -> bytes | None:
         """
         读取被动目标卡（被动感应卡）。
 
@@ -763,9 +774,6 @@ class PN532:
 
         Returns:
             bytes 或 None: 卡片 UID，如果无卡或超时返回 None。
-
-        Raises:
-            RuntimeError: 检测到多张卡或 UID 异常。
 
         Notes:
             内部调用 listen_for_passive_target 和 get_passive_target。
@@ -781,9 +789,6 @@ class PN532:
         Returns:
             bytes or None: Card UID or None if no card detected.
 
-        Raises:
-            RuntimeError: More than one card detected or invalid UID.
-
         Notes:
             NInternally calls listen_for_passive_target and get_passive_target.
         """
@@ -792,7 +797,7 @@ class PN532:
             return None
         return self.get_passive_target(timeout=timeout)
 
-    def listen_for_passive_target(self, card_baud=_MIFARE_ISO14443A, timeout=1):
+    def listen_for_passive_target(self, card_baud=_MIFARE_ISO14443A, timeout=1) -> bytes | bool:
         """
         监听被动目标卡，返回是否检测到响应。
 
@@ -802,9 +807,6 @@ class PN532:
 
         Returns:
             bytes 或 bool: 响应数据，如果忙返回 False。
-
-        Raises:
-            BusyError: 当 PN532 忙时。
 
         Notes:
             内部调用 send_command。
@@ -820,19 +822,13 @@ class PN532:
         Returns:
             bytes or bool: Response data, False if busy.
 
-        Raises:
-            BusyError: If PN532 is busy.
-
         Notes:
             Internally calls send_command.
         """
-        try:
-            response = self.send_command(_COMMAND_INLISTPASSIVETARGET, params=[0x01, card_baud], timeout=timeout)
-        except BusyError:
-            return False
+        response = self.send_command(_COMMAND_INLISTPASSIVETARGET, params=[0x01, card_baud], timeout=timeout)
         return response
 
-    def get_passive_target(self, timeout=1000):
+    def get_passive_target(self, timeout=1000) -> bytes | None:
         """
         获取被动目标卡 UID。
 
@@ -876,7 +872,7 @@ class PN532:
         return response[6 : 6 + response[5]]
 
     # ------------- Mifare Classic -------------
-    def mifare_classic_authenticate_block(self, uid, block_number, key_number, key):
+    def mifare_classic_authenticate_block(self, uid, block_number, key_number, key) -> bool:
         """
         验证 Mifare Classic 指定块的访问权限。
 
@@ -889,11 +885,9 @@ class PN532:
         Returns:
             bool: 验证是否成功。
 
-        Raises:
-            RuntimeError: 响应异常。
-
         Notes:
             Internal call call_function。
+            `params` 内部构造为 bytearray，虽然写法类似 list，但实际上类型是 bytearray，不是 list。
 
         ==========================================
 
@@ -908,11 +902,9 @@ class PN532:
         Returns:
             bool: True if authentication succeeded.
 
-        Raises:
-            RuntimeError: On command response error.
-
         Notes:
             Internal call call_function.
+            `params` is constructed as a bytearray, not a list.
         """
         uidlen, keylen = len(uid), len(key)
         params = bytearray(3 + uidlen + keylen)
@@ -924,7 +916,7 @@ class PN532:
         response = self.call_function(_COMMAND_INDATAEXCHANGE, params=params, response_length=1)
         return response[0] == 0x00
 
-    def mifare_classic_read_block(self, block_number):
+    def mifare_classic_read_block(self, block_number) -> bytes | None:
         """
         读取 Mifare Classic 指定块的数据。
 
@@ -933,9 +925,6 @@ class PN532:
 
         Returns:
             bytes or None: 读取到的块数据（16 字节），失败返回 None。
-
-        Raises:
-            RuntimeError: 当响应异常时。
 
         Notes:
             内部调用 call_function 方法。
@@ -950,9 +939,6 @@ class PN532:
         Returns:
             bytes or None: Block data (16 bytes) or None if failed.
 
-        Raises:
-            RuntimeError: If response is invalid.
-
         Notes:
             Calls call_function internally.
         """
@@ -961,7 +947,7 @@ class PN532:
             return None
         return response[1:]
 
-    def mifare_classic_write_block(self, block_number, data):
+    def mifare_classic_write_block(self, block_number, data) -> bool:
         """
         写入 Mifare Classic 指定块的数据。
 
@@ -973,11 +959,11 @@ class PN532:
             bool: 写入是否成功。
 
         Raises:
-            AssertionError: 当数据长度不为 16 字节。
-            RuntimeError: 当响应异常时。
+            ValueError: 当数据长度不为 16 字节。
 
         Notes:
             内部调用 call_function 方法。
+            `params` 内部构造为 bytearray，虽然写法类似 list，但实际上类型是 bytearray，不是 list。
 
         ==========================================
 
@@ -991,19 +977,20 @@ class PN532:
             bool: True if write successful, False otherwise.
 
         Raises:
-            AssertionError: If data length is not 16 bytes.
-            RuntimeError: If response is invalid.
+            valueError: If data length is not 16 bytes.
 
         Notes:
             Calls call_function internally.
+            `params` is constructed as a bytearray, not a list.
         """
-        assert data is not None and len(data) == 16, "Data must be 16 bytes"
+        if data is None or len(data) != 16:
+            raise ValueError("Data must be 16 bytes")
         params = bytearray([0x01, MIFARE_CMD_WRITE, block_number & 0xFF] + list(data))
         response = self.call_function(_COMMAND_INDATAEXCHANGE, params=params, response_length=1)
         return response[0] == 0x00
 
     # ------------- NTAG 2XX -------------
-    def ntag2xx_write_block(self, block_number, data):
+    def ntag2xx_write_block(self, block_number, data) -> bool:
         """
         写入 NTAG 2XX 指定块的数据。
 
@@ -1015,11 +1002,11 @@ class PN532:
             bool: 写入是否成功。
 
         Raises:
-            AssertionError: 当数据长度不为 4 字节。
-            RuntimeError: 当响应异常时。
+            ValueError: 当数据长度不为 4 字节。
 
         Notes:
             内部调用 call_function 方法。
+            `params` 内部构造为 bytearray，虽然写法类似 list，但实际上类型是 bytearray，不是 list。
 
         ==========================================
 
@@ -1033,18 +1020,19 @@ class PN532:
             bool: True if write successful, False otherwise.
 
         Raises:
-            AssertionError: If data length is not 4 bytes.
-            RuntimeError: If response is invalid.
+            ValueError: If data length is not 4 bytes.
 
         Notes:
             Calls call_function internally.
+            `params` is constructed as a bytearray, not a list.
         """
-        assert data is not None and len(data) == 4, "Data must be 4 bytes"
+        if data is None or len(data) != 4:
+            raise ValueError("Data must be 4 bytes")
         params = bytearray([0x01, MIFARE_ULTRALIGHT_CMD_WRITE, block_number & 0xFF] + list(data))
         response = self.call_function(_COMMAND_INDATAEXCHANGE, params=params, response_length=1)
         return response[0] == 0x00
 
-    def ntag2xx_read_block(self, block_number):
+    def ntag2xx_read_block(self, block_number) -> bytes | None:
         """
         读取 NTAG 2XX 指定块的数据。
 

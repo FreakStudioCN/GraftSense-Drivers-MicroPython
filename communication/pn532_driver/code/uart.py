@@ -15,7 +15,7 @@ __platform__ = "MicroPython v1.23"
 
 from machine import UART, Pin
 import time
-from pn532 import PN532, BusyError
+from pn532 import PN532
 
 # ======================================== 全局变量 ============================================
 
@@ -84,6 +84,10 @@ class PN532_UART(PN532):
             uart (UART): 已初始化的 UART 对象。
             reset (Pin, optional): 可选的复位引脚。
             debug (bool): 是否启用调试输出。
+        raises:
+            TypeError: 如果 uart 不是 machine.UART 的实例。
+            TypeError: 如果 reset 不是 machine.Pin 的实例或 None。
+            TypeError: 如果 debug 不是布尔值。
 
         ==========================================
 
@@ -94,6 +98,10 @@ class PN532_UART(PN532):
             reset (Pin, optional): Optional reset pin.
             debug (bool): Enable debug output.
 
+        raises:
+            TypeError: If uart is not an instance of machine.UART.
+            TypeError: If reset is not an instance of machine.Pin or None.
+            TypeError: If debug is not a boolean value.
         """
         if not isinstance(uart, UART):
             raise TypeError("uart must be an instance of machine.UART")
@@ -126,19 +134,20 @@ class PN532_UART(PN532):
         Send wake-up byte sequence over UART.
         Default delay is 10ms, adjustable if needed.
 
-        Note:
+        Notes:
             Calls SAM_configuration internally.
         """
         if self._reset_pin:
-            self._reset_pin.value = True
+            self._reset_pin.value(1)
             time.sleep(0.01)
         self.low_power = False
         self._uart.write(
             b"\x55\x55\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-        )  # wake up!
+        )
+        # 使用普通模式，配置内部安全访问模式
         self.SAM_configuration()
 
-    def _wait_ready(self, timeout=1000):
+    def _wait_ready(self, timeout=1000) -> bool:
         """
         等待 PN532 在指定时间内变为可读状态。
 
@@ -165,7 +174,7 @@ class PN532_UART(PN532):
             time.sleep(0.01)
         return False
 
-    def _read_data(self, count):
+    def _read_data(self, count) -> bytes:
         """
         从 PN532 读取指定字节数。
 
@@ -176,8 +185,7 @@ class PN532_UART(PN532):
             bytes: 读取的数据。
 
         Raises:
-            BusyError: 如果未读取到数据。
-            RuntimeError: 如果读取超时或 UART 错误。
+            RuntimeError: 如果未读取到数据。
 
         ==========================================
 
@@ -190,14 +198,13 @@ class PN532_UART(PN532):
             bytes: Data read.
 
         Raises:
-            BusyError: If no data available.
-            RuntimeError: On timeout or UART error.
+            RuntimeError: If no data available.
         """
         frame = self._uart.read(count)
         if not frame:
-            raise BusyError("No data read from PN532")
+            raise RuntimeError("No data read from PN532")
         if self.debug:
-            print("RX:", [hex(i) for i in frame])
+            print("Reading: ", [hex(i) for i in frame])
         return frame
 
     def _write_data(self, framebytes):
@@ -207,9 +214,6 @@ class PN532_UART(PN532):
         Args:
             framebytes (bytes/bytearray): 要发送的数据帧。
 
-        Raises:
-            RuntimeError: 如果写入失败。
-
         ==========================================
 
         Write data bytes to PN532.
@@ -217,13 +221,9 @@ class PN532_UART(PN532):
         Args:
             framebytes (bytes/bytearray): Data frame to send.
 
-        Raises:
-            RuntimeError: If write fails.
         """
         while self._uart.any():
             self._uart.read()
-        if self.debug:
-            print("TX:", [hex(i) for i in framebytes])
         self._uart.write(framebytes)
 
 # ======================================== 初始化配置 ==========================================

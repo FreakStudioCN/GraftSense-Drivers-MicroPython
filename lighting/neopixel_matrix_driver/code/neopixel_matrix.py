@@ -257,7 +257,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             self.rgb565_to_rgb888(color)
 
     @property
-    def brightness(self):
+    def brightness(self) -> float:
         """
         获取当前亮度值。
 
@@ -290,7 +290,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             value (float): 新的亮度值，范围 0.0–1.0。
 
         Raises:
-            ValueError: 当亮度值超出 0.0–1.0 范围时。
+            ValueError: 亮度值超出 0.0–1.0 范围。
 
         Notes:
             - 亮度变化会影响所有后续的颜色转换
@@ -304,7 +304,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             value (float): New brightness value, range 0.0–1.0.
 
         Raises:
-            ValueError: When brightness value is out of 0.0–1.0 range.
+            ValueError: brightness value is out of 0.0–1.0 range.
 
         Notes:
             - Brightness change affects all subsequent color conversions
@@ -317,7 +317,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         self._init_color_cache()
 
     @micropython.native
-    def _pos2index(self, x, y):
+    def _pos2index(self, x, y) -> int:
         """
         将 (x, y) 坐标转换为 NeoPixel 像素数组中的索引，考虑旋转、翻转和布局设置。
 
@@ -371,7 +371,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             return y * self.width + (x if y % 2 == 0 else self.width - 1 - x)
 
     @micropython.native
-    def rgb565_to_rgb888(self, val, brightness=None, order=None):
+    def rgb565_to_rgb888(self, val, brightness=None, order=None) -> tuple:
         """
         将 RGB565 颜色格式转换为 RGB888 格式，并应用亮度和颜色通道顺序。
 
@@ -709,7 +709,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             data (dict): 已解析的图像数据字典。
 
         Raises:
-            ValueError: 当数据缺少必要键、像素不是列表或颜色值超出范围时。
+            ValueError: 当数据缺少必要键、像素不是列表或颜色值超出范围时,宽度不是正整数时。
 
         Notes:
             - 内部辅助方法，确保图像数据格式正确
@@ -724,7 +724,8 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             data (dict): Parsed image data dictionary.
 
         Raises:
-            ValueError: When data lacks required keys, pixels are not a list, or color values are out of range.
+            ValueError: When data lacks required keys, pixels are not a list, or color values are out of range,
+            width must be positive integer.
 
         Notes:
             - Internal helper method ensuring correct image data format
@@ -793,10 +794,6 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             offset_x (int, optional): 图像显示的 X 偏移量，默认 0。
             offset_y (int, optional): 图像显示的 Y 偏移量，默认 0。
 
-        Raises:
-            OSError: 当文件打开或读取失败时。
-            ValueError: 当图像数据格式不合法时。
-
         Notes:
             - 调用 show_rgb565_image() 处理实际的图像解析和绘制
             - 仅修改帧缓存，需调用 show() 方法刷新显示
@@ -810,10 +807,6 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             filename (str): Filename containing JSON image data.
             offset_x (int, optional): X offset for image display, default 0.
             offset_y (int, optional): Y offset for image display, default 0.
-
-        Raises:
-            OSError: When file opening or reading fails.
-            ValueError: When image data format is invalid.
 
         Notes:
             - Calls show_rgb565_image() to handle actual image parsing and drawing

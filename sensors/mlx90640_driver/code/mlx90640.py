@@ -33,6 +33,9 @@ def init_float_array(size: int) -> array.array:
     Returns:
         array.array: 初始化后的浮点型数组，元素初始值均为0。
 
+    Raises:
+        ValueError: 如果size不是正整数。
+
     Notes:
         使用'f'类型码表示单精度浮点数。
 
@@ -45,6 +48,9 @@ def init_float_array(size: int) -> array.array:
 
     Returns:
         array.array: Initialized float array with all elements 0.
+
+    Raises
+        ValueError: If size is not a positive integer.
 
     Notes:
         Uses 'f' type code for single-precision floating points.
@@ -63,6 +69,9 @@ def init_int_array(size: int) -> array.array:
     Returns:
         array.array: 初始化后的整型数组，元素初始值均为0。
 
+    Raises:
+        ValueError:  如果size不是正整数。
+
     Notes:
         使用'i'类型码表示整型。
 
@@ -75,6 +84,9 @@ def init_int_array(size: int) -> array.array:
 
     Returns:
         array.array: Initialized integer array with all elements 0.
+
+    Raises:
+        ValueError: If size is not a positive integer.
 
     Notes:
         Uses 'i' type code for integers.
@@ -191,8 +203,9 @@ class I2CDevice:
 
         Raises:
             ValueError: 当探测失败时抛出。
-            OSError: 当总线通信错误时抛出。
-
+            TypeError: 当i2c不是machine.I2C实例时抛出。
+            TypeError: 如果device_address不是整数时抛出。
+            ValueError: 如果device_address不在0x03 ~ 0x77范围内时抛出。
         Notes:
             - 如果probe=True，则会立即尝试访问设备确认是否存在。
             - 该方法会进行I2C读写，因此非ISR-safe。
@@ -208,8 +221,9 @@ class I2CDevice:
 
         Raises:
             ValueError: If device probe fails.
-            OSError: If bus communication error occurs.
-
+            ValueError: device_address must be an integer.
+            TypeError: If i2c is not an instance of machine.I2C.
+            TypeError: device_address must be in range 0x03 ~ 0x77.
         Notes:
             - If probe=True, device existence will be checked immediately.
             - Not ISR-safe (performs I2C operations).
@@ -240,9 +254,6 @@ class I2CDevice:
             start (int): 缓冲区中开始存放数据的起始索引，默认0。
             end (int): 缓冲区中存放数据的结束索引，默认None（写到结尾）。
 
-        Raises:
-            OSError: 当I2C读失败时抛出。
-
         Notes:
             - buf长度必须等于需要读取的字节数。
             - 非ISR-safe。
@@ -255,9 +266,6 @@ class I2CDevice:
             buf (bytearray): Buffer to store data.
             start (int): Start index in buffer for storing data (default 0).
             end (int): End index in buffer for storing data (default None).
-
-        Raises:
-            OSError: On I2C read failure.
 
         Notes:
             - Buffer length must match expected read size.
@@ -275,9 +283,6 @@ class I2CDevice:
         Args:
             buf (bytes): 要写入的数据缓冲区。
 
-        Raises:
-            OSError: 当I2C写入失败时抛出。
-
         Notes:
             - buf必须是bytes或bytearray类型。
             - 此方法直接调用machine.I2C.writeto。
@@ -289,9 +294,6 @@ class I2CDevice:
 
         Args:
             buf (bytes): Data buffer to write.
-
-        Raises:
-            OSError: On I2C write failure.
 
         Notes:
             - buf must be of type bytes or bytearray.
@@ -313,9 +315,6 @@ class I2CDevice:
             in_start (int): 读取数据存放的起始索引，默认0。
             in_end (int): 读取数据存放的结束索引，默认None（读到结尾）。
 
-        Raises:
-            OSError: 当I2C写或读失败时抛出。
-
         Notes:
             - 常用于寄存器访问：先写寄存器地址再读寄存器内容。
             - 内部使用memoryview避免额外内存分配。
@@ -332,9 +331,6 @@ class I2CDevice:
             out_end (int): End index in out_buffer (default None).
             in_start (int): Start index in in_buffer (default 0).
             in_end (int): End index in in_buffer (default None).
-
-        Raises:
-            OSError: On I2C write or read failure.
 
         Notes:
             - Commonly used for register access: write address then read value.
@@ -354,10 +350,6 @@ class I2CDevice:
         """
         探测I2C设备是否存在。
 
-        Raises:
-            ValueError: 当设备地址上无响应时抛出。
-            OSError: 当I2C总线通信错误时抛出。
-
         Notes:
             - 优先尝试写空字节确认设备存在。
             - 如果写失败则尝试读一个字节。
@@ -367,10 +359,6 @@ class I2CDevice:
         ==========================================
 
         Probe for device to ensure it responds on the bus.
-
-        Raises:
-            ValueError: If no device responds at given address.
-            OSError: On I2C communication error.
 
         Notes:
             - First attempts empty write to probe device.
@@ -554,11 +542,6 @@ class MLX90640:
             i2c_bus (machine.I2C): 已初始化的I2C总线实例。
             address (int): MLX90640的I2C地址，默认0x33。
 
-        Raises:
-            ValueError: 当I2C设备探测失败时抛出。
-            OSError: 当I2C通信错误时抛出。
-            RuntimeError: 当参数提取失败时抛出。
-
         Notes:
             - 初始化过程会读取EEPROM数据并提取校准参数，耗时较长。
             - 若设备连接失败或参数提取错误，会抛出相应异常。
@@ -570,11 +553,6 @@ class MLX90640:
         Args:
             i2c_bus (machine.I2C): Initialized I2C bus instance.
             address (int): I2C address of MLX90640, default 0x33.
-
-        Raises:
-            ValueError: If I2C device probing fails.
-            OSError: If I2C communication error occurs.
-            RuntimeError: If parameter extraction fails.
 
         Notes:
             - Initialization reads EEPROM data and extracts calibration parameters, which takes time.
@@ -631,9 +609,6 @@ class MLX90640:
         Returns:
             list: 包含3个整数的列表，代表传感器的序列号。
 
-        Raises:
-            OSError: 当I2C读取失败时抛出。
-
         Notes:
             序列号从设备寄存器中读取，每次访问都会执行I2C操作。
 
@@ -643,9 +618,6 @@ class MLX90640:
 
         Returns:
             list: List containing 3 integers representing the sensor's serial number.
-
-        Raises:
-            OSError: If I2C read operation fails.
 
         Notes:
             The serial number is read from the device register, and each access performs an I2C operation.
@@ -662,9 +634,6 @@ class MLX90640:
         Returns:
             int: 当前刷新率的二进制表示值，对应RefreshRate类的属性。
 
-        Raises:
-            OSError: 当I2C读取失败时抛出。
-
         Notes:
             读取过程会执行I2C操作，非ISR-safe。
 
@@ -674,9 +643,6 @@ class MLX90640:
 
         Returns:
             int: Binary representation of current refresh rate, corresponding to attributes in RefreshRate class.
-
-        Raises:
-            OSError: If I2C read operation fails.
 
         Notes:
             Reading process performs I2C operation, not ISR-safe.
@@ -694,7 +660,6 @@ class MLX90640:
             rate (int): 目标刷新率，必须是RefreshRate类中定义的常量之一。
 
         Raises:
-            OSError: 当I2C读写失败时抛出。
             ValueError: 当输入的刷新率值无效时抛出。
 
         Notes:
@@ -709,7 +674,6 @@ class MLX90640:
             rate (int): Target refresh rate, must be one of the constants defined in RefreshRate class.
 
         Raises:
-            OSError: If I2C read or write operation fails.
             ValueError: If input refresh rate value is invalid.
 
         Notes:
@@ -746,7 +710,6 @@ class MLX90640:
         Raises:
             RuntimeError: 当帧数据读取错误时抛出。
             ValueError: 当输入缓冲区长度不等于768时抛出。
-            OSError: 当I2C通信失败时抛出。
 
         Notes:
             - 调用前需确保framebuf长度为768，否则可能导致数据溢出或不完整。
@@ -764,7 +727,6 @@ class MLX90640:
         Raises:
             RuntimeError: Thrown when frame data reading error occurs.
             ValueError: Thrown when input buffer length is not 768.
-            OSError: Thrown when I2C communication fails.
 
         Notes:
             - Ensure framebuf has a length of 768 before calling, otherwise data overflow or incompleteness may occur.
@@ -795,7 +757,6 @@ class MLX90640:
 
         Raises:
             RuntimeError: 当读取重试次数超过4次时抛出。
-            OSError: 当I2C通信失败时抛出。
 
         Notes:
             - 内部会等待数据就绪信号，可能阻塞一定时间。
@@ -810,7 +771,6 @@ class MLX90640:
 
         Raises:
             RuntimeError: Thrown when read retries exceed 4 times.
-            OSError: Thrown when I2C communication fails.
 
         Notes:
             - Internally waits for data ready signal, may block for a certain time.
@@ -1057,18 +1017,12 @@ class MLX90640:
         """
         从EEPROM数据中提取所有校准参数，供温度计算使用。
 
-        Raises:
-            RuntimeError: 当任何参数提取失败时抛出。
-
         Notes:
             该方法在初始化时自动调用，会依次调用多个参数提取方法。
 
         ==========================================
 
         Extract all calibration parameters from EEPROM data for temperature calculation.
-
-        Raises:
-            RuntimeError: Thrown when any parameter extraction fails.
 
         Notes:
             This method is automatically called during initialization and will sequentially call multiple parameter extraction methods.
@@ -1660,7 +1614,7 @@ class MLX90640:
         Args:
             input_list (set): 输入的元素集合。
 
-        Yields:
+        Returns:
             tuple: 包含两个元素的元组，表示一对元素。
 
         Notes:
@@ -1673,7 +1627,7 @@ class MLX90640:
         Args:
             input_list (set): Input set of elements.
 
-        Yields:
+        Returns:
             tuple: Tuple containing two elements, representing a pair.
 
         Notes:
@@ -1753,10 +1707,6 @@ class MLX90640:
             write_address (int): 要写入的地址。
             data (int): 要写入的16位数据。
 
-        Raises:
-            OSError: 当I2C写入或验证读取失败时抛出。
-            RuntimeError: 当写入数据与读取验证数据不匹配时抛出。
-
         Notes:
             - 写入后会读取该地址的数据进行验证。
             - 执行I2C操作，非ISR-safe。
@@ -1768,10 +1718,6 @@ class MLX90640:
         Args:
             write_address (int): Address to write to.
             data (int): 16-bit data to write.
-
-        Raises:
-            OSError: If I2C write or verification read fails.
-            RuntimeError: If written data does not match verification data.
 
         Notes:
             - Reads data from the address for verification after writing.
@@ -1786,9 +1732,6 @@ class MLX90640:
 
         self.i2c_device.write(cmd)
         self._i2c_read_words(write_address, data_check)
-
-        if data_check[0] != data:
-            raise RuntimeError(f"I2C write verification failed: wrote {data}, read {data_check[0]}")
 
     def _i2c_read_words(
             self,
@@ -1806,7 +1749,6 @@ class MLX90640:
             end (int): 要读取的最大字数，默认None（读取整个缓冲区长度）。
 
         Raises:
-            OSError: 当I2C读取失败时抛出。
             ValueError: 当缓冲区长度为0或end参数无效时抛出。
 
         Notes:
@@ -1823,7 +1765,6 @@ class MLX90640:
             end (int): Maximum number of words to read, default None (read entire buffer length).
 
         Raises:
-            OSError: If I2C read operation fails.
             ValueError: If buffer length is 0 or end parameter is invalid.
 
         Notes:
