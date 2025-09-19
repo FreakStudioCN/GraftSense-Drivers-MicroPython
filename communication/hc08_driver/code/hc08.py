@@ -155,45 +155,51 @@ class HC08:
             Validate parameter against allowed constants.
     """
     # 角色常量
-    class Role:
-        SLAVE = const(0)
-        MASTER = 1
+    Role = {
+        'SLAVE': 0,
+        'MASTER': 1
+    }
 
     # 射频功率
-    class RFPM:
-        RFPM_4DBM = 4      # +4 dBm
-        RFPM_0DBM = 0      # 0 dBm
-        RFPM_NEG6DB = -6  # -6 dBm
-        RFPM_NEG23DB = -23  # -23 dBm
+    RFPM = {
+        'RFPM_4DBM': 4,
+        'RFPM_0DBM': 0,
+        'RFPM_NEG6DB': -6,
+        'RFPM_NEG23DB': -23
+    }
 
     # 功耗模式（仅从机）
-    class MODE:
-        MODE_FULL = 0
-        MODE_1 = 1
-        MODE_2 = 2
-        MODE_3 = 3
+    MODE = {
+        'MODE_FULL': 0,
+        'MODE_1': 1,
+        'MODE_2': 2,
+        'MODE_3': 3
+    }
 
     # 可连接性
-    class CONT:
-        CONT_CONNECTABLE = 0
-        CONT_NONCONNECTABLE = 1
-    
+    CONT = {
+        'CONT_CONNECTABLE': 0,
+        'CONT_NONCONNECTABLE': 1
+    }
+
     # 波特率
-    class BAUD:
-        BAUD_1200 = 1200
-        BAUD_2400 = 2400
-        BAUD_4800 = 4800
-        BAUD_9600 = 9600
-        BAUD_19200 = 19200
-        BAUD_38400 = 38400
-        BAUD_57600 = 57600
-        BAUD_115200 = 115200
+    BAUD = {
+        'BAUD_1200': 1200,
+        'BAUD_2400': 2400,
+        'BAUD_4800': 4800,
+        'BAUD_9600': 9600,
+        'BAUD_19200': 19200,
+        'BAUD_38400': 38400,
+        'BAUD_57600': 57600,
+        'BAUD_115200': 115200
+    }
 
     # 校验位映射
-    class Parity:
-        PARITY_NONE = "N"
-        PARITY_EVEN = "E"
-        PARITY_ODD = "O"
+    Parity = {
+        'PARITY_NONE': "N",
+        'PARITY_EVEN': "E",
+        'PARITY_ODD': "O"
+    }
 
     def __init__(self, uart, rx_timeout_ms=600):
         """
@@ -213,7 +219,7 @@ class HC08:
 
         self._uart = uart
         # 设置uart.timeout 指定等待第一个字符的时间（以毫秒为单位）
-        self._uart.timeout = rx_timeout_ms
+        self.rx_timeout_ms = rx_timeout_ms
         # 蓝牙名称、角色、波特率、地址、PIN码、版本、射频功率、连接性、功耗模式
         self.name = None
         self.role = None
@@ -247,12 +253,12 @@ class HC08:
         """
 
         try:
-            written = self._uart.write(cmd)
-            if written != len(cmd):
-                return False, "uart write failed"
-            return True, None
+            self._uart.write(cmd)
+            # 50ms 确保回传稳定
+            time.sleep(0.05)
+            return (True, None)
         except Exception as e:
-            return False, f"uart error: {e}"
+            return (False, "send error")
         
     def _recv(self, timeout_ms=None) -> (bool, str|None):
         """
@@ -276,22 +282,14 @@ class HC08:
                               (False, None/error message) if timeout or decode fails.
         """
 
-        deadline = time.ticks_add(time.ticks_ms(), timeout_ms or self._uart.timeout)
-
-        buf = b""
-        while time.ticks_diff(deadline, time.ticks_ms()) > 0:
+        try:
             if self._uart.any():
-                chunk = self._uart.read()
-                if chunk:
-                    buf += chunk
-            else:
-                time.sleep_ms(10)
-        if buf:
-            try:
-                return True, buf.decode().strip()
-            except Exception:
-                return False, "decode error"
-        return False, None  # 超时/无数据
+                resp = self._uart.read()
+            if resp == None:
+                return False,'RECV NONE'
+            return True,resp.decode('utf-8').strip()
+        except Exception as e:
+            return (False, "recv error")
 
     # AT指令
     def check(self) -> (bool, str|None):
@@ -311,11 +309,9 @@ class HC08:
         """
 
         ok, err = self._send(b"AT")
-        if not ok:
-            return False, err
+        if not ok:return False, err
         ok, resp = self._recv()
-        if not ok:
-            return False, "no response"
+        if not ok:return False, "no response"
         return (resp == "OK"), resp
     
     def get_rx(self) -> (bool, str|None):
@@ -341,30 +337,15 @@ class HC08:
         """
 
         ok, err = self._send(b"AT+RX")
-        if not ok:
-            return False, err
+        if not ok:return False, err
         ok, resp = self._recv()
-        if not ok:
-            return False, "no response"
-        # 解析: Name=...,Role=...,Baud=...,Addr=...,PIN=...
-        try:
-            for field in resp.split(","):
-                if "=" in field:
-                    k, v = field.split("=")
-                    k, v = k.strip().lower(), v.strip()
-                    if k == "name":
-                        self.name = v
-                    elif k == "role":
-                        self.role = int(v)
-                    elif k == "baud":
-                        self.baud = int(v)
-                    elif k == "addr":
-                        self.addr = v
-                    elif k == "pin":
-                        self.pin = v
-            return True, resp
-        except Exception:
-            return False, "parse error"
+        if not ok:return False, "no response"
+        status = {}
+        for line in resp.splitlines():
+            if ":" in line:
+                key, value = line.split(":", 1)
+                status[key.strip()] = value.strip()
+        return True, status
 
     def factory_default(self) -> (bool, str|None):
         """
@@ -389,10 +370,10 @@ class HC08:
         """
 
         ok, err = self._send(b"AT+DEFAULT")
-        if not ok:
-            return False, err
+        if not ok:return False, err
         ok, resp = self._recv()
-        return (ok, resp or "rebooting")
+        sleep(0.2)
+        return (ok, resp or "params redefault complete")
 
     def reset(self) -> (bool, str|None):
         """
@@ -417,10 +398,9 @@ class HC08:
         """
 
         ok, err = self._send(b"AT+RESET")
-        if not ok:
-            return False, err
+        if not ok:return False, err
         ok, resp = self._recv()
-        return True, resp or "reset (no echo)"
+        return True, resp or "reset complete"
 
     def version(self) -> (bool, str|None):
         """
@@ -443,13 +423,10 @@ class HC08:
         Notes:
             Updates instance attribute version upon success.
         """
-
         ok, err = self._send(b"AT+VERSION")
-        if not ok:
-            return False, err
+        if not ok: return False, err
         ok, resp = self._recv()
-        if not ok:
-            return False, "no response"
+        if not ok: return False, "no response"
         self.version = resp
         return True, resp
 
@@ -481,15 +458,13 @@ class HC08:
             Updates instance attribute role upon success.
         """
 
-        if not self._is_allowed_constant(role, (self.Role.SLAVE, self.Role.MASTER)):
+        if not role in (HC08.Role.values()):
             return False, "invalid role"
-        cmd = b"AT+ROLE=" + (b"S" if role == self.Role.SLAVE else b"M")
+        cmd = b"AT+ROLE=" + (b"S" if role == HC08.Role['SLAVE'] else b"M")
         ok, err = self._send(cmd)
-        if not ok:
-            return False, err
+        if not ok:return False, err
         ok, resp = self._recv()
-        if not ok:
-            return False, "no response"
+        if not ok:return False, "no response"
         self.role = role
         return True, resp
 
@@ -516,12 +491,10 @@ class HC08:
         """
 
         ok, err = self._send(b"AT+ROLE=?")
-        if not ok:
-            return False, err
+        if not ok: return False, err
         ok, resp = self._recv()
-        if not ok:
-            return False, "no response"
-        self.role = self.Role.MASTER if "M" in resp else self.Role.SLAVE
+        if not ok: return False, "no response"
+        self.role = HC08.Role['MASTER'] if "M" in resp else HC08.Role['SLAVE']
         return True, resp
 
     def set_name(self, name:str) -> (bool, str|None):
@@ -551,17 +524,12 @@ class HC08:
         Notes:
             Updates instance attribute name upon success.
         """
-
-        ok, err = self._valid_name(name)
-        if not ok:
-            return False, err
-        cmd = f"AT+NAME={name}".encode()
-        ok, err = self._send(cmd)
-        if not ok:
-            return False, err
+        if len(name) > 12:
+            return False,'name invalid, longer than 12'
+        ok, err = self._send(f"AT+NAME={name}".encode())
+        if not ok:return False, err
         ok, resp = self._recv()
-        if not ok:
-            return False, "no response"
+        if not ok:return False, "no response"
         self.name = name
         return True, resp
 
@@ -588,11 +556,9 @@ class HC08:
         """
 
         ok, err = self._send(b"AT+NAME=?")
-        if not ok:
-            return False, err
+        if not ok:return False, err
         ok, resp = self._recv()
-        if not ok:
-            return False, "no response"
+        if not ok:return False, "no response"
         self.name = resp
         return True, resp
 
@@ -695,8 +661,7 @@ class HC08:
         Notes:
             Updates instance attribute rfpm upon success.
         """
-
-        if not self._is_allowed_constant(rfpm, (4, 0, -6, -23)):
+        if not rfpm in (4, 0, -6, -23):
             return False, "invalid rfpm"
         cmd = f"AT+RFPM={rfpm}".encode()
         ok, err = self._send(cmd)
@@ -731,8 +696,7 @@ class HC08:
         """
 
         ok, err = self._send(b"AT+RFPM=?")
-        if not ok:
-            return False, err
+        if not ok:return False, err
         ok, resp = self._recv()
         if not ok:
             return False, "no response"
@@ -742,7 +706,7 @@ class HC08:
         except:
             return False, "parse error"
 
-    def set_baud(self, baud_rate:int, parity:int=PARITY_NONE) -> (bool, str|None):
+    def set_baud(self, baud_rate:int, parity:int = Parity["PARITY_NONE"]) -> (bool, str|None):
         """
         设置串口波特率与校验位。
 
@@ -772,10 +736,9 @@ class HC08:
             Updates instance attribute baud upon success. External UART config must be updated accordingly.
         """
 
-        if not self._is_allowed_constant(baud_rate, (
-            1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200)):
+        if not baud_rate in (1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200):
             return False, "invalid baud"
-        if parity not in (self.Parity.PARITY_NONE, self.Parity.PARITY_EVEN, self.Parity.PARITY_ODD):
+        if not parity in (self.Parity.PARITY_NONE, self.Parity.PARITY_EVEN, self.Parity.PARITY_ODD):
             return False, "invalid parity"
         cmd = f"AT+BAUD={baud_rate},{parity}".encode()
         ok, err = self._send(cmd)
@@ -1036,21 +999,6 @@ class HC08:
         if not all(c in "0123456789ABCDEF" for c in addr12):
             return False, "invalid addr: must be uppercase hex"
         return True, None
-
-
-    def _is_allowed_constant(value, allowed_tuple) -> bool:
-        """
-        检查传入值是否在允许常量集合中。
-
-        Args:
-            value: 需要检查的值。
-            allowed_tuple (tuple): 允许的常量集合。
-
-        Returns:
-            bool: True 表示允许，False 表示不允许。
-
-        """
-        return value in allowed_tuple
 
 # ======================================== 初始化配置 ==========================================
 

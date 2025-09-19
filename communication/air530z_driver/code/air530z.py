@@ -128,7 +128,7 @@ class Air530Z(MicropyGPS):
     MSG_TIM = const(13)
 
     # ---------------- 初始化 ----------------
-    def __init__(self, uart: UART):
+    def __init__(self, uart: UART, local_offset: int = 8):
         """
         初始化 Air530Z 模块驱动。  
 
@@ -141,7 +141,7 @@ class Air530Z(MicropyGPS):
         Args:
             uart (UART): UART instance for GPS module communication.
         """
-        super().__init__(timezone=8)  # MicropyGPS 初始化（可根据需求修改时区）
+        super().__init__(local_offset)  # MicropyGPS 初始化（可根据需求修改时区）
         self._uart = uart
         self._sender = NMEASender()
 
@@ -166,12 +166,12 @@ class Air530Z(MicropyGPS):
             bool: True if sent successfully, False otherwise.
         """
         try:
-            self._uart.write(sentence + "\r\n")
+            self._uart.write(f'{sentence}\r\n'.encode())
             return True
         except Exception:
             return False
 
-    def _recv(self, timeout=3) -> str:
+    def _recv(self) -> str:
         """
         私有方法：接收 GPS 模块返回的 NMEA 响应。  
 
@@ -190,14 +190,14 @@ class Air530Z(MicropyGPS):
         Returns:
             str: Received NMEA response string, or empty string if timeout.
         """
-        start = time.time()
-        buffer = b""
-        while time.time() - start < timeout:
+        try:
             if self._uart.any():
-                buffer += self._uart.read()
-                if buffer.endswith(b"\r\n"):
-                    return buffer.decode(errors="ignore")
-        return ""
+                resp = self._uart.read()
+            if resp == None:
+                return False,'RECV NONE'
+            return True,resp.decode('utf-8', errors='ignore')
+        except Exception as e:
+            return (False, "recv error")
 
     # ---------------- API 方法 ----------------
     def set_baudrate(self, baudrate: int) -> (bool, str):
