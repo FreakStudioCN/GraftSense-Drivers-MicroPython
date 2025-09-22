@@ -19,7 +19,13 @@ import time
 # ======================================== 功能函数 ============================================
 
 def demo_brightness(disp: tm1637):
-   
+    """
+    演示亮度调节：
+    逐级增加亮度并显示数值，最后回到适合的亮度等级。
+
+    Args:
+        disp (tm1637): 显示屏驱动对象。
+    """
     # 逐级变亮
     for b in range(0, 8):
         disp.brightness(b)
@@ -29,48 +35,100 @@ def demo_brightness(disp: tm1637):
     disp.brightness(4)
     time.sleep_ms(400)
 
+
 def demo_show(disp: tm1637):
-    
-    disp.show("dEMo")      # 直接显示字符串
+    """
+    演示字符串显示：
+    直接显示字符串和冒号显示效果。
+
+    Args:
+        disp (tm1637): 显示屏驱动对象。
+    """
+    disp.show("dEMo")  # 直接显示字符串
     time.sleep_ms(800)
-    disp.show(" A01", True)  # 演示 colon=True 的效果（第二位点亮小数点/冒号位）
+    disp.show(" A01", True)  # 演示 colon=True 的效果
     time.sleep_ms(800)
 
-def demo_numbers(disp:tm1637):
-   
+
+def demo_numbers(disp: tm1637):
+    """
+    演示两组数字显示：
+    显示带冒号的两组数字，并演示范围裁剪。
+
+    Args:
+        disp (tm1637): 显示屏驱动对象。
+    """
     disp.numbers(12, 34, colon=True)
     time.sleep_ms(800)
     disp.numbers(-9, 99, colon=True)  # 展示范围裁剪
     time.sleep_ms(800)
 
-def demo_number(disp:tm1637):
-    
+
+def demo_number(disp: tm1637):
+    """
+    演示单个数字显示：
+    循环展示不同的整数，含正数与负数。
+
+    Args:
+        disp (tm1637): 显示屏驱动对象。
+    """
     for n in (0, 7, 42, 256, 9999, -999, -1234):
         disp.number(n)
         time.sleep_ms(600)
 
-def demo_hex(disp:tm1637):
+
+def demo_hex(disp: tm1637):
+    """
+    演示十六进制数显示：
+    循环显示不同的十六进制数。
+
+    Args:
+        disp (tm1637): 显示屏驱动对象。
+    """
     for v in (0x0, 0x5A, 0xBEEF, 0x1234, 0xFFFF):
         disp.hex(v)
         time.sleep_ms(600)
 
-def demo_temperature(disp:tm1637):
-    
+
+def demo_temperature(disp: tm1637):
+    """
+    演示温度显示：
+    循环显示不同的温度值（范围 -15 ~ 120）。
+
+    Args:
+        disp (tm1637): 显示屏驱动对象。
+    """
     for t in (-15, -9, 0, 25, 37, 99, 120):
         disp.temperature(t)
         time.sleep_ms(700)
 
-def demo_scroll(disp:tm1637):
-   
+
+def demo_scroll(disp: tm1637):
+    """
+    演示字符串滚动：
+    循环滚动显示字符串。
+
+    Args:
+        disp (tm1637): 显示屏驱动对象。
+    """
     disp.scroll("HELLO TM1637  ", delay=180)  # 末尾空格便于间隔
 
-def demo_raw_write(disp:tm1637):
-    DASH = 0x40   # 中横杠
+
+def demo_raw_write(disp: tm1637):
+    """
+    演示原始段码写入：
+    使用自定义段码绘制中横杠，再清空。
+
+    Args:
+        disp (tm1637): 显示屏驱动对象。
+    """
+    DASH = 0x40  # 中横杠
     BLANK = 0x00  # 空白
     disp.write([DASH, DASH, DASH, DASH], pos=0)
     time.sleep_ms(800)
     disp.write([BLANK, BLANK, BLANK, BLANK], pos=0)
     time.sleep_ms(800)
+
 
 # ======================================== 自定义类 ============================================
 
