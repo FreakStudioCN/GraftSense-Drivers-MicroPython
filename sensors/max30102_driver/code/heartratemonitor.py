@@ -422,7 +422,15 @@ class MAX30102(object):
         sense (SensorData): Channel ring buffers.
 
     Methods:
-        setup_sensor(...), soft_reset(), shutdown()/wakeup(), set_*(), get_*().
+        setup_sensor(...): Initialize once with common configurations.
+        soft_reset(): Soft reset.
+        shutdown()/wakeup(): Power down/wake up.
+        set_led_mode()/set_adc_range()/set_sample_rate()/set_pulse_width(): Basic configurations.
+        set_pulse_amplitude_*(): LED current setting.
+        set_fifo_average()/enable_fifo_rollover()/clear_fifo(): FIFO management.
+        get_write_pointer()/get_read_pointer(): FIFO pointer reading.
+        read_temperature(): Read chip temperature.
+        read_part_id()/
 
     Notes:
         - Core logic unchanged; only documentation/comments were added;
@@ -1566,7 +1574,11 @@ class CircularBuffer(object):
         max_size (int): Capacity.
 
     Methods:
-        append(item), pop(), pop_head(), clear(), is_empty().
+       append(item): Append an element (if full, discard the earliest element).
+        pop(): Pop the earliest element.
+        pop_head(): Pop the latest element (Note: The original implementation includes boundary logic).
+        clear(): Clear all elements.
+        is_empty(): Check if it is empty.
 
     Notes:
         - The original `pop_head` behavior is preserved verbatim; it is unusual
