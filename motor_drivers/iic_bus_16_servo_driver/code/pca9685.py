@@ -7,6 +7,11 @@
 # 参考代码：https://github.com/adafruit/micropython-adafruit-pca9685/blob/master/pca9685.py
 # 本代码部分原本由 adafruit 发布，使用 MIT 许可证
 
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23.0"
+
 # ======================================== 导入相关模块 =========================================
 
 # 导入打包解包相关模块

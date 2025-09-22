@@ -584,18 +584,12 @@ class DYSV19T:
     def pause(self):
         """
         暂停（AA 03 00 SM）。
-
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Pause (AA 03 00 SM).
 
         Brief:
             Set playback state to PAUSE.
-
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x03)
         self.play_state = PLAY_PAUSE
@@ -606,10 +600,6 @@ class DYSV19T:
 
         简介：
             停止播放并更新状态。
-
-
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Stop (AA 04 00 SM).
@@ -617,8 +607,6 @@ class DYSV19T:
         Brief:
             Stop playback and update state.
 
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x04)
         self.play_state = PLAY_STOP
@@ -629,19 +617,12 @@ class DYSV19T:
 
         简介：
             跳转到上一曲目。
-
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Previous (AA 05 00 SM).
 
         Brief:
             Skip to previous track.
-
-
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x05)
 
@@ -651,18 +632,12 @@ class DYSV19T:
 
         简介：
             跳转到下一曲目。
-
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Next (AA 06 00 SM).
 
         Brief:
             Skip to next track.
-
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x06)
 
@@ -676,10 +651,6 @@ class DYSV19T:
         Args:
             track_no (int): 曲目号，范围 1..65535
             play (bool): True 立即播放；False 仅预选
-
-        Raises:
-            ValueError: track_no 越界
-            IOError: UART 写入失败
         ==========================================
 
         Select track 1..65535; play immediately if True, else select only.
@@ -691,9 +662,6 @@ class DYSV19T:
             track_no (int): Track number 1..65535
             play (bool): True to play now, False to preselect only
 
-        Raises:
-            ValueError: If track_no out of range
-            IOError: If UART write fails
         """
         H, L = self._u16(track_no)
         if play:
@@ -711,10 +679,6 @@ class DYSV19T:
 
         Args:
             track_no (int): 曲目号 1..65535
-
-        Raises:
-            ValueError: track_no 越界
-            IOError: UART 写入失败
         ==========================================
 
         Preselect track (AA 1F 02 H L SM).
@@ -724,10 +688,6 @@ class DYSV19T:
 
         Args:
             track_no (int): Track number 1..65535
-
-        Raises:
-            ValueError: If track_no out of range
-            IOError: If UART write fails
         """
         H, L = self._u16(track_no)
         self.uart.write(self.build_frame(0x1F, bytes([H, L])))
@@ -742,10 +702,6 @@ class DYSV19T:
         Args:
             disk (int): 盘符（DISK_*）
             path (str): 形如 '/DIR/NAME.MP3' 的路径
-
-        Raises:
-            ValueError: 非法盘符或非法路径
-            IOError: UART 写入失败
         ==========================================
 
         Play by disk + path (AA 08 <len> <disk> <path...> SM).
@@ -756,10 +712,6 @@ class DYSV19T:
         Args:
             disk (int): One of DISK_*
             path (str): Path like '/DIR/NAME.MP3'
-
-        Raises:
-            ValueError: If disk or path invalid
-            IOError: If UART write fails
         """
         d = self._validate_disk(disk)
         pb = self._validate_path(path)
@@ -767,7 +719,6 @@ class DYSV19T:
         self.play_state = PLAY_PLAY
         self.current_disk = d
 
-    # 插播
     def insert_track(self, disk: int, track_no: int):
         """
         插播曲目（AA 16 03 <disk> <H> <L> SM）。
@@ -779,9 +730,6 @@ class DYSV19T:
             disk (int): 盘符（DISK_*）
             track_no (int): 曲目号 1..65535
 
-        Raises:
-            ValueError: 非法盘符或 track_no 越界
-            IOError: UART 写入失败
         ==========================================
 
         Insert a track (AA 16 03 <disk> <H> <L> SM).
@@ -793,9 +741,6 @@ class DYSV19T:
             disk (int): One of DISK_*
             track_no (int): 1..65535
 
-        Raises:
-            ValueError: If disk invalid or track_no out of range
-            IOError: If UART write fails
         """
         d = self._validate_disk(disk)
         H, L = self._u16(track_no)
@@ -812,9 +757,6 @@ class DYSV19T:
             disk (int): 盘符（DISK_*）
             path (str): 路径（需以'/'起始）
 
-        Raises:
-            ValueError: 非法盘符或路径
-            IOError: UART 写入失败
         ==========================================
 
         Insert by path (AA 17 <len> <disk> <path...> SM).
@@ -826,9 +768,6 @@ class DYSV19T:
             disk (int): One of DISK_*
             path (str): Path (must start with '/')
 
-        Raises:
-            ValueError: If disk or path invalid
-            IOError: If UART write fails
         """
         d = self._validate_disk(disk)
         pb = self._validate_path(path)
@@ -841,8 +780,6 @@ class DYSV19T:
         简介：
             终止插播，回到正常播放流程。
 
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         End insertion: use stop playing (AA 10 00 SM).
@@ -850,8 +787,6 @@ class DYSV19T:
         Brief:
             Stop insertion and return to normal flow.
 
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x10)
 
@@ -868,7 +803,6 @@ class DYSV19T:
 
         Raises:
             ValueError: 音量越界
-            IOError: UART 写入失败
         ==========================================
 
         Set volume 0..30 (AA 13 01 <vol> SM).
@@ -881,7 +815,6 @@ class DYSV19T:
 
         Raises:
             ValueError: If out of range
-            IOError: If UART write fails
         """
         vol = int(vol)
         if not (VOLUME_MIN <= vol <= VOLUME_MAX):
@@ -895,10 +828,6 @@ class DYSV19T:
 
         简介：
             将音量提升一个单位。
-
-
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Volume up (AA 14 00 SM).
@@ -906,9 +835,6 @@ class DYSV19T:
         Brief:
             Increase volume by one step.
 
-
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x14)
 
@@ -919,8 +845,6 @@ class DYSV19T:
         简介：
             将音量降低一个单位。
 
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Volume down (AA 15 00 SM).
@@ -929,8 +853,6 @@ class DYSV19T:
             Decrease volume by one step.
 
 
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x15)
 
@@ -943,10 +865,6 @@ class DYSV19T:
 
         Args:
             eq (int): EQ 常量（EQ_*）
-
-        Raises:
-            ValueError: 非法 EQ 常量
-            IOError: UART 写入失败
         ==========================================
 
         Set EQ (AA 1A 01 <eq> SM).
@@ -957,9 +875,6 @@ class DYSV19T:
         Args:
             eq (int): One of EQ_*
 
-        Raises:
-            ValueError: If eq invalid
-            IOError: If UART write fails
         """
         e = self._validate_eq(eq)
         self.uart.write(self.build_frame(0x1A, bytes([e])))
@@ -974,10 +889,6 @@ class DYSV19T:
 
         Args:
             ch (int): CH_* 常量
-
-        Raises:
-            ValueError: 非法通道
-            IOError: UART 写入失败
         ==========================================
 
         Set DAC output channel (AA 1D 01 <ch> SM).
@@ -987,10 +898,6 @@ class DYSV19T:
 
         Args:
             ch (int): One of CH_*
-
-        Raises:
-            ValueError: If channel invalid
-            IOError: If UART write fails
         """
         c = self._validate_channel(ch)
         self.uart.write(self.build_frame(0x1D, bytes([c])))
@@ -1007,9 +914,6 @@ class DYSV19T:
         Args:
             mode (int): MODE_* 常量
 
-        Raises:
-            ValueError: 非法模式
-            IOError: UART 写入失败
         ==========================================
 
         Set loop mode (AA 18 01 <mode> SM).
@@ -1020,9 +924,6 @@ class DYSV19T:
         Args:
             mode (int): One of MODE_*
 
-        Raises:
-            ValueError: If mode invalid
-            IOError: If UART write fails
         """
         m = self._validate_mode(mode)
         self.uart.write(self.build_frame(0x18, bytes([m])))
@@ -1040,7 +941,6 @@ class DYSV19T:
 
         Raises:
             ValueError: count 越界 或 当前播放模式不支持设置循环次数
-            IOError: UART 写入失败
         ==========================================
 
         Set loop count 1..65535 (AA 19 02 H L SM).
@@ -1053,7 +953,6 @@ class DYSV19T:
 
         Raises:
             ValueError: If count out of range or current mode unsupported
-            IOError: If UART write fails
         """
         H, L = self._u16(count)
         self.uart.write(self.build_frame(0x19, bytes([H, L])))
@@ -1076,7 +975,6 @@ class DYSV19T:
 
         Raises:
             ValueError: 任一分秒越界
-            IOError: UART 写入失败
         ==========================================
 
         A-B repeat, minutes/seconds 0..59.
@@ -1092,7 +990,6 @@ class DYSV19T:
 
         Raises:
             ValueError: If any minute/second out of range
-            IOError: If UART write fails
         """
         for x in (start_min, start_sec, end_min, end_sec):
             v = int(x)
@@ -1108,8 +1005,6 @@ class DYSV19T:
         简介：
             终止 A–B 区间复读。
 
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         End A-B repeat (AA 21 00 SM).
@@ -1117,8 +1012,6 @@ class DYSV19T:
         Brief:
             Stop A–B repeat.
 
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x21)
 
@@ -1132,9 +1025,6 @@ class DYSV19T:
         Args:
             seconds (int): 回退的秒数 0..65535
 
-        Raises:
-            ValueError: seconds 越界
-            IOError: UART 写入失败
         ==========================================
 
         Seek backward seconds (AA 22 02 H L SM).
@@ -1145,9 +1035,6 @@ class DYSV19T:
         Args:
             seconds (int): 0..65535
 
-        Raises:
-            ValueError: If seconds out of range
-            IOError: If UART write fails
         """
         H, L = self._u16(seconds)
         self.uart.write(self.build_frame(0x22, bytes([H, L])))
@@ -1162,9 +1049,6 @@ class DYSV19T:
         Args:
             seconds (int): 前进的秒数 0..65535
 
-        Raises:
-            ValueError: seconds 越界
-            IOError: UART 写入失败
         ==========================================
 
         Seek forward seconds (AA 23 02 H L SM).
@@ -1175,9 +1059,6 @@ class DYSV19T:
         Args:
             seconds (int): 0..65535
 
-        Raises:
-            ValueError: If seconds out of range
-            IOError: If UART write fails
         """
         H, L = self._u16(seconds)
         self.uart.write(self.build_frame(0x23, bytes([H, L])))
@@ -1190,8 +1071,6 @@ class DYSV19T:
         简介：
             返回播放状态值并更新 self.play_state；超时返 None。
 
-        Raises:
-            无
         ==========================================
 
         Query play state; return int or None.
@@ -1199,8 +1078,6 @@ class DYSV19T:
         Brief:
             Update and return playback state; None on timeout.
 
-        Raises:
-            None
         """
         self.send_frame(0x01)
         resp = self.recv_response(expected_cmd=0x01)
@@ -1220,8 +1097,6 @@ class DYSV19T:
         简介：
             返回在线盘符位图；超时返 None。
 
-        Raises:
-            无
         ==========================================
 
         Query online disks bitmap; return int or None.
@@ -1229,8 +1104,6 @@ class DYSV19T:
         Brief:
             Return bitmap of online disks; None on timeout.
 
-        Raises:
-            None
         """
         self.send_frame(0x09)
         resp = self.recv_response(expected_cmd=0x09)
@@ -1246,8 +1119,6 @@ class DYSV19T:
         简介：
             获取当前工作盘符并写入 self.current_disk。
 
-        Raises:
-            无
         ==========================================
 
         Query current disk; return DISK_* or None.
@@ -1422,7 +1293,6 @@ class DYSV19T:
 
         Raises:
             ValueError: 列表为空、元素不是长度为 2 的 A-Z/0-9 字符串
-            IOError: UART 写入失败
         ==========================================
 
         Start combination playlist under ZH; short_names like ['01','02'].
@@ -1435,7 +1305,6 @@ class DYSV19T:
 
         Raises:
             ValueError: If empty list or any element invalid
-            IOError: If UART write fails
         """
         if not isinstance(short_names, (list, tuple)) or not short_names:
             raise ValueError("short_names 必须为非空列表")
@@ -1458,8 +1327,6 @@ class DYSV19T:
         简介：
             终止组合播放流程。
 
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         End combination playlist (AA 1C 00).
@@ -1467,8 +1334,6 @@ class DYSV19T:
         Brief:
             Stop combination playlist.
 
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x1C)
 
@@ -1480,8 +1345,6 @@ class DYSV19T:
         简介：
             开启每秒或协议定义周期的时间上报。
 
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Enable play-time auto report (AA 25 00).
@@ -1489,8 +1352,6 @@ class DYSV19T:
         Brief:
             Enable periodic time reporting.
 
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x25)
 
@@ -1501,8 +1362,6 @@ class DYSV19T:
         简介：
             关闭周期性时间上报。
 
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Disable play-time auto report (AA 26 00).
@@ -1510,8 +1369,6 @@ class DYSV19T:
         Brief:
             Disable periodic time reporting.
 
-        Raises:
-            IOError: If UART write fails
         """
         self.send_frame(0x26)
 

@@ -9,32 +9,7 @@
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
 __license__ = "CC BY-NC 4.0"
-__platform__ = "MicroPython v1.23.0 on RP2040/Pico"
-
-"""
-MAX30102/MAX30105 传感器驱动与心率计算工具模块。
-
-本模块包含三个主要类：
-1) HeartRateMonitor：对采样序列进行窗口平滑与峰值检测，计算心率（BPM）。
-2) MAX30102：面向 MAX30102/MAX30105 的 I2C 读写与寄存器配置、FIFO 读取等底层驱动。
-3) CircularBuffer：基于 deque 的简易环形缓冲区，用于缓存最近的 PPG 采样数据。
-
-=========================================
-Driver and utilities for MAX30102/MAX30105 sensors with a simple heart-rate monitor.
-
-This module contains:
-1) HeartRateMonitor: Smooths samples and detects peaks to estimate BPM.
-2) MAX30102: I2C driver for MAX30102/30105 (register configuration, FIFO reading, etc.).
-3) CircularBuffer: A tiny ring buffer based on deque for storing recent PPG samples.
-
-"""
-# Python env   : MicroPython v1.23.0 # 根据具体开发版本环境修改
-# -*- coding: utf-8 -*-
-# @Time    : 2025/01/16 10:21   # 使用24小时制，日期格式YYYY/MM/DD
-# @Author  : YourName           # 作者姓名
-# @File    : sensor.py          # 文件名
-# @Description : 传感器功能描述（1-2句话）
-# @License : MIT / Apache2.0 / Custom  # 明确许可证
+__platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
 # 导入i2c类

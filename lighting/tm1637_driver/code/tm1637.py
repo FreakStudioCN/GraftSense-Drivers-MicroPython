@@ -6,10 +6,10 @@
 # @Description : tm1637驱动for micropython
 # @License : MIT
 
-__version__ = "0.1.0"  # 语义化版本规范：主版本.次版本.修订号
-__author__ = "侯钧瀚"  # 运行时可获取的作者信息
-__license__ = "MIT"  # 程序化许可证校验
-__platform__ = "MicroPython v1.19+"  # 明确兼容性边界
+__version__ = "0.1.0"
+__author__ = "侯钧瀚"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
 # 导入MicroPython内置模块
