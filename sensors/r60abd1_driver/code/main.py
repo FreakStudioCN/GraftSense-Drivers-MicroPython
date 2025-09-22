@@ -20,7 +20,26 @@ from r60abd1 import R60ABD1
 # ======================================== 功能函数 ============================================
 
 def show(label, value, unit=""):
+    """
+    打印带标签的数值：
+    按格式输出标签、数值和可选单位。
+
+    Args:
+        label (str): 标签文本。
+        value (Any): 显示的数值。
+        unit (str, optional): 单位，默认为空字符串。
+
+    ==================================
+    Print labeled value:
+    Output label, value, and optional unit in formatted style.
+
+    Args:
+        label (str): Label text.
+        value (Any): Value to display.
+        unit (str, optional): Unit string, defaults to empty.
+    """
     print(f"→ {label}：{value}{unit}")
+
 
 # ======================================== 自定义类 ============================================
 

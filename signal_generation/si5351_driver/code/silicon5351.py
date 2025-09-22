@@ -392,14 +392,34 @@ class SI5351_I2C:
                  crystal,
                  load=SI5351_CRYSTAL_LOAD_10PF,
                  address=SI5351_I2C_ADDRESS_DEFAULT):
-        """Instantiate the SI5353_I2C class.  All clock outputs 
-        (clkouts) will be shutdown and disabled.
-        :param i2c The MicroPython or CircuitPython I2C object.
-        :param crystal The crystal frequency in Hz.
-        :param load The load capacitance of crystal.  Must use one of 
-        the global constants defined in the library for this value.
-        :param address The I2C address of the si5351 chip. 
         """
+          初始化 SI5351 对象：
+          配置 I2C 接口、晶振频率、晶振负载电容以及 I2C 地址。
+          初始化时会等待芯片完成上电自检，关闭所有输出，并配置晶振负载。
+
+          Args:
+              i2c: I2C 总线对象。
+              crystal (float): 晶振频率，单位 Hz。
+              load (int, optional): 晶振负载电容，可选值为
+                  SI5351_CRYSTAL_LOAD_6PF / SI5351_CRYSTAL_LOAD_8PF / SI5351_CRYSTAL_LOAD_10PF。
+                  默认 SI5351_CRYSTAL_LOAD_10PF。
+              address (int, optional): I2C 地址，默认 SI5351_I2C_ADDRESS_DEFAULT。
+
+          ==================================
+          Initialize SI5351 object:
+          Configure I2C bus, crystal frequency, crystal load capacitance,
+          and I2C address. During initialization, the constructor waits
+          until the chip finishes power-on self-test, disables all outputs,
+          and sets the crystal load value.
+
+          Args:
+              i2c: I2C bus object.
+              crystal (float): Crystal frequency in Hz.
+              load (int, optional): Crystal load capacitance, one of
+                  SI5351_CRYSTAL_LOAD_6PF / SI5351_CRYSTAL_LOAD_8PF / SI5351_CRYSTAL_LOAD_10PF.
+                  Defaults to SI5351_CRYSTAL_LOAD_10PF.
+              address (int, optional): I2C address, defaults to SI5351_I2C_ADDRESS_DEFAULT.
+          """
         self.i2c = i2c
         self.crystal = crystal
         self.address = address

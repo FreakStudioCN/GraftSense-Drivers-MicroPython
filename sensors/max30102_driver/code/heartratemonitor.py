@@ -1274,7 +1274,6 @@ class MAX30102(object):
             VALUE (int): 1-byte value to write.
         """
         self._i2c.writeto(self.i2c_address, bytearray([REGISTER, VALUE]))
-        return
 
     def set_bitmask(self, REGISTER, MASK, NEW_VALUES):
         """
@@ -1295,7 +1294,6 @@ class MAX30102(object):
         """
         newCONTENTS = (ord(self.i2c_read_register(REGISTER)) & MASK) | NEW_VALUES
         self.i2c_set_register(REGISTER, newCONTENTS)
-        return
 
     def bitmask(self, reg, slotMask, thing):
         """
