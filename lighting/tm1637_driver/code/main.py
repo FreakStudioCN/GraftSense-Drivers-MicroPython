@@ -22,17 +22,18 @@ def demo_brightness(disp: tm1637):
     """
     演示亮度调节：
     逐级增加亮度并显示数值，最后回到适合的亮度等级。
+    ==================================================
+    Demonstrate brightness control:
+    Gradually increase brightness, display the value, and reset to a suitable level.
 
     Args:
-        disp (tm1637): 显示屏驱动对象。
+        disp (tm1637): 显示屏驱动对象 / Display driver object.
     """
-    # 逐级变亮
     for b in range(0, 8):
         disp.brightness(b)
-        disp.show("b{:>3d}".format(b))  # 显示当前亮度
+        disp.show("b{:>3d}".format(b))  # 显示当前亮度 / Show current brightness
         time.sleep_ms(300)
-    # 设回较适合的 3~4 级
-    disp.brightness(4)
+    disp.brightness(4)  # 设回合适亮度 / Reset to suitable brightness
     time.sleep_ms(400)
 
 
@@ -41,12 +42,15 @@ def demo_show(disp: tm1637):
     演示字符串显示：
     直接显示字符串和冒号显示效果。
 
+    Demonstrate string display:
+    Show plain strings and colon-enabled effect.
+
     Args:
-        disp (tm1637): 显示屏驱动对象。
+        disp (tm1637): 显示屏驱动对象 / Display driver object.
     """
-    disp.show("dEMo")  # 直接显示字符串
+    disp.show("dEMo")
     time.sleep_ms(800)
-    disp.show(" A01", True)  # 演示 colon=True 的效果
+    disp.show(" A01", True)  # colon=True 演示 / Show with colon=True
     time.sleep_ms(800)
 
 
@@ -55,22 +59,30 @@ def demo_numbers(disp: tm1637):
     演示两组数字显示：
     显示带冒号的两组数字，并演示范围裁剪。
 
+    Demonstrate two-number display:
+    Show numbers with colon, including range clipping.
+
     Args:
-        disp (tm1637): 显示屏驱动对象。
+        disp (tm1637): 显示屏驱动对象 / Display driver object.
     """
     disp.numbers(12, 34, colon=True)
     time.sleep_ms(800)
-    disp.numbers(-9, 99, colon=True)  # 展示范围裁剪
+    disp.numbers(-9, 99, colon=True)  # 范围裁剪演示 / Range clipping demo
     time.sleep_ms(800)
 
 
 def demo_number(disp: tm1637):
     """
     演示单个数字显示：
-    循环展示不同的整数，含正数与负数。
+    循环展示不同整数，含正数与负数。
+
+    ==================================================
+
+    Demonstrate single-number display:
+    Loop through various integers, including positives and negatives.
 
     Args:
-        disp (tm1637): 显示屏驱动对象。
+        disp (tm1637): 显示屏驱动对象 / Display driver object.
     """
     for n in (0, 7, 42, 256, 9999, -999, -1234):
         disp.number(n)
@@ -80,10 +92,15 @@ def demo_number(disp: tm1637):
 def demo_hex(disp: tm1637):
     """
     演示十六进制数显示：
-    循环显示不同的十六进制数。
+    循环显示不同的十六进制值。
+
+    ==================================================
+
+    Demonstrate hexadecimal display:
+    Loop through various hex values.
 
     Args:
-        disp (tm1637): 显示屏驱动对象。
+        disp (tm1637): 显示屏驱动对象 / Display driver object.
     """
     for v in (0x0, 0x5A, 0xBEEF, 0x1234, 0xFFFF):
         disp.hex(v)
@@ -93,10 +110,15 @@ def demo_hex(disp: tm1637):
 def demo_temperature(disp: tm1637):
     """
     演示温度显示：
-    循环显示不同的温度值（范围 -15 ~ 120）。
+    循环显示不同温度值（范围 -15 ~ 120）。
+
+    ==================================================
+
+    Demonstrate temperature display:
+    Loop through various temperatures (-15 ~ 120).
 
     Args:
-        disp (tm1637): 显示屏驱动对象。
+        disp (tm1637): 显示屏驱动对象 / Display driver object.
     """
     for t in (-15, -9, 0, 25, 37, 99, 120):
         disp.temperature(t)
@@ -108,22 +130,32 @@ def demo_scroll(disp: tm1637):
     演示字符串滚动：
     循环滚动显示字符串。
 
+    ==================================================
+
+    Demonstrate scrolling text:
+    Continuously scroll a string across the display.
+
     Args:
-        disp (tm1637): 显示屏驱动对象。
+        disp (tm1637): 显示屏驱动对象 / Display driver object.
     """
-    disp.scroll("HELLO TM1637  ", delay=180)  # 末尾空格便于间隔
+    disp.scroll("HELLO TM1637  ", delay=180)  # 末尾空格用于间隔 / Trailing spaces for spacing
 
 
 def demo_raw_write(disp: tm1637):
     """
     演示原始段码写入：
-    使用自定义段码绘制中横杠，再清空。
+    使用自定义段码绘制横杠，再清空。
+
+    ==================================================
+
+    Demonstrate raw segment writing:
+    Use custom segment codes to draw dashes, then clear.
 
     Args:
-        disp (tm1637): 显示屏驱动对象。
+        disp (tm1637): 显示屏驱动对象 / Display driver object.
     """
-    DASH = 0x40  # 中横杠
-    BLANK = 0x00  # 空白
+    DASH = 0x40   # 中横杠 / Middle dash
+    BLANK = 0x00  # 空白 / Blank
     disp.write([DASH, DASH, DASH, DASH], pos=0)
     time.sleep_ms(800)
     disp.write([BLANK, BLANK, BLANK, BLANK], pos=0)

@@ -21,6 +21,15 @@ from dy_sv19t import *
 
 # 定义状态打印函数：按标题统一查询并打印播放器各项状态
 def dump_status(p: DYSV19T, title: str = "") -> None:
+    """
+    查询音频模块对象所有状态并输出到串口
+    Args:
+    p:（DYSV19T）: 音频模块驱动对象
+    ==============================
+    Query all statuses of the audio module object and output them to the serial port
+    Args:
+    p: (DYSV19T): Audio module driver object
+    """
     # 查询播放状态：返回 0=停、1=播、2=暂停
     st = p.query_status()
     # 查询当前盘符：返回 DISK_USB/DISK_SD/DISK_FLASH 或 None，并更新内部 current_disk
