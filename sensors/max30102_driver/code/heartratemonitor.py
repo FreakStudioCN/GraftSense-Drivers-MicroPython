@@ -4,6 +4,7 @@
 # @Author  : 侯钧瀚
 # @File    : heartratemonitor.py
 # @Description : MAX30102/MAX30105 心率与PPG读取驱动 + 简易心率计算器（窗口平滑+峰值检测）
+# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 # @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"
@@ -12,6 +13,7 @@ __license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
+
 # 导入i2c类
 from machine import I2C
 # 导入ustruct
@@ -167,6 +169,7 @@ SLOT_GREEN_PILOT            = const(0x07)
 
 # 读取缓冲区大小（每色通道）
 STORAGE_QUEUE_SIZE = const(4)
+
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
@@ -743,6 +746,7 @@ class MAX30102(object):
         self.set_bitmask(MAX30105_PARTICLE_CONFIG, MAX30105_ADC_RANGE_MASK, r)
 
     def set_sample_rate(self, sample_rate):
+
         """
         设置采样率（SPS）。
 
@@ -761,6 +765,7 @@ class MAX30102(object):
         Raises:
             ValueError: If rate not supported.
         """
+
         if sample_rate == 50:
             sr = MAX30105_SAMPLERATE_50
         elif sample_rate == 100:
@@ -786,6 +791,7 @@ class MAX30102(object):
         self.update_acquisition_frequency()
 
     def set_pulse_width(self, pulse_width):
+
         """
         设置 LED 脉冲宽度（影响探测距离）。
 
@@ -804,6 +810,7 @@ class MAX30102(object):
         Raises:
             ValueError: If width not supported.
         """
+
         if pulse_width == 69:
             pw = MAX30105_PULSE_WIDTH_69
         elif pulse_width == 118:
@@ -818,6 +825,7 @@ class MAX30102(object):
         self._pulse_width = pw
 
     def set_active_leds_amplitude(self, amplitude):
+
         """
         按当前启用的 LED 数量批量设置电流。
 
@@ -838,6 +846,7 @@ class MAX30102(object):
             self.set_pulse_amplitude_green(amplitude)
 
     def set_pulse_amplitude_red(self, amplitude):
+
         """
         设置红光 LED 电流。
 
@@ -850,9 +859,11 @@ class MAX30102(object):
         Args:
             amplitude (int): Current register value.
         """
+
         self.i2c_set_register(MAX30105_LED1_PULSE_AMP, amplitude)
 
     def set_pulse_amplitude_it(self, amplitude):
+
         """
         设置 IR LED 电流（沿用原方法名 it）。
 
@@ -865,9 +876,11 @@ class MAX30102(object):
         Args:
             amplitude (int): Current register value.
         """
+
         self.i2c_set_register(MAX30105_LED2_PULSE_AMP, amplitude)
 
     def set_pulse_amplitude_green(self, amplitude):
+
         """
         设置绿光 LED 电流（若芯片支持）。
 
@@ -880,9 +893,11 @@ class MAX30102(object):
         Args:
             amplitude (int): Current register value.
         """
+
         self.i2c_set_register(MAX30105_LED3_PULSE_AMP, amplitude)
 
     def set_pulse_amplitude_proximity(self, amplitude):
+
         """
         设置接近检测 LED 电流。
 
@@ -895,9 +910,11 @@ class MAX30102(object):
         Args:
             amplitude (int): Current register value.
         """
+
         self.i2c_set_register(MAX30105_LED_PROX_AMP, amplitude)
 
     def set_proximity_threshold(self, thresh_msb):
+
         """
         设置接近中断门限的高 8 位。
 
@@ -910,9 +927,11 @@ class MAX30102(object):
         Args:
             thresh_msb (int): Threshold MSB value.
         """
+
         self.i2c_set_register(MAX30105_PROX_INT_THRESH, thresh_msb)
 
     def set_fifo_average(self, number_of_samples):
+
         """
         设置 FIFO 内部平均样本数。
 
@@ -931,6 +950,7 @@ class MAX30102(object):
         Raises:
             ValueError: If not supported.
         """
+
         if number_of_samples == 1:
             ns = MAX30105_SAMPLE_AVG_1
         elif number_of_samples == 2:
@@ -951,12 +971,14 @@ class MAX30102(object):
         self.update_acquisition_frequency()
 
     def update_acquisition_frequency(self):
+
         """
         根据采样率与平均样本数计算有效采集频率与建议读取间隔。
 
         =========================================
         Update effective acquisition frequency and suggested read interval.
         """
+
         if None in [self._sample_rate, self._sample_avg]:
             return
         else:
@@ -966,6 +988,7 @@ class MAX30102(object):
             self._acq_frequency_inv = int(ceil(1000 / self._acq_frequency))
 
     def get_acquisition_frequency(self):
+
         """
         获取有效采集频率（SPS）。
 
@@ -978,38 +1001,46 @@ class MAX30102(object):
         Returns:
             float|None: Frequency.
         """
+
         return self._acq_frequency
 
     def clear_fifo(self):
+
         """
         清空 FIFO 指针（推荐在开始读取前执行）。
 
         =========================================
         Clear FIFO pointers (recommended before starting reads).
         """
+
         self.i2c_set_register(MAX30105_FIFO_WRITE_PTR, 0)
         self.i2c_set_register(MAX30105_FIFO_OVERFLOW, 0)
         self.i2c_set_register(MAX30105_FIFO_READ_PTR, 0)
 
     def enable_fifo_rollover(self):
+
         """
         允许 FIFO 回绕覆盖旧数据。
 
         =========================================
         Enable FIFO rollover.
         """
+
         self.set_bitmask(MAX30105_FIFO_CONFIG, MAX30105_ROLLOVER_MASK, MAX30105_ROLLOVER_ENABLE)
 
     def disable_fifo_rollover(self):
+
         """
         禁止 FIFO 回绕。
 
         =========================================
         Disable FIFO rollover.
         """
+
         self.set_bitmask(MAX30105_FIFO_CONFIG, MAX30105_ROLLOVER_MASK, MAX30105_ROLLOVER_DISABLE)
 
     def set_fifo_almost_full(self, number_of_samples):
+
         """
         设置触发“接近满”中断的剩余空间阈值（反向编码）。
 
@@ -1022,9 +1053,11 @@ class MAX30102(object):
         Args:
             number_of_samples (int): 0x00=32 samples, 0x0F=17 samples.
         """
+
         self.set_bitmask(MAX30105_FIFO_CONFIG, MAX30105_A_FULL_MASK, number_of_samples)
 
     def get_write_pointer(self):
+
         """
         读取 FIFO 写指针。
 
@@ -1037,10 +1070,12 @@ class MAX30102(object):
         Returns:
             bytes: Register value (1 byte).
         """
+
         wp = self.i2c_read_register(MAX30105_FIFO_WRITE_PTR)
         return wp
 
     def get_read_pointer(self):
+
         """
         读取 FIFO 读指针。
 
@@ -1053,10 +1088,12 @@ class MAX30102(object):
         Returns:
             bytes: Register value (1 byte).
         """
+
         wp = self.i2c_read_register(MAX30105_FIFO_READ_PTR)
         return wp
 
     def read_temperature(self):
+
         """
         读取芯片内部温度（℃）。
 
@@ -1069,6 +1106,7 @@ class MAX30102(object):
         Returns:
             float: Temperature in °C.
         """
+
         # 触发一次温度转换
         self.i2c_set_register(MAX30105_DIE_TEMP_CONFIG, 0x01)
         # 轮询完成位清零
@@ -1083,6 +1121,7 @@ class MAX30102(object):
         return float(tempInt) + (float(tempFrac) * 0.0625)
 
     def set_prox_int_tresh(self, val):
+
         """
         设置接近中断门限（别名函数）。
 
@@ -1095,9 +1134,11 @@ class MAX30102(object):
         Args:
             val (int): Threshold MSB value.
         """
+
         self.i2c_set_register(MAX30105_PROX_INT_THRESH, val)
 
     def read_part_id(self):
+        
         """
         读取器件 ID。
 
@@ -1110,10 +1151,12 @@ class MAX30102(object):
         Returns:
             bytes: 1-byte value.
         """
+
         part_id = self.i2c_read_register(MAX30105_PART_ID)
         return part_id
 
     def check_part_id(self):
+
         """
         校验器件 ID 是否为预期值（0x15）。
 
@@ -1126,10 +1169,12 @@ class MAX30102(object):
         Returns:
             bool: True if matched.
         """
+
         part_id = ord(self.read_part_id())
         return part_id == MAX_30105_EXPECTED_PART_ID
 
     def get_revision_id(self):
+
         """
         读取修订 ID。
 
@@ -1142,10 +1187,12 @@ class MAX30102(object):
         Returns:
             int: Revision number.
         """
+
         rev_id = self.i2c_read_register(MAX30105_REVISION_ID)
         return ord(rev_id)
 
     def enable_slot(self, slot_number, device):
+        
         """
         在多路 LED 模式下配置时间槽。
 

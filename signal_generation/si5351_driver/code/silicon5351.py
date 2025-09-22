@@ -11,9 +11,14 @@ __version__ = "0.1.0"
 __author__ = "侯钧瀚"
 __license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.19+"
+
 # ======================================== 导入相关模块 =========================================
+
+#导入micropython内置库
 import sys
+#导入常量模块
 from micropython import const
+
 # ======================================== 全局变量 ============================================
 SI5351_I2C_ADDRESS_DEFAULT        = const(0x60)
 

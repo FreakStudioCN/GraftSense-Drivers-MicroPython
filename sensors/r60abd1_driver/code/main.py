@@ -7,26 +7,32 @@
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 # @License : CC BY-NC 4.0
 # ======================================== 导入相关模块 =========================================
+
 #MicroPython 提供的硬件接口类，用于串口通信和引脚控制模块
 from machine import UART, Pin
 #关于时间的模块
 import time
 #R60ABD1 模块驱动类（人体存在/心率/睡眠等传感器协议封装）模块
 from r60abd1 import R60ABD1
+
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 def show(label, value, unit=""):
     print(f"→ {label}：{value}{unit}")
+
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
+
 # 上电延时3s
 time.sleep(3)
 # # 打印调试消息
 print("FreakStudio: Using R60ABD1 millimeter wave information collection")
 uart = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
 dev = R60ABD1(uart)
+
 # ========================================  主程序  ===========================================
 
 dev.disable_all_reports()
