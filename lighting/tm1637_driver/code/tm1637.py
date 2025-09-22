@@ -5,11 +5,11 @@
 # @File    : tm1637.py
 # @Description : tm1637驱动for micropython
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : MIT
+# @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
-__license__ = "MIT"
+__license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
