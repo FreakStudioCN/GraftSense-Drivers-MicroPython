@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/09/17 16:35
-# @Author  : q
+# @Author  : 侯钧瀚
 # @File    : main.py
 # @Description : DY-SV19T 驱动“满功能”示例：在一个脚本里串联演示尽量多的外部功能方法
 # @License : CC BY-NC 4.0

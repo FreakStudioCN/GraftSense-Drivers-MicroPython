@@ -118,9 +118,6 @@ class DYSV19T:
         """
         初始化驱动实例；仅保存状态与参数校验，不主动向模块发命令。
 
-        简介：
-            保存默认参数并完成范围校验，不与设备交互。
-
         Args:
             uart: UART 实例（需已配置 9600 8N1），必须具备 read()/write()
             default_volume (int): 默认音量 0..30
@@ -134,9 +131,6 @@ class DYSV19T:
         ==========================================
 
         Initialize driver; only stores defaults and validates params.
-
-        Brief:
-            Store defaults and validate without sending commands.
 
         Args:
             uart: UART instance (9600 8N1) providing read()/write()
@@ -181,9 +175,6 @@ class DYSV19T:
         """
         将 0..65535 转为 (H,L) 两个字节。
 
-        简介：
-            参数检查并输出大端序的高/低字节元组。
-
         Args:
             value (int): 要编码的无符号 16 位整数
 
@@ -192,9 +183,6 @@ class DYSV19T:
         ==========================================
 
         Convert 0..65535 to (H, L) bytes.
-
-        Brief:
-            Validate and return high/low bytes in big-endian order.
 
         Args:
             value (int): Unsigned 16-bit integer
@@ -211,9 +199,6 @@ class DYSV19T:
         """
         校验盘符是否为 USB/SD/FLASH。
 
-        简介：
-            约束仅允许 3 种有效盘符。
-
         Args:
             disk (int): 盘符常量
 
@@ -222,9 +207,6 @@ class DYSV19T:
         ==========================================
 
         Validate disk is one of USB/SD/FLASH.
-
-        Brief:
-            Accept only three valid disk constants.
 
         Args:
             disk (int): Disk constant
@@ -240,9 +222,6 @@ class DYSV19T:
         """
         校验播放模式常量。
 
-        简介：
-            仅允许 MODE_* 枚举。
-
         Args:
             mode (int): 播放模式
 
@@ -251,9 +230,6 @@ class DYSV19T:
         ==========================================
 
         Validate loop mode constant.
-
-        Brief:
-            Allow only MODE_* enums.
 
         Args:
             mode (int): Loop mode
@@ -273,9 +249,6 @@ class DYSV19T:
         """
         校验 EQ 常量。
 
-        简介：
-            仅允许 EQ_NORMAL/POP/ROCK/JAZZ/CLASSIC。
-
         Args:
             eq (int): EQ 模式
 
@@ -284,9 +257,6 @@ class DYSV19T:
         ==========================================
 
         Validate EQ constant.
-
-        Brief:
-            Allow only EQ_NORMAL/POP/ROCK/JAZZ/CLASSIC.
 
         Args:
             eq (int): EQ mode
@@ -302,9 +272,6 @@ class DYSV19T:
         """
         校验 DAC 输出通道常量。
 
-        简介：
-            仅允许 CH_MP3/CH_AUX/CH_MP3_AUX。
-
         Args:
             ch (int): 通道常量
 
@@ -314,10 +281,6 @@ class DYSV19T:
 
         Validate output channel constant.
 
-        Brief:
-            Allow only CH_MP3/CH_AUX/CH_MP3_AUX.
-
-        Args:
             ch (int): Channel constant
 
         Raises:
@@ -331,9 +294,6 @@ class DYSV19T:
         """
         校验并编码路径字符串。
 
-        简介：
-            强制以'/'开头，分段 1..8 字节，仅 A-Z/0-9/_ 及格式符 '*', '.', '/'。
-
         Args:
             path (str): 目标路径（如 '/MUSIC/01.MP3' 或 '/ZH/*.WAV'）
 
@@ -342,9 +302,6 @@ class DYSV19T:
         ==========================================
 
         Validate and encode path string.
-
-        Brief:
-            Must start with '/', 1..8 chars per segment, allowed charset A-Z/0-9/_ and '*', '.', '/'.
 
         Args:
             path (str): Path such as '/MUSIC/01.MP3' or '/ZH/*.WAV'
@@ -386,9 +343,6 @@ class DYSV19T:
         """
         构造完整帧：AA CMD LEN DATA... SM
 
-        简介：
-            依据协议拼接帧并计算低 8 位校验和。
-
         Args:
             cmd (int): 命令码
             data (bytes): 载荷数据
@@ -399,10 +353,7 @@ class DYSV19T:
 
         Build a complete frame: AA CMD LEN DATA... SM
 
-        Brief:
-            Concatenate by spec and compute low-8-bit checksum.
-
-        Args:
+        
             cmd (int): Command code
             data (bytes): Payload data
 
@@ -428,9 +379,6 @@ class DYSV19T:
         """
         解析并校验响应帧，返回 { 'cmd': int, 'data': bytes }。
 
-        简介：
-            检查起始、长度与校验和，提取命令字与数据段。
-
         Args:
             resp (bytes): 原始响应帧字节序列
 
@@ -439,12 +387,6 @@ class DYSV19T:
         ==========================================
 
         Parse & validate response frame, return {'cmd': int, 'data': bytes}.
-
-        Brief:
-            Verify start, length, checksum; extract command and data.
-
-        Args:
-            resp (bytes): Raw response bytes
 
         Raises:
             ValueError: If too short, bad start byte, length mismatch, or checksum mismatch
@@ -469,9 +411,6 @@ class DYSV19T:
         """
         读取一帧响应；若 expected_cmd 提供则仅返回匹配的帧；超时返回 None。
 
-        简介：
-            逐字节解析串口数据流，超时未取到完整帧则返回 None。
-
         Args:
             expected_cmd (int|None): 期望的命令码；None 表示接受任意
             timeout_ms (int|None): 覆盖默认超时时间；None 使用 self.timeout_ms
@@ -481,9 +420,6 @@ class DYSV19T:
         ==========================================
 
         Read one response frame; if expected_cmd given, only return matching; None on timeout.
-
-        Brief:
-            Parse the stream byte-by-byte; return None if timed out.
 
         Args:
             expected_cmd (int|None): Expected command code or None
@@ -533,9 +469,6 @@ class DYSV19T:
         """
         发送无数据载荷的通用指令帧。
 
-        简介：
-            构造空载荷帧并通过 UART 写出。
-
         Args:
             cmd (int): 命令码
 
@@ -544,9 +477,6 @@ class DYSV19T:
         ==========================================
 
         Send a generic command with empty payload.
-
-        Brief:
-            Build empty frame and write via UART.
 
         Args:
             cmd (int): Command code
@@ -565,16 +495,10 @@ class DYSV19T:
         """
         播放（AA 02 00 SM）。
 
-        简介：
-            切换至播放状态。
-        Raises:
-            IOError: UART 写入失败
         ==========================================
 
         Start playback (AA 02 00 SM).
 
-        Brief:
-            Set playback state to PLAY.
         Raises:
             IOError: If UART write fails
         """
@@ -584,12 +508,11 @@ class DYSV19T:
     def pause(self):
         """
         暂停（AA 03 00 SM）。
+
         ==========================================
 
         Pause (AA 03 00 SM).
-
-        Brief:
-            Set playback state to PAUSE.
+        
         """
         self.send_frame(0x03)
         self.play_state = PLAY_PAUSE
@@ -598,14 +521,9 @@ class DYSV19T:
         """
         停止（AA 04 00 SM）。
 
-        简介：
-            停止播放并更新状态。
         ==========================================
 
         Stop (AA 04 00 SM).
-
-        Brief:
-            Stop playback and update state.
 
         """
         self.send_frame(0x04)
@@ -615,14 +533,10 @@ class DYSV19T:
         """
         上一首（AA 05 00 SM）。
 
-        简介：
-            跳转到上一曲目。
         ==========================================
 
-        Previous (AA 05 00 SM).
+        Previous song (AA 05 00 SM).
 
-        Brief:
-            Skip to previous track.
         """
         self.send_frame(0x05)
 
@@ -630,13 +544,11 @@ class DYSV19T:
         """
         下一首（AA 06 00 SM）。
 
-        简介：
-            跳转到下一曲目。
+        
         ==========================================
 
         Next (AA 06 00 SM).
 
-        Brief:
             Skip to next track.
         """
         self.send_frame(0x06)
@@ -645,18 +557,11 @@ class DYSV19T:
         """
         指定曲目号 1..65535；play=True 直接播放（AA 07 02 H L SM），否则仅选曲（AA 1F 02 H L SM）。
 
-        简介：
-            选择目标曲目，按需立即开始播放。
-
         Args:
             track_no (int): 曲目号，范围 1..65535
             play (bool): True 立即播放；False 仅预选
-        ==========================================
-
+        
         Select track 1..65535; play immediately if True, else select only.
-
-        Brief:
-            Select target track and optionally start playback.
 
         Args:
             track_no (int): Track number 1..65535
@@ -674,17 +579,11 @@ class DYSV19T:
         """
         预选曲目（AA 1F 02 H L SM）。
 
-        简介：
-            仅选择曲目，不立即播放。
-
         Args:
             track_no (int): 曲目号 1..65535
         ==========================================
 
         Preselect track (AA 1F 02 H L SM).
-
-        Brief:
-            Select track without starting playback.
 
         Args:
             track_no (int): Track number 1..65535
@@ -696,18 +595,12 @@ class DYSV19T:
         """
         按盘符+路径播放（AA 08 <len> <disk> <path...> SM）。
 
-        简介：
-            校验盘符与路径后下发路径播放指令。
-
         Args:
             disk (int): 盘符（DISK_*）
             path (str): 形如 '/DIR/NAME.MP3' 的路径
         ==========================================
 
         Play by disk + path (AA 08 <len> <disk> <path...> SM).
-
-        Brief:
-            Validate disk and path, then send play command.
 
         Args:
             disk (int): One of DISK_*
@@ -723,19 +616,13 @@ class DYSV19T:
         """
         插播曲目（AA 16 03 <disk> <H> <L> SM）。
 
-        简介：
-            在当前播放中插入并播放指定曲目。
-
         Args:
             disk (int): 盘符（DISK_*）
             track_no (int): 曲目号 1..65535
 
         ==========================================
 
-        Insert a track (AA 16 03 <disk> <H> <L> SM).
-
-        Brief:
-            Insert and play a specific track.
+        Insert a track (AA 16 03 <disk> <H> <L> SM).  
 
         Args:
             disk (int): One of DISK_*
@@ -750,9 +637,6 @@ class DYSV19T:
         """
         插播路径（AA 17 <len> <disk> <path...> SM）。
 
-        简介：
-            在当前播放中插入并播放指定路径文件。
-
         Args:
             disk (int): 盘符（DISK_*）
             path (str): 路径（需以'/'起始）
@@ -761,8 +645,6 @@ class DYSV19T:
 
         Insert by path (AA 17 <len> <disk> <path...> SM).
 
-        Brief:
-            Insert and play the file by path.
 
         Args:
             disk (int): One of DISK_*
@@ -777,15 +659,9 @@ class DYSV19T:
         """
         结束插播：等价于结束播放（AA 10 00 SM）。
 
-        简介：
-            终止插播，回到正常播放流程。
-
         ==========================================
 
         End insertion: use stop playing (AA 10 00 SM).
-
-        Brief:
-            Stop insertion and return to normal flow.
 
         """
         self.send_frame(0x10)
@@ -795,9 +671,6 @@ class DYSV19T:
         """
         设置音量 0..30（AA 13 01 <vol> SM）。
 
-        简介：
-            校验范围并写入音量。
-
         Args:
             vol (int): 期望音量 0..30
 
@@ -806,9 +679,6 @@ class DYSV19T:
         ==========================================
 
         Set volume 0..30 (AA 13 01 <vol> SM).
-
-        Brief:
-            Validate range and write volume.
 
         Args:
             vol (int): Desired volume 0..30
@@ -826,14 +696,9 @@ class DYSV19T:
         """
         音量+（AA 14 00 SM）。
 
-        简介：
-            将音量提升一个单位。
         ==========================================
 
         Volume up (AA 14 00 SM).
-
-        Brief:
-            Increase volume by one step.
 
         """
         self.send_frame(0x14)
@@ -842,17 +707,9 @@ class DYSV19T:
         """
         音量-（AA 15 00 SM）。
 
-        简介：
-            将音量降低一个单位。
-
         ==========================================
 
         Volume down (AA 15 00 SM).
-
-        Brief:
-            Decrease volume by one step.
-
-
         """
         self.send_frame(0x15)
 
@@ -860,17 +717,12 @@ class DYSV19T:
         """
         设置 EQ（AA 1A 01 <eq> SM）。
 
-        简介：
-            切换至指定均衡模式。
-
         Args:
             eq (int): EQ 常量（EQ_*）
         ==========================================
 
         Set EQ (AA 1A 01 <eq> SM).
 
-        Brief:
-            Switch to target EQ mode.
 
         Args:
             eq (int): One of EQ_*
@@ -884,17 +736,11 @@ class DYSV19T:
         """
         设置 DAC 通道（AA 1D 01 <ch> SM）。
 
-        简介：
-            选择音频输出通道。
-
         Args:
             ch (int): CH_* 常量
         ==========================================
 
         Set DAC output channel (AA 1D 01 <ch> SM).
-
-        Brief:
-            Select audio output channel.
 
         Args:
             ch (int): One of CH_*
@@ -908,18 +754,12 @@ class DYSV19T:
         """
         设置播放模式（AA 18 01 <mode> SM）。
 
-        简介：
-            按枚举切换循环/随机/顺序等模式。
-
         Args:
             mode (int): MODE_* 常量
 
         ==========================================
 
         Set loop mode (AA 18 01 <mode> SM).
-
-        Brief:
-            Switch among loop/random/sequential modes.
 
         Args:
             mode (int): One of MODE_*
@@ -933,9 +773,6 @@ class DYSV19T:
         """
         设置循环次数 1..65535（AA 19 02 H L SM）。
 
-        简介：
-            定义单曲/目录/全盘的循环次数（受模式限制）。
-
         Args:
             count (int): 循环次数 1..65535
 
@@ -944,9 +781,6 @@ class DYSV19T:
         ==========================================
 
         Set loop count 1..65535 (AA 19 02 H L SM).
-
-        Brief:
-            Define repeat count for track/folder/disk (mode dependent).
 
         Args:
             count (int): Repeat count 1..65535
@@ -962,10 +796,7 @@ class DYSV19T:
 
     def repeat_area(self, start_min: int, start_sec: int, end_min: int, end_sec: int):
         """
-        区间复读（AA 20 04 s_min s_sec e_min e_sec SM），分秒 0..59。
-
-        简介：
-            设置 A–B 循环区间。
+        区间复读（AA 20 04 s_min s_sec e_min e_sec SM），分秒 0..59。 
 
         Args:
             start_min (int): 起始分钟 0..59
@@ -978,9 +809,6 @@ class DYSV19T:
         ==========================================
 
         A-B repeat, minutes/seconds 0..59.
-
-        Brief:
-            Configure A–B loop segment.
 
         Args:
             start_min (int): 0..59
@@ -1002,15 +830,9 @@ class DYSV19T:
         """
         结束复读（AA 21 00 SM）。
 
-        简介：
-            终止 A–B 区间复读。
-
         ==========================================
 
         End A-B repeat (AA 21 00 SM).
-
-        Brief:
-            Stop A–B repeat.
 
         """
         self.send_frame(0x21)
@@ -1019,8 +841,7 @@ class DYSV19T:
         """
         快退 seconds（AA 22 02 H L SM）。
 
-        简介：
-            按秒数回退播放位置。
+        
 
         Args:
             seconds (int): 回退的秒数 0..65535
@@ -1028,9 +849,6 @@ class DYSV19T:
         ==========================================
 
         Seek backward seconds (AA 22 02 H L SM).
-
-        Brief:
-            Rewind by given seconds.
 
         Args:
             seconds (int): 0..65535
@@ -1043,18 +861,12 @@ class DYSV19T:
         """
         快进 seconds（AA 23 02 H L SM）。
 
-        简介：
-            按秒数前进播放位置。
-
         Args:
             seconds (int): 前进的秒数 0..65535
 
         ==========================================
 
         Seek forward seconds (AA 23 02 H L SM).
-
-        Brief:
-            Fast-forward by given seconds.
 
         Args:
             seconds (int): 0..65535
@@ -1068,15 +880,9 @@ class DYSV19T:
         """
         查询播放状态（AA 01 00 -> AA 01 01 <state> SM）。
 
-        简介：
-            返回播放状态值并更新 self.play_state；超时返 None。
-
         ==========================================
 
         Query play state; return int or None.
-
-        Brief:
-            Update and return playback state; None on timeout.
 
         """
         self.send_frame(0x01)
@@ -1094,15 +900,9 @@ class DYSV19T:
         """
         查询在线盘符位图 bit0 USB / bit1 SD / bit2 FLASH（AA 09 00）。
 
-        简介：
-            返回在线盘符位图；超时返 None。
-
         ==========================================
 
         Query online disks bitmap; return int or None.
-
-        Brief:
-            Return bitmap of online disks; None on timeout.
 
         """
         self.send_frame(0x09)
@@ -1116,15 +916,9 @@ class DYSV19T:
         """
         查询当前盘符（AA 0A 00）。返回 DISK_* 或 None，并更新 current_disk。
 
-        简介：
-            获取当前工作盘符并写入 self.current_disk。
-
         ==========================================
 
         Query current disk; return DISK_* or None.
-
-        Brief:
-            Get current disk and update self.current_disk.
 
         """
         self.send_frame(0x0A)
@@ -1141,15 +935,9 @@ class DYSV19T:
         """
         查询总曲目数（AA 0C 00 -> AA 0C 02 H L）。返回 int 或 None。
 
-        简介：
-            返回设备报告的总曲目数。
-
         ==========================================
 
         Query total tracks; return int or None.
-
-        Brief:
-            Return total number of tracks.
         """
         self.send_frame(0x0C)
         resp = self.recv_response(expected_cmd=0x0C)
@@ -1164,14 +952,9 @@ class DYSV19T:
         """
         查询当前曲目号（AA 0D 00 -> AA 0D 02 H L）。
 
-        简介：
-            返回当前曲目的编号。
         ==========================================
 
         Query current track number.
-
-        Brief:
-            Return the index number of current track.
 
         """
         self.send_frame(0x0D)
@@ -1187,15 +970,9 @@ class DYSV19T:
         """
         查询当前文件夹首曲（AA 11 00 -> AA 11 02 H L）。
 
-        简介：
-            返回当前目录中的第一首曲目编号。
-
         ==========================================
 
         Query first track index in current folder.
-
-        Brief:
-            Return index of the first track in current directory.
 
         """
         self.send_frame(0x11)
@@ -1211,15 +988,10 @@ class DYSV19T:
         """
         查询当前文件夹曲目数（AA 12 00 -> AA 12 02 H L）。
 
-        简介：
-            返回当前目录中的曲目数量。
-
         ==========================================
 
         Query number of tracks in current folder.
 
-        Brief:
-            Return total track count under current directory.
 
         """
         self.send_frame(0x12)
@@ -1235,15 +1007,9 @@ class DYSV19T:
         """
         查询短文件名（AA 1E 00 -> AA 1E <len> <bytes..>）。返回 str 或 None。
 
-        简介：
-            读取 8.3 短文件名的 ASCII 字符串。
-
         ==========================================
 
         Query short file name; return str or None.
-
-        Brief:
-            Read ASCII 8.3 short filename.
 
         """
         self.send_frame(0x1E)
@@ -1260,16 +1026,9 @@ class DYSV19T:
         """
         查询当前播放时间 h:m:s（AA 24 00 -> AA 24 03 h m s）。返回 (h,m,s) 或 None。
 
-        简介：
-            返回当前曲目的已播放时长。
-
         ==========================================
 
         Query current play time tuple (h,m,s) or None.
-
-        Brief:
-            Return elapsed time of current track.
-
         """
         self.send_frame(0x24)
         resp = self.recv_response(expected_cmd=0x24)
@@ -1285,9 +1044,6 @@ class DYSV19T:
         """
         组合播放（ZH 文件夹）。short_names 为 2 字节短名列表，如 ['01','02']。
 
-        简介：
-            拼接短名序列并开始组合播放。
-
         Args:
             short_names (list[str]|tuple[str]): 由 2 字节字符串组成的列表/元组（'01'..'ZZ'）
 
@@ -1296,9 +1052,6 @@ class DYSV19T:
         ==========================================
 
         Start combination playlist under ZH; short_names like ['01','02'].
-
-        Brief:
-            Build short-name bytes and start playback.
 
         Args:
             short_names (list[str]|tuple[str]): 2-char strings ('01'..'ZZ')
@@ -1324,15 +1077,11 @@ class DYSV19T:
         """
         结束组合播放（AA 1C 00）。
 
-        简介：
-            终止组合播放流程。
-
         ==========================================
 
         End combination playlist (AA 1C 00).
 
-        Brief:
-            Stop combination playlist.
+        
 
         """
         self.send_frame(0x1C)
@@ -1342,15 +1091,9 @@ class DYSV19T:
         """
         使能播放时间自动上报（AA 25 00）。
 
-        简介：
-            开启每秒或协议定义周期的时间上报。
-
         ==========================================
 
         Enable play-time auto report (AA 25 00).
-
-        Brief:
-            Enable periodic time reporting.
 
         """
         self.send_frame(0x25)
@@ -1359,15 +1102,9 @@ class DYSV19T:
         """
         关闭播放时间自动上报（AA 26 00）。
 
-        简介：
-            关闭周期性时间上报。
-
         ==========================================
 
         Disable play-time auto report (AA 26 00).
-
-        Brief:
-            Disable periodic time reporting.
 
         """
         self.send_frame(0x26)
