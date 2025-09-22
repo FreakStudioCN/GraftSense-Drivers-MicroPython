@@ -28,12 +28,6 @@ from micropython import const
 # ======================================== 全局变量 ============================================
 
 # I2C 地址（7位）
-# 仅 MicroPython 的 const；CPython 下做兼容
-try:
-    from micropython import const
-except ImportError:
-    def const(x): return x
-
 # 设备地址
 MAX3010X_I2C_ADDRESS = const(0x57)  # 0xAE/0xAF 右移得到
 
