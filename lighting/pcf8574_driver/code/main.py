@@ -4,22 +4,21 @@
 # @Author  : 侯钧瀚
 # @File    : main.py
 # @Description : 基于PCF8574芯片的八段光条数码管模块
-
+ 
 # ======================================== 导入相关模块 =========================================
 
-# 导入时间模块
-import time
-# 导入PCF8574模块
+from machine import I2C, Pin
+#导入pcf8574模块
+from pcf8574 import PCF8574
+#导入基于PCF8574芯片的八段光条数码管模块
 from led_bar import LEDBar
+#时间相关模块
+import time
 
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
 
-def write(v):
-    v &= 0xFF
-    logical = (~v) & 0xFF  # LEDBar 默认低电平点亮
-    print("phys=0x%02X  logical=0b%s" % (v, format(logical, "08b")))
 
 # ======================================== 自定义类 ============================================
 
@@ -29,18 +28,35 @@ def write(v):
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Test PCF8574 Module")
-# 动态创建一个只含 write() 的对象（不是自定义类）
-pcf = type("Obj", (), {})()
+i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=100000)
+# 初始化 PCF8574，假设地址为 0x20
+pcf = PCF8574(i2c, 0x20)
+
 
 # ========================================  主程序  ===========================================
 
-pcf.write = write  # 挂载 write 方法
+# 创建 LEDBar 实例
+ledbar = LEDBar(pcf)
+# 1. 单个 LED 点亮（点亮第 3 个 LED）
+ledbar.set_led(2, True)
+time.sleep(1)
 
-# 如果你的硬件并非低电平点亮，可取消下一行注释：
-# LEDBar._ACTIVE_LOW = False
+# 2. 单个 LED 熄灭（关闭第 3 个 LED）
+ledbar.set_led(2, False)
+time.sleep(1)
 
-bar = LEDBar(pcf)
-bar.display_level(3)          # 点亮前3个
-bar.set_led(6, True)          # 点亮索引6
-bar.set_all(0b10101010)       # 交替图样
-bar.clear()                   # 全灭
+# 3. 设置所有 LED（例如点亮前 4 个）
+ledbar.set_all(0b00001111)
+time.sleep(1)
+
+# 4. 显示 level（例如点亮前 6 个 LED）
+ledbar.display_level(6)
+time.sleep(1)
+
+# 5. 跑马灯效果
+for i in range(8):
+    ledbar.set_all(1 << i)
+    time.sleep(0.2)
+
+# 6. 全部熄灭
+ledbar.clear()
