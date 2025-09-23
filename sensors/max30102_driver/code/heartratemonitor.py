@@ -1686,7 +1686,7 @@ class CircularBuffer(object):
         Pop the "newest" element (keeps original implementation semantics).
 
         Returns:
-            Any|int: 0 if empty, else the element.
+            Any|int: 0 if empty, els法 2：通过 GitHub 客户端e the element.
         """
         buffer_size = len(self.data)
         temp = self.data

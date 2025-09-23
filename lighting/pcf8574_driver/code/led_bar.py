@@ -6,10 +6,12 @@
 # @Description : 基于 PCF8574 的 8 段光条数码管驱动（仅一个 LEDBar 类）
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 # @License : CC BY-NC 4.0
+
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
 __license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.23.0"
+
 # ======================================== 导入相关模块 =========================================
 
 from pcf8574 import PCF8574
@@ -172,6 +174,7 @@ class LEDBar:
         Turn off all LEDs.
         """
         self.set_all(0x00)
+
 
 # ======================================== 初始化配置 ==========================================
 

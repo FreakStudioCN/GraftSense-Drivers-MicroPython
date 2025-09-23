@@ -58,8 +58,6 @@ VOLUME_MIN = const(0)
 VOLUME_MAX = const(30)
 DEFAULT_BAUD = const(9600)
 
-
-
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
@@ -107,7 +105,6 @@ class DYSV19T:
           (and '*' '.' as protocol format symbols).
         - Query methods return None on timeout; control methods may raise IOError/IOError on write failure.
     """
-
 
     def __init__(self, uart, *,
                  default_volume: int = VOLUME_MAX,
