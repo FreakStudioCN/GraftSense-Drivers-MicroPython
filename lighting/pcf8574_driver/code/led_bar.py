@@ -6,11 +6,15 @@
 # @Description : 基于 PCF8574 的 8 段光条数码管驱动（仅一个 LEDBar 类）
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 # @License : CC BY-NC 4.0
+
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
 __license__ = "CC BY-NC 4.0"
-__platform__ = "MicroPython v1.19+"
+__platform__ = "MicroPython v1.23.0"
+
 # ======================================== 导入相关模块 =========================================
+
+from pcf8574 import PCF8574
 
 # ======================================== 全局变量 ============================================
 
@@ -20,233 +24,157 @@ __platform__ = "MicroPython v1.19+"
 
 class LEDBar:
     """
-    LEDBar 类，用于通过 PCF8574 芯片控制 8 段 LED 光条数码管，实现单独或批量点亮/熄灭 LED。
+        基于 PCF8574 的 8 位 LED 灯条驱动类。
+        提供单个/多个 LED 控制、全局清除，以及电平显示（点亮前 N 个 LED）功能。
+        常用于电平指示、进度显示和调试输出。
 
-    Attributes:
-        _pcf: 提供 write(value:int) 方法的 PCF8574 实例。
-        _state (int): 当前 8 位 LED 逻辑状态，bit1=点亮。
+        Attributes:
+            pcf (PCF8574): 已初始化好的 PCF8574 实例，用于控制 I/O 扩展口。
 
-    Methods:
-        __init__(pcf8574) -> None: 初始化 LEDBar，传入 PCF8574 实例。
-        set_led(index: int, value: bool) -> None: 点亮或熄灭指定 LED。
-        set_all(value: int) -> None: 设置全部 LED 的点亮图样。
-        display_level(level: int) -> None: 点亮前 N 个 LED，显示进度。
-        clear() -> None: 熄灭所有 LED。
-    ==========================================
+        Methods:
+            __init__(pcf8574: PCF8574):
+                初始化 LEDBar 并清空所有 LED。
+            set_led(index: int, value: bool) -> None:
+                点亮或熄灭指定 LED。
+            set_all(value: int) -> None:
+                设置所有 LED 的状态（8 位二进制数）。
+            display_level(level: int) -> None:
+                根据 level 值点亮前 N 个 LED。
+            clear() -> None:
+                熄灭所有 LED。
 
-    LEDBar driver class for controlling an 8-segment LED bar via PCF8574.
-    Provides methods for single LED control, batch control, and level display.
-
-    Attributes:
-        _pcf: PCF8574 instance providing write(value:int).
-        _state (int): Current 8-bit logical LED state, bit1=ON.
-
-    Methods:
-        __init__(pcf8574) -> None: Initialize LEDBar with a PCF8574 instance.
-        set_led(index: int, value: bool) -> None: Turn a specific LED on/off.
-        set_all(value: int) -> None: Set all LEDs with an 8-bit pattern.
-        display_level(level: int) -> None: Light up the first N LEDs.
-        clear() -> None: Turn all LEDs off.
-    """
-
-    NUM_LEDS = 8
-    _ACTIVE_LOW = True
-
-    def __init__(self, pcf8574):
-        """
-        初始化 LEDBar 类。
-
-        Args:
-            pcf8574: 提供 write(value:int) 方法的 PCF8574 实例。
-
-        Raises:
-            ValueError: 如果未提供 write 方法。
+        Notes:
+            - 需要依赖 PCF8574 I/O 扩展芯片，需通过 I2C 初始化。
+            - 操作非中断安全（I2C 驱动限制），不建议在 ISR 中直接调用。
 
         ==========================================
 
-        Initialize LEDBar class.
+        8-bit LED bar driver based on PCF8574.
+        Provides per-LED control, batch update, and level display (light up first N LEDs).
+        Commonly used for level indicators, progress display, and debugging.
+
+        Attributes:
+            pcf (PCF8574): Pre-initialized PCF8574 instance for controlling I/O expander.
+
+        Methods:
+            __init__(pcf8574: PCF8574):
+                Initialize LEDBar and clear all LEDs.
+            set_led(index: int, value: bool) -> None:
+                Turn ON/OFF a specific LED.
+            set_all(value: int) -> None:
+                Set all LEDs at once (8-bit binary).
+            display_level(level: int) -> None:
+                Light up the first N LEDs based on level.
+            clear() -> None:
+                Turn off all LEDs.
+
+        Notes:
+            - Requires PCF8574 I/O expander initialized via I2C.
+            - Not ISR-safe due to I2C driver limitations.
+        """
+
+    def __init__(self, pcf8574: "PCF8574") -> None:
+        """
+            基于 PCF8574 的 8 位 LED 灯条驱动类。
+
+            Args:
+                pcf8574 (PCF8574): 已初始化好的 PCF8574 实例。
+
+            Notes:
+                默认初始化时会清空所有 LED 状态。
+
+            ==========================================
+
+            8-bit LED bar driver based on PCF8574.
+
+            Args:
+                pcf8574 (PCF8574): Pre-initialized PCF8574 instance.
+
+            Notes:
+                All LEDs will be cleared on initialization.
+            """
+        self.pcf = pcf8574
+        self.clear()
+
+    def set_led(self, index: int, value: bool) -> None:
+        """
+        点亮或熄灭指定 LED。
 
         Args:
-            pcf8574: PCF8574 instance providing write(value:int) method.
+            index (int): LED 索引 0~7。
+            value (bool): True=点亮, False=熄灭。
 
         Raises:
-            ValueError: If no compatible write method is found.
-        """
-        if not hasattr(pcf8574, "write"):
-            raise ValueError("pcf8574 must provide write(value:int)")
-        self._pcf = pcf8574
-        self._state = 0
-        self._flush()
-
-    def set_led(self, index: int, value: bool):
-        """
-        点亮或熄灭指定 LED（0~7），并立即写入硬件。
-
-        Args:
-            index (int): 0..7
-            value (bool): True=点亮，False=熄灭
+            ValueError: 当 index 不在 0~7 范围内时抛出。
 
         ==========================================
 
-        Turn one LED (0..7) ON/OFF and flush to hardware.
+        Turn on/off a specific LED.
 
         Args:
-            index (int): 0..7
-            value (bool): True=ON, False=OFF
+            index (int): LED index, range 0–7.
+            value (bool): True=ON, False=OFF.
 
+        Raises:
+            ValueError: If index is out of 0–7.
         """
-        self._ensure_index(index)
-        self._state = (self._state | (1 << index)) if value else (self._state & ~(1 << index))
-        self._flush()
+        if not 0 <= index <= 7:
+            raise ValueError("LED index must be 0~7")
+        self.pcf.pin(index, 1 if value else 0)
 
-    def set_all(self, value: int):
+    def set_all(self, value: int) -> None:
         """
-        设置全部 LED 的逻辑状态（bit1=亮），并立即写入硬件。
+        设置所有 LED 的状态。
 
         Args:
-            value (int): 0..255
+            value (int): 8 位二进制数，每一位对应一个 LED。
+                         例如 0b11110000 表示点亮前 4 个 LED。
 
         ==========================================
 
-        Set all LEDs with an 8-bit logical pattern (bit1=ON) and flush.
+        Set the state of all LEDs.
 
         Args:
-            value (int): 0..255
+            value (int): 8-bit value, each bit maps to one LED.
+                         For example, 0b11110000 lights the first 4 LEDs.
         """
-        self._state = self._clip8(value)
-        self._flush()
+        self.pcf.port = value & 0xFF
 
-    def display_level(self, level: int):
+    def display_level(self, level: int) -> None:
         """
-        显示进度：点亮前 N 个 LED（从 index 0 起数）。
+        根据传入值点亮前 N 个 LED。
 
         Args:
-            level (int): 0..8
+            level (int): 范围 0~8，点亮前 N 个 LED。
 
         Raises:
-            ValueError: level 越界
+            ValueError: 当 level 不在 0~8 范围内时抛出。
 
         ==========================================
 
-        Display a level by lighting the first N LEDs starting at index 0.
+        Light up the first N LEDs.
 
         Args:
-            level (int): 0..8
+            level (int): Range 0–8, lights the first N LEDs.
 
         Raises:
-            ValueError: If level is out of range.
+            ValueError: If level is out of 0–8.
         """
-        if not isinstance(level, int) or not (0 <= level <= self.NUM_LEDS):
-            raise ValueError("level must be int in 0..8")
-        self._state = ((1 << level) - 1) & 0xFF if level > 0 else 0
-        self._flush()
+        if not 0 <= level <= 8:
+            raise ValueError("Level must be 0~8")
+        value = (1 << level) - 1 if level > 0 else 0
+        self.set_all(value)
 
-    def clear(self):
+    def clear(self) -> None:
         """
-        熄灭所有 LED（逻辑全 0），并立即写入硬件。
+        熄灭所有 LED。
 
         ==========================================
 
-        Turn all LEDs OFF (logical 0) and flush to hardware.
+        Turn off all LEDs.
         """
-        self._state = 0
-        self._flush()
+        self.set_all(0x00)
 
-    def _ensure_index(self, index):
-        """
-        校验 LED 索引是否在有效范围 0..7。
-
-        Args:
-            index (int): LED 索引，必须为 0..7 的整数。
-
-        Raises:
-            ValueError: 如果 index 不是整数或超出范围。
-
-        ==========================================
-
-        Ensure the LED index is within valid range 0..7.
-
-        Args:
-            index (int): LED index, must be integer in 0..7.
-
-        Raises:
-            ValueError: If index is not int or out of range.
-        """
-        if not isinstance(index, int) or not (0 <= index < self.NUM_LEDS):
-            raise ValueError("index must be int in 0..7")
-
-    def _clip8(self, value):
-        """
-        将输入整数裁剪到 0..255 范围。
-
-        Args:
-            value (int): 输入值。
-
-        Returns:
-            int: 裁剪后的 0..255 整数。
-
-        Raises:
-            ValueError: 如果 value 不是整数。
-
-        ==========================================
-
-        Clip input integer to 0..255.
-
-        Args:
-            value (int): Input value.
-
-        Returns:
-            int: Clipped value in 0..255.
-
-        Raises:
-            ValueError: If value is not int.
-        """
-        if not isinstance(value, int):
-            raise ValueError("value must be int")
-        return max(0, min(0xFF, value))
-
-    def _logical_to_port(self, logical_byte):
-        """
-        将逻辑 LED 状态（1=亮）转换为 PCF8574 端口值。默认低电平点亮。
-
-        Args:
-            logical_byte (int): 8 位逻辑 LED 状态。
-
-        Returns:
-            int: 端口输出值。
-
-        ==========================================
-
-        Convert logical LED state (1=ON) to PCF8574 port value.
-        Active-low by default.
-
-        Args:
-            logical_byte (int): 8-bit logical LED state.
-
-        Returns:
-            int: Port output value.
-        """
-        b = logical_byte & 0xFF
-        return (~b) & 0xFF if self._ACTIVE_LOW else b
-
-    def _flush(self):
-        """
-        将当前 LED 状态刷新写入 PCF8574 芯片。
-
-        Raises:
-            RuntimeError: 写入 PCF8574 失败。
-
-        ==========================================
-
-        Flush current LED state to PCF8574 chip.
-
-        Raises:
-            RuntimeError: If write to PCF8574 fails.
-        """
-        try:
-            self._pcf.write(self._logical_to_port(self._state))
-        except Exception as e:
-            raise RuntimeError("PCF8574 write failed") from e
 
 # ======================================== 初始化配置 ==========================================
 

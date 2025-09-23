@@ -6,6 +6,7 @@
 # @Description : PCA968516路PWM驱动板示例程序
 
 # ======================================== 导入相关模块 =========================================
+
 #导入时间模块
 import time
 # 导入MicroPython标准库模块
@@ -14,6 +15,7 @@ from machine import Pin, I2C
 from bus_servo import BusPWMServoController
 # 导入PCA9685模块
 from pca9685 import PCA9685
+
 # ======================================== 全局变量 ============================================
 
 # 自动扫描 PCA9685 地址（0x40~0x4F）
@@ -30,7 +32,7 @@ time.sleep(3)
 print("FreakStudio: Using PCA9685 to control the angles of two servos")
 
 # 自动扫描 PCA9685 地址（0x40~0x4F）
-i2c = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)
+i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
 for d in i2c.scan():
     if 0x40 <= d <= 0x4F:
         addr = d
@@ -43,7 +45,8 @@ srv = BusPWMServoController(pca, freq=50)
 
 # --------------- 绑定两个通道 ---------------
 # 通道0：180° 舵机，标准 500~2500us，1500us 为中立
-srv.attach_servo(2, BusPWMServoController.SERVO_180, min_us=500, max_us=2500, neutral_us=1500)
+srv.attach_servo(0, BusPWMServoController.SERVO_180, min_us=500, max_us=2500, neutral_us=1500)
+
 # 通道1：360° 连续舵机，自带停转点在 1500us 附近；如需反向可 reversed=True
 srv.attach_servo(1, BusPWMServoController.SERVO_360, min_us=1000, max_us=2000, neutral_us=1500)
 
