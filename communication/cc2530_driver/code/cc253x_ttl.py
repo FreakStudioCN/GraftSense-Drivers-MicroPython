@@ -14,6 +14,7 @@ __platform__ = "MicroPython v1.23"
 # ======================================== 导入相关模块 =========================================
 
 import time
+import binascii
 from micropython import const
 
 # ======================================== 全局变量 ============================================
@@ -243,31 +244,7 @@ class CC253xTTL:
     """
 
     # 前导与控制码
-    PREFIX = const(0x02A879C3)   # 示例：也可用 bytes 表示
-    PREFIX_BYTES = b'\x02\xA8\x79\xC3'
-
-    # 控制码
-    CMD_STATUS                   = const(0x01)
-    CMD_SET_QUERY_INTERVAL       = const(0x02)
-    CMD_FACTORY_RESET            = const(0x03)
-    CMD_SET_PANID                = const(0x04)
-    CMD_READ_PANID_CHANNEL       = const(0x05)
-    CMD_SET_BAUD                 = const(0x06)
-    CMD_SLEEP                    = const(0x07)
-    CMD_SET_SEEK_TIME            = const(0x08)
-    CMD_SET_CHANNEL              = const(0x09)
-
-    # 点对点控制码
-    CMD_P2P_NODE_TO_COORD        = const(0x0A)
-    CMD_P2P_COORD_TO_NODE        = const(0x0B)
-    CMD_READ_MAC                 = const(0x0C)
-    CMD_SET_CUSTOM_SHORT         = const(0x0D)
-    CMD_READ_CUSTOM_SHORT        = const(0x0E)
-    CMD_P2P_CUSTOM_ADDR          = const(0x0F)
-
-    # 返回码（字节对），模块用 '4F 4B' 表示 OK，'45 52' 表示 ERR
-    RESP_OK                      = b'OK'   # b'\x4F\x4B'
-    RESP_ERR                     = b'ER'   # b'\x45\x52'
+    PREFIX = const("02A879C3")   # 示例：也可用 bytes 表示
 
     # 身份（ROLE）
     ROLE_COORDINATOR = const(0x00)
@@ -308,12 +285,53 @@ class CC253xTTL:
         self._recv_buf = bytearray()
         self._ensure_recv_buffer_capacity()
 
-        
+    # 私有辅助方法
+    def _send(self, cmd):
+        """
+        私有方法：发送 AT 命令并等待响应，直到收到 OK 或 ERROR。  
+
+        Args:
+            cmd (str): 完整的 AT 命令字符串。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)，True 表示成功，False 表示失败。  
+
+        ==========================================
+        Private method: Send an AT command and wait for response until OK or ERROR.  
+
+        Args:
+            cmd (str): Full AT command string.  
+
+        Returns:
+            Tuple[bool, str]: (status, response), True if success, False otherwise.
+        """
+        cmd = self.PREFIX + cmd
+        self._uart.write(binascii.unhexlify(cmd.lower()))
+        time.sleep(0.1)
+        if self._uart.any():
+            resp = self._uart.read()
+            tag = resp[4]
+            resp = resp[5:]
+            resp_hex = resp.hex().lower()
+            if tag in [1, 5, 12, 14]:
+                return True, resp_hex
+            else:
+                if resp_hex == "4f4b":
+                    return True, "success"
+                elif resp_hex == "4552":
+                    return False, "failure"
+        else:
+            return False, 'No response from UART'
 
     # 公共设置与查询 API
-    def read_status(self) -> int:
+    def read_status(self) -> str:
         """
         查询入网状态。
+        02：设备没有加入网络
+        06：EndDevice已经入网
+        07：Router已经入网
+        08：Coordiator正在启动
+        09：Coordinator已经启动
 
         Returns:
             int: 入网状态码（来自模块返回的 1 字节值）。
@@ -330,16 +348,7 @@ class CC253xTTL:
         Raises:
             CommandFailedError: If response times out or returns ERR.
         """
-        # 发送状态查询命令（CMD_STATUS），期待 payload 为 1 字节状态码或包含在回复 payload 里
-        frame = self.PREFIX_BYTES + bytes([self.CMD_STATUS, 0x00])  # ctrl, len=0
-        self._uart_write_raw(frame)
-        resp = self._wait_for_response(self.CMD_STATUS, timeout_ms=500)
-        # 解析：若 payload 长度 >=1，返回第一个字节作为状态
-        payload = resp.get('data', b'')
-        if len(payload) >= 1:
-            return int(payload[0])
-        # 若没有 payload，但 raw 含有 OK，则返回 0 表示 OK / unknown
-        return 0
+        return self._send('01')[1]
     
     def set_query_interval(self, ms: int) -> bool:
         """
@@ -370,8 +379,7 @@ class CC253xTTL:
         """
         if not (0 <= ms <= 0xFFFF):
             raise InvalidParameterError("query interval out of range 0..65535")
-        payload = bytes([(ms >> 8) & 0xFF, ms & 0xFF])
-        return self._send_cmd_expect_ok(self.CMD_SET_QUERY_INTERVAL, payload)
+        return self._send('02' + f'{ms:04X}')[0]
     
     def reset_factory(self) -> bool:
         """
@@ -392,42 +400,8 @@ class CC253xTTL:
         Raises:
             CommandFailedError: If module returns ERR or times out.
         """
-        # CMD_FACTORY_RESET 无负载
-        res = self._send_cmd_expect_ok(self.CMD_FACTORY_RESET, b'')
-        # Note: 对 Coordinator 会导致 PANID 变更/节点清空，调用方需处理
-        return res
-            
-    def read_panid_channel(self) -> tuple[int, int]:
-        """
-        读取 PANID 与信道。
+        return self._send('03')[0]
 
-        Returns:
-            tuple[int, int]: (PANID, 信道)。
-
-        Raises:
-            CC253xError: 返回数据无效。
-            CommandFailedError: 响应超时或返回 ERR。
-
-        ---
-        Read PANID and channel.
-
-        Returns:
-            tuple[int, int]: (PANID, channel).
-
-        Raises:
-            CC253xError: If invalid response is received.
-            CommandFailedError: If response times out or returns ERR.
-        """
-        # 发送读取 PANID/CHANNEL 命令，期望 payload = panid_hi panid_lo channel
-        self._uart_write_raw(bytes(self.PREFIX_BYTES) + bytes([self.CMD_READ_PANID_CHANNEL, 0x00]))
-        resp = self._wait_for_response(self.CMD_READ_PANID_CHANNEL, timeout_ms=500)
-        payload = resp.get('data', b'')
-        if len(payload) >= 3:
-            panid = (payload[0] << 8) | payload[1]
-            channel = payload[2]
-            return (panid, channel)
-        raise CC253xError("Invalid response for PANID/CHANNEL")
-    
     def set_panid(self, panid: int) -> bool:
         """
         设置 PANID。
@@ -457,15 +431,44 @@ class CC253xTTL:
         """
         if not (0 <= panid <= 0xFFFF):
             raise InvalidParameterError("panid must be 0..0xFFFF")
-        payload = bytes([(panid >> 8) & 0xFF, panid & 0xFF])
-        return self._send_cmd_expect_ok(self.CMD_SET_PANID, payload)
-        
+        return self._send('02' + f'{panid:04X}')[0]
+
+    def read_panid_channel(self) -> tuple[str, str]:
+        """
+        读取 PANID 与信道。
+
+        Returns:
+            tuple[int, int]: (PANID, 信道)。
+
+        Raises:
+            CC253xError: 返回数据无效。
+            CommandFailedError: 响应超时或返回 ERR。
+
+        ---
+        Read PANID and channel.
+
+        Returns:
+            tuple[int, int]: (PANID, channel).
+
+        Raises:
+            CC253xError: If invalid response is received.
+            CommandFailedError: If response times out or returns ERR.
+        """
+        # 发送读取 PANID/CHANNEL 命令，期望 payload = panid_hi panid_lo channel
+        resp = self._send('05')[1]
+        return resp[:4], resp[4:]
+    
     def set_baud(self, baud_idx: int) -> bool:
         """
         设置串口波特率索引。
 
         Args:
             baud_idx (int): 波特率索引（0–4）。
+        00：9600
+        01：19200
+        02：38400
+        03：57600
+        04：115200
 
         Returns:
             bool: 成功返回 True。
@@ -487,11 +490,31 @@ class CC253xTTL:
             InvalidParameterError: If index is out of range.
             CommandFailedError: If module returns ERR or times out.
         """
-        if not (0 <= baud_idx <= 4):
+        if baud_idx in range(5):
             raise InvalidParameterError("baud index must be 0..4")
-        payload = bytes([baud_idx])
-        return self._send_cmd_expect_ok(self.CMD_SET_BAUD, payload)
-    
+        return self._send('06' + f'{i:02d}')[0]
+
+    def enter_lowpower(self) -> bool:
+        """
+        请求进入休眠模式。
+
+        Returns:
+            bool: 成功返回 True。
+
+        Raises:
+            CommandFailedError: 模块返回 ERR 或超时。
+
+        ---
+        Request sleep mode.
+
+        Returns:
+            bool: True if success.
+
+        Raises:
+            CommandFailedError: If module returns ERR or times out.
+        """
+        return self._send('07')[0]
+
     def set_seek_time(self, seconds: int) -> bool:
         """
         设置寻找网络时间。
@@ -521,31 +544,88 @@ class CC253xTTL:
         """
         if not (1 <= seconds <= 65):
             raise InvalidParameterError("seek time must be 1..65 seconds")
-        payload = bytes([seconds])
-        return self._send_cmd_expect_ok(self.CMD_SET_SEEK_TIME, payload)
+        return self._send('08' + f'{seconds:02X}')[0]
         
-    def enter_sleep(self) -> bool:
+    def set_channel(self, channel: int) -> bool:
         """
-        请求进入休眠模式。
+        设置寻找网络时间。
+
+        Args:
+            seconds (int): 秒数（1–65）。
 
         Returns:
             bool: 成功返回 True。
 
         Raises:
+            InvalidParameterError: 超出范围。
             CommandFailedError: 模块返回 ERR 或超时。
 
         ---
-        Request sleep mode.
+        Set network seek time.
+
+        Args:
+            seconds (int): Seconds (1–65).
 
         Returns:
             bool: True if success.
 
-        Raises:
+        Raises:panid
+            InvalidParameterError: If parameter is out of range.
             CommandFailedError: If module returns ERR or times out.
         """
-        return self._send_cmd_expect_ok(self.CMD_SLEEP, b'')
+        if not channel in range(2405,2485,5):
+            raise InvalidParameterError("channel must be [2405,2480,5]")
+        return self._send('09' + f'{channel:02X}')[0]
 
-    def read_mac(self) -> bytes:
+    def send_node_to_coord(self, data: str) -> None:
+        """
+        节点发送数据到协调器。
+
+        Args:
+            data (bytes): 数据，长度 ≤ MAX_USER_PAYLOAD。
+
+        Raises:
+            PacketTooLargeError: 数据长度超限。
+
+        ---
+        Node sends data to coordinator.
+
+        Args:
+            data (bytes): Data, length ≤ MAX_USER_PAYLOAD.
+
+        Raises:
+            PacketTooLargeError: If data exceeds maximum payload length.
+        """
+        self._send('0A' + data)
+
+    def send_coord_to_node(self, short_addr: int, data: str) -> None:
+        """
+        协调器发送数据到指定节点。
+
+        Args:
+            short_addr (int): 目标短地址。
+            data (bytes): 数据，长度 ≤ MAX_USER_PAYLOAD。
+
+        Raises:
+            InvalidParameterError: 地址超出范围。
+            PacketTooLargeError: 数据长度超限。
+
+        ---
+        Coordinator sends data to node.
+
+        Args:
+            short_addr (int): Destination short address.
+            data (bytes): Data, length ≤ MAX_USER_PAYLOAD.
+
+        Raises:
+            InvalidParameterError: If address is out of range.
+            PacketTooLargeError: If data exceeds maximum payload length.
+        """
+        if not (0 <= short_addr <= 0xFFFF):
+            raise InvalidParameterError("short_addr out of range 0..65535")
+        self._send('0B' + f'{short_addr:04X}' + data)
+
+    def read_mac(self) -> str:
         """
         读取 MAC 地址。
 
@@ -566,59 +646,8 @@ class CC253xTTL:
             CC253xError: If response payload is too short.
             CommandFailedError: If response times out or returns ERR.
         """
-        self._uart_write_raw(bytes(self.PREFIX_BYTES) + bytes([self.CMD_READ_MAC, 0x00]))
-        resp = self._wait_for_response(self.CMD_READ_MAC, timeout_ms=500)
-        payload = resp.get('data', b'')
-        if len(payload) >= 8:
-            return bytes(payload[:8])
-        raise CC253xError("Invalid MAC read response")
-    
-    # 短地址与入网判断
-    def read_short_addr(self) -> int:
-        """
-        读取短地址。
+        return self._send('0C')[1]
 
-        Returns:
-            int: 16 位短地址，或 SHORTADDR_NOT_JOINED。
-
-        Raises:
-            CommandFailedError: 响应超时或返回 ERR。
-
-        ---
-        Read short address.
-
-        Returns:
-            int: 16-bit short address, or SHORTADDR_NOT_JOINED.
-
-        Raises:
-            CommandFailedError: If response times out or returns ERR.
-        """
-        # 这里假定 read_custom_short_addr 或另一个命令返回短地址字段；如果设备有独立命令，请替换 CMD
-        # 先尝试用读取自定义短地址命令（若设备使用其他命令读取短地址，请调整）
-        self._uart_write_raw(bytes(self.PREFIX_BYTES) + bytes([self.CMD_READ_CUSTOM_SHORT, 0x00]))
-        resp = self._wait_for_response(self.CMD_READ_CUSTOM_SHORT, timeout_ms=500)
-        payload = resp.get('data', b'')
-        if len(payload) >= 2:
-            return (payload[0] << 8) | payload[1]
-        # 兜底：若没有返回，用 NOT_JOINED 表示
-        return self.SHORTADDR_NOT_JOINED
-    
-    def is_joined(self) -> bool:
-        """
-        判断是否已入网。
-
-        Returns:
-            bool: True 表示已入网，False 表示未入网。
-
-        ---
-        Check if joined.
-
-        Returns:
-            bool: True if joined, False otherwise.
-        """
-        sa = self.read_short_addr()
-        return sa != self.SHORTADDR_NOT_JOINED
-    
     def set_custom_short_addr(self, short_addr: int) -> bool:
         """
         设置自定义短地址。
@@ -646,37 +675,61 @@ class CC253xTTL:
             InvalidParameterError: If parameter is out of range.
             CommandFailedError: If module returns ERR or times out.
         """
-        if not (0 <= short_addr <= 0xFFFF):
-            raise InvalidParameterError("short_addr must be 0..0xFFFF")
-        payload = bytes([(short_addr >> 8) & 0xFF, short_addr & 0xFF])
-        return self._send_cmd_expect_ok(self.CMD_SET_CUSTOM_SHORT, payload)
-    
-    def read_custom_short_addr(self) -> int:
+        if not (0 <= short_addr <= 0xFFFF): 
+            raise InvalidParameterError("short_addr out of range 0..65535")
+        return self._send('0D' + f'{short_addr:04X}')
+
+    # 短地址与入网判断
+    def read_short_addr(self) -> int:
         """
-        读取自定义短地址。
+        读取短地址。
 
         Returns:
-            int: 自定义短地址，默认 0xFFFF。
+            int: 16 位短地址，或 SHORTADDR_NOT_JOINED。
 
         Raises:
             CommandFailedError: 响应超时或返回 ERR。
 
         ---
-        Read custom short address.
+        Read short address.
 
         Returns:
-            int: Custom short address, default 0xFFFF.
+            int: 16-bit short address, or SHORTADDR_NOT_JOINED.
 
         Raises:
             CommandFailedError: If response times out or returns ERR.
         """
-        self._uart_write_raw(bytes(self.PREFIX_BYTES) + bytes([self.CMD_READ_CUSTOM_SHORT, 0x00]))
-        resp = self._wait_for_response(self.CMD_READ_CUSTOM_SHORT, timeout_ms=500)
-        payload = resp.get('data', b'')
-        if len(payload) >= 2:
-            return (payload[0] << 8) | payload[1]
-        return 0xFFFF
+        return self._send('0E')[1]
     
+    def send_node_to_node(self, source_addr: int, target_addr, data: str) -> None:
+        """
+        节点发送数据到节点。
+
+        Args:
+            short_addr (int): 目标短地址。
+            data (bytes): 数据，长度 ≤ MAX_USER_PAYLOAD。
+
+        Raises:
+            InvalidParameterError: 地址超出范围。
+            PacketTooLargeError: 数据长度超限。
+
+        ---
+        Coordinator sends data to node.
+
+        Args:
+            short_addr (int): Destination short address.
+            data (bytes): Data, length ≤ MAX_USER_PAYLOAD.
+
+        Raises:
+            InvalidParameterError: If address is out of range.
+            PacketTooLargeError: If data exceeds maximum payload length.
+        """
+        if not (0 <= source_addr <= 0xFFFF):
+            raise InvalidParameterError("source_addr out of range 0..65535")
+        if not (0 <= target_addr <= 0xFFFF):
+            raise InvalidParameterError("target_addr out of range 0..65535")
+        self._send('0B' + f'{target_addr:04X}' + f'{source_addr:04X}' + data)
+
     # 点对点 / 透明数据发送（长度限制与延时）
     def send_transparent(self, data: bytes) -> None:
         """
@@ -705,62 +758,6 @@ class CC253xTTL:
             raise InvalidParameterError("transparent data begins with PREFIX_BYTES — would be treated as control frame. Escape or change payload.")
         # 直接写入
         self._uart_write_raw(data)
-        time.sleep_ms(self.TX_POST_DELAY_MS)
-
-    def send_node_to_coord(self, data: bytes) -> None:
-        """
-        节点发送数据到协调器。
-
-        Args:
-            data (bytes): 数据，长度 ≤ MAX_USER_PAYLOAD。
-
-        Raises:
-            PacketTooLargeError: 数据长度超限。
-
-        ---
-        Node sends data to coordinator.
-
-        Args:
-            data (bytes): Data, length ≤ MAX_USER_PAYLOAD.
-
-        Raises:
-            PacketTooLargeError: If data exceeds maximum payload length.
-        """
-        self._validate_payload_length(data)
-        payload = bytes(data)
-        frame = self.PREFIX_BYTES + bytes([self.CMD_P2P_NODE_TO_COORD, len(payload)]) + payload + self.RESP_OK  # note: append RESP_OK is harmless for send; module ignores
-        self._uart_write_raw(frame)
-        time.sleep_ms(self.TX_POST_DELAY_MS)
-
-    def send_coord_to_node(self, short_addr: int, data: bytes) -> None:
-        """
-        协调器发送数据到指定节点。
-
-        Args:
-            short_addr (int): 目标短地址。
-            data (bytes): 数据，长度 ≤ MAX_USER_PAYLOAD。
-
-        Raises:
-            InvalidParameterError: 地址超出范围。
-            PacketTooLargeError: 数据长度超限。
-
-        ---
-        Coordinator sends data to node.
-
-        Args:
-            short_addr (int): Destination short address.
-            data (bytes): Data, length ≤ MAX_USER_PAYLOAD.
-
-        Raises:
-            InvalidParameterError: If address is out of range.
-            PacketTooLargeError: If data exceeds maximum payload length.
-        """
-        self._validate_payload_length(data)
-        if not (0 <= short_addr <= 0xFFFF):
-            raise InvalidParameterError("short_addr out of range")
-        payload = bytes([(short_addr >> 8) & 0xFF, short_addr & 0xFF]) + data
-        frame = self.PREFIX_BYTES + bytes([self.CMD_P2P_COORD_TO_NODE, len(payload)]) + payload
-        self._uart_write_raw(frame)
         time.sleep_ms(self.TX_POST_DELAY_MS)
 
     def send_custom_addr(self, dst_short: int, src_short: int, data: bytes) -> None:
@@ -832,45 +829,6 @@ class CC253xTTL:
             if time.ticks_diff(time.ticks_ms(), deadline) >= 0:
                 return None
             
-    # 私有串口 I/O 与解析相关（必须实现并使用）
-    # 所有串口原始读写与解析流程均为私有方法，上层 API 一律调用这些私有方法。
-    def _uart_write_raw(self, frame: bytes) -> None:
-        """
-        UART 底层写入。
-
-        Args:
-            frame (bytes): 原始数据帧。
-
-        ---
-        Low-level UART write.
-
-        Args:
-            frame (bytes): Raw data frame.
-        """
-        # 尝试兼容 MicroPython / pyserial 等常见接口
-        self._uart.write(frame)
-        time.sleep_ms(self.TX_POST_DELAY_MS)
-
-    def _uart_read_raw(self) -> bytes:
-        """
-        UART 底层读取。
-
-        Returns:
-            bytes: 读取到的数据，可能为空。
-
-        ---
-        Low-level UART read.
-
-        Returns:
-            bytes: Data read, may be empty.
-        """
-        # 兼容多种 UART API：若 MicroPython 风格有 read(n) 或 read()，pyserial read() 等
-        # timeout_ms 是本次读操作的超时（尽量短），并返回本次读到的数据（可能为空）
-        data = self._uart.read()  # 直接读，不传参数，返回 None 或 bytes
-        if data is None:
-            return b''
-        return data
-    
     def _ensure_recv_buffer_capacity(self) -> None:
         """
         确保接收缓冲区存在并可扩展。
@@ -1031,101 +989,7 @@ class CC253xTTL:
         """
         if len(payload) > self.MAX_USER_PAYLOAD:
             raise PacketTooLargeError(f"payload length {len(payload)} exceeds MAX_USER_PAYLOAD {self.MAX_USER_PAYLOAD}")
-        
-    # 私有辅助方法
-    def _send_cmd_expect_ok(self, cmd: int, payload: bytes, timeout_ms: int=500) -> bool:
-        """
-        发送命令并等待 OK。
-
-        Args:
-            cmd (int): 控制码。
-            payload (bytes): 命令负载。
-            timeout_ms (int, 可选): 超时时间（毫秒）。
-
-        Returns:
-            bool: 成功返回 True。
-
-        Raises:
-            CommandFailedError: 模块返回 ERR 或超时。
-
-        ---
-        Send command and expect OK.
-
-        Args:
-            cmd (int): Control code.
-            payload (bytes): Command payload.
-            timeout_ms (int, optional): Timeout in ms.
-
-        Returns:
-            bool: True if success.
-
-        Raises:
-            CommandFailedError: If module returns ERR or times out.
-        """
-        
-        # 简单同步等待：调用 recv_frame 直到拿到 ctrl == expected_ctrl 或遇到 resp 'ER'/'OK'
-        deadline = time.ticks_add(time.ticks_ms(), int(timeout_ms))
-        while time.ticks_diff(deadline, time.ticks_ms()) > 0:
-            frame = self.recv_frame(timeout_ms=50)
-            if frame is None:
-                continue
-            # 跳过透明数据
-            if frame.get('ctrl') == 0xFF:
-                continue
-            resp = frame.get('resp', b'')
-            if resp == self.RESP_ERR:
-                raise CommandFailedError("CMD returned ERR", frame.get('raw'))
-            # 明确接受模块的 OK 响应或来自预期 control code 的帧作为成功
-            if resp == self.RESP_OK or frame.get('ctrl') == cmd:
-                return True
-            # 否则继续等待
-        raise CommandFailedError("Timeout waiting for response")
-
-    def _wait_for_response(self, expected_cmd: int, timeout_ms: int = 500) -> dict:
-        """
-        等待并返回响应。
-
-        Args:
-            expected_cmd (int): 期望的控制码。
-            timeout_ms (int, 可选): 超时时间（毫秒）。
-
-        Returns:
-            dict: 响应帧。
-
-        Raises:
-            CommandFailedError: 模块返回 ERR 或超时。
-
-        ---
-        Wait for response.
-
-        Args:
-            expected_cmd (int): Expected control code.
-            timeout_ms (int, optional): Timeout in ms.
-
-        Returns:
-            dict: Response frame.
-
-        Raises:
-            CommandFailedError: If module returns ERR or times out.
-        """
-        deadline = time.ticks_add(time.ticks_ms(), int(timeout_ms))
-        while time.ticks_diff(deadline, time.ticks_ms()) > 0:
-            frame = self.recv_frame(timeout_ms=50)
-            if frame is None:
-                continue
-            # 跳过透明数据
-            if frame.get('ctrl') == 0xFF:
-                continue
-            # 若收到 ERR，则直接抛出
-            resp = frame.get('resp', b'')
-            if resp == self.RESP_ERR:
-                raise CommandFailedError("CMD returned ERR", frame.get('raw'))
-            # 匹配期望 control code
-            if frame.get('ctrl') == expected_cmd:
-                return frame
-            # 若不是期望帧，继续循环等待
-        raise CommandFailedError("Timeout waiting for response")
-
+    
 
 # ======================================== 初始化配置 ==========================================
 

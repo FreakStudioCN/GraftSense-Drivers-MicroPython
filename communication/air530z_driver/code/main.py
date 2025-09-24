@@ -44,11 +44,10 @@ uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
 # 创建 HC14_Lora 实例
 gps = Air530Z(uart0)
 nema = NMEASender()
-#gps._uart.write(nema.set_update_rate(1000).encode())
-#print(nema.set_update_rate(1000).encode())
-#time.sleep(0.5)
-gps._uart.write(b'$PCAS06,0*1B')
-#ime.sleep(0.5)
+gps._uart.write(nema.set_baudrate(5).encode())
+print(nema.set_baudrate(5).encode())
+#gps._uart.write(b'$PCAS06,0*1B\r\n')
+time.sleep(0.5)
 # ========================================  主程序  ===========================================
 while True:
     if gps._uart.any():
