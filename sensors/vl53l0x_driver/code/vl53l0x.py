@@ -206,7 +206,7 @@ class VL53L0X:
         - Measurement results are in millimeters, invalid values may be returned when out of range.
     """
     # 默认i2c地址0x29，部分手册描述0x52,根据实际情况进行修改
-    def __init__(self, i2c, address=0x29):
+    def __init__(self, i2c, address=None):
         """
         初始化VL53L0X传感器实例。
 

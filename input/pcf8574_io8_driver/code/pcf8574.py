@@ -74,7 +74,7 @@ class PCF8574:
     def __init__(self, i2c: I2C, address: int = None,
                  int_pin: int = None,
                  callback: callable = None,
-                 trigger: int = Pin.IRQ_FALLING):
+                 trigger: int = Pin.IRQ_FALLING) -> None:
         """
         初始化 PCF8574 实例。
 
@@ -305,7 +305,7 @@ class PCF8574:
         # 写回设备
         self._write()
 
-    def toggle(self, pin: int):
+    def toggle(self, pin: int) -> None:
         """
         翻转指定引脚状态。
 

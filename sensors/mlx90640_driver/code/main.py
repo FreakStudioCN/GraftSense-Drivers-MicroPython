@@ -7,11 +7,13 @@
 
 # ======================================== 导入相关模块 =========================================
 
-import machine
+from machine import I2C
 import time
 from mlx90640 import MLX90640, RefreshRate
 
 # ======================================== 全局变量 ============================================
+
+mlxaddr=None
 
 # ======================================== 功能函数 ============================================
 
@@ -22,20 +24,26 @@ from mlx90640 import MLX90640, RefreshRate
 time.sleep(3)
 print("FreakStudio:Testing the MLX90640 fractional infrared temperature sensor")
 # Initialize I2C bus (adjust pins if needed)
-i2c_bus = machine.I2C(0, scl=machine.Pin(13), sda=machine.Pin(12), freq=100000)
 
-# Scan I2C devices
-print("Scanning I2C bus...")
-devices = i2c_bus.scan()
-if not devices:
-    print("No I2C devices found. Please check wiring!")
-    raise SystemExit(1)
+i2c = I2C(0, scl=1, sda=0, freq=100000)
+
+# 开始扫描I2C总线上的设备，返回从机地址的列表
+devices_list: list[int] = i2c.scan()
+print('START I2C SCANNER')
+# 若devices list为空，则没有设备连接到I2C总线上
+if len(devices_list) == 0:
+    # 若非空，则打印从机设备地址
+    print("No i2c device !")
 else:
-    print(f"Found I2C devices: {[hex(dev) for dev in devices]}")
+    print('i2c devices found:', len(devices_list))
+for device in devices_list:
+    if 0x30 <= device <= 0x7A:
+        print("I2c hexadecimal address:", hex(device))
+        mlxaddr = device
 
 # Initialize MLX90640
 try:
-    thermal_camera = MLX90640(i2c_bus)
+    thermal_camera = MLX90640(i2c, mlxaddr)
     print("MLX90640 sensor initialized successfully")
 except ValueError as init_error:
     print(f"Sensor initialization failed: {init_error}")

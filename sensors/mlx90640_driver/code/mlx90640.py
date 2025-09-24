@@ -534,7 +534,7 @@ class MLX90640:
     mlx90640_deviceid1 = 0x2407
     openair_ta_shift = 8
 
-    def __init__(self, i2c_bus: machine.I2C, address: int = 0x33):
+    def __init__(self, i2c_bus: machine.I2C, address: int = None):
         """
         初始化MLX90640红外热像仪实例，建立I2C通信并读取校准数据。
 

@@ -119,7 +119,8 @@ class Joystick:
         self.adc_x = ADC(vrx_pin)
         self.adc_y = ADC(vry_pin)
         # 初始化按键引脚
-        self.sw = Pin(vsw_pin, Pin.IN, Pin.PULL_UP)
+        if vsw_pin is not None:
+            self.sw = Pin(vsw_pin, Pin.IN, Pin.PULL_UP)
 
         # 初始化定时器
         self.timer = Timer(-1)
@@ -157,7 +158,7 @@ class Joystick:
         """
         self.timer.init(period=int(1000/self.freq), mode=Timer.PERIODIC, callback=self._timer_callback)
 
-    def _timer_callback(self, timer: Timer) -> None:
+    def _timer_callback(self, timer: Timer, vsw_pin=None) -> None:
         """
         定时器回调函数，采集并处理摇杆数据。
 
@@ -188,7 +189,6 @@ class Joystick:
         # 更新值
         self.x_value = self.filtered_x
         self.y_value = self.filtered_y
-
         # 读取按键状态，按下为0，未按下为1
         self.sw_value = self.sw.value()
 
