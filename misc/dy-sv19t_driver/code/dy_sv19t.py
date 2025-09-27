@@ -606,6 +606,7 @@ class DYSV19T:
             disk (int): One of DISK_*
             path (str): Path like '/DIR/NAME.MP3'
         """
+        path = path.replace('.', '*')
         d = self._validate_disk(disk)
         pb = self._validate_path(path)
         self.uart.write(self.build_frame(0x08, bytes([d]) + pb))
@@ -651,6 +652,7 @@ class DYSV19T:
             path (str): Path (must start with '/')
 
         """
+        path = path.replace('.', '*')
         d = self._validate_disk(disk)
         pb = self._validate_path(path)
         self.uart.write(self.build_frame(0x17, bytes([d]) + pb))
@@ -1108,6 +1110,18 @@ class DYSV19T:
 
         """
         self.send_frame(0x26)
+    def check_play_time_send(self):
+        # 接收期望命令 0x25 的上报帧，超时 1500ms
+        resp = self.recv_response(expected_cmd=0x25)
+        # 若成功收到完整帧
+        if resp:
+            # 解析帧得到数据段
+            parsed = self.parse_response(resp)
+            d = parsed['data']
+            # 数据长度为 3 字节时按 (h, m, s) 打印
+            if len(d) == 3:
+                return d[0], d[1], d[2]
+
 
 # ======================================== 初始化配置 ==========================================
 
