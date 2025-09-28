@@ -49,7 +49,7 @@ def play_track_demo():
 
     """
     # 根据文件路径选择立即播放
-    player.play_disk_path(DISK_SD, "/AA./01.MP3")
+    player.play_disk_path(player.DISK_SD, "/AA./01.MP3")
     # 开始监听播放进度
     player.enable_play_time_send()
     print("Enable automatic reporting of playback time, monitoring 3 times...")
@@ -133,14 +133,14 @@ def loop_mode_demo():
     Set the loop playback mode and specify the number of loops.
     """
     # 设置播放模式支持循环次数设置
-    player.set_loop_mode(MODE_SINGLE_LOOP)
+    player.set_play_mode(player.MODE_SINGLE_LOOP)
     # 设定循环次数为 3（注意部分模式不支持，若不支持会在驱动层抛参数错误）
     player.set_loop_count(3)
     # 播放第一段音频，立即播放
     player.select_track(1, play=True)
     time.sleep(10)
     # 设置播放模式为单曲停止
-    player.set_loop_mode(MODE_SINGLE_STOP)
+    player.set_play_mode(player.MODE_SINGLE_STOP)
 
 
 
@@ -155,7 +155,7 @@ def insert_track_demo():
     # 等待正常播放
     time.sleep(10)
     # 插入第一段音频
-    player.insert_track(DISK_SD, 1)
+    player.insert_track(player.DISK_SD, 1)
     # 等待结束
     while player.query_status():
         pass
@@ -193,13 +193,13 @@ player = DYSV19T(
     # 传入已配置的 UART 实例
     uart,
     # 默认音量设置为最大（0~30）
-    default_volume=VOLUME_MAX,
+    default_volume=DYSV19T.VOLUME_MAX,
     # 默认工作盘符选择 SD 卡
-    default_disk=DISK_SD,
+    default_disk=DYSV19T.DISK_SD,
     # 默认播放模式设置为“单曲播放后停止”
-    default_play_mode=MODE_SINGLE_STOP,
+    default_play_mode=DYSV19T.MODE_SINGLE_STOP,
     # 默认输出通道设置为 MP3 通道
-    default_dac_channel=CH_MP3,
+    default_dac_channel=DYSV19T.CH_MP3,
     # 串口读取超时 600ms
     timeout_ms=600,
 )
@@ -208,11 +208,11 @@ player = DYSV19T(
 # 将音量调整到 20（范围 0~30）
 player.set_volume(20)
 # 设置均衡为摇滚 EQ_ROCK
-player.set_eq(EQ_ROCK)
+player.set_eq(player.EQ_ROCK)
 # 设置循环模式为目录顺序播放后停止 MODE_DIR_SEQUENCE
-player.set_loop_mode(MODE_SINGLE_STOP)
+player.set_play_mode(player.MODE_SINGLE_STOP)
 # 选择输出通道为 MP3 数字通道
-player.set_dac_channel(CH_MP3)
+player.set_dac_channel(player.CH_MP3)
 # 通过曲目序号直接播放一段音频，监听播放进度并等待播放结束。
 
 player.query_status()
