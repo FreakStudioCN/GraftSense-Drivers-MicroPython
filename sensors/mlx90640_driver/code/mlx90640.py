@@ -34,7 +34,7 @@ def init_float_array(size: int) -> array.array:
         array.array: 初始化后的浮点型数组，元素初始值均为0。
 
     Raises:
-        ValueError: 如果size不是正整数。
+        ValueError: 如果size不是正整数或者size不是负数。
 
     Notes:
         使用'f'类型码表示单精度浮点数。
@@ -50,7 +50,7 @@ def init_float_array(size: int) -> array.array:
         array.array: Initialized float array with all elements 0.
 
     Raises
-        ValueError: If size is not a positive integer.
+        ValueError: If size is not a positive integer or size is not a negative number.
 
     Notes:
         Uses 'f' type code for single-precision floating points.
@@ -1607,7 +1607,7 @@ class MLX90640:
                 if self._are_pixels_adjacent(broken_pixel, outlier_pixel):
                     raise RuntimeError('Adjacent broken and outlier pixels')
 
-    def _unique_list_pairs(self, input_list: set) -> tuple:
+    def _unique_list_pairs(self, input_list: set):
         """
         生成集合中元素的所有唯一无序配对。
 
@@ -1615,10 +1615,11 @@ class MLX90640:
             input_list (set): 输入的元素集合。
 
         Returns:
-            tuple: 包含两个元素的元组，表示一对元素。
+            generator:返回生成器对象，每次迭代产出一个包含两个元素的元组。
 
         Notes:
             每个配对仅出现一次，例如(a, b)和(b, a)会被视为同一个配对，只返回一次。
+            该函数是一个生成器函数，函数本身返回值不是具体的元素配对而是生成器对象，迭代产出的值是具体的元素配对。
 
         ==========================================
 
@@ -1628,10 +1629,11 @@ class MLX90640:
             input_list (set): Input set of elements.
 
         Returns:
-            tuple: Tuple containing two elements, representing a pair.
+            generator:Returns an generator object that produces a tuple containing two elements with each iteration.
 
         Notes:
             Each pair appears only once, e.g., (a, b) and (b, a) are considered the same pair and only returned once.
+            This function is a generator function, and its return value is an generator object, producing specific elements as pairs.
         """
         input_list = list(input_list)
         for i in range(len(input_list)):

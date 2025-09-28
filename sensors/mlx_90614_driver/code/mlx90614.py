@@ -363,9 +363,29 @@ class MLX90614(SensorBase):
             "object": self.read_object(),
             "object2": self.read_object2() if self.dual_zone else None,
         }
-    # 别名 / Alias for read
-    get = read
 
+    def get(self) -> dict:
+        """
+        读取传感器数据的别名方法，功能与 read() 完全相同。
+
+        Returns:
+            dict: 返回传感器当前的测量数据，具体字段和说明参见 read() 方法。
+
+        Notes:
+            该方法仅作为 read() 的别名，方便统一接口调用。
+
+        ==========================================
+
+        Alias method for reading sensor data, identical to read().
+
+        Returns:
+            dict: Returns the current measurement data from the sensor.
+                  See read() method for detailed field descriptions.
+
+        Notes:
+            This method is simply an alias of read(), provided for interface consistency.
+        """
+        return self.read()
 
 class MLX90615(SensorBase):
     """

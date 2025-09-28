@@ -35,7 +35,21 @@ KEYS_MAP = {
 # ======================================== 功能函数 ============================================
 
 def key_callback(key_name, state):
-    """按键状态变化回调函数"""
+    """
+    按键事件回调函数，当按键状态发生变化时调用此函数。
+
+    Args:
+        key_name (str): 按键名称或标识符，用于区分不同按键。
+        state (bool): 按键状态，True 表示按下，False 表示释放。
+
+    ===========================================
+
+    Key event callback function, this function is called when the key state changes.
+
+    Args:
+        key_name (str): The name or identifier of the key, used to differentiate between different keys.
+        state (bool): The key state, True indicates pressed, False indicates released.
+    """
     status = "press" if state else "release"
     print(f"key {key_name} {status}")
 

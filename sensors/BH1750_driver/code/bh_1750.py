@@ -301,22 +301,22 @@ class BH1750:
         else:
             return lux
 
-    def measurements(self) -> float:
+    def measurements(self):
         """
         光照强度数据生成器，持续提供测量值。
 
-        Yields:
-            float: 光照强度，单位 lux。
+        Returns:
+            generator: 该方法返回生成器对象，每次执行迭代返回当前光照强度值（float）。
 
         Notes:
             睡眠时间根据分辨率和测量时间自动计算。
 
         ==========================================
 
-        Generator for continuous lux measurements.
+        Generator for continuous light intensity measurements.
 
-        Yields:
-            float: Light intensity in lux.
+        Returns:
+            generator:returns a generator object ,returns the current light intensity value (float) each time an iteration is executed.
 
         Notes:
             Sleep time is calculated based on resolution and measurement time.

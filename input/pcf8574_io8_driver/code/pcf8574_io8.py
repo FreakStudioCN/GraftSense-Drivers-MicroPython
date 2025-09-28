@@ -111,7 +111,7 @@ class PCF8574IO8:
         self._pcf = pcf
         # 默认所有引脚高阻
         self._cache = 0xFF
-        self._ports_default: dict[int, tuple[int, int]] = {i: (1, 1) for i in range(4)}
+        self._ports_default = {i: (1, 1) for i in range(4)}
 
         if ports_init:
             for port, state in ports_init.items():
