@@ -103,6 +103,7 @@ class PN532_UART(PN532):
             TypeError: If reset is not an instance of machine.Pin or None.
             TypeError: If debug is not a boolean value.
         """
+        super().__init__(debug=debug, reset=reset)
         if not isinstance(uart, UART):
             raise TypeError("uart must be an instance of machine.UART")
 
@@ -113,7 +114,6 @@ class PN532_UART(PN532):
             raise TypeError("debug must be a boolean value")
         self.debug = debug
         self._uart = uart
-        super().__init__(debug=debug, reset=reset)
 
     def _wakeup(self):
         """

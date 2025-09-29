@@ -90,14 +90,14 @@ MLX90640是一款基于红外检测原理的24×32点阵温度传感器，可实
 ---
 
 ## 使用说明
-### 硬件接线（ESP32示例）
+### 硬件接线（树莓派pico示例）
 
-| MLX90640引脚 | ESP32 GPIO引脚 |
-|--------------|----------------|
-| VCC          | 3.3V           |
-| GND          | GND            |
-| SCL          | GPIO13         |
-| SDA          | GPIO12         |
+| MLX90640引脚 | GPIO引脚        |
+|--------------|---------------|
+| VCC          | 3.3V          |
+| GND          | GND           |
+| SCL          | GPIO1         |
+| SDA          | GPIO0         |
 | ADDR         | GND（默认地址0x33） |
 
 > **注意**：
@@ -129,11 +129,13 @@ MLX90640是一款基于红外检测原理的24×32点阵温度传感器，可实
 
 # ======================================== 导入相关模块 =========================================
 
-import machine
+from machine import I2C
 import time
 from mlx90640 import MLX90640, RefreshRate
 
 # ======================================== 全局变量 ============================================
+
+mlxaddr=None
 
 # ======================================== 功能函数 ============================================
 
@@ -144,20 +146,25 @@ from mlx90640 import MLX90640, RefreshRate
 time.sleep(3)
 print("FreakStudio:Testing the MLX90640 fractional infrared temperature sensor")
 # Initialize I2C bus (adjust pins if needed)
-i2c_bus = machine.I2C(0, scl=machine.Pin(13), sda=machine.Pin(12), freq=100000)
+i2c = I2C(0, scl=1, sda=0, freq=100000)
 
-# Scan I2C devices
-print("Scanning I2C bus...")
-devices = i2c_bus.scan()
-if not devices:
-    print("No I2C devices found. Please check wiring!")
-    raise SystemExit(1)
+# 开始扫描I2C总线上的设备，返回从机地址的列表
+devices_list: list[int] = i2c.scan()
+print('START I2C SCANNER')
+# 若devices list为空，则没有设备连接到I2C总线上
+if len(devices_list) == 0:
+    # 若非空，则打印从机设备地址
+    print("No i2c device !")
 else:
-    print(f"Found I2C devices: {[hex(dev) for dev in devices]}")
+    print('i2c devices found:', len(devices_list))
+for device in devices_list:
+    if 0x31 <= device <= 0x35:
+        print("I2c hexadecimal address:", hex(device))
+        mlxaddr = device
 
 # Initialize MLX90640
 try:
-    thermal_camera = MLX90640(i2c_bus)
+    thermal_camera = MLX90640(i2c, mlxaddr)
     print("MLX90640 sensor initialized successfully")
 except ValueError as init_error:
     print(f"Sensor initialization failed: {init_error}")
@@ -196,24 +203,24 @@ try:
         print("\n--- Temperature Statistics ---")
         print(f"Min: {min_temp:.2f} °C | Max: {max_temp:.2f} °C | Avg: {avg_temp:.2f} °C")
 
-        # Print a few pixels (top-left 4x4 area)
+        # Print a few pixels (top-left 4*4 area)
         print("--- Sample Pixels (Top-Left 4x4) ---")
         # 打印左上角4*4像素
         for row in range(4):
             row_data = [
+                # 这里row*32因为一行是32个像素点，所以这个row*32表示每一行的索引，第0行索引是0
                 f"{temperature_frame[row*32 + col]:5.1f}"
                 for col in range(4)
             ]
             print(" | ".join(row_data))
 
-        # 等待下次测量，用刷新率编号加1作为近似值来计算，防止读取数据过快
+        # 等待下一次测量，用刷新率编号加1作为近似值来计算，防止读取数据过快
         time.sleep(1.0 / (thermal_camera.refresh_rate + 1))
 
 except KeyboardInterrupt:
     print("\nProgram terminated by user")
 finally:
     print("Testing process completed")
-
 ```
 ---
 

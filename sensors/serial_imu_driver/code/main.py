@@ -64,30 +64,37 @@ LED = Pin(25, Pin.OUT, Pin.PULL_DOWN)
 imu_obj = IMU(uart)
 
 # ========================================  主程序  ============================================
+try:
+    while True:
+        # 点亮LED灯
+        LED.on()
+        # 接收陀螺仪数据
+        imu_obj.RecvData()
+        # 熄灭LED灯
+        LED.off()
 
-while True:
-    # 点亮LED灯
-    LED.on()
-    # 接收陀螺仪数据
-    imu_obj.RecvData()
-    # 熄灭LED灯
+        # 打印 x 轴角度
+        print(" X-axis angle : ", imu_obj.angle_x)
+        # 打印 y 轴角度
+        print(" Y-axis angle : ", imu_obj.angle_y)
+        # 打印 z 轴角度
+        print(" Z-axis angle : ", imu_obj.angle_z)
+        # 返回可用堆 RAM 的字节数
+        print(" the number of RAM remaining is %d bytes ", gc.mem_free())
+
+        # 将三轴角度数据格式化成字符串
+        angle_data = "{:.2f}, {:.2f}, {:.2f}\r\n".format(imu_obj.angle_x, imu_obj.angle_y, imu_obj.angle_z)
+        # 通过串口0发送角度数据到上位机
+        uart_pc.write(angle_data)
+
+        # 当可用堆 RAM 的字节数小于 80000 时，手动触发垃圾回收功能
+        if gc.mem_free() < 220000:
+            # 手动触发垃圾回收功能
+            gc.collect()
+except KeyboardInterrupt:
+    # 捕获键盘中断（Ctrl+C）时的处理
+    print("程序被用户中断")
+finally:
+    # 无论程序正常结束还是被中断，最终都会执行这里，确保LED关闭
     LED.off()
-
-    # 打印 x 轴角度
-    print(" X-axis angle : ", imu_obj.angle_x)
-    # 打印 y 轴角度
-    print(" Y-axis angle : ", imu_obj.angle_y)
-    # 打印 z 轴角度
-    print(" Z-axis angle : ", imu_obj.angle_z)
-    # 返回可用堆 RAM 的字节数
-    print(" the number of RAM remaining is %d bytes ", gc.mem_free())
-
-    # 将三轴角度数据格式化成字符串
-    angle_data = "{:.2f}, {:.2f}, {:.2f}\r\n".format(imu_obj.angle_x, imu_obj.angle_y, imu_obj.angle_z)
-    # 通过串口0发送角度数据到上位机
-    uart_pc.write(angle_data)
-
-    # 当可用堆 RAM 的字节数小于 80000 时，手动触发垃圾回收功能
-    if gc.mem_free() < 220000:
-        # 手动触发垃圾回收功能
-        gc.collect()
+    print("LED已关闭，程序退出")
