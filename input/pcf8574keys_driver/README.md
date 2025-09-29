@@ -94,8 +94,8 @@ PCF8574 是一款 I2C 接口的 GPIO 扩展芯片，可通过 2 根 I2C 引脚�
 - 配置参数化：I2C 引脚、设备地址、按键映射、消抖时间等均通过参数配置，修改 `main.py` 中的参数即可适配不同硬件接线，无需改动驱动文件。
 ---
 ## 使用说明
-### 硬件接线（ESP32 示例）
-| PCF8574 引脚 | ESP32 GPIO 引脚 | 五向按键模块连接 | 备注 |
+### 硬件接线（树莓派pico 示例）
+| PCF8574 引脚 |  GPIO 引脚 | 五向按键模块连接 | 备注 |
 |--------------|----------------|------------------|------|
 | VCC          | 3.3V           | -                | 若模块支持 5V 可接 5V，避免过压损坏 |
 | GND          | GND            | GND（按键公共地） | 必须与开发板共地，否则按键状态检测异常 |
@@ -145,11 +145,11 @@ from pcf8574keys import PCF8574Keys
 # I2C配置
 I2C_ID = 0
 # 根据实际硬件修改
-SCL_PIN = 17
+SCL_PIN = 1
 # 根据实际硬件修改
-SDA_PIN = 16
-# PCF8574地址，默认0x20
-PCF8574_ADDR = 0x20
+SDA_PIN = 0
+
+PCF8574_ADDR = None
 
 # 五向按键引脚映射（根据实际接线修改）
 KEYS_MAP = {
@@ -163,7 +163,36 @@ KEYS_MAP = {
 # ======================================== 功能函数 ============================================
 
 def key_callback(key_name, state):
-    """按键状态变化回调函数"""
+    """
+    按键事件回调函数，当按键状态发生变化时调用此函数。
+
+    Args:
+        key_name (str): 按键名称或标识符，用于区分不同按键。
+        state (bool): 按键状态，True 表示按下，False 表示释放。
+
+    Raises:
+        TypeError: 当key_name不是str类型或者state不是bool类型抛出异常。
+        ValueError: 当key_name不在 KEYS_MAP 中时抛出。
+
+    ===========================================
+
+    Key event callback function, this function is called when the key state changes.
+
+    Args:
+        key_name (str): The name or identifier of the key, used to differentiate between different keys.
+        state (bool): The key state, True indicates pressed, False indicates released.
+
+    Raises:
+        TypeError: Throw an exception when key_name is not of type str or state is not of type bool.
+        ValueError: Raised when key_name is not defined in KEYS_MAP.
+    """
+    # 参数校验
+    if not isinstance(key_name, str):
+        raise TypeError(f"key_name must be a str, got {type(key_name).__name__}")
+    if key_name not in KEYS_MAP:
+        raise ValueError(f"Unknown key_name '{key_name}', must be one of {list(KEYS_MAP.keys())}")
+    if not isinstance(state, bool):
+        raise TypeError(f"state must be a bool, got {type(state).__name__}")
     status = "press" if state else "release"
     print(f"key {key_name} {status}")
 
@@ -175,17 +204,24 @@ time.sleep(3)
 print("FreakStudio:PCF8574 Five-way Button Test Program")
 # 初始化I2C
 i2c = I2C(I2C_ID, scl=Pin(SCL_PIN), sda=Pin(SDA_PIN), freq=400000)
-
+# 开始扫描I2C总线上的设备，返回从机地址的列表
+devices_list: list[int] = i2c.scan()
+print('START I2C SCANNER')
+# 若devices list为空，则没有设备连接到I2C总线上
+if len(devices_list) == 0:
+    # 若非空，则打印从机设备地址
+    print("No i2c device !")
+else:
+    # 遍历从机设备地址列表
+    print('i2c devices found:', len(devices_list))
+for device in devices_list:
+    # 判断设备地址是否为的PCF8574地址
+    if 0x20 <= device <= 0x28:
+        # 假设第一个找到的设备是PCF8574地址
+        print("I2c hexadecimal address:", hex(device))
+        PCF8574_ADDR = device
 # 初始化PCF8574
 pcf = PCF8574(i2c, PCF8574_ADDR)
-try:
-    pcf.check()
-    print(f"PCF8574 found at address {PCF8574_ADDR:#x}")
-except OSError as e:
-    print(f"PCF8574 Initialize failed: {e}")
-    while True:
-        time.sleep(1)
-
 # 初始化五向按键
 keys = PCF8574Keys(pcf, KEYS_MAP, key_callback)
 
@@ -197,13 +233,12 @@ try:
         all_states = keys.read_all()
         print("status:", {k: "press" if v else "release" for k, v in all_states.items()})
         # 500ms刷新一次状态显示
-        time.sleep(0.5)  
+        time.sleep(0.5)
 except KeyboardInterrupt:
     print("test stop")
 finally:
     keys.deinit()
     print("Resource release")
-
 ```
 ---
 ## 注意事项

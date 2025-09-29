@@ -112,8 +112,11 @@ class EC11Encoder:
         # 初始化A相和B相的GPIO引脚，设置为输入模式
         self.pin_a = Pin(pin_a, Pin.IN)
         self.pin_b = Pin(pin_b, Pin.IN)
-        # 初始化按键引脚，设置为输入模式，并启用内部上拉电阻
-        self.pin_btn = Pin(pin_btn, Pin.IN, Pin.PULL_UP)
+        
+        # 判断按键引脚有没有注册       
+        if pin_btn is not None:
+            # 初始化按键引脚，设置为输入模式，并启用内部上拉电阻
+            self.pin_btn = Pin(pin_btn, Pin.IN, Pin.PULL_UP)
 
         # 初始化计数器，用于记录旋转的步数
         self.rotation_count = 0
@@ -134,8 +137,10 @@ class EC11Encoder:
 
         # 为A相引脚设置中断处理，只检测上升沿（避免重复计数）
         self.pin_a.irq(trigger=Pin.IRQ_RISING, handler=self._handle_rotation)
-        # 为按键引脚设置中断处理，检测按键的按下（下降沿）和释放（上升沿）
-        self.pin_btn.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=self._handle_button)
+        # 判断按键引脚有没有注册       
+        if pin_btn is not None:
+            # 为按键引脚设置中断处理，检测按键的按下（下降沿）和释放（上升沿）
+            self.pin_btn.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=self._handle_button)
 
     def _handle_rotation(self, pin: Pin) -> None:
         """
