@@ -16,7 +16,8 @@ __platform__ = "MicroPython v1.23.0"
 
 # 导入 const 用于常量定义
 from micropython import const
-#导入 time 提供延时与时间控制
+
+# 导入 time 提供延时与时间控制
 import time
 
 # ======================================== 全局变量 ============================================
@@ -58,9 +59,11 @@ VOLUME_MIN = const(0)
 VOLUME_MAX = const(30)
 DEFAULT_BAUD = const(9600)
 
+
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class DYSV19T:
     """
@@ -106,6 +109,44 @@ class DYSV19T:
         - Query methods return None on timeout; control methods may raise IOError/IOError on write failure.
     """
 
+    # 盘符
+    DISK_USB = const(0x00)
+    DISK_SD = const(0x01)
+    DISK_FLASH = const(0x02)
+    DISK_NONE = const(0xFF)
+
+    # 播放状态
+    PLAY_STOP = const(0x00)
+    PLAY_PLAY = const(0x01)
+    PLAY_PAUSE = const(0x02)
+
+    # 播放模式（loop）
+    MODE_FULL_LOOP = const(0x00)
+    MODE_SINGLE_LOOP = const(0x01)
+    MODE_SINGLE_STOP = const(0x02)  # 默认
+    MODE_FULL_RANDOM = const(0x03)
+    MODE_DIR_LOOP = const(0x04)
+    MODE_DIR_RANDOM = const(0x05)
+    MODE_DIR_SEQUENCE = const(0x06)
+    MODE_SEQUENCE = const(0x07)
+
+    # EQ
+    EQ_NORMAL = const(0x00)
+    EQ_POP = const(0x01)
+    EQ_ROCK = const(0x02)
+    EQ_JAZZ = const(0x03)
+    EQ_CLASSIC = const(0x04)
+
+    # DAC 输出通道
+    CH_MP3 = const(0x00)
+    CH_AUX = const(0x01)
+    CH_MP3_AUX = const(0x02)
+
+    # 其它常量
+    VOLUME_MIN = const(0)
+    VOLUME_MAX = const(30)
+    DEFAULT_BAUD = const(9600)
+
     def __init__(self, uart, *,
                  default_volume: int = VOLUME_MAX,
                  default_disk: int = DISK_USB,
@@ -142,17 +183,17 @@ class DYSV19T:
         """
         if uart is None or not hasattr(uart, 'read') or not hasattr(uart, 'write'):
             raise ValueError("Invalid UART instance, must have read()/write() / 无效的UART实例")
-        if not (VOLUME_MIN <= int(default_volume) <= VOLUME_MAX):
+        if not (self.VOLUME_MIN <= int(default_volume) <= self.VOLUME_MAX):
             raise ValueError("default_volume must be within 0..30")
-        if default_disk not in (DISK_USB, DISK_SD, DISK_FLASH, DISK_NONE):
+        if default_disk not in (self.DISK_USB, self.DISK_SD, self.DISK_FLASH, self.DISK_NONE):
             raise ValueError("default_disk must be a DISK_* constant")
         if default_play_mode not in (
-            MODE_FULL_LOOP, MODE_SINGLE_LOOP, MODE_SINGLE_STOP,
-            MODE_FULL_RANDOM, MODE_DIR_LOOP, MODE_DIR_RANDOM,
-            MODE_DIR_SEQUENCE, MODE_SEQUENCE,
+            self.MODE_FULL_LOOP, self.MODE_SINGLE_LOOP, self.MODE_SINGLE_STOP,
+            self.MODE_FULL_RANDOM, self.MODE_DIR_LOOP, self.MODE_DIR_RANDOM,
+            self.MODE_DIR_SEQUENCE, self.MODE_SEQUENCE,
         ):
             raise ValueError("default_play_mode must be a MODE_* constant")
-        if default_dac_channel not in (CH_MP3, CH_AUX, CH_MP3_AUX):
+        if default_dac_channel not in (self.CH_MP3, self.CH_AUX, self.CH_MP3_AUX):
             raise ValueError("default_dac_channel must be a CH_* constant")
         if timeout_ms <= 0:
             raise ValueError("timeout_ms must be a positive integer")
@@ -161,12 +202,12 @@ class DYSV19T:
         self.timeout_ms = int(timeout_ms)
 
         # 运行态属性（查询后/命令成功后由驱动维护）
-        self.play_state   = PLAY_STOP
+        self.play_state = self.PLAY_STOP
         self.current_disk = int(default_disk)
-        self.volume       = int(default_volume)
-        self.play_mode    = int(default_play_mode)
-        self.eq           = EQ_NORMAL
-        self.dac_channel  = int(default_dac_channel)
+        self.volume = int(default_volume)
+        self.play_mode = int(default_play_mode)
+        self.eq = self.EQ_NORMAL
+        self.dac_channel = int(default_dac_channel)
 
     def _u16(self, value: int) -> tuple:
         """
@@ -211,7 +252,8 @@ class DYSV19T:
         Raises:
             ValueError: If disk is invalid
         """
-        if disk not in (DISK_USB, DISK_SD, DISK_FLASH):
+        
+        if disk not in (self.DISK_USB, self.DISK_SD, self.DISK_FLASH):
             raise ValueError("The disk must be DISK_USB/SD/FLASH and must be online.")
         return int(disk)
 
@@ -235,9 +277,9 @@ class DYSV19T:
             ValueError: If mode invalid
         """
         if mode not in (
-            MODE_FULL_LOOP, MODE_SINGLE_LOOP, MODE_SINGLE_STOP,
-            MODE_FULL_RANDOM, MODE_DIR_LOOP, MODE_DIR_RANDOM,
-            MODE_DIR_SEQUENCE, MODE_SEQUENCE,
+            self.MODE_FULL_LOOP, self.MODE_SINGLE_LOOP, self.MODE_SINGLE_STOP,
+            self.MODE_FULL_RANDOM, self.MODE_DIR_LOOP, self.MODE_DIR_RANDOM,
+            self.MODE_DIR_SEQUENCE, self.MODE_SEQUENCE,
         ):
             raise ValueError("mode must be a MODE_* constant")
         return int(mode)
@@ -261,7 +303,7 @@ class DYSV19T:
         Raises:
             ValueError: If eq invalid
         """
-        if eq not in (EQ_NORMAL, EQ_POP, EQ_ROCK, EQ_JAZZ, EQ_CLASSIC):
+        if eq not in (self.EQ_NORMAL, self.EQ_POP, self.EQ_ROCK, self.EQ_JAZZ, self.EQ_CLASSIC):
             raise ValueError("eq must be an EQ_* constant")
         return int(eq)
 
@@ -283,7 +325,7 @@ class DYSV19T:
         Raises:
             ValueError: If ch invalid
         """
-        if ch not in (CH_MP3, CH_AUX, CH_MP3_AUX):
+        if ch not in (self.CH_MP3, self.CH_AUX, self.CH_MP3_AUX):
             raise ValueError("ch must be a CH_* constant")
         return int(ch)
 
@@ -336,7 +378,7 @@ class DYSV19T:
                 seg += ch
         return path.encode('ascii')
 
-    def build_frame(self, cmd: int, data: bytes) -> bytes:
+    def _build_frame(self, cmd: int, data: bytes) -> bytes:
         """
         构造完整帧：AA CMD LEN DATA... SM
 
@@ -372,7 +414,7 @@ class DYSV19T:
         frame[-1] = sm
         return bytes(frame)
 
-    def parse_response(self, resp: bytes):
+    def _parse_response(self, resp: bytes):
         """
         解析并校验响应帧，返回 { 'cmd': int, 'data': bytes }。
 
@@ -404,7 +446,7 @@ class DYSV19T:
         data = resp[3:3+n] if n else b""
         return {'cmd': cmd, 'data': data}
 
-    def recv_response(self, expected_cmd: int = None, timeout_ms: int = None):
+    def _recv_response(self, expected_cmd: int = None, timeout_ms: int = None):
         """
         读取一帧响应；若 expected_cmd 提供则仅返回匹配的帧；超时返回 None。
 
@@ -449,7 +491,7 @@ class DYSV19T:
                 if len(buf) >= 3 and len(buf) == need:
                     # 完整帧到达
                     try:
-                        parsed = self.parse_response(buf)
+                        parsed = self._parse_response(buf)
                     except ValueError:
                         # 丢弃并重新寻找起始
                         state = 0
@@ -462,7 +504,7 @@ class DYSV19T:
                     buf = bytearray()
         return None
 
-    def send_frame(self, cmd: int):
+    def _send_frame(self, cmd: int):
         """
         发送无数据载荷的通用指令帧。
 
@@ -483,10 +525,9 @@ class DYSV19T:
         """
         # 发送无数据的通用命令
         try:
-            self.uart.write(self.build_frame(cmd, b""))
+            self.uart.write(self._build_frame(cmd, b""))
         except IOError as e:
             raise IOError("UART Write failed") from e
-
 
     def play(self):
         """
@@ -495,12 +536,9 @@ class DYSV19T:
         ==========================================
 
         Start playback (AA 02 00 SM).
-
-        Raises:
-            IOError: If UART write fails
         """
-        self.send_frame(0x02)
-        self.play_state = PLAY_PLAY
+        self._send_frame(0x02)
+        self.play_state = self.PLAY_PLAY
 
     def pause(self):
         """
@@ -509,10 +547,10 @@ class DYSV19T:
         ==========================================
 
         Pause (AA 03 00 SM).
-        
+
         """
-        self.send_frame(0x03)
-        self.play_state = PLAY_PAUSE
+        self._send_frame(0x03)
+        self.play_state = self.PLAY_PAUSE
 
     def stop(self):
         """
@@ -523,8 +561,8 @@ class DYSV19T:
         Stop (AA 04 00 SM).
 
         """
-        self.send_frame(0x04)
-        self.play_state = PLAY_STOP
+        self._send_frame(0x04)
+        self.play_state = self.PLAY_STOP
 
     def prev_track(self):
         """
@@ -535,20 +573,20 @@ class DYSV19T:
         Previous song (AA 05 00 SM).
 
         """
-        self.send_frame(0x05)
+        self._send_frame(0x05)
 
     def next_track(self):
         """
         下一首（AA 06 00 SM）。
 
-        
+
         ==========================================
 
         Next (AA 06 00 SM).
 
             Skip to next track.
         """
-        self.send_frame(0x06)
+        self._send_frame(0x06)
 
     def select_track(self, track_no: int, play: bool = True):
         """
@@ -557,36 +595,22 @@ class DYSV19T:
         Args:
             track_no (int): 曲目号，范围 1..65535
             play (bool): True 立即播放；False 仅预选
-        
-        Select track 1..65535; play immediately if True, else select only.
+            
+    ==========================================
 
+        Select track 1..65535; play immediately if True, else select only.
+        
         Args:
             track_no (int): Track number 1..65535
             play (bool): True to play now, False to preselect only
-
         """
+        # 验证track_no 输出H,L
         H, L = self._u16(track_no)
         if play:
-            self.uart.write(self.build_frame(0x07, bytes([H, L])))
-            self.play_state = PLAY_PLAY
+            self.uart.write(self._build_frame(0x07, bytes([H, L])))
+            self.play_state = self.PLAY_PLAY
         else:
-            self.uart.write(self.build_frame(0x1F, bytes([H, L])))
-
-    def select_track_no_play(self, track_no: int):
-        """
-        预选曲目（AA 1F 02 H L SM）。
-
-        Args:
-            track_no (int): 曲目号 1..65535
-        ==========================================
-
-        Preselect track (AA 1F 02 H L SM).
-
-        Args:
-            track_no (int): Track number 1..65535
-        """
-        H, L = self._u16(track_no)
-        self.uart.write(self.build_frame(0x1F, bytes([H, L])))
+            self.uart.write(self._build_frame(0x1F, bytes([H, L])))
 
     def play_disk_path(self, disk: int, path: str):
         """
@@ -603,10 +627,13 @@ class DYSV19T:
             disk (int): One of DISK_*
             path (str): Path like '/DIR/NAME.MP3'
         """
+        path = path.replace('.', '*')
+        # 校验盘符
         d = self._validate_disk(disk)
+        # 校验路径
         pb = self._validate_path(path)
-        self.uart.write(self.build_frame(0x08, bytes([d]) + pb))
-        self.play_state = PLAY_PLAY
+        self.uart.write(self._build_frame(0x08, bytes([d]) + pb))
+        self.play_state = self.PLAY_PLAY
         self.current_disk = d
 
     def insert_track(self, disk: int, track_no: int):
@@ -619,16 +646,18 @@ class DYSV19T:
 
         ==========================================
 
-        Insert a track (AA 16 03 <disk> <H> <L> SM).  
+        Insert a track (AA 16 03 <disk> <H> <L> SM).
 
         Args:
             disk (int): One of DISK_*
             track_no (int): 1..65535
 
         """
+        # 校验盘符
         d = self._validate_disk(disk)
+        # 校验track_no 处理出H,L
         H, L = self._u16(track_no)
-        self.uart.write(self.build_frame(0x16, bytes([d, H, L])))
+        self.uart.write(self._build_frame(0x16, bytes([d, H, L])))
 
     def insert_path(self, disk: int, path: str):
         """
@@ -646,11 +675,13 @@ class DYSV19T:
         Args:
             disk (int): One of DISK_*
             path (str): Path (must start with '/')
-
         """
+        path = path.replace('.', '*')
+        # 验证文件
         d = self._validate_disk(disk)
+        # 验证路径
         pb = self._validate_path(path)
-        self.uart.write(self.build_frame(0x17, bytes([d]) + pb))
+        self.uart.write(self._build_frame(0x17, bytes([d]) + pb))
 
     def end_insert(self):
         """
@@ -661,7 +692,7 @@ class DYSV19T:
         End insertion: use stop playing (AA 10 00 SM).
 
         """
-        self.send_frame(0x10)
+        self._send_frame(0x10)
 
     # 音量 / EQ / 通道
     def set_volume(self, vol: int):
@@ -684,9 +715,9 @@ class DYSV19T:
             ValueError: If out of range
         """
         vol = int(vol)
-        if not (VOLUME_MIN <= vol <= VOLUME_MAX):
+        if not (self.VOLUME_MIN <= vol <= self.VOLUME_MAX):
             raise ValueError("The volume must be between 0..30")
-        self.uart.write(self.build_frame(0x13, bytes([vol])))
+        self.uart.write(self._build_frame(0x13, bytes([vol])))
         self.volume = vol
 
     def volume_up(self):
@@ -698,7 +729,7 @@ class DYSV19T:
         Volume up (AA 14 00 SM).
 
         """
-        self.send_frame(0x14)
+        self._send_frame(0x14)
 
     def volume_down(self):
         """
@@ -708,7 +739,7 @@ class DYSV19T:
 
         Volume down (AA 15 00 SM).
         """
-        self.send_frame(0x15)
+        self._send_frame(0x15)
 
     def set_eq(self, eq: int):
         """
@@ -725,8 +756,9 @@ class DYSV19T:
             eq (int): One of EQ_*
 
         """
+        # 验证eq
         e = self._validate_eq(eq)
-        self.uart.write(self.build_frame(0x1A, bytes([e])))
+        self.uart.write(self._build_frame(0x1A, bytes([e])))
         self.eq = e
 
     def set_dac_channel(self, ch: int):
@@ -742,12 +774,13 @@ class DYSV19T:
         Args:
             ch (int): One of CH_*
         """
+        # 校验 DAC 输出通道常量
         c = self._validate_channel(ch)
-        self.uart.write(self.build_frame(0x1D, bytes([c])))
+        self.uart.write(self._build_frame(0x1D, bytes([c])))
         self.dac_channel = c
 
     # 循环/复读/快进快退
-    def set_loop_mode(self, mode: int):
+    def set_play_mode(self, mode: int):
         """
         设置播放模式（AA 18 01 <mode> SM）。
 
@@ -762,8 +795,9 @@ class DYSV19T:
             mode (int): One of MODE_*
 
         """
+        # 校验播放模式
         m = self._validate_mode(mode)
-        self.uart.write(self.build_frame(0x18, bytes([m])))
+        self.uart.write(self._build_frame(0x18, bytes([m])))
         self.play_mode = m
 
     def set_loop_count(self, count: int):
@@ -785,15 +819,16 @@ class DYSV19T:
         Raises:
             ValueError: If count out of range or current mode unsupported
         """
+        # 验证count 并且输出H,L
         H, L = self._u16(count)
-        self.uart.write(self.build_frame(0x19, bytes([H, L])))
+        self.uart.write(self._build_frame(0x19, bytes([H, L])))
         if self.play_mode in ( 0x02, 0x03, 0x05, 0x06, 0x07):
             # 单曲停止、全盘随机、目录随机、目录顺序、全盘
-            raise ValueError("The playback mode is incorrect, it supports (MODE_FULL_LOOP, MODE_SINGLE_LOOP, MODE_DIR_LOOP, MODE_SEQUENCE)")
+            raise ValueError("The playback mode is incorrect, it supports \n(MODE_FULL_LOOP, MODE_SINGLE_LOOP, MODE_DIR_LOOP, MODE_SEQUENCE)")
 
     def repeat_area(self, start_min: int, start_sec: int, end_min: int, end_sec: int):
         """
-        区间复读（AA 20 04 s_min s_sec e_min e_sec SM），分秒 0..59。 
+        区间复读（AA 20 04 s_min s_sec e_min e_sec SM），分秒 0..59。
 
         Args:
             start_min (int): 起始分钟 0..59
@@ -821,7 +856,7 @@ class DYSV19T:
             if not (0 <= v <= 59):
                 raise ValueError("Minutes/seconds must be in the range of 0..59")
         data = bytes([int(start_min), int(start_sec), int(end_min), int(end_sec)])
-        self.uart.write(self.build_frame(0x20, data))
+        self.uart.write(self._build_frame(0x20, data))
 
     def end_repeat(self):
         """
@@ -832,13 +867,11 @@ class DYSV19T:
         End A-B repeat (AA 21 00 SM).
 
         """
-        self.send_frame(0x21)
+        self._send_frame(0x21)
 
     def seek_back(self, seconds: int):
         """
         快退 seconds（AA 22 02 H L SM）。
-
-        
 
         Args:
             seconds (int): 回退的秒数 0..65535
@@ -851,8 +884,9 @@ class DYSV19T:
             seconds (int): 0..65535
 
         """
+        # 验证seconds 并且输出H,L
         H, L = self._u16(seconds)
-        self.uart.write(self.build_frame(0x22, bytes([H, L])))
+        self.uart.write(self._build_frame(0x22, bytes([H, L])))
 
     def seek_forward(self, seconds: int):
         """
@@ -869,8 +903,9 @@ class DYSV19T:
             seconds (int): 0..65535
 
         """
+        # 验证seconds 并且输出H,L
         H, L = self._u16(seconds)
-        self.uart.write(self.build_frame(0x23, bytes([H, L])))
+        self.uart.write(self._build_frame(0x23, bytes([H, L])))
 
     # 查询类（解析并更新属性；超时返回 None）
     def query_status(self):
@@ -882,11 +917,11 @@ class DYSV19T:
         Query play state; return int or None.
 
         """
-        self.send_frame(0x01)
-        resp = self.recv_response(expected_cmd=0x01)
+        self._send_frame(0x01)
+        resp = self._recv_response(expected_cmd=0x01)
         if not resp:
             return None
-        parsed = self.parse_response(resp)
+        parsed = self._parse_response(resp)
         if len(parsed['data']) == 1:
             st = parsed['data'][0]
             self.play_state = st
@@ -902,11 +937,11 @@ class DYSV19T:
         Query online disks bitmap; return int or None.
 
         """
-        self.send_frame(0x09)
-        resp = self.recv_response(expected_cmd=0x09)
+        self._send_frame(0x09)
+        resp = self._recv_response(expected_cmd=0x09)
         if not resp:
             return None
-        d = self.parse_response(resp)['data']
+        d = self._parse_response(resp)['data']
         return d[0] if len(d) == 1 else None
 
     def query_current_disk(self):
@@ -918,11 +953,11 @@ class DYSV19T:
         Query current disk; return DISK_* or None.
 
         """
-        self.send_frame(0x0A)
-        resp = self.recv_response(expected_cmd=0x0A)
+        self._send_frame(0x0A)
+        resp = self._recv_response(expected_cmd=0x0A)
         if not resp:
             return None
-        d = self.parse_response(resp)['data']
+        d = self._parse_response(resp)['data']
         if len(d) == 1:
             self.current_disk = d[0]
             return d[0]
@@ -936,11 +971,11 @@ class DYSV19T:
 
         Query total tracks; return int or None.
         """
-        self.send_frame(0x0C)
-        resp = self.recv_response(expected_cmd=0x0C)
+        self._send_frame(0x0C)
+        resp = self._recv_response(expected_cmd=0x0C)
         if not resp:
             return None
-        d = self.parse_response(resp)['data']
+        d = self._parse_response(resp)['data']
         if len(d) == 2:
             return (d[0] << 8) | d[1]
         return None
@@ -954,11 +989,11 @@ class DYSV19T:
         Query current track number.
 
         """
-        self.send_frame(0x0D)
-        resp = self.recv_response(expected_cmd=0x0D)
+        self._send_frame(0x0D)
+        resp = self._recv_response(expected_cmd=0x0D)
         if not resp:
             return None
-        d = self.parse_response(resp)['data']
+        d = self._parse_response(resp)['data']
         if len(d) == 2:
             return (d[0] << 8) | d[1]
         return None
@@ -972,11 +1007,11 @@ class DYSV19T:
         Query first track index in current folder.
 
         """
-        self.send_frame(0x11)
-        resp = self.recv_response(expected_cmd=0x11)
+        self._send_frame(0x11)
+        resp = self._recv_response(expected_cmd=0x11)
         if not resp:
             return None
-        d = self.parse_response(resp)['data']
+        d = self._parse_response(resp)['data']
         if len(d) == 2:
             return (d[0] << 8) | d[1]
         return None
@@ -991,11 +1026,11 @@ class DYSV19T:
 
 
         """
-        self.send_frame(0x12)
-        resp = self.recv_response(expected_cmd=0x12)
+        self._send_frame(0x12)
+        resp = self._recv_response(expected_cmd=0x12)
         if not resp:
             return None
-        d = self.parse_response(resp)['data']
+        d = self._parse_response(resp)['data']
         if len(d) == 2:
             return (d[0] << 8) | d[1]
         return None
@@ -1009,11 +1044,11 @@ class DYSV19T:
         Query short file name; return str or None.
 
         """
-        self.send_frame(0x1E)
-        resp = self.recv_response(expected_cmd=0x1E)
+        self._send_frame(0x1E)
+        resp = self._recv_response(expected_cmd=0x1E)
         if not resp:
             return None
-        d = self.parse_response(resp)['data']
+        d = self._parse_response(resp)['data']
         try:
             return d.decode('ascii') if d else ""
         except Exception:
@@ -1027,11 +1062,11 @@ class DYSV19T:
 
         Query current play time tuple (h,m,s) or None.
         """
-        self.send_frame(0x24)
-        resp = self.recv_response(expected_cmd=0x24)
+        self._send_frame(0x24)
+        resp = self._recv_response(expected_cmd=0x24)
         if not resp:
             return None
-        d = self.parse_response(resp)['data']
+        d = self._parse_response(resp)['data']
         if len(d) == 3:
             return (d[0], d[1], d[2])
         return None
@@ -1068,7 +1103,7 @@ class DYSV19T:
                 if not (48 <= o <= 57 or 65 <= o <= 90):
                     raise ValueError(" names are only allowed to contain A-Z or 0-9")
             bb.extend(s.encode('ascii'))
-        self.uart.write(self.build_frame(0x1B, bytes(bb)))
+        self.uart.write(self._build_frame(0x1B, bytes(bb)))
 
     def end_combination_playlist(self):
         """
@@ -1078,10 +1113,10 @@ class DYSV19T:
 
         End combination playlist (AA 1C 00).
 
-        
+
 
         """
-        self.send_frame(0x1C)
+        self._send_frame(0x1C)
 
     # 播放时间自动上报
     def enable_play_time_send(self):
@@ -1093,7 +1128,7 @@ class DYSV19T:
         Enable play-time auto report (AA 25 00).
 
         """
-        self.send_frame(0x25)
+        self._send_frame(0x25)
 
     def disable_play_time_send(self):
         """
@@ -1104,7 +1139,24 @@ class DYSV19T:
         Disable play-time auto report (AA 26 00).
 
         """
-        self.send_frame(0x26)
+        self._send_frame(0x26)
+
+    def check_play_time_send(self):
+        """
+        播放进度解析并返回
+        ==========================================
+        Parse the playback progress and return it
+        """
+        # 接收期望命令 0x25 的上报帧，超时 1500ms
+        resp = self._recv_response(expected_cmd=0x25)
+        # 若成功收到完整帧
+        if resp:
+            # 解析帧得到数据段
+            parsed = self._parse_response(resp)
+            d = parsed['data']
+            # 数据长度为 3 字节时按 (h, m, s) 打印
+            if len(d) == 3:
+                return d[0], d[1], d[2]
 
 # ======================================== 初始化配置 ==========================================
 
