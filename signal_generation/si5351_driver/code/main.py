@@ -35,6 +35,7 @@ time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Use silicon5351 to output clock signals.")
 i2c = machine.I2C(1, scl=machine.Pin(7), sda=machine.Pin(6), freq = 100000)
+
 # 初始化 SI5351 芯片
 si = SI5351_I2C(i2c, crystal=crystal)
 # 配置 PLL0 = 375 MHz
@@ -54,7 +55,4 @@ print(f'done freq={freq} mul={mul} quadrature={quadrature} invert={invert}')
 # 保持输出 20 秒
 time.sleep(20)
 # 关闭输出 0
-
-
-
 

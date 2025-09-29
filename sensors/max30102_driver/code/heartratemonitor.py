@@ -1137,7 +1137,6 @@ class MAX30102(object):
         =========================================
         Clear FIFO pointers (recommended before starting reads).
         """
-
         self._i2c_set_register(MAX30105_FIFO_WRITE_PTR, 0)
         self._i2c_set_register(MAX30105_FIFO_OVERFLOW, 0)
         self._i2c_set_register(MAX30105_FIFO_READ_PTR, 0)
@@ -1195,7 +1194,6 @@ class MAX30102(object):
         Returns:
             bytes: Register value (1 byte).
         """
-
         wp = self._i2c_read_register(MAX30105_FIFO_WRITE_PTR)
         return wp
 
@@ -1213,7 +1211,6 @@ class MAX30102(object):
         Returns:
             bytes: Register value (1 byte).
         """
-
         wp = self._i2c_read_register(MAX30105_FIFO_READ_PTR)
         return wp
 
@@ -1289,7 +1286,6 @@ class MAX30102(object):
         Returns:
             bytes: 1-byte value.
         """
-
         part_id = self._i2c_read_register(MAX30105_PART_ID)
         return part_id
 
@@ -1325,7 +1321,6 @@ class MAX30102(object):
         Returns:
             int: Revision number.
         """
-
         rev_id = self._i2c_read_register(MAX30105_REVISION_ID)
         return ord(rev_id)
 
@@ -1663,7 +1658,6 @@ class MAX30102(object):
                     self.sense.IR.append(self._fifo_bytes_to_int(fifo_bytes[3:6]))
                 if self._active_leds > 2:
                     self.sense.green.append(self._fifo_bytes_to_int(fifo_bytes[6:9]))
-
                 return True
         else:
             return False
@@ -1709,7 +1703,6 @@ class MAX30102(object):
             if self.check():
                 return True
             time.sleep_ms(1)
-
 
 class CircularBuffer(object):
     """

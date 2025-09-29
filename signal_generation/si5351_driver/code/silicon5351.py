@@ -225,7 +225,6 @@ class SI5351_I2C:
             register (int): Register address.
             value (int): Value to write.
         """
-
         self._write_bulk(register, [value])
 
     def write_config(self, reg, whole, num, denom, rdiv):
@@ -242,7 +241,7 @@ class SI5351_I2C:
         Raises:
             TypeError: 如果参数类型不正确。
             ValueError: 如果参数值超出允许范围。
-
+            
         ==========================================
         Write PLL or Multisynth configuration.
 
@@ -303,7 +302,7 @@ class SI5351_I2C:
         Raises:
             TypeError: 如果 output 或 div 不是 int。
             ValueError: 如果 output 或 div 不在允许范围内。
-
+            
         ==========================================
         Set phase offset for a given output.
 
@@ -356,7 +355,6 @@ class SI5351_I2C:
         # 值检查
         if pll not in (0, 1):
             raise ValueError("pll must be 0 (PLLA) or 1 (PLLB)")
-
         if pll == 0: value = self.SI5351_PLL_RESET_A
         if pll == 1: value = self.SI5351_PLL_RESET_B
         self._write(self.SI5351_REGISTER_PLL_RESET, value)
@@ -395,7 +393,6 @@ class SI5351_I2C:
             raise TypeError("output must be an int")
         if not isinstance(integer_mode, bool):
             raise TypeError("integer_mode must be a bool")
-
         # 值检查
         if not 0 <= output <= 2:
             raise ValueError("output must be in range 0..2")
@@ -633,7 +630,7 @@ class SI5351_I2C:
         Raises:
             TypeError: 如果 output 不是 int。
             ValueError: 如果 output 不在允许范围内。
-
+            
         ==========================================
         Enable the given clock output.
 
@@ -946,7 +943,7 @@ class SI5351_I2C:
         Raises:
             TypeError: 参数类型错误。
             ValueError: mask 不在 0..0xFF 范围。
-
+            
         ==========================================
         Disable OEB pin support for given outputs.
 

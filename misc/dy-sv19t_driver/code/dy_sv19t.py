@@ -16,10 +16,48 @@ __platform__ = "MicroPython v1.23.0"
 
 # 导入 const 用于常量定义
 from micropython import const
+
 # 导入 time 提供延时与时间控制
 import time
 
 # ======================================== 全局变量 ============================================
+# 盘符
+DISK_USB = const(0x00)
+DISK_SD = const(0x01)
+DISK_FLASH = const(0x02)
+DISK_NONE = const(0xFF)
+
+# 播放状态
+PLAY_STOP = const(0x00)
+PLAY_PLAY = const(0x01)
+PLAY_PAUSE = const(0x02)
+
+# 播放模式（loop）
+MODE_FULL_LOOP = const(0x00)
+MODE_SINGLE_LOOP = const(0x01)
+MODE_SINGLE_STOP = const(0x02)  # 默认
+MODE_FULL_RANDOM = const(0x03)
+MODE_DIR_LOOP = const(0x04)
+MODE_DIR_RANDOM = const(0x05)
+MODE_DIR_SEQUENCE = const(0x06)
+MODE_SEQUENCE = const(0x07)
+
+# EQ
+EQ_NORMAL = const(0x00)
+EQ_POP = const(0x01)
+EQ_ROCK = const(0x02)
+EQ_JAZZ = const(0x03)
+EQ_CLASSIC = const(0x04)
+
+# DAC 输出通道
+CH_MP3 = const(0x00)
+CH_AUX = const(0x01)
+CH_MP3_AUX = const(0x02)
+
+# 其它常量
+VOLUME_MIN = const(0)
+VOLUME_MAX = const(30)
+DEFAULT_BAUD = const(9600)
 
 
 # ======================================== 功能函数 ============================================
@@ -70,6 +108,7 @@ class DYSV19T:
           (and '*' '.' as protocol format symbols).
         - Query methods return None on timeout; control methods may raise IOError/IOError on write failure.
     """
+
     # 盘符
     DISK_USB = const(0x00)
     DISK_SD = const(0x01)
@@ -213,6 +252,7 @@ class DYSV19T:
         Raises:
             ValueError: If disk is invalid
         """
+        
         if disk not in (self.DISK_USB, self.DISK_SD, self.DISK_FLASH):
             raise ValueError("The disk must be DISK_USB/SD/FLASH and must be online.")
         return int(disk)
@@ -496,7 +536,6 @@ class DYSV19T:
         ==========================================
 
         Start playback (AA 02 00 SM).
-
         """
         self._send_frame(0x02)
         self.play_state = self.PLAY_PLAY
@@ -556,13 +595,14 @@ class DYSV19T:
         Args:
             track_no (int): 曲目号，范围 1..65535
             play (bool): True 立即播放；False 仅预选
+            
+    ==========================================
 
         Select track 1..65535; play immediately if True, else select only.
-
+        
         Args:
             track_no (int): Track number 1..65535
             play (bool): True to play now, False to preselect only
-
         """
         # 验证track_no 输出H,L
         H, L = self._u16(track_no)
@@ -832,8 +872,6 @@ class DYSV19T:
     def seek_back(self, seconds: int):
         """
         快退 seconds（AA 22 02 H L SM）。
-
-
 
         Args:
             seconds (int): 回退的秒数 0..65535
@@ -1119,7 +1157,6 @@ class DYSV19T:
             # 数据长度为 3 字节时按 (h, m, s) 打印
             if len(d) == 3:
                 return d[0], d[1], d[2]
-
 
 # ======================================== 初始化配置 ==========================================
 
