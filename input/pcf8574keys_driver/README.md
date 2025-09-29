@@ -239,8 +239,6 @@ except KeyboardInterrupt:
 finally:
     keys.deinit()
     print("Resource release")
-
-
 ```
 ---
 ## 注意事项

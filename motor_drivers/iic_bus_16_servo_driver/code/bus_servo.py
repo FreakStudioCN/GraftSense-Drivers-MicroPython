@@ -11,6 +11,7 @@ __version__ = "0.1.0"
 __author__ = "侯钧瀚"
 __license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.19+"
+
 # ======================================== 导入相关模块 =========================================
 
 #导入时间模块
@@ -388,7 +389,6 @@ class BusPWMServoController:
         if speed_deg_per_s is None or cfg.get("angle") is None or speed_deg_per_s <= 0:
             self._write_pulse(channel, pulse)
             cfg["angle"] = 180.0 - angle if cfg["rev"] else angle
-            return
 
         # 处理平滑角度变化
         current = cfg.get("angle", angle)

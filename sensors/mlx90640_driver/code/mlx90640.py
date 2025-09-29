@@ -49,7 +49,7 @@ def init_float_array(size: int) -> array.array:
     Returns:
         array.array: Initialized float array with all elements 0.
 
-    Raises
+    Raises:
         ValueError: If size is not a positive integer or size is not a negative number.
 
     Notes:
@@ -257,7 +257,7 @@ class I2CDevice:
         Raises:
             TypeError: 当 buf 不是 bytearray 时。
             ValueError: 当 start/end 超出范围时。
-
+            
         Notes:
             - buf长度必须等于需要读取的字节数。
             - 非ISR-safe。
@@ -274,7 +274,7 @@ class I2CDevice:
         Raises:
             TypeError: If buf is not a bytearray.
             ValueError: If start/end are out of range.
-
+            
         Notes:
             - Buffer length must match expected read size.
             - Not ISR-safe.
@@ -297,7 +297,7 @@ class I2CDevice:
 
         Raises:
             TypeError: 当 buf 不是 bytes时。
-
+            
         Notes:
             - buf必须是bytes或bytearray类型。
             - 此方法直接调用machine.I2C.writeto。
@@ -312,7 +312,7 @@ class I2CDevice:
 
         Raises:
             TypeError: If buf is not bytes.
-
+            
         Notes:
             - buf must be of type bytes or bytearray.
             - Uses machine.I2C.writeto internally.
@@ -338,7 +338,7 @@ class I2CDevice:
         Raises:
             TypeError: out_buffer 不是 bytes 或 in_buffer 不是 bytearray。
             ValueError: out_start/out_end 或 in_start/in_end 超出缓冲区长度范围。
-
+            
         Notes:
             - 常用于寄存器访问：先写寄存器地址再读寄存器内容。
             - 内部使用memoryview避免额外内存分配。
@@ -382,13 +382,14 @@ class I2CDevice:
             raise ValueError(f"Invalid out_buffer range: start={out_start}, end={out_end}, len={len(out_buffer)}")
         if not (0 <= in_start <= in_end <= len(in_buffer)):
             raise ValueError(f"Invalid in_buffer range: start={in_start}, end={in_end}, len={len(in_buffer)}")
+            
         self.i2c.writeto(self.device_address, memoryview(out_buffer)[out_start:out_end], False)
         self.i2c.readfrom_into(self.device_address, memoryview(in_buffer)[in_start:in_end])
 
     def _probe_for_device(self) -> None:
         """
         探测I2C设备是否存在。
-
+        
         Raises:
             ValueError: 如果设备不存在或无法响应。
 
@@ -404,7 +405,7 @@ class I2CDevice:
 
         Raises:
             ValueError: Raised if the device is absent or does not respond.
-
+            
         Notes:
             - First attempts empty write to probe device.
             - If write fails, tries reading 1 byte.
@@ -621,7 +622,7 @@ class MLX90640:
         # 这里按手册默认范围，可根据实际修改
         if not (0x31 <= address <= 0x35):
             raise ValueError(f"Invalid MLX90640 I2C address: 0x{address:x}")
-
+            
         # 初始化EEPROM数据缓冲区
         self.ee_data = init_int_array(1024)
         # 双缓存

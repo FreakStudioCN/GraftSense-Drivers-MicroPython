@@ -115,7 +115,6 @@ class PN532_UART(PN532):
         self.debug = debug
         self._uart = uart
 
-
     def _wakeup(self):
         """
         唤醒 PN532 芯片。
