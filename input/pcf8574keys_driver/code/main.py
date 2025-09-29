@@ -42,6 +42,10 @@ def key_callback(key_name, state):
         key_name (str): 按键名称或标识符，用于区分不同按键。
         state (bool): 按键状态，True 表示按下，False 表示释放。
 
+    Raises:
+        TypeError: 当key_name不是str类型或者state不是bool类型抛出异常。
+        ValueError: 当key_name不在 KEYS_MAP 中时抛出。
+
     ===========================================
 
     Key event callback function, this function is called when the key state changes.
@@ -49,7 +53,18 @@ def key_callback(key_name, state):
     Args:
         key_name (str): The name or identifier of the key, used to differentiate between different keys.
         state (bool): The key state, True indicates pressed, False indicates released.
+
+    Raises:
+        TypeError: Throw an exception when key_name is not of type str or state is not of type bool.
+        ValueError: Raised when key_name is not defined in KEYS_MAP.
     """
+    # 参数校验
+    if not isinstance(key_name, str):
+        raise TypeError(f"key_name must be a str, got {type(key_name).__name__}")
+    if key_name not in KEYS_MAP:
+        raise ValueError(f"Unknown key_name '{key_name}', must be one of {list(KEYS_MAP.keys())}")
+    if not isinstance(state, bool):
+        raise TypeError(f"state must be a bool, got {type(state).__name__}")
     status = "press" if state else "release"
     print(f"key {key_name} {status}")
 
@@ -79,14 +94,6 @@ for device in devices_list:
         PCF8574_ADDR = device
 # 初始化PCF8574
 pcf = PCF8574(i2c, PCF8574_ADDR)
-try:
-    pcf.check()
-    print(f"PCF8574 found at address {PCF8574_ADDR:#x}")
-except OSError as e:
-    print(f"PCF8574 Initialize failed: {e}")
-    while True:
-        time.sleep(1)
-
 # 初始化五向按键
 keys = PCF8574Keys(pcf, KEYS_MAP, key_callback)
 

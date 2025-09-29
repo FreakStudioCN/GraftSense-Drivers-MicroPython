@@ -159,7 +159,7 @@ if len(devices_list) == 0:
 else:
     print('i2c devices found:', len(devices_list))
 for device in devices_list:
-    if 0x30 <= device <= 0x7A:
+    if 0x31 <= device <= 0x35:
         print("I2c hexadecimal address:", hex(device))
         mlxaddr = device
 
@@ -222,6 +222,7 @@ except KeyboardInterrupt:
     print("\nProgram terminated by user")
 finally:
     print("Testing process completed")
+
 
 ```
 ---

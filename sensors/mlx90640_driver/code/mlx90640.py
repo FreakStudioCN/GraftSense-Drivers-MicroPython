@@ -254,6 +254,10 @@ class I2CDevice:
             start (int): 缓冲区中开始存放数据的起始索引，默认0。
             end (int): 缓冲区中存放数据的结束索引，默认None（写到结尾）。
 
+        Raises:
+            TypeError: 当 buf 不是 bytearray 时。
+            ValueError: 当 start/end 超出范围时。
+
         Notes:
             - buf长度必须等于需要读取的字节数。
             - 非ISR-safe。
@@ -267,12 +271,20 @@ class I2CDevice:
             start (int): Start index in buffer for storing data (default 0).
             end (int): End index in buffer for storing data (default None).
 
+        Raises:
+            TypeError: If buf is not a bytearray.
+            ValueError: If start/end are out of range.
+
         Notes:
             - Buffer length must match expected read size.
             - Not ISR-safe.
         """
+        if not isinstance(buf, bytearray):
+            raise TypeError("buf must be a bytearray")
         if end is None:
             end = len(buf)
+        if not (0 <= start < end <= len(buf)):
+            raise ValueError(f"Invalid start/end range: start={start}, end={end}, len={len(buf)}")
 
         self.i2c.readfrom_into(self.device_address, buf, start=start, end=end)
 
@@ -282,6 +294,9 @@ class I2CDevice:
 
         Args:
             buf (bytes): 要写入的数据缓冲区。
+
+        Raises:
+            TypeError: 当 buf 不是 bytes时。
 
         Notes:
             - buf必须是bytes或bytearray类型。
@@ -295,11 +310,16 @@ class I2CDevice:
         Args:
             buf (bytes): Data buffer to write.
 
+        Raises:
+            TypeError: If buf is not bytes.
+
         Notes:
             - buf must be of type bytes or bytearray.
             - Uses machine.I2C.writeto internally.
             - Not ISR-safe.
         """
+        if not isinstance(buf, bytes):
+            raise TypeError(f"buf must be bytes, got {type(buf).__name__}")
         self.i2c.writeto(self.device_address, buf)
 
     def write_then_read_into(self, out_buffer: bytes, in_buffer: bytearray, *, out_start: int = 0, out_end: int = None,
@@ -314,6 +334,10 @@ class I2CDevice:
             out_end (int): 写入数据的结束索引，默认None（写到结尾）。
             in_start (int): 读取数据存放的起始索引，默认0。
             in_end (int): 读取数据存放的结束索引，默认None（读到结尾）。
+
+        Raises:
+            TypeError: out_buffer 不是 bytes 或 in_buffer 不是 bytearray。
+            ValueError: out_start/out_end 或 in_start/in_end 超出缓冲区长度范围。
 
         Notes:
             - 常用于寄存器访问：先写寄存器地址再读寄存器内容。
@@ -332,23 +356,41 @@ class I2CDevice:
             in_start (int): Start index in in_buffer (default 0).
             in_end (int): End index in in_buffer (default None).
 
+        Raises:
+            TypeError: If out_buffer is not bytes or in_buffer is not bytearray.
+            ValueError: If out_start/out_end or in_start/in_end are out of buffer range.
+
         Notes:
             - Commonly used for register access: write address then read value.
             - Uses memoryview to avoid extra allocations.
             - Not ISR-safe.
         """
+        # 类型检查
+        if not isinstance(out_buffer, bytes):
+            raise TypeError(f"out_buffer must be bytes, got {type(out_buffer).__name__}")
+        if not isinstance(in_buffer, bytearray):
+            raise TypeError(f"in_buffer must be bytearray, got {type(in_buffer).__name__}")
+
+        # 默认索引
         if out_end is None:
             out_end = len(out_buffer)
-
         if in_end is None:
             in_end = len(in_buffer)
 
+        # 索引范围检查
+        if not (0 <= out_start <= out_end <= len(out_buffer)):
+            raise ValueError(f"Invalid out_buffer range: start={out_start}, end={out_end}, len={len(out_buffer)}")
+        if not (0 <= in_start <= in_end <= len(in_buffer)):
+            raise ValueError(f"Invalid in_buffer range: start={in_start}, end={in_end}, len={len(in_buffer)}")
         self.i2c.writeto(self.device_address, memoryview(out_buffer)[out_start:out_end], False)
         self.i2c.readfrom_into(self.device_address, memoryview(in_buffer)[in_start:in_end])
 
     def _probe_for_device(self) -> None:
         """
         探测I2C设备是否存在。
+
+        Raises:
+            ValueError: 如果设备不存在或无法响应。
 
         Notes:
             - 优先尝试写空字节确认设备存在。
@@ -359,6 +401,9 @@ class I2CDevice:
         ==========================================
 
         Probe for device to ensure it responds on the bus.
+
+        Raises:
+            ValueError: Raised if the device is absent or does not respond.
 
         Notes:
             - First attempts empty write to probe device.
@@ -540,11 +585,16 @@ class MLX90640:
 
         Args:
             i2c_bus (machine.I2C): 已初始化的I2C总线实例。
-            address (int): MLX90640的I2C地址，默认0x33。
+            address (int): MLX90640的I2C地址。
+
+        Raises:
+            TypeError: i2c_bus 不是 machine.I2C 实例，address 不是 int。
+            ValueError: address 不在合法范围内。
 
         Notes:
             - 初始化过程会读取EEPROM数据并提取校准参数，耗时较长。
             - 若设备连接失败或参数提取错误，会抛出相应异常。
+            - I2C默认地址根据手册来看是0x33,实际上我们通过判断连接设备后扫描到的符合范围的设备地址进行I2C地址的传入。
 
         ==========================================
 
@@ -552,12 +602,26 @@ class MLX90640:
 
         Args:
             i2c_bus (machine.I2C): Initialized I2C bus instance.
-            address (int): I2C address of MLX90640, default 0x33.
+            address (int): I2C address of MLX90640.
+
+        Raises:
+            TypeError: i2c_bus is not an instance of machine.I2C, address is not an int.
+            ValueError: address is not within the valid range.
 
         Notes:
             - Initialization reads EEPROM data and extracts calibration parameters, which takes time.
             - Corresponding exceptions will be thrown if device connection fails or parameter extraction errors occur.
+            - The default I2C address is 0x33 according to the manual, but in practice, we use the device address detected after connecting the device to set the I2C address.
         """
+        # 参数校验
+        if not isinstance(i2c_bus, machine.I2C):
+            raise TypeError(f"i2c_bus must be a machine.I2C instance, got {type(i2c_bus).__name__}")
+        if not isinstance(address, int):
+            raise TypeError(f"address must be an int or None, got {type(address).__name__}")
+        # 这里按手册默认范围，可根据实际修改
+        if not (0x31 <= address <= 0x35):
+            raise ValueError(f"Invalid MLX90640 I2C address: 0x{address:x}")
+
         # 初始化EEPROM数据缓冲区
         self.ee_data = init_int_array(1024)
         # 双缓存

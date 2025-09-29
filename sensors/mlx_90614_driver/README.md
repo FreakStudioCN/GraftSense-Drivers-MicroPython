@@ -75,7 +75,7 @@ MLX90614 和 MLX90615 是基于红外技术的非接触式温度传感器，可�
 #### 2. 子类 `MLX90614`
 - **作用**：控制 MLX90614 传感器，支持单/双区域测温。
 - **主要方法**：
-  - `init(i2c, address: int = 0x5a) -> None`：初始化传感器，绑定 I2C 实例和地址。
+  - `init(i2c, address: int =None) -> None`：初始化传感器。
   - `read() -> dict`：批量读取温度数据，返回包含 `ambient`、`object`、`object2`（双区域）的字典。
   - `get() -> dict`：`read()` 的别名方法。
 - **属性**：
@@ -83,7 +83,7 @@ MLX90614 和 MLX90615 是基于红外技术的非接触式温度传感器，可�
 
 #### 3. 子类 `MLX90615`
 - **作用**：控制 MLX90615 传感器（单区域）。
-- **初始化**：`__init__(i2c, address: int = 0x5b) -> None`，直接绑定 I2C 实例和地址（默认地址 0x5b）。
+- **初始化**：`__init__(i2c, address: int = None) -> None`。
 - **限制**：`dual_zone` 固定为 `False`，不支持 `object2` 相关功能。
 
 
@@ -264,10 +264,10 @@ if len(devices_list) == 0:
 else:
     print('i2c devices found:', len(devices_list))
 for device in devices_list:
-    if 0x60 <= device <= 0x7A:
+    if 0x5A <= device <= 0x5D:
         print("I2c hexadecimal address:", hex(device))
         mlx61xaddr = device
-        
+
 # 初始化 MLX90614
 sensor14 = MLX90614(i2c, mlx61xaddr)
 print("[MLX90614] Sensor initialized.")
@@ -284,9 +284,6 @@ test_sensor_realtime(sensor14, "MLX90614", interval=1.0)
 # ================= MLX90615 测试 =================
 print("\n--- Starting MLX90615 Realtime Test ---")
 test_sensor_realtime(sensor15, "MLX90615", interval=1.0)
-
-
-
 
 ```
 ---

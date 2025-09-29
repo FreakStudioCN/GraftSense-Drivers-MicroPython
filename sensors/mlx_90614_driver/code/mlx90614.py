@@ -15,6 +15,7 @@ __platform__ = "MicroPython v1.23"
 
 #导入模块用于数据打包和解包
 import ustruct
+from machine import I2C, Pin
 
 # ======================================== 全局变量 =============================================
 
@@ -278,11 +279,11 @@ class MLX90614(SensorBase):
 
     Attributes:
         i2c (I2C): 已初始化的 I2C 对象。
-        address (int): 设备地址，默认 0x5a。
+        address (int): 设备地址。
         dual_zone (bool): 是否支持双温区，读取配置寄存器获取。
 
     Methods:
-        init(i2c, address: int = 0x5a) -> None: 初始化传感器。
+        init(i2c, address: int = None) -> None: 初始化传感器。
         read() -> dict: 一次性读取 ambient、object、object2 数据。
         get() -> dict: read 的别名方法。
 
@@ -295,11 +296,11 @@ class MLX90614(SensorBase):
 
     Attributes:
         i2c (I2C): Initialized I2C object.
-        address (int): Device address (default 0x5a).
+        address (int): Device address.
         dual_zone (bool): True if dual-zone, parsed from configuration register.
 
     Methods:
-        init(i2c, address: int = 0x5a) -> None: Initialize sensor.
+        init(i2c, address: int = None) -> None: Initialize sensor.
         read() -> dict: Read ambient, object, object2 data at once.
         get() -> dict: Alias for read().
 
@@ -317,10 +318,15 @@ class MLX90614(SensorBase):
 
         Args:
             i2c (I2C): 已创建的 I2C 对象。
-            address (int): 设备地址，默认 0x5a。
+            address (int): 设备地址。
+
+        Raises:
+            TypeError: i2c 不是 I2C 实例，address 不是 int。
+            ValueError: address 不在 MLX90614 的合法 I2C 地址范围内。
 
         Notes:
             dual_zone 根据寄存器配置自动解析。
+            根据手册默认地址0x5a,实际上我们通过判断连接设备后扫描到的符合范围的设备地址进行I2C地址的传入。
 
         ==========================================
 
@@ -328,10 +334,23 @@ class MLX90614(SensorBase):
 
         Args:
             i2c (I2C): Initialized I2C object.
-            address (int): Device address (default 0x5a).
+            address (int): Device address.
+
+        Raises:
+            TypeError: If i2c is not an I2C instance, or address is not int.
+            ValueError: If address is out of MLX90614 allowed range.
+
         Notes:
             dual_zone parsed from configuration register.
+            According to the manual, the default address is 0x5a. In practice, we pass the I2C address by determining the device address within the acceptable range after scanning the connected devices.
         """
+        # 参数校验
+        if not isinstance(i2c, I2C):
+            raise TypeError(f"i2c must be an I2C instance, got {type(i2c).__name__}")
+        if not isinstance(address, int):
+            raise TypeError(f"address must be int, got {type(address).__name__}")
+        if not (0x5A <= address <= 0x5D):
+            raise ValueError(f"Invalid MLX90615 I2C address: 0x{address:x}")
         self.i2c = i2c
         self.address = address
         _config1 = i2c.readfrom_mem(address, 0x25, 2)
@@ -393,11 +412,11 @@ class MLX90615(SensorBase):
 
     Attributes:
         i2c (I2C): 已初始化的 I2C 对象。
-        address (int): 设备地址，默认 0x5b。
+        address (int): 设备地址。
         dual_zone (bool): 总为 False，不支持双温区。
 
     Methods:
-        __init__(i2c, address: int = 0x5b) -> None: 初始化传感器。
+        __init__(i2c, address: int = None) -> None: 初始化传感器。
 
     Notes:
         不支持 object2。
@@ -408,27 +427,31 @@ class MLX90615(SensorBase):
 
     Attributes:
         i2c (I2C): Initialized I2C object.
-        address (int): Device address (default 0x5b).
+        address (int): Device address.
         dual_zone (bool): Always False, no dual-zone support.
 
     Methods:
-        __init__(i2c, address: int = 0x5b) -> None: Initialize sensor.
+        __init__(i2c, address: int = None) -> None: Initialize sensor.
 
     Notes:
         object2 is not available.
     """
 
-    def __init__(self, i2c, address: int = 0x5b):
+    def __init__(self, i2c, address: int = None):
         """
         初始化 MLX90615。
 
         Args:
             i2c (I2C): 已创建的 I2C 对象。
-            address (int): 设备地址，默认 0x5b。
+            address (int): i2c设备地址。
 
+        Raises:
+            TypeError: i2c 不是 I2C 实例，address 不是 int。
+            ValueError: address 不在 MLX90615 的合法 I2C 地址范围内。
 
         Notes:
             不支持 dual_zone。
+            根据手册默认地址0x5b,实际上我们通过判断连接设备后扫描到的符合范围的设备地址进行I2C地址的传入。
 
         ==========================================
 
@@ -436,11 +459,25 @@ class MLX90615(SensorBase):
 
         Args:
             i2c (I2C): Initialized I2C object.
-            address (int): Device address (default 0x5b).
+            address (int):i2c Device address.
+
+        Raises:
+            TypeError: If i2c is not an I2C instance, or address is not int.
+            ValueError: If address is out of MLX90615 allowed range.
 
         Notes:
             dual_zone is always False.
+            According to the manual, the default address is 0x5b. In practice, we pass the I2C address by determining the device address within the acceptable range after scanning the connected devices.
         """
+        # 参数校验
+        if not isinstance(i2c, I2C):
+            raise TypeError(f"i2c must be an I2C instance, got {type(i2c).__name__}")
+
+        if not isinstance(address, int):
+            raise TypeError(f"address must be int, got {type(address).__name__}")
+
+        if not (0x5A <= address <= 0x5D):
+            raise ValueError(f"Invalid MLX90615 I2C address: 0x{address:x}")
         self.i2c = i2c
         self.address = address
         self.dual_zone = False

@@ -80,7 +80,7 @@ class PCF8574:
 
         Args:
             i2c (I2C): I2C 总线对象。
-            address (int, optional): I2C 地址，默认 0x20。
+            address (int, optional): I2C 地址。
             int_pin (int, optional): INT 引脚编号。
             callback (callable, optional): 中断回调函数。
 
@@ -91,6 +91,7 @@ class PCF8574:
         Notes:
             - 初始化不会触发 I2C 操作。
             - 中断回调将在 micropython.schedule 调度下执行。
+            - I2C根据手册来看默认地址是0x20,但是地址是根据硬件变的，我们通过扫描I2C总线然后传入符合范围的I2C地址。
 
         ==========================================
 
@@ -98,7 +99,7 @@ class PCF8574:
 
         Args:
             i2c (I2C): I2C bus object.
-            address (int, optional): I2C address, default 0x20.
+            address (int, optional): I2C address.
             int_pin (int, optional): INT pin number.
             callback (callable, optional): Interrupt callback function.
             trigger (int, optional): Trigger type, default falling edge.
@@ -110,6 +111,8 @@ class PCF8574:
         Notes:
             - Initialization does not perform I2C operations.
             - Callback is scheduled via micropython.schedule.
+            - According to the manual, the default I2C address is 0x20, but the address varies depending on the hardware.
+            We scan the I2C bus and then pass in an I2C address that falls within the valid range.
         """
         # 检查i2c是不是一个I2C对象
         if not isinstance(i2c, I2C):
