@@ -389,7 +389,6 @@ class BusPWMServoController:
         if speed_deg_per_s is None or cfg.get("angle") is None or speed_deg_per_s <= 0:
             self._write_pulse(channel, pulse)
             cfg["angle"] = 180.0 - angle if cfg["rev"] else angle
-            return
 
         # 处理平滑角度变化
         current = cfg.get("angle", angle)

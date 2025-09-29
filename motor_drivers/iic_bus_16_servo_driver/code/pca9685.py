@@ -77,8 +77,6 @@ class PCA9685:
             i2c (I2C): 用于与PCA9685芯片通信的I2C实例。
             address (int, optional): PCA9685的I2C地址，默认为0x40。
 
-        Raises:
-            ValueError: 如果I2C地址超出范围（0x40-0x4F）。
 
         ==========================================
         Constructor to initialize the PCA9685 instance, setting the I2C address and calling the `reset()` method to reset.
@@ -87,12 +85,7 @@ class PCA9685:
             i2c (I2C): I2C instance for communicating with the PCA9685.
             address (int, optional): I2C address of the PCA9685, default is 0x40.
 
-        Raises:
-            ValueError: If the I2C address is out of range (0x40-0x4F).
         """
-        # 判断I2C地址是否在0x40 到 0x4F之间
-        if not 0x40 <= address <= 0x4F:
-            raise ValueError("Invalid address: %d (must be 0x40-0x4F)" % address)
 
         self.i2c = i2c
         self.address = address

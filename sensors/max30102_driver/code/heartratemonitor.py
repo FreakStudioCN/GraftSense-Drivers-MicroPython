@@ -249,13 +249,18 @@ class HeartRateMonitor:
 
         Args:
             sample (float|int): 原始样本值。
-
+        Raises:
+            TypeError: 如果 sample 不是 int 或 float。
         =========================================
         Add a new sample and update the smoothed value.
 
         Args:
             sample (float|int): Raw sample value.
+        Raises:
+            TypeError: If sample is not int or float.
         """
+        if not isinstance(sample, (int, float)):
+            raise TypeError("sample must be an int or float")
         timestamp = time.ticks_ms()
         self.samples.append(sample)
         self.timestamps.append(timestamp)
@@ -440,19 +445,36 @@ class MAX30102(object):
 
     def __init__(self, i2c: I2C, i2c_hex_address=MAX3010X_I2C_ADDRESS):
         """
-        构造函数。
+        构造函数，用于初始化 MAX3010X 传感器实例。
 
         Args:
             i2c (I2C): I2C 实例。
             i2c_hex_address (int): 器件地址（7 位，默认 0x57）。
 
+        Raises:
+            TypeError: 如果 i2c 不是 I2C 实例，或者 i2c_hex_address 不是 int。
+            ValueError: 如果 i2c_hex_address 不在 0x00~0x7F 范围内。
+
         =========================================
-        Constructor.
+        Constructor for MAX3010X sensor instance.
 
         Args:
             i2c (I2C): I2C instance.
             i2c_hex_address (int): 7-bit device address (default 0x57).
+
+        Raises:
+            TypeError: If i2c is not an I2C instance or i2c_hex_address is not an int.
+            ValueError: If i2c_hex_address is not in the range 0x00–0x7F.
         """
+
+        if not isinstance(i2c, I2C):
+            raise TypeError("i2c must be an instance of I2C")
+        if not isinstance(i2c_hex_address, int):
+            raise TypeError("i2c_hex_address must be an int")
+
+            # 地址范围检查（I2C 7-bit 地址）
+        if not 0x00 <= i2c_hex_address <= 0x7F:
+            raise ValueError("i2c_hex_address must be in 0x00–0x7F")
         self.i2c_address = i2c_hex_address
         self._i2c = i2c
         self._active_leds = None
@@ -480,6 +502,10 @@ class MAX30102(object):
             sample_avg (int): FIFO 平均样本数（1/2/4/8/16/32）。
             pulse_width (int): 69/118/215/411（us）。
 
+        Raises:
+            TypeError: 参数类型不正确。
+            ValueError: 参数值超出允许范围。
+
         =========================================
         Initialize sensor with common defaults and clear FIFO.
 
@@ -491,7 +517,36 @@ class MAX30102(object):
             sample_avg (int): FIFO averaging (1/2/4/8/16/32).
             pulse_width (int): 69/118/215/411 us.
 
+        Raises:
+            TypeError: If any argument is not int.
+            ValueError: If any argument is out of allowed range.
         """
+        # 参数类型检查
+        for arg_name, arg_value in [
+            ("led_mode", led_mode),
+            ("adc_range", adc_range),
+            ("sample_rate", sample_rate),
+            ("led_power", led_power),
+            ("sample_avg", sample_avg),
+            ("pulse_width", pulse_width),
+        ]:
+            if not isinstance(arg_value, int):
+                raise TypeError(f"{arg_name} must be an int")
+
+        # 参数值检查
+        if led_mode not in (1, 2, 3):
+            raise ValueError("led_mode must be 1, 2, or 3")
+        if adc_range not in (2048, 4096, 8192, 16384):
+            raise ValueError("adc_range must be one of 2048, 4096, 8192, 16384")
+        if not 50 <= sample_rate <= 3200:
+            raise ValueError("sample_rate must be between 50 and 3200")
+        if not 0x02 <= led_power <= 0xFF:
+            raise ValueError("led_power must be between 0x02 and 0xFF")
+        if sample_avg not in (1, 2, 4, 8, 16, 32):
+            raise ValueError("sample_avg must be 1,2,4,8,16,32")
+        if pulse_width not in (69, 118, 215, 411):
+            raise ValueError("pulse_width must be 69,118,215,411")
+
         # 软复位
         self.soft_reset()
         # FIFO 平均
@@ -536,7 +591,7 @@ class MAX30102(object):
         Returns:
             bytes: Raw register value (1 byte).
         """
-        rev_id = self.i2c_read_register(MAX30105_INT_STAT_1)
+        rev_id = self._i2c_read_register(MAX30105_INT_STAT_1)
         return rev_id
 
     def get_int_2(self):
@@ -552,7 +607,7 @@ class MAX30102(object):
         Returns:
             bytes: Raw register value (1 byte).
         """
-        rev_id = self.i2c_read_register(MAX30105_INT_STAT_2)
+        rev_id = self._i2c_read_register(MAX30105_INT_STAT_2)
         return rev_id
 
     def enable_a_full(self):
@@ -656,7 +711,7 @@ class MAX30102(object):
         curr_status = -1
         while not ((curr_status & MAX30105_RESET) == 0):
             time.sleep_ms(10)
-            curr_status = ord(self.i2c_read_register(MAX30105_MODE_CONFIG))
+            curr_status = ord(self._i2c_read_register(MAX30105_MODE_CONFIG))
 
     def shutdown(self):
         """
@@ -827,19 +882,32 @@ class MAX30102(object):
         self._pulse_width = pw
 
     def set_active_leds_amplitude(self, amplitude):
-
         """
-        按当前启用的 LED 数量批量设置电流。
+            按当前启用的 LED 数量批量设置电流。
 
-        Args:
-            amplitude (int): 电流寄存器值（0x02~0xFF）。
+            Args:
+                amplitude (int): 电流寄存器值（0x02~0xFF）。
 
-        =========================================
-        Set LED current for all active LEDs.
+            Raises:
+                TypeError: 如果 amplitude 不是 int 类型。
+                ValueError: 如果 amplitude 不在 0x02~0xFF 范围内。
 
-        Args:
-            amplitude (int): Current register value (0x02..0xFF).
-        """
+            =========================================
+            Set LED current for all active LEDs.
+
+            Args:
+                amplitude (int): Current register value (0x02..0xFF).
+
+            Raises:
+                TypeError: If amplitude is not an int.
+                ValueError: If amplitude is not in the range 0x02–0xFF.
+            """
+        # 参数类型检查
+        if not isinstance(amplitude, int):
+            raise TypeError("amplitude must be an int")
+        # 参数值检查
+        if not 0x02 <= amplitude <= 0xFF:
+            raise ValueError("amplitude must be between 0x02 and 0xFF")
         if self._active_leds and self._active_leds > 0:
             self.set_pulse_amplitude_red(amplitude)
         if self._active_leds and self._active_leds > 1:
@@ -853,16 +921,28 @@ class MAX30102(object):
         设置红光 LED 电流。
 
         Args:
-            amplitude (int): 电流寄存器值。
+            amplitude (int): 电流寄存器值（0x02~0xFF）。
+
+        Raises:
+            TypeError: 如果 amplitude 不是 int 类型。
+            ValueError: 如果 amplitude 不在 0x02~0xFF 范围内。
 
         =========================================
         Set RED LED current.
 
         Args:
-            amplitude (int): Current register value.
-        """
+            amplitude (int): Current register value (0x02..0xFF).
 
-        self.i2c_set_register(MAX30105_LED1_PULSE_AMP, amplitude)
+        Raises:
+            TypeError: If amplitude is not an int.
+            ValueError: If amplitude is not in the range 0x02–0xFF.
+        """
+        if not isinstance(amplitude, int):
+            raise TypeError("amplitude must be an int")
+            # 参数值检查
+        if not 0x02 <= amplitude <= 0xFF:
+            raise ValueError("amplitude must be between 0x02 and 0xFF")
+        self._i2c_set_register(MAX30105_LED1_PULSE_AMP, amplitude)
 
     def set_pulse_amplitude_it(self, amplitude):
 
@@ -871,15 +951,25 @@ class MAX30102(object):
 
         Args:
             amplitude (int): 电流寄存器值。
+        Raises:
+            TypeError: 如果 amplitude 不是 int 类型。
+            ValueError: 如果 amplitude 不在 0x02~0xFF 范围内。
 
         =========================================
         Set IR LED current (method name kept as 'it').
 
         Args:
             amplitude (int): Current register value.
+        Raises:
+            TypeError: If amplitude is not an int.
+            ValueError: If amplitude is not in the range 0x02–0xFF.
         """
-
-        self.i2c_set_register(MAX30105_LED2_PULSE_AMP, amplitude)
+        if not isinstance(amplitude, int):
+            raise TypeError("amplitude must be an int")
+            # 参数值检查
+        if not 0x02 <= amplitude <= 0xFF:
+            raise ValueError("amplitude must be between 0x02 and 0xFF")
+        self._i2c_set_register(MAX30105_LED2_PULSE_AMP, amplitude)
 
     def set_pulse_amplitude_green(self, amplitude):
 
@@ -888,15 +978,24 @@ class MAX30102(object):
 
         Args:
             amplitude (int): 电流寄存器值。
-
+        Raises:
+            TypeError: 如果 amplitude 不是 int 类型。
+            ValueError: 如果 amplitude 不在 0x02~0xFF 范围内。
         =========================================
         Set GREEN LED current (if available).
 
         Args:
             amplitude (int): Current register value.
+        Raises:
+            TypeError: If amplitude is not an int.
+            ValueError: If amplitude is not in the range 0x02–0xFF.
         """
-
-        self.i2c_set_register(MAX30105_LED3_PULSE_AMP, amplitude)
+        if not isinstance(amplitude, int):
+            raise TypeError("amplitude must be an int")
+            # 参数值检查
+        if not 0x02 <= amplitude <= 0xFF:
+            raise ValueError("amplitude must be between 0x02 and 0xFF")
+        self._i2c_set_register(MAX30105_LED3_PULSE_AMP, amplitude)
 
     def set_pulse_amplitude_proximity(self, amplitude):
 
@@ -905,32 +1004,56 @@ class MAX30102(object):
 
         Args:
             amplitude (int): 电流寄存器值。
+        Raises:
+            TypeError: 如果 amplitude 不是 int 类型。
+            ValueError: 如果 amplitude 不在 0x02~0xFF 范围内。
 
         =========================================
         Set proximity LED current.
 
         Args:
             amplitude (int): Current register value.
+        Raises:
+            TypeError: If amplitude is not an int.
+            ValueError: If amplitude is not in the range 0x02–0xFF.
         """
-
-        self.i2c_set_register(MAX30105_LED_PROX_AMP, amplitude)
+        if not isinstance(amplitude, int):
+            raise TypeError("amplitude must be an int")
+            # 参数值检查
+        if not 0x02 <= amplitude <= 0xFF:
+            raise ValueError("amplitude must be between 0x02 and 0xFF")
+        self._i2c_set_register(MAX30105_LED3_PULSE_AMP, amplitude)
+        self._i2c_set_register(MAX30105_LED_PROX_AMP, amplitude)
 
     def set_proximity_threshold(self, thresh_msb):
-
         """
         设置接近中断门限的高 8 位。
 
         Args:
-            thresh_msb (int): 门限高 8 位。
+            thresh_msb (int): 门限高 8 位（0x00~0xFF）。
+
+        Raises:
+            TypeError: 如果 thresh_msb 不是 int 类型。
+            ValueError: 如果 thresh_msb 不在 0x00~0xFF 范围内。
 
         =========================================
         Set MSB part of proximity interrupt threshold.
 
         Args:
-            thresh_msb (int): Threshold MSB value.
-        """
+            thresh_msb (int): Threshold MSB value (0x00..0xFF).
 
-        self.i2c_set_register(MAX30105_PROX_INT_THRESH, thresh_msb)
+        Raises:
+            TypeError: If thresh_msb is not an int.
+            ValueError: If thresh_msb is not in the range 0x00–0xFF.
+        """
+        # 类型检查
+        if not isinstance(thresh_msb, int):
+            raise TypeError("thresh_msb must be an int")
+        # 值域检查
+        if not 0x00 <= thresh_msb <= 0xFF:
+            raise ValueError("thresh_msb must be between 0x00 and 0xFF")
+
+        self._i2c_set_register(MAX30105_PROX_INT_THRESH, thresh_msb)
 
     def set_fifo_average(self, number_of_samples):
 
@@ -1015,9 +1138,9 @@ class MAX30102(object):
         Clear FIFO pointers (recommended before starting reads).
         """
 
-        self.i2c_set_register(MAX30105_FIFO_WRITE_PTR, 0)
-        self.i2c_set_register(MAX30105_FIFO_OVERFLOW, 0)
-        self.i2c_set_register(MAX30105_FIFO_READ_PTR, 0)
+        self._i2c_set_register(MAX30105_FIFO_WRITE_PTR, 0)
+        self._i2c_set_register(MAX30105_FIFO_OVERFLOW, 0)
+        self._i2c_set_register(MAX30105_FIFO_READ_PTR, 0)
 
     def enable_fifo_rollover(self):
 
@@ -1073,7 +1196,7 @@ class MAX30102(object):
             bytes: Register value (1 byte).
         """
 
-        wp = self.i2c_read_register(MAX30105_FIFO_WRITE_PTR)
+        wp = self._i2c_read_register(MAX30105_FIFO_WRITE_PTR)
         return wp
 
     def get_read_pointer(self):
@@ -1091,7 +1214,7 @@ class MAX30102(object):
             bytes: Register value (1 byte).
         """
 
-        wp = self.i2c_read_register(MAX30105_FIFO_READ_PTR)
+        wp = self._i2c_read_register(MAX30105_FIFO_READ_PTR)
         return wp
 
     def read_temperature(self):
@@ -1110,34 +1233,47 @@ class MAX30102(object):
         """
 
         # 触发一次温度转换
-        self.i2c_set_register(MAX30105_DIE_TEMP_CONFIG, 0x01)
+        self._i2c_set_register(MAX30105_DIE_TEMP_CONFIG, 0x01)
         # 轮询完成位清零
-        reading = ord(self.i2c_read_register(MAX30105_INT_STAT_2))
+        reading = ord(self._i2c_read_register(MAX30105_INT_STAT_2))
         time.sleep_ms(100)
         while (reading & MAX30105_INT_DIE_TEMP_RDY_ENABLE) > 0:
-            reading = ord(self.i2c_read_register(MAX30105_INT_STAT_2))
+            reading = ord(self._i2c_read_register(MAX30105_INT_STAT_2))
         time.sleep_ms(1)
         # 读取整数与小数部分
-        tempInt = ord(self.i2c_read_register(MAX30105_DIE_TEMP_INT))
-        tempFrac = ord(self.i2c_read_register(MAX30105_DIE_TEMP_FRAC))
+        tempInt = ord(self._i2c_read_register(MAX30105_DIE_TEMP_INT))
+        tempFrac = ord(self._i2c_read_register(MAX30105_DIE_TEMP_FRAC))
         return float(tempInt) + (float(tempFrac) * 0.0625)
 
     def set_prox_int_tresh(self, val):
-
         """
-        设置接近中断门限（别名函数）。
+        设置接近中断门限。
 
         Args:
-            val (int): 门限高 8 位。
+            val (int): 门限高 8 位（0x00~0xFF）。
+
+        Raises:
+            TypeError: 如果 val 不是 int 类型。
+            ValueError: 如果 val 不在 0x00~0xFF 范围内。
 
         =========================================
         Set proximity interrupt threshold (alias of set_proximity_threshold).
 
         Args:
-            val (int): Threshold MSB value.
-        """
+            val (int): Threshold MSB value (0x00..0xFF).
 
-        self.i2c_set_register(MAX30105_PROX_INT_THRESH, val)
+        Raises:
+            TypeError: If val is not an int.
+            ValueError: If val is not in the range 0x00–0xFF.
+        """
+        # 类型检查
+        if not isinstance(val, int):
+            raise TypeError("val must be an int")
+        # 值域检查
+        if not 0x00 <= val <= 0xFF:
+            raise ValueError("val must be between 0x00 and 0xFF")
+
+        self._i2c_set_register(MAX30105_PROX_INT_THRESH, val)
 
     def read_part_id(self):
         
@@ -1154,7 +1290,7 @@ class MAX30102(object):
             bytes: 1-byte value.
         """
 
-        part_id = self.i2c_read_register(MAX30105_PART_ID)
+        part_id = self._i2c_read_register(MAX30105_PART_ID)
         return part_id
 
     def check_part_id(self):
@@ -1190,11 +1326,10 @@ class MAX30102(object):
             int: Revision number.
         """
 
-        rev_id = self.i2c_read_register(MAX30105_REVISION_ID)
+        rev_id = self._i2c_read_register(MAX30105_REVISION_ID)
         return ord(rev_id)
 
     def enable_slot(self, slot_number, device):
-        
         """
         在多路 LED 模式下配置时间槽。
 
@@ -1203,7 +1338,8 @@ class MAX30102(object):
             device (int): 槽位绑定：SLOT_* 常量之一。
 
         Raises:
-            ValueError: 槽位编号不在 1..4。
+            TypeError: 如果 device 不是 int。
+            ValueError: 槽位编号不在 1..4，或 device 不在允许范围。
 
         =========================================
         Configure time slots for multi-LED mode.
@@ -1213,8 +1349,21 @@ class MAX30102(object):
             device (int): One of SLOT_* constants.
 
         Raises:
-            ValueError: If slot_number not in 1..4.
+            TypeError: If device is not an int.
+            ValueError: If slot_number not in 1..4 or device invalid.
         """
+        # slot_number 检查
+        if slot_number not in (1, 2, 3, 4):
+            raise ValueError(f"Wrong slot number: {slot_number}!")
+
+        # device 类型和值检查
+        allowed_devices = (SLOT_RED_LED, SLOT_IR_LED, SLOT_GREEN_LED, SLOT_NONE)  # 根据实际常量定义
+        if not isinstance(device, int):
+            raise TypeError("device must be an int")
+        if device not in allowed_devices:
+            raise ValueError(f"Invalid device: {device}, must be one of {allowed_devices}")
+
+        # 配置寄存器
         if slot_number == 1:
             self.bitmask(MAX30105_MULTI_LED_CONFIG_1, MAX30105_SLOT1_MASK, device)
         elif slot_number == 2:
@@ -1223,8 +1372,6 @@ class MAX30102(object):
             self.bitmask(MAX30105_MULTI_LED_CONFIG_2, MAX30105_SLOT3_MASK, device)
         elif slot_number == 4:
             self.bitmask(MAX30105_MULTI_LED_CONFIG_2, MAX30105_SLOT4_MASK, device << 4)
-        else:
-            raise ValueError('Wrong slot number:{0}!'.format(slot_number))
 
     def disable_slots(self):
         """
@@ -1233,10 +1380,10 @@ class MAX30102(object):
         =========================================
         Clear all time-slot assignments.
         """
-        self.i2c_set_register(MAX30105_MULTI_LED_CONFIG_1, 0)
-        self.i2c_set_register(MAX30105_MULTI_LED_CONFIG_2, 0)
+        self._i2c_set_register(MAX30105_MULTI_LED_CONFIG_1, 0)
+        self._i2c_set_register(MAX30105_MULTI_LED_CONFIG_2, 0)
 
-    def i2c_read_register(self, REGISTER, n_bytes=1):
+    def _i2c_read_register(self, REGISTER, n_bytes=1):
         """
         读寄存器。
 
@@ -1260,7 +1407,7 @@ class MAX30102(object):
         self._i2c.writeto(self.i2c_address, bytearray([REGISTER]))
         return self._i2c.readfrom(self.i2c_address, n_bytes)
 
-    def i2c_set_register(self, REGISTER, VALUE):
+    def _i2c_set_register(self, REGISTER, VALUE):
         """
         写寄存器一个字节。
 
@@ -1294,8 +1441,8 @@ class MAX30102(object):
             MASK (int): Bit mask.
             NEW_VALUES (int): New value (already aligned).
         """
-        newCONTENTS = (ord(self.i2c_read_register(REGISTER)) & MASK) | NEW_VALUES
-        self.i2c_set_register(REGISTER, newCONTENTS)
+        newCONTENTS = (ord(self._i2c_read_register(REGISTER)) & MASK) | NEW_VALUES
+        self._i2c_set_register(REGISTER, newCONTENTS)
 
     def bitmask(self, reg, slotMask, thing):
         """
@@ -1314,11 +1461,11 @@ class MAX30102(object):
             slotMask (int): Bit mask.
             thing (int): New value.
         """
-        originalContents = ord(self.i2c_read_register(reg))
+        originalContents = ord(self._i2c_read_register(reg))
         originalContents = originalContents & slotMask
-        self.i2c_set_register(reg, originalContents | thing)
+        self._i2c_set_register(reg, originalContents | thing)
 
-    def fifo_bytes_to_int(self, fifo_bytes):
+    def _fifo_bytes_to_int(self, fifo_bytes):
         """
         将 FIFO 中的 3 字节样本解码为整数，并按当前脉宽位宽右移。
 
@@ -1507,15 +1654,15 @@ class MAX30102(object):
 
             for _ in range(number_of_samples):
                 # 每个样本字节数 = active_leds * 3
-                fifo_bytes = self.i2c_read_register(MAX30105_FIFO_DATA, self._multi_led_read_mode)
+                fifo_bytes = self._i2c_read_register(MAX30105_FIFO_DATA, self._multi_led_read_mode)
 
                 # 按 LED 通道解码并压入环形缓冲
                 if self._active_leds > 0:
-                    self.sense.red.append(self.fifo_bytes_to_int(fifo_bytes[0:3]))
+                    self.sense.red.append(self._fifo_bytes_to_int(fifo_bytes[0:3]))
                 if self._active_leds > 1:
-                    self.sense.IR.append(self.fifo_bytes_to_int(fifo_bytes[3:6]))
+                    self.sense.IR.append(self._fifo_bytes_to_int(fifo_bytes[3:6]))
                 if self._active_leds > 2:
-                    self.sense.green.append(self.fifo_bytes_to_int(fifo_bytes[6:9]))
+                    self.sense.green.append(self._fifo_bytes_to_int(fifo_bytes[6:9]))
 
                 return True
         else:
@@ -1526,20 +1673,35 @@ class MAX30102(object):
         在给定超时时间（ms）内循环调用 check() 直到有新数据或超时。
 
         Args:
-            max_time_to_check (int): 超时（毫秒）。
+            max_time_to_check (int): 超时（毫秒），必须为非负整数。
 
         Returns:
             bool: 有新数据返回 True；超时返回 False。
+
+        Raises:
+            TypeError: 如果 max_time_to_check 不是 int。
+            ValueError: 如果 max_time_to_check 为负数。
 
         =========================================
         Poll check() until data arrives or timeout (ms) elapses.
 
         Args:
-            max_time_to_check (int): Timeout in ms.
+            max_time_to_check (int): Timeout in ms, must be a non-negative integer.
 
         Returns:
             bool: True if new data found; False on timeout.
+
+        Raises:
+            TypeError: If max_time_to_check is not an int.
+            ValueError: If max_time_to_check is negative.
         """
+        # 类型检查
+        if not isinstance(max_time_to_check, int):
+            raise TypeError("max_time_to_check must be an int")
+        # 值检查
+        if max_time_to_check < 0:
+            raise ValueError("max_time_to_check must be non-negative")
+
         mark_time = time.ticks_ms()
         while True:
             if time.ticks_diff(time.ticks_ms(), mark_time) > max_time_to_check:
@@ -1547,6 +1709,7 @@ class MAX30102(object):
             if self.check():
                 return True
             time.sleep_ms(1)
+
 
 class CircularBuffer(object):
     """
@@ -1590,14 +1753,29 @@ class CircularBuffer(object):
         初始化。
 
         Args:
-            max_size (int): 容量上限。
+            max_size (int): 容量上限，必须为正整数。
+
+        Raises:
+            TypeError: 如果 max_size 不是 int 类型。
+            ValueError: 如果 max_size 小于等于 0。
 
         =========================================
         Initialize.
 
         Args:
-            max_size (int): Capacity.
+            max_size (int): Capacity, must be a positive integer.
+
+        Raises:
+            TypeError: If max_size is not an int.
+            ValueError: If max_size is not positive.
         """
+        # 类型检查
+        if not isinstance(max_size, int):
+            raise TypeError("max_size must be an int")
+        # 值检查
+        if max_size <= 0:
+            raise ValueError("max_size must be a positive integer")
+
         self.data = deque((), max_size, True)
         self.max_size = max_size
 

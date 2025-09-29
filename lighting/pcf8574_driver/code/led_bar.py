@@ -75,24 +75,38 @@ class LEDBar:
 
     def __init__(self, pcf8574: "PCF8574") -> None:
         """
-            基于 PCF8574 的 8 位 LED 灯条驱动类。
+        基于 PCF8574 的 8 位 LED 灯条驱动类。
 
-            Args:
-                pcf8574 (PCF8574): 已初始化好的 PCF8574 实例。
+        Args:
+            pcf8574 (PCF8574): 已初始化好的 PCF8574 实例或实现了兼容方法的对象。
 
-            Notes:
-                默认初始化时会清空所有 LED 状态。
+        Raises:
+            TypeError:
+                - 如果传入对象未实现 `check`、`port`、`pin` 或 `toggle` 方法。
 
-            ==========================================
+        Notes:
+            默认初始化时会清空所有 LED 状态。
 
-            8-bit LED bar driver based on PCF8574.
+        ==========================================
 
-            Args:
-                pcf8574 (PCF8574): Pre-initialized PCF8574 instance.
+        8-bit LED bar driver based on PCF8574.
 
-            Notes:
-                All LEDs will be cleared on initialization.
-            """
+        Args:
+            pcf8574 (PCF8574): Pre-initialized PCF8574 instance
+                               or any object implementing the required methods.
+
+        Raises:
+            TypeError:
+                - If the provided object does not implement
+                  `check`, `port`, `pin`, or `toggle` methods.
+
+        Notes:
+            All LEDs will be cleared on initialization.
+    """
+        required_methods = ["check", "port", "pin", "toggle"]
+        for method in required_methods:
+            if not hasattr(pcf8574, method) or not callable(getattr(pcf8574, method)):
+                raise TypeError(f"pcf8574 must implement method: {method}")
         self.pcf = pcf8574
         self.clear()
 
@@ -130,6 +144,9 @@ class LEDBar:
             value (int): 8 位二进制数，每一位对应一个 LED。
                          例如 0b11110000 表示点亮前 4 个 LED。
 
+        Raises:
+            ValueError: 如果 value 不在 0~255 范围内。
+
         ==========================================
 
         Set the state of all LEDs.
@@ -137,7 +154,13 @@ class LEDBar:
         Args:
             value (int): 8-bit value, each bit maps to one LED.
                          For example, 0b11110000 lights the first 4 LEDs.
+
+        Raises:
+            ValueError: If value is not in the range 0–255.
         """
+        if not 0 <= value <= 0xFF:
+            raise ValueError("value must be between 0 and 255 (0x00–0xFF)")
+
         self.pcf.port = value & 0xFF
 
     def display_level(self, level: int) -> None:

@@ -497,8 +497,6 @@ class DYSV19T:
 
         Start playback (AA 02 00 SM).
 
-        Raises:
-            IOError: If UART write fails
         """
         self._send_frame(0x02)
         self.play_state = self.PLAY_PLAY

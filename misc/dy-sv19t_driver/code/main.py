@@ -24,13 +24,18 @@ def tick(timer):
     定时器回调函数
     Args:
         timer:为监测播放进度条的定时器
+    Raises:
+        TypeError:计时器必须是Timer的一个实例
 
     ============================================================
 
     Args:
         timer: a timer used to monitor the playback progress bar
-
+     Raises:
+         TypeError:timer must be an instance of Timer
     """
+    if not isinstance(timer, Timer):
+        raise TypeError("timer must be an instance of Timer")
     # 查看播放进度方法
     hms = player.check_play_time_send()
     if hms:

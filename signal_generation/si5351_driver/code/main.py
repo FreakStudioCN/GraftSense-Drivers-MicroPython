@@ -15,26 +15,26 @@ import machine
 import time
 #导入silicon5351
 from silicon5351 import SI5351_I2C
-# 初始化 I2C（使用 SCL=7, SDA=6 引脚）
 
 # ======================================== 全局变量 ============================================
 
 crystal = 25e6     # 晶振频率 25 MHz
 mul = 15           # PLL 倍频系数 (25MHz * 15 = 375 MHz)
 freq = 2.0e6       # 输出频率 2 MHz（最大 200 MHz）
-quadrature = True  # 四相模式（最低输出频率 = PLL / 128）
-invert = False     # 反相标志（四相模式下忽略）
+quadrature = True  # 正交输出标志（最低输出频率 = PLL / 128）
+invert = False     # 反相输出标志（四相模式下忽略）
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
+
 # 上电延时3s
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Use silicon5351 to output clock signals.")
-i2c = machine.I2C(1, scl=machine.Pin(7), sda=machine.Pin(6))
+i2c = machine.I2C(1, scl=machine.Pin(7), sda=machine.Pin(6), freq = 100000)
 # 初始化 SI5351 芯片
 si = SI5351_I2C(i2c, crystal=crystal)
 # 配置 PLL0 = 375 MHz
@@ -54,6 +54,7 @@ print(f'done freq={freq} mul={mul} quadrature={quadrature} invert={invert}')
 # 保持输出 20 秒
 time.sleep(20)
 # 关闭输出 0
-si.disable_output(0)
+
+
 
 
