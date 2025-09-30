@@ -212,7 +212,7 @@ class BusPWMServoController:
             pulse_us (int): 脉宽（微秒，µs）。必须为正数。
 
         Raises:
-            ValueError:  pulse_us 为非正数（≤ 0）。
+            ValueError:  pulse_us 为非正数（< 0）。
             RuntimeError: PCA9685 IIC 操作失败。
 
         ==========================================
@@ -227,7 +227,7 @@ class BusPWMServoController:
             RuntimeError: PCA9685 I/O operation fails.
         """
         # 显式检查 pulse_us 是否为正数
-        if pulse_us <= 0:
+        if pulse_us < 0:
             raise ValueError("pulse_us must be a positive number (greater than 0).")
 
         try:

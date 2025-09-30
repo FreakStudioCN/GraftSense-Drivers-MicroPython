@@ -150,6 +150,115 @@ def _q_wave(self, ctl, cmd):
 # ======================================== 自定义类 ============================================
 
 class R60ABD1:
+    """
+    该类提供了对 R60ABD1 毫米波雷达模块的协议解析与高层接口封装，支持通过 UART 与模块通信完成存在检测、运动参数、距离、三维位置、心率、睡眠等信息的查询与控制。
+    注意：模块返回值有物理与协议范围限制，超出或异常情况将返回 None。
+
+    Attributes:
+        uart (UART): 已初始化的 UART 实例，用于与模块通信（必须由外部创建并传入）。
+        _control (int): 内部使用的默认控制字节（例：0x80）。
+        _timeout_ms (int): 查询/接收超时时间，单位毫秒。
+        _rx_buf (bytearray): 非阻塞接收时使用的滚动缓冲区（内部实现细节，不应外部修改）。
+
+    Methods:
+        __init__(uart):
+            初始化解析器，接收一个已准备好的 UART 实例，清除串口残留数据并设置默认超时时间。
+
+        build_frame(control: int, cmd: int, data: bytes = b"") -> bytes:
+            根据协议构造完整帧：帧头 + ctl + cmd + len(2B) + data + checksum + 帧尾。
+
+        parse_response(resp: bytes) -> dict:
+            解析并校验一帧完整响应，返回字典 {"control": int, "cmd": int, "data": bytes}，校验失败抛出 ValueError。
+
+        recv_response() -> tuple[int, int, bytes] | None:
+            阻塞接收并解析单帧响应，内部实现字节级有限状态机，校验头/尾/长度/校验和，成功返回 (control, cmd, data)，超时返回 None。
+
+        send_frame(control: int, cmd: int, data: bytes = b""):
+            发送一帧数据到模块，失败抛出 IOError。
+
+        query_and_wait(control: int, command: int, send_data: bytes = b"") -> bytes | None:
+            发送请求并循环等待匹配 control/command 的响应，返回响应的数据区 bytes。
+
+        disable_all_reports():
+            禁用模块的所有主动上报（根据协议发送若干关闭上报命令）。
+
+        q_presence() -> int | None:
+            查询存在检测结果，返回 1 表示有人，0 表示无人，失败返回 None。
+
+        q_motion_param() -> tuple | None:
+            查询运动参数（方向、强度等），返回解析后的元组或 None。
+
+        q_distance() -> int | None:
+            查询目标距离（单位：cm），协议返回两字节大端无符号整数，超时或非法返回 None。
+
+        q_position() -> tuple[int, int, int] | None:
+            查询目标三维位置或方向，返回 (x, y, z) 三个有符号 16 位大端整数（单位：度或协议定义的单位），异常返回 None。
+
+        q_hr_value() -> int | None:
+            查询心率值（BPM），返回整数或 None。
+
+        q_hr_waveform() -> list[int] | None:
+            查询心率波形，返回中心化后的数据数组（例如每点 = raw - 128），或 None。
+
+        q_sleep_end_time() -> str | None:
+            查询最近一次睡眠结束时间，返回格式化字符串 "YYYY-MM-DD HH:MM:SS" 或 None。
+
+        q_struggle_sensitivity() -> int | None:
+            查询挣扎敏感度设置，返回数值或 None。
+
+    ==========================================
+     Attributes:
+        uart (UART): An initialized UART instance used for communication with the module (must be created externally and passed in).
+        _control (int): Default control byte used internally (e.g.: 0x80).
+        _timeout_ms (int): Timeout period for queries/reception, in milliseconds.
+        _rx_buf (bytearray): Rolling buffer used for non-blocking reception (internal implementation detail, should not be modified externally).
+
+    Methods:
+        __init__(uart):
+            Initializes the parser, receives a prepared UART instance, clears residual serial port data, and sets the default timeout period.
+
+        build_frame(control: int, cmd: int, data: bytes = b"") -> bytes:
+            Constructs a complete frame according to the protocol: frame header + ctl + cmd + len(2B) + data + checksum + frame tail.
+
+        parse_response(resp: bytes) -> dict:
+            Parses and verifies a complete response frame, returns a dictionary {"control": int, "cmd": int, "data": bytes}, and throws a ValueError if verification fails.
+
+        recv_response() -> tuple[int, int, bytes] | None:
+            Blocking reception and parsing of a single response frame, internally implements a byte-level finite state machine, verifies header/tail/length/checksum, returns (control, cmd, data) on success, and None on timeout.
+
+        send_frame(control: int, cmd: int, data: bytes = b""):
+            Sends a frame of data to the module, throws an IOError on failure.
+
+        query_and_wait(control: int, command: int, send_data: bytes = b"") -> bytes | None:
+            Sends a request and loops to wait for a response matching the control/command, returns the data area bytes of the response.
+
+        disable_all_reports():
+            Disables all active reports of the module (sends several report closing commands according to the protocol).
+
+        q_presence() -> int | None:
+            Queries the presence detection result, returns 1 indicating someone is present, 0 indicating no one is present, and None on failure.
+
+        q_motion_param() -> tuple | None:
+            Queries motion parameters (direction, intensity, etc.), returns the parsed tuple or None.
+
+        q_distance() -> int | None:
+            Queries the target distance (unit: cm), the protocol returns a 2-byte big-endian unsigned integer, returns None on timeout or if invalid.
+
+        q_position() -> tuple[int, int, int] | None:
+            Queries the target's 3D position or direction, returns (x, y, z) three signed 16-bit big-endian integers (unit: degrees or as defined by the protocol), returns None on exception.
+
+        q_hr_value() -> int | None:
+            Queries the heart rate value (BPM), returns an integer or None.
+
+        q_hr_waveform() -> list[int] | None:
+            Queries the heart rate waveform, returns a centralized data array (e.g., each point = raw - 128), or None.
+
+        q_sleep_end_time() -> str | None:
+            Queries the end time of the most recent sleep, returns a formatted string "YYYY-MM-DD HH:MM:SS" or None.
+
+        q_struggle_sensitivity() -> int | None:
+            Queries the struggle sensitivity setting, returns a value or None.
+    """
     def __init__(self, uart):
         """
         初始化协议解析器。
