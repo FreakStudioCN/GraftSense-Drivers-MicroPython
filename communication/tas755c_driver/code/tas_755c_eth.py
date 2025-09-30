@@ -13,7 +13,7 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
-from time import ticks_diff
+import time
 from machine import Pin
 
 # ======================================== 全局变量 ============================================
@@ -27,7 +27,7 @@ class TAS_755C_ETH:
     TAS-755C 串口转以太网模块驱动类  
     - 通过 UART 与设备交互，采用 AT 命令进行配置  
     - 提供串口、网络、HTTP、心跳、注册、轮询、Modbus、MQTT、云平台等配置接口  
-    - 内部封装 AT 命令发送与响应解析逻辑  
+    - 内部封装 AT 命令发送与响应解析逻辑   
     - 返回值均为 (bool, str)，其中 bool 表示执行状态，str 为响应内容  
 
     本类既可作为配置控制器，也可用于设备发现与控制。  
@@ -173,192 +173,6 @@ class TAS_755C_ETH:
         discovery() -> (bool, str):
             Discover devices.
     """
-    # 串口与基础配置常量
-    class UARTConfig:
-        # 波特率选项
-        BAUD_1200 = 1200
-        BAUD_2400 = 2400
-        BAUD_4800 = 4800
-        BAUD_9600 = 9600
-        BAUD_19200 = 19200
-        BAUD_38400 = 38400
-        BAUD_57600 = 57600
-        BAUD_115200 = 115200
-        BAUD_230400 = 230400
-        
-        # 数据位选项
-        DATA_BITS_7 = 0
-        DATA_BITS_8 = 1
-        
-        # 校验位选项
-        PARITY_NONE = 0
-        PARITY_ODD = 1
-        PARITY_EVEN = 2
-        
-        # 停止位选项
-        STOP_BITS_1 = 0
-        STOP_BITS_2 = 1
-        
-        # 分包时间默认值
-        PACKET_TIME_DEFAULT = 0
-
-    class NetworkConfig:
-        # IP配置模式
-        IP_MODE_STATIC = 0
-        IP_MODE_DHCP = 1
-        
-        # 工作模式
-        MODE_TCP_CLIENT = 0
-        MODE_TCP_SERVER = 1
-        MODE_UDP_CLIENT = 2
-        MODE_UDP_SERVER = 3
-        MODE_DUAL_SERVER = 4
-        MODE_IGMP = 5
-        MODE_DTU_CLOUD = 6
-        MODE_IOT_CLOUD = 7  # 不可用
-        MODE_HTTP_PASSTHROUGH = 8
-        MODE_MQTT = 9
-
-    class HTTPConfig:
-        # 网络状态
-        HTTP_NET_DISABLED = 0
-        HTTP_NET_ENABLED = 1
-        
-        # 方法
-        HTTP_METHOD_POST = 0
-        HTTP_METHOD_GET = 1
-        
-        # 包头返回
-        HTTP_HEADER_DISABLED = 0
-        HTTP_HEADER_ENABLED = 1
-
-    class HeartbeatConfig:
-        # 使能选项
-        HEARTBEAT_DISABLED = 0
-        HEARTBEAT_ENABLED = 1
-        HEARTBEAT_EXTENDED = 2
-        
-        # 格式选项
-        HEARTBEAT_FORMAT_ASCII = 0
-        HEARTBEAT_FORMAT_HEX = 1
-
-    class RegisterConfig:
-        # 类型选项
-        REGISTER_TYPE_NONE = 0
-        REGISTER_TYPE_MAC = 1
-        REGISTER_TYPE_CUSTOM = 2
-        
-        # 发送方式选项
-        REGISTER_SEND_ONCE = 0
-        REGISTER_SEND_PERIODIC = 1
-        REGISTER_SEND_BOTH = 2
-        
-        # 格式选项
-        REGISTER_FORMAT_ASCII = 0
-        REGISTER_FORMAT_HEX = 1
-
-    class PollConfig:
-        # 使能选项
-        POLL_DISABLED = 0
-        POLL_ENABLED = 1
-        
-        # CRC选项
-        POLL_CRC_DISABLED = 0
-        POLL_CRC_ENABLED = 1
-
-    class ModbusConfig:
-        MODBUS_DISABLED = 0
-        MODBUS_ENABLED = 1
-
-    class MQTTConfig:
-        # Clean session选项
-        CLEAN_SESSION_DISABLED = 0
-        CLEAN_SESSION_ENABLED = 1
-        
-        # Retain选项
-        RETAIN_DISABLED = 0
-        RETAIN_ENABLED = 1
-        
-        # 保持连接最小时间
-        KEEPALIVE_MIN = 60
-
-    class DataHeaderConfig:
-        HEADER_DISABLED = 0
-        HEADER_ENABLED = 1
-
-    class LogConfig:
-        # 网络状态日志
-        LOG_NET_DISABLED = 0
-        LOG_NET_ENABLED = 1
-        
-        # 开机提示日志
-        LOG_BOOT_DISABLED = 0
-        LOG_BOOT_ENABLED = 1
-        
-        # 异常重启提示日志
-        LOG_EXCEPTION_DISABLED = 0
-        LOG_EXCEPTION_ENABLED = 1
-
-    class StatusConfig:
-        STATUS_DISABLED = 0
-        STATUS_ENABLED = 1
-
-    class PinMuxConfig:
-        PINMUX_NET_INDICATOR = 0
-        PINMUX_HW_FLOW_CONTROL = 1
-        PINMUX_RS485_DE_RE = 2
-
-    class TimeoutConfig:
-        # 禁用选项
-        TIMEOUT_DISABLED = 0
-        
-        # 断开连接重启时间默认值
-        DISCONNECT_TIME_DEFAULT = 120
-        
-        # 无响应重启时间默认值
-        ACK_TIME_DEFAULT = 1800
-        
-        # 无数据重启时间默认值
-        PORT_TIME_DEFAULT = 1800
-        
-        # 周期性重启时间默认值
-        RESTART_TIME_DEFAULT = 0
-
-    class CloudConfig:
-        # 云平台模式
-        CLOUD_MODE_DISABLED = 0
-        CLOUD_MODE_ENABLED = 1
-        CLOUD_MODE_LOCKED = 2
-
-    # 通用常量
-    class General:
-        # 布尔选项
-        DISABLED = 0
-        ENABLED = 1
-        
-        # 默认端口
-        DEFAULT_PORT = 10123
-        
-        # 默认心跳间隔
-        DEFAULT_HEARTBEAT_INTERVAL = 0
-        
-        # 默认轮询间隔
-        DEFAULT_POLL_INTERVAL = 0
-        
-        # UDP广播端口
-        UDP_BROADCAST_PORT = 8081
-        
-        # 命令终止符
-        COMMAND_TERMINATOR = "\r\n"
-        
-        # 命令模式进入序列
-        COMMAND_MODE_ENTER = "+++"
-        
-        # MAC地址前缀
-        MAC_PREFIX = "+MAC:"
-        
-        # 发现命令
-        DISCOVERY_COMMAND = "at+tas"
 
     def __init__(self, uart):
         """
@@ -395,23 +209,16 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response), True if success, False otherwise.
         """
-        self._uart.write(cmd + self.General.COMMAND_TERMINATOR)
-        response = []
-        while True:
-            line = self._uart.readline()
-            if not line:
-                break
-            try:
-                text = line.decode().strip()
-            except:
-                text = line.strip()
-            if text == "OK":
-                # 返回成功，附带之前收集的响应内容
-                return True, "\n".join(response)
-            if text.startswith("ERROR"):
-                return False, text
-            response.append(text)
-        return False, "\n".join(response)
+        self._uart.write(f'{cmd}\r\n'.encode())
+        time.sleep(0.1)
+        if self._uart.any():
+            resp = self._uart.read().decode('utf-8')
+            if 'OK' in resp:
+                return True, resp
+            else:
+                return False, resp
+        else:
+            return False, 'No response from UART'
 
     def set_uart_config(self, baud_rate, data_bits, parity, stop_bits):
         """
@@ -441,6 +248,22 @@ class TAS_755C_ETH:
         cmd = f"AT+UARTCFG={baud_rate},{data_bits},{parity},{stop_bits}"
         return self._send_at(cmd)
 
+    def get_uart_config(self):
+        """
+        查询当前串口参数 (AT+UARTCFG?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current UART parameters (AT+UARTCFG?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+UARTCFG?"
+        return self._send_at(cmd)
+
     def set_uart_time(self, packet_time):
         """
         设置串口分包时间 (AT+UARTTIME)。  
@@ -449,9 +272,9 @@ class TAS_755C_ETH:
             packet_time (int): 分包时间，单位 ms。  
 
         Returns:
-            Tuple[bool, str]: (状态, 响应内容)。  
+            Tuple[bool, str]: (状态, 响应内容)。
 
-        ==========================================
+          ==========================================
         Configure UART packet split time (AT+UARTTIME).  
 
         Args:
@@ -460,15 +283,32 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+UARTTIME=0,{packet_time}"
+        cmd = f"AT+UARTTIME={packet_time}"
         return self._send_at(cmd)
+
+    def get_uart_time(self):
+        """
+        查询当前串口分包时间 (AT+UARTTIME?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current UART packet split time (AT+UARTTIME?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+UARTTIME?"
+        return self._send_at(cmd)
+
 
     def set_mac_address(self, mac):
         """
         设置 MAC 地址 (AT+MACADDR)。  
 
         Args:
-            mac (str): MAC 地址字符串 (格式: XX:XX:XX:XX:XX:XX)。  
+            mac (str): MAC 地址字符串 (格式: XX-XX-XX-XX-XX-XX)。  
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)。  
@@ -477,12 +317,28 @@ class TAS_755C_ETH:
         Set MAC address (AT+MACADDR).  
 
         Args:
-            mac (str): MAC address string (format: XX:XX:XX:XX:XX:XX).  
+            mac (str): MAC address string (format: XX-XX-XX-XX-XX-XX).  
 
         Returns:
             Tuple[bool, str]: (status, response).
         """
         cmd = f"AT+MACADDR={mac}"
+        return self._send_at(cmd)
+
+    def get_mac_address(self):
+        """
+        查询当前 MAC 地址 (AT+MACADDR?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current MAC address (AT+MACADDR?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+MACADDR?"
         return self._send_at(cmd)
 
     # ==============================
@@ -519,9 +375,26 @@ class TAS_755C_ETH:
         cmd = f"AT+IPCONFIG={mode},{ip},{gateway},{subnet},{dns}"
         return self._send_at(cmd)
 
+    def get_ip_config(self):
+        """
+        查询当前 IP 配置 (AT+IPCONFIG?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current IP configuration (AT+IPCONFIG?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+IPCONFIG?"
+        return self._send_at(cmd)
+
+
     def set_tcp_config(self, local_port, remote_port, mode, remote_address):
         """
-        设置 TCP/UDP 配置 (AT+SOCKET)。  
+        设置 TCP 配置 (AT+TCPCFG)。  
 
         Args:
             local_port (int): 本地端口。  
@@ -533,7 +406,7 @@ class TAS_755C_ETH:
             Tuple[bool, str]: (状态, 响应内容)。  
 
         ==========================================
-        Configure TCP/UDP settings (AT+SOCKET).  
+        Configure TCP settings (AT+TCPCFG).  
 
         Args:
             local_port (int): Local port.  
@@ -544,30 +417,68 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+SOCKET=1,{mode},{local_port},{remote_port},{remote_address}"
+        cmd = f"AT+TCPCFG={local_port},{remote_port},{mode},{remote_address}"
         return self._send_at(cmd)
 
-    def set_secondary_server(self, address):
+    def get_tcp_config(self):
         """
-        设置第二服务器地址 (AT+SECONDSERVERADDR)。  
-
-        Args:
-            address (str): 第二服务器的 IP 或域名。  
+        查询当前 TCP 配置 (AT+TCPCFG?)。  
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)。  
 
         ==========================================
-        Set secondary server address (AT+SECONDSERVERADDR).  
-
-        Args:
-            address (str): IP or domain of secondary server.  
+        Query current TCP configuration (AT+TCPCFG?).  
 
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+SECONDSERVERADDR={address}"
+        cmd = "AT+TCPCFG?"
         return self._send_at(cmd)
+
+
+    def set_secondary_server(self, local_port, remote_port, remote_address):
+        """
+        设置第二服务器地址配置 (AT+SECONDSERVERADDRES)。  
+
+        Args:
+            local_port (int): 本地端口。  
+            remote_port (int): 远程端口。  
+            remote_address (str): 第二服务器的 IP 或域名。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        =========================================
+        Set secondary server address configuration (AT+SECONDSERVERADDRES).  
+
+        Args:
+            local_port (int): Local port.  
+            remote_port (int): Remote port.  
+            remote_address (str): IP or domain of the secondary server.  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = f"AT+SECONDSERVERADDRES={local_port},{remote_port},{remote_address}"
+        return self._send_at(cmd)
+
+    def get_secondary_server(self):
+        """
+        查询当前第二服务器地址配置 (AT+SECONDSERVERADDRES?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        =========================================
+        Query current secondary server address configuration (AT+SECONDSERVERADDRES?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+SECONDSERVERADDRES?"
+        return self._send_at(cmd)
+
 
     # ==============================
     # HTTP/Web 配置方法
@@ -592,8 +503,25 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+PATH=1,\"{path}\""
+        cmd = f'AT+PATH="{path}"'
         return self._send_at(cmd)
+
+    def get_http_path(self):
+        """
+        查询当前 HTTP 路径 (AT+PATH?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current HTTP path (AT+PATH?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+PATH?"
+        return self._send_at(cmd)
+
 
     def set_http_config(self, net_status, method, header_return):
         """
@@ -618,8 +546,25 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+HTTPCFG=1,{net_status},{method},{header_return}"
+        cmd = f"AT+HTTPCFG={net_status},{method},{header_return}"
         return self._send_at(cmd)
+
+    def get_http_config(self):
+        """
+        查询当前 HTTP 配置 (AT+HTTPCFG?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current HTTP configuration (AT+HTTPCFG?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+HTTPCFG?"
+        return self._send_at(cmd)
+
 
     def set_http_header(self, length, content):
         """
@@ -642,8 +587,25 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+HTTPHEAD=1,{length},\"{content}\""
+        cmd = f'AT+HTTPHEAD={length},"{content}"'
         return self._send_at(cmd)
+
+    def get_http_header(self):
+        """
+        查询当前 HTTP Header (AT+HTTPHEAD?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current HTTP header (AT+HTTPHEAD?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+HTTPHEAD?"
+        return self._send_at(cmd)
+
 
     # ==============================
     # 心跳/注册/轮询 配置方法
@@ -674,8 +636,25 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+KEEPALIVE={enable},{fmt},\"{content}\",{interval}"
+        cmd = f'AT+KEEPALIVE={enable},{fmt},"{content}",{interval}'
         return self._send_at(cmd)
+
+    def get_keepalive(self):
+        """
+        查询当前心跳包配置 (AT+KEEPALIVE?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current keepalive packet configuration (AT+KEEPALIVE?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+KEEPALIVE?"
+        return self._send_at(cmd)
+
 
     def set_register(self, reg_type, send_mode, fmt, content):
         """
@@ -702,8 +681,25 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+REGIS={reg_type},{send_mode},{fmt},\"{content}\""
+        cmd = f'AT+REGIS={reg_type},{send_mode},{fmt},"{content}"'
         return self._send_at(cmd)
+
+    def get_register(self):
+        """
+        查询当前注册包配置 (AT+REGIS?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current register packet configuration (AT+REGIS?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+REGIS?"
+        return self._send_at(cmd)
+
 
     def set_poll(self, enable, interval):
         """
@@ -729,31 +725,67 @@ class TAS_755C_ETH:
         cmd = f"AT+POLL={enable},{interval}"
         return self._send_at(cmd)
 
-    def set_poll_str(self, enable, crc, hex_str):
+    def get_poll(self):
         """
-        设置轮询字符串 (AT+STRPOLL)。  
-
-        Args:
-            enable (int): 是否启用 (0=否, 1=是)。  
-            crc (int): CRC 校验开关 (0=否, 1=是)。  
-            hex_str (str): 轮询字符串内容。  
+        查询当前轮询配置 (AT+POLL?)。  
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)。  
 
         ==========================================
-        Configure polling string (AT+STRPOLL).  
-
-        Args:
-            enable (int): Enable (0=No, 1=Yes).  
-            crc (int): Enable CRC (0=No, 1=Yes).  
-            hex_str (str): Polling string content.  
+        Query current polling configuration (AT+POLL?).  
 
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+STRPOLL=1,1,{enable},{crc},\"{hex_str}\""
+        cmd = "AT+POLL?"
         return self._send_at(cmd)
+
+
+    def set_poll_str(self, index: int, enable: int, crc: int, hex_str: str):
+        """
+        设置轮询字符串 (AT+POLLSTR)。  
+
+        Args:
+            index (int): 字串号 (1-10)。  
+            enable (int): 是否启用 (0=否, 1=是)。  
+            crc (int): CRC 校验开关 (0=否, 1=是)。  
+            hex_str (str): 轮询字符串内容 (16进制字符串)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Configure polling string (AT+POLLSTR).  
+
+        Args:
+            index (int): String ID (1-10).  
+            enable (int): Enable (0=No, 1=Yes).  
+            crc (int): Enable CRC (0=No, 1=Yes).  
+            hex_str (str): Polling string content (hex string)。  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = f'AT+POLLSTR={index},{enable},{crc},"{hex_str}"'
+        return self._send_at(cmd)
+
+    def get_poll_str(self):
+        """
+        查询当前轮询字符串配置 (AT+POLLSTR?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current polling string configuration (AT+POLLSTR?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+POLLSTR?"
+        return self._send_at(cmd)
+
 
     # ==============================
     # Modbus 配置方法
@@ -778,97 +810,300 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+TCPMODBUS=1,{enable}"
+        cmd = f"AT+TCPMODBUS={enable}"
         return self._send_at(cmd)
 
-    # ==============================
-    # MQTT 配置方法
-    # ==============================
-
-    def set_mqtt_client(self, client_id, username, password):
+    def get_modbus(self):
         """
-        设置 MQTT 客户端信息 (AT+CLIENTID / AT+USERPWD)。  
-
-        Args:
-            client_id (str): 客户端 ID。  
-            username (str): 用户名。  
-            password (str): 密码。  
+        查询当前 Modbus 转换配置 (AT+TCPMODBUS?)。  
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)。  
 
         ==========================================
-        Configure MQTT client info (AT+CLIENTID / AT+USERPWD).  
-
-        Args:
-            client_id (str): Client ID.  
-            username (str): Username.  
-            password (str): Password.  
+        Query current Modbus conversion configuration (AT+TCPMODBUS?).  
 
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        status, data = self._send_at(f"AT+CLIENTID=\"{client_id}\"")
-        if not status:
-            return status, data
-        return self._send_at(f"AT+USERPWD=\"{username}\",\"{password}\"")
+        cmd = "AT+TCPMODBUS?"
+        return self._send_at(cmd)
 
-    def set_mqtt_topics(self, sub_topic, pub_topic):
+
+    # ==============================
+    # MQTT 配置方法
+    # ==============================
+
+    def set_mqtt_client_id(self, client_id: str):
         """
-        设置 MQTT 主题 (AT+MQTTSUB / AT+MQTTPUB)。  
+        设置 MQTT Client ID (AT+CLIENTID)。  
+
+        Args:
+            client_id (str): 客户端 ID (0-128 字节)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Configure MQTT Client ID (AT+CLIENTID).  
+
+        Args:
+            client_id (str): Client ID (0-128 bytes).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = f'AT+CLIENTID="{client_id}"'
+        return self._send_at(cmd)
+
+    def get_mqtt_client_id(self):
+        """
+        查询当前 MQTT Client ID (AT+CLIENTID?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current MQTT Client ID (AT+CLIENTID?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+CLIENTID?"
+        return self._send_at(cmd)
+
+
+    def set_mqtt_userpwd(self, username: str, password: str):
+        """
+        设置 MQTT 用户名和密码 (AT+USERPWD)。  
+
+        Args:
+            username (str): 用户名 (0-64 字节)。  
+            password (str): 密码 (0-128 字节)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Configure MQTT username and password (AT+USERPWD).  
+
+        Args:
+            username (str): Username (0-64 bytes).  
+            password (str): Password (0-128 bytes).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = f'AT+USERPWD="{username}","{password}"'
+        return self._send_at(cmd)
+
+    def get_mqtt_userpwd(self):
+        """
+        查询当前 MQTT 用户名和密码配置 (AT+USERPWD?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current MQTT username and password configuration (AT+USERPWD?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+USERPWD?"
+        return self._send_at(cmd)
+
+
+    def set_mqtt_subtopic(self, sub_topic):
+        """
+        设置 MQTT 订阅主题 (AT+MQTTSUB)。  
 
         Args:
             sub_topic (str): 订阅主题。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Configure MQTT subscribe topic (AT+MQTTSUB).  
+
+        Args:
+            sub_topic (str): Subscribe topic.  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = f'AT+MQTTSUB="{sub_topic}"'
+        return self._send_at(cmd)
+
+    def get_mqtt_subtopic(self):
+        """
+        查询当前 MQTT 订阅主题 (AT+MQTTSUB?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current MQTT subscribe topic (AT+MQTTSUB?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+MQTTSUB?"
+        return self._send_at(cmd)
+
+    def set_mqtt_pubtopic(self, pub_topic):
+        """
+        设置 MQTT 发布主题 (AT+MQTTPUB)。  
+
+        Args:
             pub_topic (str): 发布主题。  
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)。  
 
         ==========================================
-        Configure MQTT topics (AT+MQTTSUB / AT+MQTTPUB).  
+        Configure MQTT publish topic (AT+MQTTPUB).  
 
         Args:
-            sub_topic (str): Subscribe topic.  
             pub_topic (str): Publish topic.  
 
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        status, data = self._send_at(f"AT+MQTTSUB=\"{sub_topic}\"")
-        if not status:
-            return status, data
-        return self._send_at(f"AT+MQTTPUB=\"{pub_topic}\"")
+        cmd = f'AT+MQTTPUB="{pub_topic}"'
+        return self._send_at(cmd)
 
-    def set_mqtt_options(self, clean_session, retain, keepalive):
+    def get_mqtt_pubtopic(self):
         """
-        设置 MQTT 参数 (AT+CLEANSESSION / AT+RETAIN / AT+MQTTKEEP)。  
-
-        Args:
-            clean_session (int): 是否清理会话 (0=否, 1=是)。  
-            retain (int): 保留消息 (0=否, 1=是)。  
-            keepalive (int): 保活时间 (秒)。  
+        查询当前 MQTT 发布主题 (AT+MQTTPUB?)。  
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)。  
 
         ==========================================
-        Configure MQTT options (AT+CLEANSESSION / AT+RETAIN / AT+MQTTKEEP).  
-
-        Args:
-            clean_session (int): Clean session (0=No, 1=Yes).  
-            retain (int): Retain message (0=No, 1=Yes).  
-            keepalive (int): Keepalive time in seconds.  
+        Query current MQTT publish topic (AT+MQTTPUB?).  
 
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        status, data = self._send_at(f"AT+CLEANSESSION={clean_session}")
-        if not status:
-            return status, data
-        status, data = self._send_at(f"AT+RETAIN={retain}")
-        if not status:
-            return status, data
-        return self._send_at(f"AT+MQTTKEEP={keepalive}")
+        cmd = "AT+MQTTPUB?"
+        return self._send_at(cmd)
+
+    def set_mqtt_clean_session(self, clean_session: int):
+        """
+        设置 MQTT 清除会话标志 (AT+CLEANSESSION)。  
+
+        Args:
+            clean_session (int): 是否清理会话 (0=否, 1=是)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Configure MQTT clean session flag (AT+CLEANSESSION).  
+
+        Args:
+            clean_session (int): Clean session (0=No, 1=Yes).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = f"AT+CLEANSESSION={clean_session}"
+        return self._send_at(cmd)
+
+    def get_mqtt_clean_session(self):
+        """3 
+        查询当前 MQTT 清除会话标志 (AT+CLEANSESSION?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current MQTT clean session flag (AT+CLEANSESSION?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+CLEANSESSION?"
+        return self._send_at(cmd)
+
+
+    def set_mqtt_retain(self, retain: int):
+        """
+        设置 MQTT 消息保留 (AT+RETAIN)。  
+
+        Args:
+            retain (int): 是否保留消息 (0=否, 1=是)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Configure MQTT retain message flag (AT+RETAIN).  
+
+        Args:
+            retain (int): Retain message (0=No, 1=Yes).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = f"AT+RETAIN={retain}"
+        return self._send_at(cmd)
+
+    def get_mqtt_retain(self):
+        """
+        查询当前 MQTT 消息保留设置 (AT+RETAIN?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current MQTT retain message flag (AT+RETAIN?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+RETAIN?"
+        return self._send_at(cmd)
+
+    def set_mqtt_keepalive(self, keepalive: int):
+        """
+        设置 MQTT 心跳保活时间 (AT+MQTTKEEP)。  
+
+        Args:
+            keepalive (int): 心跳时间，范围 60–65535 秒。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Configure MQTT keepalive time (AT+MQTTKEEP).  
+
+        Args:
+            keepalive (int): Keepalive time in seconds (60–65535).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = f"AT+MQTTKEEP={keepalive}"
+        return self._send_at(cmd)
+
+    def get_mqtt_keepalive(self):
+        """
+        查询当前 MQTT 心跳保活时间 (AT+MQTTKEEP?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current MQTT keepalive time (AT+MQTTKEEP?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+MQTTKEEP?"
+        return self._send_at(cmd)
 
     # ==============================
     # 数据头/网络传输 配置方法
@@ -893,7 +1128,23 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+CIPHEAD=1,{enable}"
+        cmd = f"AT+CIPHEAD={enable}"
+        return self._send_at(cmd)
+
+    def get_ciphead(self):
+        """
+        查询当前数据头配置 (AT+CIPHEAD?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current data header configuration (AT+CIPHEAD?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+CIPHEAD?"
         return self._send_at(cmd)
 
     def set_link_delay(self, delay):
@@ -915,9 +1166,24 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+LINKDELAY=1,{delay}"
+        cmd = f"AT+LINKDELAY={delay}"
         return self._send_at(cmd)
 
+    def get_link_delay(self):
+        """
+        查询当前连接延迟配置 (AT+LINKDELAY?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current link delay configuration (AT+LINKDELAY?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+LINKDELAY?"
+        return self._send_at(cmd)
 
     # ==============================
     # 日志/状态/引脚 配置方法
@@ -946,7 +1212,24 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+LOG=0,{net_status},{boot_msg},{exception_restart}"
+        cmd = f"AT+LOG={net_status},{boot_msg},{exception_restart}"
+        return self._send_at(cmd)
+
+
+    def get_log(self):
+        """
+        查询当前日志选项配置 (AT+LOG?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current log options configuration (AT+LOG?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+LOG?"
         return self._send_at(cmd)
 
     def set_status(self, enable):
@@ -968,7 +1251,23 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+STATUS=0,{enable}"
+        cmd = f"AT+STATUS={enable}"
+        return self._send_at(cmd)
+
+    def get_status(self):
+        """
+        查询当前状态配置 (AT+STATUS?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current status configuration (AT+STATUS?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+STATUS?"
         return self._send_at(cmd)
 
     def set_pinmux(self, mode):
@@ -991,6 +1290,22 @@ class TAS_755C_ETH:
             Tuple[bool, str]: (status, response).
         """
         cmd = f"AT+PINMUX={mode}"
+        return self._send_at(cmd)
+
+    def get_pinmux(self):
+        """
+        查询当前引脚复用配置 (AT+PINMUX?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current pin multiplexing configuration (AT+PINMUX?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+PINMUX?"
         return self._send_at(cmd)
 
     # ==============================
@@ -1016,8 +1331,25 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+DSCTIME=0,{time_sec}"
+        cmd = f"AT+DSCTIME={time_sec}"
         return self._send_at(cmd)
+
+    def get_disconnect_time(self):
+        """
+        查询当前断开连接重启时间配置 (AT+DSCTIME?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current disconnect restart time configuration (AT+DSCTIME?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+DSCTIME?"
+        return self._send_at(cmd)
+
 
     def set_ack_time(self, time_sec):
         """
@@ -1038,7 +1370,24 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+ACKTIME=0,{time_sec}"
+        cmd = f"AT+ACKTIME={time_sec}"
+        return self._send_at(cmd)
+
+
+    def get_ack_time(self):
+        """
+        查询当前无下行重启时间配置 (AT+ACKTIME?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current no-downlink restart time configuration (AT+ACKTIME?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+ACKTIME?"
         return self._send_at(cmd)
 
     def set_port_time(self, time_sec):
@@ -1060,7 +1409,23 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+PORTTIME=0,{time_sec}"
+        cmd = f"AT+PORTTIME={time_sec}"
+        return self._send_at(cmd)
+
+    def get_port_time(self):
+        """
+        查询当前无上行重启时间配置 (AT+PORTTIME?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current no-uplink restart time configuration (AT+PORTTIME?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+PORTTIME?"
         return self._send_at(cmd)
 
     def set_restart_time(self, time_sec):
@@ -1083,6 +1448,23 @@ class TAS_755C_ETH:
             Tuple[bool, str]: (status, response).
         """
         cmd = f"AT+RESTTIME={time_sec}"
+        return self._send_at(cmd)
+
+
+    def get_restart_time(self):
+        """
+        查询当前周期性重启时间配置 (AT+RESTTIME?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current periodic restart time configuration (AT+RESTTIME?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+RESTTIME?"
         return self._send_at(cmd)
 
     # ==============================
@@ -1112,7 +1494,23 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+DTUCLOUD={mode},\"{account}\",\"{password}\""
+        cmd = f'AT+DTUCLOUD={mode},"{account}","{password}"'
+        return self._send_at(cmd)
+
+    def get_dtu_cloud(self):
+        """
+        查询当前云平台配置 (AT+DTUCLOUD?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current cloud platform configuration (AT+DTUCLOUD?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+DTUCLOUD?"
         return self._send_at(cmd)
 
     def set_web_login(self, username, password):
@@ -1136,7 +1534,23 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+WEBLOGIN=\"{username}\",\"{password}\""
+        cmd = f'AT+WEBLOGIN="{username}","{password}"'
+        return self._send_at(cmd)
+
+    def get_web_login(self):
+        """
+        查询当前 Web 登录配置 (AT+WEBLOGIN?)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Query current Web login configuration (AT+WEBLOGIN?).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+WEBLOGIN?"
         return self._send_at(cmd)
 
     # ==============================
@@ -1156,49 +1570,78 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        self._uart.write(self.General.COMMAND_MODE_ENTER)
-        line = self._uart.readline()
-        if not line:
-            return False, ""
-        if line.decode().strip() == "OK":
+        self._uart.write(b'+++')
+        time.sleep(0.05)
+        if self._uart.any():
+            resp = self._uart.read()
+        if resp.decode('utf-8').strip() == "OK":
             return True, ""
         return False, ""
 
-    def send_raw_command(self, command):
+    def enter_data_mode(self):
         """
-        发送原始 AT 命令。  
-
-        Args:
-            command (str): AT 命令字符串。  
+        进入数据模式 (ATO)。  
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)。  
 
         ==========================================
-        Send raw AT command.  
-
-        Args:
-            command (str): AT command string.  
+        Enter data mode (ATO).  
 
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        return self._send_at(command)
+        cmd = "ATO"
+        return self._send_at(cmd)
 
-    def discovery(self):
+    def get_all(self):
         """
-        发现设备 (AT+TAS)。  
+        查询所有配置 (AT+ALL?)。  
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)。  
 
         ==========================================
-        Discover device (AT+TAS).  
+        Query all configurations (AT+ALL?).  
 
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        return self._send_at(self.General.DISCOVERY_COMMAND)
+        cmd = "AT+ALL?"
+        return self._send_at(cmd)
+    
+    def save(self):
+        """
+        保存当前配置 (AT&W)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Save current configuration (AT&W).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT&W"
+        return self._send_at(cmd)
+    
+    def restart(self):
+        """
+        重启设备 (AT+CFUN=1,1)。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)。  
+
+        ==========================================
+        Restart device (AT+CFUN=1,1).  
+
+        Returns:
+            Tuple[bool, str]: (status, response).
+        """
+        cmd = "AT+CFUN=1,1"
+        return self._send_at(cmd)
+
 
 
 # ======================================== 初始化配置 ==========================================

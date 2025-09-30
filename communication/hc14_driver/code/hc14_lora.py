@@ -13,8 +13,9 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
-from time import ticks_diff
-from machine import Pin
+from micropython import const
+from machine import UART
+import time
 
 # ======================================== 全局变量 ============================================
 
@@ -57,8 +58,6 @@ class HC14_Lora:
             获取固件版本信息。
         get_params():
             一次性查询并返回所有关键参数。
-        send_raw(data) / recv_raw():
-            原始字节级别收发接口（低级）。
         transparent_send(data, wait_between_packets_s=0.01):
             透明传输模式下发送数据（自动分包）。
         transparent_recv(max_total_bytes=1024):
@@ -102,8 +101,6 @@ class HC14_Lora:
             Get firmware version string.
         get_params():
             Query all key parameters at once.
-        send_raw(data) / recv_raw():
-            Raw byte-level send/receive (low-level).
         transparent_send(data, wait_between_packets_s=0.01):
             Send data in transparent mode (with auto packetization).
         transparent_recv(max_total_bytes=1024):
@@ -154,7 +151,7 @@ class HC14_Lora:
     # 私有：接收超时时间（秒），固定 3s（接口要求）
     _RECV_TIMEOUT_S = const(3)
 
-    def __init__(self, uart, baud: int = BAUD_DEFAULT, line_terminator: bytes = b'\r\n'):
+    def __init__(self, uart : UART, baud: int = BAUD_DEFAULT):
         """
         初始化 HC14_Lora 驱动类，绑定 UART 并设置默认参数。
 
@@ -182,15 +179,14 @@ class HC14_Lora:
         self._uart = uart
         self.in_at_mode = False
         self.baud = baud
-        self.rate = S_DEFAULT
-        self.power = POWER_DEFAULT
-        self.channel = CH_DEFAULT
+        self.rate = HC14_Lora.S_DEFAULT
+        self.power = HC14_Lora.POWER_DEFAULT
+        self.channel = HC14_Lora.CH_DEFAULT
         self.firmware_version = ''
-        self._line_terminator = line_terminator
 
-    def _send(self, cmd: bytes, append_lt: bool = True) -> (bool, None|str):
+    def _send(self, cmd: bytes) -> (bool, None|str):
         """
-        向模块发送 AT 命令或原始字节数据。
+        向模块发送 AT 命令
 
         Args:
             cmd (bytes): 待发送的数据。
@@ -202,7 +198,7 @@ class HC14_Lora:
         Notes:
             低级私有方法，直接调用 UART.write。
         ==========================================
-        Send AT command or raw bytes to the module.
+        Send AT command to the module.
 
         Args:
             cmd (bytes): Data to send.
@@ -216,16 +212,16 @@ class HC14_Lora:
         """
 
         try:
-            if append_lt:
-                cmd += self._lt
             self._uart.write(cmd)
+            # 50ms 确保回传稳定
+            time.sleep(0.05)
             return (True, None)
         except Exception as e:
-            return (False, "io error")
+            return (False, "send error")
 
     def _recv(self) -> (bool, None|str):
         """
-        从模块接收数据，等待 _RECV_TIMEOUT_S 秒或遇到行结束符。
+        从模块接收数据
 
         Returns:
             Tuple[bool, None|str]: 成功返回 (True, 接收到的 bytes)，
@@ -234,28 +230,27 @@ class HC14_Lora:
         Notes:
             低级私有方法，直接调用 UART.read。
         ==========================================
-        Receive data from the module, wait up to _RECV_TIMEOUT_S seconds or line terminator.
+        Receive data from the module
 
         Returns:
-            Tuple[bool, None|str]: (True, received bytes) if success,
+            Tuple[bool, None|str]: (True, received bytes) if success,m
                                 (False, "timeout"/error) if failed.
 
         Notes:
             Low-level private method, directly reads from UART.
         """
-
         try:
-            t0 = time.ticks_ms()
-            buf = b''
-            while time.ticks_diff(time.ticks_ms(), t0) < self._RECV_TIMEOUT_S*1000:
-                if self._uart.any():
-                    buf += self._uart.read()
-                    if buf.endswith(self._lt):
-                        return (True, buf)
-                time.sleep_ms(10)
-            return (False, "timeout")
+            resp = self._uart.read()
+            if resp == None:
+                return False,'RECV NONE'
+            if resp.decode('utf-8').strip() == 'ORDER ERROR':
+                return False,'ORDER ERROR'
+            try:
+                return True,resp.decode('utf-8').strip().split(':')[1]
+            except:
+                return True,resp.decode('utf-8').strip()
         except Exception as e:
-            return (False, str(e))
+            return (False, "recv error")
 
     def test_comm(self) -> (bool, None|str):
         """
@@ -278,17 +273,12 @@ class HC14_Lora:
             Uses _send + _recv to perform test. Sets self.in_at_mode = True if successful.
         """
 
-        ok, err = self._send(b'AT')
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT'.encode())
+        if not ok: return (False, err)
         ok, resp = self._recv()
         if not ok:
             return (False, resp)
-        text = resp.decode(errors="ignore").strip()
-        if text.startswith("OK"):
-            self.in_at_mode = True
-            return (True, None)
-        return (False, "unexpected resp")
+        if resp == 'OK':return (True, None)
         
     def reset_defaults(self) -> (bool, None|str):
         """
@@ -311,13 +301,12 @@ class HC14_Lora:
             Caller should refresh internal cache after success, or get_params can be called internally.
         """
 
-        ok, err = self._send(b'AT+DEFAULT')
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+DEFAULT'.encode())
+        if not ok: return (False, err)
         ok, resp = self._recv()
-        if ok and b"OK+DEFAULT" in resp: 
-            return (True, resp.decode().strip())
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:
+            return (False, resp)
+        if resp == 'OK+DEFAULT':return (True, None)
 
     def get_baud(self) -> (bool, int|str):
         """
@@ -340,16 +329,11 @@ class HC14_Lora:
             Does not change local UART, only returns module setting; use set_baud to switch.
         """
 
-        ok, err = self._send(b'AT+B?')
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+B?'.encode())
+        if not ok: return (False, err)
         ok, resp = self._recv()
-        if ok and resp.startswith(b"OK+B:"):
-            try:
-                return (True, int(resp[5:]))
-            except:
-                return (False, "parse error")
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:return (False, resp)
+        return True,resp
     
     def set_baud(self, baud: int) -> (bool, int|str):
         """
@@ -376,18 +360,16 @@ class HC14_Lora:
             Caller or this method must sync UART instance baud rate after success.
         """
 
-        if baud not in [self.BAUD_1200,self.BAUD_2400,self.BAUD_4800,
-                        self.BAUD_9600,self.BAUD_19200,self.BAUD_38400,
-                        self.BAUD_57600,self.BAUD_115200]:
+        if baud not in [HC14_Lora.BAUD_1200,HC14_Lora.BAUD_2400,HC14_Lora.BAUD_4800,
+                        HC14_Lora.BAUD_9600,HC14_Lora.BAUD_19200,HC14_Lora.BAUD_38400,
+                        HC14_Lora.BAUD_57600,HC14_Lora.BAUD_115200]:
             return (False, "invalid param")
-        ok, err = self._send(f"AT+B{baud}".encode())
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+B{baud}'.encode())
+        if not ok:return (False, err)
         ok, resp = self._recv()
-        if ok and resp.startswith(b"OK+B:"):
-            self.baud = baud
-            return (True, baud)
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:return (False, resp)
+        self.baud = baud
+        return True,resp
 
     def get_channel(self) -> (bool, int|str):
         """
@@ -408,16 +390,11 @@ class HC14_Lora:
             Returns integer channel number (1–50).
         """
 
-        ok, err = self._send(b'AT+C?')
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+C?'.encode())
+        if not ok: return (False, err)
         ok, resp = self._recv()
-        if ok and resp.startswith(b"OK+C:"):
-            try:
-                return (True, int(resp[5:]))
-            except:
-                return (False, "parse error")
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:return (False, resp)
+        return True,resp
 
     def set_channel(self, ch: int) -> (bool, int|str):
         """
@@ -446,14 +423,12 @@ class HC14_Lora:
 
         if not (self.CH_MIN <= ch <= self.CH_MAX):
             return (False, "invalid param")
-        ok, err = self._send(f"AT+C{ch:03d}".encode())
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+C{ch:03d}'.encode())
+        if not ok:return (False, err)
         ok, resp = self._recv()
-        if ok and resp.startswith(b"OK+C:"):
-            self.channel = ch
-            return (True, ch)
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:return (False, resp)
+        self.channel = ch
+        return True,resp
 
     def get_rate(self) -> (bool, int|str):
         """
@@ -474,16 +449,11 @@ class HC14_Lora:
             Returns value in range 1–8.
         """
 
-        ok, err = self._send(b'AT+S?')
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+S?'.encode())
+        if not ok: return (False, err)
         ok, resp = self._recv()
-        if ok and resp.startswith(b"OK+S:"):
-            try:
-                return (True, int(resp[5:]))
-            except:
-                return (False, "parse error")
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:return (False, resp)
+        return True,resp
 
     def set_rate(self, s: int) -> (bool, int|str):
         """
@@ -512,14 +482,12 @@ class HC14_Lora:
 
         if not (1 <= s <= 8):
             return (False, "invalid param")
-        ok, err = self._send(f"AT+S{s}".encode())
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+S{s:03d}'.encode())
+        if not ok:return (False, err)
         ok, resp = self._recv()
-        if ok and resp.startswith(b"OK+S:"):
-            self.rate = s
-            return (True, s)
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:return (False, resp)
+        self.rate = s
+        return True,resp
 
     def get_power(self) -> (bool, int|str):
         """
@@ -540,16 +508,11 @@ class HC14_Lora:
             Returns integer in dBm.
         """
 
-        ok, err = self._send(b'AT+P?')
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+P?'.encode())
+        if not ok: return (False, err)
         ok, resp = self._recv()
-        if ok and resp.startswith(b"OK+P:"):
-            try:
-                return (True, int(resp[5:].replace(b"dBm", b"")))
-            except:
-                return (False, "parse error")
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:return (False, resp)
+        return True,resp
 
     def set_power(self, p_dbm: int) -> (bool, int|str):
         """
@@ -578,14 +541,12 @@ class HC14_Lora:
 
         if not (self.POWER_MIN <= p_dbm <= self.POWER_MAX):
             return (False, "invalid param")
-        ok, err = self._send(f"AT+P{p_dbm}".encode())
-        if not ok:
-            return (False, err)
+        ok, err = self._send(f'AT+P{p_dbm}'.encode())
+        if not ok:return (False, err)
         ok, resp = self._recv()
-        if ok and resp.startswith(b"OK+P:"):
-            self.power = p_dbm
-            return (True, p_dbm)
-        return (False, resp.decode().strip() if ok else resp)
+        if not ok:return (False, resp)
+        self.power = p_dbm
+        return True,resp
 
     def get_version(self) -> (bool, str):
         """
@@ -606,14 +567,11 @@ class HC14_Lora:
             Updates self.firmware_version on success.
         """
 
-        ok, err = self._send(b'AT+V')
-        if not ok:
-            return (False, err)
+        ok, err = self._send(b'AT+V?')
+        if not ok: return (False, err)
         ok, resp = self._recv()
-        if ok:
-            self.firmware_version = resp.decode().strip()
-            return (True, self.firmware_version)
-        return (False, resp)
+        if not ok:return (False, resp)
+        return True,resp
 
     def get_params(self) -> (bool, dict|str):
         """
@@ -637,68 +595,15 @@ class HC14_Lora:
         Notes:
             Updates internal cache self.baud/self.channel/self.rate/self.power on success.
         """
-
-        ok, err = self._send(b'AT+RX')
-        if not ok:
-            return (False, err)
-        params = {"baud":None, "channel":None, "rate":None, "power":None}
-        t0 = time.ticks_ms()
-        while time.ticks_diff(time.ticks_ms(), t0) < self._RECV_TIMEOUT_S*1000:
-            if self._uart.any():
-                line = self._uart.readline()
-                if not line:
-                    continue
-                line = line.decode().strip()
-                if line.startswith("OK+B:"): params["baud"] = int(line[5:])
-                elif line.startswith("OK+C:"): params["channel"] = int(line[5:])
-                elif line.startswith("OK+S:"): params["rate"] = int(line[5:])
-                elif line.startswith("OK+P:"): params["power"] = int(line[5:].replace("dBm",""))
-            if all(params.values()):
-                self.baud,self.channel,self.rate,self.power = params.values()
-                return (True, params)
-        return (False, "timeout or parse error")
-
-    def send_raw(self, data: bytes) -> (bool, None|str):
-        """
-        低级原始写入（透传/调试用）。
-
-        Args:
-            data (bytes): 待发送原始字节。
-
-        Returns:
-            Tuple[bool, None|str]: 成功返回 (True, None)，失败返回 (False, "io error")。
-
-        Notes:
-            不自动追加行结束符。
-        ==========================================
-        Low-level raw write (transparent/debug use).
-
-        Args:
-            data (bytes): Raw bytes to send.
-
-        Returns:
-            Tuple[bool, None|str]: (True, None) if success, (False, "io error") if failed.
-
-        Notes:
-            Does not append line terminator automatically.
-        """
-
-        return self._send(data, append_lt=False)
-
-    def recv_raw(self) -> (bool, bytes|str):
-        """
-        低级原始读取，使用固定 3s 超时的 _recv。
-
-        Returns:
-            Tuple[bool, bytes|str]: 成功返回 (True, raw_bytes)，失败返回 (False, "timeout")。
-        ==========================================
-        Low-level raw read, using fixed 3s timeout _recv.
-
-        Returns:
-            Tuple[bool, bytes|str]: (True, raw_bytes) if success, (False, "timeout") if failed.
-        """
-
-        return self._recv()
+        ok, err = self._send(f'AT+RX'.encode())
+        if not ok: return (False, err)
+        
+        try:
+            lines = self._uart.read().decode('utf-8').strip().split('\r\n')
+            values = [item.split(':')[1] for item in lines if ':' in item]
+            return True,{'baud': values[0],'channel': values[1],'rate': values[2],'power': values[3]}
+        except:
+            return False,'get params error'
 
     def transparent_send(self, data: bytes, wait_between_packets_s: float = 0.01) -> (bool, dict|str):
         """
@@ -735,52 +640,47 @@ class HC14_Lora:
             n = 0
             for i in range(0, len(data), M):
                 packet = data[i:i+M]
-                ok, _ = self.send_raw(packet)
-                if not ok:
-                    return (False, "send error")
+                if self._uart.write(packet) != len(packet):
+                    return (False, f"send error, wrote {ok}/{len(packet)} bytes")
                 n += 1
                 time.sleep(wait_between_packets_s)
             return (True, {"packets":n, "bytes_sent":len(data)})
         except Exception as e:
             return (False, str(e))
 
-    def transparent_recv(self, max_total_bytes: int = 1024) -> (bool, bytes|str):
+    def transparent_recv(self, max_total_bytes: int = 1024, timeout_ms: int = 5000, quiet_ms: int = 2300):
         """
-        透明接收，从模块读取透传数据。
-
-        Args:
-            max_total_bytes (int, optional): 最大接收字节数，默认 1024。
-
-        Returns:
-            Tuple[bool, bytes|str]: 成功返回 (True, received_bytes)，失败返回 (False, "timeout")。
-
-        Notes:
-            循环调用 _recv 拼接多次分包数据，但不做高阶重组。
-        ==========================================
-        Transparent receive, read transparent data from module.
-
-        Args:
-            max_total_bytes (int, optional): Maximum bytes to receive, default 1024.
-
-        Returns:
-            Tuple[bool, bytes|str]: (True, received_bytes) if success, (False, "timeout") if failed.
-
-        Notes:
-            Loops _recv to concatenate multiple packets, no high-level reassembly.
+        从 UART 读取并合并分片：当在 quiet_ms 时间内没有新数据到达时返回。
+        timeout_ms 为最大等待时间，避免死等。
         """
+        t_start = time.ticks_ms()
+        last_activity = time.ticks_ms()
+        buf = bytearray()
 
-        buf = b''
-        t0 = time.ticks_ms()
-        while time.ticks_diff(time.ticks_ms(), t0) < self._RECV_TIMEOUT_S*1000:
+        while True:
+            # 有数据就读并重置 last_activity
             if self._uart.any():
-                buf += self._uart.read()
-                if len(buf) >= max_total_bytes:
-                    break
+                chunk = self._uart.read()  # 读走当前缓冲区内的所有字节
+                if chunk:
+                    buf.extend(chunk)
+                    last_activity = time.ticks_ms()
+                    # 如果已达到最大允许字节数，立即返回
+                    if len(buf) >= max_total_bytes:
+                        return (True, bytes(buf[:max_total_bytes]))
             else:
-                time.sleep_ms(20)
-        if buf:
-            return (True, buf)
-        return (False, "timeout")
+                # 若无数据，检查 quiet/timeout
+                if len(buf) > 0:
+                    # 如果在 quiet_ms 内没有新数据，则认为包完整
+                    if time.ticks_diff(time.ticks_ms(), last_activity) >= quiet_ms:
+                        return (True, bytes(buf))
+                # 超时处理：如果起始等待时间超过 timeout_ms 且没有收到任何数据，超时返回
+                if time.ticks_diff(time.ticks_ms(), t_start) >= timeout_ms:
+                    if len(buf) > 0:
+                        return (True, bytes(buf))  # 收到部分数据但超时，还是返回
+                    else:
+                        return (False, "timeout")
+            time.sleep_ms(5)  # 小延时，避免 busy-loop
+
 
     def close(self) -> (bool, None|str):
         """

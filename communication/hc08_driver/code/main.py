@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from machine import Pin
+from machine import UART,Pin
 from hc08 import HC08
 
 # ======================================== 全局变量 ============================================
@@ -20,12 +20,16 @@ from hc08 import HC08
 # ======================================== 初始化配置 ===========================================
 
 # 上电延时3s
-time.sleep(3)
-print("FreakStudio:Infrared transceiver test")
+print("FreakStudio:HC08 test")
+
+# 初始化 UART 通信（按硬件实际接线调整 TX/RX）
+uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+# 创建 HC14_Lora 实例
+hc0 = HC08(uart0)
 
 # ========================================  主程序  ===========================================
 while True:
-    print("[TX] Sending NEC signal...")
-    # 地址=0x10, 命令=0x20
-    ir_tx.transmit(0x10, 0x20)
-    time.sleep(2)
+    
+    if hc0._uart.any():
+       print(hc0._uart.read())
+    time.sleep(0.05)
