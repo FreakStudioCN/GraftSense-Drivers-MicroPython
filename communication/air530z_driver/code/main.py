@@ -15,6 +15,28 @@ from air530z import Air530Z,NMEASender
 
 # ======================================== 功能函数 ============================================
 def resolve(gps, resp):
+    """
+    功能函数：解析 GPS 模块返回的 NMEA 数据，并在解析出有效定位信息时打印关键信息。  
+
+    Args:
+        gps (object): GPS 解析对象，提供 update()、timestamp、date_string() 等接口。  
+        resp (iterable): NMEA 数据序列，每个元素为一条 NMEA 语句。  
+
+    处理逻辑：
+        - 遍历输入的 NMEA 数据，逐条调用 gps.update() 进行解析。  
+        - 当解析得到有效结果时，打印时间、日期、经纬度、速度、高度以及卫星数等关键数据。  
+
+    ==========================================
+    Utility function: Parse NMEA data from GPS module and print key info when valid fix is obtained.  
+
+    Args:
+        gps (object): GPS parser instance with update(), timestamp, date_string(), etc.  
+        resp (iterable): Sequence of NMEA sentences.  
+
+    Processing:
+        - Iterate through NMEA sentences, call gps.update() on each.  
+        - If a valid fix is parsed, print timestamp, date, latitude, longitude, speed, altitude, and satellites in use.  
+    """
     for i in resp:
         parsed_sentence = gps.update(i)
 
@@ -36,7 +58,7 @@ def resolve(gps, resp):
 # ======================================== 初始化配置 ===========================================
 
 # 上电延时3s
-#time.sleep(3)
+time.sleep(3)
 print("FreakStudio: air530z test")
 
 # 初始化 UART 通信（按硬件实际接线调整 TX/RX）
@@ -44,13 +66,10 @@ uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
 # 创建 HC14_Lora 实例
 gps = Air530Z(uart0)
 nema = NMEASender()
-gps._uart.write(nema.set_baudrate(5).encode())
-print(nema.set_baudrate(5).encode())
-#gps._uart.write(b'$PCAS06,0*1B\r\n')
-time.sleep(0.5)
+
 # ========================================  主程序  ===========================================
 while True:
     if gps._uart.any():
-        print(gps._uart.read().decode('utf-8'))
+        resp = gps._uart.read().decode('utf-8')
+        resolve(gps, resp)
 
-    #time.sleep(2)

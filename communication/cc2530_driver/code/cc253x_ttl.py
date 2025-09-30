@@ -266,15 +266,16 @@ class CC253xTTL:
     SHORTADDR_COORDINATOR = const(0x0000)  # 协调器短地址始终 0x0000
     SHORTADDR_NOT_JOINED  = const(0xFFFE)  # 表示未加入网络（驱动层约定）
 
-    def __init__(self, uart, role, baud=DEFAULT_BAUD,channel=DEFAULT_CHANNEL, panid=DEFAULT_PANID,seek_time=DEFAULT_SEEK_TIME, query_interval_ms=DEFAULT_QUERY_MS):
+    def __init__(self, uart, wake=None,baud=DEFAULT_BAUD,channel=DEFAULT_CHANNEL, panid=DEFAULT_PANID,seek_time=DEFAULT_SEEK_TIME, query_interval_ms=DEFAULT_QUERY_MS):
         """
         uart: 已初始化的 UART 实例（driver 只使用其 read/write）
+        wake: 只有enddevice需要
         role: CC253xTTL.ROLE_*
         其余为默认值，驱动会在 __init__ 时将 UART 波特率设置为 baud（如果需要）
         """
 
         self._uart = uart
-        self.role = role
+        self._wake = wake
         self.baud = baud
         self.channel = channel
         self.panid = panid
@@ -306,13 +307,13 @@ class CC253xTTL:
             Tuple[bool, str]: (status, response), True if success, False otherwise.
         """
         cmd = self.PREFIX + cmd
-        self._uart.write(binascii.unhexlify(cmd.lower()))
-        time.sleep(0.1)
+        self._uart.write(bytes.fromhex(cmd))
+        time.sleep(0.05)
         if self._uart.any():
             resp = self._uart.read()
             tag = resp[4]
             resp = resp[5:]
-            resp_hex = resp.hex().lower()
+            resp_hex = resp.hex()
             if tag in [1, 5, 12, 14]:
                 return True, resp_hex
             else:
@@ -322,6 +323,29 @@ class CC253xTTL:
                     return False, "failure"
         else:
             return False, 'No response from UART'
+
+    def _recv(self):
+        """
+        私有方法：发送 AT 命令并等待响应，直到收到 OK 或 ERROR。  
+
+        Args:
+            cmd (str): 完整的 AT 命令字符串。  
+
+        Returns:
+            Tuple[bool, str]: (状态, 响应内容)，True 表示成功，False 表示失败。  
+
+        ==========================================
+        Private method: Send an AT command and wait for response until OK or ERROR.  
+
+        Args:
+            cmd (str): Full AT command string.  
+
+        Returns:
+            Tuple[bool, str]: (status, response), True if success, False otherwise.
+        """
+        if self._uart.any():
+            resp = self._uart.read()[7:].decode('utf-8')
+            return True, resp
 
     # 公共设置与查询 API
     def read_status(self) -> str:
@@ -596,7 +620,7 @@ class CC253xTTL:
         Raises:
             PacketTooLargeError: If data exceeds maximum payload length.
         """
-        self._send('0A' + data)
+        self._send('0A' + data.encode('utf-8').hex())
 
     def send_coord_to_node(self, short_addr: int, data: str) -> None:
         """
@@ -623,7 +647,7 @@ class CC253xTTL:
         """
         if not (0 <= short_addr <= 0xFFFF):
             raise InvalidParameterError("short_addr out of range 0..65535")
-        self._send('0B' + f'{short_addr:04X}' + data)
+        return self._send('0B' + f'{short_addr:04X}' + data.encode("utf-8").hex())[0]
 
     def read_mac(self) -> str:
         """
@@ -728,7 +752,7 @@ class CC253xTTL:
             raise InvalidParameterError("source_addr out of range 0..65535")
         if not (0 <= target_addr <= 0xFFFF):
             raise InvalidParameterError("target_addr out of range 0..65535")
-        self._send('0B' + f'{target_addr:04X}' + f'{source_addr:04X}' + data)
+        self._send('0F' + f'{target_addr:04X}' + f'{source_addr:04X}' + data.encode("utf-8").hex())
 
     # 点对点 / 透明数据发送（长度限制与延时）
     def send_transparent(self, data: bytes) -> None:

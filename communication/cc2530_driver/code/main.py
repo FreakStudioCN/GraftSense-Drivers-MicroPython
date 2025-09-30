@@ -8,7 +8,6 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-import binascii
 from machine import UART,Pin
 from cc253x_ttl import CC253xTTL
 
@@ -21,16 +20,22 @@ from cc253x_ttl import CC253xTTL
 # ======================================== 初始化配置 ===========================================
 
 # 上电延时3s
-#time.sleep(3)
+time.sleep(3)
 print("FreakStudio:cc253x_ttl test")
 
 uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
-#uart1 = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
+uart1 = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
+key = Pin(2, mode=Pin.OUT)
 
-cor = CC253xTTL(uart0,0x00)
-#end = CC253xTTL(uart1,0x02)
-print(cor.read_mac())
+# 唤醒
+key.value(0)
+time.sleep(0.05)
+key.value(1)
+
+cor = CC253xTTL(uart0)
+env = CC253xTTL(uart1)
 
 # ========================================  主程序  ===========================================
-#while True:
-    #if cor._uart.any():
+
+print(cor.read_short_addr())
+print(env.read_mac())
