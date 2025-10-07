@@ -75,7 +75,11 @@ class PCA9685:
             ValueError: 如果I2C地址超出范围（0x40-0x4F）。
 
         ==========================================
-        Constructor to initialize the PCA9685 instance, setting the I2C address and calling the `reset()` method to reset.
+        Constructor to initialize the PCA9685 instance, setting the I2C address and calling the `reset()`
+        method to reset.
+
+        This method initializes I2C communication, sets the address of PCA9685, and calls the reset() method to perform
+        a reset.
 
         Args:
             i2c (I2C): I2C instance for communicating with the PCA9685.
@@ -152,6 +156,8 @@ class PCA9685:
 
         Set the PWM frequency of the PCA9685.
 
+        This method will adjust the prescaler of PCA9685 to achieve PWM output of the specified frequency.
+
         Args:
             freq (float): The desired PWM frequency in Hz.
 
@@ -185,6 +191,8 @@ class PCA9685:
         ==========================================
 
         Set the PWM signal of the specified channel.
+
+        This method controls the high-level and low-level times of the PWM signal by specifying the on and off times.
 
         Args:
             index (int): Index of the channel (0-15).

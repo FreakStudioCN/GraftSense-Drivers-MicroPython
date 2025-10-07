@@ -31,6 +31,16 @@ def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
 
     Returns:
         callable: 返回计时后的函数
+    =================================================
+    A timing decorator used to calculate and print the running time of a function/method.
+
+    Args:
+        f (callable): The function/method to be passed in
+        args (tuple): Any number of positional arguments passed to function/method f
+        kwargs (dict): Any number of keyword arguments passed to function/method f
+
+    Returns:
+        callable: The function after timing
     """
     myname = str(f).split(' ')[1]
 

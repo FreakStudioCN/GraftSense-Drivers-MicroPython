@@ -320,6 +320,7 @@ class SerialServo:
             int: 计算出的校验和，值范围为 0~255。
 
         ===================================================
+        Calculate the checksum.
 
         Calculate checksum to ensure data integrity and correctness.
 
@@ -356,6 +357,8 @@ class SerialServo:
         ===================================================
 
         Build servo control command packet, including checksum.
+
+        Generate a complete data package based on the servo ID, command, and parameters, and append a checksum.
 
         Args:
             servo_id (int): Servo ID, range 0~253, where 254 is broadcast ID, indicating all servos.
@@ -401,6 +404,8 @@ class SerialServo:
         ===================================================
 
         Send control command to the servo.
+
+        Send the constructed data packet to the specified servo via UART to execute the corresponding control command.
 
         Args:
             servo_id (int): Servo ID, range 0~253.
@@ -507,6 +512,8 @@ class SerialServo:
         ===================================================
 
         Immediately control the servo to rotate to the specified angle.
+
+        This method uses the SERVO_MOVE_TIME_WRITE command to rotate the servo to a specified angle within a given time.
 
         Args:
             servo_id (int): Servo ID, range 0~253.
@@ -1271,7 +1278,9 @@ class SerialServo:
 
         Retrieve the servo's internal maximum temperature limit.
 
-        This method sends the `SERVO_TEMP_MAX_LIMIT_READ` command using the servo's ID to read the servo's internal maximum temperature limit,
+        This method sends the `SERVO_TEMP_MAX_LIMIT_READ` command using the servo's ID to read the servo's
+        internal maximum temperature limit,
+
         then converts the returned value to degrees Celsius.
 
         Args:
@@ -1488,7 +1497,10 @@ class SerialServo:
 
     def set_servo_mode_and_speed(self, servo_id: int, mode: int, speed: int) -> None:
         """
-        设置舵机的工作模式和电机转速，只有在电机控制模式下，转动速度才有效。
+        设置舵机的工作模式和电机速度。
+
+        此方法用于设置舵机的工作模式和电机速度。
+        仅在电机控制模式下，旋转速度才有效。
 
         Args:
             servo_id (int): 舵机ID，范围0~253。
@@ -1771,6 +1783,9 @@ class SerialServo:
     def set_servo_led_alarm(self, servo_id: int, alarm_code: int) -> None:
         """
         设置舵机LED闪烁报警对应的故障值。
+
+        设置舵机的工作模式和电机速度。此方法用于设置舵机的工作模式和电机速度。
+        仅在电机控制模式下，旋转速度才有效。
 
         Args:
             servo_id (int): 舵机ID，范围0~253。

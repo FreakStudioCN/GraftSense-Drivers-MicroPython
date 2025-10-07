@@ -190,7 +190,14 @@ class BusStepMotor:
 
         =============================================
 
-        Calculate and update the step state of the current motor.
+        Calculate and update the current stepping state of the stepper motor.
+
+        Based on the drive mode, direction, and current step count of the stepper motor, calculate the next phase of the
+        motor, and output the corresponding PWM signal through PCA9685 to drive the motor.
+
+        It should be noted that this method realizes control based on the step count of each motor and does not consider
+        some special cases, such as the step loss problem caused by excessively fast stepping speed. It can only be used
+        under light load and stable conditions.
 
         Args:
             motor_id (int): Motor ID.
@@ -244,7 +251,11 @@ class BusStepMotor:
 
         ==============================================
 
-        Start the timer and set the callback function to control the continuous motion of the motor.
+        Start the timer and set the callback function.
+
+        There may be a certain deviation between the precision of the timer and the stepping frequency (speed),
+        especially at high frequencies. If the control system requires more precise stepping control, more professional
+        timer hardware may be needed or the timer frequency may be adjusted through more accurate algorithms.
 
         Args:
             motor_id (int): Motor ID.
