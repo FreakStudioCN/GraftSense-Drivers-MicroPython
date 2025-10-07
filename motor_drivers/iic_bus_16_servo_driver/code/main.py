@@ -99,9 +99,9 @@ time.sleep(20)
 srv.set_speed(4, -0.6)          # 反向中速
 srv.set_speed(5, -0.6)          # 反向中速
 time.sleep(20)
-srv.set_speed(4, 0.0)           # 停止（1500us）
-srv.set_speed(5, 0.0)           # 停止（1500us）
-time.sleep(0.5)
+srv.stop(4)                     # 4号通道回中或停
+srv.stop(5)                     # 5号通道回中或停
+time.sleep(0.5)                  # 回中或停
 srv.detach_servo(0)             # 关闭输出并解除绑定
 srv.detach_servo(1)             # 关闭输出并解除绑定
 srv.detach_servo(2)             # 关闭输出并解除绑定
