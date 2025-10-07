@@ -1,4 +1,4 @@
-# RCWL9623 收发一体超声波模块驱动 - MicroPython版本
+# PCA9685  16路PWM驱动板示例程序 - MicroPython版本
 
 ## 目录
 - [简介](#简介)
