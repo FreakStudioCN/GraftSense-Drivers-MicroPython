@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from machine import Pin
+from machine import UART,Pin
 from cc253x_ttl import CC253xTTL
 
 # ======================================== 全局变量 ============================================
@@ -21,11 +21,21 @@ from cc253x_ttl import CC253xTTL
 
 # 上电延时3s
 time.sleep(3)
-print("FreakStudio:Infrared transceiver test")
+print("FreakStudio:cc253x_ttl test")
+
+uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+uart1 = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
+key = Pin(2, mode=Pin.OUT)
+
+# 唤醒
+key.value(0)
+time.sleep(0.05)
+key.value(1)
+
+cor = CC253xTTL(uart0)
+env = CC253xTTL(uart1)
 
 # ========================================  主程序  ===========================================
-while True:
-    print("[TX] Sending NEC signal...")
-    # 地址=0x10, 命令=0x20
-    ir_tx.transmit(0x10, 0x20)
-    time.sleep(2)
+
+print(cor.read_short_addr())
+print(env.read_mac())
