@@ -3,17 +3,17 @@
 # @Time    : 2025/9/9 上午11:25
 # @Author  : 缪贵成
 # @File    : main.py
-# @Description : 基于BME280的大气压强温湿度传感器模块驱动测试程序
+# @Description : 基于BMP280的大气压强温湿度传感器模块驱动测试程序
 
 # ======================================== 导入相关模块 =========================================
 
 import time
 from machine import I2C
-from bme280_float import BME280
+from bmp280_float import BMP280
 
 # ======================================== 全局变量 =============================================
 
-bme_addr = None
+bmp_addr = None
 
 # ======================================== 功能函数 =============================================
 
@@ -22,7 +22,7 @@ bme_addr = None
 # ======================================== 初始化配置 ============================================
 
 time.sleep(3)
-print("FreakStudio:Testing BME280 pressure, temperature, and humidity sensor")
+print("FreakStudio:Testing BMP280 pressure, temperature, and humidity sensor")
 # 注意：引脚号根据实际硬件修改
 i2c = I2C(0, scl=1, sda=0, freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
@@ -37,16 +37,16 @@ else:
 for device in devices_list:
     if 0x60 <= device <= 0x7A:
         print("I2c hexadecimal address:", hex(device))
-        bme_addr = device
+        bmp_addr = device
 
-bme = BME280(i2c=i2c, address=bme_addr)
+bmp = BMP280(i2c=i2c, address=bmp_addr)
 
 # ======================================== 主程序 ===============================================
 try:
-    print("FreakStudio: Testing BME280 sensor (Temperature, Humidity, Pressure)")
+    print("FreakStudio: Testing BMP280 sensor (Temperature, Humidity, Pressure)")
     while True:
         # 获取浮点数温湿度和气压
-        temp, press, hum = bme.read_compensated_data()
+        temp, press, hum = bmp.read_compensated_data()
         # 转换气压单位为 hPa（1 hPa = 100 Pa）
         press_hpa = press / 100.0
         # 计算海拔高度
