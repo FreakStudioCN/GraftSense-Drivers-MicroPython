@@ -3,13 +3,13 @@
 # @Time    : 2025/9/5 下午10:11
 # @Author  : ben0i0d
 # @File    : main.py
-# @Description : hc14_lora测试文件
+# @Description : tas755c测试文件
 
 # ======================================== 导入相关模块 =========================================
 
 import time
-from machine import Pin
-from hc14_lora import HC14_Lora
+from machine import UART, Pin
+from tas_755c_eth import TAS_755C_ETH
 
 # ======================================== 全局变量 ============================================
 
@@ -21,14 +21,19 @@ from hc14_lora import HC14_Lora
 
 # 上电延时3s
 time.sleep(3)
-print("FreakStudio:Infrared transceiver test")
+print("FreakStudio:tas755c test")
+# 初始化 UART 通信（按硬件实际接线调整 TX/RX）
+uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+# 创建 HC14_Lora 实例
+tas = TAS_755C_ETH(uart0)
+# 切换AT模式
+tas.enter_command_mode()
 
-a = HC14_Lora()
+print(tas.get_mqtt_pubtopic())
 
-
+tas.enter_data_mode()
 # ========================================  主程序  ===========================================
 while True:
-    print("[TX] Sending NEC signal...")
-    # 地址=0x10, 命令=0x20
-    ir_tx.transmit(0x10, 0x20)
-    time.sleep(2)
+    
+    if tas._uart.any():
+        print(tas._uart.read().decode('utf-8'))

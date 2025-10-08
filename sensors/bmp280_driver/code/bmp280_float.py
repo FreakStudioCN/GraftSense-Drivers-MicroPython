@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/9 上午11:25
 # @Author  : 缪贵成
-# @File    : bme280_float.py
-# @Description : 基于BME280的大气压强温湿度传感器模块驱动（浮点型版本）
+# @File    : bmp280_float.py
+# @Description : 基于BMP280的大气压强温湿度传感器模块驱动（浮点型版本）
 # Reference :https://github.com/robert-hh/BME280/blob/master
 # @License : CC BY-NC 4.0
 
@@ -23,36 +23,36 @@ from math import pow
 
 # ======================================== 全局变量 ============================================
 
-# BME280 default address.
-BME280_I2CADDR = 0x76
+# BMP280 default address.
+BMP280_I2CADDR = 0x76
 # Operating Modes
-BME280_OSAMPLE_1 = 1
-BME280_OSAMPLE_2 = 2
-BME280_OSAMPLE_4 = 3
-BME280_OSAMPLE_8 = 4
-BME280_OSAMPLE_16 = 5
+BMP280_OSAMPLE_1 = 1
+BMP280_OSAMPLE_2 = 2
+BMP280_OSAMPLE_4 = 3
+BMP280_OSAMPLE_8 = 4
+BMP280_OSAMPLE_16 = 5
 # 湿度数据的过采样
-BME280_REGISTER_CONTROL_HUM = 0xF2
-BME280_REGISTER_STATUS = 0xF3
+BMP280_REGISTER_CONTROL_HUM = 0xF2
+BMP280_REGISTER_STATUS = 0xF3
 # 通过0xF4寄存器的不同位配置从而实现对温度压力和湿度的过采样和模式控制 详细参考数据手册第3.3章节转换图
-BME280_REGISTER_CONTROL = 0xF4
+BMP280_REGISTER_CONTROL = 0xF4
 MODE_SLEEP = const(0)
 MODE_FORCED = const(1)
 MODE_NORMAL = const(3)
 # about 1 second timeout
-BME280_TIMEOUT = const(100)
+BMP280_TIMEOUT = const(100)
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
 
-class BME280:
+class BMP280:
     """
-    该类控制 BME280 大气压、温度和湿度传感器，提供浮点型数据读取接口。
+    该类控制 BMP280 大气压、温度和湿度传感器，提供浮点型数据读取接口。
 
     Attributes:
         i2c (I2C): machine.I2C 实例，用于总线通信。
-        address (int): BME280 I2C 地址。
+        address (int): BMP280 I2C 地址。
         _mode_hum (int): 湿度采样模式。
         _mode_temp (int): 温度采样模式。
         _mode_press (int): 气压采样模式。
@@ -85,7 +85,7 @@ class BME280:
 
     ==========================================
 
-    BME280 driver for temperature, pressure, and humidity sensors (float version).
+    BMP280 driver for temperature, pressure, and humidity sensors (float version).
 
     Attributes:
         i2c (I2C): machine.I2C instance for bus communications.
@@ -116,12 +116,12 @@ class BME280:
     """
 
     def __init__(self,
-                 mode=BME280_OSAMPLE_8,
+                 mode=BMP280_OSAMPLE_8,
                  address=None,
                  i2c=None,
                  **kwargs):
         """
-        初始化 BME280 传感器，加载校准数据并配置采样模式。
+        初始化 BMP280 传感器，加载校准数据并配置采样模式。
 
         Args:
             mode (int or tuple): 采样模式，可为单一模式或三元组 (hum, temp, press)。
@@ -139,7 +139,7 @@ class BME280:
 
         ==========================================
 
-        Initialize BME280 sensor, load calibration data, and set sampling mode.
+        Initialize BMP280 sensor, load calibration data, and set sampling mode.
 
         Args:
             mode (int or tuple): Sampling mode, single value or (hum, temp, press) tuple.
@@ -164,12 +164,12 @@ class BME280:
             raise ValueError("Wrong type for the mode parameter, must be int or a 3 element tuple")
 
         for mode in (self._mode_hum, self._mode_temp, self._mode_press):
-            if mode not in [BME280_OSAMPLE_1, BME280_OSAMPLE_2, BME280_OSAMPLE_4,
-                            BME280_OSAMPLE_8, BME280_OSAMPLE_16]:
+            if mode not in [BMP280_OSAMPLE_1, BMP280_OSAMPLE_2, BMP280_OSAMPLE_4,
+                            BMP280_OSAMPLE_8, BMP280_OSAMPLE_16]:
                 raise ValueError(
                     'Unexpected mode value {0}. Set mode to one of '
-                    'BME280_OSAMPLE_1, BME280_OSAMPLE_2, BME280_OSAMPLE_4, '
-                    'BME280_OSAMPLE_8 or BME280_OSAMPLE_16'.format(mode))
+                    'BMP280_OSAMPLE_1, BMP280_OSAMPLE_2, BMP280_OSAMPLE_4, '
+                    'BMP280_OSAMPLE_8 or BMP280_OSAMPLE_16'.format(mode))
 
         self.address = address
         if i2c is None:
@@ -199,7 +199,7 @@ class BME280:
         self._l3_resultarray = array("i", [0, 0, 0])
 
         self._l1_barray[0] = self._mode_temp << 5 | self._mode_press << 2 | MODE_SLEEP
-        self.i2c.writeto_mem(self.address, BME280_REGISTER_CONTROL,
+        self.i2c.writeto_mem(self.address, BMP280_REGISTER_CONTROL,
                              self._l1_barray)
         self.t_fine = 0
 
@@ -231,25 +231,25 @@ class BME280:
             Not ISR-safe.
         """
         self._l1_barray[0] = self._mode_hum
-        self.i2c.writeto_mem(self.address, BME280_REGISTER_CONTROL_HUM,
+        self.i2c.writeto_mem(self.address, BMP280_REGISTER_CONTROL_HUM,
                              self._l1_barray)
         self._l1_barray[0] = self._mode_temp << 5 | self._mode_press << 2 | MODE_FORCED
-        self.i2c.writeto_mem(self.address, BME280_REGISTER_CONTROL,
+        self.i2c.writeto_mem(self.address, BMP280_REGISTER_CONTROL,
                              self._l1_barray)
 
         # wait up to about 5 ms for the conversion to start
         for _ in range(5):
-            if self.i2c.readfrom_mem(self.address, BME280_REGISTER_STATUS, 1)[0] & 0x08:
-                break;  # The conversion is started.
+            if self.i2c.readfrom_mem(self.address, BMP280_REGISTER_STATUS, 1)[0] & 0x08:
+                break  # The conversion is started.
             time.sleep_ms(1)  # still not busy
         # Wait for conversion to complete
-        for _ in range(BME280_TIMEOUT):
-            if self.i2c.readfrom_mem(self.address, BME280_REGISTER_STATUS, 1)[0] & 0x08:
+        for _ in range(BMP280_TIMEOUT):
+            if self.i2c.readfrom_mem(self.address, BMP280_REGISTER_STATUS, 1)[0] & 0x08:
                 time.sleep_ms(10)  # still busy
             else:
                 break  # Sensor ready
         else:
-            raise RuntimeError("Sensor BME280 not ready")
+            raise RuntimeError("Sensor BMP280 not ready")
 
         # burst readout from 0xF7 to 0xFE, recommended by datasheet
         self.i2c.readfrom_mem_into(self.address, 0xF7, self._l8_barray)
@@ -275,7 +275,7 @@ class BME280:
             array: 长度为 3 的浮点型数组 [温度, 气压, 湿度]。该方法存在返回值，但是由于不使用Typing从而无法进行返回值注解，对代码本身无影响。
 
         Notes:
-            - 自动应用 BME280 校准参数进行补偿。
+            - 自动应用 BMP280 校准参数进行补偿。
             - 温度范围：-40~85 °C，气压范围：30000~110000 Pa，湿度范围：0~100%。
             - 非 ISR-safe。
 
@@ -291,7 +291,9 @@ class BME280:
             array: 3-element float array [temperature, pressure, humidity].
 
         Notes:
-            Non-ISR-safe.
+            - Non-ISR-safe.
+            - Automatically apply BMP280 calibration parameters for compensation.
+            - Temperature range: -40~85 °C, pressure range: 30000~110000 Pa, humidity range: 0~100%.
         """
         self.read_raw_data(self._l3_resultarray)
         raw_temp, raw_press, raw_hum = self._l3_resultarray
