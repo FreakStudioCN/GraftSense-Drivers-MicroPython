@@ -3,14 +3,14 @@
 # @Time    : 2025/09/08 15:00
 # @Author  : 侯钧瀚
 # @File    : mian.py
-# @Description : 基于MEMS气体传感器的空气质量监测模块示例程序
+# @Description : 基于PCA9546ADR4通道I2C多路复用示例程序
 # ======================================== 导入相关模块 =========================================
 # 导入MicroPython标准库模块
 from machine import Pin, I2C
 # 导入时间模块
 import time
-# 导入空气质量监测模块
-from air_quality import AirQualityMonitor
+
+from pca9546adr import PCA9546ADR
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
@@ -27,23 +27,16 @@ print("FreakStudio: Testing Gas Concentration with MEMS Modules")
 i2c = I2C(1, scl=Pin(22), sda=Pin(21))
 
 # 创建空气质量监测模块实例
-monitor = AirQualityMonitor(i2c)
+pca = PCA9546ADR(i2c)
 
 # 注册传感器
-monitor.register_sensor('VOC_Sensor', monitor.MEMS_SENSOR_ADDR7, 0, monitor.MEMS_SENSOR_ADDR7)
+pca.select_channel(0)  # 选择通道0
 
 # ========================================  主程序  ===========================================
 
-# 读取 VOC 气体浓度
-concentration = monitor.read_gas('VOC_Sensor')
-print(f"VOC 气体浓度: {concentration}")
-
-# 校准传感器
-success = monitor.calibrate_gas('VOC_Sensor', 0)
-print(f"校准成功: {success}")
-
-# 重启模块
-monitor.restart()
+while True:
+    print(i2c.scan())
+    time.sleep(1)
 
 
 
