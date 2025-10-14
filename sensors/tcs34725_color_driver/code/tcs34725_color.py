@@ -109,13 +109,15 @@ class TCS34725:
         Methods performing I2C are not ISR-safe.
     """
 
-    def __init__(self, i2c, address=None, int_pin: Pin = None):
+    def __init__(self, i2c, address=None, int_pin: Pin = None, led_pin=None):
         """
         初始化 TCS34725 实例。
 
         Args:
             i2c (I2C): I2C 实例，必须已经初始化。
             address (int): 传感器 I2C 地址。
+            int_pin(Pin):中断引脚。
+            led_pin:led控制引脚编号。
 
         Raises:
             ValueError: address 不在规定范围内或者不是I2C实例。
@@ -132,6 +134,8 @@ class TCS34725:
         Args:
             i2c (I2C): I2C instance, must be initialized.
             address (int): Device I2C address, default 0x29.
+            int_pin:interrupt number.
+            led_pin:led number.
 
         Raises:
             ValueError: The address is out of the specified range or is not an I2C instance..
@@ -144,6 +148,7 @@ class TCS34725:
             raise ValueError("i2c parameter must be a machine.I2C instance")
         if not isinstance(address, int) or not (0x03 <= address <= 0x77):
             raise ValueError("address parameter must be int and in range 0x03~0x77")
+        slef.led_pin = led_pin
         self.i2c = i2c
         self.address = address
         self.int_pin = int_pin
@@ -259,6 +264,17 @@ class TCS34725:
             - Contains delay operations.
 
         """
+        if led_pin is not None:
+            if isinstance(led_pin, int):  # 若传入的是 GPIO 编号（如 25）
+                self.led_pin = Pin(led_pin, Pin.OUT)
+            elif isinstance(led_pin, Pin):  # 若传入的是已创建的 Pin 对象
+                self.led_pin = led_pin
+            else:
+                raise ValueError("led_pin must be GPIO number (int) or Pin object")
+        # 若未初始化过 led_pin，创建空属性避免后续报错
+        if not hasattr(self, 'led_pin'):
+            self.led_pin = None
+
         if value is None:
             return self._active
         value = bool(value)
@@ -266,18 +282,20 @@ class TCS34725:
             return
         self._active = value
         enable = self._register8(_REGISTER_ENABLE)
+
         if value:
+            # 激活传感器：上电 → 启用 ADC → 点亮 LED（若有）
             self._register8(_REGISTER_ENABLE, enable | _ENABLE_PON)
             time.sleep_ms(3)
-            self._register8(_REGISTER_ENABLE,
-                            enable | _ENABLE_PON | _ENABLE_AEN)
-            if led_pin:
-                led_pin = Pin(led_pin, Pin.OUT)
-                led_pin.value(1)
+            self._register8(_REGISTER_ENABLE, enable | _ENABLE_PON | _ENABLE_AEN)
+            if self.led_pin is not None:
+                self.led_pin.value(1)
         else:
-            self._register8(_REGISTER_ENABLE,
-                            enable & ~(_ENABLE_PON | _ENABLE_AEN))
-            led_pin.value(0)
+            # 关闭传感器：关闭 ADC 和电源 → 熄灭 LED（若有）
+            self._register8(_REGISTER_ENABLE, enable & ~(_ENABLE_PON | _ENABLE_AEN))
+            if self.led_pin is not None:  # 仅在 led_pin 有效时操作
+                self.led_pin.value(0)
+
 
     def sensor_id(self) -> int:
         """
