@@ -159,6 +159,16 @@ class Buzzer:
                 self.play_tone(frequency, duration)
             # 每个音符之间的间隔
             time.sleep_ms(10)
+    def stop_tone(self) -> None:
+        """
+        停止播放
+        ==========================================
+        stop playing
+        
+        """
+        self.buzzer.duty_u16(0)
+        
+    
 
 # ======================================== 初始化配置 ==========================================
 
