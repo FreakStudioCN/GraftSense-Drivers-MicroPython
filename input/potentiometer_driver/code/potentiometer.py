@@ -161,7 +161,18 @@ class Potentiometer:
             0 means min position, 1 means max position.
         """
         raw = self.read_raw()
-        return raw / 65535
+
+        # 动态计算有效范围（自动忽略极端值）
+        # 假设硬件实际范围在 [5%~90%] 之间，通过偏移量补偿
+        min_offset = 65535 * 0.05  # 5% 偏移量（适应无法到达最左端）
+        max_offset = 65535 * 0.9  # 95% 偏移量（适应无法到达最右端）
+
+        # 限制原始值在有效范围内
+        clamped_raw = max(min_offset, min(raw, max_offset))
+
+        # 基于有效范围归一化到 0.0~1.0
+        ratio = (clamped_raw - min_offset) / (max_offset - min_offset)
+        return max(0.0, min(1.0, ratio))
 
     def get_state(self) -> dict:
         """
