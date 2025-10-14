@@ -295,9 +295,6 @@ class I2CDevice:
         Args:
             buf (bytes): 要写入的数据缓冲区。
 
-        Raises:
-            TypeError: 当 buf 不是 bytes时。
-            
         Notes:
             - buf必须是bytes或bytearray类型。
             - 此方法直接调用machine.I2C.writeto。
@@ -309,17 +306,12 @@ class I2CDevice:
 
         Args:
             buf (bytes): Data buffer to write.
-
-        Raises:
-            TypeError: If buf is not bytes.
             
         Notes:
             - buf must be of type bytes or bytearray.
             - Uses machine.I2C.writeto internally.
             - Not ISR-safe.
         """
-        if not isinstance(buf, bytes):
-            raise TypeError(f"buf must be bytes, got {type(buf).__name__}")
         self.i2c.writeto(self.device_address, buf)
 
     def write_then_read_into(self, out_buffer: bytes, in_buffer: bytearray, *, out_start: int = 0, out_end: int = None,
@@ -336,7 +328,6 @@ class I2CDevice:
             in_end (int): 读取数据存放的结束索引，默认None（读到结尾）。
 
         Raises:
-            TypeError: out_buffer 不是 bytes 或 in_buffer 不是 bytearray。
             ValueError: out_start/out_end 或 in_start/in_end 超出缓冲区长度范围。
             
         Notes:
@@ -357,7 +348,6 @@ class I2CDevice:
             in_end (int): End index in in_buffer (default None).
 
         Raises:
-            TypeError: If out_buffer is not bytes or in_buffer is not bytearray.
             ValueError: If out_start/out_end or in_start/in_end are out of buffer range.
 
         Notes:
@@ -365,11 +355,6 @@ class I2CDevice:
             - Uses memoryview to avoid extra allocations.
             - Not ISR-safe.
         """
-        # 类型检查
-        if not isinstance(out_buffer, bytes):
-            raise TypeError(f"out_buffer must be bytes, got {type(out_buffer).__name__}")
-        if not isinstance(in_buffer, bytearray):
-            raise TypeError(f"in_buffer must be bytearray, got {type(in_buffer).__name__}")
 
         # 默认索引
         if out_end is None:

@@ -14,6 +14,7 @@ from tcs34725_color import TCS34725, html_rgb, html_hex
 # ======================================== 全局变量 ============================================
 
 tcs_addr = None
+
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
@@ -22,8 +23,9 @@ tcs_addr = None
 
 time.sleep(3)
 print("FreakStudio:test TCS34725 color recognition sensor")
+
 # 根据硬件修改引脚
-i2c = I2C(0, scl=Pin(1), sda=Pin(0), freq=100000)
+i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list:list[int] = i2c.scan()
 print('START I2C SCANNER')
@@ -34,7 +36,7 @@ if len(devices_list) == 0:
 else:
     print('i2c devices found:', len(devices_list))
 for device in devices_list:
-    if 0x60 <= device <= 0x7A:
+    if device == 0x29:
         print("I2c hexadecimal address:", hex(device))
         tcs_addr = device
 

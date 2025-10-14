@@ -148,7 +148,7 @@ class TCS34725:
             raise ValueError("i2c parameter must be a machine.I2C instance")
         if not isinstance(address, int) or not (0x03 <= address <= 0x77):
             raise ValueError("address parameter must be int and in range 0x03~0x77")
-        slef.led_pin = led_pin
+        self.led_pin = led_pin
         self.i2c = i2c
         self.address = address
         self.int_pin = int_pin
