@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-        
 # @Time    : 2024/7/3 下午9:34   
 # @Author  : 李清水            
-# @File    : SSD1306.py.py       
+# @File    : SSD1306.py
 # @Description : 主要定义了SSD 1306类
 
 
