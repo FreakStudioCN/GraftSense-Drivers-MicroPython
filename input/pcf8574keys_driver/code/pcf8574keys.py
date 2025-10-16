@@ -20,6 +20,17 @@ from machine import Timer
 
 # debounce time in milliseconds
 DEBOUNCE_MS = 20
+# 五向按键引脚映射（根据实际接线修改）
+KEYS_MAP = {
+    'UP': 0,
+    'DOWN': 3,
+    'LEFT': 1,
+    'RIGHT': 2,
+    'CENTER': 4,
+    'SW1':5,
+    'SW2':7,
+    
+}
 
 # ======================================== 功能函数 ============================================
 
@@ -106,7 +117,7 @@ class PCF8574Keys:
             Timer-based polling is started internally for debounce, not ISR-safe.
         """
 
-        if not hasattr(pcf, "read"):
+        if not hasattr(pcf, "pin"):
             raise TypeError("pcf parameter must have a read(pin) method")
         if not isinstance(keys, dict) or not keys:
             raise ValueError("keys parameter must be a non-empty dictionary")
@@ -116,11 +127,12 @@ class PCF8574Keys:
         self._pcf = pcf
         self._keys = keys
         self._callback = callback
-
+        self._pcf.port =0b00000000
         # debounce state cache
         self._state = {k: False for k in keys.keys()}
         self._last_state = self._state.copy()
         self._last_time = {k: 0 for k in keys.keys()}
+        
 
         # create timer for periodic scanning
         self._timer = Timer(-1)
@@ -150,14 +162,14 @@ class PCF8574Keys:
         for key_name, pin in self._keys.items():
             try:
                 # low level means pressed
-                raw = not bool(self._pcf.read(pin))
+                raw = not bool(self._pcf.pin(pin))
             except Exception:
                 # ignore I2C errors
                 continue
 
             # debounce logic
             if raw != self._state[key_name]:
-                if time.ticks_diff(now, self._last_time[key_name]) > self.DEBOUNCE_MS:
+                if time.ticks_diff(now, self._last_time[key_name]) > DEBOUNCE_MS:
                     self._state[key_name] = raw
                     self._last_time[key_name] = now
                     # trigger callback if state changed
