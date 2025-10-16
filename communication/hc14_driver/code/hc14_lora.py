@@ -482,7 +482,7 @@ class HC14_Lora:
 
         if not (1 <= s <= 8):
             return (False, "invalid param")
-        ok, err = self._send(f'AT+S{s:03d}'.encode())
+        ok, err = self._send(f'AT+S{s}'.encode())
         if not ok:return (False, err)
         ok, resp = self._recv()
         if not ok:return (False, resp)
