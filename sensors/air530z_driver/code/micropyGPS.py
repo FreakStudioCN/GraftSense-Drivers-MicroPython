@@ -428,41 +428,56 @@ class MicropyGPS(object):
         return True
 
     def gpgsa(self):
-        """Parse GNSS DOP and Active Satellites (GSA) sentence. Updates GPS fix type, list of satellites used in
-        fix calculation, Position Dilution of Precision (PDOP), Horizontal Dilution of Precision (HDOP), Vertical
-        Dilution of Precision, and fix status"""
-
+        """Parse GNSS DOP and Active Satellites (GSA) sentence.
+        Updates GPS fix type, list of satellites used in fix calculation,
+        Position Dilution of Precision (PDOP), Horizontal Dilution of Precision (HDOP),
+        Vertical Dilution of Precision, and fix status"""
         # Fix Type (None,2D or 3D)
         try:
             fix_type = int(self.gps_segments[2])
-        except ValueError:
+        except (ValueError, IndexError):
             return False
 
         # Read All (up to 12) Available PRN Satellite Numbers
         sats_used = []
         for sats in range(12):
-            sat_number_str = self.gps_segments[3 + sats]
+            idx = 3 + sats
+            try:
+                sat_number_str = self.gps_segments[idx]
+            except IndexError:
+                # 不足字段，直接停止读取卫星号
+                break
+
             if sat_number_str:
                 try:
                     sat_number = int(sat_number_str)
                     sats_used.append(sat_number)
                 except ValueError:
-                    return False
+                    # 如果某个卫星号不是整数，跳过但不要让整个解析失败
+                    continue
             else:
-                break
+                # 空字段表示后面没有更多卫星号
+                continue
 
-        # PDOP,HDOP,VDOP
-        try:
-            pdop = float(self.gps_segments[15])
-            hdop = float(self.gps_segments[16])
-            vdop = float(self.gps_segments[17])
-        except ValueError:
-            return False
+        # PDOP, HDOP, VDOP — 有可能为空或字段缺失，使用默认值
+        def _parse_float_field(index, default=0.0):
+            try:
+                val_str = self.gps_segments[index]
+                if val_str:
+                    return float(val_str)
+                else:
+                    return default
+            except (IndexError, ValueError):
+                return default
+
+        pdop = _parse_float_field(15, 0.0)
+        hdop = _parse_float_field(16, 0.0)
+        vdop = _parse_float_field(17, 0.0)
 
         # Update Object Data
         self.fix_type = fix_type
 
-        # If Fix is GOOD, update fix timestamp
+        # If Fix is GOOD (2D or 3D), update fix timestamp
         if fix_type > self.__NO_FIX:
             self.new_fix_time()
 
@@ -823,7 +838,9 @@ class MicropyGPS(object):
                            'GPGLL': gpgll, 'GLGLL': gpgll,
                            'GNGGA': gpgga, 'GNRMC': gprmc,
                            'GNVTG': gpvtg, 'GNGLL': gpgll,
-                           'GNGSA': gpgsa,
+                           'GNGSA': gpgsa, 'BDGGA': gpgga, 
+                           'BDRMC': gprmc, 'BDVTG': gpvtg, 
+                           'BDGLL': gpgll, 'BDGSA': gpgsa,
                           }
 
 if __name__ == "__main__":
