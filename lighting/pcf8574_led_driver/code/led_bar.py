@@ -98,18 +98,17 @@ class LEDBar:
         Raises:
             TypeError:
                 - If the provided object does not implement
-                  `check`, `port`, `pin`, or `toggle` methods.
+                  `check`, `pin`, or `toggle` methods.
 
         Notes:
             All LEDs will be cleared on initialization.
     """
-        required_methods = ["check", "port", "pin", "toggle"]
+        required_methods = ["check", "pin", "toggle"]
         for method in required_methods:
             if not hasattr(pcf8574, method) or not callable(getattr(pcf8574, method)):
                 raise TypeError(f"pcf8574 must implement method: {method}")
         self.pcf = pcf8574
         self.clear()
-
     def set_led(self, index: int, value: bool) -> None:
         """
         点亮或熄灭指定 LED。
