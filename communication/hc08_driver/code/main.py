@@ -23,13 +23,12 @@ from hc08 import HC08
 print("FreakStudio:HC08 test")
 
 # 初始化 UART 通信（按硬件实际接线调整 TX/RX）
-uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 # 创建 HC14_Lora 实例
 hc0 = HC08(uart0)
 
 # ========================================  主程序  ===========================================
 while True:
-    
-    if hc0._uart.any():
-       print(hc0._uart.read())
-    time.sleep(0.05)
+   if hc0._uart.any():
+      print(hc0._uart.read())
+   time.sleep(0.05)
