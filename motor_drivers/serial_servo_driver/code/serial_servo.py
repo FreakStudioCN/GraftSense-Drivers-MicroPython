@@ -852,7 +852,7 @@ class SerialServo:
             int: The servo's ID. If the read operation fails, returns None.
 
         Raises:
-            ValueError: If the servo ID is not within the range of 0~253, an exception is raised.
+            ValueError: If the servo ID is not within the range of 0~254, an exception is raised.
 
         """
         # 发送SERVO_ID_READ命令

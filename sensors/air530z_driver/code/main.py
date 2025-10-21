@@ -10,6 +10,7 @@
 import time
 from machine import UART,Pin
 from air530z import Air530Z,NMEASender
+from nemapar import NMEAParser
 
 # ======================================== 全局变量 ============================================
 
@@ -31,7 +32,7 @@ def resolve(gps, resp):
 
     Args:
         gps (object): GPS parser instance with update(), timestamp, date_string(), etc.  
-        resp (iterable): Sequence of NMEA sentences.  
+5        resp (iterable): Sequence of NMEA sentences.  
 
     Processing:
         - Iterate through NMEA sentences, call gps.update() on each.  
@@ -62,14 +63,18 @@ time.sleep(3)
 print("FreakStudio: air530z test")
 
 # 初始化 UART 通信（按硬件实际接线调整 TX/RX）
-uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 # 创建 HC14_Lora 实例
 gps = Air530Z(uart0)
 nema = NMEASender()
+resolver = NMEAParser()
 
 # ========================================  主程序  ===========================================
 while True:
     if gps._uart.any():
-        resp = gps._uart.read().decode('utf-8')
-        resolve(gps, resp)
+        resp = gps._uart.read()
+        print(resp)
+        resolver.feed(resp)
+        print(resolver.last_known_fix)
+    time.sleep(1)
 
