@@ -22,7 +22,7 @@ I2C_DEFAULT_FREQ = 100_000
 I2C_DEFAULT_ADDR = 0x57
 
 # 测试模式:可选 RCWL9623.GPIO_MODE, RCWL9623.ONEWIRE_MODE, RCWL9623.UART_MODE, RCWL9623.I2C_MODE
-test_mode = RCWL9623.ONEWIRE_MODE
+test_mode = RCWL9623.I2C_MODE
 # 测试间隔时间，单位秒
 test_interval = 0.5
 
@@ -52,7 +52,7 @@ elif test_mode == RCWL9623.UART_MODE:
     sensor = RCWL9623(mode=RCWL9623.UART_MODE, uart=uart)
     print("FreakStudio: UART Mode")
 elif test_mode == RCWL9623.I2C_MODE:
-    i2c = I2C(0, scl=Pin(1), sda=Pin(0), freq=I2C_DEFAULT_FREQ)
+    i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=I2C_DEFAULT_FREQ)
     sensor = RCWL9623(mode=RCWL9623.I2C_MODE, i2c=i2c)
     print("FreakStudio: I2C Mode")
 else:
