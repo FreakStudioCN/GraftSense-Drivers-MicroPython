@@ -12,8 +12,7 @@ from machine import Pin, I2C
 # 导入时间模块
 import time
 # 导入空气质量监测模块
-from air_quality import AirQualityMonitor
-
+from jedmemes import MEMSGasSensor
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
@@ -31,24 +30,14 @@ print("FreakStudio: Testing Gas Concentration with MEMS Modules")
 i2c = I2C(1, scl=Pin(22), sda=Pin(21))
 
 # 创建空气质量监测模块实例
-monitor = AirQualityMonitor(i2c)
-
-# 注册传感器
-monitor.register_sensor('VOC_Sensor', monitor.MEMS_SENSOR_ADDR7, 0, monitor.MEMS_SENSOR_ADDR7)
+monitor = MEMSGasSensor(i2c)
 
 # ========================================  主程序  ===========================================
 
-# 读取 VOC 气体浓度
-concentration = monitor.read_gas('VOC_Sensor')
-print(f"VOC 气体浓度: {concentration}")
+# 读取气体浓度
+concentration = monitor.read_concentration()
+print(f"气体浓度: {concentration}")
 
 # 校准传感器
-success = monitor.calibrate_gas('VOC_Sensor', 0)
+success = monitor.calibrate_zero(0)
 print(f"校准成功: {success}")
-
-# 重启模块
-monitor.restart()
-
-
-
-

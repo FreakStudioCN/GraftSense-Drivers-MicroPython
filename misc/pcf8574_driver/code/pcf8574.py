@@ -1,12 +1,14 @@
-# Python env   :               
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/7/3 下午4:58   
-# @Author  : 李清水            
-# @File    : PCF8574.py       
-# @Description : 参考代码为https://github.com/mcauser/micropython-pcf8574/blob/master/src/pcf8574.py
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2025/9/8 下午1:34
+# @Author  : 缪贵成
+# @File    : pcf8574.py
+# @Description : pcf8574扩展芯片驱动
+# @License : CC BY-NC 4.0
+# @Reference   :https://github.com/mcauser/micropython-pcf8574/blob/master/src/pcf8574.py
 
 __version__ = "0.1.0"
-__author__ = "李清水"
+__author__ = "缪贵成"
 __license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.23"
 
@@ -23,88 +25,52 @@ import micropython
 
 # ======================================== 自定义类 ============================================
 
+# 自定义PCF8574类
 class PCF8574:
     """
-    PCF8574 I/O 扩展芯片 I2C 驱动类，用于扩展微控制器的 GPIO 引脚。
-
-    该类通过 I2C 总线与 PCF8574 芯片通信，支持 8 位 GPIO 的输入与输出控制，
-    并提供端口级和引脚级操作接口。可选支持外部中断引脚，用于检测引脚状态变化。
+    该类控制 PCF8574 I2C GPIO 扩展芯片，提供端口读写、单引脚控制和翻转功能。
 
     Attributes:
-        _i2c (I2C): I2C 总线对象。
-        _address (int): 设备 I2C 地址，范围 0x20–0x27。
-        _port (bytearray): 当前端口状态缓存（8 位）。
-        _callback (callable): 可选，外部中断触发时执行的用户回调函数。
-        _int_pin (Pin): 可选，中断引脚对象，用于硬件事件检测。
+        _i2c (I2C): machine.I2C 实例用于总线通信。
+        _address (int): PCF8574 I2C 地址，0x20~0x27。
+        _port (bytearray): 当前端口状态缓存。
+        _callback (callable): 外部中断触发时调用的回调函数。
+        _int_pin (Pin): 可选中断引脚对象。
 
     Methods:
-        __init__(i2c, address=0x20, int_pin=None, callback=None, trigger=Pin.IRQ_FALLING) -> None:
-            初始化 PCF8574 实例，配置 I2C 地址、中断引脚及回调函数。
-        check() -> bool:
-            检测设备是否在 I2C 总线上响应。
-        port (property):
-            获取或设置整个 8 位端口的值。
-        pin(pin: int, value: Optional[int] = None) -> int:
-            读取或设置指定引脚的电平状态。
-        toggle(pin: int) -> None:
-            翻转指定引脚的当前状态。
-        _validate_pin(pin: int) -> int:
-            验证引脚编号是否合法（0–7）。
-        _read() -> None:
-            从设备读取端口状态并更新缓存。
-        _write() -> None:
-            将缓存中的端口状态写入设备。
-        _scheduled_handler(_) -> None:
-            在中断调度时调用用户定义的回调函数。
+        check() -> bool: 检查设备是否存在。
+        port() -> int: 获取当前端口状态。
+        port(value: int) -> None: 设置端口状态。
+        pin(pin: int, value: int = None) -> int: 读取或设置单个引脚。
+        toggle(pin: int) -> None: 翻转指定引脚状态。
 
     Notes:
-        - PCF8574 提供 8 位 GPIO，通过 I2C 控制。
-        - 地址范围通常为 0x20–0x27，取决于 A0–A2 引脚配置。
-        - 输出为开漏结构，需外接上拉电阻。
-        - 可结合外部中断引脚实现事件驱动的 GPIO 检测。
+        - 初始化时可选外部中断引脚及回调，ISR-safe 调用需使用 micropython.schedule。
+        - 所有 I2C 操作非 ISR-safe，不建议在中断处理函数直接调用。
+        - 支持 MicroPython v1.23.0。
 
     ==========================================
 
-    PCF8574 I/O expander driver class for I2C communication.
-
-    This class provides GPIO expansion via the PCF8574 chip, allowing control
-    of 8 input/output pins over I2C. Supports port-wide and per-pin operations,
-    with optional interrupt pin handling for event-driven applications.
+    PCF8574 driver for controlling I2C GPIO expanders. Provides port read/write, single pin control and toggle.
 
     Attributes:
-        _i2c (I2C): I2C bus object.
-        _address (int): Device I2C address (0x20–0x27).
-        _port (bytearray): Cached port state (8 bits).
-        _callback (callable): Optional user callback triggered by external interrupt.
-        _int_pin (Pin): Optional interrupt pin for hardware event detection.
+        _i2c (I2C): machine.I2C instance for bus communications.
+        _address (int): I2C address of PCF8574.
+        _port (bytearray): Current port status buffer.
+        _callback (callable): Optional callback function for external interrupt.
+        _int_pin (Pin): Optional interrupt Pin instance.
 
     Methods:
-        __init__(i2c, address=0x20, int_pin=None, callback=None, trigger=Pin.IRQ_FALLING) -> None:
-            Initialize PCF8574 instance with I2C address, optional interrupt pin and callback.
-        check() -> bool:
-            Verify device presence on the I2C bus.
-        port (property):
-            Get or set the full 8-bit port value.
-        pin(pin: int, value: Optional[int] = None) -> int:
-            Read or set the state of a specific GPIO pin.
-        toggle(pin: int) -> None:
-            Toggle the state of a given GPIO pin.
-        _validate_pin(pin: int) -> int:
-            Ensure pin number is valid (0–7).
-        _read() -> None:
-            Read current port state from device into cache.
-        _write() -> None:
-            Write cached port state to device.
-        _scheduled_handler(_) -> None:
-            Dispatch user-defined callback during interrupt scheduling.
+        check() -> bool: Check if device exists.
+        port() -> int: Get port status.
+        port(value: int) -> None: Set port status.
+        pin(pin: int, value: int = None) -> int: Read or write single pin.
+        toggle(pin: int) -> None: Toggle a pin's value.
 
     Notes:
-        - Provides 8 GPIO pins via I2C control.
-        - Address range typically 0x20–0x27 (set by A0–A2).
-        - Outputs are open-drain, external pull-up resistors required.
-        - External interrupt pin enables event-driven GPIO monitoring.
+        - Not ISR-safe, use micropython.schedule when calling from ISR.
+        - Supports MicroPython v1.23.0.
     """
-
     def __init__(self, i2c: I2C, address: int = 0x20,
                  int_pin: int = None,
                  callback: callable = None,
@@ -114,18 +80,17 @@ class PCF8574:
 
         Args:
             i2c (I2C): I2C 总线对象。
-            address (int, optional): I2C 地址，默认 0x20，范围 0x20~0x27。
+            address (int, optional): I2C 地址，默认 0x20。
             int_pin (int, optional): INT 引脚编号。
-            callback (callable, optional): 外部中断触发时调用的回调函数。
-            trigger (int, optional): 中断触发类型，默认下降沿触发。
+            callback (callable, optional): 中断回调函数。
 
         Raises:
-            TypeError: 如果 i2c 不是 I2C 类型，或 int_pin 不是整数，或 callback 不是函数。
-            ValueError: 如果 address 超出范围 0x20~0x27。
+            TypeError: i2c 不是 I2C , callback 非可调用对象 , int_pin非引脚编号 。
+            ValueError: 地址不在 0x20~0x27 范围内。
 
         Notes:
-            INT 引脚为开漏输出，需外部或内部上拉电阻。
-            回调函数在调度上下文中运行，避免阻塞或长时间操作。
+            - 初始化不会触发 I2C 操作。
+            - 中断回调将在 micropython.schedule 调度下执行。
 
         ==========================================
 
@@ -133,18 +98,18 @@ class PCF8574:
 
         Args:
             i2c (I2C): I2C bus object.
-            address (int, optional): I2C address, default 0x20, valid 0x20~0x27.
+            address (int, optional): I2C address, default 0x20.
             int_pin (int, optional): INT pin number.
-            callback (callable, optional): Callback triggered on external interrupt.
-            trigger (int, optional): Interrupt trigger type, default falling edge.
+            callback (callable, optional): Interrupt callback function.
+            trigger (int, optional): Trigger type, default falling edge.
 
         Raises:
-            TypeError: If i2c is not I2C, int_pin not int, or callback not callable.
-            ValueError: If address out of 0x20~0x27 range.
+            TypeError: If i2c is not I2C or callback not callable，int_pin isn't number.
+            ValueError: If address not in 0x20~0x27.
 
         Notes:
-            INT pin is open-drain, requires pull-up resistor.
-            Callback runs in scheduled context, avoid blocking.
+            - Initialization does not perform I2C operations.
+            - Callback is scheduled via micropython.schedule.
         """
         # 检查i2c是不是一个I2C对象
         if not isinstance(i2c, I2C):
@@ -184,31 +149,27 @@ class PCF8574:
 
     def _scheduled_handler(self, _: None) -> None:
         """
-        执行用户回调，由 micropython.schedule 调度。
+        调度执行用户回调函数。
 
         Args:
             _ (None): 占位参数，无实际意义。
 
-        Returns:
-            None
-
         Notes:
-            在调度上下文执行，安全性高于中断上下文。
-            用户回调异常会被捕获并打印。
+            - 在 micropython.schedule 调度下执行，非 ISR-safe。
+            - 回调函数接收当前 port 状态。
+            - 不抛出异常，防止中断调度器
 
         ==========================================
 
-        Execute user callback, scheduled by micropython.schedule.
+        Scheduled handler to call user callback.
 
         Args:
-            _ (None): Placeholder argument, unused.
-
-        Returns:
-            None
+            _ (None): Placeholder argument.
 
         Notes:
-            Runs in scheduled context, safer than IRQ context.
-            User callback exceptions are caught and printed.
+            - Executed under micropython.schedule, not ISR-safe.
+            - Callback receives current port state.
+            - Do not throw exceptions to prevent interrupting the scheduler.
         """
         # 读取当前端口值，清除中断标志
         self._read()
@@ -224,20 +185,26 @@ class PCF8574:
         检查 PCF8574 是否存在于 I2C 总线上。
 
         Returns:
-            bool: 如果设备存在，返回 True。
+            bool: 如果设备存在返回 True。
 
         Raises:
-            OSError: 如果在指定地址未检测到设备。
+            OSError: 设备未找到。
+
+        Notes:
+            - 会进行 I2C 扫描操作，非 ISR-safe。
 
         ==========================================
 
-        Check whether PCF8574 is present on the I2C bus.
+        Check if PCF8574 is present on I2C bus.
 
         Returns:
-            bool: True if device found.
+            bool: True if device exists.
 
         Raises:
-            OSError: If device not found at given address.
+            OSError: Device not found.
+
+        Notes:
+            - Performs I2C scan, not ISR-safe.
         """
         # 检查 PCF8574 是否连接在指定的 I2C 地址上
         if self._i2c.scan().count(self._address) == 0:
@@ -247,17 +214,23 @@ class PCF8574:
     @property
     def port(self) -> int:
         """
-        获取当前端口值。
+        获取整个 8 位端口状态。
 
         Returns:
             int: 当前 8 位端口状态。
 
+        Notes:
+            - 会主动读取 I2C 状态，非 ISR-safe。
+
         ==========================================
 
-        Get current port value.
+        Get current 8-bit port state.
 
         Returns:
-            int: Current 8-bit port state.
+            int: Current port state.
+
+        Notes:
+            - Performs I2C read, not ISR-safe.
         """
         # 主动读取，确保最新状态
         self._read()
@@ -267,23 +240,23 @@ class PCF8574:
     @port.setter
     def port(self, value: int) -> None:
         """
-        设置端口输出值。
+        设置整个 8 位端口状态。
 
         Args:
-            value (int): 新的端口值，仅低 8 位有效。
+            value (int): 端口新状态，仅低 8 位有效。
 
-        Returns:
-            None
+        Notes:
+            - 会写入 I2C 总线，非 ISR-safe。
 
         ==========================================
 
-        Set port output value.
+        Set entire 8-bit port state.
 
         Args:
-            value (int): New port value, only low 8 bits effective.
+            value (int): New port state (only low 8 bits used).
 
-        Returns:
-            None
+        Notes:
+            - Performs I2C write, not ISR-safe.
         """
         # 屏蔽高位，只保留低 8 位
         self._port[0] = value & 0xFF
@@ -292,31 +265,31 @@ class PCF8574:
 
     def pin(self, pin: int, value: int = None) -> int:
         """
-        读取或设置单个引脚状态。
+        读取或设置指定引脚状态。
 
         Args:
             pin (int): 引脚编号 0~7。
-            value (int, optional): 若提供，则设置引脚状态（0/1）。
+            value (int, optional): 设置引脚状态，0=低，1=高。默认为 None 读取。
 
         Returns:
-            int: 如果未提供 value，返回当前引脚状态。
+            int: 读取时返回。当前引脚状态；写入时返回 None
 
-        Raises:
-            ValueError: 如果引脚超出 0~7。
+        Notes:
+            - I2C 操作非 ISR-safe。
 
         ==========================================
 
-        Read or set single pin state.
+        Read or set individual pin state.
 
         Args:
-            pin (int): Pin index 0~7.
-            value (int, optional): If given, set pin state (0/1).
+            pin (int): Pin number 0~7.
+            value (int, optional): Set pin state (0=Low, 1=High). None to read.
 
         Returns:
-            int: If value not given, return current pin state.
+            int: Pin state when reading; None when writing.
 
-        Raises:
-            ValueError: If pin out of range 0~7.
+        Notes:
+            - I2C operations are not ISR-safe.
         """
         # 校验引脚范围
         pin = self._validate_pin(pin)
@@ -334,29 +307,23 @@ class PCF8574:
 
     def toggle(self, pin: int) -> None:
         """
-        翻转引脚状态。
+        翻转指定引脚状态。
 
         Args:
             pin (int): 引脚编号 0~7。
 
-        Returns:
-            None
-
-        Raises:
-            ValueError: 如果引脚超出范围。
+        Notes:
+            - I2C 操作非 ISR-safe。
 
         ==========================================
 
-        Toggle pin state.
+        Toggle the state of a pin.
 
         Args:
-            pin (int): Pin index 0~7.
+            pin (int): Pin number 0~7.
 
-        Returns:
-            None
-
-        Raises:
-            ValueError: If pin out of range.
+        Notes:
+            - I2C operations are not ISR-safe.
         """
         # 校验引脚范围
         pin = self._validate_pin(pin)
@@ -375,20 +342,26 @@ class PCF8574:
             int: 合法的引脚编号。
 
         Raises:
-            ValueError: 如果引脚不在 0~7 范围。
+            ValueError: 如果引脚编号不在 0~7 范围。
+
+        Notes:
+            - 仅进行编号检查，不涉及 I2C 操作。
 
         ==========================================
 
-        Validate pin index.
+        Validate pin number.
 
         Args:
-            pin (int): Pin index.
+            pin (int): Pin number.
 
         Returns:
-            int: Valid pin index.
+            int: Validated pin number.
 
         Raises:
-            ValueError: If pin not in 0~7 range.
+            ValueError: If pin not in 0~7.
+
+        Notes:
+            - Only checks pin number, no I2C operation.
         """
         #  校验引脚编号是否在 0-7 范围。
         if not 0 <= pin <= 7:
@@ -397,33 +370,33 @@ class PCF8574:
 
     def _read(self) -> None:
         """
-        从 PCF8574 读取当前端口值。
+        从 PCF8574 读取端口状态。
 
-        Returns:
-            None
+        Notes:
+            - 执行 I2C 读取操作，非 ISR-safe。
 
         ==========================================
 
-        Read current port value from PCF8574.
+        Read port state from PCF8574.
 
-        Returns:
-            None
+        Notes:
+            - Performs I2C read, not ISR-safe.
         """
         self._i2c.readfrom_into(self._address, self._port)
 
     def _write(self) -> None:
         """
-        将当前端口值写入 PCF8574。
+        将端口状态写入 PCF8574。
 
-        Returns:
-            None
+        Notes:
+            - 执行 I2C 写操作，非 ISR-safe。
 
         ==========================================
 
-        Write current port value to PCF8574.
+        Write port state to PCF8574.
 
-        Returns:
-            None
+        Notes:
+            - Performs I2C write, not ISR-safe.
         """
         self._i2c.writeto(self._address, self._port)
 

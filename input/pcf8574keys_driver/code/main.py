@@ -10,27 +10,20 @@
 from machine import I2C, Pin
 import time
 from pcf8574 import PCF8574
-from pcf8574keys import PCF8574Keys
+from pcf8574keys import PCF8574Keys, KEYS_MAP
 
 # ======================================== 全局变量 ============================================
 
 # I2C配置
 I2C_ID = 0
 # 根据实际硬件修改
-SCL_PIN = 1
+SCL_PIN = 5
 # 根据实际硬件修改
-SDA_PIN = 0
+SDA_PIN = 4
 
 PCF8574_ADDR = None
 
-# 五向按键引脚映射（根据实际接线修改）
-KEYS_MAP = {
-    'UP': 4,
-    'DOWN': 1,
-    'LEFT': 2,
-    'RIGHT': 0,
-    'CENTER': 3
-}
+
 
 # ======================================== 功能函数 ============================================
 
@@ -61,8 +54,6 @@ def key_callback(key_name, state):
     # 参数校验
     if not isinstance(key_name, str):
         raise TypeError(f"key_name must be a str, got {type(key_name).__name__}")
-    if key_name not in KEYS_MAP:
-        raise ValueError(f"Unknown key_name '{key_name}', must be one of {list(KEYS_MAP.keys())}")
     if not isinstance(state, bool):
         raise TypeError(f"state must be a bool, got {type(state).__name__}")
     status = "press" if state else "release"
@@ -95,19 +86,12 @@ for device in devices_list:
 # 初始化PCF8574
 pcf = PCF8574(i2c, PCF8574_ADDR)
 # 初始化五向按键
-keys = PCF8574Keys(pcf, KEYS_MAP, key_callback)
-
+keys = PCF8574Keys(pcf, KEYS_MAP)
 # ========================================  主程序  ============================================
+while True:
+    # 打印当前所有按键状态
+    all_states = keys.read_all()
+    print("status:", {k: "press" if v else "release" for k, v in all_states.items()})
+    # 500ms刷新一次状态显示
+    time.sleep(0.5)
 
-try:
-    while True:
-        # 打印当前所有按键状态
-        all_states = keys.read_all()
-        print("status:", {k: "press" if v else "release" for k, v in all_states.items()})
-        # 500ms刷新一次状态显示
-        time.sleep(0.5)
-except KeyboardInterrupt:
-    print("test stop")
-finally:
-    keys.deinit()
-    print("Resource release")
