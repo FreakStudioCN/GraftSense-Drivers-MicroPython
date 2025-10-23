@@ -21,11 +21,11 @@ vl530_addr = None
 
 # ======================================== 初始化配置 ===========================================
 
-time.sleep(3)
+#time.sleep(3)
 print("FreakStudio: Testing VL53L0X Time-of-Flight sensor")
 
 # 初始化 I2C (Raspberry Pi Pico 使用 I2C0，默认引脚 GP8=SDA, GP9=SCL)
-i2c = machine.I2C(0, scl=1, sda=0, freq=100000)
+i2c = machine.I2C(0, scl=5, sda=4, freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list:list[int] = i2c.scan()
 print('START I2C SCANNER')
@@ -36,7 +36,7 @@ if len(devices_list) == 0:
 else:
     print('i2c devices found:', len(devices_list))
 for device in devices_list:
-    if 0x60 <= device <= 0x7A:
+    if device == 0x29:
         print("I2c hexadecimal address:", hex(device))
         vl530_addr = device
 
