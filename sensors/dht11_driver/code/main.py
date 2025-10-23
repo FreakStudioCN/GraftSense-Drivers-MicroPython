@@ -41,6 +41,8 @@ dht11 = DHT11(DHT11_PIN)
 
 while True:
     dht11.measure
+    time.sleep(2)
+    dht11.measure
     # 读取温湿度数据
     temperature = dht11.temperature
     humidity = dht11.humidity

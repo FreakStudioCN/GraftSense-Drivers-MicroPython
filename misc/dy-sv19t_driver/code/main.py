@@ -188,7 +188,7 @@ def combination_playlist_demo():
 
 # ======================================== 初始化配置 ==========================================
 # 初始化硬件串口：选择 UART1，波特率 9600，TX=GP4，RX=GP5（需与模块连线一致）
-uart = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
+uart = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 # 创建定时器
 tim = Timer()
 # 初始化定时器：每 1000ms（1秒）触发一次

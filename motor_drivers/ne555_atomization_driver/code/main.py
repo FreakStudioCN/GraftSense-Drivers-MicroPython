@@ -21,7 +21,7 @@ from ne555_atomization import Atomization
 time.sleep(3)
 print("FreakStudio:Testing the NE555-based atomization module")
 # 假设 GPIO2 控制雾化模块
-atomizer = Atomization(pin=2)
+atomizer = Atomization(pin=3)
 
 # ========================================  主程序  ============================================
 
