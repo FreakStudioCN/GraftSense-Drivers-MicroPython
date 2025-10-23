@@ -9,8 +9,6 @@
 
 # 从SSD1306模块中导入SSD1306_I2C类
 from SSD1306 import SSD1306_I2C
-# 从pcf8574模块中导入PCF8574类
-from pcf8574 import PCF8574
 # 硬件相关的模块
 from machine import I2C, Pin
 # 导入时间相关的模块
@@ -24,13 +22,6 @@ import os
 OLED_ADDRESS = 0
 # IO扩展芯片地址
 PCF8574_ADDRESS = 0
-
-# IO扩展芯片外接按键映射定义
-keys = {'UP': 4, 'DOWN': 1, 'LEFT': 2, 'RIGHT': 0, 'CENTER': 3}
-sides = {'SET': 5, 'RST': 6}
-# IO扩展芯片外接LED引脚编号
-LED_PIN = 7
-
 # ======================================== 功能函数 ============================================
 
 def display_key(name: str) -> None:
@@ -66,63 +57,6 @@ def display_key(name: str) -> None:
     oled.text(name, 0, 10)
     oled.show()
 
-def handle_keys(port_value: int) -> None:
-    """
-    处理 PCF8574 读取到的按键端口值，判断按键状态并执行相应操作。
-    优先检测普通方向键；若未检测到则检查 SET 和 RST 按键。
-
-    Args:
-        port_value (int): 从 PCF8574 读取的端口值，每一位对应一个引脚电平。
-
-    Returns:
-        None
-
-    Notes:
-        - 按键为高电平时表示按下。
-        - SET 键会点亮 LED，RST 键会熄灭 LED。
-        - 执行完成后会将所有按键引脚复位为低电平。
-
-    ==========================================
-
-    Handle key events from PCF8574 by checking pressed keys and executing actions.
-    Normal keys have higher priority; if none pressed, check SET and RST keys.
-
-    Args:
-        port_value (int): Port value read from PCF8574, each bit maps to a pin level.
-
-    Returns:
-        None
-
-    Notes:
-        - Keys are active high (pressed when logic HIGH).
-        - SET key turns on LED, RST key turns off LED.
-        - All key pins are reset to LOW after handling.
-    """
-    # 按键为高电平表示按下
-    for name, pin in keys.items():
-        if (port_value >> pin) & 1:
-            display_key(name)
-            return
-
-    # SET和RST处理
-    if (port_value >> sides['SET']) & 1:
-        # 点亮LED
-        pcf8574.pin(LED_PIN, 0)
-        display_key("SET")
-    elif (port_value >> sides['RST']) & 1:
-        # 熄灭LED
-        pcf8574.pin(LED_PIN, 1)
-        display_key("RST")
-
-    # 将所有按键引脚置为低电平
-    pcf8574.pin(0, 0)
-    pcf8574.pin(1, 0)
-    pcf8574.pin(2, 0)
-    pcf8574.pin(3, 0)
-    pcf8574.pin(4, 0)
-    pcf8574.pin(5, 0)
-    pcf8574.pin(6, 0)
-
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
@@ -133,7 +67,7 @@ time.sleep(3)
 print("FreakStudio: Testing OLED display and PCF8574-controlled LEDs & buttons")
 
 # 创建硬件I2C的实例，使用I2C1外设，时钟频率为400KHz，SDA引脚为6，SCL引脚为7
-i2c = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)
+i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
 
 # 输出当前目录下所有文件
 print('START LIST ALL FILES')
@@ -159,7 +93,7 @@ else:
             PCF8574_ADDRESS = device
 
 # 创建SSD1306 OLED屏幕的实例，宽度为128像素，高度为64像素，不使用外部电源
-oled = SSD1306_I2C(i2c, OLED_ADDRESS, 64, 32,False)
+oled = SSD1306_I2C(i2c, OLED_ADDRESS, 128, 64,False)
 # 打印提示信息
 print('OLED init success')
 
@@ -174,14 +108,6 @@ oled.text('Freak', 10, 5)
 oled.text('Studio', 10, 15)
 # 显示图像
 oled.show()
-
-# 创建PCF8574 IO扩展芯片的实例
-pcf8574 = PCF8574(i2c, PCF8574_ADDRESS, int_pin=29, callback=handle_keys)
-# 打印提示信息
-print('PCF8574 init success')
-# 设置PCF8574芯片的端口状态
-pcf8574.port = 0x00
-
 # ========================================  主程序  ============================================
 
 while True:
