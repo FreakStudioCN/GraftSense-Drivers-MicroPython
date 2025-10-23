@@ -54,7 +54,7 @@ time.sleep(3)
 print("FreakStudio: Hall Sensor OH34N Test Start ")
 
 # 初始化霍尔传感器（GP22 引脚）
-sensor = HallSensorOH34N(pin=22, callback=hall_callback)
+sensor = HallSensorOH34N(pin=6, callback=hall_callback)
 
 # 启用中断检测
 sensor.enable()

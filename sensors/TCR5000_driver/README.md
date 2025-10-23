@@ -87,10 +87,10 @@
 ### 硬件接线（树莓派 Pico 示例）
 
 | TCR5000L 引脚 | Pico GPIO 引脚 |
-|---------------|----------------|
-| VCC           | 3.3V 或 5V     |
-| GND           | GND            |
-| OUT           | GP14           |
+|---------------|--------------|
+| VCC           | 3.3V 或 5V    |
+| GND           | GND          |
+| OUT           | GP6          |
 
 > **注意：**
 > - 确保 VCC 和 GND 接线正确
@@ -166,7 +166,7 @@ def on_change(value: int) -> None:
 time.sleep(3)
 print("FreakStudio:Single-channel tracking module test")
 # 初始化 TCR5000 传感器
-sensor = TCR5000(pin=14)
+sensor = TCR5000(pin=6)
 # 注册回调函数
 sensor.set_callback(on_change)
 

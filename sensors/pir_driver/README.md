@@ -95,13 +95,11 @@
 ## 使用说明
 ### 硬件接线（树莓派 Pico 示例）
 
-| 传感器引脚 | Pico GPIO 引脚 |
-|------------|----------------|
+| 传感器引脚 | Pico GPIO 引脚      |
+|------------|-------------------|
 | VCC        | 3.3V 或 5V（根据模块要求） |
-| GND        | GND            |
-| OUT        | GP22           |
-| （LED阳极） | GP21（通过限流电阻连接） |
-| （LED阴极） | GND            |
+| GND        | GND               |
+| OUT        | GP6               |
 
 > **注意：**
 > - 确认传感器的工作电压，避免接错电源导致损坏
@@ -162,7 +160,7 @@ def motion_callback():
 
 time.sleep(3)
 print("FreakStudio:Infrared human body pyro-release sensor test")
-pir = PIRSensor(pin=2, callback=motion_callback)
+pir = PIRSensor(pin=6, callback=motion_callback)
 
 # ========================================  主程序  ============================================
 

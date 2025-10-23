@@ -113,7 +113,7 @@ time.sleep(3)
 print("FreakStudio:Vibration motor test")
 
 # 默认引脚 12，PWM 频率 1000Hz
-motor = VibrationMotor(pin=12, pwm_freq=1000)
+motor = VibrationMotor(pin=6, pwm_freq=1000)
 
 # ========================================  主程序  ===========================================
 

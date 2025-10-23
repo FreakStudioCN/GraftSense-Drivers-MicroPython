@@ -103,11 +103,11 @@ class BusDCMotor:
 ### 硬件接线（树莓派 Pico 示例）
 
 | 扩展板引脚 | Pico GPIO 引脚 |
-|------------|----------------|
-| VCC        | 5V/3.3V        |
-| GND        | GND            |
-| SCL        | GP7            |
-| SDA        | GP6            |
+|------------|--------------|
+| VCC        | 5V/3.3V      |
+| GND        | GND          |
+| SCL        | GP5          |
+| SDA        | GP4          |
 
 > **注意：**
 > - SCL/SDA 可根据实际需求修改为其他 GPIO
@@ -142,7 +142,7 @@ from pca9685 import PCA9685
 from bus_dc_motor import BusDCMotor
 import time
 
-i2c = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)
+i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
 pca9685 = PCA9685(i2c, 0x40)
 motor = BusDCMotor(pca9685, 4)
 

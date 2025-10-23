@@ -125,7 +125,7 @@ def test_with_gain_control() -> None:
     adc = ADC(26)
 
     # 初始化GP15 作为增益控制引脚
-    gain_pin = Pin(15, Pin.OUT)
+    gain_pin = Pin(6, Pin.OUT)
     mic = MAX9814Mic(adc=adc, gain_pin=gain_pin)
     try:
         # 低增益模式

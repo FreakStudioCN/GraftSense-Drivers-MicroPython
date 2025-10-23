@@ -33,7 +33,7 @@ time.sleep(3)
 print("FreakStudio: Using PCA9685 to control step motor")
 
 # 创建硬件I2C的实例，使用I2C1外设，时钟频率为400KHz，SDA引脚为6，SCL引脚为7
-i2c = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)
+i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
