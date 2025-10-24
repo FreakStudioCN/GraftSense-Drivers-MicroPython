@@ -21,44 +21,6 @@ from micropython import const
 import time
 
 # ======================================== 全局变量 ============================================
-# 盘符
-DISK_USB = const(0x00)
-DISK_SD = const(0x01)
-DISK_FLASH = const(0x02)
-DISK_NONE = const(0xFF)
-
-# 播放状态
-PLAY_STOP = const(0x00)
-PLAY_PLAY = const(0x01)
-PLAY_PAUSE = const(0x02)
-
-# 播放模式（loop）
-MODE_FULL_LOOP = const(0x00)
-MODE_SINGLE_LOOP = const(0x01)
-MODE_SINGLE_STOP = const(0x02)  # 默认
-MODE_FULL_RANDOM = const(0x03)
-MODE_DIR_LOOP = const(0x04)
-MODE_DIR_RANDOM = const(0x05)
-MODE_DIR_SEQUENCE = const(0x06)
-MODE_SEQUENCE = const(0x07)
-
-# EQ
-EQ_NORMAL = const(0x00)
-EQ_POP = const(0x01)
-EQ_ROCK = const(0x02)
-EQ_JAZZ = const(0x03)
-EQ_CLASSIC = const(0x04)
-
-# DAC 输出通道
-CH_MP3 = const(0x00)
-CH_AUX = const(0x01)
-CH_MP3_AUX = const(0x02)
-
-# 其它常量
-VOLUME_MIN = const(0)
-VOLUME_MAX = const(30)
-DEFAULT_BAUD = const(9600)
-
 
 # ======================================== 功能函数 ============================================
 
