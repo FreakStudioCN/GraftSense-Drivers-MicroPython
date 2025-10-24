@@ -199,13 +199,23 @@ class DHT11:
 
         Returns:
             float: 湿度值。
+
+        Raises:
+            InvalidChecksum: 数据校验和错误。
+            InvalidPulseCount: 捕获的脉冲数不正确。
+
         ==========================================
 
         Get current humidity (%RH).
 
         Returns:
             float: Humidity value.
+
+        Raises:
+            InvalidChecksum: If checksum validation fails.
+            InvalidPulseCount: If captured pulse count is invalid.
         """
+        self.measure()
         return self._humidity
 
     # 获取温度数据
@@ -216,13 +226,23 @@ class DHT11:
 
         Returns:
             float: 温度值。
+
+        Raises:
+            InvalidChecksum: 数据校验和错误。
+            InvalidPulseCount: 捕获的脉冲数不正确。
+
         ==========================================
 
         Get current temperature (°C).
 
         Returns:
             float: Temperature value.
+
+        Raises:
+            InvalidChecksum: If checksum validation fails.
+            InvalidPulseCount: If captured pulse count is invalid.
         """
+        self.measure()
         return self._temperature
 
     # 发送初始化信号
@@ -406,4 +426,3 @@ class DHT11:
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ============================================
-
