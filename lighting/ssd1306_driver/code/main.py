@@ -9,8 +9,6 @@
 
 # 从SSD1306模块中导入SSD1306_I2C类
 from ssd1306 import SSD1306_I2C
-# 从pcf8574模块中导入PCF8574类
-from pcf8574 import PCF8574
 # 硬件相关的模块
 from machine import I2C, Pin
 # 导入时间相关的模块
