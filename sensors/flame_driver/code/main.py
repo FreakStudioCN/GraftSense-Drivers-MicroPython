@@ -39,8 +39,8 @@ def flame_detected_callback() -> None:
 print("FreakStudio:Testing Flame Sensor")
 time.sleep(3)
 
-# 初始化火焰传感器对象，假设模拟输出引脚为 26，数字输出引脚为 15
-flame_sensor = FlameSensor(analog_pin=26, digital_pin=15, callback=flame_detected_callback)
+# 初始化火焰传感器对象，假设模拟输出引脚为 26，数字输出引脚为 19
+flame_sensor = FlameSensor(analog_pin=26, digital_pin=19, callback=flame_detected_callback)
 # 启用数字引脚中断
 flame_sensor.enable()
 

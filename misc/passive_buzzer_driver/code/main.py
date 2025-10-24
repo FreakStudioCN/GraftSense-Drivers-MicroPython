@@ -35,7 +35,7 @@ time.sleep(3)
 # 打印调试信息
 print("FreakStudio : Use PWM to drive a buzzer to play MIDI music")
 # 初始化蜂鸣器对象
-buzzer = Buzzer(pin=9)
+buzzer = Buzzer(pin=6)
 
 # ========================================  主程序  ===========================================
 

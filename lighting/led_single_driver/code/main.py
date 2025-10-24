@@ -25,7 +25,7 @@ time.sleep(3)
 print("FreakStudio: Test high-power LED lights")
 
 # 创建实例，使用GP15引脚
-led = PowerLED(pin=25, pwm_freq=1000)
+led = PowerLED(pin=6, pwm_freq=1000)
 
 # ======================================== 主程序 ==============================================
 

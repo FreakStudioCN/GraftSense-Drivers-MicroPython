@@ -21,7 +21,7 @@ import time
 time.sleep(3)
 print("FreakStudio:Testing the driving of the LM386-based power amplifier speaker module.")
 # 初始化扬声器，假设 PWM 引脚 = 15
-speaker = LMSpeaker(pin=15, freq=1000)
+speaker = LMSpeaker(pin=6, freq=1000)
 
 # ========================================  主程序  ============================================
 

@@ -45,7 +45,7 @@ def on_change(value: int) -> None:
 time.sleep(3)
 print("FreakStudio:Single-channel tracking module test")
 # 初始化 TCR5000 传感器
-sensor = TCR5000(pin=14)
+sensor = TCR5000(pin=6)
 # 注册回调函数
 sensor.set_callback(on_change)
 

@@ -25,7 +25,7 @@ time.sleep(3)
 print("FreakStudio:Testing the MLX90640 fractional infrared temperature sensor")
 # Initialize I2C bus (adjust pins if needed)
 
-i2c = I2C(0, scl=1, sda=0, freq=100000)
+i2c = I2C(0, scl=5, sda=4, freq=100000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()

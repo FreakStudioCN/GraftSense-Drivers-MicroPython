@@ -33,20 +33,22 @@ print('FreakStudio : Using OneWire to read DHT11 sensor')
 # 延时1s，等待DHT11传感器上电完成
 time.sleep(1)
 # 初始化单总线通信引脚，下拉输出
-DHT11_PIN = Pin(6, Pin.OUT, Pin.PULL_DOWN)
+DHT11_PIN = Pin(6, Pin.OUT, Pin.PULL_UP)
 # 初始化DHT11实例
 dht11 = DHT11(DHT11_PIN)
 
 # ========================================  主程序  ============================================
 
 while True:
-    dht11.measure
-    time.sleep(2)
-    dht11.measure
-    # 读取温湿度数据
-    temperature = dht11.temperature
-    humidity = dht11.humidity
-    # 打印温湿度数据
-    print("temperature: {}℃, humidity: {}%".format(temperature, humidity))
-    # 等待2秒
-    time.sleep(2)
+    try:
+        # 读取温湿度数据
+        dht11.measure()
+        # 读取温湿度数据
+        temperature = dht11.temperature
+        humidity = dht11.humidity
+        # 打印温湿度数据
+        print("temperature: {}℃, humidity: {}%".format(temperature, humidity))
+        # 等待2秒
+        time.sleep(2)
+    except:
+        pass

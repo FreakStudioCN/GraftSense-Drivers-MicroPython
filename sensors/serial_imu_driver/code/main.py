@@ -43,8 +43,8 @@ uart = UART(1, 115200)
 uart.init(bits=8,
           parity=None,
           stop=1,
-          tx=4,
-          rx=5,
+          tx=8,
+          rx=9,
           timeout=5)
 
 # 创建串口对象，设置波特率为115200，用于将三轴角度数据发送到上位机

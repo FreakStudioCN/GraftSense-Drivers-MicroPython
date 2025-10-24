@@ -99,10 +99,10 @@ OptoMosSimple 驱动用于控制基于光耦隔离 + MOS 管的电路，通过 P
 ## 使用说明
 ### 硬件接线（树莓派 Pico 示例）
 | 光耦 MOS 模块 | 树莓派 Pico 引脚 |
-|--------------|------------------|
-| VCC          | 3.3V             |
-| GND          | GND              |
-| IN           | GP15             |
+|--------------|-------------|
+| VCC          | 3.3V        |
+| GND          | GND         |
+| IN           | GP6         |
 | OUT+         | 电机正极（接外部电源） |
 | OUT-         | 电机负极（接外部电源） |
 
@@ -155,11 +155,11 @@ from opto_mos_simple import OptoMosSimple
 #上电延时
 time.sleep(3)
 print("FreakStudio:  OptoMosSimple Test Start ")
-# 创建 PWM 对象，GPIO15 输出
-pwm = PWM(Pin(15))
+# 创建 PWM 对象，GPIO6 输出
+pwm = PWM(Pin(6))
 # Set PWM frequency to 1kHz
 pwm.freq(1000)
-print("PWM object created on Pin 15 with 1kHz frequency.")
+print("PWM object created on Pin 6 with 1kHz frequency.")
 
 # 创建驱动实例
 driver = OptoMosSimple(pwm)

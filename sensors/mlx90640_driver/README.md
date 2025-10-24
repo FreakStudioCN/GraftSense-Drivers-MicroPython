@@ -96,8 +96,8 @@ MLX90640是一款基于红外检测原理的24×32点阵温度传感器，可实
 |--------------|---------------|
 | VCC          | 3.3V          |
 | GND          | GND           |
-| SCL          | GPIO1         |
-| SDA          | GPIO0         |
+| SCL          | GPIO5         |
+| SDA          | GPIO4         |
 | ADDR         | GND（默认地址0x33） |
 
 > **注意**：
@@ -146,7 +146,8 @@ mlxaddr=None
 time.sleep(3)
 print("FreakStudio:Testing the MLX90640 fractional infrared temperature sensor")
 # Initialize I2C bus (adjust pins if needed)
-i2c = I2C(0, scl=1, sda=0, freq=100000)
+
+i2c = I2C(0, scl=5, sda=4, freq=100000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
@@ -221,6 +222,7 @@ except KeyboardInterrupt:
     print("\nProgram terminated by user")
 finally:
     print("Testing process completed")
+
 ```
 ---
 
