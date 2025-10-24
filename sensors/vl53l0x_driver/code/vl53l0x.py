@@ -241,8 +241,8 @@ class VL53L0X:
             raise TypeError("i2c must be a valid machine.I2C  instance")
         
         # 检查 address 是否为合法的 I2C 地址
-        if not isinstance(address, int) or address < 0x00 or address > 0x7F:
-            raise ValueError(" The I2C address must be an integer and within the range of 0x00 to 0x7F.")
+        if not isinstance(address, int) or address != 0x29:
+            raise ValueError(" The I2C address must be 0x29.")
         
         self.i2c = i2c
         self.address = address
