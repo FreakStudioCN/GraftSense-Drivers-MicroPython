@@ -33,7 +33,7 @@ time.sleep(3)
 print("FreakStudio : Infrared human body pyro-release sensor test")
 
 # 创建红外人体热释传感器对象
-pir = PIRSensor(pin=2, callback=motion_callback)
+pir = PIRSensor(pin=6, callback=motion_callback)
 
 # ========================================  主程序  ============================================
 

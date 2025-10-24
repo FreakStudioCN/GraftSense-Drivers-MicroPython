@@ -26,8 +26,8 @@ print('FreakStudio : Using OneWire to read DHT22 sensor')
 
 # 延时1s，等待DHT22传感器上电完成
 time.sleep(1)
-# 假设数据脚接 GPIO22
-d = dht.DHT22(Pin(22))
+# 假设数据脚接 GPIO6
+d = dht.DHT22(Pin(6))
 
 # ========================================  主程序  ============================================
 

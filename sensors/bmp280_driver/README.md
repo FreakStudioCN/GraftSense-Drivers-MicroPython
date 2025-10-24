@@ -97,12 +97,12 @@ BMP280 是一款集成温度、湿度和气压测量功能的高精度传感器�
 ## 使用说明
 ### 硬件接线（树莓派pico 示例）
 
-| BMP280 引脚 |GPIO 引脚 |
-|-----------|---------------|
-| VCC       | 5V            |
-| GND       | GND           |
-| SCL       | GPIO21        |
-| SDA       | GPIO20        |
+| BMP280 引脚 | GPIO 引脚 |
+|-----------|---------|
+| VCC       | 5V      |
+| GND       | GND     |
+| SCL       | GPIO5   |
+| SDA       | GPIO4   |
 
 > **注意：**
 > - 传感器仅支持5V供电
@@ -157,7 +157,7 @@ bmp_addr = None
 time.sleep(3)
 print("FreakStudio:Testing BMP280 pressure, temperature, and humidity sensor")
 # 注意：引脚号根据实际硬件修改
-i2c = I2C(0, scl=1, sda=0, freq=100000)
+i2c = I2C(0, scl=5, sda=4, freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list:list[int] = i2c.scan()
 print('START I2C SCANNER')
@@ -176,6 +176,7 @@ bmp = BMP280(i2c=i2c, address=bmp_addr)
 
 # ======================================== 主程序 ===============================================
 try:
+    print("FreakStudio: Testing BMP280 sensor (Temperature, Humidity, Pressure)")
     while True:
         # 获取浮点数温湿度和气压
         temp, press, hum = bmp.read_compensated_data()
@@ -192,7 +193,6 @@ try:
         time.sleep(2)
 except KeyboardInterrupt:
     print("\nTest stopped")
-
 
 
 

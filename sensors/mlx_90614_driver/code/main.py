@@ -114,7 +114,7 @@ def test_sensor_realtime(sensor, name="Sensor", interval=1.0):
 time.sleep(3)
 print("FreakStudio: MLX90614 test start ")
 # ================= I2C 初始化 =================
-i2c = I2C(0, scl=1, sda=0, freq=100000)
+i2c = I2C(0, scl=5, sda=4, freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
 print('START I2C SCANNER')

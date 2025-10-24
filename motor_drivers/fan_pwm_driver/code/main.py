@@ -25,7 +25,7 @@ time.sleep(3)
 print("FreakStudio:Testing PWM cooling fans")
 
 # 创建一个 FANPWM 对象
-fan = FanPWM(pin=25)
+fan = FanPWM(pin=6)
 
 # ========================================  主程序  ============================================
 

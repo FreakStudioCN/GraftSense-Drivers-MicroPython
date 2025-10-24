@@ -127,32 +127,33 @@
 ---
 ## 使用说明
 ### 硬件接线（树莓派Pico示例）
-| 滑动变阻器引脚 | Pico引脚 | 接线功能 |
-|--------------|----------|----------|
-| 固定端1 | 3.3V（Pin36） | 电源输入 |
-| 滑动触点 | GP26/ADC0（Pin31） | 信号采样 |
-| 固定端2 | GND（Pin38） | 接地 |
+| 旋转编码器引脚 | Pico引脚     | 接线功能 |
+|---------|------------|------|
+| A相      | GP6        | 信号采样 |
+| B相      | GP7        | 信号采样 |
 ### 软件依赖
-- 固件：MicroPython v1.23+；内置库：`machine`（ADC控制）、`time`（延时）；开发工具：Thonny/PyCharm
+- 固件：MicroPython v1.23+；内置库：`machine`、`time`（延时）；开发工具：Thonny/PyCharm
 ### 安装步骤
 1. 烧录MicroPython固件到开发板
-2. 上传`potentiometer.py`和`main.py`，修改`main.py`中`ADC(0)`为实际接线引脚
-3. 运行`main.py`，滑动触点观察数值变化
+2. 上传`potentiometer.py`和`main.py`，修改`main.py`中引脚实际接线引脚
+3. 运行`main.py`，拧动触点观察数值变化
 ---
 ## 示例程序
 ```python
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/8/28 下午3:19
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 滑动变阻器测试文件
+# -*- coding: utf-8 -*-        
+# @Time    : 2024/9/19 下午7:46   
+# @Author  : 李清水            
+# @File    : main.py       
+# @Description : Timer类实验，读取旋转编码器的值，使用定时器做软件消抖
 
 # ======================================== 导入相关模块 =========================================
 
+# 导入时间相关模块
 import time
-from machine import ADC
-from potentiometer import Potentiometer
+# 导入自定义驱动模块
+from processbar import ProgressBar
+from ec11encoder import EC11Encoder
 
 # ======================================== 全局变量 ============================================
 
@@ -160,29 +161,34 @@ from potentiometer import Potentiometer
 
 # ======================================== 自定义类 ============================================
 
+# ======================================== 初始化配置 ==========================================
 
-# ======================================== 初始化配置 ===========================================
-
+# 上电延时3s
 time.sleep(3)
-print("FreakStudio:Sliding rheostat module testing")
-# 滑动变阻器电压输出端接在 ADC0
-adc = ADC(26)
-pot = Potentiometer(adc)
+# 打印调试信息
+print("FreakStudio : Using GPIO read Rotary Encoder value, use software debounce by timer")
 
-# ========================================  主程序  ============================================
+# 创建EC11旋转编码器对象，使用GPIO10和GPIO11作为A相和B相，使用GPIO12作为按键
+# 如果你想改变编码器计数值变大的旋转方向（例如原本是逆时针变大，想改成顺时针变大）
+# 只需要在初始化编码器对象时，将参数 pin_a 和 pin_b 的值互换即可
+encoder = EC11Encoder(pin_a=6, pin_b=7)
+# 创建终端进度条对象，用于显示进度，旋转20次达到100%
+progress_bar = ProgressBar(max_value=20)
 
-interval = 0.5
-try:
-    while True:
-        # 获取当前状态字典
-        state = pot.get_state()
-        # 打印当前状态
-        print(f"State: raw={state['raw']}, voltage={state['voltage']:.3f} V, ratio={state['ratio']:.3f}")
-        # 等待下一次读取
-        time.sleep(interval)
+# ========================================  主程序  ===========================================
 
-except KeyboardInterrupt:
-    print("\nTest terminated by user.")
+# 主循环中获取旋转计数值和按键状态
+while True:
+    # 获取旋转计数值
+    current_rotation = encoder.get_rotation_count()
+    print(f"Rotation count: {current_rotation}")
+    # 更新进度条
+    progress_bar.update(current_rotation)
+    # 按键被按下时，重置进度条
+    if encoder.is_button_pressed():
+        progress_bar.reset()
+    # 每隔10ms秒更新一次
+    time.sleep_ms(10)
 ```
 ---
 ## 注意事项
