@@ -167,9 +167,6 @@ class R60ABD1:
         build_frame(control: int, cmd: int, data: bytes = b"") -> bytes:
             根据协议构造完整帧：帧头 + ctl + cmd + len(2B) + data + checksum + 帧尾。
 
-        parse_response(resp: bytes) -> dict:
-            解析并校验一帧完整响应，返回字典 {"control": int, "cmd": int, "data": bytes}，校验失败抛出 ValueError。
-
         recv_response() -> tuple[int, int, bytes] | None:
             阻塞接收并解析单帧响应，内部实现字节级有限状态机，校验头/尾/长度/校验和，成功返回 (control, cmd, data)，超时返回 None。
 
@@ -219,10 +216,6 @@ class R60ABD1:
 
         build_frame(control: int, cmd: int, data: bytes = b"") -> bytes:
             Constructs a complete frame according to the protocol: frame header + ctl + cmd + len(2B) + data + checksum + frame tail.
-
-        parse_response(resp: bytes) -> dict:
-            Parses and verifies a complete response frame, returns a dictionary {"control": int, "cmd": int, "data": bytes}, and throws a ValueError if verification fails.
-
         recv_response() -> tuple[int, int, bytes] | None:
             Blocking reception and parsing of a single response frame, internally implements a byte-level finite state machine, verifies header/tail/length/checksum, returns (control, cmd, data) on success, and None on timeout.
 
@@ -302,7 +295,6 @@ class R60ABD1:
         if n:
             self.uart.read(n)
 
-        # 其余：build_frame / parse_response / recv_response / send_frame ...
 
     def build_frame(self, control: int, cmd: int, data: bytes = b"") -> bytes:
         """
@@ -366,58 +358,6 @@ class R60ABD1:
         frame[-1] = 0x43  # 'C'
         return bytes(frame)
 
-    def parse_response(self, resp: bytes):
-        """
-        解析一帧响应数据并校验。
-
-        Args:
-            resp (bytes): 完整的响应帧。
-
-        Returns:
-            dict: {"control": int, "cmd": int, "data": bytes}
-
-        Raises:
-            ValueError: 帧过短、头尾错误、长度不符或校验和不匹配。
-        ==========================================
-        Parse and validate a response frame.
-
-        Args:
-            resp (bytes): Full response frame.
-
-        Returns:
-            dict: {"control": int, "cmd": int, "data": bytes}
-
-        Raises:
-            ValueError: If frame too short, header/footer invalid, length mismatch, or checksum fails.
-        """
-
-        # 基础长度检查：最小 2头+1ctl+1cmd+2len+1sum+2尾 = 9
-        if not resp or len(resp) < 9:
-            raise ValueError("response is too short.")
-
-        if not (resp[0] == 0x53 and resp[1] == 0x59):
-            raise ValueError("Frame header error")
-        if not (resp[-2] == 0x54 and resp[-1] == 0x43):
-            raise ValueError("Frame end error")
-
-        control = resp[2]
-        cmd = resp[3]
-        n = (resp[4] << 8) | resp[5]
-
-        expected_len = 2 + 1 + 1 + 2 + n + 1 + 2  # = 9 + n
-        if len(resp) != expected_len:
-            raise ValueError("Length mismatch")
-
-        data = resp[6:6 + n] if n else b""
-
-        s = 0
-        for b in resp[:6 + n]:  # 含头到数据末
-            s = (s + b) & 0xFF
-        if s != resp[6 + n]:
-            raise ValueError("Checksum mismatch")
-
-        return {"control": control, "cmd": cmd, "data": data}
-
     def recv_response(self):
         """
         接收并解析一帧响应（阻塞直到超时）。
@@ -440,7 +380,7 @@ class R60ABD1:
               Invalid frames are discarded.
         """
 
-        timeout_ms = getattr(self, "timeout_ms", 300)
+        timeout_ms = getattr(self, "timeout_ms", 100)
 
         t0 = time.ticks_ms()
         buf = bytearray()
@@ -801,6 +741,32 @@ class R60ABD1:
             return None
         return data[0]
 
+    cmd_map = {
+        (0x80, 0x05): "b_text"  # 使用方法名字符串避免类级别前向引用
+    }
+
+    def b_text(self, data):
+        print("触发成功")
+        print(data)
+
+    def b_recv_response(self):
+        ret = self.recv_response()
+        if ret is not None:
+            ctrl, cmd, data = ret
+            handler = self.cmd_map.get((ctrl, cmd), None)
+            if handler is None:
+                return None
+            # 支持两种映射：方法名字符串或直接可调用对象
+            if isinstance(handler, str):
+                func = getattr(self, handler, None)
+            else:
+                func = handler
+            if callable(func):
+                try:
+                    return func(data)
+                except Exception:
+                    return None
+            return None
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================
