@@ -49,7 +49,7 @@ def show(label, value, unit=""):
 time.sleep(3)
 # # 打印调试消息
 print("FreakStudio: Using R60ABD1 millimeter wave information collection")
-uart = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
+uart = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
 dev = R60ABD1(uart)
 
 # ========================================  主程序  ===========================================

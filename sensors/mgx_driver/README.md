@@ -201,7 +201,7 @@ print("Measuring Gas Concentration with MG Series Gas Sensor Modules")
 # Pico ADC0 (GPIO26)
 adc = ADC(Pin(26))
 # Comparator output (GPIO15, optional)
-comp = Pin(15, Pin.IN)
+comp = Pin(19, Pin.IN)
 mg = MGX(adc, comp, mg_callback, rl_ohm=10000, vref=3.3)
 
 # 选择内置多项式（MG811,MG812）

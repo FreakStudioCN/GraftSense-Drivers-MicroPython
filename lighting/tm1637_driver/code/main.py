@@ -192,7 +192,7 @@ def demo_raw_write(disp: tm1637):
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Test TM1637 Module")
-tm = tm1637.TM1637(clk=Pin(4), dio=Pin(5))
+tm = tm1637.TM1637(clk=Pin(5), dio=Pin(4))
 
 # ========================================  主程序  ===========================================
 

@@ -91,7 +91,12 @@ keys = PCF8574Keys(pcf, KEYS_MAP)
 while True:
     # 打印当前所有按键状态
     all_states = keys.read_all()
-    print("status:", {k: "press" if v else "release" for k, v in all_states.items()})
+    print("status:", {k: "release" if v else "press" for k, v in all_states.items()})
+    if not all_states['SW1']:
+        keys.on()
+    if not all_states['SW2']:
+        keys.off()
     # 500ms刷新一次状态显示
     time.sleep(0.5)
+
 

@@ -10,7 +10,7 @@
 # ======================================== 导入相关模块 =========================================
 
 #导入micropython自带库
-import machine
+from machine import Pin
 #导入时间模块
 import time
 #导入silicon5351
@@ -34,7 +34,7 @@ invert = False     # 反相输出标志（四相模式下忽略）
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Use silicon5351 to output clock signals.")
-i2c = machine.I2C(1, scl=machine.Pin(7), sda=machine.Pin(6), freq = 100000)
+i2c = machine.I2C(0, scl=Pin(5), sda=Pin(4), freq = 100000)
 
 # 初始化 SI5351 芯片
 si = SI5351_I2C(i2c, crystal=crystal)
@@ -42,17 +42,14 @@ si = SI5351_I2C(i2c, crystal=crystal)
 si.setup_pll(pll=0, mul=mul)
 # 初始化输出通道 0 和 1，使用 PLL0
 si.init_clock(output=0, pll=0)
-si.init_clock(output=1, pll=0, quadrature=quadrature, invert=invert)
 # 设置输出频率为 2 MHz（基于固定 PLL）
 si.set_freq_fixedpll(output=0, freq=freq)
-si.set_freq_fixedpll(output=1, freq=freq)
 
 # ========================================  主程序  ===========================================
 # 打开输出 0 和 1
 si.enable_output(output=0)
-si.enable_output(output=1)
 print(f'done freq={freq} mul={mul} quadrature={quadrature} invert={invert}')
 # 保持输出 20 秒
 time.sleep(20)
 # 关闭输出 0
-
+si.disable_output(output=0)

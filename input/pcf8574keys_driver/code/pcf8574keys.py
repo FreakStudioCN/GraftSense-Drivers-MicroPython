@@ -127,7 +127,7 @@ class PCF8574Keys:
         self._pcf = pcf
         self._keys = keys
         self._callback = callback
-        self._pcf.port =0b00000000
+        self._pcf.port =0b01000000
         # debounce state cache
         self._state = {k: False for k in keys.keys()}
         self._last_state = self._state.copy()
@@ -137,6 +137,10 @@ class PCF8574Keys:
         # create timer for periodic scanning
         self._timer = Timer(-1)
         self._timer.init(period=10, mode=Timer.PERIODIC, callback=self._scan_keys)
+    def on(self):
+        self._pcf.port =0b00000000
+    def off(self):
+        self._pcf.port =0b01000000
 
     def _scan_keys(self, t):
         """
