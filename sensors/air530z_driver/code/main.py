@@ -49,7 +49,7 @@ def resolve(gps, resp):
 # ======================================== 初始化配置 ===========================================
 
 # 上电延时3s
-#time.sleep(3)
+time.sleep(3)
 print("FreakStudio: air530z test")
 
 # 初始化 UART 通信（按硬件实际接线调整 TX/RX）
@@ -59,9 +59,13 @@ gps = Air530Z(uart0)
 
 # ========================================  主程序  ===========================================
 while True:
-    if gps._uart.any():
-        resp = gps._uart.read()
-        print(resp)
-        resolve(gps, resp)
+    try:
+        if gps._uart.any():
+            resp = gps._uart.read()
+            print(resp)
+            resolve(gps, resp)
+    except Exception as e:
+        # 失败后等待 1 秒再重试，避免占满 CPU
+        pass
     time.sleep(1)
 
