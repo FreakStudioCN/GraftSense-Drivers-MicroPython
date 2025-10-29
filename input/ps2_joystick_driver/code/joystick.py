@@ -158,7 +158,7 @@ class Joystick:
         """
         self.timer.init(period=int(1000/self.freq), mode=Timer.PERIODIC, callback=self._timer_callback)
 
-    def _timer_callback(self, timer: Timer, vsw_pin=None) -> None:
+    def _timer_callback(self,timer: Timer) -> None:
         """
         定时器回调函数，采集并处理摇杆数据。
 
@@ -190,10 +190,12 @@ class Joystick:
         self.x_value = self.filtered_x
         self.y_value = self.filtered_y
         # 读取按键状态，按下为0，未按下为1
-        self.sw_value = self.sw.value()
+        if hasattr(self, 'sw'):
+            self.sw_value = self.sw.value()
 
         # 调用用户自定义回调函数，传递采集到的X轴、Y轴电压值和按键状态
-        micropython.schedule(self.callback, (self.x_value, self.y_value, self.sw_value))
+        if self.callback is not None:
+            micropython.schedule(self.callback, (self.x_value, self.y_value, self.sw_value))
 
     def stop(self) -> None:
         """
