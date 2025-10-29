@@ -21,7 +21,7 @@ vl530_addr = None
 
 # ======================================== 初始化配置 ===========================================
 
-time.sleep(3)
+#time.sleep(3)
 print("FreakStudio: Testing VL53L0X Time-of-Flight sensor")
 
 # 初始化 I2C (Raspberry Pi Pico 使用 I2C0，默认引脚 GP4=SDA, GP5=SCL)
