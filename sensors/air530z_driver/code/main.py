@@ -40,18 +40,16 @@ def resolve(gps, resp):
     gps.feed(resp)
 
     print(f"本地时间：{gps.data['time']['hour']:02d}:{gps.data['time']['minute']:02d}:{gps.data['time']['second']:02d}")
-    print(f"本地日期：{gps.data['date']['day']:02d}/{gps.data['date']['month']:02d}/{gps.data['date']['year']:04d}")
     print(f"纬度：{gps.data['latitude']}")
     print(f"经度：{gps.data['longitude']}")
     print(f"海拔：{gps.data['altitude']} 米")
-    print(f"使用卫星数：{gps.data['sats_in_view']} 颗")
 
 # ======================================== 自定义类 =============================================
 
 # ======================================== 初始化配置 ===========================================
 
 # 上电延时3s
-time.sleep(3)
+#time.sleep(3)
 print("FreakStudio: air530z test")
 
 # 初始化 UART 通信（按硬件实际接线调整 TX/RX）
@@ -63,6 +61,7 @@ gps = Air530Z(uart0)
 while True:
     if gps._uart.any():
         resp = gps._uart.read()
+        print(resp)
         resolve(gps, resp)
     time.sleep(1)
 
