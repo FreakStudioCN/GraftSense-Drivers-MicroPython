@@ -15,11 +15,11 @@ from relay import RelayController
 # ======================================== 全局变量 ============================================
 
 # 继电器配置：在XIAO-RP2040开发板上
-# 如果是 'normal' 类型继电器，使用GP29
+# 如果是 'normal' 类型继电器，使用GP6
 RELAY_TYPE = 'normal'   # 'normal' 或 'latching'
 RELAY_PIN1 = 27           # 控制引脚1
 RELAY_PIN2 = 28           # 控制引脚2（磁保持继电器需要）
-RELAY_PIN3 = 22           # 控制引脚3
+RELAY_PIN3 = 6           # 控制引脚3
 
 # 音乐节奏定义 (单位：毫秒)
 # 每个元组表示 (持续时间, 是否在结束时切换)

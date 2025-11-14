@@ -20,8 +20,8 @@ from uv_matrix import UVMatrix
 
 time.sleep(3)
 print("Freak_studio:UV matrix test")
-# 初始化 UVMatrix，假设控制引脚为 14，PWM 频率 1000Hz
-uv = UVMatrix(pin=14, pwm_freq=1000)
+# 初始化 UVMatrix，假设控制引脚为 6，PWM 频率 1000Hz
+uv = UVMatrix(pin=6, pwm_freq=1000)
 
 # ========================================  主程序  ===========================================
 
