@@ -105,7 +105,8 @@ class UVMatrix:
         Notes:
             Sets PWM duty to maximum (1023).
         """
-        self._pwm.duty_u16(65535)
+        # 最高只能占空比一半
+        self._pwm.duty_u16(32766)
         self._state = True
 
     def off(self) -> None:
@@ -166,8 +167,8 @@ class UVMatrix:
         Notes:
             Does not change _state, only adjusts brightness.
         """
-        if not (0 <= duty <= 1023):
-            raise ValueError("PWM duty must be 0-1023")
+        if not (0 <= duty <= 512):
+            raise ValueError("PWM duty must be 0-512")
             # 转换 0-1023 到 0-65535
         self._pwm.duty_u16(int(duty * 65535 / 1023))
 

@@ -54,15 +54,15 @@ def ir_callback(addr: int, cmd: int, repeat: bool) -> None:
 time.sleep(3)
 print("FreakStudio:Infrared transceiver test")
 
-# 发射管接 GP15
-TX_PIN = Pin(15, Pin.OUT)
+# 发射管接 GP6
+TX_PIN = Pin(6, Pin.OUT)
 # 接收头接 GP14
 RX_PIN = Pin(14, Pin.IN)
 # 38kHz 发射
 ir_tx = NEC(TX_PIN, freq=38000)
 # 接收 NEC
 ir_rx = NEC_16(RX_PIN, ir_callback)
-print("[System] Ready... TX=GP15, RX=GP14")
+print("[System] Ready... TX=GP6, RX=GP14")
 
 # ========================================  主程序  ===========================================
 while True:

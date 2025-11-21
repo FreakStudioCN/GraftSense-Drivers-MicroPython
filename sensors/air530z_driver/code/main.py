@@ -72,9 +72,13 @@ resolver = NMEAParser()
 # ========================================  主程序  ===========================================
 while True:
     if gps._uart.any():
-        resp = gps._uart.read()
-        print(resp)
-        resolver.feed(resp)
-        print(resolver.last_known_fix)
+        try:
+            resp = gps._uart.read()
+            print(resp)
+            resolver.feed(resp)
+            print(resolver.last_known_fix)
+        except Exception as e:
+            pass
+    time.sleep(1)
     time.sleep(1)
 
