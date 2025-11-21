@@ -15,8 +15,8 @@ from piranha_led import PiranhaLED, POLARITY_CATHODE, POLARITY_ANODE
 
 # ======================================== 全局变量 ============================================
 
-# 🔧 测试配置
-LED_PIN = 0
+# 测试配置
+LED_PIN = 6
 TEST_COUNT = 3
 BLINK_INTERVAL = 1.0
 # 设置为True如果是共阳极LED

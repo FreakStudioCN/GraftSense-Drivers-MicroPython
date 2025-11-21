@@ -187,16 +187,20 @@ def combination_playlist_demo():
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
+
 # 延时3s等待设备上电完毕
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio:  DY-SV19T Play Test ")
-# 初始化硬件串口：选择 UART1，波特率 9600，TX=GP4，RX=GP5（需与模块连线一致）
+
+# 初始化硬件串口：选择 UART1，波特率 9600，TX=GP16，RX=GP17（需与模块连线一致）
 uart = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
+
 # 创建定时器
-tim = Timer()
+tim = Timer(-1)
 # 初始化定时器：每 1000ms（1秒）触发一次
 tim.init(period=1000, mode=Timer.PERIODIC, callback=tick)
+
 # 创建播放器实例：设定默认音量/盘符/模式/通道与读取超时
 player = DYSV19T(
     # 传入已配置的 UART 实例
@@ -214,6 +218,7 @@ player = DYSV19T(
 )
 
 # ========================================  主程序  ===========================================
+
 # 将音量调整到 20（范围 0~30）
 player.set_volume(20)
 # 设置均衡为摇滚 EQ_ROCK
@@ -241,21 +246,23 @@ player.query_folder_first_track()
 player.query_folder_total_tracks()
 # 查询在线盘符位图：bit0=USB, bit1=SD, bit2=FLASH
 player.query_online_disks()
+player.enable_play_time_send()
+player.play()
 
 # 通过曲目序号直接播放一段音频，监听播放进度并等待播放结束。
-play_track_demo()
+# play_track_demo()
 
 # 选择曲目但不立即播放，并展示暂停、恢复、切换曲目的用法
-select_and_play_demo()
+# select_and_play_demo()
 
 # 设置 A-B 区间复读，并在一段时间后关闭复读。
-repeat_area_demo()
+# repeat_area_demo()
 
 # 在播放过程中插入另一段音频。
-insert_track_demo()
+# insert_track_demo()
 
 # 播放多个曲目组合，并在指定时间后结束组合播放。
-combination_playlist_demo()
+# combination_playlist_demo()
 
 # 设置循环播放模式，并指定循环次数。
-loop_mode_demo()
+# loop_mode_demo()

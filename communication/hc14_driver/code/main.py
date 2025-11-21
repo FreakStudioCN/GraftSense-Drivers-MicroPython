@@ -29,7 +29,7 @@ key0.value(0)
 print("FreakStudio: HC14_Lora Test Start")
 
 # 初始化 UART 通信（按硬件实际接线调整 TX/RX）
-uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 
 # 创建 HC14_Lora 实例
 hc0 = HC14_Lora(uart0)

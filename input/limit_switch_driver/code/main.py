@@ -45,7 +45,7 @@ time.sleep(3)
 print("FreakStudio: Limit switch test")
 
 # 初始化限位开关，设置消抖时间间隔为 50ms
-switch = LimitSwitch(pin=19, callback=switch_callback, debounce_ms=50)
+switch = LimitSwitch(pin=6, callback=switch_callback, debounce_ms=50)
 # 启用消抖检测
 switch.enable()
 

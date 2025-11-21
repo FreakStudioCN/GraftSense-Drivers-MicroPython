@@ -35,7 +35,7 @@ try:
         except RuntimeError as e:
             print(f"[Error] Failed to read sensor data: {e}")
 
-        time.sleep(2)
+        time.sleep(0.2)
 
 except ValueError as e:
     print(f"[Critical Error] Sensor initialization failed: {e}")

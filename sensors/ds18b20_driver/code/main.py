@@ -30,7 +30,7 @@ time.sleep(3)
 print('FreakStudio : Using OneWire to read DS18B20 temperature')
 
 # 定义单总线通信引脚
-ow_pin = OneWire(Pin(14))
+ow_pin = OneWire(Pin(6))
 # 定义温度传感器
 ds18x20 = DS18X20(ow_pin)
 
