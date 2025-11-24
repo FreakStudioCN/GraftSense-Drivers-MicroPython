@@ -14,7 +14,6 @@ from relay import RelayController
 
 # ======================================== 全局变量 ============================================
 
-# 继电器配置：在XIAO-RP2040开发板上
 # 如果是 'normal' 类型继电器，使用GP6
 RELAY_TYPE = 'latching'   # 'normal' 或 'latching'
 RELAY_PIN1 = 14           # 控制引脚1

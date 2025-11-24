@@ -80,5 +80,4 @@ while True:
         except Exception as e:
             pass
     time.sleep(1)
-    time.sleep(1)
 
