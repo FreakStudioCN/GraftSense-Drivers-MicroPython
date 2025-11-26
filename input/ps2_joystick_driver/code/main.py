@@ -26,7 +26,7 @@ time.sleep(3)
 print("FreakStudio : reading the voltage value of Joystick experiment")
 
 # 创建摇杆实例，使用ADC0-GP27、ADC1-GP28作为Y轴和X轴
-joystick = Joystick(vrx_pin=27, vry_pin=28, freq=10)
+joystick = Joystick(vrx_pin=28, vry_pin=27, freq=10)
 
 # ========================================  主程序  ===========================================
 
