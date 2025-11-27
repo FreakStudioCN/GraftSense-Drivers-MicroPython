@@ -14,7 +14,7 @@ from relay import RelayController
 
 # ======================================== 全局变量 ============================================
 
-# 如果是 'normal' 类型继电器，使用GP6
+# 如果是 'normal' 类型继电器，使用GP14
 RELAY_TYPE = 'normal'   # 'normal' 或 'latching'
 RELAY_PIN1 = 14           # 控制引脚1
 RELAY_PIN2 = 15           # 控制引脚2
