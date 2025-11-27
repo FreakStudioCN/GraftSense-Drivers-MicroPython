@@ -6,10 +6,13 @@
 # @Description : 8位IO扩展驱动测试文件
 
 # ======================================== 导入相关模块 =========================================
-
+# 导入I2C和Pin模块
 from machine import I2C, Pin
+# 导入时间模块
 import time
+# 导入PCF8574和PCF8574IO8模块
 from pcf8574 import PCF8574
+# 导入PCF8574IO8模块
 from pcf8574_io8 import PCF8574IO8
 
 # ======================================== 全局变量 ============================================
@@ -51,14 +54,14 @@ try:
 except OSError as e:
     print("Error: PCF8574 not found!", e)
 # PCF8574IO8 init
-# Example: PORT0=(0,1), PORT1=(1,0), PORT2=(1,1), PORT3=(0,0)
+# 初始化模块引脚状态: PORT0=(0,1), PORT1=(1,0), PORT2=(1,1), PORT3=(0,0)
 ports_init = {0: (1, 1), 1: (1, 1), 2: (1, 1), 3: (1, 1)}
 io8 = PCF8574IO8(pcf, ports_init=ports_init)
 print("PCF8574IO8 initialized with default port states:", io8.ports_state())
 time.sleep(3)
 
 # ========================================  主程序  ============================================
-
+# 控制端口2的引脚2闪烁
 io8.set_port(1,0)
 time.sleep(1)
 io8.set_port(1,2)
