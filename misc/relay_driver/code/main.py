@@ -15,10 +15,9 @@ from relay import RelayController
 # ======================================== 全局变量 ============================================
 
 # 如果是 'normal' 类型继电器，使用GP6
-RELAY_TYPE = 'latching'   # 'normal' 或 'latching'
+RELAY_TYPE = 'normal'   # 'normal' 或 'latching'
 RELAY_PIN1 = 14           # 控制引脚1
-RELAY_PIN2 = 15           # 控制引脚2（磁保持继电器需要）
-RELAY_PIN3 = 6           # 控制引脚3
+RELAY_PIN2 = 15           # 控制引脚2
 
 # 音乐节奏定义 (单位：毫秒)
 # 每个元组表示 (持续时间, 是否在结束时切换)
@@ -76,31 +75,24 @@ print("FreakStudio: Using ESP32 WiFi to control relay")
 if RELAY_TYPE == 'latching':
     relay = RelayController(RELAY_TYPE, RELAY_PIN1, RELAY_PIN2)
 else:
-    relay = RelayController(RELAY_TYPE, RELAY_PIN3)
+    relay = RelayController(RELAY_TYPE, RELAY_PIN1)
 
 # ========================================  主程序  ===========================================
-if RELAY_TYPE == 'latching':
-    # 打开继电器
-    relay.on()
-    print('relay.off')
-    # 延时1s
-    time.sleep(5)
-    # 关闭继电器
-    relay.off()
-    print('relay.on')
-else:
-    # 打开继电器
-    relay.off()
-    print('relay.off')
-    # 延时1s
-    time.sleep(5)
-    # 关闭继电器
-    relay.on()
-    print('relay.on')
+
+# 打开继电器
+relay.on()
+print('relay.on')
+# 延时1s
+time.sleep(5)
+# 关闭继电器
+relay.off()
+print('relay.off')
+
 
 # 继电器开合音乐
-# while True:
-#     print("Playing relay music...")
-#     play_relay_music()
-#     # 每段音乐间隔1秒
-#     time.sleep(1)
+while True:
+    print("Playing relay music...")
+    play_relay_music()
+    # 每段音乐间隔1秒
+    time.sleep(1)
+
