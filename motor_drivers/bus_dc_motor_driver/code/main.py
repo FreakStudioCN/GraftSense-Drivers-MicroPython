@@ -71,4 +71,14 @@ motor = BusDCMotor(pca9685, 4)
 # motor.stop_motor(1)
 # # 刹车电机2
 # motor.break_motor(2)
+
+# 电机启动
+print("Motor 4 started: Speed = 4000, Direction = 0")
 motor.set_motor_speed(4, 4000, 0)
+
+# 运行10秒
+time.sleep(10)
+
+# 电机停止
+motor.stop_motor(4)
+print("Motor 4 stopped successfully")

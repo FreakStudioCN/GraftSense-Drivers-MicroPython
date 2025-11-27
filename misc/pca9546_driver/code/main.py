@@ -24,19 +24,25 @@ time.sleep(3)
 print("FreakStudio: Testing Gas Concentration with MEMS Modules")
 
 # 初始化 I2C 总线
-i2c = I2C(1, scl=Pin(22), sda=Pin(21))
+i2c = I2C(1, scl=Pin(2), sda=Pin(3))
 
-# 创建空气质量监测模块实例
 pca = PCA9546ADR(i2c)
 
-# 注册传感器
-pca.select_channel(0)  # 选择通道0
 
 # ========================================  主程序  ===========================================
 
 while True:
-    print(i2c.scan())
-    time.sleep(1)
+    
+    disable_all()
+    pca.select_channel(0)
+    print("0 address",i2c.scan())
+    
+    time.sleep(4)
+    
+    disable_all()
+    pca.select_channel(1)
+    print("1 address",i2c.scan())
+
 
 
 

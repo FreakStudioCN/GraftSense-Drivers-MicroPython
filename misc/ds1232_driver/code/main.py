@@ -38,24 +38,8 @@ def rst_callback(pin: Pin) -> None:
     """
     DS1232 RST 引脚触发回调函数。
 
-    当 DS1232 芯片的 RST 引脚触发时调用，用于设置系统复位标志，
-    由主循环检测该标志后执行复位逻辑。
-
     Args:
-        pin (Pin): 触发该回调的 GPIO 引脚对象。
-
-    Returns:
-        None
-
-    ==========================================
-
-    Callback for DS1232 RST pin trigger.
-
-    Called when the RST pin of DS1232 is triggered.
-    Sets a system reset flag to be checked by the main loop.
-
-    Args:
-        pin (Pin): GPIO pin object that triggered the callback.
+        pin (Pin): 触发该回调的 GPIO 引脚。
 
     Returns:
         None
@@ -69,25 +53,10 @@ def rst_callback(pin: Pin) -> None:
 
 def stop_feed_callback(t: Timer) -> None:
     """
-    定时器回调：停止自动喂狗，模拟喂狗失败以触发复位。
-
-    此函数在定时器到期时调用，用于停止看门狗喂养，并解除自身定时器。
+    定时器回调：停止自动喂狗，模拟喂狗失败触发复位。
 
     Args:
-        t (Timer): 触发回调的定时器对象。
-
-    Returns:
-        None
-
-    ==========================================
-
-    Timer callback: stop automatic watchdog feeding to simulate failure.
-
-    This function is called when the timer expires.  
-    It stops feeding the watchdog and disables the timer itself.
-
-    Args:
-        t (Timer): Timer object that triggered the callback.
+        t (Timer): 定时器对象
 
     Returns:
         None

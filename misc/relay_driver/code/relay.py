@@ -145,7 +145,7 @@ class RelayController:
 
         # 初始化控制引脚
         self.pin1 = Pin(pin1, Pin.OUT)
-        self.pin1.value(1)
+        self.pin1.value(0)
 
         # 创建虚拟定时器用于非阻塞脉冲
         self._pulse_timer = Timer(-1)
@@ -193,7 +193,7 @@ class RelayController:
             None: This method does not raise any exceptions.
         """
         if self.relay_type == 'normal':
-            return bool(not self.pin1.value())
+            return bool(self.pin1.value())
         else:
             return self._last_state
 
@@ -235,7 +235,7 @@ class RelayController:
         """
         吸合继电器。
 
-        该方法用于控制继电器吸合。对于普通继电器直接给低电平，对于磁保持继电器发送短脉冲。
+        该方法用于控制继电器吸合。对于普通继电器直接给高电平，对于磁保持继电器发送短脉冲。
 
         Args:
             None: 此方法不接受任何参数。
@@ -263,8 +263,8 @@ class RelayController:
             None: This method does not raise any exceptions.
         """
         if self.relay_type == 'normal':
-            # 普通继电器直接给低电平
-            self.pin1.value(0)
+            # 普通继电器直接给高电平
+            self.pin1.value(1)
         else:
             # 磁保持继电器需要短脉冲
             # 取消已有定时器
@@ -283,7 +283,7 @@ class RelayController:
         """
         释放继电器。
 
-        该方法用于控制继电器释放。对于普通继电器直接给高电平，对于磁保持继电器发送反向短脉冲。
+        该方法用于控制继电器释放。对于普通继电器直接给低电平，对于磁保持继电器发送反向短脉冲。
 
         Args:
             None: 此方法不接受任何参数。
@@ -312,7 +312,7 @@ class RelayController:
         """
         if self.relay_type == 'normal':
             # 普通继电器直接给低电平
-            self.pin1.value(1)
+            self.pin1.value(0)
         else:
             # 磁保持需要反向脉冲
             self._pulse_timer.deinit()

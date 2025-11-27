@@ -30,5 +30,8 @@ hc0 = HC08(uart0)
 # ========================================  主程序  ===========================================
 while True:
    if hc0._uart.any():
-      print(hc0._uart.read())
+      data = hc0._uart.read()
+      print(data)
+      hc0.send_data("get data：")
+      hc0.send_data(data)
    time.sleep(0.05)

@@ -59,7 +59,7 @@ print("Measuring Gas Concentration with MQ Series Gas Sensor Modules")
 # Pico ADC0 (GPIO26)
 adc = ADC(Pin(26))
 # Comparator output (GPIO15, optional)
-comp = Pin(15, Pin.IN)
+comp = Pin(19, Pin.IN)
 mq = MQX(adc, comp, mq_callback, rl_ohm=10000, vref=3.3)
 
 # 选择内置多项式（MQ2、MQ4、MQ7）
