@@ -11,10 +11,10 @@ from machine import UART, Pin
 import time
 
 # ======================================== 全局变量 ============================================
-# Initialize UART1: TX=Pin8, RX=Pin9, baud rate 9600
+# 初始化 UART1：TX=Pin8，RX=Pin9，波特率9600
 uart = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 
-# Counter for test messages
+# 测试消息计数器
 count = 1
 
 # ======================================== 功能函数 ============================================
@@ -22,7 +22,7 @@ count = 1
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
-# 上电延时3s
+# 上电延时 3 秒
 time.sleep(3)
 
 print("FreakStudio: UART loopback test started. Sending data every 2 seconds...")
@@ -31,24 +31,24 @@ print("FreakStudio: UART loopback test started. Sending data every 2 seconds..."
 
 try:
     while True:
-        # Create test message with counter
+        # 构造带计数器的测试消息
         test_msg = f"Test message {count}: Hello, UART loopback!"
         print(f"\nSent: {test_msg}")
-        
-        # Send the message
+
+        # 发送消息
         uart.write(test_msg.encode('utf-8'))
-        
-        # Wait a short time for data to be received
+
+        # 等待短时间以接收数据
         time.sleep(0.1)
-        
-        # Read and print received data
+
+        # 读取并打印接收到的数据
         if uart.any():
             received = uart.read(uart.any()).decode('utf-8')
             print(f"Received: {received}")
         else:
             print("Received: No data (check connections)")
-        
-        # Increment counter and wait 2 seconds before next send
+
+        # 计数器自增并在下一次发送前等待 2 秒
         count += 1
         time.sleep(2)
 
