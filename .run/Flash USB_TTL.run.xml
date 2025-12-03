@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Flash USB_TTL" type="MicroPythonConfigurationType" factoryName="MicroPython" singleton="false" path="$PROJECT_DIR$/communication/usb_ttl_test/code" runReplOnSuccess="no">
-    <module name="GraftSense-Drivers-MicroPython#" />
-    <method v="2">
-      <option name="MicroPython.StopREPL.Before.Run" enabled="true" />
-    </method>
-  </configuration>
-</component>

@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Flash BH1750_driver" type="MicroPythonConfigurationType" factoryName="MicroPython" singleton="false" nameIsGenerated="true" path="$PROJECT_DIR$/sensors/BH1750_driver" runReplOnSuccess="no">
-    <module name="GraftSense-Drivers-MicroPython#" />
-    <method v="2">
-      <option name="MicroPython.StopREPL.Before.Run" enabled="true" />
-    </method>
-  </configuration>
-</component>
