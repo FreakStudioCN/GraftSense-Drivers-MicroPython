@@ -71,8 +71,8 @@ def color_wipe(color, delay=0.1):
         - The effect is similar to "pixels lighting up from left to right, top to bottom".
     """
     matrix.fill(0)
-    for i in range(4):
-        for j in range(4):
+    for i in range(8):
+        for j in range(8):
             matrix.pixel(i, j, color)
             matrix.show()
             time.sleep(delay)
@@ -262,11 +262,13 @@ def play_animation(matrix, frames, fps=30):
 
 time.sleep(3)
 print("FreakStudio:WS2812 LED Matrix Test")
-matrix = NeopixelMatrix(4, 4, Pin(22), layout=NeopixelMatrix.LAYOUT_ROW, brightness=0.2, order=NeopixelMatrix.ORDER_BRG, flip_v=True)
+matrix = NeopixelMatrix(8, 8, Pin(6), layout=NeopixelMatrix.LAYOUT_ROW, brightness=0.2, order=NeopixelMatrix.ORDER_BRG, flip_v=True)
 matrix.fill(0)
 matrix.show()
 
 # ========================================  主程序  ===========================================
+
+color_wipe(matrix.COLOR_BLUE, delay=0.1)
 
 # 绘制蓝色水平线
 # matrix.hline(0, 0, 4, matrix.COLOR_BLUE)
@@ -280,9 +282,9 @@ matrix.show()
 
 # animate_images(matrix, animation_frames, delay=0.5)
 
-print("Loading animation frames...")
-animation_frames = load_animation_frames()
-print("Found {} frames".format(len(animation_frames)))
-
-print("Starting animation (30FPS)")
-play_animation(matrix, animation_frames, fps=30)
+# print("Loading animation frames...")
+# animation_frames = load_animation_frames()
+# print("Found {} frames".format(len(animation_frames)))
+#
+# print("Starting animation (30FPS)")
+# play_animation(matrix, animation_frames, fps=30)

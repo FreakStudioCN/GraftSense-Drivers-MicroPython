@@ -24,8 +24,8 @@ from led_single_power import PowerLED
 time.sleep(3)
 print("FreakStudio: Test high-power LED lights")
 
-# 创建实例，使用GP15引脚
-led = PowerLED(pin=6, pwm_freq=1000)
+# 创建实例，使用GP26引脚
+led = PowerLED(pin=26, pwm_freq=1000)
 
 # ======================================== 主程序 ==============================================
 

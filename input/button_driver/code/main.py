@@ -31,7 +31,7 @@ time.sleep(3)
 print("FreakStudio:Testing Button")
 
 # 创建 TouchKey 对象
-button = TouchKey(pin_num=15, idle_state=TouchKey.high, debounce_time=50, press_callback=on_press, release_callback=on_release)
+button = TouchKey(pin_num=6, idle_state=TouchKey.high, debounce_time=50, press_callback=on_press, release_callback=on_release)
 
 # ========================================  主程序  ============================================
 

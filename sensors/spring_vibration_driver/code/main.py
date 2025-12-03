@@ -51,7 +51,7 @@ def vibration_callback() -> None:
 time.sleep(3)
 print("FreakStudio: Vibration Sensor Test Start")
 # 初始化震动传感器，GPIO 引脚 15 输入，回调函数处理
-sensor = VibrationSensor(pin=Pin(15), callback=vibration_callback, debounce_ms=10)
+sensor = VibrationSensor(pin=Pin(6), callback=vibration_callback, debounce_ms=10)
 sensor.init()
 print("Sensor initialized with callback and debounce 50ms.")
 
