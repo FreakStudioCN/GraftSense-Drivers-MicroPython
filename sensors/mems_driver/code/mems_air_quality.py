@@ -191,15 +191,15 @@ class MEMSAirQuality:
         """
         # 检查传感器类型是否有效
         if sensor not in self.SENSOR_POLY:
-            raise ValueError(f"无效的传感器类型 '{sensor}'。可用的传感器: {list(self.SENSOR_POLY.keys())}")
+            raise ValueError(f"Invalid sensor type '{sensor}'. Available sensors:{list(self.SENSOR_POLY.keys())}")
 
         # 检查系数列表长度是否为3
         if len(coeffs) != 3:
-            raise ValueError(f"系数列表必须包含3个值，但收到了 {len(coeffs)} 个")
+            raise ValueError(f"The coefficient list must contain 3 values, but received {len(coeffs)}.")
 
         # 更新字典中的系数
         self.SENSOR_POLY[sensor] = coeffs
-        print(f"传感器 {sensor} 的多项式系数已更新为: {coeffs}")
+        print(f"The polynomial coefficients of sensor {sensor} have been updated to: {coeffs}")
 
     def select_builtin(self, sensor: Union[str, List[str]] = "all") -> None:
         """
@@ -237,16 +237,16 @@ class MEMSAirQuality:
             # 多个传感器
             sensors_to_reset = sensor
         else:
-            raise TypeError(f"参数 sensor 应为 'all'、字符串或列表，但收到 {type(sensor)}")
+            raise TypeError(f"The parameter 'sensor' should be 'all', a string, or a list, but got {type(sensor)}")
 
         # 恢复每个传感器的默认系数
         for sensor_name in sensors_to_reset:
             if sensor_name in self.SENSOR_POLY:
                 # 使用内置系数的副本，避免引用问题
                 self.SENSOR_POLY[sensor_name] = MEMSAirQuality.SENSOR_POLY[sensor_name]
-                print(f"传感器 {sensor_name} 已恢复为内置多项式系数: {self.SENSOR_POLY[sensor_name]}")
+                print(f"sensor: {sensor_name} Restored: {self.SENSOR_POLY[sensor_name]}")
             else:
-                print(f"警告: 传感器 {sensor_name} 不存在，跳过")
+                print(f"Warning: Sensor {sensor_name} does not exist, skipping")
 
     def get_polynomial(self, sensor: str) -> List[float]:
         """
@@ -277,7 +277,7 @@ class MEMSAirQuality:
         if sensor in self.SENSOR_POLY:
             return self.SENSOR_POLY[sensor].copy()
         else:
-            raise ValueError(f"无效的传感器类型 '{sensor}'")
+            raise ValueError(f"Invalid sensor type '{sensor}'")
 
     def show_all_polynomials(self) -> None:
         """
@@ -287,7 +287,7 @@ class MEMSAirQuality:
 
         Display current polynomial coefficients for all sensors.
         """
-        print("当前传感器多项式系数:")
+        print("Current sensor polynomial coefficients:")
         for sensor, coeffs in self.SENSOR_POLY.items():
             print(f"  {sensor}: {coeffs}")
 

@@ -67,5 +67,20 @@ else:
 adc = ADS1115(i2c, ADC_ADDRESS, 1)
 mems=MEMSAirQuality(adc,7)
 
-
 # ========================================  主程序  ============================================
+# 查看VOC参数的默认多项式
+mems.get_polynomial('VOC')
+# 设置VOC参数的自定义多项式系数
+mems.set_custom_polynomial('VOC',[20,100,20])
+# 查看VOC更改后参数的多项式
+mems.get_polynomial('VOC')
+# 选择VOC内置默认参数
+mems.select_builtin('VOC')
+while True:
+    # 读取VOC电压
+    voltage = mems.read_voltage(MEMSAirQuality.VOC)
+    # 读取VOC浓度
+    ppm = mems.read_ppm('VOC')
+    # 打印
+    print(f"VOC Voltage: {voltage}V,  VOC Concentration: {ppm} ppm")
+    time.sleep(1)
