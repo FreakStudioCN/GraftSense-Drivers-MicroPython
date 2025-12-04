@@ -16,6 +16,55 @@ import time
 # ======================================== 自定义类 ============================================
 
 class MEMSAirQuality:
+    """
+        MEMS空气质量传感器类，用于读取和转换4路MEMS传感器数据。
+
+        Attributes:
+            CO2 (int): CO2传感器通道常量值，值为0。
+            VOC (int): VOC传感器通道常量值，值为1。
+            PM25 (int): PM2.5传感器通道常量值，值为2。
+            PM10 (int): PM10传感器通道常量值，值为3。
+            SENSOR_POLY (dict): 传感器名称与校准多项式系数的映射字典。
+
+        Methods:
+            __init__(ads1115, adc_rate: int = 7) -> None: 初始化MEMS空气质量监测模块。
+            read_voltage(sensor: int) -> float: 读取指定传感器的原始电压值。
+            set_custom_polynomial(sensor: str, coeffs: List[float]) -> None: 设置传感器的自定义多项式系数。
+            select_builtin(sensor: Union[str, List[str]] = "all") -> None: 恢复传感器的内置多项式系数。
+            get_polynomial(sensor: str) -> List[float]: 获取指定传感器的多项式系数。
+            show_all_polynomials() -> None: 显示所有传感器的当前多项式系数。
+            read_ppm(sensor: str, samples: int = 1, delay_ms: int = 0) -> float: 读取气体浓度值(ppm)。
+
+        Notes:
+            支持4种传感器类型：CO2、VOC、PM2.5、PM10。
+            使用ADS1115 ADC芯片进行模拟信号采集。
+            提供多项式校准功能，支持自定义系数。
+
+        ==========================================
+
+        MEMS Air Quality Sensor Class for reading and converting data from 4-channel MEMS sensors.
+
+        Attributes:
+            CO2 (int): CO2 sensor channel constant, value 0.
+            VOC (int): VOC sensor channel constant, value 1.
+            PM25 (int): PM2.5 sensor channel constant, value 2.
+            PM10 (int): PM10 sensor channel constant, value 3.
+            SENSOR_POLY (dict): Sensor name to calibration polynomial coefficients mapping dictionary.
+
+        Methods:
+            __init__(ads1115, adc_rate: int = 7) -> None: Initialize MEMS air quality monitoring module.
+            read_voltage(sensor: int) -> float: Read raw voltage value from specified sensor.
+            set_custom_polynomial(sensor: str, coeffs: List[float]) -> None: Set custom polynomial coefficients for sensor.
+            select_builtin(sensor: Union[str, List[str]] = "all") -> None: Restore built-in polynomial coefficients for sensor.
+            get_polynomial(sensor: str) -> List[float]: Get polynomial coefficients for specified sensor.
+            show_all_polynomials() -> None: Display current polynomial coefficients for all sensors.
+            read_ppm(sensor: str, samples: int = 1, delay_ms: int = 0) -> float: Read gas concentration value (ppm).
+
+        Notes:
+            Supports 4 sensor types: CO2, VOC, PM2.5, PM10.
+            Uses ADS1115 ADC chip for analog signal acquisition.
+            Provides polynomial calibration with support for custom coefficients.
+        """
     CO2 = 0
     VOC = 1
     PM25 = 2
@@ -30,10 +79,29 @@ class MEMSAirQuality:
     }
     def __init__(self, ads1115, adc_rate: int = 7):
         """
-        初始化监测模块，传入 ADS1115 实例，指定采样率（0-7），适配 4 路 MEMS 传感器。
-        :param ads1115: ADS1115 实例（需提供 read_rev / conversion_start / set_conv 等方法）
-        :param adc_rate: 采样率索引，0..7（对应 ADS1115.RATES 中的索引）
-        """
+               初始化监测模块，传入 ADS1115 实例，指定采样率（0-7），适配 4 路 MEMS 传感器。
+
+               Args:
+                   ads1115: ADS1115 实例（需提供 read_rev / conversion_start / set_conv 等方法）。
+                   adc_rate (int): 采样率索引，取值范围 0-7（对应 ADS1115.RATES 中的索引）。
+
+               Raises:
+                   TypeError: 如果 ads1115 对象缺少必需的方法。
+                   ValueError: 如果采样率参数超出有效范围。
+
+               ==========================================
+
+               Initialize monitoring module with ADS1115 instance and sampling rate (0-7),
+               compatible with 4-channel MEMS sensors.
+
+               Args:
+                   ads1115: ADS1115 instance (must provide read_rev / conversion_start / set_conv methods).
+                   adc_rate (int): Sampling rate index, range 0-7 (corresponding to index in ADS1115.RATES).
+
+               Raises:
+                   TypeError: If ads1115 object lacks required methods.
+                   ValueError: If sampling rate parameter is out of valid range.
+               """
 
         # 验证 ads1115 对象是否看起来像 ADS1115 驱动
         required_methods = ('read_rev', 'conversion_start', 'set_conv')
@@ -53,8 +121,28 @@ class MEMSAirQuality:
     def read_voltage(self, sensor):
         """
         读取指定传感器的电压值。
-        :param sensor: 传感器名称，支持 'CO2', 'VOC', 'PM2.5', 'PM10'
-        :return: 电压值（单位：伏特）
+
+        Args:
+            sensor (int): 传感器通道，使用类常量 CO2, VOC, PM25, PM10 之一。
+
+        Returns:
+            float: 电压值（单位：伏特）。
+
+        Raises:
+            ValueError: 如果传感器类型无效。
+
+        ==========================================
+
+        Read voltage value from specified sensor.
+
+        Args:
+            sensor (int): Sensor channel, using class constants CO2, VOC, PM25, or PM10.
+
+        Returns:
+            float: Voltage value in volts.
+
+        Raises:
+            ValueError: If sensor type is invalid.
         """
         valid_sensors = [
             MEMSAirQuality.CO2,
@@ -81,14 +169,25 @@ class MEMSAirQuality:
 
     def set_custom_polynomial(self, sensor: str, coeffs: List[float]) -> None:
         """
-        设置指定传感器的多项式系数
+        设置指定传感器的多项式系数。
 
-        参数:
-        sensor: 传感器类型，必须是 'CO2', 'VOC', 'PM2.5', 'PM10' 中的一个
-        coeffs: 多项式系数列表，需要包含3个浮点数
+        Args:
+            sensor (str): 传感器类型，必须是 'CO2', 'VOC', 'PM2.5', 'PM10' 中的一个。
+            coeffs (List[float]): 多项式系数列表，需要包含3个浮点数。
 
-        异常:
-        ValueError: 如果传感器类型无效或系数列表长度不为3
+        Raises:
+            ValueError: 如果传感器类型无效或系数列表长度不为3。
+
+        ==========================================
+
+        Set custom polynomial coefficients for specified sensor.
+
+        Args:
+            sensor (str): Sensor type, must be one of 'CO2', 'VOC', 'PM2.5', 'PM10'.
+            coeffs (List[float]): Polynomial coefficients list, must contain 3 float values.
+
+        Raises:
+            ValueError: If sensor type is invalid or coefficients list length is not 3.
         """
         # 检查传感器类型是否有效
         if sensor not in self.SENSOR_POLY:
@@ -104,13 +203,29 @@ class MEMSAirQuality:
 
     def select_builtin(self, sensor: Union[str, List[str]] = "all") -> None:
         """
-        恢复内置转换多项式系数
+        恢复内置转换多项式系数。
 
-        参数:
-        sensor:
-            - "all": 恢复所有传感器（默认）
-            - 字符串: 恢复单个传感器，如 "CO2"
-            - 列表: 恢复多个传感器，如 ["CO2", "VOC"]
+        Args:
+            sensor (Union[str, List[str]]):
+                - "all": 恢复所有传感器（默认）。
+                - 字符串: 恢复单个传感器，如 "CO2"。
+                - 列表: 恢复多个传感器，如 ["CO2", "VOC"]。
+
+        Raises:
+            TypeError: 如果传感器参数类型无效。
+
+        ==========================================
+
+        Restore built-in polynomial coefficients for sensor(s).
+
+        Args:
+            sensor (Union[str, List[str]]):
+                - "all": Restore all sensors (default).
+                - str: Restore single sensor, e.g., "CO2".
+                - List[str]: Restore multiple sensors, e.g., ["CO2", "VOC"].
+
+        Raises:
+            TypeError: If sensor parameter type is invalid.
         """
         if sensor == "all":
             # 恢复所有传感器
@@ -135,13 +250,29 @@ class MEMSAirQuality:
 
     def get_polynomial(self, sensor: str) -> List[float]:
         """
-        获取指定传感器的多项式系数
+        获取指定传感器的多项式系数。
 
-        参数:
-        sensor: 传感器类型
+        Args:
+            sensor (str): 传感器类型。
 
-        返回:
-        传感器系数列表
+        Returns:
+            List[float]: 传感器系数列表的副本。
+
+        Raises:
+            ValueError: 如果传感器类型无效。
+
+        ==========================================
+
+        Get polynomial coefficients for specified sensor.
+
+        Args:
+            sensor (str): Sensor type.
+
+        Returns:
+            List[float]: Copy of sensor coefficients list.
+
+        Raises:
+            ValueError: If sensor type is invalid.
         """
         if sensor in self.SENSOR_POLY:
             return self.SENSOR_POLY[sensor].copy()
@@ -149,7 +280,13 @@ class MEMSAirQuality:
             raise ValueError(f"无效的传感器类型 '{sensor}'")
 
     def show_all_polynomials(self) -> None:
-        """显示所有传感器的当前多项式系数"""
+        """
+        显示所有传感器的当前多项式系数。
+
+        ==========================================
+
+        Display current polynomial coefficients for all sensors.
+        """
         print("当前传感器多项式系数:")
         for sensor, coeffs in self.SENSOR_POLY.items():
             print(f"  {sensor}: {coeffs}")
@@ -160,8 +297,8 @@ class MEMSAirQuality:
         计算多项式值。
 
         Args:
-            coeffs (list[float]): 多项式系数。
-            x (float): 输入电压。
+            coeffs (List[float]): 多项式系数列表。
+            x (float): 输入电压值。
 
         Returns:
             float: ppm 计算结果。
@@ -171,8 +308,8 @@ class MEMSAirQuality:
         Evaluate polynomial.
 
         Args:
-            coeffs (list[float]): Polynomial coefficients.
-            x (float): Input value.
+            coeffs (List[float]): Polynomial coefficients list.
+            x (float): Input voltage value.
 
         Returns:
             float: Result in ppm.
@@ -188,12 +325,12 @@ class MEMSAirQuality:
         读取气体浓度 (ppm)。
 
         Args:
-            samples (int, optional): 平均采样数，默认 1。
-            delay_ms (int, optional): 采样间延时，默认 0。
-            sensor (str, optional): 临时传感器类型。
+            sensor (str): 传感器类型字符串（如 'CO2'）。
+            samples (int, optional): 平均采样次数，默认 1。
+            delay_ms (int, optional): 采样间延时（毫秒），默认 0。
 
         Returns:
-            float: ppm 值，失败时为 NaN。
+            float: ppm 值，失败时返回 NaN。
 
         Raises:
             RuntimeError: 若没有可用多项式。
@@ -203,12 +340,12 @@ class MEMSAirQuality:
         Read gas concentration (ppm).
 
         Args:
-            samples (int, optional): Number of samples. Default 1.
+            sensor (str): Sensor type string (e.g., 'CO2').
+            samples (int, optional): Number of averaging samples. Default 1.
             delay_ms (int, optional): Delay between samples (ms). Default 0.
-            sensor (str, optional): Temporary sensor type.
 
         Returns:
-            float: ppm value, NaN on failure.
+            float: ppm value, returns NaN on failure.
 
         Raises:
             RuntimeError: If no polynomial available.
