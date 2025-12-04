@@ -13,6 +13,7 @@ class MEMSAirQuality:
     VOC = 1
     PM25 = 2
     PM10 = 3
+    # 默认多项式参数（只读）
     # 传感器名称 → 校准多项式系数的映射字典
     SENSOR_POLY = {
         'CO2': [0.0, 100.0, -20.0],
@@ -39,7 +40,7 @@ class MEMSAirQuality:
             raise ValueError("adc_rate must be int in range 0..7")
 
         # 存储 ADS1115 实例与采样率
-
+        self.SENSOR_POLY = MEMSAirQuality.SENSOR_POLY.copy()
         self.ads = ads1115
         self.adc_rate = adc_rate
     def read_voltage(self, sensor):
@@ -120,7 +121,7 @@ class MEMSAirQuality:
         for sensor_name in sensors_to_reset:
             if sensor_name in self.SENSOR_POLY:
                 # 使用内置系数的副本，避免引用问题
-                self.SENSOR_POLY[sensor_name] = self.SENSOR_POLY[sensor_name].copy()
+                self.SENSOR_POLY[sensor_name] = MEMSAirQuality.SENSOR_POLY[sensor_name]
                 print(f"传感器 {sensor_name} 已恢复为内置多项式系数: {self.SENSOR_POLY[sensor_name]}")
             else:
                 print(f"警告: 传感器 {sensor_name} 不存在，跳过")
