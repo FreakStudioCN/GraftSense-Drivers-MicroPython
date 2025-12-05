@@ -292,7 +292,7 @@ class MEMSAirQuality:
             print(f"{name} polynomial coefficients: {coeffs}")
 
     @staticmethod
-    def _eval_poly(coeffs, x):
+    def _eval_poly(coeffs:list[float], x):
         """
         计算多项式值。
 
