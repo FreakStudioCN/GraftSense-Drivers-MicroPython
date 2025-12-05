@@ -69,18 +69,19 @@ mems=MEMSAirQuality(adc,7)
 
 # ========================================  主程序  ============================================
 # 查看VOC参数的默认多项式
-mems.get_polynomial('VOC')
+mems.get_polynomial(MEMSAirQuality.VOC)
 # 设置VOC参数的自定义多项式系数
-mems.set_custom_polynomial('VOC',[20,100,20])
+mems.set_custom_polynomial(MEMSAirQuality.VOC,[20,100,20])
 # 查看VOC更改后参数的多项式
-mems.get_polynomial('VOC')
+mems.get_polynomial(MEMSAirQuality.VOC)
 # 选择VOC内置默认参数
-mems.select_builtin('VOC')
+mems.select_builtin(MEMSAirQuality.VOC)
 while True:
     # 读取VOC电压
     voltage = mems.read_voltage(MEMSAirQuality.VOC)
     # 读取VOC浓度
-    ppm = mems.read_ppm('VOC')
+    ppm = mems.read_ppm(MEMSAirQuality.VOC)
     # 打印
     print(f"VOC Voltage: {voltage}V,  VOC Concentration: {ppm} ppm")
     time.sleep(1)
+
