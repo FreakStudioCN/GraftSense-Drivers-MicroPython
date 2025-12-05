@@ -165,8 +165,8 @@ class MEMSAirQuality:
         设置指定传感器的多项式系数。
 
         Args:
-            sensor : 传感器类型，需要是 'CO2'、'VOC'、'PM2.5'、'PM10' 之一。
-            coeffs (List[float]): 多项式系数列表，需要包含3个浮点数。
+            sensor (int): 传感器类型，使用类常量 CH20, SMK, VOC, CO 之一。
+            coeffs (list[float]): 多项式系数列表，需要包含3个浮点数。
 
         Raises:
             ValueError: 如果传感器类型无效或系数列表长度不为3。
@@ -176,7 +176,7 @@ class MEMSAirQuality:
         Set custom polynomial coefficients for specified sensor.
 
         Args:
-            sensor: Sensor type, must be one of 'CO2', 'VOC', 'PM2.5', 'PM10'.
+            sensor (int): Sensor type, using class constants CH20, SMK, VOC, or CO.
             coeffs (List[float]): Polynomial coefficients list, must contain 3 float values.
 
         Raises:
@@ -297,7 +297,7 @@ class MEMSAirQuality:
         计算多项式值。
 
         Args:
-            coeffs (List[float]): 多项式系数列表。
+            coeffs (list[float]): 多项式系数列表。
             x (float): 输入电压值。
 
         Returns:
@@ -325,7 +325,7 @@ class MEMSAirQuality:
         读取气体浓度 (ppm)。
 
         Args:
-            sensor : 传感器类型
+            sensor (int): 传感器类型
             samples (int, optional): 平均采样次数，默认 1。
             delay_ms (int, optional): 采样间延时（毫秒），默认 0。
 
@@ -340,7 +340,7 @@ class MEMSAirQuality:
         Read gas concentration (ppm).
 
         Args:
-            sensor : Sensor
+            sensor (int) : Sensor
             samples (int, optional): Number of averaging samples. Default 1.
             delay_ms (int, optional): Delay between samples (ms). Default 0.
 
