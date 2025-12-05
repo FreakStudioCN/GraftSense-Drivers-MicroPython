@@ -38,7 +38,7 @@ uart = machine.UART(0, baudrate=115200, tx=machine.Pin(16), rx=machine.Pin(17))
 # 上电延时3s
 time.sleep(3)
 # 打印调试消息
-print("FreakStudio: Use UART to control onboard LED.")
+print("FreakStudio: Use ASRPRO UART to control onboard LED.")
 # 主循环：持续监听串口数据
 while True:
     if uart.any():  # 检测是否有串口数据接收
