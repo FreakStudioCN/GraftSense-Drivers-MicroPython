@@ -18,6 +18,11 @@ import time
 
 # 闪烁函数（闪烁2次，每次亮/灭0.5秒）
 def led_blink():
+    """
+    LED闪烁。
+    ===========================
+    LED blink.
+    """
     for _ in range(2):  # 闪烁2次（可修改次数）
         led.value(1)
         time.sleep(0.5)
@@ -48,13 +53,13 @@ while True:
             
             # 根据指令执行对应操作
             if cmd == 0x01:  # 接收 0x01 → 闪烁
-                print("收到指令 0x01，LED 闪烁")
+                print("Received command 0x01, LED blinking")
                 led_blink()
             elif cmd == 0x02:  # 接收 0x02 → 关闭
-                print("收到指令 0x02，LED 关闭")
+                print("Received command 0x02, LED off")
                 led.value(0)
             elif cmd == 0x03:  # 接收 0x03 → 打开
-                print("收到指令 0x03，LED 打开")
+                print("Received command 0x03, LED turned on")
                 led.value(1)
             else:  # 其他指令：提示无效
-                print(f"收到无效指令：0x{cmd:02X}，忽略")
+                print(f"Received invalid command: 0x{cmd:02X}, ignoring")
