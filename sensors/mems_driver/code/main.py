@@ -3,7 +3,7 @@
 # @Time    : 2024/10/7 下午2:21   
 # @Author  : 李清水            
 # @File    : main.py       
-# @Description : ADC类实验，使用ADS1115外置ADC芯片采集数据，定时器触发采集
+# @Description : MEMS空气质量传感器驱动示例程序 for MicroPython
 
 # ======================================== 导入相关模块 ========================================
 
@@ -30,7 +30,7 @@ ADC_ADDRESS = 0
 # 上电延时3s
 time.sleep(3)
 # 打印调试消息
-print("FreakStudio: Using ADS1115 acquire signal")
+print("FreakStudio: MEMS Air Quality Sensor Test Program")
 
 # 创建串口对象，设置波特率为256000
 uart = UART(0, 256000)
