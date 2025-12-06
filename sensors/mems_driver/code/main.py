@@ -20,6 +20,7 @@ from mems_air_quality import MEMSAirQuality
 
 # 外置ADC地址
 ADC_ADDRESS = 0
+
 # ======================================== 功能函数 ============================================
 
 
@@ -29,21 +30,9 @@ ADC_ADDRESS = 0
 
 # 上电延时3s
 time.sleep(3)
+
 # 打印调试消息
 print("FreakStudio: MEMS Air Quality Sensor Test Program")
-
-# 创建串口对象，设置波特率为256000
-uart = UART(0, 256000)
-# 初始化uart对象，波特率为256000，数据位为8，无校验位，停止位为1
-# 设置接收引脚为GPIO1，发送引脚为GPIO0
-# 设置串口超时时间为100ms
-uart.init(baudrate  = 256000,
-          bits      = 8,
-          parity    = None,
-          stop      = 1,
-          tx        = 0,
-          rx        = 1,
-          timeout   = 100)
 
 # 创建硬件I2C的实例，使用I2C0外设，时钟频率为400KHz，SDA引脚为4，SCL引脚为5
 i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
@@ -55,6 +44,7 @@ print('START I2C SCANNER')
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
+
 # 若非空，则打印从机设备地址
 else:
     print('i2c devices found:', len(devices_list))
