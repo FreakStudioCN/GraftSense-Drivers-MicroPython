@@ -5,14 +5,15 @@
 # @File    : tm1637.py
 # @Description : tm1637驱动for micropython
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
+
 # 导入MicroPython内置模块
 from micropython import const
 # 导入Pin类以控制GPIO引脚

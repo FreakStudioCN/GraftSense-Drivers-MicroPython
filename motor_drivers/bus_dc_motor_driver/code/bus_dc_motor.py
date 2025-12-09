@@ -4,7 +4,12 @@
 # @Author  : 李清水            
 # @File    : bus_dc_motor.py
 # @Description : 总线直流电机驱动模块，使用PCA9685芯片控制电机驱动芯片
-# 本修改部分由 [leeqingshui] 发布，使用 CC BY-NC 4.0 许可证
+# @License : CC BY-NC 4.0
+
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 

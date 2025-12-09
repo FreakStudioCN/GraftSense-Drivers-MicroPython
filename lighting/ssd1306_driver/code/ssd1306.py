@@ -3,8 +3,8 @@
 # @Time    : 2024/7/3 下午9:34   
 # @Author  : 李清水            
 # @File    : SSD1306.py
-# @Description : 主要定义了SSD 1306类
-
+# @Description : 主要定义了SSD 1306类以及相关方法，代码参考自：https://github.com/stlehmann/micropython-ssd1306
+# @License : MIT
 
 # ======================================== 导入相关模块 ========================================
 

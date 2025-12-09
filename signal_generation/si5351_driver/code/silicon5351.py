@@ -3,9 +3,8 @@
 # @Time    : 2025/09/08 10:00
 # @Author  : 侯钧瀚
 # @File    : silicon5351.py
-# @Description : silicon5351时钟驱动 for MicroPython
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CC BY-NC 4.0
+# @Description : silicon5351时钟驱动 for MicroPython，代码参考自：https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"

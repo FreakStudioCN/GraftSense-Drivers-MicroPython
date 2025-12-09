@@ -93,8 +93,6 @@ class TouchKey:
             None: This method does not raise any exceptions.
 
         """
-
-
         # 对入口参数进行限定与判断
         if not isinstance(pin_num, int):
             print("The pin_num must be int ")

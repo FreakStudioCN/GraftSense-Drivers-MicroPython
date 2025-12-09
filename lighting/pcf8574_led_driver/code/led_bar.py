@@ -109,6 +109,7 @@ class LEDBar:
                 raise TypeError(f"pcf8574 must implement method: {method}")
         self.pcf = pcf8574
         self.clear()
+
     def set_led(self, index: int, value: bool) -> None:
         """
         点亮或熄灭指定 LED。
@@ -184,6 +185,7 @@ class LEDBar:
         """
         if not 0 <= level <= 8:
             raise ValueError("Level must be 0~8")
+
         value = (1 << level) - 1 if level > 0 else 0
         self.set_all(value)
 

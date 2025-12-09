@@ -3,8 +3,12 @@
 # @Time    : 2024/10/7 下午2:24   
 # @Author  : 李清水            
 # @File    : ads1115.py       
-# @Description : 外置ADC芯片ADS1115驱动类
-# 参考代码：https://github.com/robert-hh/ads1x15
+# @Description : 外置ADC芯片ADS1115驱动类，参考代码：https://github.com/robert-hh/ads1x15
+# @License : MIT
+
+__version__ = "0.1.0"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 

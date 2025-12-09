@@ -4,8 +4,6 @@
 # @Author  : 侯钧瀚
 # @File    : mian.py
 # @Description : 语音模块串口开关板载灯示例 for MicroPython
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CC BY-NC 4.0
 
 # ======================================== 导入相关模块 =========================================
 
@@ -33,19 +31,19 @@ def led_blink():
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
+
 # 上电延时3s
 time.sleep(3)
-
 # 打印调试消息
 print("FreakStudio: Use ASRPRO UART to control onboard LED.")
 
 # 初始化板载 LED（GPIO25，输出模式）
 led = machine.Pin(25, machine.Pin.OUT)
+
 # 初始化串口：波特率9600，TX=GPIO0，RX=GPIO1（Pico默认硬件串口0）
 uart = machine.UART(0, baudrate=115200, tx=machine.Pin(16), rx=machine.Pin(17))
 
 # ========================================  主程序  ============================================
-
 
 # 主循环：持续监听串口数据
 while True:

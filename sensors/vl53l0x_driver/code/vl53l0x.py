@@ -3,12 +3,12 @@
 # @Time    : 2025/9/5 上午10:39
 # @Author  : 缪贵成
 # @File    : vl53l0x.py
-# @Description : 基于vl53l0x的激光测距模块驱动文件
-# @License : CC BY-NC 4.0
+# @Description : 基于vl53l0x的激光测距模块驱动文件，参考自 https://github.com/uceeatz/VL53L0X
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

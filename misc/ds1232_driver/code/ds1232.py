@@ -4,6 +4,7 @@
 # @Author  : 李清水            
 # @File    : ds1232.py       
 # @Description : 外部DS1232看门狗模块驱动程序
+# @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"
 __author__ = "李清水"

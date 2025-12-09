@@ -28,6 +28,7 @@ import time
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Test PCF8574 Module")
+
 i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
@@ -44,6 +45,7 @@ else:
         # 判断设备地址是否为PCF8575的地址
         if device >= 0x20 and device <= 0x27:
             print("I2C hexadecimal address: ", hex(device))
+
 # 初始化 PCF8574，假设地址为 0x20
 pcf = PCF8574(i2c, address=device)
 

@@ -4,8 +4,6 @@
 # @Author  : 侯钧瀚
 # @File    : mian.py
 # @Description : silicon5351时钟示例 for MicroPython
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CC BY-NC 4.0
 
 # ======================================== 导入相关模块 =========================================
 

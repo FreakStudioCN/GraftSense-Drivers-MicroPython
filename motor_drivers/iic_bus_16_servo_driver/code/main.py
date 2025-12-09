@@ -65,8 +65,7 @@ srv.attach_servo(2, BusPWMServoController.SERVO_180, min_us=500, max_us=2500, ne
 # 通道3：180° 舵机，标准 500~2500us，1500us 为中立
 srv.attach_servo(3, BusPWMServoController.SERVO_180, min_us=500, max_us=2500, neutral_us=1500)
 
-#设置360°舵机通道
-
+# 设置360°舵机通道
 # 通道1：360° 连续舵机，自带停转点在 1500us 附近；如需反向可 reversed=True
 srv.attach_servo(4, BusPWMServoController.SERVO_360, min_us=1000, max_us=2000, neutral_us=1500)
 # 通道1：360° 连续舵机，自带停转点在 1500us 附近；如需反向可 reversed=True

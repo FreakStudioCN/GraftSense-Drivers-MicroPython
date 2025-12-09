@@ -3,12 +3,12 @@
 # @Time    : 2025/8/26 下午10:12
 # @Author  : 缪贵成
 # @File    : __init__.py
-# @Description : 红外发射部分基类
-# @License : CC BY-NC 4.0
+# @Description : 红外发射部分基类，参考自：https://github.com/peterhinch/micropython_ir
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

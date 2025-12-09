@@ -16,6 +16,7 @@ from ads1115 import ADS1115
 # 导入二进制数据和原生数据类型打包解包模块
 import struct
 from mems_air_quality import MEMSAirQuality
+
 # ======================================== 全局变量 ============================================
 
 # 外置ADC地址
@@ -54,9 +55,8 @@ else:
 
 # 创建ADC相关实例，增益系数设置为1
 adc = ADS1115(i2c, ADC_ADDRESS, 1)
+# 创建空气质量传感器的实例
 mems=MEMSAirQuality(adc,7)
-
-# ========================================  主程序  ============================================
 
 # 查看VOC参数的默认多项式
 mems.get_polynomial(MEMSAirQuality.VOC)
@@ -66,6 +66,9 @@ mems.set_custom_polynomial(MEMSAirQuality.VOC,[20,100,20])
 mems.get_polynomial(MEMSAirQuality.VOC)
 # 选择VOC内置默认参数
 mems.select_builtin(MEMSAirQuality.VOC)
+
+# ========================================  主程序  ============================================
+
 while True:
     # 读取VOC电压
     voltage = mems.read_voltage(MEMSAirQuality.VOC)
@@ -74,4 +77,3 @@ while True:
     # 打印
     print(f"VOC Voltage: {voltage}V,  VOC Concentration: {ppm} ppm")
     time.sleep(1)
-

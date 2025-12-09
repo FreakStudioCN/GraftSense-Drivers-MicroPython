@@ -4,6 +4,7 @@
 # @Author  : 李清水
 # @File    : ds3502.py
 # @Description : 数字电位器芯片DS3502驱动模块
+# @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"
 __author__ = "李清水"
