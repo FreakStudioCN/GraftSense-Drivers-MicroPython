@@ -3,12 +3,12 @@
 # @Time    : 2025/9/8 下午4:51
 # @Author  : 缪贵成
 # @File    : ds1307.py
-# @Description : 基于DS1307的RTC时钟
-# @License : CC BY-NC 4.0
+# @Description : 基于DS1307的RTC时钟，参考地址：https://github.com/peter-l5/DS1307
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
@@ -18,7 +18,7 @@ from machine import I2C
 
 # ======================================== 全局变量 ============================================
 
-# register definitions (see datasheet)
+# 关键寄存器定义
 _DATETIME_REGISTER = const(0x00)
 _CONTROL_REGISTER = const(0x07)
 

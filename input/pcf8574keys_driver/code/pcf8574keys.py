@@ -29,7 +29,6 @@ KEYS_MAP = {
     'CENTER': 4,
     'SW1':5,
     'SW2':7,
-    
 }
 
 # ======================================== 功能函数 ============================================
@@ -132,13 +131,14 @@ class PCF8574Keys:
         self._state = {k: False for k in keys.keys()}
         self._last_state = self._state.copy()
         self._last_time = {k: 0 for k in keys.keys()}
-        
 
         # create timer for periodic scanning
         self._timer = Timer(-1)
         self._timer.init(period=10, mode=Timer.PERIODIC, callback=self._scan_keys)
+
     def on(self):
         self._pcf.port =0b00000000
+
     def off(self):
         self._pcf.port =0b01000000
 

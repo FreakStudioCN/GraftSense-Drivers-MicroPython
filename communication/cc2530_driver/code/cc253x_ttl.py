@@ -8,7 +8,7 @@
 
 __version__ = "0.1.0"
 __author__ = "ben0i0d"
-__license__ = "CC YB-NC 4.0"
+__license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
@@ -23,7 +23,6 @@ from micropython import const
 
 # ======================================== 自定义类 ============================================
 
-
 class CC253xError(Exception):
     """
     CC253x 模块相关的基础异常类，所有自定义异常均继承自此类。  
@@ -33,7 +32,6 @@ class CC253xError(Exception):
     """
     pass
 
-
 class PacketTooLargeError(CC253xError):
     """
     当发送的数据包超过 CC253x 模块支持的最大负载时抛出。  
@@ -42,7 +40,6 @@ class PacketTooLargeError(CC253xError):
     """
     pass
 
-
 class CommandFailedError(CC253xError):
     """
     当 CC253x 模块返回 ERR 或命令执行失败时抛出。  
@@ -50,7 +47,6 @@ class CommandFailedError(CC253xError):
     Raised when CC253x module returns ERR or a command execution fails.
     """
     pass
-
 
 class NotJoinedError(CC253xError):
     """

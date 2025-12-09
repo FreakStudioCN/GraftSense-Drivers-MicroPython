@@ -68,6 +68,7 @@ class VibrationMotor:
         PWM calls not ISR-safe.
         Default state is OFF.
     """
+
     def __init__(self, pin: int, pwm_freq: int = 1000):
         """
         初始化震动马达。
@@ -92,7 +93,7 @@ class VibrationMotor:
         self._digital = Pin(pin, Pin.OUT)
         self._pwm = PWM(self._digital)
         self._pwm.freq(pwm_freq)
-        self._pwm.duty_u16(0)  # 修改为 Pico 兼容
+        self._pwm.duty_u16(0)
         self._state = False
 
     def on(self) -> None:
@@ -108,7 +109,7 @@ class VibrationMotor:
         Notes:
             Sets PWM duty to maximum (1023).
         """
-        self._pwm.duty_u16(1023 * 64)  # 修改为 Pico 兼容
+        self._pwm.duty_u16(1023 * 64)
         self._state = True
 
     def off(self) -> None:
@@ -118,6 +119,7 @@ class VibrationMotor:
         Notes:
             设置 PWM 占空比为 0。
         ==========================================
+
         Turn off motor.
         Notes:
             Sets PWM duty to 0.
@@ -218,6 +220,7 @@ class VibrationMotor:
             PWM: PWM object.
         """
         return self._pwm
+
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================

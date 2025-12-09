@@ -3,8 +3,13 @@
 # @Time    : 2024/9/1 下午2:10   
 # @Author  : 李清水            
 # @File    : mcp4725.py       
-# @Description : 12位DAC芯片mcp4725驱动模块
-# 参考代码：https://github.com/wayoda/micropython-mcp4725/blob/master/mcp4725.py
+# @Description : 12位DAC芯片mcp4725驱动模块，参考代码：https://github.com/wayoda/micropython-mcp4725/blob/master/mcp4725.py
+# @License : MIT
+
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 

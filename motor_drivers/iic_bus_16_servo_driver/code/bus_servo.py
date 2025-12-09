@@ -4,7 +4,6 @@
 # @Author  : 侯钧瀚
 # @File    : bus_servo.py
 # @Description : PCA9685 16路 PWM 驱动 for MicroPython
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 # @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"

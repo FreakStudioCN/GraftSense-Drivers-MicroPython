@@ -5,6 +5,12 @@
 # @File    : sdcard.py       
 # @Description : 自定义用于SD卡读写的SDCard类
 # 参考代码：https://github.com/micropython/micropython-lib/blob/master/micropython/drivers/storage/sdcard/sdcard.py#L291
+# @License : MIT
+
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 ========================================
 
