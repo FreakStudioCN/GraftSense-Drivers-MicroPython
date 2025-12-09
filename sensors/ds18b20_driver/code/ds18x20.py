@@ -3,12 +3,12 @@
 # @Time    : 2024/7/22 下午3:01
 # @Author  : 李清水
 # @File    : ds18x20.py
-# @Description : ds18x20温度传感器类
-# 参考代码：https://github.com/robert-hh/Onewire_DS18X20/blob/master/ds18x20.py
+# @Description : ds18x20温度传感器类，参考代码：https://github.com/robert-hh/Onewire_DS18X20/blob/master/ds18x20.py
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "李清水"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 ========================================

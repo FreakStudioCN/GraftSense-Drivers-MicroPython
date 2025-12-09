@@ -3,12 +3,12 @@
 # @Time    : 2025/9/4 下午11:14
 # @Author  : 缪贵成
 # @File    : mlx90640.py
-# @Description : mlx90640点阵红外温度传感器模块驱动测试文件
-# @License : CC BY-NC 4.0
+# @Description : mlx90640点阵红外温度传感器模块驱动文件，参考自：https://github.com/michael-sulyak/micropython-mlx90640
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

@@ -26,8 +26,6 @@ print("Please prepare the sensor for calibration (dry and wet)...")
 sensor = SoilMoistureSensor(pin=26)
 print("Sensor initialized on ADC pin 26")
 
-# ======================================== 主程序 ===============================================
-
 # Step 1: 校准干燥值
 input("Place sensor in DRY air/soil and press Enter...")
 dry_value = sensor.calibrate_dry()
@@ -42,8 +40,11 @@ print("Calibrated wet value:", wet_value)
 sensor.set_calibration(dry_value, wet_value)
 print("Calibration set: dry={}, wet={}".format(dry_value, wet_value))
 
-# Step 4: 循环读取传感器数据
+# ======================================== 主程序 ===============================================
+
+# 循环读取传感器数据
 print("\nCalibration completed. Start reading moisture...\n")
+
 try:
     while True:
         raw = sensor.read_raw()

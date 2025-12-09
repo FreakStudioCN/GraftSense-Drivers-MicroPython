@@ -113,7 +113,8 @@ def test_sensor_realtime(sensor, name="Sensor", interval=1.0):
 # 硬件上电延时，保证传感器初始化完成
 time.sleep(3)
 print("FreakStudio: MLX90614 test start ")
-# ================= I2C 初始化 =================
+
+
 i2c = I2C(0, scl=5, sda=4, freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
@@ -129,9 +130,11 @@ for device in devices_list:
         print("I2c hexadecimal address:", hex(device))
         mlx61xaddr = device
 
+
 # 初始化 MLX90614
 sensor14 = MLX90614(i2c, mlx61xaddr)
 print("[MLX90614] Sensor initialized.")
+
 # 初始化 MLX90615
 sensor15 = MLX90615(i2c, mlx61xaddr)
 print("[MLX90615] Sensor initialized.")
@@ -145,4 +148,3 @@ test_sensor_realtime(sensor14, "MLX90614", interval=1.0)
 # ================= MLX90615 测试 =================
 print("\n--- Starting MLX90615 Realtime Test ---")
 test_sensor_realtime(sensor15, "MLX90615", interval=1.0)
-

@@ -4,12 +4,12 @@
 # @Author  : 侯钧瀚
 # @File    : heartratemonitor.py
 # @Description : MAX30102/MAX30105 心率与PPG读取驱动 + 简易心率计算器（窗口平滑+峰值检测）
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CC BY-NC 4.0
+# @Repository  : 参考自：https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
