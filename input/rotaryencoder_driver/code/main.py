@@ -26,7 +26,7 @@ time.sleep(3)
 # 打印调试信息
 print("FreakStudio : Using GPIO read Rotary Encoder value, use software debounce by timer")
 
-# 创建EC11旋转编码器对象，使用GPIO10和GPIO11作为A相和B相，使用GPIO12作为按键
+# 创建EC11旋转编码器对象
 # 如果你想改变编码器计数值变大的旋转方向（例如原本是逆时针变大，想改成顺时针变大）
 # 只需要在初始化编码器对象时，将参数 pin_a 和 pin_b 的值互换即可
 encoder = EC11Encoder(pin_a=6, pin_b=7)

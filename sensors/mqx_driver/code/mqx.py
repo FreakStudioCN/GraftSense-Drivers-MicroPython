@@ -6,6 +6,11 @@
 # @Description : MQ系列电化学传感器模块驱动程序
 # @License : CC BY-NC 4.0
 
+__version__ = "0.1.0"
+__author__ = "缪贵成"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 =========================================
 
 from micropython import schedule

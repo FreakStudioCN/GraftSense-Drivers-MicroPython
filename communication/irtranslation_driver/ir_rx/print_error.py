@@ -3,8 +3,8 @@
 # @Time    : 2025/8/26 下午10:12
 # @Author  : 缪贵成
 # @File    : print_error.py
-# @Description : 打印错误信息
-# @License : CC BY-NC 4.0
+# @Description : 打印错误信息，参考自：https://github.com/peterhinch/micropython_ir
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"

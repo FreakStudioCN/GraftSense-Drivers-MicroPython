@@ -23,8 +23,6 @@ SDA_PIN = 4
 
 PCF8574_ADDR = None
 
-
-
 # ======================================== 功能函数 ============================================
 
 def key_callback(key_name, state):
@@ -67,9 +65,11 @@ time.sleep(3)
 print("FreakStudio:PCF8574 Five-way Button Test Program")
 # 初始化I2C
 i2c = I2C(I2C_ID, scl=Pin(SCL_PIN), sda=Pin(SDA_PIN), freq=400000)
+
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
 print('START I2C SCANNER')
+
 # 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     # 若非空，则打印从机设备地址
@@ -82,12 +82,15 @@ for device in devices_list:
     if 0x20 <= device <= 0x28:
         # 假设第一个找到的设备是PCF8574地址
         print("I2c hexadecimal address:", hex(device))
+
         PCF8574_ADDR = device
 # 初始化PCF8574
 pcf = PCF8574(i2c, PCF8574_ADDR)
 # 初始化五向按键
 keys = PCF8574Keys(pcf, KEYS_MAP)
+
 # ========================================  主程序  ============================================
+
 while True:
     # 打印当前所有按键状态
     all_states = keys.read_all()
@@ -98,5 +101,3 @@ while True:
         keys.off()
     # 500ms刷新一次状态显示
     time.sleep(0.5)
-
-

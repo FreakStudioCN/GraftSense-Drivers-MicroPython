@@ -70,7 +70,7 @@ PN532是一款高性能NFC近场通信芯片，支持多种卡型读写（Mifare
 - `mifare_classic_write_block(block_number, data)`：向Mifare Classic卡片指定块写入数据
 - `ntag2xx_write_page(page_number, data)`：向NTAG2XX系列卡片指定页写入数据
 
-### uart.py
+### pn532_uart.py
 包含`PN532_UART`类，继承自`PN532`基类，实现UART通信功能：
 - `__init__(uart, rst_pin, debug=False)`：初始化UART通信接口
 - `_write(data)`：通过UART发送数据帧到PN532模块
@@ -87,7 +87,7 @@ PN532是一款高性能NFC近场通信芯片，支持多种卡型读写（Mifare
 
 ## 软件设计核心思想
 ### 分层设计
-- 底层：UART通信协议实现（`uart.py`）
+- 底层：UART通信协议实现（`pn532_uart.py`）
 - 中层：PN532命令封装与解析（`pn532.py`）
 - 高层：应用级API与测试流程（`main.py`）
 

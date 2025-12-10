@@ -7,8 +7,10 @@
 
 # ======================================== 导入相关模块 =========================================
 
+# 导入硬件相关模块
 import time
 from machine import UART,Pin
+# 导入第三方驱动模块
 from cc253x_ttl import CC253xTTL
 
 # ======================================== 全局变量 ============================================
@@ -21,16 +23,20 @@ from cc253x_ttl import CC253xTTL
 
 # 上电延时3s
 time.sleep(3)
-print("FreakStudio:cc253x_ttl test")
+# 打印调试信息
+print("FreakStudio： cc253x_ttl test")
 
+# 声明串口实例
 uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
+
 # 协调器
 cor = CC253xTTL(uart0)
 # 路由器
 env = CC253xTTL(uart1)
 
 # ========================================  主程序  ===========================================
+
 while True:
     # 路由器发送
     env.send_node_to_coord("Here is EndDrive")
@@ -38,5 +44,3 @@ while True:
     # 协调器接收并且输出
     print(cor._uart.read())
     time.sleep(1)
-    
-

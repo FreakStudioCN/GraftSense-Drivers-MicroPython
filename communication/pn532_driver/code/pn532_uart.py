@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-   
 # @Time    : 2025/9/4 下午3:32
 # @Author  : 缪贵成
-# @File    : uart.py
-# @Description : 串口通信，继承pn532
-# @License : CC BY-NC 4.0
+# @File    : pn532_uart.py
+# @Description : 串口通信，继承pn532，参考自：https://github.com/luiz-brandao/micropython_pn532/tree/main/pn532
+# @License : MIT
 
 __version__ = "0.1.0"
-__author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

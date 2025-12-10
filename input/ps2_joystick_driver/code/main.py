@@ -37,8 +37,7 @@ try:
     while True:
         x_val, y_val, sw_val = joystick.get_values()
         print("Joystick values: X = {:.2f}, Y = {:.2f}, Switch = {}".format(x_val, y_val, sw_val))
-        # 每 1 秒打印一次
-        time.sleep(1)  
+        time.sleep(0.2)
 except KeyboardInterrupt:
     print("\n数据采集结束")
 finally:

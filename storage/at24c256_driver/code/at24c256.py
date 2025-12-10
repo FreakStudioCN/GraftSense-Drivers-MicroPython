@@ -4,6 +4,12 @@
 # @Author  : 李清水            
 # @File    : main.py       
 # @Description : I2C类实验。读写外部EEPROM芯片AT24C256
+# @License : MIT
+
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 

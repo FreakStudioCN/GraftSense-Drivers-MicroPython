@@ -3,12 +3,12 @@
 # @Time    : 2025/8/27 上午11:50
 # @Author  : 缪贵成
 # @File    : mlx90614.py
-# @Description : mlx90614双温区传感器
-# @License : CC BY-NC 4.0
+# @Description : mlx90614双温区传感器，参考自：https://github.com/mcauser/micropython-mlx90614/blob/master/mlx90614.py
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

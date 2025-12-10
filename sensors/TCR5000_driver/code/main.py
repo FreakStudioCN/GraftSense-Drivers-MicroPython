@@ -60,4 +60,3 @@ try:
 except KeyboardInterrupt:
     sensor.deinit()
     print("Program interrupted, resources released.")
-

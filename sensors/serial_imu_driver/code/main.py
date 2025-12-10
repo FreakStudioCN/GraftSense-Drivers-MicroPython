@@ -91,6 +91,7 @@ try:
         if gc.mem_free() < 220000:
             # 手动触发垃圾回收功能
             gc.collect()
+
 except KeyboardInterrupt:
     # 捕获键盘中断（Ctrl+C）时的处理
     print("程序被用户中断")

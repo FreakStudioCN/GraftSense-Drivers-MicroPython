@@ -3,12 +3,12 @@
 # @Time    : 2025/9/23 下午4:17
 # @Author  : 缪贵成
 # @File    : bh_1750.py
-# @Description : BH1750光照强度传感器驱动文件
-# @License : CC BY-NC 4.0
+# @Description : BH1750光照强度传感器驱动文件，代码参考自：：https://github.com/octaprog7/BH1750/tree/master
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

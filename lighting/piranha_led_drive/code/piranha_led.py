@@ -13,7 +13,7 @@ __platform__ = "MicroPython v1.23+"
 
 # ======================================== 导入相关模块 =========================================
 
-# 标准库
+# 导入硬件相关模块
 from machine import Pin
 # 导入MicroPython相关模块
 from micropython import const
@@ -21,8 +21,10 @@ from micropython import const
 # ======================================== 全局变量 ============================================
 
 # LED 极性常量
-POLARITY_CATHODE = const(0)  # 共阴极：高电平亮
-POLARITY_ANODE   = const(1)  # 共阳极：低电平亮
+# 共阴极：高电平亮
+POLARITY_CATHODE = const(0)
+# 共阳极：低电平亮
+POLARITY_ANODE   = const(1)
 
 # ======================================== 功能函数 ============================================
 

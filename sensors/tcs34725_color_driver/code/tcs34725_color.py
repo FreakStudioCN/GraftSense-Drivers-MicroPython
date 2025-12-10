@@ -3,8 +3,7 @@
 # @Time    : 2025/9/16 下午8:16
 # @Author  : 缪贵成
 # @File    : tcs34725_color.py
-# @Description : 基于TCS34725的颜色识别模块驱动文件
-# Reference :https://github.com/adafruit/micropython-adafruit-tcs34725
+# @Description : 基于TCS34725的颜色识别模块驱动文件，参考自https://github.com/adafruit/micropython-adafruit-tcs34725
 # @License : MIT
 
 __version__ = "0.1.0"

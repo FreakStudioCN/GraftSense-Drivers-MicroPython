@@ -3,13 +3,12 @@
 # @Time    : 2025/9/9 上午11:25
 # @Author  : 缪贵成
 # @File    : bmp280_float.py
-# @Description : 基于BMP280的大气压强温湿度传感器模块驱动（浮点型版本）
-# Reference :https://github.com/robert-hh/BME280/blob/master
-# @License : CC BY-NC 4.0
+# @Description : 基于BMP280的大气压强温湿度传感器模块驱动（浮点型版本），代码参考自：https://github.com/robert-hh/BME280/blob/master
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
@@ -23,23 +22,27 @@ from math import pow
 
 # ======================================== 全局变量 ============================================
 
-# BMP280 default address.
+# BMP280默认地址
 BMP280_I2CADDR = 0x76
-# Operating Modes
+
+# 操作模式
 BMP280_OSAMPLE_1 = 1
 BMP280_OSAMPLE_2 = 2
 BMP280_OSAMPLE_4 = 3
 BMP280_OSAMPLE_8 = 4
 BMP280_OSAMPLE_16 = 5
+
 # 湿度数据的过采样
 BMP280_REGISTER_CONTROL_HUM = 0xF2
 BMP280_REGISTER_STATUS = 0xF3
+
 # 通过0xF4寄存器的不同位配置从而实现对温度压力和湿度的过采样和模式控制 详细参考数据手册第3.3章节转换图
 BMP280_REGISTER_CONTROL = 0xF4
 MODE_SLEEP = const(0)
 MODE_FORCED = const(1)
 MODE_NORMAL = const(3)
-# about 1 second timeout
+
+# 阻塞时间
 BMP280_TIMEOUT = const(100)
 
 # ======================================== 功能函数 ============================================
@@ -387,7 +390,8 @@ class BMP280:
             - Values outside range are ignored.
             - Not ISR-safe.
         """
-        if 30000 < value < 120000:  # just ensure some reasonable value
+        # just ensure some reasonable value
+        if 30000 < value < 120000:
             self.__sealevel = value
 
     @property

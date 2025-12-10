@@ -7,8 +7,10 @@
 
 # ======================================== 导入相关模块 =========================================
 
+# 导入硬件相关模块
 import time
 from machine import Pin
+# 导入第三方驱动模块
 from ir_tx.nec import NEC
 # nec_16三个参数在回调函数中
 from ir_rx.nec import NEC_16
@@ -18,7 +20,6 @@ from ir_rx.nec import NEC_16
 # ======================================== 功能函数 ============================================
 
 # 如果使用nec_8需要传入不定长参数，，此处是nec_16
-
 def ir_callback(addr: int, cmd: int, repeat: bool) -> None:
     """
     NEC 协议接收回调函数（3 参数版）。

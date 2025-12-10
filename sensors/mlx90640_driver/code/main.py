@@ -15,6 +15,9 @@ from mlx90640 import MLX90640, RefreshRate
 
 mlxaddr=None
 
+# Prepare temperature data buffer
+temperature_frame = [0.0] * 768
+
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
@@ -23,7 +26,6 @@ mlxaddr=None
 
 time.sleep(3)
 print("FreakStudio:Testing the MLX90640 fractional infrared temperature sensor")
-# Initialize I2C bus (adjust pins if needed)
 
 i2c = I2C(0, scl=5, sda=4, freq=100000)
 
@@ -41,7 +43,6 @@ for device in devices_list:
         print("I2c hexadecimal address:", hex(device))
         mlxaddr = device
 
-# Initialize MLX90640
 try:
     thermal_camera = MLX90640(i2c, mlxaddr)
     print("MLX90640 sensor initialized successfully")
@@ -50,6 +51,7 @@ except ValueError as init_error:
     raise SystemExit(1)
 # Show sensor info
 print(f"Device serial number: {thermal_camera.serial_number}")
+
 # Set refresh rate
 try:
     thermal_camera.refresh_rate = RefreshRate.REFRESH_2_HZ
@@ -57,10 +59,8 @@ try:
 except ValueError as rate_error:
     print(f"Failed to set refresh rate: {rate_error}")
     raise SystemExit(1)
-# 比如测人体时候发射率
+
 thermal_camera.emissivity = 0.92
-# Prepare temperature data buffer
-temperature_frame = [0.0] * 768
 
 # ========================================  主程序  ============================================
 
