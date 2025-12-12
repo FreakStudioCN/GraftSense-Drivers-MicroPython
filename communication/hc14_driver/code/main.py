@@ -25,6 +25,8 @@ from hc14_lora import HC14_Lora
 channel = const(7)
 # 设置随机发送数据长度
 data = const(80)
+# 随机生成指定长度的数据等待后续发送
+reply = bytes([urandom.getrandbits(8) for _ in range(data)])
 # 设置发射功率
 power = const(20)
 # 设置传输速率
@@ -46,11 +48,14 @@ uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 
 # 创建 HC14_Lora 实例
+# 接收端
 hc0 = HC14_Lora(uart0)
+# 发送端
 hc1 = HC14_Lora(uart1)
 
 # ======================================== 主程序 ===========================================
 
+#保持按下两个模块按钮进入AT配置模式
 # 测试 AT 通信
 ok, resp0 = hc0.test_comm()
 if ok:
@@ -99,14 +104,14 @@ if ok:
 # 等待用户松开按钮进入透传模式
 time.sleep(2)
 print("Entering transparent mode, waiting for data...")
-# 随机生成指定长度的数据
-reply = bytes([urandom.getrandbits(8) for _ in range(data)])
+
 # 发送数据
 hc1.transparent_send(reply)
 print("Sent:", reply)
 # 记录发送时间
 start_ms = time.ticks_ms()
 print(f"Start time: {start_ms} ms")
+
 while True:
     # 接收数据
     ok, resp = hc0.transparent_recv()
