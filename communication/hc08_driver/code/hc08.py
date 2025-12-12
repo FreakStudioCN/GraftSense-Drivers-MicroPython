@@ -371,7 +371,7 @@ class HC08:
         ok, err = self._send(b"AT+DEFAULT")
         if not ok:return False, err
         ok, resp = self._recv()
-        sleep(0.2)
+        time.sleep(0.2)
         return (ok, resp or "params redefault complete")
 
     def reset(self) -> (bool, str|None):

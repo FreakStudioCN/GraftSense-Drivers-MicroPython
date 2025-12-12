@@ -69,7 +69,7 @@ def play_relay_music():
 # 上电延时3s
 time.sleep(3)
 # 打印调试信息
-print("FreakStudio: Using ESP32 WiFi to control relay")
+print("FreakStudio: Using GraftPort to control relay")
 
 # 初始化继电器控制器
 if RELAY_TYPE == 'latching':
