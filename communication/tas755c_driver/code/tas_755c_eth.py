@@ -565,7 +565,6 @@ class TAS_755C_ETH:
         cmd = "AT+HTTPCFG?"
         return self._send_at(cmd)
 
-
     def set_http_header(self, length, content):
         """
         设置 HTTP Header (AT+HTTPHEAD)。  
