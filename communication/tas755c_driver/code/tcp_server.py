@@ -24,7 +24,7 @@ from tas_755c_eth import TAS_755C_ETH
 # 上电延时3s
 time.sleep(3)
 # 打印调试信息
-print("FreakStudio:tas755c test")
+print("FreakStudio:tas755c tcp_server test")
 
 # 初始化 UART 通信（按硬件实际接线调整 TX/RX）
 uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
@@ -77,6 +77,7 @@ print(tas.get_tcp_config())
 tas.enter_data_mode()
 
 # ========================================  主程序  ===========================================
+
 while True:
     if tas.has_data():
         tas.send_data("Data received!")
