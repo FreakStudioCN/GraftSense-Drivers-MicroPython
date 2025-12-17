@@ -45,7 +45,7 @@ tas.set_ip_config(
     # 子网掩码
     subnet="255.255.255.0",
     # DNS服务器地址
-    dns="192.168.2.1"
+    dns="223.5.5.5"
 )
 
 # 配置TCP/UDP参数
@@ -54,9 +54,11 @@ tas.set_tcp_config(
     local_port=8080,       
     # 远程服务端口
     remote_port=9000, 
-    # 0=TCP Client 1=TCP SERVER 2=UDP模式
+    # 0=TCP Client 1=TCP SERVER 2=UDP Client 3=UDP SERVER 8=HTTP模式
     mode=0,
-    # 远程UDP服务器IP（与通信主机IP一致，需要用户自己查看修改）
+    # 远程服务器IP（与通信主机IP一致，需要用户自己查看修改）
+    # 域名需解析请加引号'"域名"'
+    # IP地址不需加引号"IP地址"
     remote_address="192.168.2.97"
 )
 
