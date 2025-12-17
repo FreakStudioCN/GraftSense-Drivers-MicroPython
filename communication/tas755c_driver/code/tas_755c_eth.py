@@ -417,7 +417,7 @@ class TAS_755C_ETH:
         Returns:
             Tuple[bool, str]: (status, response).
         """
-        cmd = f"AT+TCPCFG={local_port},{remote_port},{mode},{remote_address}"
+        cmd = f'AT+TCPCFG={local_port},{remote_port},{mode},{remote_address}'
         return self._send_at(cmd)
 
     def get_tcp_config(self):
@@ -564,7 +564,6 @@ class TAS_755C_ETH:
         """
         cmd = "AT+HTTPCFG?"
         return self._send_at(cmd)
-
 
     def set_http_header(self, length, content):
         """
@@ -1641,6 +1640,56 @@ class TAS_755C_ETH:
         """
         cmd = "AT+CFUN=1,1"
         return self._send_at(cmd)
+
+    def has_data(self):
+        """
+        检查是否有数据可读。
+
+        Returns:
+            bool: 是否有数据。
+
+        ==========================================
+        Check if there is data available to read.
+
+        Returns:
+            bool: Whether data is available.
+        """
+        return self._uart.any()
+    def send_data(self,data:bytes):
+        """
+        发送数据。
+
+        Args:
+            data (bytes): 要发送的数据。
+
+        Returns:
+            int: 实际发送的字节数。
+
+        ==========================================
+        Send data.
+
+        Args:
+            data (bytes): Data to send.
+
+        Returns:
+            int: Actual number of bytes sent.
+        """
+        return self._uart.write(data)
+
+    def read_data(self) -> bytes:
+        """
+        读取数据。
+
+        Returns:
+            bytes: 读取到的数据。
+
+        ==========================================
+        Read data.
+
+        Returns:
+            bytes: Data read.
+        """
+        return self._uart.read()
 
 # ======================================== 初始化配置 ==========================================
 
