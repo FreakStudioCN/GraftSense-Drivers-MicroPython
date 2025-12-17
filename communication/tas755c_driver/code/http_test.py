@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/5 下午10:11
 # @Author  : ben0i0d
-# @File    : tcp_client.py
-# @Description : tas755c DNS域名解析测试文件
+# @File    : http_test.py
+# @Description : tas755c HTTP测试文件
 
 # ======================================== 导入相关模块 =========================================
 
