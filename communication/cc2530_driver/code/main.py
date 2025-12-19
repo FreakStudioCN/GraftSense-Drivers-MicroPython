@@ -39,7 +39,7 @@ env = CC253xTTL(uart1)
 
 while True:
     # 路由器发送
-    env.send_node_to_coord("Here is EndDrive")
+    env.send_transparent("Here is EndDrive")
     time.sleep(0.5)
     # 协调器接收并且输出
     print(cor._uart.read())

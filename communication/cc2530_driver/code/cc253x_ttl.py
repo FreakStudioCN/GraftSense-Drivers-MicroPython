@@ -17,6 +17,7 @@ import time
 import binascii
 from micropython import const
 
+
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
@@ -32,6 +33,7 @@ class CC253xError(Exception):
     """
     pass
 
+
 class PacketTooLargeError(CC253xError):
     """
     当发送的数据包超过 CC253x 模块支持的最大负载时抛出。  
@@ -40,6 +42,7 @@ class PacketTooLargeError(CC253xError):
     """
     pass
 
+
 class CommandFailedError(CC253xError):
     """
     当 CC253x 模块返回 ERR 或命令执行失败时抛出。  
@@ -47,6 +50,7 @@ class CommandFailedError(CC253xError):
     Raised when CC253x module returns ERR or a command execution fails.
     """
     pass
+
 
 class NotJoinedError(CC253xError):
     """
@@ -240,29 +244,24 @@ class CC253xTTL:
     """
 
     # 前导与控制码
-    PREFIX = const("02A879C3")   # 示例：也可用 bytes 表示
-
-    # 身份（ROLE）
-    ROLE_COORDINATOR = const(0x00)
-    ROLE_ROUTER      = const(0x01)
-    ROLE_ENDDEVICE   = const(0x02)
-
-    # 默认值（const）
-    DEFAULT_BAUD         = const(9600)
-    DEFAULT_CHANNEL      = const(0x0B)
-    DEFAULT_PANID        = const(0xFFFF)
-    DEFAULT_SEEK_TIME    = const(10)    # 秒
-    DEFAULT_QUERY_MS     = const(3000)  # ms (3s)
+    PREFIX = const("02A879C3")  # 示例：也可用 bytes 表示
+    # 默认值（const)
+    DEFAULT_BAUD = const(9600)
+    DEFAULT_CHANNEL = const(0x0B)
+    DEFAULT_PANID = const(0xFFFF)
+    DEFAULT_SEEK_TIME = const(10)  # 秒
+    DEFAULT_QUERY_MS = const(3000)  # ms (3s)
 
     # 限制
-    MAX_USER_PAYLOAD     = const(32)    # 驱动强制最大用户数据长度（字节）
-    TX_POST_DELAY_MS     = const(100)   # 发送后延时（ms）
+    MAX_USER_PAYLOAD = const(32)  # 驱动强制最大用户数据长度（字节）
+    TX_POST_DELAY_MS = const(100)  # 发送后延时（ms）
 
     # 特殊短地址
     SHORTADDR_COORDINATOR = const(0x0000)  # 协调器短地址始终 0x0000
-    SHORTADDR_NOT_JOINED  = const(0xFFFE)  # 表示未加入网络（驱动层约定）
+    SHORTADDR_NOT_JOINED = const(0xFFFE)  # 表示未加入网络（驱动层约定）
 
-    def __init__(self, uart, wake=None,baud=DEFAULT_BAUD,channel=DEFAULT_CHANNEL, panid=DEFAULT_PANID,seek_time=DEFAULT_SEEK_TIME, query_interval_ms=DEFAULT_QUERY_MS):
+    def __init__(self, uart, wake=None, baud=DEFAULT_BAUD, channel=DEFAULT_CHANNEL, panid=DEFAULT_PANID,
+                 seek_time=DEFAULT_SEEK_TIME, query_interval_ms=DEFAULT_QUERY_MS):
         """
         uart: 已初始化的 UART 实例（driver 只使用其 read/write）
         wake: 只有enddevice需要
@@ -320,29 +319,6 @@ class CC253xTTL:
         else:
             return False, 'No response from UART'
 
-    def _recv(self):
-        """
-        私有方法：发送 AT 命令并等待响应，直到收到 OK 或 ERROR。  
-
-        Args:
-            cmd (str): 完整的 AT 命令字符串。  
-
-        Returns:
-            Tuple[bool, str]: (状态, 响应内容)，True 表示成功，False 表示失败。  
-
-        ==========================================
-        Private method: Send an AT command and wait for response until OK or ERROR.  
-
-        Args:
-            cmd (str): Full AT command string.  
-
-        Returns:
-            Tuple[bool, str]: (status, response), True if success, False otherwise.
-        """
-        if self._uart.any():
-            resp = self._uart.read()[7:].decode('utf-8')
-            return True, resp
-
     # 公共设置与查询 API
     def read_status(self) -> str:
         """
@@ -368,8 +344,22 @@ class CC253xTTL:
         Raises:
             CommandFailedError: If response times out or returns ERR.
         """
-        return self._send('01')[1]
-    
+        status_map = {
+            '02': 'Device has not joined the network',
+            '06': 'EndDevice has joined the network',
+            '07': 'Router has joined the network',
+            '08': 'Coordinator is starting',
+            '09': 'Coordinator has started'
+        }
+        status_code = self._send('01')[1]
+        # 判断并返回状态
+        if status_code in status_map:
+            print(status_map[status_code])
+            return status_code
+        else:
+            print(f"Unknown status (Status code: {status_code})")
+            return status_code
+
     def set_query_interval(self, ms: int) -> bool:
         """
         设置查询间隔。
@@ -400,7 +390,7 @@ class CC253xTTL:
         if not (0 <= ms <= 0xFFFF):
             raise InvalidParameterError("query interval out of range 0..65535")
         return self._send('02' + f'{ms:04X}')[0]
-    
+
     def reset_factory(self) -> bool:
         """
         恢复出厂设置。
@@ -477,7 +467,7 @@ class CC253xTTL:
         # 发送读取 PANID/CHANNEL 命令，期望 payload = panid_hi panid_lo channel
         resp = self._send('05')[1]
         return resp[:4], resp[4:]
-    
+
     def set_baud(self, baud_idx: int) -> bool:
         """
         设置串口波特率索引。
@@ -565,7 +555,7 @@ class CC253xTTL:
         if not (1 <= seconds <= 65):
             raise InvalidParameterError("seek time must be 1..65 seconds")
         return self._send('08' + f'{seconds:02X}')[0]
-        
+
     def set_channel(self, channel: int) -> bool:
         """
         设置寻找网络时间。
@@ -593,7 +583,7 @@ class CC253xTTL:
             InvalidParameterError: If parameter is out of range.
             CommandFailedError: If module returns ERR or times out.
         """
-        if not channel in range(2405,2485,5):
+        if not channel in range(0x0b, 0x1a, 1):
             raise InvalidParameterError("channel must be [2405,2480,5]")
         return self._send('09' + f'{channel:02X}')[0]
 
@@ -695,7 +685,7 @@ class CC253xTTL:
             InvalidParameterError: If parameter is out of range.
             CommandFailedError: If module returns ERR or times out.
         """
-        if not (0 <= short_addr <= 0xFFFF): 
+        if not (0 <= short_addr <= 0xFFFF):
             raise InvalidParameterError("short_addr out of range 0..65535")
         return self._send('0D' + f'{short_addr:04X}')
 
@@ -720,7 +710,7 @@ class CC253xTTL:
             CommandFailedError: If response times out or returns ERR.
         """
         return self._send('0E')[1]
-    
+
     def send_node_to_node(self, source_addr: int, target_addr, data: str) -> None:
         """
         节点发送数据到节点。
@@ -754,31 +744,16 @@ class CC253xTTL:
     def send_transparent(self, data: bytes) -> None:
         """
         透明模式发送数据。
-
         Args:
-            data (bytes): 数据，长度 ≤ MAX_USER_PAYLOAD。
-
-        Raises:
-            InvalidParameterError: 数据前缀冲突。
-            PacketTooLargeError: 数据长度超限。
+            data (bytes): 数据
 
         ---
         Send transparent data.
-
         Args:
-            data (bytes): Data, length ≤ MAX_USER_PAYLOAD.
-
-        Raises:
-            InvalidParameterError: If data begins with PREFIX_BYTES.
-            PacketTooLargeError: If data exceeds maximum payload length.
+            data (bytes): Data
         """
-        self._validate_payload_length(data)
-        # 避免误触发前导码
-        if len(data) >= 4 and data[:4] == self.PREFIX_BYTES:
-            raise InvalidParameterError("transparent data begins with PREFIX_BYTES — would be treated as control frame. Escape or change payload.")
-        # 直接写入
-        self._uart_write_raw(data)
-        time.sleep_ms(self.TX_POST_DELAY_MS)
+
+        return self._uart.write(data)
 
     def send_custom_addr(self, dst_short: int, src_short: int, data: bytes) -> None:
         """
@@ -814,41 +789,67 @@ class CC253xTTL:
         self._uart_write_raw(frame)
         time.sleep_ms(self.TX_POST_DELAY_MS)
 
-    def recv_frame(self, timeout_ms: int = 0) -> dict | None:
+    def recv_frame(self):
         """
         接收并解析一帧数据。
 
-        Args:
-            timeout_ms (int, 可选): 超时时间（毫秒，0 表示非阻塞）。
-
         Returns:
-            dict | None: 解析出的帧，或 None 表示超时。
-
+            tuple: (mode, data, addr1, addr2)
+                mode (str): 'transparent', 'node_to_node', 'node_to_coord', 'coord_to_node'
+                data (bytes): 接收到的数据
+                addr1 (str|None): 目的地址（如适用）
+                addr2 (str|None): 源地址（如适用）
         ---
         Receive and parse one frame.
-
-        Args:
-            timeout_ms (int, optional): Timeout in ms (0 = non-blocking).
-
-        Returns:
-            dict | None: Parsed frame, or None if timeout.
+         Returns:
+            tuple: (mode, data, addr1, addr2)
+                mode (str): 'transparent', 'node_to_node', 'node_to_coord', 'coord_to_node'
+                data (bytes): Received data
+                addr1 (str|None): Destination address (if applicable)
+                addr2 (str|None): Source address (if applicable)
         """
-        # 尝试解析缓冲区，若无完整帧则 _uart_read_raw 并循环等待直到超时或有帧解析出
-        deadline = time.ticks_add(time.ticks_ms(), int(timeout_ms))
-        while True:
-            parsed = self._process_receive_buffer()
-            if parsed:
-                return parsed.pop(0)
-            # 如果 timeout_ms == 0 表示非阻塞，立即返回 None
-            if timeout_ms == 0:
-                return None
-            # 读一些数据并继续
-            data = self._uart_read_raw(timeout_ms=50)
-            if data:
-                self._recv_buf.extend(data)
-            if time.ticks_diff(time.ticks_ms(), deadline) >= 0:
-                return None
-            
+        # 前导码
+        header = '02a879c3'
+        # 读取数据
+        data = self._uart.read()
+        addr1 = None
+        addr2 = None
+        try:
+            if self._uart.any != 0:
+                # 检查前导，无前导则透明传输
+                if data[0:4].hex() != header:
+                    mode = 'transparent'
+                    return mode, data, addr1, addr2
+                else:
+                    # 读取控制码
+                    cmd = data[4:5].hex()
+                    # 点对点解析
+                    if cmd == '0f':
+                        mode = 'node_to_node'
+                        # 目的地址
+                        addr1 = data[5:7].hex()
+                        # 源地址
+                        addr2 = data[7:9].hex()
+                        # 数据
+                        data = data[9:len(data)]
+                        return mode, data, addr1, addr2
+                    # 节点到协调器解析
+                    if cmd == '0a':
+                        mode = 'node_to_coord'
+                        # 协调器地址
+                        addr1 = data[5:7].hex()
+                        # 数据
+                        data = data[7:len(data)]
+                        return mode, data, addr1, addr2
+                    # 协调器到节点解析
+                    if cmd == '0b':
+                        mode = 'coord_to_node'
+                        data = data[5:len(data)]
+                        return mode, data, addr1, addr2
+        except Exception as e:
+            print("Error parsing frame:", e)
+            return None, None, None, None
+
     def _ensure_recv_buffer_capacity(self) -> None:
         """
         确保接收缓冲区存在并可扩展。
@@ -913,8 +914,8 @@ class CC253xTTL:
             # 取出完整帧
             frame_bytes = bytes(buf[:expected])
             # payload 在位置 6:6+plen
-            payload = bytes(buf[6:6+plen])
-            resp = bytes(buf[6+plen:6+plen+2])
+            payload = bytes(buf[6:6 + plen])
+            resp = bytes(buf[6 + plen:6 + plen + 2])
             # 从 payload 按常见布局尝试解析源/目的短地址（如果 ctrl 是点对点类）
             src_short = None
             dst_short = None
@@ -960,7 +961,7 @@ class CC253xTTL:
                 del buf[:idx2]
             # 循环继续
         return frames
-    
+
     def _frame_expected_length(self, ctrl: int, header_bytes: bytes) -> int:
         """
         计算期望帧长度。
@@ -987,7 +988,7 @@ class CC253xTTL:
             return -1
         plen = header_bytes[1]
         return 4 + 1 + 1 + plen + 2
-    
+
     def _validate_payload_length(self, payload: bytes) -> None:
         """
         校验负载长度。
@@ -1009,8 +1010,8 @@ class CC253xTTL:
         """
         if len(payload) > self.MAX_USER_PAYLOAD:
             raise PacketTooLargeError(f"payload length {len(payload)} exceeds MAX_USER_PAYLOAD {self.MAX_USER_PAYLOAD}")
-    
 
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================
+
