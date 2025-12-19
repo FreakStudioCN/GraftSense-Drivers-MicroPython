@@ -810,45 +810,47 @@ class CC253xTTL:
         """
         # 前导码
         header = '02a879c3'
-        # 读取数据
-        data = self._uart.read()
+        mode =None
+        data = None
         addr1 = None
         addr2 = None
-        try:
-            if self._uart.any != 0:
-                # 检查前导，无前导则透明传输
-                if data[0:4].hex() != header:
-                    mode = 'transparent'
+
+        if self._uart.any() != 0:
+            # 读取数据
+            data = self._uart.read()
+            # 检查前导，无前导则透明传输
+            if data[0:4].hex() != header:
+                mode = 'transparent'
+                return mode, data, addr1, addr2
+            else:
+                # 读取控制码
+                cmd = data[4:5].hex()
+                # 点对点解析
+                if cmd == '0f':
+                    mode = 'node_to_node'
+                    # 目的地址
+                    addr1 = data[5:7].hex()
+                    # 源地址
+                    addr2 = data[7:9].hex()
+                    # 数据
+                    data = data[9:len(data)]
                     return mode, data, addr1, addr2
-                else:
-                    # 读取控制码
-                    cmd = data[4:5].hex()
-                    # 点对点解析
-                    if cmd == '0f':
-                        mode = 'node_to_node'
-                        # 目的地址
-                        addr1 = data[5:7].hex()
-                        # 源地址
-                        addr2 = data[7:9].hex()
-                        # 数据
-                        data = data[9:len(data)]
-                        return mode, data, addr1, addr2
-                    # 节点到协调器解析
-                    if cmd == '0a':
-                        mode = 'node_to_coord'
-                        # 协调器地址
-                        addr1 = data[5:7].hex()
-                        # 数据
-                        data = data[7:len(data)]
-                        return mode, data, addr1, addr2
-                    # 协调器到节点解析
-                    if cmd == '0b':
-                        mode = 'coord_to_node'
-                        data = data[5:len(data)]
-                        return mode, data, addr1, addr2
-        except Exception as e:
-            print("Error parsing frame:", e)
-            return None, None, None, None
+                # 节点到协调器解析
+                if cmd == '0a':
+                    mode = 'node_to_coord'
+                    # 协调器地址
+                    addr1 = data[5:7].hex()
+                    # 数据
+                    data = data[7:len(data)]
+                    return mode, data, addr1, addr2
+                # 协调器到节点解析
+                if cmd == '0b':
+                    mode = 'coord_to_node'
+                    data = data[5:len(data)]
+                    return mode, data, addr1, addr2
+                return mode, data, addr1, addr2
+        else:
+            return mode, data, addr1, addr2
 
     def _ensure_recv_buffer_capacity(self) -> None:
         """
@@ -1014,4 +1016,5 @@ class CC253xTTL:
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================
+
 
