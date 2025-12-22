@@ -9,7 +9,7 @@
 
 # 导入硬件相关模块
 import time
-from machine import UART,Pin
+from machine import UART, Pin
 # 导入第三方驱动模块
 from cc253x_ttl import CC253xTTL
 
@@ -34,15 +34,25 @@ uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 cor = CC253xTTL(uart0)
 # 路由器
 env = CC253xTTL(uart1)
-#将路由器与协调器设置成相同PAMID
-#获取协调器PAMID与通道
-pamid,ch=cor.read_panid_channel()
+
+# 将路由器与协调器设置成相同PAMID
+while cor.read_status() is None:
+    pass
+while env.read_status() is None:
+    pass
+
+# 获取协调器PAMID与通道
+pamid, ch = cor.read_panid_channel()
 print(f"cor:pamid:{pamid},channel:{ch}")
-env.set_panid(int(pamid,16))
-#设置相同通道
-env.set_channel(int(ch,16))
-#输出路由器PAMID与通道
-pamid,ch=cor.read_panid_channel()
+
+while env.set_panid(int(pamid,16)) is False:
+    pass
+while env.set_channel(int(ch,16)) is False:
+    pass
+
+# 输出路由器PAMID与通道
+time.sleep(0.5)
+pamid, ch = env.read_panid_channel()
 print(f"env:pamid:{pamid},channel:{ch}")
 
 # ========================================  主程序  ===========================================
