@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/5 下午10:11
 # @Author  : ben0i0d
-# @File    : main.py
+# @File    : coord_to_node.py
 # @Description : cc253x_ttl coord_to_node测试文件
 
 # ======================================== 导入相关模块 =========================================
@@ -63,7 +63,7 @@ while True:
 
     # 协调器接收并且输出
     mode, data, addr1, addr2 = env.recv_frame()
-    print(f"📥 Coordinator Received Data:")
+    print(f"   Coordinator Received Data:")
     print(f"   Mode: {mode}")
     print(f"   Data: {data}")
     # node_to_coord 返回 协调器地址addr1
