@@ -17,7 +17,6 @@ import time
 import binascii
 from micropython import const
 
-
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
@@ -33,7 +32,6 @@ class CC253xError(Exception):
     """
     pass
 
-
 class PacketTooLargeError(CC253xError):
     """
     当发送的数据包超过 CC253x 模块支持的最大负载时抛出。  
@@ -41,7 +39,6 @@ class PacketTooLargeError(CC253xError):
     Raised when the packet size exceeds the maximum supported payload of CC253x.
     """
     pass
-
 
 class CommandFailedError(CC253xError):
     """
@@ -51,7 +48,6 @@ class CommandFailedError(CC253xError):
     """
     pass
 
-
 class NotJoinedError(CC253xError):
     """
     当尝试在未入网状态下执行需要网络的操作时抛出。  
@@ -60,7 +56,6 @@ class NotJoinedError(CC253xError):
     """
     pass
 
-
 class InvalidParameterError(CC253xError):
     """
     当提供给 CC253x 模块的参数不合法或超出范围时抛出。  
@@ -68,7 +63,6 @@ class InvalidParameterError(CC253xError):
     Raised when an invalid or out-of-range parameter is provided to CC253x module.
     """
     pass
-
 
 class CC253xTTL:
     """
@@ -223,7 +217,6 @@ class CC253xTTL:
         self.seek_time = seek_time
         self.query_interval_ms = query_interval_ms
 
-
     # 私有辅助方法
     def _send(self, cmd):
         """
@@ -259,7 +252,7 @@ class CC253xTTL:
             tag = resp[4]
             resp = resp[5:]
             resp_hex = resp.hex()
-            if tag in [1, 5, 12, 11,14]:
+            if tag in [1, 5, 12, 11, 14, 15,10]:
                 return True, resp_hex
             else:
                 if resp_hex == "4f4b":
@@ -270,7 +263,6 @@ class CC253xTTL:
         else:
             return False, 'No response from UART'
 
-    # 公共设置与查询 API
     def read_status(self) -> str:
         """
         查询入网状态。
@@ -303,12 +295,15 @@ class CC253xTTL:
             '09': 'Coordinator has started'
         }
         status_code = self._send('01')[1]
-        # 判断并返回状态
-        if status_code in status_map:
-            print(status_map[status_code])
-            return status_code
-        else:
-            raise InvalidParameterError(f"Unknown status (Status code: {status_code})")
+        try:
+            # 判断并返回状态
+            if status_code in status_map:
+                print(status_map[status_code])
+                return status_code
+            else:
+                raise InvalidParameterError(f"Unknown status (Status code: {status_code})")
+        except InvalidParameterError:
+            return None
 
     def set_query_interval(self, ms: int) -> bool:
         """
@@ -407,6 +402,8 @@ class CC253xTTL:
             tuple[int, int]: (PANID, channel).
 
         """
+        # 读取前清空 UART 缓冲区
+        resp = self._uart.read()
         # 发送读取 PANID/CHANNEL 命令，期望 payload = panid_hi panid_lo channel
         resp = self._send('05')[1]
         return resp[:4], resp[4:]
@@ -656,7 +653,7 @@ class CC253xTTL:
             raise InvalidParameterError("source_addr out of range 0..65535")
         if not (0 <= target_addr <= 0xFFFF):
             raise InvalidParameterError("target_addr out of range 0..65535")
-        self._send('0F' + f'{target_addr:04X}' + f'{source_addr:04X}' + data.encode("utf-8").hex())
+        self._send('0F' + f'{source_addr:04X}' + f'{target_addr:04X}' + data.encode("utf-8").hex())
 
     # 点对点 / 透明数据发送（长度限制与延时）
     def send_transparent(self, data: bytes) -> None:
@@ -741,7 +738,6 @@ class CC253xTTL:
                 raise CommandFailedError(f'Command {cmd} not supported for parsing')
         else:
             return mode, data, addr1, addr2
-
 
 # ======================================== 初始化配置 ==========================================
 

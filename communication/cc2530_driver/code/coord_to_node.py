@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/5 下午10:11
 # @Author  : ben0i0d
-# @File    : main.py
-# @Description : cc253x_ttl测试文件
+# @File    : coord_to_node.py
+# @Description : cc253x_ttl coord_to_node测试文件
 
 # ======================================== 导入相关模块 =========================================
 
@@ -24,7 +24,7 @@ from cc253x_ttl import CC253xTTL
 # 上电延时3s
 time.sleep(3)
 # 打印调试信息
-print("FreakStudio： cc253x_ttl test")
+print("FreakStudio： cc253x_ttl coord_to_node test")
 
 # 声明串口实例
 uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
@@ -34,13 +34,40 @@ uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 cor = CC253xTTL(uart0)
 # 路由器
 env = CC253xTTL(uart1)
+# 将路由器与协调器设置成相同PAMID
+while cor.read_status() is None:
+    pass
+while env.read_status() is None:
+    pass
 
+# 获取协调器PAMID与通道
+pamid, ch = cor.read_panid_channel()
+print(f"cor:pamid:{pamid},channel:{ch}")
+while env.set_panid(int(pamid,16)) is False:
+    pass
+while env.set_channel(int(ch,16)) is False:
+    pass
+
+# 输出路由器PAMID与通道
+time.sleep(0.5)
+pamid, ch = env.read_panid_channel()
+print(f"env:pamid:{pamid},channel:{ch}")
+# 设置路由器短地址为0xffff
+env.set_custom_short_addr(0xffff)
 # ========================================  主程序  ===========================================
 
 while True:
-    # 路由器发送
-    env.send_transparent("Here is EndDrive")
+    # 协调器对路由器发送
+    cor.send_coord_to_node(0xffff,"coord_to_node")
     time.sleep(0.5)
+
     # 协调器接收并且输出
-    print(cor._uart.read())
+    mode, data, addr1, addr2 = env.recv_frame()
+    print(f"   Coordinator Received Data:")
+    print(f"   Mode: {mode}")
+    print(f"   Data: {data}")
+    # node_to_coord 返回 协调器地址addr1
+    print(f"   Address 1: {addr1}")
+    print(f"   Address 2: {addr2}")
     time.sleep(1)
+
