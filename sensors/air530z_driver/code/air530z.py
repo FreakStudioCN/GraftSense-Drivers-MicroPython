@@ -591,7 +591,6 @@ class Air530Z(NMEAParser):
                 - altitude (float): Altitude (meters)  
                 - timestamp (tuple): Timestamp (h, m, s)
         """
-
         if self._uart.any():
                 data = self._uart.read()
                 # 使用NMEAParser的feed方法批量处理数据
@@ -609,7 +608,6 @@ class Air530Z(NMEAParser):
                     "timestamp": fix.get('time', [0, 0, 0.0])
                 }
                 return result
-
 
 # ======================================== 初始化配置 ==========================================
 
