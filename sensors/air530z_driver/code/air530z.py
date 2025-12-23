@@ -13,10 +13,11 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
+# 导入常量定义
 from micropython import const
 from machine import UART
+from nemapar import NMEAParser
 import time
-from micropyGPS import MicropyGPS
 
 # ======================================== 全局变量 ============================================
 
@@ -245,7 +246,7 @@ class NMEASender:
         """
         return self._build("PCAS10,0")
 
-class Air530Z(MicropyGPS):
+class Air530Z(NMEAParser):
     """
     Air530Z GPS 模块驱动类  
     - 继承自 MicropyGPS，用于直接解析 GPS NMEA 数据  
@@ -347,7 +348,7 @@ class Air530Z(MicropyGPS):
     MSG_TIM = const(13)
 
     # ---------------- 初始化 ----------------
-    def __init__(self, uart: UART, local_offset: int = 8):
+    def __init__(self, uart: UART):
         """
         初始化 Air530Z 模块驱动。  
 
@@ -360,10 +361,10 @@ class Air530Z(MicropyGPS):
         Args:
             uart (UART): UART instance for GPS module communication.
         """
-        super().__init__(local_offset)  # MicropyGPS 初始化（可根据需求修改时区）
         self._uart = uart
         self._sender = NMEASender()
-
+        self._parser = NMEAParser()
+        self.last_known_fix = {}
     # ---------------- 内部方法 ----------------
     def _send(self, sentence: str) -> bool:
         """
@@ -590,18 +591,26 @@ class Air530Z(MicropyGPS):
                 - altitude (float): Altitude (meters)  
                 - timestamp (tuple): Timestamp (h, m, s)
         """
-        if self._uart.any():
-            data = self._uart.read()
-            for b in data:
-                self.update(chr(b))  # MicropyGPS 的 update 方法解析单个字符
+        try:
+            if self._uart.any():
+                data = self._uart.read()
+                # 使用NMEAParser的feed方法批量处理数据
+                self.feed(data)
 
-        return {
-            "latitude": self.latitude,
-            "longitude": self.longitude,
-            "satellites": self.satellites_in_use,
-            "altitude": self.altitude,
-            "timestamp": self.timestamp
-        }
+                # 从last_known_fix获取最新的有效定位数据
+                fix = self.last_known_fix
+
+                # 构建返回的数据结构，保持与原来相似的格式
+                result = {
+                    "latitude": fix.get('latitude'),
+                    "longitude": fix.get('longitude'),
+                    "satellites": fix.get('num_satellites', 0),
+                    "altitude": fix.get('altitude'),
+                    "timestamp": fix.get('time', [0, 0, 0.0])
+                }
+                return result
+        except Exception as e:
+            print("Error reading GPS data:", e)
 
 # ======================================== 初始化配置 ==========================================
 
