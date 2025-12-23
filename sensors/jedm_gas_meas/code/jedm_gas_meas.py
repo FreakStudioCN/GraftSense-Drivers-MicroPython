@@ -22,6 +22,7 @@ class JEDMGasMeas:
     """
     JEDM气体传感器操作类
     支持读取气体浓度和校零校准功能，基于SoftI2C通信
+    需要注意，该传感器模块仅适合于测试静态气体浓度，不适合于动态气体浓度测量，适合浓度分钟级～秒级变化
     """
     # 固定的命令寄存器地址（类属性）
     # 读取气体浓度的命令字
@@ -53,7 +54,7 @@ class JEDMGasMeas:
         try:
             # 第一步：发送写操作（7位地址），写入读取命令，stop=False表示不发送停止位（实现重复起始）
             # writeto返回收到的ACK数量，需等于发送的字节数（这里是1个字节：READ_CMD）
-            ack_count = self.i2c.writeto(self._addr_7bit, bytes([JEDMGasMeas.READ_CMD]), stop=False)
+            ack_count = self.i2c.writeto(self._addr_7bit, bytes([JEDMGasMeas.READ_CMD]), False)
             if ack_count != 1:
                 raise OSError("No ACK for read command")
 
@@ -75,13 +76,13 @@ class JEDMGasMeas:
         :param calib_value: 校准值（16位整数），为None时使用当前读取的浓度值作为校准值
         :return: 校准是否成功（True/False）
         """
-        # 若校准值超过0~65535，需要抛出异常
-        if calib_value > JEDMGasMeas.CALIB_MAX or calib_value < JEDMGasMeas.CALIB_MIN:
-            raise ValueError("Calibration value must be between 0 and 65535")
-
         # 若未指定校准值，先读取当前浓度作为校准值
         if calib_value is None:
             calib_value = self.read_concentration()
+
+        # 若校准值超过0~65535，需要抛出异常
+        if calib_value > JEDMGasMeas.CALIB_MAX or calib_value < JEDMGasMeas.CALIB_MIN:
+            raise ValueError("Calibration value must be between 0 and 65535")
 
         # 将16位校准值拆分为高8位和低8位（确保在0-255范围内）
         high_byte: int = (calib_value >> 8) & 0xFF
@@ -94,8 +95,8 @@ class JEDMGasMeas:
                 self._addr_7bit,
                 bytes([JEDMGasMeas.CALIBRATE_CMD, high_byte, low_byte])
             )
-            # 检查ACK数量，需等于发送的字节数（3个字节）
-            if ack_count != 3:
+            # 检查ACK数量
+            if ack_count != 1:
                 raise OSError("No ACK for calibrate command or data")
 
             # 写入后，读取一次浓度值，确认校零成功（判断读取结果是否为0）

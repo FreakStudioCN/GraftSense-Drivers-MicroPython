@@ -1,19 +1,22 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2025/9/9 上午10:20
-# @Author  : 缪贵成
-# @File    : atomization.py
-# @Description : 基于NE555芯片的超声波雾化器驱动模块
+# @Time    : 2025/12/23 上午11:20
+# @Author  : leeqingshui
+# @File    : fm8118_atomization.py
+# @Description : 基于FM8118芯片的超声波雾化器驱动模块
 # @License : CC BY-NC 4.0
 
-__version__ = "0.1.0"
-__author__ = "缪贵成"
+__version__ = "0.1.1"
+__author__ = "leeqingshui"
 __license__ = "CC BY-NC 4.0"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
+# 导入硬件相关模块
 from machine import Pin
+# 导入时间相关模块
+import time
 
 # ======================================== 全局变量 ============================================
 
@@ -21,17 +24,17 @@ from machine import Pin
 
 # ======================================== 自定义类 ============================================
 
-class Atomization:
+class FM8118_Atomization:
     """
-    该类控制基于 NE555 芯片的超声波雾化模块，通过 GPIO 引脚输出高低电平实现雾化器开关控制。
+    该类控制基于 FM8118 芯片的超声波雾化模块，通过 GPIO 引脚实现雾化器开关控制。
 
     Attributes:
         _pin (Pin): machine.Pin 实例，用于输出高低电平控制雾化器。
         _state (bool): 当前雾化模块的开关状态，True 表示开启，False 表示关闭。
 
     Methods:
-        on() -> None: 打开雾化模块（输出高电平）。
-        off() -> None: 关闭雾化模块（输出低电平）。
+        on() -> None: 打开雾化模块（输出低电平）。
+        off() -> None: 关闭雾化模块（执行拉高→拉低→再拉高电平序列）。
         toggle() -> None: 切换雾化模块状态（开->关 或 关->开）。
         is_on() -> bool: 返回当前雾化模块的状态。
 
@@ -42,16 +45,16 @@ class Atomization:
 
     ==========================================
 
-    Driver class for NE555-based ultrasonic mist module.
-    It controls the module by setting GPIO pin high or low.
+    Driver class for FM8118-based ultrasonic mist module.
+    It controls the module by setting GPIO pin high/low or level sequence.
 
     Attributes:
         _pin (Pin): machine.Pin instance used for digital output control.
         _state (bool): Current state of mist module. True = ON, False = OFF.
 
     Methods:
-        on() -> None: Turn mist module ON (set pin high).
-        off() -> None: Turn mist module OFF (set pin low).
+        on() -> None: Turn mist module ON (set pin low).
+        off() -> None: Turn mist module OFF (execute high→low→high level sequence).
         toggle() -> None: Toggle mist module state.
         is_on() -> bool: Return current ON/OFF state.
 
@@ -69,7 +72,7 @@ class Atomization:
             pin (int): 控制雾化器开关的 GPIO 引脚编号。
 
         Notes:
-            - 初始化时会自动关闭雾化器。
+            - 初始化时会将 GPIO 设置为高电平，雾化器处于关闭状态。
             - 仅支持可配置为输出模式的 GPIO。
 
         ==========================================
@@ -80,16 +83,18 @@ class Atomization:
             pin (int): GPIO pin number used to control mist module.
 
         Notes:
-            - Module is set to OFF at initialization.
+            - Module is set to HIGH level (OFF state) at initialization.
             - Pin must support output mode.
         """
         self._pin = Pin(pin, Pin.OUT)
+        # 初始状态为关闭
         self._state = False
-        self.off()
+        # 初始化时设置为高电平（关闭状态），移除原有的off()调用
+        self._pin.value(1)
 
     def on(self):
         """
-        打开雾化模块（输出高电平）。
+        打开雾化模块（输出低电平）。
 
         Notes:
             - 会更新内部状态为 True。
@@ -97,32 +102,44 @@ class Atomization:
 
         ==========================================
 
-        Turn mist module ON (set pin high).
+        Turn mist module ON (set pin low).
 
         Notes:
             - Updates internal state to True.
             - Not ISR-safe.
         """
-        self._pin.value(1)
+        # 低电平开启
+        self._pin.value(0)
         self._state = True
 
     def off(self):
         """
-        关闭雾化模块（输出低电平）。
+        关闭雾化模块（执行拉高→拉低→再拉高电平序列）。
 
         Notes:
             - 会更新内部状态为 False。
+            - 电平切换时添加短暂延时，确保芯片识别电平变化。
             - 非 ISR-safe。
 
         ==========================================
 
-        Turn mist module OFF (set pin low).
+        Turn mist module OFF (execute high→low→high level sequence).
 
         Notes:
             - Updates internal state to False.
+            - Short delays are added for level transition recognition.
             - Not ISR-safe.
         """
+        # 步骤1：拉高电平
+        self._pin.value(1)
+        # 延时100ms
+        time.sleep_ms(100)
+        # 步骤2：拉低电平
         self._pin.value(0)
+        # 延时100ms
+        time.sleep_ms(100)
+        # 步骤3：再次拉高电平（最终保持高电平）
+        self._pin.value(1)
         self._state = False
 
     def toggle(self):
