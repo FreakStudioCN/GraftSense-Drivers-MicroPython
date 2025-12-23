@@ -66,7 +66,6 @@ class HeartRateMonitor:
         - The threshold is 50% between min and max of the recent window.
         - At least two peaks are required to compute BPM.
     """
-
     def __init__(self, sample_rate=100, window_size=10, smoothing_window=5):
         """
                 初始化。
@@ -126,7 +125,7 @@ class HeartRateMonitor:
         else:
             self.filtered_samples.append(sample)
 
-        # Maintain the size of samples and timestamps
+        # 维护样本和时间戳的大小
         if len(self.samples) > self.window_size:
             self.samples.pop(0)
             self.timestamps.pop(0)
@@ -148,22 +147,24 @@ class HeartRateMonitor:
         """
         peaks = []
 
-        if len(self.filtered_samples) < 3:  # Need at least three samples to find a peak
+        # 需要至少三个样本来寻找峰值
+        if len(self.filtered_samples) < 3:
             return peaks
 
-        # Calculate dynamic threshold based on the min and max of the recent window of filtered samples
-        recent_samples = self.filtered_samples[-self.window_size :]
+        # 基于最近窗口的滤波样本的最小值和最大值计算动态阈值
+        recent_samples = self.filtered_samples[-self.window_size:]
         min_val = min(recent_samples)
         max_val = max(recent_samples)
+        # 以最小值和最大值的50%作为阈值
         threshold = (
-            min_val + (max_val - min_val) * 0.5
-        )  # 50% between min and max as a threshold
+                min_val + (max_val - min_val) * 0.5
+        )
 
         for i in range(1, len(self.filtered_samples) - 1):
             if (
-                self.filtered_samples[i] > threshold
-                and self.filtered_samples[i - 1] < self.filtered_samples[i]
-                and self.filtered_samples[i] > self.filtered_samples[i + 1]
+                    self.filtered_samples[i] > threshold
+                    and self.filtered_samples[i - 1] < self.filtered_samples[i]
+                    and self.filtered_samples[i] > self.filtered_samples[i + 1]
             ):
                 peak_time = self.timestamps[i]
                 peaks.append((peak_time, self.filtered_samples[i]))
@@ -185,10 +186,11 @@ class HeartRateMonitor:
         """
         peaks = self.find_peaks()
 
+        # 峰值不足，无法计算心率
         if len(peaks) < 2:
-            return None  # Not enough peaks to calculate heart rate
+            return None
 
-        # Calculate the average interval between peaks in milliseconds
+        # 计算峰值之间的平均间隔（毫秒）
         intervals = []
         for i in range(1, len(peaks)):
             interval = ticks_diff(peaks[i][0], peaks[i - 1][0])
@@ -196,10 +198,11 @@ class HeartRateMonitor:
 
         average_interval = sum(intervals) / len(intervals)
 
-        # Convert intervals to heart rate in beats per minute (BPM)
+        # 将间隔转换为每分钟心跳数（BPM）
+        # 60秒每分钟 * 1000毫秒每秒
         heart_rate = (
-            60000 / average_interval
-        )  # 60 seconds per minute * 1000 ms per second
+                60000 / average_interval
+        )
 
         return heart_rate
 
