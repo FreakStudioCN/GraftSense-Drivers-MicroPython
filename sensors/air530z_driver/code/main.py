@@ -32,7 +32,11 @@ gps = Air530Z(uart0)
 # ========================================  主程序  ===========================================
 
 while True:
-    gps_data = gps.read()
+    try:
+        gps_data = gps.read()
+    except Exception as e:
+        print("Error reading GPS data:", e)
+
     if gps_data:
         print("=" * 40)
         print("GPS_DATA")

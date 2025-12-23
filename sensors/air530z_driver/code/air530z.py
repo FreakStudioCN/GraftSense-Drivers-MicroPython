@@ -593,7 +593,6 @@ class Air530Z(NMEAParser):
         """
 
         if self._uart.any():
-            try:
                 data = self._uart.read()
                 # 使用NMEAParser的feed方法批量处理数据
                 self.feed(data)
@@ -610,8 +609,7 @@ class Air530Z(NMEAParser):
                     "timestamp": fix.get('time', [0, 0, 0.0])
                 }
                 return result
-            except Exception as e:
-                print("Error reading GPS data:", e)
+
 
 # ======================================== 初始化配置 ==========================================
 
