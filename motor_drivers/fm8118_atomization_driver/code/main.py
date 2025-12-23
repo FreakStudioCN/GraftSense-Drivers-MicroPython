@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from ne555_atomization import Atomization
+from fm8118_atomization import FM8118_Atomization
 
 # ======================================== 全局变量 ============================================
 
@@ -18,10 +18,13 @@ from ne555_atomization import Atomization
 
 # ======================================== 初始化配置 ===========================================
 
+# 上电延时3s
 time.sleep(3)
+# 打印调试信息
 print("FreakStudio:Testing the NE555-based atomization module")
-# 假设 GPIO2 控制雾化模块
-atomizer = Atomization(pin=2)
+
+# 使用 GPIO6 控制雾化模块
+atomizer = FM8118_Atomization(pin=6)
 
 # ========================================  主程序  ============================================
 
@@ -30,17 +33,17 @@ try:
         print("turn on")
         atomizer.on()
         print("status:", atomizer.is_on())
-        time.sleep(3)
+        time.sleep(10)
 
         print("turn off...")
         atomizer.off()
         print("status:", atomizer.is_on())
-        time.sleep(3)
+        time.sleep(10)
 
         print("toggle...")
         atomizer.toggle()
         print("status:", atomizer.is_on())
-        time.sleep(3)
+        time.sleep(10)
 
 except KeyboardInterrupt:
     print("test stop")
