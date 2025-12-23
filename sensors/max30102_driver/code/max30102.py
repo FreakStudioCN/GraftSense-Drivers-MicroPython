@@ -20,46 +20,39 @@ from utime import sleep_ms, ticks_diff, ticks_ms
 from circular_buffer import CircularBuffer
 
 # ======================================== 全局变量 ============================================
-# I2C address (7-bit address)
-MAX3010X_I2C_ADDRESS = 0x57  # Right-shift of 0xAE, 0xAF
 
-# Status Registers
+MAX3010X_I2C_ADDRESS = 0x57  
+
 MAX30105_INT_STAT_1 = 0x00
 MAX30105_INT_STAT_2 = 0x01
 MAX30105_INT_ENABLE_1 = 0x02
 MAX30105_INT_ENABLE_2 = 0x03
 
-# FIFO Registers
+
 MAX30105_FIFO_WRITE_PTR = 0x04
 MAX30105_FIFO_OVERFLOW = 0x05
 MAX30105_FIFO_READ_PTR = 0x06
 MAX30105_FIFO_DATA = 0x07
 
-# Configuration Registers
 MAX30105_FIFO_CONFIG = 0x08
 MAX30105_MODE_CONFIG = 0x09
-MAX30105_PARTICLE_CONFIG = 0x0A  # Sometimes listed as 'SPO2' in datasheet (pag.11)
-MAX30105_LED1_PULSE_AMP = 0x0C  # IR
-MAX30105_LED2_PULSE_AMP = 0x0D  # RED
-MAX30105_LED3_PULSE_AMP = 0x0E  # GREEN (when available)
+MAX30105_PARTICLE_CONFIG = 0x0A  
+MAX30105_LED1_PULSE_AMP = 0x0C  
+MAX30105_LED2_PULSE_AMP = 0x0D  
+MAX30105_LED3_PULSE_AMP = 0x0E  
 MAX30105_LED_PROX_AMP = 0x10
 MAX30105_MULTI_LED_CONFIG_1 = 0x11
 MAX30105_MULTI_LED_CONFIG_2 = 0x12
 
-# Die Temperature Registers
 MAX30105_DIE_TEMP_INT = 0x1F
 MAX30105_DIE_TEMP_FRAC = 0x20
 MAX30105_DIE_TEMP_CONFIG = 0x21
 
-# Proximity Function Registers
 MAX30105_PROX_INT_THRESH = 0x30
 
-# Part ID Registers
 MAX30105_REVISION_ID = 0xFE
-MAX30105_PART_ID = 0xFF  # Should always be 0x15. Identical for MAX30102.
+MAX30105_PART_ID = 0xFF  
 
-# MAX30105 Commands
-# Interrupt configuration (datasheet pag 13, 14)
 MAX30105_INT_A_FULL_MASK = ~0b10000000
 MAX30105_INT_A_FULL_ENABLE = 0x80
 MAX30105_INT_A_FULL_DISABLE = 0x00
@@ -80,7 +73,7 @@ MAX30105_INT_DIE_TEMP_RDY_MASK = ~0b00000010
 MAX30105_INT_DIE_TEMP_RDY_ENABLE = 0x02
 MAX30105_INT_DIE_TEMP_RDY_DISABLE = 0x00
 
-# FIFO data queue configuration
+
 MAX30105_SAMPLE_AVG_MASK = ~0b11100000
 MAX30105_SAMPLE_AVG_1 = 0x00
 MAX30105_SAMPLE_AVG_2 = 0x20
@@ -92,10 +85,10 @@ MAX30105_SAMPLE_AVG_32 = 0xA0
 MAX30105_ROLLOVER_MASK = 0xEF
 MAX30105_ROLLOVER_ENABLE = 0x10
 MAX30105_ROLLOVER_DISABLE = 0x00
-# Mask for 'almost full' interrupt (defaults to 32 samples)
+
 MAX30105_A_FULL_MASK = 0xF0
 
-# Mode configuration commands (page 19)
+
 MAX30105_SHUTDOWN_MASK = 0x7F
 MAX30105_SHUTDOWN = 0x80
 MAX30105_WAKEUP = 0x00
@@ -107,7 +100,6 @@ MAX30105_MODE_RED_ONLY = 0x02
 MAX30105_MODE_RED_IR_ONLY = 0x03
 MAX30105_MODE_MULTI_LED = 0x07
 
-# Particle sensing configuration commands (pgs 19-20)
 MAX30105_ADC_RANGE_MASK = 0x9F
 MAX30105_ADC_RANGE_2048 = 0x00
 MAX30105_ADC_RANGE_4096 = 0x20
@@ -130,13 +122,11 @@ MAX30105_PULSE_WIDTH_118 = 0x01
 MAX30105_PULSE_WIDTH_215 = 0x02
 MAX30105_PULSE_WIDTH_411 = 0x03
 
-# LED brightness level. It affects the distance of detection.
-MAX30105_PULSE_AMP_LOWEST = 0x02  # 0.4mA  - Presence detection of ~4 inch
-MAX30105_PULSE_AMP_LOW = 0x1F  # 6.4mA  - Presence detection of ~8 inch
-MAX30105_PULSE_AMP_MEDIUM = 0x7F  # 25.4mA - Presence detection of ~8 inch
-MAX30105_PULSE_AMP_HIGH = 0xFF  # 50.0mA - Presence detection of ~12 inch
+MAX30105_PULSE_AMP_LOWEST = 0x02  
+MAX30105_PULSE_AMP_LOW = 0x1F  
+MAX30105_PULSE_AMP_MEDIUM = 0x7F  
+MAX30105_PULSE_AMP_HIGH = 0xFF  
 
-# Multi-LED Mode configuration (datasheet pag 22)
 MAX30105_SLOT1_MASK = 0xF8
 MAX30105_SLOT2_MASK = 0x8F
 MAX30105_SLOT3_MASK = 0xF8
@@ -152,7 +142,7 @@ SLOT_GREEN_PILOT = 0x07
 
 MAX_30105_EXPECTED_PART_ID = 0x15
 
-# Size of the queued readings
+
 STORAGE_QUEUE_SIZE = 4
 
 # ======================================== 功能函数 ============================================
@@ -189,7 +179,7 @@ class SensorData:
         self.green = CircularBuffer(STORAGE_QUEUE_SIZE)
 
 
-# Sensor class
+
 class MAX30102(object):
     """
         MAX30102/MAX30105 传感器 I2C 驱动（寄存器配置、FIFO 读取、温度读取等）。
@@ -283,15 +273,15 @@ class MAX30102(object):
         self._active_leds = None
         self._pulse_width = None
         self._multi_led_read_mode = None
-        # Store current config values to compute acquisition frequency
+        
         self._sample_rate = None
         self._sample_avg = None
         self._acq_frequency = None
         self._acq_frequency_inv = None
-        # Circular buffer of readings from the sensor
+        
         self.sense = SensorData()
 
-    # Sensor setup method
+    
     def setup_sensor(self, led_mode=2, adc_range=16384, sample_rate=400,
                      led_power=MAX30105_PULSE_AMP_MEDIUM, sample_avg=8,
                      pulse_width=411):
@@ -325,35 +315,35 @@ class MAX30102(object):
                TypeError: If any argument is not int.
                ValueError: If any argument is out of allowed range.
         """
-        # Reset the sensor's registers from previous configurations
+        
         self.soft_reset()
 
-        # Set the number of samples to be averaged by the chip to 8
+        
         self.set_fifo_average(sample_avg)
 
-        # Allow FIFO queues to wrap/roll over
+        
         self.enable_fifo_rollover()
 
-        # Set the LED mode to the default value of 2 (RED + IR)
-        # Note: the 3rd mode is available only with MAX30105
+        
+        
         self.set_led_mode(led_mode)
 
-        # Set the ADC range to default value of 16384
+        
         self.set_adc_range(adc_range)
 
-        # Set the sample rate to the default value of 400
+        
         self.set_sample_rate(sample_rate)
 
-        # Set the Pulse Width to the default value of 411
+        
         self.set_pulse_width(pulse_width)
 
-        # Set the LED brightness to the default value of 'low'
+        
         self.set_pulse_amplitude_red(led_power)
         self.set_pulse_amplitude_it(led_power)
         self.set_pulse_amplitude_green(led_power)
         self.set_pulse_amplitude_proximity(led_power)
 
-        # Clears the FIFO
+        
         self.clear_fifo()
 
     def __del__(self):
@@ -365,7 +355,7 @@ class MAX30102(object):
         """
         self.shutdown()
 
-    # Methods to read the two interrupt flags
+    
     def get_int_1(self):
         """
             读取中断状态寄存器 1。
@@ -398,7 +388,7 @@ class MAX30102(object):
         rev_id = self.i2c_read_register(MAX30105_INT_STAT_2)
         return rev_id
 
-    # Methods to set up the interrupt flags
+    
     def enable_a_full(self):
         """
         使能 FIFO 接近满中断。
@@ -489,7 +479,7 @@ class MAX30102(object):
         """
         self.bitmask(MAX30105_INT_ENABLE_2, MAX30105_INT_DIE_TEMP_RDY_MASK, MAX30105_INT_DIE_TEMP_RDY_DISABLE)
 
-        # Configuration reset
+        
 
     def soft_reset(self):
         """
@@ -522,7 +512,7 @@ class MAX30102(object):
         """
         self.set_bitmask(MAX30105_MODE_CONFIG, MAX30105_SHUTDOWN_MASK, MAX30105_WAKEUP)
 
-        # LED Configuration
+        
 
     def set_led_mode(self, LED_mode):
         """
@@ -552,20 +542,20 @@ class MAX30102(object):
         else:
             raise ValueError('Wrong LED mode:{0}!'.format(LED_mode))
 
-        # Multi-LED Mode Configuration: enable the reading of the LEDs
-        # depending on the chosen mode
+        
+        
         self.enable_slot(1, SLOT_RED_LED)
         if LED_mode > 1:
             self.enable_slot(2, SLOT_IR_LED)
         if LED_mode > 2:
             self.enable_slot(3, SLOT_GREEN_LED)
 
-        # Store the LED mode used to control how many bytes to read from
-        # FIFO buffer in multiLED mode: a sample is made of 3 bytes
+        
+        
         self._active_leds = LED_mode
         self._multi_led_read_mode = LED_mode * 3
 
-    # ADC Configuration
+    
     def set_adc_range(self, ADC_range):
         """
         设置 ADC 量程。
@@ -598,7 +588,7 @@ class MAX30102(object):
 
         self.set_bitmask(MAX30105_PARTICLE_CONFIG, MAX30105_ADC_RANGE_MASK, r)
 
-    # Sample Rate Configuration
+    
     def set_sample_rate(self, sample_rate):
         """
         设置采样率（SPS）。
@@ -639,11 +629,11 @@ class MAX30102(object):
 
         self.set_bitmask(MAX30105_PARTICLE_CONFIG, MAX30105_SAMPLERATE_MASK, sr)
 
-        # Store the sample rate and recompute the acq. freq.
+        
         self._sample_rate = sample_rate
         self.update_acquisition_frequency()
 
-    # Pulse width Configuration
+    
     def set_pulse_width(self, pulse_width):
         """
         设置 LED 脉冲宽度（影响探测距离）。
@@ -675,10 +665,10 @@ class MAX30102(object):
             raise ValueError('Wrong pulse width:{0}!'.format(pulse_width))
         self.set_bitmask(MAX30105_PARTICLE_CONFIG, MAX30105_PULSE_WIDTH_MASK, pw)
 
-        # Store the pulse width
+        
         self._pulse_width = pw
 
-    # LED Pulse Amplitude Configuration methods
+    
     def set_active_leds_amplitude(self, amplitude):
         """
             按当前启用的 LED 数量批量设置电流。
@@ -783,7 +773,7 @@ class MAX30102(object):
         """
         self.i2c_set_register(MAX30105_PROX_INT_THRESH, thresh_msb)
 
-    # FIFO averaged samples number Configuration
+    
     def set_fifo_average(self, number_of_samples):
         """
            设置 FIFO 内部平均样本数。
@@ -803,8 +793,8 @@ class MAX30102(object):
            Raises:
                ValueError: If not supported.
        """
-        # FIFO sample avg: set the number of samples to be averaged by the chip.
-        # Options: MAX30105_SAMPLE_AVG_1, 2, 4, 8, 16, 32
+        
+        
         if number_of_samples == 1:
             ns = MAX30105_SAMPLE_AVG_1
         elif number_of_samples == 2:
@@ -822,7 +812,7 @@ class MAX30102(object):
                 'Wrong number of samples:{0}!'.format(number_of_samples))
         self.set_bitmask(MAX30105_FIFO_CONFIG, MAX30105_SAMPLE_AVG_MASK, ns)
 
-        # Store the number of averaged samples and recompute the acq. freq.
+        
         self._sample_avg = number_of_samples
         self.update_acquisition_frequency()
 
@@ -839,8 +829,8 @@ class MAX30102(object):
             self._acq_frequency = self._sample_rate / self._sample_avg
             from math import ceil
 
-            # Compute the time interval to wait before taking a good measure
-            # (see note in setSampleRate() method)
+            
+            
             self._acq_frequency_inv = int(ceil(1000 / self._acq_frequency))
 
     def get_acquisition_frequency(self):
@@ -931,11 +921,11 @@ class MAX30102(object):
         Returns:
             bytes: Register value (1 byte).
         """
-        # Read the FIFO Read Pointer from the register
+        
         wp = self.i2c_read_register(MAX30105_FIFO_READ_PTR)
         return wp
 
-    # Die Temperature method: returns the temperature in C
+    
     def read_temperature(self):
         """
             读取芯片内部温度（℃）。
@@ -949,23 +939,23 @@ class MAX30102(object):
             Returns:
                 float: Temperature in °C.
         """
-        # DIE_TEMP_RDY interrupt must be enabled
-        # Config die temperature register to take 1 temperature sample
+        
+        
         self.i2c_set_register(MAX30105_DIE_TEMP_CONFIG, 0x01)
 
-        # Poll for bit to clear, reading is then complete
+        
         reading = ord(self.i2c_read_register(MAX30105_INT_STAT_2))
         sleep_ms(100)
         while (reading & MAX30105_INT_DIE_TEMP_RDY_ENABLE) > 0:
             reading = ord(self.i2c_read_register(MAX30105_INT_STAT_2))
             sleep_ms(1)
 
-        # Read die temperature register (integer)
+        
         tempInt = ord(self.i2c_read_register(MAX30105_DIE_TEMP_INT))
-        # Causes the clearing of the DIE_TEMP_RDY interrupt
+        
         tempFrac = ord(self.i2c_read_register(MAX30105_DIE_TEMP_FRAC))
 
-        # Calculate temperature (datasheet pg. 23)
+        
         return float(tempInt) + (float(tempFrac) * 0.0625)
 
     def set_prox_int_tresh(self, val):
@@ -984,7 +974,7 @@ class MAX30102(object):
         """
         self.i2c_set_register(MAX30105_PROX_INT_THRESH, val)
 
-    # DeviceID and Revision methods
+    
     def read_part_id(self):
         """
             读取器件 ID。
@@ -1033,7 +1023,7 @@ class MAX30102(object):
         rev_id = self.i2c_read_register(MAX30105_REVISION_ID)
         return ord(rev_id)
 
-    # Time slots management for multi-LED operation mode
+    
     def enable_slot(self, slot_number, device):
         """
         在多路 LED 模式下配置时间槽。
@@ -1078,7 +1068,7 @@ class MAX30102(object):
         self.i2c_set_register(MAX30105_MULTI_LED_CONFIG_1, 0)
         self.i2c_set_register(MAX30105_MULTI_LED_CONFIG_2, 0)
 
-    # Low-level I2C Communication
+    
     def i2c_read_register(self, REGISTER, n_bytes=1):
         """
         读寄存器。
@@ -1124,7 +1114,7 @@ class MAX30102(object):
         self._i2c.writeto(self.i2c_address, bytearray([REGISTER, VALUE]))
         return
 
-    # Given a register, read it, mask it, and then set the thing
+    
     def set_bitmask(self, REGISTER, MASK, NEW_VALUES):
         """
         读取-掩码-合并-写回（便捷改位）。
@@ -1146,7 +1136,7 @@ class MAX30102(object):
         self.i2c_set_register(REGISTER, newCONTENTS)
         return
 
-    # Given a register, read it and mask it
+    
     def bitmask(self, reg, slotMask, thing):
         """
         读取寄存器、按掩码保留位后与新值合并写回。
@@ -1191,7 +1181,7 @@ class MAX30102(object):
         value = unpack(">i", b'\x00' + fifo_bytes)
         return (value[0] & 0x3FFFF) >> self._pulse_width
 
-    # Returns how many samples are available
+    
     def available(self):
         """
         返回红光通道可用样本数量。
@@ -1208,7 +1198,7 @@ class MAX30102(object):
         number_of_samples = len(self.sense.red)
         return number_of_samples
 
-    # Get a new red value
+    
     def get_red(self):
         """
         读取一个新的红光值（带超时轮询）。
@@ -1222,14 +1212,14 @@ class MAX30102(object):
         Returns:
             int: Sample value or 0 if timeout.
         """
-        # Check the sensor for new data for 250ms
+        
         if self.safe_check(250):
             return self.sense.red.pop_head()
         else:
-            # Sensor failed to find new data
+            
             return 0
 
-    # Get a new IR value
+    
     def get_ir(self):
         """
         读取一个新的 IR 值（带超时轮询）。
@@ -1243,14 +1233,14 @@ class MAX30102(object):
         Returns:
             int: Sample value or 0 if timeout.
         """
-        # Check the sensor for new data for 250ms
+        
         if self.safe_check(250):
             return self.sense.IR.pop_head()
         else:
-            # Sensor failed to find new data
+            
             return 0
 
-    # Get a new green value
+    
     def get_green(self):
         """
         读取一个新的绿光值（带超时轮询）。
@@ -1264,16 +1254,16 @@ class MAX30102(object):
         Returns:
             int: Sample value or 0 if timeout.
         """
-        # Check the sensor for new data for 250ms
+        
         if self.safe_check(250):
             return self.sense.green.pop_head()
         else:
-            # Sensor failed to find new data
+            
             return 0
 
-    # Note: the following 3 functions are the equivalent of using 'getFIFO'
-    # methods of the SparkFun library
-    # Pops the next red value in storage (if available)
+    
+    
+    
     def pop_red_from_storage(self):
         """
         从缓存弹出一个红光样本（若为空返回 0）。
@@ -1292,7 +1282,7 @@ class MAX30102(object):
         else:
             return self.sense.red.pop()
 
-    # Pops the next IR value in storage (if available)
+    
     def pop_ir_from_storage(self):
         """
         从缓存弹出一个 IR 样本（若为空返回 0）。
@@ -1311,7 +1301,7 @@ class MAX30102(object):
         else:
             return self.sense.IR.pop()
 
-    # Pops the next green value in storage (if available)
+    
     def pop_green_from_storage(self):
         """
         从缓存弹出一个绿光样本（若为空返回 0）。
@@ -1330,7 +1320,7 @@ class MAX30102(object):
         else:
             return self.sense.green.pop()
 
-    # (useless - for comparison purposes only)
+    
     def next_sample(self):
         """
         与 SparkFun 库行为对齐的占位函数：仅检查是否存在可用数据。
@@ -1345,11 +1335,11 @@ class MAX30102(object):
             bool|None: True if data available; otherwise None.
         """
         if self.available():
-            # With respect to the SparkFun library, using a deque object
-            # allows us to avoid manually advancing of the tail
+            
+            
             return True
 
-    # Polls the sensor for new data
+    
     def check(self):
         """
         轮询读取 FIFO 新数据并写入环形缓冲。
@@ -1363,26 +1353,26 @@ class MAX30102(object):
         Returns:
             bool: True if new data found, else False.
         """
-        # Call continuously to poll the sensor for new data.
+        
         read_pointer = ord(self.get_read_pointer())
         write_pointer = ord(self.get_write_pointer())
 
-        # Do we have new data?
+        
         if read_pointer != write_pointer:
-            # Calculate the number of readings we need to get from sensor
+            
             number_of_samples = write_pointer - read_pointer
 
-            # Wrap condition (return to the beginning of 32 samples)
+            
             if number_of_samples < 0:
                 number_of_samples += 32
 
             for i in range(number_of_samples):
-                # Read a number of bytes equal to activeLEDs*3 (= 1 sample)
+                
                 fifo_bytes = self.i2c_read_register(MAX30105_FIFO_DATA,
                                                     self._multi_led_read_mode)
 
-                # Convert the readings from bytes to integers, depending
-                # on the number of active LEDs
+                
+                
                 if self._active_leds > 0:
                     self.sense.red.append(
                         self.fifo_bytes_to_int(fifo_bytes[0:3])
@@ -1403,7 +1393,7 @@ class MAX30102(object):
         else:
             return False
 
-    # Check for new data but give up after a certain amount of time
+    
     def safe_check(self, max_time_to_check):
         """
         在给定超时时间（ms）内循环调用 check() 直到有新数据或超时。
@@ -1426,10 +1416,10 @@ class MAX30102(object):
         mark_time = ticks_ms()
         while True:
             if ticks_diff(ticks_ms(), mark_time) > max_time_to_check:
-                # Timeout reached
+                
                 return False
             if self.check():
-                # new data found
+                
                 return True
             sleep_ms(1)
 
