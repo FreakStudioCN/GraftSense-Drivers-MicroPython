@@ -34,32 +34,31 @@ gps = Air530Z(uart0)
 while True:
     try:
         gps_data = gps.read()
+
+        if gps_data:
+            print("=" * 40)
+            print("GPS_DATA")
+            print("=" * 40)
+
+            # 坐标
+            # 经度
+            print(f"longitude: {gps_data['longitude']}°")
+            # 纬度
+            print(f"latitude: {gps_data['latitude']}°")
+
+            # 海拔
+            print(f"altitude: {gps_data['altitude']}")
+            # 时间
+            if gps_data['timestamp'] is None:
+                print("time:None")
+            else:
+                ts = gps_data['timestamp']
+                print(f"time: {ts['hour']:02d}:{ts['minute']:02d}:{ts['second']:02d}")
+
+            # 卫星
+            print(f"satellites: {gps_data['satellites']}")
+            print("=" * 40)
     except Exception as e:
         print("Error reading GPS data:", e)
 
-    if gps_data:
-        print("=" * 40)
-        print("GPS_DATA")
-        print("=" * 40)
-
-        # 坐标
-        # 经度
-        print(f"longitude: {gps_data['longitude']}°")
-        # 纬度
-        print(f"latitude: {gps_data['latitude']}°")
-
-        # 海拔
-        print(f"altitude: {gps_data['altitude']}")
-        # 时间
-        if gps_data['timestamp'] is None:
-            print("time:None")
-        else:
-            ts = gps_data['timestamp']
-            print(f"time: {ts['hour']:02d}:{ts['minute']:02d}:{ts['second']:02d}")
-
-        # 卫星
-        print(f"satellites: {gps_data['satellites']}")
-        print("=" * 40)
     time.sleep(1)
-
-
