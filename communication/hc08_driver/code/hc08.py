@@ -58,7 +58,7 @@ class HC08:
             恢复出厂设置。
         reset():
             模块重启。
-        version():
+        get_version():
             查询固件版本。
         set_role(role) / get_role():
             设置/查询模块角色。
@@ -124,7 +124,7 @@ class HC08:
             Restore factory settings.
         reset():
             Reset the module.
-        version():
+        get_version():
             Query firmware version.
         set_role(role) / get_role():
             Set/get module role.
@@ -194,11 +194,9 @@ class HC08:
     }
 
     # 校验位映射
-    Parity = {
-        'PARITY_NONE': "N",
-        'PARITY_EVEN': "E",
-        'PARITY_ODD': "O"
-    }
+    PARITY_NONE = "N",
+    PARITY_EVEN = "E",
+    PARITY_ODD  = "O"
 
     def __init__(self, uart, rx_timeout_ms=600):
         """
@@ -401,7 +399,7 @@ class HC08:
         ok, resp = self._recv()
         return True, resp or "reset complete"
 
-    def version(self) -> (bool, str|None):
+    def get_version(self) -> (bool, str|None):
         """
         发送 AT+VERSION 查询固件版本。
 
@@ -410,7 +408,7 @@ class HC08:
                               (False, 错误信息) 表示失败。
 
         Notes:
-            成功时会更新实例属性 version。
+            成功时会更新实例属性 version。 
 
         ---
         Send AT+VERSION to query firmware version.
@@ -660,9 +658,17 @@ class HC08:
         Notes:
             Updates instance attribute rfpm upon success.
         """
+        # AT指令对应的参数映射
+        rfpm_param = {
+            4: 0,
+            0: 1,
+            -6: 2,
+            -23: 3
+        }
         if not rfpm in (4, 0, -6, -23):
             return False, "invalid rfpm"
-        cmd = f"AT+RFPM={rfpm}".encode()
+
+        cmd = f"AT+RFPM={rfpm_param[rfpm]}".encode()
         ok, err = self._send(cmd)
         if not ok:
             return False, err
@@ -697,15 +703,10 @@ class HC08:
         ok, err = self._send(b"AT+RFPM=?")
         if not ok:return False, err
         ok, resp = self._recv()
-        if not ok:
-            return False, "no response"
-        try:
-            self.rfpm = int(resp)
-            return True, resp
-        except:
-            return False, "parse error"
+        self.rfpm = resp
+        return True, resp
 
-    def set_baud(self, baud_rate:int, parity:int = Parity["PARITY_NONE"]) -> (bool, str|None):
+    def set_baud(self, baud_rate:int, parity:str) -> (bool, str|None):
         """
         设置串口波特率与校验位。
 
@@ -737,7 +738,7 @@ class HC08:
 
         if not baud_rate in (1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200):
             return False, "invalid baud"
-        if not parity in (self.Parity.PARITY_NONE, self.Parity.PARITY_EVEN, self.Parity.PARITY_ODD):
+        if not parity in (self.PARITY_NONE, self.PARITY_EVEN, self.PARITY_ODD):
             return False, "invalid parity"
         cmd = f"AT+BAUD={baud_rate},{parity}".encode()
         ok, err = self._send(cmd)
@@ -941,7 +942,7 @@ class HC08:
             return False, f"uart error: {e}"
     
     # 辅助函数
-    def _valid_name(name) -> (bool, str|None):
+    def _valid_name(self,name) -> (bool, str|None):
         """
         检查蓝牙名称是否合法。
 
@@ -969,7 +970,7 @@ class HC08:
             return False, "invalid name: must be 1~12 chars"
         return True, None
 
-    def _valid_addr(addr12) -> (bool, str|None):
+    def _valid_addr(self, addr12) -> (bool, str|None):
         """
         检查蓝牙地址是否合法。
 
