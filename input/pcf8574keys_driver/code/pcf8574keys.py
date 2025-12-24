@@ -130,15 +130,27 @@ class PCF8574Keys:
         self._state = {k: False for k in keys.keys()}
         self._last_state = self._state.copy()
         self._last_time = {k: 0 for k in keys.keys()}
-
+        self._pcf.port =0b01000000
         # create timer for periodic scanning
         self._timer = Timer(-1)
         self._timer.init(period=10, mode=Timer.PERIODIC, callback=self._scan_keys)
 
     def led_on(self):
+        """
+        打开按键模块LED
+        ==========================================
+        Turn on the button module LED.
+
+        """
         self._pcf.port =0b00000000
 
     def led_off(self):
+        """
+        关闭按键模块LED
+        ==========================================
+        Turn off the button module LED.
+
+        """
         self._pcf.port =0b01000000
 
     def _scan_keys(self, t):
@@ -164,8 +176,8 @@ class PCF8574Keys:
         now = time.ticks_ms()
         for key_name, pin in self._keys.items():
             try:
-                # low level means pressed
-                raw = not bool(self._pcf.pin(pin))
+                # HIGH level means pressed
+                raw = bool(self._pcf.pin(pin))
             except Exception:
                 # ignore I2C errors
                 continue
@@ -266,3 +278,4 @@ class PCF8574Keys:
 # ======================================== 初始化配置 ===========================================
 
 # ========================================  主程序  ============================================
+
