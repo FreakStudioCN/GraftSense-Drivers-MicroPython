@@ -34,6 +34,8 @@ print("FreakStudio:Using JED MEMS Digital Sensor to measure gas Concentration")
 # 创建软件I2C的实例，使用I2C0外设，时钟频率为100KHz，SDA引脚为4，SCL引脚为5
 # 对于该模块来说，I2C最大允许通信速率（100KHz）
 i2c = SoftI2C(sda=Pin(4), scl=Pin(5), freq=100000)
+# 如果传感器模块没有上拉电阻，需要内部上拉
+# i2c = SoftI2C(sda=Pin(4, pull=Pin.PULL_UP), scl=Pin(5, pull=Pin.PULL_UP), freq=100000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
@@ -80,5 +82,5 @@ while True:
         print(f"Measure Gas Concentration: {gas_concentration}")
     except Exception as e:
         print(f"Error reading concentration: {e}")
-    # 每隔10s测试一次
-    time.sleep(10)
+    # 每隔1s测试一次
+    time.sleep(1)
