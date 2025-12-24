@@ -22,7 +22,6 @@ time.sleep(3)
 print("Freak_studio:UV matrix test")
 # 初始化 UVMatrix，假设控制引脚为 26，PWM 频率 1000Hz
 uv = UVMatrix(pin=26, pwm_freq=1000)
-
 print("status:", uv.get_state())
 
 # ========================================  主程序  ===========================================
