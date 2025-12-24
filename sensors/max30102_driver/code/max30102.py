@@ -16,7 +16,7 @@ __platform__ = "MicroPython v1.23.0"
 
 from machine import SoftI2C
 from ustruct import unpack
-from utime import sleep_ms, ticks_diff, ticks_ms
+from time import sleep_ms, ticks_diff, ticks_ms
 from circular_buffer import CircularBuffer
 
 # ======================================== 全局变量 ============================================

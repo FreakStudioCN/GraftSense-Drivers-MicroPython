@@ -11,7 +11,7 @@
 from machine import SoftI2C, Pin
 # 导入时间模块
 import time
-from utime import ticks_diff, ticks_us, ticks_ms
+from time import ticks_diff, ticks_us, ticks_ms
 #导入MAX30102驱动模块
 from max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
 # 导入心率监测器
@@ -22,14 +22,13 @@ from circular_buffer import CircularBuffer
 # ======================================== 全局变量 ============================================
 
 # 设置每2秒计算一次心率
-hr_compute_interval = 2  # 秒
+hr_compute_interval = 2
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
-
 # 上电延时3s
 time.sleep(3)
 # 打印调试消息
