@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 # 导入所需模块
-from machine import I2C, Pin
+from machine import SoftI2C, Pin
 # 导入时间模块
 import time
 from utime import ticks_diff, ticks_us, ticks_ms
@@ -29,15 +29,30 @@ hr_compute_interval = 2  # 秒
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
+
 # 上电延时3s
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Use MAX30102 to read heart rate and temperature.")
-# I2C0：SDA=GP4，SCL=GP5，400kHz
-i2c = I2C(0, sda=Pin(4), scl=Pin(5), freq=400000)
+# I2C：SDA=GP4，SCL=GP5，400kHz
+i2c = SoftI2C(
+    sda=Pin(4),
+    scl=Pin(5),
+    freq=400000,
+)
 
 # 初始化传感器实例
-sensor = MAX30102(i2c=i2c)  # 需要传入I2C实例
+sensor = MAX30102(i2c=i2c)
+
+if sensor.i2c_address not in i2c.scan():
+    print("Sensor not found.")
+
+elif not (sensor.check_part_id()):
+    # Check that the targeted sensor is compatible
+    print("I2C device ID not corresponding to MAX30102 or MAX30105.")
+
+else:
+    print("Sensor connected and recognized.")
 
 # 加载默认配置
 print("Setting up sensor with default configuration.", "\n")
@@ -65,7 +80,8 @@ hr_monitor = HeartRateMonitor(
     window_size=int(actual_acquisition_rate * 3),
 )
 
-ref_time = ticks_ms()  # 参考时间
+# 参考时间
+ref_time = ticks_ms()
 
 # ========================================  主程序  ===========================================
 
@@ -90,8 +106,8 @@ while True:
             # 计算心率
             heart_rate = hr_monitor.calculate_heart_rate()
             if heart_rate is not None:
-                print("心率: {:.0f} BPM".format(heart_rate))
+                print("Heart Rate: {:.0f} BPM".format(heart_rate))
             else:
-                print("数据不足，无法计算心率")
+                print("Not enough data to calculate heart rate")
             # 重置参考时间
             ref_time = ticks_ms()

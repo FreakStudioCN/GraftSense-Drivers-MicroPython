@@ -28,7 +28,6 @@ MAX30105_INT_STAT_2 = 0x01
 MAX30105_INT_ENABLE_1 = 0x02
 MAX30105_INT_ENABLE_2 = 0x03
 
-
 MAX30105_FIFO_WRITE_PTR = 0x04
 MAX30105_FIFO_OVERFLOW = 0x05
 MAX30105_FIFO_READ_PTR = 0x06
@@ -142,7 +141,6 @@ SLOT_GREEN_PILOT = 0x07
 
 MAX_30105_EXPECTED_PART_ID = 0x15
 
-
 STORAGE_QUEUE_SIZE = 4
 
 # ======================================== 功能函数 ============================================
@@ -177,8 +175,6 @@ class SensorData:
         self.red = CircularBuffer(STORAGE_QUEUE_SIZE)
         self.IR = CircularBuffer(STORAGE_QUEUE_SIZE)
         self.green = CircularBuffer(STORAGE_QUEUE_SIZE)
-
-
 
 class MAX30102(object):
     """
@@ -268,6 +264,7 @@ class MAX30102(object):
                 TypeError: If i2c is not an I2C instance or i2c_hex_address is not an int.
                 ValueError: If i2c_hex_address is not in the range 0x00–0x7F.
         """
+
         self.i2c_address = i2c_hex_address
         self._i2c = i2c
         self._active_leds = None
@@ -278,10 +275,8 @@ class MAX30102(object):
         self._sample_avg = None
         self._acq_frequency = None
         self._acq_frequency_inv = None
-        
         self.sense = SensorData()
 
-    
     def setup_sensor(self, led_mode=2, adc_range=16384, sample_rate=400,
                      led_power=MAX30105_PULSE_AMP_MEDIUM, sample_avg=8,
                      pulse_width=411):
@@ -317,33 +312,16 @@ class MAX30102(object):
         """
         
         self.soft_reset()
-
-        
         self.set_fifo_average(sample_avg)
-
-        
         self.enable_fifo_rollover()
-
-        
-        
         self.set_led_mode(led_mode)
-
-        
         self.set_adc_range(adc_range)
-
-        
         self.set_sample_rate(sample_rate)
-
-        
         self.set_pulse_width(pulse_width)
-
-        
         self.set_pulse_amplitude_red(led_power)
         self.set_pulse_amplitude_it(led_power)
         self.set_pulse_amplitude_green(led_power)
         self.set_pulse_amplitude_proximity(led_power)
-
-        
         self.clear_fifo()
 
     def __del__(self):
@@ -355,7 +333,6 @@ class MAX30102(object):
         """
         self.shutdown()
 
-    
     def get_int_1(self):
         """
             读取中断状态寄存器 1。
@@ -479,8 +456,6 @@ class MAX30102(object):
         """
         self.bitmask(MAX30105_INT_ENABLE_2, MAX30105_INT_DIE_TEMP_RDY_MASK, MAX30105_INT_DIE_TEMP_RDY_DISABLE)
 
-        
-
     def soft_reset(self):
         """
         软复位（复位后等待 RESET 位自动清零）。
@@ -512,8 +487,6 @@ class MAX30102(object):
         """
         self.set_bitmask(MAX30105_MODE_CONFIG, MAX30105_SHUTDOWN_MASK, MAX30105_WAKEUP)
 
-        
-
     def set_led_mode(self, LED_mode):
         """
         设置 LED 采样模式。
@@ -542,20 +515,15 @@ class MAX30102(object):
         else:
             raise ValueError('Wrong LED mode:{0}!'.format(LED_mode))
 
-        
-        
         self.enable_slot(1, SLOT_RED_LED)
         if LED_mode > 1:
             self.enable_slot(2, SLOT_IR_LED)
         if LED_mode > 2:
             self.enable_slot(3, SLOT_GREEN_LED)
 
-        
-        
         self._active_leds = LED_mode
         self._multi_led_read_mode = LED_mode * 3
 
-    
     def set_adc_range(self, ADC_range):
         """
         设置 ADC 量程。
@@ -575,6 +543,7 @@ class MAX30102(object):
         Raises:
             ValueError: If range not supported.
         """
+
         if ADC_range == 2048:
             r = MAX30105_ADC_RANGE_2048
         elif ADC_range == 4096:
@@ -588,7 +557,6 @@ class MAX30102(object):
 
         self.set_bitmask(MAX30105_PARTICLE_CONFIG, MAX30105_ADC_RANGE_MASK, r)
 
-    
     def set_sample_rate(self, sample_rate):
         """
         设置采样率（SPS）。
@@ -608,6 +576,7 @@ class MAX30102(object):
         Raises:
             ValueError: If rate not supported.
         """
+
         if sample_rate == 50:
             sr = MAX30105_SAMPLERATE_50
         elif sample_rate == 100:
@@ -628,12 +597,9 @@ class MAX30102(object):
             raise ValueError('Wrong sample rate:{0}!'.format(sample_rate))
 
         self.set_bitmask(MAX30105_PARTICLE_CONFIG, MAX30105_SAMPLERATE_MASK, sr)
-
-        
         self._sample_rate = sample_rate
         self.update_acquisition_frequency()
 
-    
     def set_pulse_width(self, pulse_width):
         """
         设置 LED 脉冲宽度（影响探测距离）。
@@ -664,10 +630,7 @@ class MAX30102(object):
         else:
             raise ValueError('Wrong pulse width:{0}!'.format(pulse_width))
         self.set_bitmask(MAX30105_PARTICLE_CONFIG, MAX30105_PULSE_WIDTH_MASK, pw)
-
-        
         self._pulse_width = pw
-
     
     def set_active_leds_amplitude(self, amplitude):
         """
@@ -773,7 +736,6 @@ class MAX30102(object):
         """
         self.i2c_set_register(MAX30105_PROX_INT_THRESH, thresh_msb)
 
-    
     def set_fifo_average(self, number_of_samples):
         """
            设置 FIFO 内部平均样本数。
@@ -793,8 +755,7 @@ class MAX30102(object):
            Raises:
                ValueError: If not supported.
        """
-        
-        
+
         if number_of_samples == 1:
             ns = MAX30105_SAMPLE_AVG_1
         elif number_of_samples == 2:
@@ -810,9 +771,8 @@ class MAX30102(object):
         else:
             raise ValueError(
                 'Wrong number of samples:{0}!'.format(number_of_samples))
-        self.set_bitmask(MAX30105_FIFO_CONFIG, MAX30105_SAMPLE_AVG_MASK, ns)
 
-        
+        self.set_bitmask(MAX30105_FIFO_CONFIG, MAX30105_SAMPLE_AVG_MASK, ns)
         self._sample_avg = number_of_samples
         self.update_acquisition_frequency()
 
@@ -828,9 +788,6 @@ class MAX30102(object):
         else:
             self._acq_frequency = self._sample_rate / self._sample_avg
             from math import ceil
-
-            
-            
             self._acq_frequency_inv = int(ceil(1000 / self._acq_frequency))
 
     def get_acquisition_frequency(self):
@@ -924,7 +881,6 @@ class MAX30102(object):
         
         wp = self.i2c_read_register(MAX30105_FIFO_READ_PTR)
         return wp
-
     
     def read_temperature(self):
         """
@@ -939,11 +895,8 @@ class MAX30102(object):
             Returns:
                 float: Temperature in °C.
         """
-        
-        
-        self.i2c_set_register(MAX30105_DIE_TEMP_CONFIG, 0x01)
 
-        
+        self.i2c_set_register(MAX30105_DIE_TEMP_CONFIG, 0x01)
         reading = ord(self.i2c_read_register(MAX30105_INT_STAT_2))
         sleep_ms(100)
         while (reading & MAX30105_INT_DIE_TEMP_RDY_ENABLE) > 0:
@@ -974,7 +927,6 @@ class MAX30102(object):
         """
         self.i2c_set_register(MAX30105_PROX_INT_THRESH, val)
 
-    
     def read_part_id(self):
         """
             读取器件 ID。
@@ -1023,7 +975,6 @@ class MAX30102(object):
         rev_id = self.i2c_read_register(MAX30105_REVISION_ID)
         return ord(rev_id)
 
-    
     def enable_slot(self, slot_number, device):
         """
         在多路 LED 模式下配置时间槽。
@@ -1068,7 +1019,6 @@ class MAX30102(object):
         self.i2c_set_register(MAX30105_MULTI_LED_CONFIG_1, 0)
         self.i2c_set_register(MAX30105_MULTI_LED_CONFIG_2, 0)
 
-    
     def i2c_read_register(self, REGISTER, n_bytes=1):
         """
         读寄存器。
@@ -1092,7 +1042,6 @@ class MAX30102(object):
         """
         self._i2c.writeto(self.i2c_address, bytearray([REGISTER]))
         return self._i2c.readfrom(self.i2c_address, n_bytes)
-
         self._i2c.writeto(self.i2c_address, bytearray([REGISTER]))
         return self._i2c.readfrom(self.i2c_address, n_bytes)
 
