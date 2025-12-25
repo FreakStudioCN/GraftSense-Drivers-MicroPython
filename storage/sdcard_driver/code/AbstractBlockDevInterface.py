@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-        
 # @Time    : 2024/9/18 下午12:15   
 # @Author  : 李清水            
-# @File    : AbstractBlockDevInterface.py.py       
+# @File    : AbstractBlockDevInterface.py
 # @Description : 定义了块设备的抽象基类 AbstractBlockDev
 # @License : CC BY-NC 4.0
 
@@ -51,12 +51,18 @@ class AbstractBlockDev:
             - 扩展接口禁止隐式擦除
     """
     # 标准操作码常量（类属性）
-    IOCTL_INIT = 1      # 设备初始化
-    IOCTL_SHUTDOWN = 2  # 设备关闭
-    IOCTL_SYNC = 3      # 数据同步
-    IOCTL_BLK_COUNT = 4 # 获取块数量（必须实现）
-    IOCTL_BLK_SIZE = 5  # 获取块大小（可选）
-    IOCTL_BLK_ERASE = 6 # 块擦除（littlefs必需）
+    # 设备初始化
+    IOCTL_INIT = 1
+    # 设备关闭
+    IOCTL_SHUTDOWN = 2
+    # 数据同步
+    IOCTL_SYNC = 3
+    # 获取块数量（必须实现）
+    IOCTL_BLK_COUNT = 4
+    # 获取块大小（可选）
+    IOCTL_BLK_SIZE = 5
+    # 块擦除（littlefs必需）
+    IOCTL_BLK_ERASE = 6
 
     def __init__(self) -> None:
         """

@@ -24,12 +24,18 @@ from machine import SPI, Pin
 # ======================================== 全局变量 ============================================
 
 # 定义SD卡相关常量
-CMD_TIMEOUT = const(100)            # 命令超时时间常量
-R1_IDLE_STATE = const(1 << 0)       # R1响应状态：空闲状态
-R1_ILLEGAL_COMMAND = const(1 << 2)  # R1响应状态：非法命令
-TOKEN_CMD25 = const(0xFC)           # 数据传输命令令牌
-TOKEN_STOP_TRAN = const(0xFD)       # 停止传输令牌
-TOKEN_DATA = const(0xFE)            # 数据令牌
+# 命令超时时间常量
+CMD_TIMEOUT = const(100)
+# R1响应状态：空闲状态
+R1_IDLE_STATE = const(1 << 0)
+# R1响应状态：非法命令
+R1_ILLEGAL_COMMAND = const(1 << 2)
+# 数据传输命令令牌
+TOKEN_CMD25 = const(0xFC)
+# 停止传输令牌
+TOKEN_STOP_TRAN = const(0xFD)
+# 数据令牌
+TOKEN_DATA = const(0xFE)
 
 # ======================================== 功能函数 ============================================
 

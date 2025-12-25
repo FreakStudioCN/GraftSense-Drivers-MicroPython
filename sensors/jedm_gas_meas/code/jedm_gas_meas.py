@@ -33,7 +33,8 @@ class JEDMGasMeas:
     MAX_I2C_FREQ: int = 100000
     # 类常量：校准值的范围（16位无符号整数）
     CALIB_MIN: int = 0
-    CALIB_MAX: int = 65535  # 2^16 - 1
+    # 2^16 - 1
+    CALIB_MAX: int = 65535
 
     def __init__(self, i2c: SoftI2C, addr: int = 0x2A) -> None:
         """
