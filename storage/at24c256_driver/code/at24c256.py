@@ -24,21 +24,25 @@ import time
 
 class AT24CXX:
     # 用于AT24CXX系列EEPROM的驱动类，支持多种容量的EEPROM
-
     # 类变量：定义 EEPROM 不同大小
-    AT24C32 = 4096      # 4KiB
-    AT24C64 = 8192      # 8KiB
-    AT24C128 = 16384    # 16KiB
-    AT24C256 = 32768    # 32KiB
-    AT24C512 = 65536    # 64KiB
+    # 4KiB
+    AT24C32 = 4096
+    # 8KiB
+    AT24C64 = 8192
+    # 16KiB
+    AT24C128 = 16384
+    # 32KiB
+    AT24C256 = 32768
+    # 64KiB
+    AT24C512 = 65536
 
     def __init__(self, i2c, chip_size=AT24C512, addr=0x50):
-        '''
+        """
         初始化AT24CXX类实例
         :param i2c        [machine.I2C]: I2C接口实例
         :param chip_size          [int]: EEPROM芯片容量
         :param addr               [int]: 芯片设备的I2C地址，默认为0x50
-        '''
+        """
         # 判断EEPROM芯片容量是否在AT24CXX类定义的范围内
         if chip_size not in [AT24CXX.AT24C32, AT24CXX.AT24C64, AT24CXX.AT24C128,
                              AT24CXX.AT24C256, AT24CXX.AT24C512]:
@@ -51,12 +55,12 @@ class AT24CXX:
         self.max_address = chip_size - 1
 
     def write_byte(self, address, data):
-        '''
+        """
         向指定地址写入一个字节
         :param address   [int]: 写入的地址
         :param data      [int]: 要写入的数据，范围0-255
         :return: None
-        '''
+        """
         # 检查地址是否在有效范围内
         if address < 0 or address > self.max_address:
             raise ValueError('address is out of range')
@@ -72,11 +76,11 @@ class AT24CXX:
         time.sleep_ms(5)
 
     def read_byte(self, address):
-        '''
+        """
         从指定地址读取一个字节
         :param address  [int]: 读取的地址
         :return         [int]: 读取的数据
-        '''
+        """
         # 检查地址是否在有效范围内
         if address < 0 or address > self.max_address:
             raise ValueError("address is out of range")
@@ -87,12 +91,12 @@ class AT24CXX:
         return int.from_bytes(value_read, "big")
 
     def write_page(self, address, data):
-        '''
+        """
         向指定地址写入一页数据，处理跨页情况
         :param address    [int]: 写入的起始地址
         :param data     [bytes]: 要写入的数据，最大长度不受限制，为字节序列
         :return: None
-        '''
+        """
         # 检查地址是否在有效范围内
         if address < 0 or address > self.max_address:
             raise ValueError("address is out of range")
@@ -131,12 +135,12 @@ class AT24CXX:
                 raise ValueError("address exceeds maximum limit")
 
     def read_sequence(self, start_address, length):
-        '''
+        """
         顺序读取指定长度的数据
         :param start_address  [int]: 读取的起始地址
         :param length         [int]: 读取的字节数
         :return             [bytes]: 读取的数据
-        '''
+        """
         # 检查起始地址和长度是否在有效范围内
         if start_address < 0 or (start_address + length) > self.max_address:
             raise ValueError("address is out of range")
