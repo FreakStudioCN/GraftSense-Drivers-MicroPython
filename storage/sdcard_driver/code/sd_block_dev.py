@@ -65,7 +65,30 @@ class SDCARDBlockDevice(AbstractBlockDev):
 
         ioctl(self, op: int, arg: int) -> int:
             设备控制接口，用于执行初始化、同步、获取块信息等操作。
+    ==========================================
+    SDCARDBlockDevice class, implements read/write operations for SD card block device.
+
+    This class inherits from AbstractBlockDev, encapsulates block-level read/write operations for SDCard devices,
+    provides standard readblocks, writeblocks and ioctl methods, compliant with MicroPython block device interface specification.
+
+    Attributes:
+        sdcard (SDCard): Associated SDCard instance for executing actual SD card operations.
+
+    Methods:
+        __init__(self, sdcard: SDCard):
+            Initialize SDCARDBlockDevice instance, bind an SDCard device.
+        readblocks(self, block_num: int, buf: bytearray, offset: int = 0):
+            Read one or more blocks of data from SD card to buffer.
+        writeblocks(self, block_num: int, buf: bytearray, offset: int = 0):
+            Write buffer data to one or more blocks on SD card.
+        ioctl(self, op: int, arg: int) -> int:
+            Device control interface for executing initialization, synchronization, getting block information and other operations.
+
+    Notes:
+        All read/write operations use 512 bytes as block size unit, buffer length must be multiple of 512.
+        Supports both single block read/write (CMD17/CMD24) and multiple block continuous read/write (CMD18/CMD25) modes.
     """
+
     def __init__(self, sdcard: SDCard) -> None:
         """
         初始化 SDCARDBlockDevice 实例。
@@ -75,6 +98,14 @@ class SDCARDBlockDevice(AbstractBlockDev):
 
         Raises:
             ValueError: 如果传入的 sdcard 不是 SDCard 实例。
+        ==========================================
+        Initialize SDCARDBlockDevice instance.
+
+        Args:
+            sdcard (SDCard): Input SDCard instance.
+
+        Raises:
+            ValueError: If the input sdcard is not an SDCard instance.
         """
 
         # 检查传入的SDCard实例是否有效
@@ -98,6 +129,21 @@ class SDCARDBlockDevice(AbstractBlockDev):
 
         Raises:
             OSError: 如果缓冲区长度不是 512 的倍数，或者读取失败。
+        ==========================================
+
+        Read data blocks from SD card to buffer.
+
+        Args:
+            block_num (int): Starting block number.
+            buf (bytearray): Buffer for storing read data, length must be multiple of 512 bytes.
+            offset (int, optional): Data offset, default is 0.
+
+        Raises:
+            OSError: If buffer length is not multiple of 512, or read fails.
+
+        Notes:
+            Supports both single block read (CMD17) and multiple block continuous read (CMD18) modes.
+            Need to use CMD12 to stop transmission after multiple block read.
         """
         # 检查缓冲区是否有效并且是否长度为512个字节
         if not buf or len(buf) % 512 != 0:
@@ -154,6 +200,25 @@ class SDCARDBlockDevice(AbstractBlockDev):
 
         Raises:
             OSError: 如果缓冲区长度不是 512 的倍数，或者写入失败。
+
+        Notes:
+            支持单块写入（CMD24）和多块连续写入（CMD25）两种模式。
+            多块写入完成后需要发送停止传输令牌（TOKEN_STOP_TRAN）。
+        ==========================================
+
+        Write data blocks from buffer to SD card.
+
+        Args:
+            block_num (int): Starting block number.
+            buf (bytearray): Data to write, length must be multiple of 512 bytes.
+            offset (int, optional): Data offset, default is 0.
+
+        Raises:
+            OSError: If buffer length is not multiple of 512, or write fails.
+
+        Notes:
+            Supports both single block write (CMD24) and multiple block continuous write (CMD25) modes.
+            Need to send stop transmission token (TOKEN_STOP_TRAN) after multiple block write.
         """
         # 检查缓冲区是否有效并且是否长度为512字节
         if not buf or len(buf) % 512 != 0:
@@ -197,18 +262,42 @@ class SDCARDBlockDevice(AbstractBlockDev):
 
     def ioctl(self, op: int, arg: int) -> int:
         """
-        控制块设备并查询其参数。
+           控制块设备并查询其参数。
 
-        Args:
-            op (int): 操作码，参考 AbstractBlockDev 定义。
-            arg (int): 附加参数。
+           Args:
+               op (int): 操作码，参考 AbstractBlockDev 定义。
+               arg (int): 附加参数。
 
-        Returns:
-            int: 操作结果，成功返回 0，或相应的块数/字节数。
+           Returns:
+               int: 操作结果，成功返回 0，或相应的块数/字节数。
 
-        Raises:
-            OSError: 如果操作码无效或者擦除块号无效。
-        """
+           Raises:
+               OSError: 如果操作码无效或者擦除块号无效。
+
+           Notes:
+               支持的操作包括：设备初始化（IOCTL_INIT）、设备关闭（IOCTL_SHUTDOWN）、
+               数据同步（IOCTL_SYNC）、获取块数量（IOCTL_BLK_COUNT）、获取块大小（IOCTL_BLK_SIZE）、
+               擦除块（IOCTL_BLK_ERASE）。
+
+           ==========================================
+
+           Control block device and query its parameters.
+
+           Args:
+               op (int): Operation code, refer to AbstractBlockDev definition.
+               arg (int): Additional parameter.
+
+           Returns:
+               int: Operation result, returns 0 for success, or corresponding block count/byte count.
+
+           Raises:
+               OSError: If operation code is invalid or erase block number is invalid.
+
+           Notes:
+               Supported operations include: device initialization (IOCTL_INIT), device shutdown (IOCTL_SHUTDOWN),
+               data synchronization (IOCTL_SYNC), get block count (IOCTL_BLK_COUNT), get block size (IOCTL_BLK_SIZE),
+               erase block (IOCTL_BLK_ERASE).
+           """
         # 初始化设备
         if op == AbstractBlockDev.IOCTL_INIT:
             # 执行初始化操作

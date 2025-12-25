@@ -60,42 +60,74 @@ class SDCard:
     Methods:
         __init__(self, spi: machine.SPI, cs: machine.Pin, baudrate: int = 1320000) -> None:
             初始化SD卡控制器
-
         init_spi(self, baudrate: int) -> None:
             配置SPI接口参数
-
         init_card(self, baudrate: int) -> None:
             执行完整初始化流程
-
         cmd(self, cmd: int, arg: int, crc: int, final: int = 0, release: bool = True, skip1: bool = False) -> int:
             发送SD卡命令并获取响应
-
         readinto(self, buf: bytearray) -> None:
             读取数据块到缓冲区
-
         write(self, token: int, buf: bytearray) -> bool:
             写入数据块到卡片
-
         write_token(self, token: int) -> None:
             发送控制令牌
-
         erase_block(self, block_number: int) -> None:
             擦除指定数据块
-
         init_card_v1(self) -> None:
             初始化标准容量SD卡
-
         init_card_v2(self) -> None:
             初始化高容量SD卡
 
-    Constants:
-        CMD_TIMEOUT: 命令超时重试次数（100次）
-        R1_IDLE_STATE: 卡片空闲状态标志（0x01）
-        R1_ILLEGAL_COMMAND: 非法命令标志（0x04）
-        TOKEN_CMD25: 多块写入开始令牌（0xFC）
-        TOKEN_STOP_TRAN: 停止传输令牌（0xFD）
-        TOKEN_DATA: 单块数据令牌（0xFE）
-    """
+    Notes:
+        SD卡操作遵循SPI协议规范，支持标准容量（SDSC）和高容量（SDHC/SDXC）卡。
+        初始化过程包括卡识别、CSD寄存器读取和块大小设置。
+        读写操作以512字节为块单位，支持单块和多块传输模式。
+
+    ==========================================
+
+    SDCard class for operating SD/MMC memory cards via SPI bus.
+    This class encapsulates the underlying SD card communication protocol, supports initialization,
+    data block reading/writing and erasing of standard capacity cards (SDSC) and high capacity cards (SDHC/SDXC).
+    Implements complete SPI mode protocol stack, including card identification mode and data transfer mode.
+
+    Attributes:
+        spi (SPI): SPI interface instance for communicating with SD card
+        cs (Pin): Chip select pin instance for selecting SD card
+        sectors (int): Total number of sectors of the card (read-only)
+        cdv (int): Block addressing factor (1 for block addressing, 512 for byte addressing)
+        cmdbuf (bytearray): Command buffer (6 bytes)
+        dummybuf (bytearray): Data buffer (512 bytes)
+        tokenbuf (bytearray): Token buffer (1 byte)
+
+    Methods:
+        __init__(self, spi: machine.SPI, cs: machine.Pin, baudrate: int = 1320000) -> None:
+            Initialize SD card controller
+        init_spi(self, baudrate: int) -> None:
+            Configure SPI interface parameters
+        init_card(self, baudrate: int) -> None:
+            Execute complete initialization process
+        cmd(self, cmd: int, arg: int, crc: int, final: int = 0, release: bool = True, skip1: bool = False) -> int:
+            Send SD card command and get response
+        readinto(self, buf: bytearray) -> None:
+            Read data block to buffer
+        write(self, token: int, buf: bytearray) -> bool:
+            Write data block to card
+        write_token(self, token: int) -> None:
+            Send control token
+        erase_block(self, block_number: int) -> None:
+            Erase specified data block
+        init_card_v1(self) -> None:
+            Initialize standard capacity SD card
+        init_card_v2(self) -> None:
+            Initialize high capacity SD card
+
+    Notes:
+        SD card operations follow SPI protocol specification, support standard capacity (SDSC) and high capacity (SDHC/SDXC) cards.
+        Initialization process includes card identification, CSD register reading and block size setting.
+        Read/write operations use 512 bytes as block unit, support single block and multiple block transfer modes.
+"""
+
     def __init__(self, spi: SPI, cs: Pin, baudrate: int = 1320000) -> None:
         """
         初始化SD卡控制器。
@@ -111,6 +143,22 @@ class SDCard:
         Raises:
             OSError: 如果初始化过程中出现硬件错误
             ValueError: 如果波特率超出有效范围
+
+        ==========================================
+
+        Initialize SD card controller.
+
+        Args:
+            spi (machine.SPI): Configured SPI interface object
+            cs (machine.Pin): Chip select pin object
+            baudrate (int, optional): SPI baud rate, default is 1320000
+
+        Returns:
+            None
+
+        Raises:
+            OSError: If hardware error occurs during initialization
+            ValueError: If baud rate exceeds valid range
         """
         # 存储SPI接口
         self.spi = spi
@@ -146,6 +194,19 @@ class SDCard:
 
         Raises:
             ValueError: 如果波特率超出硬件支持范围
+
+        ==========================================
+
+        Configure SPI interface parameters.
+
+        Args:
+            baudrate (int): Target communication rate (Hz)
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If baud rate exceeds hardware supported range
         """
         # 初始化SPI
         self.spi.init(baudrate=baudrate, phase=0, polarity=0)
@@ -166,6 +227,23 @@ class SDCard:
                 - 版本识别失败
                 - CSD格式不支持
                 - 块大小设置失败
+
+        ==========================================
+
+        Execute complete SD card initialization process.
+
+        Args:
+            baudrate (int): Target data transfer baud rate
+
+        Returns:
+            None
+
+        Raises:
+            OSError: If any of the following occurs:
+                - Card no response
+                - Version identification failed
+                - CSD format not supported
+                - Block size setting failed
         """
         # 初始化CS引脚,设置CS引脚为输出高电平
         self.cs.init(self.cs.OUT, value=1)
@@ -249,6 +327,19 @@ class SDCard:
 
         Raises:
             OSError: 如果初始化超时（100次尝试）
+
+        ==========================================
+
+        Initialize standard capacity SD card (SDSC).
+
+        Args:
+            None
+
+        Returns:
+            None
+
+        Raises:
+            OSError: If initialization timeout (100 attempts)
         """
         for i in range(CMD_TIMEOUT):
             time.sleep_ms(50)
@@ -277,6 +368,19 @@ class SDCard:
 
         Raises:
             OSError: 如果初始化超时（100次尝试）
+
+        ==========================================
+
+        Initialize high capacity SD card (SDHC/SDXC).
+
+        Args:
+            None
+
+        Returns:
+            None
+
+        Raises:
+            OSError: If initialization timeout (100 attempts)
         """
         for i in range(CMD_TIMEOUT):
             # 等待50毫秒
@@ -326,6 +430,27 @@ class SDCard:
 
         Raises:
             OSError: 如果SPI通信失败
+
+        ==========================================
+
+        Send SD card command and get response.
+
+        Args:
+            cmd (int): Command number (0-63)
+            arg (int): 32-bit command parameter
+            crc (int): CRC check value
+            final (int, optional): Additional read bytes count, default is 0
+            release (bool, optional): Whether to release CS, default is True
+            skip1 (bool, optional): Whether to skip first byte, default is False
+
+        Returns:
+            int: Response status:
+                - 0x00: Normal
+                - 0x01: Idle state
+                - -1: Timeout
+
+        Raises:
+            OSError: If SPI communication fails
         """
         # 拉低CS引脚，开始通信
         self.cs(0)
@@ -406,6 +531,20 @@ class SDCard:
         Raises:
             ValueError: 如果缓冲区长度错误
             OSError: 如果读取超时或校验失败
+
+        ==========================================
+
+        Read data block to buffer.
+
+        Args:
+            buf (bytearray): Target buffer (must be 512 bytes)
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If buffer length is wrong
+            OSError: If read timeout or check fails
         """
         # 拉低CS引脚，开始通信
         self.cs(0)
@@ -460,6 +599,23 @@ class SDCard:
         Raises:
             ValueError: 如果数据长度错误
             OSError: 如果卡片响应异常
+
+        ==========================================
+
+        Write data block to card.
+
+        Args:
+            token (int): Write token (0xFC/0xFD/0xFE)
+            buf (bytearray): Source data (must be 512 bytes)
+
+        Returns:
+            bool: Write result:
+                - True: Success
+                - False: Failure
+
+        Raises:
+            ValueError: If data length is wrong
+            OSError: If card response is abnormal
         """
         # 拉低CS引脚，开始通信
         self.cs(0)
@@ -501,6 +657,19 @@ class SDCard:
 
         Raises:
             OSError: 如果卡片未响应
+
+        ==========================================
+
+        Send control token.
+
+        Args:
+            token (int): Control token (0xFC/0xFD/0xFE)
+
+        Returns:
+            None
+
+        Raises:
+            OSError: If card does not respond
         """
         # 拉低CS引脚，开始通信
         self.cs(0)
@@ -532,6 +701,20 @@ class SDCard:
         Raises:
             ValueError: 如果块号超出范围
             OSError: 如果擦除命令失败
+
+        ==========================================
+
+        Erase specified data block.
+
+        Args:
+            block_number (int): Block number (LBA format)
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If block number exceeds range
+            OSError: If erase command fails
         """
         # 拉低CS引脚，开始通信
         self.cs(0)
