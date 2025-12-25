@@ -26,7 +26,7 @@ import time
 # 上电延时3s
 time.sleep(3)
 # 打印调试消息
-print("FreakStudio: Test PCF8574 LED Module")
+print("FreakStudio: Test PCF8574 Eight-Segment LED Display Module ")
 
 i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
