@@ -41,7 +41,7 @@ print("FreakStudio: Use ASRPRO UART to control onboard LED.")
 # 初始化板载 LED（GPIO25，输出模式）
 led = machine.Pin(25, machine.Pin.OUT)
 
-# 初始化串口：波特率9600，TX=GPIO0，RX=GPIO1（Pico默认硬件串口0）
+# 初始化串口：波特率9600，TX=GPIO16，RX=GPIO17（Pico默认硬件串口0）
 uart = machine.UART(0, baudrate=115200, tx=machine.Pin(16), rx=machine.Pin(17))
 
 # ========================================  主程序  ============================================

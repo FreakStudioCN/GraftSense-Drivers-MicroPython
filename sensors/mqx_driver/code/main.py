@@ -68,27 +68,23 @@ mq.select_builtin("MQ2")
 # mq.set_custom_polynomial([1.0, -2.5, 3.3])
 
 # ========================================  主程序  ===========================================
-def main():
-    print("===== MQ Sensor Test Program Started =====")
-    try:
-        while True:
-            # 读取电压
-            v = mq.read_voltage()
-            print("Voltage: {:.3f} V".format(v))
 
-            # 读取 ppm（5 次采样，间隔 200 ms）
-            ppm = mq.read_ppm(samples=5, delay_ms=200)
-            print("Gas concentration: {:.2f} ppm".format(ppm))
+print("===== MQ Sensor Test Program Started =====")
+try:
+    while True:
+        # 读取电压
+        v = mq.read_voltage()
+        print("Voltage: {:.3f} V".format(v))
 
-            print("-" * 40)
-            # 主循环间隔
-            sleep(2)
-    except KeyboardInterrupt:
-        print("User interrupted, exiting program...")
-    finally:
-        mq.deinit()
-        print("Sensor resources released.")
+        # 读取 ppm（5 次采样，间隔 200 ms）
+        ppm = mq.read_ppm(samples=5, delay_ms=200)
+        print("Gas concentration: {:.2f} ppm".format(ppm))
 
-# ======================================== 主程序入口===========================================
-if __name__ == "__main__":
-    main()
+        print("-" * 40)
+        # 主循环间隔
+        sleep(2)
+except KeyboardInterrupt:
+    print("User interrupted, exiting program...")
+finally:
+    mq.deinit()
+    print("Sensor resources released.")

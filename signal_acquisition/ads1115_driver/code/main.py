@@ -34,8 +34,23 @@ filter_sum = 0
 def timer_callback(timer):
     """
     定时器回调函数，用于定时采样
-    :param timer    [machine.Timer]: 定时器对象
-    :return : None
+    Args:
+        timer (machine.Timer): 定时器对象。
+
+    Returns:
+        None
+
+
+    ==========================================
+
+    Timer callback function for periodic sampling.
+
+    Args:
+        timer (machine.Timer): Timer object.
+
+    Returns:
+        None
+
     """
     # 声明全局变量
     global adc, POT_CHANNEL, FILTER_SIZE
@@ -64,9 +79,25 @@ def timer_callback(timer):
 def send_data_frames(raw_adc, average):
     """
     串口发送数据函数，发送原始ADC值和滤波后的平均值
-    :param raw_adc     [int]: 原始ADC采集的值
-    :param average     [int]: 滤波后的平均值
-    :return : None
+
+    Args:
+        raw_adc (int): 原始ADC采集的值。
+        average (int): 滤波后的平均值。
+
+    Returns:
+        None
+
+    ==========================================
+
+    UART data transmission function, sends raw ADC value and filtered average value.
+
+    Args:
+        raw_adc (int): Raw ADC collected value.
+        average (int): Filtered average value.
+
+    Returns:
+        None
+
     """
     global uart
 
@@ -84,10 +115,24 @@ def send_data_frames(raw_adc, average):
 # 滑动均值滤波函数
 def moving_average_filter(new_value, filter_size):
     """
-    滑动均值滤波器
-    :param new_value    [int]: 新采样值
-    :param filter_size  [int]: 滤波器窗口大小
-    :return [int]: 当前滑动均值
+    Args:
+        new_value (int): 新采样值。
+        filter_size (int): 滤波器窗口大小。
+
+    Returns:
+        int: 当前滑动均值。
+
+
+    ==========================================
+
+    Moving average filter.
+
+    Args:
+        new_value (int): New sampling value.
+        filter_size (int): Filter window size.
+
+    Returns:
+        int: Current moving average.
     """
     # 声明全局变量
     global filter_buffer, filter_sum

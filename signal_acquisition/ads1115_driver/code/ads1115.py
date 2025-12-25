@@ -28,6 +28,101 @@ from machine import Pin
 
 # 自定义ADS1115类
 class ADS1115:
+    """
+    ADS1115 16位高精度模数转换器驱动类。
+    提供单端和差分输入模式，可配置增益、采样率和比较器功能。
+    支持单次转换和连续转换模式，带有可配置警报引脚和中断回调。
+
+    Attributes:
+        i2c: I2C接口实例，用于与ADS1115通信。
+        address (int): ADS1115的I2C设备地址（0x48-0x4B）。
+        gain_index (int): 当前增益设置的索引。
+        temp2 (bytearray): 临时缓冲区，用于读写寄存器操作。
+        alert_pin (Pin, optional): 警报引脚对象。
+        callback (function, optional): 警报中断回调函数。
+        alert_trigger (int): 中断触发模式。
+        mode (int): 当前转换模式配置值。
+
+    Methods:
+        __init__(self, i2c, address=0x48, gain=2, alert_pin=None, callback=None):
+            初始化ADS1115实例。
+        _get_gain_register_value(self, gain):
+            根据增益值返回对应的寄存器配置值。
+        _irq_handler(self, pin):
+            内部中断处理程序。
+        _write_register(self, register, value):
+            写入寄存器。
+        _read_register(self, register):
+            读取寄存器的值。
+        raw_to_v(self, raw):
+            将原始ADC值转换为电压。
+        set_conv(self, rate=4, channel1=0, channel2=None):
+            设置转换速率和通道。
+        read(self, rate=4, channel1=0, channel2=None):
+            读取指定通道的ADC值。
+        read_rev(self):
+            读取转换结果并启动下一个转换。
+        alert_start(self, rate=4, channel1=0, channel2=None,
+                    threshold_high=0x4000, threshold_low=0, latched=False):
+            启动持续测量，并设置ALERT引脚的阈值。
+        conversion_start(self, rate=4, channel1=0, channel2=None):
+            启动持续测量，基于ALERT/RDY引脚触发。
+        alert_read(self):
+            从持续测量中获取最后一次读取的转换结果。
+
+    Notes:
+        支持单端输入（0-3通道）和差分输入（0-1, 0-3, 1-3, 2-3组合）。
+        增益范围从2/3倍（±6.144V）到16倍（±0.256V）。
+        采样率从8 SPS到860 SPS可配置。
+
+    ==========================================
+    ADS1115 16-bit high precision analog-to-digital converter driver class.
+    Provides single-ended and differential input modes, configurable gain, sampling rate and comparator functions.
+    Supports single conversion and continuous conversion modes, with configurable alert pins and interrupt callbacks.
+
+    Attributes:
+        i2c: I2C interface instance for communicating with ADS1115.
+        address (int): ADS1115 I2C device address (0x48-0x4B).
+        gain_index (int): Current gain setting index.
+        temp2 (bytearray): Temporary buffer for register read/write operations.
+        alert_pin (Pin, optional): Alert pin object.
+        callback (function, optional): Alert interrupt callback function.
+        alert_trigger (int): Interrupt trigger mode.
+        mode (int): Current conversion mode configuration value.
+
+    Methods:
+        __init__(self, i2c, address=0x48, gain=2, alert_pin=None, callback=None):
+            Initialize ADS1115 instance.
+        _get_gain_register_value(self, gain):
+            Return corresponding register configuration value based on gain value.
+        _irq_handler(self, pin):
+            Internal interrupt handler.
+        _write_register(self, register, value):
+            Write to register.
+        _read_register(self, register):
+            Read register value.
+        raw_to_v(self, raw):
+            Convert raw ADC value to voltage.
+        set_conv(self, rate=4, channel1=0, channel2=None):
+            Set conversion rate and channels.
+        read(self, rate=4, channel1=0, channel2=None):
+            Read ADC value of specified channel.
+        read_rev(self):
+            Read conversion result and start next conversion.
+        alert_start(self, rate=4, channel1=0, channel2=None,
+                    threshold_high=0x4000, threshold_low=0, latched=False):
+            Start continuous measurement and set ALERT pin thresholds.
+        conversion_start(self, rate=4, channel1=0, channel2=None):
+            Start continuous measurement based on ALERT/RDY pin triggering.
+        alert_read(self):
+            Get last read conversion result from continuous measurement.
+
+    Notes:
+        Supports single-ended input (channels 0-3) and differential input (0-1, 0-3, 1-3, 2-3 combinations).
+        Gain range from 2/3x (±6.144V) to 16x (±0.256V).
+        Sampling rate configurable from 8 SPS to 860 SPS.
+    """
+
     # 寄存器地址常量
     # 转换寄存器
     REGISTER_CONVERT = const(0x00)
@@ -206,12 +301,41 @@ class ADS1115:
 
     def __init__(self, i2c, address=0x48, gain=2, alert_pin=None, callback=None):
         """
-            初始化 ADS1115 实例。
-            :param i2c          [machine.I2C]: I2C 对象
-            :param address              [int]: ADS1115 的 I2C 地址，默认 0x48
-            :param gain                 [int]: 增益设置，默认 2 对应 +/-2.048V
-            :param alert_pin            [int]: 警报引脚编号（可选），默认下降沿触发
-            :param callback             [func]: 警报回调函数（可选）
+        初始化 ADS1115 实例。
+
+        Args:
+            i2c (machine.I2C): I2C 对象。
+            address (int, optional): ADS1115 的 I2C 地址，默认 0x48。
+            gain (int, optional): 增益设置，默认 2 对应 +/-2.048V。
+            alert_pin (int, optional): 警报引脚编号。
+            callback (function, optional): 警报回调函数。
+
+        Raises:
+            ValueError: 如果地址不在 0x48-0x4B 范围内。
+            ValueError: 如果增益值不在有效范围内。
+
+        Notes:
+            支持的增益值：2/3, 1, 2, 4, 8, 16。
+            如果设置了警报引脚，默认使用下降沿触发中断。
+
+        ==========================================
+
+        Initialize ADS1115 instance.
+
+        Args:
+            i2c (machine.I2C): I2C object.
+            address (int, optional): ADS1115 I2C address, default 0x48.
+            gain (int, optional): Gain setting, default 2 corresponds to +/-2.048V.
+            alert_pin (int, optional): Alert pin number.
+            callback (function, optional): Alert callback function.
+
+        Raises:
+            ValueError: If address is not in range 0x48-0x4B.
+            ValueError: If gain value is not in valid range.
+
+        Notes:
+            Supported gain values: 2/3, 1, 2, 4, 8, 16.
+            If alert pin is set, uses falling edge trigger for interrupt by default.
         """
         # 判断ads1115的I2C通信地址是否为0x48、0x49、0x4A或0x4B
         if not 0x48 <= address <= 0x4B:
@@ -248,8 +372,22 @@ class ADS1115:
     def _get_gain_register_value(self, gain):
         """
         根据增益值返回对应的寄存器配置值。
-        :param gain [float]: 增益值
-        :return [int]: 寄存器配置值
+
+        Args:
+            gain (float): 增益值。
+
+        Returns:
+            int: 寄存器配置值。
+
+        ==========================================
+
+        Return corresponding register configuration value based on gain value.
+
+        Args:
+            gain (float): Gain value.
+
+        Returns:
+            int: Register configuration value.
         """
         gain_map = {
             2/3: ADS1115.GAINS[0],
@@ -263,8 +401,17 @@ class ADS1115:
 
     def _irq_handler(self, pin):
         """
-        内部中断处理程序，使用 micropython.schedule 调度用户回调
-        :param pin [machine.Pin]: 触发中断的引脚对象
+        内部中断处理程序，使用 micropython.schedule 调度用户回调。
+
+        Args:
+            pin (machine.Pin): 触发中断的引脚对象。
+
+        ==========================================
+
+        Internal interrupt handler, uses micropython.schedule to schedule user callback.
+
+        Args:
+            pin (machine.Pin): Pin object that triggered interrupt.
         """
         if hasattr(self, 'callback') and self.callback:
             micropython.schedule(self.callback, pin)
@@ -272,8 +419,18 @@ class ADS1115:
     def _write_register(self, register, value):
         """
         写入寄存器。
-        :param register [int]: 寄存器地址
-        :param value    [int]: 要写入的值
+
+        Args:
+            register (int): 寄存器地址。
+            value (int): 要写入的值。
+
+        ==========================================
+
+        Write to register.
+
+        Args:
+            register (int): Register address.
+            value (int): Value to write.
         """
         # 取value的高八字节
         self.temp2[0] = (value >> 8) & 0xFF
@@ -285,8 +442,22 @@ class ADS1115:
     def _read_register(self, register):
         """
         读取寄存器的值。
-        :param register [int]: 寄存器地址
-        :return         [int]: 读取的值
+
+        Args:
+            register (int): 寄存器地址。
+
+        Returns:
+            int: 读取的值。
+
+        ==========================================
+
+        Read register value.
+
+        Args:
+            register (int): Register address.
+
+        Returns:
+            int: Read value.
         """
         # 读取寄存器
         self.i2c.readfrom_mem_into(self.address, register, self.temp2)
@@ -295,9 +466,29 @@ class ADS1115:
 
     def raw_to_v(self, raw):
         """
-        将原始 ADC 值转换为电压
-        :param raw    [int]: 原始 ADC 值
-        :return     [float]: 转换后的电压值
+        将原始 ADC 值转换为电压。
+
+        Args:
+            raw (int): 原始 ADC 值。
+
+        Returns:
+            float: 转换后的电压值。
+
+        Notes:
+            转换公式：电压 = 原始值 × (满量程电压 / 32768)。
+
+        ==========================================
+
+        Convert raw ADC value to voltage.
+
+        Args:
+            raw (int): Raw ADC value.
+
+        Returns:
+            float: Converted voltage value.
+
+        Notes:
+            Conversion formula: voltage = raw value × (full scale voltage / 32768).
         """
         # 计算每位电压值
         v_p_b = ADS1115.GAINS_V[self.gain_index] / 32768
@@ -306,10 +497,29 @@ class ADS1115:
 
     def set_conv(self, rate=4, channel1=0, channel2=None):
         """
-            设置转换速率和通道
-            :param rate     [int]: 数据速率索引，默认 4 对应 128 SPS
-            :param channel1 [int]: 主通道编号
-            :param channel2 [int]: 差分通道编号（可选）
+        设置转换速率和通道。
+
+        Args:
+            rate (int, optional): 数据速率索引，默认 4 对应 128 SPS。
+            channel1 (int, optional): 主通道编号。
+            channel2 (int, optional): 差分通道编号。
+
+        Raises:
+            ValueError: 如果速率索引无效。
+            ValueError: 如果通道编号无效。
+
+        ==========================================
+
+        Set conversion rate and channels.
+
+        Args:
+            rate (int, optional): Data rate index, default 4 corresponds to 128 SPS.
+            channel1 (int, optional): Main channel number.
+            channel2 (int, optional): Differential channel number.
+
+        Raises:
+            ValueError: If rate index is invalid.
+            ValueError: If channel number is invalid.
         """
         # 判断采样率是否设置正确
         if rate not in range(len(ADS1115.RATES)):
@@ -327,11 +537,39 @@ class ADS1115:
 
     def read(self, rate=4, channel1=0, channel2=None):
         """
-            读取指定通道的 ADC 值
-            :param rate         [int]: 数据速率索引，默认 4 对应 128 SPS
-            :param channel1     [int]: 主通道编号
-            :param channel2     [int]: 差分通道编号（可选）
-            :return             [int]: ADC 原始值，若为负值则进行补偿
+        读取指定通道的 ADC 值。
+
+        Args:
+            rate (int, optional): 数据速率索引，默认 4 对应 128 SPS。
+            channel1 (int, optional): 主通道编号。
+            channel2 (int, optional): 差分通道编号。
+
+        Returns:
+            int: ADC 原始值，若为负值则进行补偿。
+
+        Raises:
+            ValueError: 如果速率索引或通道编号无效。
+
+        Notes:
+            使用单次转换模式，读取完成后自动等待转换完成。
+
+        ==========================================
+
+        Read ADC value of specified channel.
+
+        Args:
+            rate (int, optional): Data rate index, default 4 corresponds to 128 SPS.
+            channel1 (int, optional): Main channel number.
+            channel2 (int, optional): Differential channel number.
+
+        Returns:
+            int: ADC raw value, negative values are compensated.
+
+        Raises:
+            ValueError: If rate index or channel number is invalid.
+
+        Notes:
+            Uses single conversion mode, automatically waits for conversion to complete after reading.
         """
         # 判断采样率是否设置正确
         if rate not in range(len(ADS1115.RATES)):
@@ -361,8 +599,23 @@ class ADS1115:
 
     def read_rev(self):
         """
-            读取转换结果并启动下一个转换
-            :return: ADC 原始值，若为负值则进行补偿
+        读取转换结果并启动下一个转换。
+
+        Returns:
+            int: ADC 原始值，若为负值则进行补偿。
+
+        Notes:
+            需要在调用 set_conv() 方法设置转换模式后使用。
+
+        ==========================================
+
+        Read conversion result and start next conversion.
+
+        Returns:
+            int: ADC raw value, negative values are compensated.
+
+        Notes:
+            Need to use after calling set_conv() method to set conversion mode.
         """
         # 读取转换结果
         res = self._read_register(ADS1115.REGISTER_CONVERT)
@@ -374,13 +627,35 @@ class ADS1115:
     def alert_start(self, rate=4, channel1=0, channel2=None,
                     threshold_high=0x4000, threshold_low=0, latched=False):
         """
-            启动持续测量，并设置 ALERT 引脚的阈值
-            :param rate             [int]: 数据速率索引，默认 4 对应 1600/128 SPS
-            :param channel1         [int]: 主通道编号
-            :param channel2         [int]: 差分通道编号（可选）
-            :param threshold_high   [int]: 高阈值
-            :param threshold_low    [int]: 低阈值
-            :param latched         [bool]: 是否锁存 ALERT 引脚
+        启动持续测量，并设置 ALERT 引脚的阈值。
+
+        Args:
+            rate (int, optional): 数据速率索引，默认 4 对应 1600/128 SPS。
+            channel1 (int, optional): 主通道编号。
+            channel2 (int, optional): 差分通道编号。
+            threshold_high (int, optional): 高阈值，默认 0x4000。
+            threshold_low (int, optional): 低阈值，默认 0。
+            latched (bool, optional): 是否锁存 ALERT 引脚，默认 False。
+
+        Raises:
+            ValueError: 如果速率索引或通道编号无效。
+            ValueError: 如果高阈值小于低阈值。
+
+        ==========================================
+
+        Start continuous measurement and set ALERT pin thresholds.
+
+        Args:
+            rate (int, optional): Data rate index, default 4 corresponds to 1600/128 SPS.
+            channel1 (int, optional): Main channel number.
+            channel2 (int, optional): Differential channel number.
+            threshold_high (int, optional): High threshold, default 0x4000.
+            threshold_low (int, optional): Low threshold, default 0.
+            latched (bool, optional): Whether to latch ALERT pin, default False.
+
+        Raises:
+            ValueError: If rate index or channel number is invalid.
+            ValueError: If high threshold is less than low threshold.
         """
         # 判断采样率是否设置正确
         if rate not in range(len(ADS1115.RATES)):
@@ -412,11 +687,27 @@ class ADS1115:
 
     def conversion_start(self, rate=4, channel1=0, channel2=None):
         """
-            启动持续测量，基于 ALERT/RDY 引脚触发
-            :param rate     [int]: 数据速率索引，默认 4 对应 1600/128 SPS
-            :param channel1 [int]: 主通道编号
-            :param channel2 [int]: 差分通道编号（可选）
-            :return: None
+        启动持续测量，基于 ALERT/RDY 引脚触发。
+
+        Args:
+            rate (int, optional): 数据速率索引，默认 4 对应 1600/128 SPS。
+            channel1 (int, optional): 主通道编号。
+            channel2 (int, optional): 差分通道编号。
+
+        Raises:
+            ValueError: 如果速率索引或通道编号无效。
+
+        ==========================================
+
+        Start continuous measurement based on ALERT/RDY pin triggering.
+
+        Args:
+            rate (int, optional): Data rate index, default 4 corresponds to 1600/128 SPS.
+            channel1 (int, optional): Main channel number.
+            channel2 (int, optional): Differential channel number.
+
+        Raises:
+            ValueError: If rate index or channel number is invalid.
         """
         # 判断采样率是否设置正确
         if rate not in range(len(ADS1115.RATES)):
@@ -443,8 +734,17 @@ class ADS1115:
 
     def alert_read(self):
         """
-            从持续测量中获取最后一次读取的转换结果。
-            :return [int]: ADC 原始值，若为负值则进行补偿
+        从持续测量中获取最后一次读取的转换结果。
+
+        Returns:
+            int: ADC 原始值，若为负值则进行补偿。
+
+        ==========================================
+
+        Get last read conversion result from continuous measurement.
+
+        Returns:
+            int: ADC raw value, negative values are compensated.
         """
         # 读取转换结果
         res = self._read_register(ADS1115.REGISTER_CONVERT)
