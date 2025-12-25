@@ -201,7 +201,7 @@ time.sleep(3)
 # 打印调试消息
 print("FreakStudio:  DY-SV19T Play Test ")
 
-# 初始化硬件串口：选择 UART1，波特率 9600，TX=GP16，RX=GP17（需与模块连线一致）
+# 初始化硬件串口：选择 UART0，波特率 9600，TX=GP16，RX=GP17（需与模块连线一致）
 uart = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 
 # 创建定时器

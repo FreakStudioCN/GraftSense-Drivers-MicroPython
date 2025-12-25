@@ -31,7 +31,7 @@ addr = 0x40
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Using PCA9685 to control the angles of two servos")
-# 创建硬件I2C的实例，使用I2C1外设，时钟频率为400KHz，SDA引脚为4，SCL引脚为5
+# 创建硬件I2C的实例，使用I2C0外设，时钟频率为400KHz，SDA引脚为4，SCL引脚为5
 i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
