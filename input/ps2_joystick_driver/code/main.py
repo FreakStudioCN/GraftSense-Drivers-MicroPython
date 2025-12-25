@@ -39,6 +39,6 @@ try:
         print("Joystick values: X = {:.2f}, Y = {:.2f}, Switch = {}".format(x_val, y_val, sw_val))
         time.sleep(0.2)
 except KeyboardInterrupt:
-    print("\nData collection completed")
+    print("Data collection completed")
 finally:
     joystick.stop()
