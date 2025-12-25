@@ -41,7 +41,6 @@ try:
             time.sleep(0.2)
             received = uart.read(uart.any()).decode('utf-8')
             print(f"Received: {received}")
-
-
+            
 except KeyboardInterrupt:
     print("\nTest stopped by user")
