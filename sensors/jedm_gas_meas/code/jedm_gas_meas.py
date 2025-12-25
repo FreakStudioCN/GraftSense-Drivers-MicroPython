@@ -23,7 +23,57 @@ class JEDMGasMeas:
     JEDM气体传感器操作类
     支持读取气体浓度和校零校准功能，基于SoftI2C通信
     需要注意，该传感器模块仅适合于测试静态气体浓度，不适合于动态气体浓度测量，适合浓度分钟级～秒级变化
+
+    Attributes:
+    i2c (SoftI2C): I2C通信实例对象。
+    _addr_7bit (int): 传感器的7位I2C地址。
+    READ_CMD (int): 读取气体浓度的命令寄存器地址。
+    CALIBRATE_CMD (int): 校零校准的命令寄存器地址。
+    MAX_I2C_FREQ (int): I2C最大允许通信速率。
+    CALIB_MIN (int): 校准值的最小范围。
+    CALIB_MAX (int): 校准值的最大范围。
+
+    Methods:
+        __init__(self, i2c: SoftI2C, addr: int = 0x2A) -> None:
+            初始化传感器并绑定I2C通信接口。
+        read_concentration(self) -> int:
+            读取气体浓度值。
+        calibrate_zero(self, calib_value: int | None = None) -> bool:
+            执行传感器的校零校准操作。
+
+    Notes:
+        该传感器模块适用于静态气体浓度测量，不适用于动态变化快速的气体浓度测量。
+        建议在气体环境稳定后进行校零校准，以获得更准确的测量结果。
+        通信速率限制为100KHz，使用时需确保I2C总线配置正确。
+
+    ==========================================
+    JED series MEMS digital gas sensor driver class.
+    Supports reading gas concentration and zero calibration functions, based on SoftI2C communication protocol.
+
+    Attributes:
+        i2c (SoftI2C): I2C communication instance object.
+        _addr_7bit (int): 7-bit I2C address of the sensor.
+        READ_CMD (int): Command register address for reading gas concentration.
+        CALIBRATE_CMD (int): Command register address for zero calibration.
+        MAX_I2C_FREQ (int): Maximum allowed I2C communication rate.
+        CALIB_MIN (int): Minimum range of calibration value.
+        CALIB_MAX (int): Maximum range of calibration value.
+
+    Methods:
+        __init__(self, i2c: SoftI2C, addr: int = 0x2A) -> None:
+            Initialize sensor and bind I2C communication interface.
+        read_concentration(self) -> int:
+            Read gas concentration value.
+        calibrate_zero(self, calib_value: int | None = None) -> bool:
+            Perform zero calibration operation of the sensor.
+
+    Notes:
+        This sensor module is suitable for static gas concentration measurement, not for rapidly changing dynamic gas concentration measurement.
+        It is recommended to perform zero calibration when the gas environment is stable for more accurate measurement results.
+        The communication rate is limited to 100KHz, ensure correct I2C bus configuration when using.
+
     """
+
     # 固定的命令寄存器地址（类属性）
     # 读取气体浓度的命令字
     READ_CMD: int = 0xA1
@@ -38,9 +88,25 @@ class JEDMGasMeas:
 
     def __init__(self, i2c: SoftI2C, addr: int = 0x2A) -> None:
         """
-        初始化方法
-        :param i2c: SoftI2C实例（MicroPython的软I2C对象）
-        :param addr: 传感器7位基础地址（不带读写位），默认0x2A
+        初始化气体传感器并绑定I2C通信接口。
+
+        Args:
+            i2c (SoftI2C): SoftI2C实例（MicroPython的软I2C对象）。
+            addr (int): 传感器的7位基础地址（不带读写位），默认为0x2A。
+
+        Raises:
+            TypeError: 如果i2c参数不是SoftI2C实例。
+
+        ==========================================
+
+        Initialize gas sensor and bind I2C communication interface.
+
+        Args:
+            i2c (SoftI2C): SoftI2C instance (MicroPython software I2C object).
+            addr (int): 7-bit base address of the sensor (without R/W bit), default is 0x2A.
+
+        Raises:
+            TypeError: If i2c parameter is not a SoftI2C instance.
         """
         # 保存I2C实例和基础地址
         self.i2c: SoftI2C = i2c
@@ -49,9 +115,29 @@ class JEDMGasMeas:
 
     def read_concentration(self) -> int:
         """
-        读取气体浓度值（遵循传感器的I2C读取时序，使用标准I2C方法）
-        :return: 16位气体浓度值（高位*256 + 低位），读取失败返回0
+        读取气体浓度值，遵循传感器的I2C读取时序。
+
+        Returns:
+            int: 16位气体浓度值（高位*256 + 低位），读取失败返回0。
+
+        Notes:
+            使用标准的I2C重复起始条件进行读取操作。
+            先发送读取命令，然后读取2个字节的数据。
+            如果通信失败或数据不完整，会返回0并打印错误信息。
+
+        ==========================================
+
+        Read gas concentration value, following the sensor's I2C read timing.
+
+        Returns:
+            int: 16-bit gas concentration value (high byte * 256 + low byte), returns 0 if read fails.
+
+        Notes:
+            Uses standard I2C repeated start condition for read operation.
+            First sends read command, then reads 2 bytes of data.
+            If communication fails or data is incomplete, returns 0 and prints error message.
         """
+
         try:
             # 第一步：发送写操作（7位地址），写入读取命令，stop=False表示不发送停止位（实现重复起始）
             # writeto返回收到的ACK数量，需等于发送的字节数（这里是1个字节：READ_CMD）
@@ -73,10 +159,39 @@ class JEDMGasMeas:
 
     def calibrate_zero(self, calib_value: int | None = None) -> bool:
         """
-        传感器校零校准方法
-        :param calib_value: 校准值（16位整数），为None时使用当前读取的浓度值作为校准值
-        :return: 校准是否成功（True/False）
+        执行传感器的校零校准操作。
+
+        Args:
+            calib_value (int | None): 校准值（16位整数），为None时使用当前读取的浓度值作为校准值。
+
+        Returns:
+            bool: 校准是否成功（True/False）。
+
+        Raises:
+            ValueError: 如果校准值超出0~65535范围。
+
+        Notes:
+            校零后会自动验证校准结果，读取当前浓度值应为0。
+            如果验证失败，会打印警告信息并返回False。
+
+        ==========================================
+
+        Perform zero calibration operation of the sensor.
+
+        Args:
+            calib_value (int | None): Calibration value (16-bit integer), uses current read concentration value as calibration value if None.
+
+        Returns:
+            bool: Whether calibration succeeded (True/False).
+
+        Raises:
+            ValueError: If calibration value is outside 0~65535 range.
+
+        Notes:
+            Automatically verifies calibration result after zeroing, current read concentration value should be 0.
+            If verification fails, prints warning message and returns False.
         """
+
         # 若未指定校准值，先读取当前浓度作为校准值
         if calib_value is None:
             calib_value = self.read_concentration()
