@@ -23,8 +23,63 @@ import time
 # ======================================== 自定义类 ============================================
 
 class AT24CXX:
-    # 用于AT24CXX系列EEPROM的驱动类，支持多种容量的EEPROM
-    # 类变量：定义 EEPROM 不同大小
+    """
+    AT24CXX 系列 EEPROM 存储器驱动类。
+    支持多种容量的 EEPROM 芯片，提供字节读写、页写入和顺序读取功能。
+    兼容 AT24C32, AT24C64, AT24C128, AT24C256, AT24C512 等芯片。
+
+    Attributes:
+    i2c: I2C 接口实例，用于与 EEPROM 通信。
+    chip_size (int): EEPROM 芯片容量，单位字节。
+    addr (int): 芯片的 I2C 设备地址，默认为 0x50。
+    max_address (int): 用户可操作的最大地址，等于 chip_size - 1。
+
+    Methods:
+        __init__(self, i2c, chip_size=AT24C512, addr=0x50):
+            初始化 AT24CXX 类实例。
+        write_byte(self, address, data):
+            向指定地址写入一个字节。
+        read_byte(self, address):
+            从指定地址读取一个字节。
+        write_page(self, address, data):
+            向指定地址写入一页数据，自动处理跨页情况。
+        read_sequence(self, start_address, length):
+            顺序读取指定长度的数据。
+
+    Notes:
+        EEPROM 写入需要一定时间（典型 5ms），写入操作后需要适当延时。
+        页大小为 64 字节，跨页写入会自动分段处理。
+        地址范围为 0 到 chip_size-1，超出范围会抛出 ValueError。
+
+    ==========================================
+    AT24CXX series EEPROM memory driver class.
+    Supports various capacity EEPROM chips, provides byte read/write, page write and sequential read functions.
+    Compatible with AT24C32, AT24C64, AT24C128, AT24C256, AT24C512 and other chips.
+
+    Attributes:
+        i2c: I2C interface instance for communicating with EEPROM.
+        chip_size (int): EEPROM chip capacity in bytes.
+        addr (int): Chip I2C device address, default is 0x50.
+        max_address (int): Maximum address user can operate, equals chip_size - 1.
+
+    Methods:
+        __init__(self, i2c, chip_size=AT24C512, addr=0x50):
+            Initialize AT24CXX class instance.
+        write_byte(self, address, data):
+            Write one byte to specified address.
+        read_byte(self, address):
+            Read one byte from specified address.
+        write_page(self, address, data):
+            Write one page of data to specified address, automatically handles cross-page situations.
+        read_sequence(self, start_address, length):
+            Sequentially read data of specified length.
+
+    Notes:
+        EEPROM writing requires certain time (typically 5ms), need appropriate delay after write operations.
+        Page size is 64 bytes, cross-page writing will be automatically segmented.
+        Address range is 0 to chip_size-1, exceeding range will raise ValueError.
+    """
+    # 类常量：定义 EEPROM 不同容量
     # 4KiB
     AT24C32 = 4096
     # 8KiB
@@ -35,13 +90,29 @@ class AT24CXX:
     AT24C256 = 32768
     # 64KiB
     AT24C512 = 65536
-
     def __init__(self, i2c, chip_size=AT24C512, addr=0x50):
         """
-        初始化AT24CXX类实例
-        :param i2c        [machine.I2C]: I2C接口实例
-        :param chip_size          [int]: EEPROM芯片容量
-        :param addr               [int]: 芯片设备的I2C地址，默认为0x50
+        初始化 AT24CXX 类实例。
+
+        Args:
+            i2c (machine.I2C): I2C 接口实例。
+            chip_size (int, optional): EEPROM 芯片容量，默认为 AT24C512。
+            addr (int, optional): 芯片设备的 I2C 地址，默认为 0x50。
+
+        Raises:
+            ValueError: 如果芯片容量不在支持范围内。
+
+        ==========================================
+
+        Initialize AT24CXX class instance.
+
+        Args:
+            i2c (machine.I2C): I2C interface instance.
+            chip_size (int, optional): EEPROM chip capacity, default is AT24C512.
+            addr (int, optional): Chip device I2C address, default is 0x50.
+
+        Raises:
+            ValueError: If chip capacity is not in supported range.
         """
         # 判断EEPROM芯片容量是否在AT24CXX类定义的范围内
         if chip_size not in [AT24CXX.AT24C32, AT24CXX.AT24C64, AT24CXX.AT24C128,
@@ -56,10 +127,37 @@ class AT24CXX:
 
     def write_byte(self, address, data):
         """
-        向指定地址写入一个字节
-        :param address   [int]: 写入的地址
-        :param data      [int]: 要写入的数据，范围0-255
-        :return: None
+        向指定地址写入一个字节。
+
+        Args:
+            address (int): 写入的地址。
+            data (int): 要写入的数据，范围 0-255。
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: 如果地址超出范围或数据超出 0-255 范围。
+
+        Notes:
+            写入操作后会自动延时 5ms 等待 EEPROM 写入完成。
+
+        ==========================================
+
+        Write one byte to specified address.
+
+        Args:
+            address (int): Write address.
+            data (int): Data to write, range 0-255.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If address is out of range or data exceeds 0-255 range.
+
+        Notes:
+            Automatically delays 5ms after write operation to wait for EEPROM write completion.
         """
         # 检查地址是否在有效范围内
         if address < 0 or address > self.max_address:
@@ -77,9 +175,29 @@ class AT24CXX:
 
     def read_byte(self, address):
         """
-        从指定地址读取一个字节
-        :param address  [int]: 读取的地址
-        :return         [int]: 读取的数据
+        从指定地址读取一个字节。
+
+        Args:
+            address (int): 读取的地址。
+
+        Returns:
+            int: 读取的数据，范围 0-255。
+
+        Raises:
+            ValueError: 如果地址超出范围。
+
+        ==========================================
+
+        Read one byte from specified address.
+
+        Args:
+            address (int): Read address.
+
+        Returns:
+            int: Read data, range 0-255.
+
+        Raises:
+            ValueError: If address is out of range.
         """
         # 检查地址是否在有效范围内
         if address < 0 or address > self.max_address:
@@ -92,10 +210,39 @@ class AT24CXX:
 
     def write_page(self, address, data):
         """
-        向指定地址写入一页数据，处理跨页情况
-        :param address    [int]: 写入的起始地址
-        :param data     [bytes]: 要写入的数据，最大长度不受限制，为字节序列
-        :return: None
+        向指定地址写入一页数据，自动处理跨页情况。
+
+        Args:
+            address (int): 写入的起始地址。
+            data (bytes): 要写入的数据字节序列。
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: 如果地址超出范围、数据超出 0-255 范围或数据长度超出芯片容量。
+
+        Notes:
+            页大小为 64 字节，如果写入数据跨越页边界，会自动分段写入。
+            每段写入后都会延时 5ms 等待 EEPROM 写入完成。
+
+        ==========================================
+
+        Write one page of data to specified address, automatically handles cross-page situations.
+
+        Args:
+            address (int): Write starting address.
+            data (bytes): Data byte sequence to write.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If address is out of range, data exceeds 0-255 range, or data length exceeds chip capacity.
+
+        Notes:
+            Page size is 64 bytes, if write data crosses page boundary, automatically segments and writes.
+            Delays 5ms after each segment write to wait for EEPROM write completion.
         """
         # 检查地址是否在有效范围内
         if address < 0 or address > self.max_address:
@@ -136,10 +283,31 @@ class AT24CXX:
 
     def read_sequence(self, start_address, length):
         """
-        顺序读取指定长度的数据
-        :param start_address  [int]: 读取的起始地址
-        :param length         [int]: 读取的字节数
-        :return             [bytes]: 读取的数据
+        顺序读取指定长度的数据。
+
+        Args:
+            start_address (int): 读取的起始地址。
+            length (int): 要读取的字节数。
+
+        Returns:
+            bytes: 读取的数据字节序列。
+
+        Raises:
+            ValueError: 如果起始地址或读取范围超出芯片容量。
+
+        ==========================================
+
+        Sequentially read data of specified length.
+
+        Args:
+            start_address (int): Read starting address.
+            length (int): Number of bytes to read.
+
+        Returns:
+            bytes: Read data byte sequence.
+
+        Raises:
+            ValueError: If starting address or read range exceeds chip capacity.
         """
         # 检查起始地址和长度是否在有效范围内
         if start_address < 0 or (start_address + length) > self.max_address:
