@@ -13,9 +13,9 @@ __platform__ = "MicroPython v1.19+"
 
 # ======================================== 导入相关模块 =========================================
 
-#导入时间模块
+# 导入时间模块
 import time
-#导入常量模块
+# 导入常量模块
 from micropython import const
 
 # ======================================== 全局变量 ============================================
@@ -87,12 +87,15 @@ class BusPWMServoController:
             ValueError: If pca lacks required methods or freq invalid.
             RuntimeError: If setting frequency fails.
         """
+        # 检查 pca 是否符合接口要求
         if not hasattr(pca, "freq") or not hasattr(pca, "duty"):
             raise ValueError("pca must provide freq(hz) and duty(channel, value)")
+        # 检查 freq 是否为正整数
         if not isinstance(freq, int) or freq <= 0:
             raise ValueError("freq must be a positive integer")
         self._pca = pca
         self._freq = freq
+        # 设置频率
         try:
             if hasattr(self._pca, "reset"):
                 self._pca.reset()
@@ -195,6 +198,7 @@ class BusPWMServoController:
         Raises:
             ValueError: pulse_us is a non-positive number (≤ 0).
         """
+        # 显式检查 pulse_us 是否为正整数
         if not isinstance(pulse_us, int) or pulse_us <= 0:
             raise ValueError("pulse_us must be positive int")
         period_us = 1000000.0 / float(self._freq)
