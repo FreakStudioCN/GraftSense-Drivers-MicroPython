@@ -193,6 +193,14 @@ class HC08:
         'BAUD_115200': 115200
     }
 
+    # AT指令对应的参数映射
+    rfpm_param = {
+        4: 0,
+        0: 1,
+        -6: 2,
+        -23: 3
+    }
+
     # 校验位映射
     PARITY_NONE = "N",
     PARITY_EVEN = "E",
@@ -658,17 +666,11 @@ class HC08:
         Notes:
             Updates instance attribute rfpm upon success.
         """
-        # AT指令对应的参数映射
-        rfpm_param = {
-            4: 0,
-            0: 1,
-            -6: 2,
-            -23: 3
-        }
+
         if not rfpm in (4, 0, -6, -23):
             return False, "invalid rfpm"
 
-        cmd = f"AT+RFPM={rfpm_param[rfpm]}".encode()
+        cmd = f"AT+RFPM={HC08.rfpm_param[rfpm]}".encode()
         ok, err = self._send(cmd)
         if not ok:
             return False, err
@@ -738,7 +740,7 @@ class HC08:
 
         if not baud_rate in (1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200):
             return False, "invalid baud"
-        if not parity in (self.PARITY_NONE, self.PARITY_EVEN, self.PARITY_ODD):
+        if not parity in (HC08.PARITY_NONE, HC08.PARITY_EVEN, HC08.PARITY_ODD):
             return False, "invalid parity"
         cmd = f"AT+BAUD={baud_rate},{parity}".encode()
         ok, err = self._send(cmd)
