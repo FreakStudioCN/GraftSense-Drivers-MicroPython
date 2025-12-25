@@ -112,10 +112,10 @@ class SI5351_I2C:
     SI5351_DIS_STATE_HIGH_IMPEDANCE = const(2)
     SI5351_DIS_STATE_NEVER_DISABLED = const(3)
     SI5351_MULTISYNTH_RX_MAX = const(7)
-    SI5351_MULTISYNTH_C_MAX = const(1048575)  # fits in [19:0] or 2**20-1
+    SI5351_MULTISYNTH_C_MAX = const(1048575)
 
-    SI5351_MULTISYNTH_DIV_MIN = const(8)  # 4 and 6 only allowed in integer mode
-    SI5351_MULTISYNTH_DIV_MAX = const(2048)  # DIV_MAX = 128 for quadrature
+    SI5351_MULTISYNTH_DIV_MIN = const(8)
+    SI5351_MULTISYNTH_DIV_MAX = const(2048)
 
     SI5351_MULTISYNTH_MUL_MIN = const(15)
     SI5351_MULTISYNTH_MUL_MAX = const(90)
@@ -512,17 +512,6 @@ class SI5351_I2C:
         until the chip finishes power-on self-test, disables all outputs,
         and sets the crystal load value.
         """
-        # 类型检查
-        from machine import I2C  # 假设使用 MicroPython I2C
-        if not isinstance(i2c, I2C):
-            raise TypeError("i2c must be an I2C instance")
-        if not isinstance(crystal, (int, float)):
-            raise TypeError("crystal must be int or float")
-        if not isinstance(load, int):
-            raise TypeError("load must be an int")
-        if not isinstance(address, int):
-            raise TypeError("address must be an int")
-
         # 值检查
         allowed_loads = (self.SI5351_CRYSTAL_LOAD_6PF,
                          self.SI5351_CRYSTAL_LOAD_8PF,
@@ -777,7 +766,8 @@ class SI5351_I2C:
         if self.div[output] != div:
             pll = self.pll[output]
             self.set_phase(output, div if self.quadrature[output] else 0)
-            self.reset_pll(pll)  # only after MS setup, syncs all clocks of pll
+            # only after MS setup, syncs all clocks of pll
+            self.reset_pll(pll)
             integer_mode = (num == 0)
             self.init_multisynth(output, integer_mode=integer_mode)
             self.div[output] = div
@@ -823,7 +813,8 @@ class SI5351_I2C:
         vco = int(10 * vco)
         denom = int(10 * freq)
         num = vco % denom
-        div = vco // denom  # div = 4,6,[8+0/1048575 to 2047]
+        # div = 4,6,[8+0/1048575 to 2047]
+        div = vco // denom
         if (div < self.SI5351_MULTISYNTH_DIV_MIN or
                 div >= self.SI5351_MULTISYNTH_DIV_MAX):
             raise ValueError('multisynth divisor out of range')
@@ -878,15 +869,14 @@ class SI5351_I2C:
         vco = int(10 * vco)
         denom = int(10 * crystal)
         num = vco % denom
-        mul = vco // denom  # mul = 15+0/1048575 to 90
+        # mul = 15+0/1048575 to 90
+        mul = vco // denom
         if (mul < self.SI5351_MULTISYNTH_MUL_MIN or
                 mul >= self.SI5351_MULTISYNTH_MUL_MAX):
             raise ValueError('pll multiplier out of range')
         max_denom = self.SI5351_MULTISYNTH_C_MAX
         num, denom = self.approximate_fraction(num, denom, max_denom=max_denom)
         self.setup_pll(pll, mul=mul, num=num, denom=denom)
-
-    ###
 
     def disabled_states(self, output, state):
         """
