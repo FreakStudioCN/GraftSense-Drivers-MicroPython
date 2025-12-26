@@ -21,7 +21,7 @@ from pca9546adr import PCA9546ADR
 # 上电延时3s
 time.sleep(3)
 # 打印调试消息
-print("FreakStudio: Testing Gas Concentration with MEMS Modules")
+print("FreakStudio: Testing PCA9546ADR4 I2C Multiplexer Modules")
 
 # 初始化 I2C 总线
 i2c = I2C(1, scl=Pin(2), sda=Pin(3))
@@ -33,13 +33,13 @@ pca = PCA9546ADR(i2c)
 
 while True:
     
-    disable_all()
+    pca.disable_all()
     pca.select_channel(0)
     print("0 address",i2c.scan())
     
     time.sleep(4)
     
-    disable_all()
+    pca.disable_all()
     pca.select_channel(1)
     print("1 address",i2c.scan())
 
