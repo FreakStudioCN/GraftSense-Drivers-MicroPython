@@ -5,6 +5,11 @@
 # @File    : main.py
 # @Description : MEMS空气质量传感器驱动代码，适配4路MEMS传感器（CO2, VOC, PM2.5, PM10）
 
+__version__ = "0.1.0"
+__author__ = "侯钧瀚"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23.0"
+
 # ======================================== 导入相关模块 =========================================
 # 导入时间相关模块
 import time

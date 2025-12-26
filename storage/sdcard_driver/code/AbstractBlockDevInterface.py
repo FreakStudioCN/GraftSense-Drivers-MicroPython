@@ -121,7 +121,7 @@ class AbstractBlockDev:
             Note:
                 - Must at least support ioctl(4) to get block count
                 - To implement littlefs, need to additionally support ioctl(6) block erase
-            """
+        """
         pass
 
     def readblocks(self, block_num: int, buf: bytearray, offset: int = 0) -> None:

@@ -3,8 +3,7 @@
 # @Time    : 2025/09/17 16:00
 # @Author  : 侯钧瀚
 # @File    : dy_sv19t.py
-# @Description : DY-SV19T 语音播放模块驱动（UART，按API要求补齐）
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
+# @Description : DY-SV19T 语音播放模块驱动
 # @License : CC BY-NC 4.0
 
 __version__ = "0.2.0"

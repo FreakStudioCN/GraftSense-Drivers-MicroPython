@@ -5,6 +5,11 @@
 # @File    : neopixel_matrix.py       
 # @Description : WS2812矩阵驱动库
 
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 =========================================
 
 # 导入硬件相关模块
@@ -21,74 +26,20 @@ import json
 
 # ======================================== 全局变量 ============================================
 
+# Gamma校正系数
+# 红通道：线性，无校正
+GAMMA_RED = 1.0
+# 绿通道：线性，无校正
+GAMMA_GREEN = 1.0
+# 蓝通道：线性，无校正
+GAMMA_BLUE = 1.0
+
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
 
 # WS2812 矩阵驱动类
 class NeopixelMatrix(framebuf.FrameBuffer):
-    """
-    该类用于驱动基于 WS2812 的 LED 矩阵，支持 RGB565 图像渲染、颜色转换、局部刷新和滚动显示。
-
-    Attributes:
-        np (NeoPixel): WS2812 灯珠驱动实例。
-        width (int): 矩阵宽度（像素）。
-        height (int): 矩阵高度（像素）。
-        layout (str): 布局类型，支持 "row" 和 "snake"。
-        buffer (memoryview): RGB565 帧缓存，每像素 2 字节。
-        order (str): WS2812 的 RGB 通道顺序。
-        flip_h (bool): 是否水平翻转。
-        flip_v (bool): 是否垂直翻转。
-        rotate (int): 矩阵旋转角度（0、90、180、270）。
-        _brightness (float): 显示亮度，范围 0.0–1.0。
-        COLOR_CACHE (dict): 颜色转换缓存，加速重复 RGB565 转换。
-
-    Methods:
-        brightness() -> float: 获取当前亮度。
-        brightness(value: float) -> None: 设置亮度并刷新缓存。
-        rgb565_to_rgb888(val: int, brightness: float, order: str) -> tuple: 转换颜色。
-        show(x1: int, y1: int, x2: int, y2: int) -> None: 局部或全屏刷新。
-        scroll(xstep: int, ystep: int, clear_color: int, wrap: bool) -> None: 滚动显示。
-        show_rgb565_image(image_data: str|dict, offset_x: int, offset_y: int) -> None: 显示 JSON 图片。
-        load_rgb565_image(filename: str, offset_x: int, offset_y: int) -> None: 从文件加载图片。
-
-    Notes:
-        - 本类使用了 micropython.native 装饰器优化性能。
-        - 涉及 neopixel.NeoPixel.write() 的方法属于硬件 I/O 操作，非 ISR-safe。
-        - JSON 图片需符合定义的 RGB565 格式规范。
-
-    ==========================================
-
-    NeopixelMatrix driver for WS2812-based LED matrices.
-    Provides support for RGB565 rendering, color conversion, partial refresh, and scrolling.
-
-    Attributes:
-        np (NeoPixel): WS2812 driver instance.
-        width (int): matrix width in pixels.
-        height (int): matrix height in pixels.
-        layout (str): layout type, "row" or "snake".
-        buffer (memoryview): RGB565 framebuffer.
-        order (str): RGB order of WS2812 LEDs.
-        flip_h (bool): horizontal flip.
-        flip_v (bool): vertical flip.
-        rotate (int): rotation angle (0, 90, 180, 270).
-        _brightness (float): brightness scale factor 0.0–1.0.
-        COLOR_CACHE (dict): cache for color conversion results.
-
-    Methods:
-        brightness() -> float: get brightness.
-        brightness(value: float) -> None: set brightness and reinit cache.
-        rgb565_to_rgb888(val: int, brightness: float, order: str) -> tuple: convert RGB565 to RGB888.
-        show(x1: int, y1: int, x2: int, y2: int) -> None: refresh LED matrix.
-        scroll(xstep: int, ystep: int, clear_color: int, wrap: bool) -> None: scroll contents.
-        show_rgb565_image(image_data: str|dict, offset_x: int, offset_y: int) -> None: render JSON image.
-        load_rgb565_image(filename: str, offset_x: int, offset_y: int) -> None: load JSON image from file.
-
-    Notes:
-        - Methods involving neopixel.NeoPixel.write() perform hardware I/O and are not ISR-safe.
-        - JSON image must follow the RGB565 specification.
-    """
-
     # 常用颜色（RGB565）
     COLOR_BLACK   = const(0x0000)
     COLOR_WHITE   = const(0xFFFF)
@@ -111,72 +62,32 @@ class NeopixelMatrix(framebuf.FrameBuffer):
     LAYOUT_ROW = 'row'
     LAYOUT_SNAKE = 'snake'
 
-    # 缓存颜色转换结果，加速重复色值的处理
-    COLOR_CACHE = {}
+    # Gamma色准校正计算公式
 
-    # 图片JSON格式规范:
+    _GAMMA_TABLE_R = [round(255 * ((i / 255) ** (1 / GAMMA_RED))) for i in range(256)]
+    _GAMMA_TABLE_G = [round(255 * ((i / 255) ** (1 / GAMMA_GREEN))) for i in range(256)]
+    _GAMMA_TABLE_B = [round(255 * ((i / 255) ** (1 / GAMMA_BLUE))) for i in range(256)]
+
+    # 图片JSON格式规范 (RGB565像素格式)
+    # 说明：该JSON用于存储RGB565格式的像素图像数据，可被图像加载方法解析渲染
     # {
-    #     "pixels": [    # 必需 - RGB565像素数组，每个值范围0-65535
-    #         0xF800,    # 红色 (R=31, G=0, B=0)
-    #         0x07E0,    # 绿色 (R=0, G=63, B=0)
-    #         0x001F     # 蓝色 (R=0, G=0, B=31)
+    #     "pixels": [    # 必需字段 - RGB565像素数组，每个值的数值范围为0-65535（对应十六进制0x0000-0xFFFF）
+    #                    # 像素值**必须使用十进制整数**表示（如63488），禁止使用十六进制格式（如0xF800）
+    #                    # 排版建议：每个像素值单独占一行，提升JSON文件的可读性并避免解析错误
+    #         63488,     # 示例：纯红色（对应RGB565编码：R=31, G=0, B=0，十六进制0xF800转换为十进制63488）
+    #         2016,      # 示例：纯绿色（对应RGB565编码：R=0, G=63, B=0，十六进制0x07E0转换为十进制2016）
+    #         31         # 示例：纯蓝色（对应RGB565编码：R=0, G=0, B=31，十六进制0x001F转换为十进制31）
     #     ],
-    #     "width": 128,   # 可选 - 图片宽度(像素)，默认使用显示器宽度
-    #                     # 注: len(pixels)必须能被width整除
-    #     # 以下为可选元数据(不影响渲染):
-    #     "height": 64,   # 自动计算: len(pixels)/width
-    #     "description": "示例图片",
-    #     "version": 1.0
+    #     "width": 128,   # 可选字段 - 图片宽度（单位：像素），默认使用显示器宽度
+    #                     # 强制约束：像素数组长度len(pixels)必须能被width整除，否则会导致解析失败
+    #     # 以下为可选元数据字段（仅用于描述信息，不影响图像渲染逻辑）
+    #     "height": 64,   # 可选字段 - 图片高度（单位：像素），可通过公式自动计算：height = len(pixels) / width
+    #     "description": "Sample image", # 可选字段 - 图片描述信息，建议使用英文表述
+    #     "version": 1.0  # 可选字段 - 格式版本号，用于区分不同版本的规范定义
     # }
 
-    def __init__(self, width, height, pin, layout=LAYOUT_ROW, brightness=0.2, order=ORDER_BRG,
+    def __init__(self, width, height, pin, layout=LAYOUT_ROW, brightness=1, order=ORDER_RGB,
                  flip_h=False, flip_v=False, rotate=0):
-        """
-        初始化 WS2812 矩阵对象，创建 NeoPixel 实例及 FrameBuffer 缓冲区，并设置布局、亮度和旋转。
-
-        Args:
-            width (int): 矩阵宽度，像素数量，必须大于 0。
-            height (int): 矩阵高度，像素数量，必须大于 0。
-            pin (Pin): 控制 WS2812 的 GPIO 引脚。
-            layout (str): 布局类型，可选 "row" 或 "snake"，默认为 "row"。
-            brightness (float): 亮度值，范围 0.0–1.0，默认为 0.2。
-            order (str): RGB 顺序，默认为 "BRG"，可选值：RGB, GRB, BGR, BRG, RBG, GBR。
-            flip_h (bool): 是否水平翻转，默认 False。
-            flip_v (bool): 是否垂直翻转，默认 False。
-            rotate (int): 顺时针旋转角度，可选 0, 90, 180, 270，默认 0。
-
-        Raises:
-            ValueError: 参数非法，如宽高小于 1，布局或颜色顺序不合法，亮度超范围，旋转角度非法。
-
-        Notes:
-            - 会创建 NeoPixel 对象及 framebuf 缓冲区。
-            - 初始化会填充颜色缓存，加速 RGB565 转 RGB888。
-            - 非 ISR-safe，不可在中断中调用。
-
-        ==========================================
-
-        Initialize WS2812 matrix object, creating NeoPixel instance and FrameBuffer buffer,
-        and setting layout, brightness, flipping and rotation.
-
-        Args:
-            width (int): Matrix width in pixels, must be >0.
-            height (int): Matrix height in pixels, must be >0.
-            pin (Pin): GPIO pin controlling WS2812.
-            layout (str): Layout type, "row" or "snake", default "row".
-            brightness (float): Brightness value, 0.0–1.0, default 0.2.
-            order (str): RGB order, default "BRG", options: RGB, GRB, BGR, BRG, RBG, GBR.
-            flip_h (bool): Horizontal flip, default False.
-            flip_v (bool): Vertical flip, default False.
-            rotate (int): Rotation in degrees, 0,90,180,270, default 0.
-
-        Raises:
-            ValueError: Invalid parameters, e.g., width/height <1, invalid layout or order, brightness out of range, illegal rotation.
-
-        Notes:
-            - Creates NeoPixel object and framebuf buffer.
-            - Initializes color cache for fast RGB565 to RGB888 conversion.
-            - Not ISR-safe.
-        """
         # 检查参数是否合法
         if width < 1 or height < 1:
             raise ValueError('width and height must be greater than 0')
@@ -221,133 +132,48 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         # 初始化 framebuf.FrameBuffer，使用 RGB565 模式
         super().__init__(self.buffer, width, height, framebuf.RGB565)
 
-        # 初始化亮度并缓存常用颜色
+        # 初始化亮度
         self._brightness = brightness
-        self._init_color_cache()
-
-    def _init_color_cache(self):
-        """
-        初始化颜色转换缓存，预计算常用颜色的 RGB565 到 RGB888 转换结果。
-
-        Notes:
-            - 缓存会被清空并重新填充常用颜色的转换结果
-            - 当亮度改变时会自动调用此方法更新缓存
-
-        ==========================================
-
-        Initialize color conversion cache, precompute RGB565 to RGB888 conversion results for common colors.
-
-        Notes:
-            - Cache will be cleared and repopulated with conversion results for common colors
-            - Automatically called when brightness changes to update cache
-        """
-        NeopixelMatrix.COLOR_CACHE.clear()
-        common_colors = [
-            NeopixelMatrix.COLOR_BLACK,
-            NeopixelMatrix.COLOR_WHITE,
-            NeopixelMatrix.COLOR_RED,
-            NeopixelMatrix.COLOR_GREEN,
-            NeopixelMatrix.COLOR_BLUE,
-            NeopixelMatrix.COLOR_YELLOW,
-            NeopixelMatrix.COLOR_CYAN,
-            NeopixelMatrix.COLOR_MAGENTA
-        ]
-        for color in common_colors:
-            # 计算并缓存
-            self.rgb565_to_rgb888(color)
 
     @property
-    def brightness(self) -> float:
-        """
-        获取当前亮度值。
-
-        Returns:
-            float: 当前亮度，范围 0.0–1.0。
-
-        Notes:
-            - 亮度值影响所有像素的显示强度
-            - 此为属性的getter方法
-
-        ==========================================
-
-        Get current brightness value.
-
-        Returns:
-            float: Current brightness, range 0.0–1.0.
-
-        Notes:
-            - Brightness value affects display intensity of all pixels
-            - This is the getter method for the property
-        """
+    def brightness(self):
+        """获取当前亮度"""
         return self._brightness
 
     @brightness.setter
     def brightness(self, value):
-        """
-        设置亮度值并重新初始化颜色缓存。
-
-        Args:
-            value (float): 新的亮度值，范围 0.0–1.0。
-
-        Raises:
-            ValueError: 亮度值超出 0.0–1.0 范围。
-
-        Notes:
-            - 亮度变化会影响所有后续的颜色转换
-            - 设置后会自动重建颜色转换缓存
-
-        ==========================================
-
-        Set brightness value and reinitialize color cache.
-
-        Args:
-            value (float): New brightness value, range 0.0–1.0.
-
-        Raises:
-            ValueError: brightness value is out of 0.0–1.0 range.
-
-        Notes:
-            - Brightness change affects all subsequent color conversions
-            - Automatically rebuilds color conversion cache after setting
-        """
+        """设置亮度"""
         if not 0 <= value <= 1:
             raise ValueError("Brightness must be between 0 and 1")
         self._brightness = value
-        # 清空并重新初始化缓存
-        self._init_color_cache()
 
     @micropython.native
-    def _pos2index(self, x, y) -> int:
+    def apply_brightness_gamma_balance(self, r, g, b, brightness=None, r_balance=1.0, g_balance=1.0, b_balance=1.0):
         """
-        将 (x, y) 坐标转换为 NeoPixel 像素数组中的索引，考虑旋转、翻转和布局设置。
+        应用亮度调节、Gamma校正和三色调整
+        """
+        if brightness is None:
+            brightness = self._brightness
 
-        Args:
-            x (int): 像素的 X 坐标（水平方向）。
-            y (int): 像素的 Y 坐标（垂直方向）。
+        if not 0 <= brightness <= 1:
+            raise ValueError("Brightness must be between 0 and 1")
 
-        Returns:
-            int: 对应像素在 NeoPixel 数组中的索引。
+        # 应用Gamma校正
+        r = NeopixelMatrix._GAMMA_TABLE_R[r]
+        g = NeopixelMatrix._GAMMA_TABLE_G[g]
+        b = NeopixelMatrix._GAMMA_TABLE_B[b]
 
-        Notes:
-            - 内部辅助方法，处理坐标到物理像素的映射
-            - 考虑旋转、翻转和布局设置的综合影响
-            - 使用 micropython.native 装饰器优化性能
+        # 应用亮度和三色调整
+        r = int(r * brightness * r_balance)
+        g = int(g * brightness * g_balance)
+        b = int(b * brightness * b_balance)
 
-        ==========================================
+        return r, g, b
 
-        Convert (x, y) coordinates to index in NeoPixel pixel array, considering rotation, flipping and layout settings.
-
-        Args:
-            x (int): X coordinate of the pixel (horizontal).
-            y (int): Y coordinate of the pixel (vertical).
-
-        Returns:
-            int: Index of the corresponding pixel in NeoPixel array.
-
-        Notes:
-            - Internal helper method handling coordinate to physical pixel mapping
-            - Considers combined effects of rotation, flipping and layout settings
-            - Optimized with micropython.native decorator
+    @micropython.native
+    def _pos2index(self, x, y):
+        """
+        处理不同矩阵排列方式
         """
         # 1. 旋转处理
         if self.rotate == 90:
@@ -371,45 +197,9 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             return y * self.width + (x if y % 2 == 0 else self.width - 1 - x)
 
     @micropython.native
-    def rgb565_to_rgb888(self, val, brightness=None, order=None) -> tuple:
+    def rgb565_to_rgb888(self, val, brightness=None, order=None, r_balance=1.0, g_balance=1.0, b_balance=1.0):
         """
-        将 RGB565 颜色格式转换为 RGB888 格式，并应用亮度和颜色通道顺序。
-
-        Args:
-            val (int): RGB565 颜色值（0x0000–0xFFFF）。
-            brightness (float, optional): 亮度系数，范围 0.0–1.0，默认使用当前亮度。
-            order (str, optional): 颜色通道顺序，默认使用实例设置的顺序。
-
-        Returns:
-            tuple: (r, g, b) 形式的 RGB888 颜色值（0–255）。
-
-        Raises:
-            ValueError: 当亮度值超出范围或颜色顺序不合法时。
-
-        Notes:
-            - 使用缓存机制避免重复计算，提高性能
-            - 使用 micropython.native 装饰器优化转换速度
-            - 转换公式参考：https://en.wikipedia.org/wiki/High_color#16-bit
-
-        ==========================================
-
-        Convert RGB565 color format to RGB888 format, applying brightness and color channel order.
-
-        Args:
-            val (int): RGB565 color value (0x0000–0xFFFF).
-            brightness (float, optional): Brightness factor, range 0.0–1.0, uses current brightness by default.
-            order (str, optional): Color channel order, uses instance setting by default.
-
-        Returns:
-            tuple: RGB888 color values in (r, g, b) form (0–255).
-
-        Raises:
-            ValueError: When brightness value is out of range or color order is invalid.
-
-        Notes:
-            - Uses caching mechanism to avoid redundant calculations and improve performance
-            - Optimized with micropython.native decorator
-            - Conversion formula reference: https://en.wikipedia.org/wiki/High_color#16-bit
+        将 RGB565 颜色转换为 RGB888（三元组），适配 WS2812。
         """
         if brightness is None:
             brightness = self._brightness
@@ -420,20 +210,18 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         if not 0 <= brightness <= 1:
             raise ValueError("Brightness must be between 0 and 1")
 
-        # 检查缓存
-        cache_key = (val, brightness, order)
-        if cache_key in NeopixelMatrix.COLOR_CACHE:
-            return NeopixelMatrix.COLOR_CACHE[cache_key]
-
         # 提取 RGB565 颜色分量
         r = (val >> 11) & 0x1F
         g = (val >> 5) & 0x3F
         b = val & 0x1F
 
-        # 转换为 8bit 并应用亮度
-        r8 = int(((r * 527 + 23) >> 6) * brightness)
-        g8 = int(((g * 259 + 33) >> 6) * brightness)
-        b8 = int(((b * 527 + 23) >> 6) * brightness)
+        # 转换为 8bit
+        r8 = (r << 3) | (r >> 2)
+        g8 = (g << 2) | (g >> 4)
+        b8 = (b << 3) | (b >> 2)
+
+        # 调用apply_brightness_gamma_balance进行亮度、Gamma校正和三色调整
+        r8, g8, b8 = self.apply_brightness_gamma_balance(r8, g8, b8, brightness, r_balance, g_balance, b_balance)
 
         # 根据顺序组合
         if order == NeopixelMatrix.ORDER_RGB:
@@ -451,47 +239,13 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         else:
             raise ValueError('Invalid order: {}'.format(order))
 
-        # 写入缓存
-        NeopixelMatrix.COLOR_CACHE[cache_key] = rgb
-
         return rgb
 
     @micropython.native
     def show(self, x1=0, y1=0, x2=None, y2=None):
         """
-        将帧缓存中的内容刷新到物理 LED 矩阵，支持局部区域刷新以提高效率。
-
-        Args:
-            x1 (int, optional): 刷新区域左上角 X 坐标，默认 0。
-            y1 (int, optional): 刷新区域左上角 Y 坐标，默认 0。
-            x2 (int, optional): 刷新区域右下角 X 坐标，默认宽度-1。
-            y2 (int, optional): 刷新区域右下角 Y 坐标，默认高度-1。
-
-        Raises:
-            ValueError: 当坐标超出矩阵范围或区域不合法（x2 < x1 或 y2 < y1）时。
-
-        Notes:
-            - 调用 neopixel.NeoPixel.write() 执行实际硬件刷新，非 ISR-safe
-            - 局部刷新可减少数据传输量，提高性能
-            - 使用 micropython.native 装饰器优化循环性能
-
-        ==========================================
-
-        Refresh content from frame buffer to physical LED matrix, supporting partial area refresh for efficiency.
-
-        Args:
-            x1 (int, optional): Top-left X coordinate of refresh area, default 0.
-            y1 (int, optional): Top-left Y coordinate of refresh area, default 0.
-            x2 (int, optional): Bottom-right X coordinate of refresh area, default width-1.
-            y2 (int, optional): Bottom-right Y coordinate of refresh area, default height-1.
-
-        Raises:
-            ValueError: When coordinates are out of matrix range or area is invalid (x2 < x1 or y2 < y1).
-
-        Notes:
-            - Calls neopixel.NeoPixel.write() to perform actual hardware refresh, not ISR-safe
-            - Partial refresh reduces data transfer and improves performance
-            - Optimized with micropython.native decorator
+        刷新屏幕，将 FrameBuffer 中的内容写入 WS2812 灯带。
+        支持局部刷新，通过指定 (x1, y1) 到 (x2, y2) 的区域。
         """
         # 如果没指定 x2，默认整行
         x2 = x2 if x2 is not None else self.width - 1
@@ -517,8 +271,8 @@ class NeopixelMatrix(framebuf.FrameBuffer):
                 idx = self._pos2index(x, y)
                 # 每个像素占 2 字节，计算在 buffer 中的偏移地址
                 addr = (y * self.width + x) * 2
-                # 从 FrameBuffer 中读取 RGB565 值（高字节在前）
-                val = (self.buffer[addr] << 8) | self.buffer[addr + 1]
+                # 从 FrameBuffer 中读取 RGB565 值， 注意，FrameBuffer是小端序
+                val = (self.buffer[addr + 1] << 8) | self.buffer[addr]
                 # 转换为 RGB888 后赋值给 WS2812
                 self.np[idx] = self.rgb565_to_rgb888(val, self.brightness, self.order)
 
@@ -528,39 +282,14 @@ class NeopixelMatrix(framebuf.FrameBuffer):
     @micropython.native
     def scroll(self, xstep, ystep, clear_color=None, wrap=False):
         """
-        沿水平和垂直方向滚动显示内容，支持循环滚动和普通滚动两种模式。
-
-        Args:
-            xstep (int): 水平滚动像素数，正数向右，负数向左。
-            ystep (int): 垂直滚动像素数，正数向下，负数向上。
-            clear_color (int, optional): 滚动后露出区域的填充颜色（RGB565），默认黑色。
-            wrap (bool, optional): 是否循环滚动，True 表示循环，False 表示普通滚动，默认 False。
-
-        Raises:
-            ValueError: 当 xstep/ystep 不是整数、clear_color 不是整数或 wrap 不是布尔值时。
-
-        Notes:
-            - 滚动仅修改帧缓存，需调用 show() 方法刷新到物理矩阵
-            - 循环滚动模式下内容会从另一侧出现，普通模式下露出区域会被填充
-            - 使用 micropython.native 装饰器优化性能
-
-        ==========================================
-
-        Scroll display content horizontally and vertically, supporting both circular and normal scrolling modes.
-
-        Args:
-            xstep (int): Number of pixels to scroll horizontally, positive for right, negative for left.
-            ystep (int): Number of pixels to scroll vertically, positive for down, negative for up.
-            clear_color (int, optional): Fill color for exposed areas after scrolling (RGB565), default black.
-            wrap (bool, optional): Whether to wrap around, True for circular scrolling, False for normal scrolling, default False.
-
-        Raises:
-            ValueError: When xstep/ystep are not integers, clear_color is not integer, or wrap is not boolean.
-
-        Notes:
-            - Scrolling only modifies frame buffer, need to call show() to refresh physical matrix
-            - In wrap mode content reappears on opposite side, in normal mode exposed areas are filled
-            - Optimized with micropython.native decorator
+        重写scroll方法，提供两种滚动模式
+        参数:
+            xstep: 水平滚动步数(正数向右，负数向左)
+            ystep: 垂直滚动步数(正数向下，负数向上)
+            clear_color: 清除残留区域使用的颜色(默认COLOR_BLACK)
+            wrap: True=循环滚动 False=普通滚动(默认)
+        需要注意：
+            不允许同时设置水平和垂直滚动步数（xstep和ystep不能同时非零）
         """
         # 如果没有指定清除颜色，使用默认黑色
         if clear_color is None:
@@ -577,6 +306,10 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         # 检查循环滚动设置参数是否合法
         if not isinstance(wrap, bool):
             raise ValueError('wrap must be bool')
+
+        # 只能选择水平或垂直一个方向滚动
+        if xstep != 0 and ystep != 0:
+            raise ValueError('Cannot set xstep and ystep at the same time (only one direction allowed)')
 
         if wrap:
             # 循环滚动模式 - 保存原始缓冲区
@@ -648,39 +381,11 @@ class NeopixelMatrix(framebuf.FrameBuffer):
     @micropython.native
     def show_rgb565_image(self, image_data, offset_x=0, offset_y=0):
         """
-        显示 JSON 格式的 RGB565 图像数据，可以是 JSON 字符串或已解析的字典。
-
-        Args:
-            image_data (str | dict): JSON 图像数据，可以是字符串或已解析的字典。
-            offset_x (int, optional): 图像显示的 X 偏移量，默认 0。
-            offset_y (int, optional): 图像显示的 Y 偏移量，默认 0。
-
-        Raises:
-            ValueError: 当图像数据格式不合法时。
-            json.JSONDecodeError: 当 JSON 字符串解析失败时。
-
-        Notes:
-            - 图像数据需符合类中定义的 JSON 格式规范
-            - 仅修改帧缓存，需调用 show() 方法刷新显示
-            - 使用 micropython.native 装饰器优化性能
-
-        ==========================================
-
-        Display JSON formatted RGB565 image data, which can be a JSON string or parsed dictionary.
-
-        Args:
-            image_data (str | dict): JSON image data, can be string or parsed dictionary.
-            offset_x (int, optional): X offset for image display, default 0.
-            offset_y (int, optional): Y offset for image display, default 0.
-
-        Raises:
-            ValueError: When image data format is invalid.
-            json.JSONDecodeError: When JSON string parsing fails.
-
-        Notes:
-            - Image data must conform to JSON format specification defined in the class
-            - Only modifies frame buffer, need to call show() to refresh display
-            - Optimized with micropython.native decorator
+        显示RGB565格式的JSON图片
+        参数:
+            image_data: 包含RGB565数据的JSON字符串或字典
+            offset_x: X轴偏移(像素)
+            offset_y: Y轴偏移(像素)
         """
         try:
             # 解析JSON数据
@@ -703,34 +408,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
     @micropython.native
     def _validate_rgb565_image(self, data):
         """
-        验证 RGB565 图像数据的格式是否符合规范。
-
-        Args:
-            data (dict): 已解析的图像数据字典。
-
-        Raises:
-            ValueError: 当数据缺少必要键、像素不是列表或颜色值超出范围时,宽度不是正整数时。
-
-        Notes:
-            - 内部辅助方法，确保图像数据格式正确
-            - 检查必要的键、数据类型和值范围
-            - 使用 micropython.native 装饰器优化性能
-
-        ==========================================
-
-        Validate that RGB565 image data format conforms to specifications.
-
-        Args:
-            data (dict): Parsed image data dictionary.
-
-        Raises:
-            ValueError: When data lacks required keys, pixels are not a list, or color values are out of range,
-            width must be positive integer.
-
-        Notes:
-            - Internal helper method ensuring correct image data format
-            - Checks for required keys, data types and value ranges
-            - Optimized with micropython.native decorator
+        验证RGB565图像数据结构
         """
         required = ['pixels']
         if not all(key in data for key in required):
@@ -749,33 +427,12 @@ class NeopixelMatrix(framebuf.FrameBuffer):
     @micropython.native
     def _draw_rgb565_data(self, pixels, img_width, offset_x, offset_y):
         """
-        将 RGB565 像素数据绘制到帧缓存的指定位置。
-
-        Args:
-            pixels (list): RGB565 颜色值列表。
-            img_width (int): 图像宽度（像素），用于计算像素坐标。
-            offset_x (int): 绘制的 X 偏移量。
-            offset_y (int): 绘制的 Y 偏移量。
-
-        Notes:
-            - 内部辅助方法，负责实际绘制像素
-            - 仅绘制矩阵范围内的像素，超出部分会被忽略
-            - 使用 micropython.native 装饰器优化性能
-
-        ==========================================
-
-        Draw RGB565 pixel data to specified position in frame buffer.
-
-        Args:
-            pixels (list): List of RGB565 color values.
-            img_width (int): Image width in pixels, used to calculate pixel coordinates.
-            offset_x (int): X offset for drawing.
-            offset_y (int): Y offset for drawing.
-
-        Notes:
-            - Internal helper method responsible for actual pixel drawing
-            - Only draws pixels within matrix range, out-of-bounds pixels are ignored
-            - Optimized with micropython.native decorator
+        渲染RGB565像素数据
+        参数:
+            pixels: RGB565值数组
+            img_width: 原图宽度
+            offset_x: X偏移
+            offset_y: Y偏移
         """
         for i, color in enumerate(pixels):
             x = i % img_width + offset_x
@@ -787,31 +444,11 @@ class NeopixelMatrix(framebuf.FrameBuffer):
     @micropython.native
     def load_rgb565_image(self, filename, offset_x=0, offset_y=0):
         """
-        从文件加载 JSON 格式的 RGB565 图像并显示在指定位置。
-
-        Args:
-            filename (str): 包含 JSON 图像数据的文件名。
-            offset_x (int, optional): 图像显示的 X 偏移量，默认 0。
-            offset_y (int, optional): 图像显示的 Y 偏移量，默认 0。
-
-        Notes:
-            - 调用 show_rgb565_image() 处理实际的图像解析和绘制
-            - 仅修改帧缓存，需调用 show() 方法刷新显示
-            - 使用 micropython.native 装饰器优化性能
-
-        ==========================================
-
-        Load JSON formatted RGB565 image from file and display at specified position.
-
-        Args:
-            filename (str): Filename containing JSON image data.
-            offset_x (int, optional): X offset for image display, default 0.
-            offset_y (int, optional): Y offset for image display, default 0.
-
-        Notes:
-            - Calls show_rgb565_image() to handle actual image parsing and drawing
-            - Only modifies frame buffer, need to call show() to refresh display
-            - Optimized with micropython.native decorator
+        从JSON文件加载RGB565格式图片
+        参数:
+            filename: JSON文件路径
+            offset_x: X轴偏移
+            offset_y: Y轴偏移
         """
         try:
             with open(filename, 'r') as f:
