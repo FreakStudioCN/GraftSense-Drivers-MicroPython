@@ -62,7 +62,7 @@ class PCA9546ADR:
 
     MAX_CH = const(4)
 
-    def __init__(self, i2c, addr7=const(0x70)):
+    def __init__(self, i2c, addr7=0x70):
         """
         初始化 PCA9546ADR 实例。
 
