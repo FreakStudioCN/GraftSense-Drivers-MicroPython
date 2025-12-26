@@ -32,7 +32,7 @@ time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Testing OLED display")
 
-# 创建硬件I2C的实例，使用I2C1外设，时钟频率为400KHz，SDA引脚为6，SCL引脚为7
+# 创建硬件I2C的实例，使用I2C1外设，时钟频率为400KHz，SDA引脚为4，SCL引脚为5
 i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
 
 # 输出当前目录下所有文件

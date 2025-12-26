@@ -144,22 +144,25 @@ class WaveformGenerator:
         self.timer = Timer(-1)
 
         # 保存波形生成器的参数
-        self.frequency = frequency  # 信号频率
-        self.amplitude = amplitude  # 信号幅度
-        self.offset = offset  # 直流偏移
-        self.waveform = waveform  # 波形类型
-        self.rise_ratio = rise_ratio  # 三角波上升沿比例
-        self.vref = vref  # 偏置电压
+        # 信号频率
+        self.frequency = frequency
+        # 信号幅度
+        self.amplitude = amplitude
+        # 直流偏移
+        self.offset = offset
+        # 波形类型
+        self.waveform = waveform
+        # 三角波上升沿比例
+        self.rise_ratio = rise_ratio
+        # 偏置电压
+        self.vref = vref
 
         # 固定 50 个采样点
         self.sample_rate = 50
-
         # DS3502 的分辨率为 7 位（128 级）
         self.dac_resolution = 127
-
         # 根据波形类型生成采样点数据
         self.samples = self.generate_samples()
-
         # 初始化当前采样点索引
         self.index = 0
 

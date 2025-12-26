@@ -25,38 +25,6 @@ PCF8574_ADDR = None
 
 # ======================================== 功能函数 ============================================
 
-def key_callback(key_name, state):
-    """
-    按键事件回调函数，当按键状态发生变化时调用此函数。
-
-    Args:
-        key_name (str): 按键名称或标识符，用于区分不同按键。
-        state (bool): 按键状态，True 表示按下，False 表示释放。
-
-    Raises:
-        TypeError: 当key_name不是str类型或者state不是bool类型抛出异常。
-        ValueError: 当key_name不在 KEYS_MAP 中时抛出。
-
-    ===========================================
-
-    Key event callback function, this function is called when the key state changes.
-
-    Args:
-        key_name (str): The name or identifier of the key, used to differentiate between different keys.
-        state (bool): The key state, True indicates pressed, False indicates released.
-
-    Raises:
-        TypeError: Throw an exception when key_name is not of type str or state is not of type bool.
-        ValueError: Raised when key_name is not defined in KEYS_MAP.
-    """
-    # 参数校验
-    if not isinstance(key_name, str):
-        raise TypeError(f"key_name must be a str, got {type(key_name).__name__}")
-    if not isinstance(state, bool):
-        raise TypeError(f"state must be a bool, got {type(state).__name__}")
-    status = "press" if state else "release"
-    print(f"key {key_name} {status}")
-
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
@@ -94,10 +62,11 @@ keys = PCF8574Keys(pcf, KEYS_MAP)
 while True:
     # 打印当前所有按键状态
     all_states = keys.read_all()
-    print("status:", {k: "release" if v else "press" for k, v in all_states.items()})
-    if not all_states['SW1']:
-        keys.on()
-    if not all_states['SW2']:
-        keys.off()
-    # 500ms刷新一次状态显示
-    time.sleep(0.5)
+    print(all_states)
+    # 查看SW1和SW2按键状态，控制LED灯开关
+    if keys.read_key('SW1') == True:
+        keys.led_on()
+    if keys.read_key('SW2') == True:
+        keys.led_off()
+    # 100ms刷新一次状态显示
+    time.sleep(0.1)

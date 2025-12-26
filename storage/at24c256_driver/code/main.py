@@ -27,13 +27,13 @@ data_to_write = bytes(range(DATA_SIZE))
 # ======================================== 功能函数 ============================================
 
 def erase_data(at24cxx, start_address, length):
-    '''
+    """
     将指定区域的数据擦除为0xFF
     :param at24cxx   [AT24CXX]: AT24CXX类实例
     :param start_address [int]: 起始地址
     :param length        [int]: 写入长度
     :return: None
-    '''
+    """
 
     # 生成一个长度为length、数据均为0xFF的字节数据
     data_to_erase = bytes([0xFF] * length)
@@ -43,11 +43,11 @@ def erase_data(at24cxx, start_address, length):
 # ======================================== 初始化配置 ==========================================
 
 # 上电延时3s
-#time.sleep(3)
+time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Read and Write AT24C256")
 
-# 创建硬件I2C的实例，使用I2C1外设，时钟频率为400KHz，SDA引脚为10，SCL引脚为11
+# 创建硬件I2C的实例，使用I2C0外设，时钟频率为100KHz，SDA引脚为4，SCL引脚为5
 i2c_at24c256 = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=100000)
 
 # 创建AT24C256的实例

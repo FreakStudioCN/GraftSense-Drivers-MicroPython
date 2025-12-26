@@ -11,8 +11,6 @@ from machine import UART, Pin
 import time
 
 # ======================================== 全局变量 ============================================
-# 初始化 UART1：TX=Pin8，RX=Pin9，波特率9600
-uart = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 
 # 测试消息计数器
 count = 1
@@ -22,10 +20,13 @@ count = 1
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
+
 # 上电延时 3 秒
 time.sleep(3)
-
 print("FreakStudio: UART loopback test started. Sending data every 2 seconds...")
+
+# 初始化 UART1：TX=Pin8，RX=Pin9，波特率9600
+uart = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 
 # ========================================  主程序  ===========================================
 
@@ -51,6 +52,5 @@ try:
         # 计数器自增并在下一次发送前等待 2 秒
         count += 1
         time.sleep(2)
-
 except KeyboardInterrupt:
     print("\nTest stopped by user")

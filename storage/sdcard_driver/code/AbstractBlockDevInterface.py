@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-        
 # @Time    : 2024/9/18 下午12:15   
 # @Author  : 李清水            
-# @File    : AbstractBlockDevInterface.py.py       
+# @File    : AbstractBlockDevInterface.py
 # @Description : 定义了块设备的抽象基类 AbstractBlockDev
 # @License : CC BY-NC 4.0
 
@@ -49,29 +49,79 @@ class AbstractBlockDev:
         - 写入时必须遵守：
             - 简单接口需自动处理擦除
             - 扩展接口禁止隐式擦除
+    ==========================================
+
+    AbstractBlockDev class, defines block device operation interface compliant with MicroPython specification.
+
+    This class provides abstract interface for block devices, supporting simple interface (block-aligned operations)
+    and extended interface (arbitrary offset operations), compatible with MicroPython filesystem (such as FAT and littlefs)
+    driver requirements. Implementers must at least support ioctl(4) block count query, and if need to support littlefs,
+    also need to implement ioctl(6) block erase function.
+
+    Attributes:
+        (Implemented by specific subclasses)
+        block_size (int): Block size in bytes, usually exposed via ioctl(5)
+        block_count (int): Total number of blocks, usually exposed via ioctl(4)
+
+    Methods:
+        __init__():
+            Initialize abstract base class for block device
+        readblocks(block_num, buf, offset=0):
+            Read data blocks from device to buffer
+        writeblocks(block_num, buf, offset=0):
+            Write data to device or erase block
+        ioctl(op, arg):
+            Control device operations and query parameters
+
+    Note:
+        - Simple interface: Requires buffer length to align with block size (offset=0)
+        - Extended interface: Supports arbitrary offset and length (offset≠0)
+        - Writing must comply with:
+            - Simple interface needs to automatically handle erase
+            - Extended interface prohibits implicit erase
     """
     # 标准操作码常量（类属性）
-    IOCTL_INIT = 1      # 设备初始化
-    IOCTL_SHUTDOWN = 2  # 设备关闭
-    IOCTL_SYNC = 3      # 数据同步
-    IOCTL_BLK_COUNT = 4 # 获取块数量（必须实现）
-    IOCTL_BLK_SIZE = 5  # 获取块大小（可选）
-    IOCTL_BLK_ERASE = 6 # 块擦除（littlefs必需）
+    # 设备初始化
+    IOCTL_INIT = 1
+    # 设备关闭
+    IOCTL_SHUTDOWN = 2
+    # 数据同步
+    IOCTL_SYNC = 3
+    # 获取块数量（必须实现）
+    IOCTL_BLK_COUNT = 4
+    # 获取块大小（可选）
+    IOCTL_BLK_SIZE = 5
+    # 块擦除（littlefs必需）
+    IOCTL_BLK_ERASE = 6
 
     def __init__(self) -> None:
         """
-        初始化块设备抽象基类。
+            初始化块设备抽象基类。
 
-        Args:
-            None
+            Args:
+                None
 
-        Returns:
-            None
+            Returns:
+                None
 
-        Note:
-            - 必须至少支持 ioctl(4) 获取块数量
-            - 实现 littlefs 需额外支持 ioctl(6) 块擦除
-        """
+            Note:
+                - 必须至少支持 ioctl(4) 获取块数量
+                - 实现 littlefs 需额外支持 ioctl(6) 块擦除
+
+            ==========================================
+
+            Initialize abstract base class for block device.
+
+            Args:
+                None
+
+            Returns:
+                None
+
+            Note:
+                - Must at least support ioctl(4) to get block count
+                - To implement littlefs, need to additionally support ioctl(6) block erase
+            """
         pass
 
     def readblocks(self, block_num: int, buf: bytearray, offset: int = 0) -> None:
@@ -90,6 +140,23 @@ class AbstractBlockDev:
             OSError: 如果 block_num 无效（ENODEV）。
             OSError: 如果读取失败（EIO）。
             NotImplementedError: 如果扩展接口未实现（当 offset≠0）。
+
+        ==========================================
+
+        Read data blocks from device to buffer.
+
+        Args:
+            block_num (int): Starting block number (starting from 0).
+            buf (bytearray): Buffer to store read data.
+            offset (int, optional): Byte offset within block (default 0 means full block read).
+
+        Returns:
+            None
+
+        Raises:
+            OSError: If block_num is invalid (ENODEV).
+            OSError: If read fails (EIO).
+            NotImplementedError: If extended interface not implemented (when offset≠0).
         """
         raise NotImplementedError("sub class must implement this method")
 
@@ -110,6 +177,24 @@ class AbstractBlockDev:
             OSError: 如果写入失败（EIO）
             OSError: 如果设备为只读（EROFS）
             NotImplementedError: 如果扩展接口未实现（当 offset≠0）
+
+        ==========================================
+
+        Write data to block device.
+
+        Args:
+            block_num (int): Target block number (starting from 0)
+            buf (bytearray | None): Data to write (None means erase block)
+            offset (int, optional): Byte offset within block (default 0 means full block write)
+
+        Returns:
+            None
+
+        Raises:
+            OSError: If block_num is invalid (ENODEV)
+            OSError: If write fails (EIO)
+            OSError: If device is read-only (EROFS)
+            NotImplementedError: If extended interface not implemented (when offset≠0)
         """
         raise NotImplementedError("sub class must implement this method")
 
@@ -139,6 +224,33 @@ class AbstractBlockDev:
 
         Raises:
             NotImplementedError: 如果子类未实现该方法
+
+        ==========================================
+
+        Device control operation.
+
+        Args:
+            op (int): Operation code (should use class constants):
+                - `AbstractBlockDev.IOCTL_INIT` (1)       : Device initialization
+                - `AbstractBlockDev.IOCTL_SHUTDOWN` (2)   : Device shutdown
+                - `AbstractBlockDev.IOCTL_SYNC` (3)       : Data synchronization
+                - `AbstractBlockDev.IOCTL_BLK_COUNT` (4)  : Get total number of device blocks (must be implemented)
+                - `AbstractBlockDev.IOCTL_BLK_SIZE` (5)   : Get block size (optional)
+                - `AbstractBlockDev.IOCTL_BLK_ERASE` (6)  : Erase block (required for littlefs)
+
+            arg (int): Operation parameter (depends on op), some operations don't need parameters:
+                - `IOCTL_BLK_ERASE` (6) requires block number to erase
+                - Other operations can pass `0` or `None`, defined by subclass
+
+        Returns:
+            int | None:
+                - `IOCTL_BLK_COUNT` (4): Returns total number of device blocks (int)
+                - `IOCTL_BLK_SIZE` (5) : Returns block size (int)
+                - `IOCTL_BLK_ERASE` (6): Returns `0` if erase successful
+                - Other operations default return `None`
+
+        Raises:
+            NotImplementedError: If subclass does not implement this method
         """
         raise NotImplementedError("sub class must implement this method")
 

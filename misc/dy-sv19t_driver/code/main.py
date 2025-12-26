@@ -54,7 +54,7 @@ def play_track_demo():
 
     """
     # 根据文件路径选择立即播放
-    player.play_disk_path(player.DISK_SD, "/AA./01.MP3")
+    player.play_disk_path(DYSV19T.DISK_SD, "/AA./01.MP3")
     # 开始监听播放进度
     player.enable_play_time_send()
     print("Enable automatic reporting of playback time, monitoring 3 times...")
@@ -111,8 +111,10 @@ def select_and_play_demo():
 def repeat_area_demo():
     """
     设置 A-B 区间复读，并在一段时间后关闭复读。
+
     ==========================================================
     Set the A-B interval for repeated reading and turn off the repeated reading after a period of time.
+
     """
     print("repeat_area_demo")
     # 设置 A-B 复读区间（起点分:秒，终点分:秒）
@@ -134,25 +136,30 @@ def repeat_area_demo():
 def loop_mode_demo():
     """
     设置循环播放模式，并指定循环次数。
+
     ==========================================================
     Set the loop playback mode and specify the number of loops.
+
     """
     # 设置播放模式支持循环次数设置
-    player.set_play_mode(player.MODE_SINGLE_LOOP)
+    player.set_play_mode(DYSV19T.MODE_SINGLE_LOOP)
     # 设定循环次数为 3（注意部分模式不支持，若不支持会在驱动层抛参数错误）
     player.set_loop_count(3)
     # 播放第一段音频，立即播放
     player.select_track(1, play=True)
     time.sleep(10)
     # 设置播放模式为单曲停止
-    player.set_play_mode(player.MODE_SINGLE_STOP)
+    player.set_play_mode(DYSV19T.MODE_SINGLE_STOP)
 
 
 
 def insert_track_demo():
     """
     在播放过程中插入另一段音频。
+
+    ==========================================================
     Insert another audio segment during playback.
+
     """
     print("insert_track_demo")
     # 播放第四段音频，立即播放
@@ -160,7 +167,7 @@ def insert_track_demo():
     # 等待正常播放
     time.sleep(10)
     # 插入第一段音频
-    player.insert_track(player.DISK_SD, 1)
+    player.insert_track(DYSV19T.DISK_SD, 1)
     # 等待结束
     while player.query_status():
         pass
@@ -171,6 +178,7 @@ def combination_playlist_demo():
     """
 
     播放多个曲目组合，并在指定时间后结束组合播放。
+
     =========================================================
     Use the combined playback function to play multiple
     track combinations and end the combined playback after a specified time.
@@ -193,7 +201,7 @@ time.sleep(3)
 # 打印调试消息
 print("FreakStudio:  DY-SV19T Play Test ")
 
-# 初始化硬件串口：选择 UART1，波特率 9600，TX=GP16，RX=GP17（需与模块连线一致）
+# 初始化硬件串口：选择 UART0，波特率 9600，TX=GP16，RX=GP17（需与模块连线一致）
 uart = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 
 # 创建定时器

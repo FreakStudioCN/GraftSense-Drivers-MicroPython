@@ -18,23 +18,40 @@ from machine import I2C
 # ======================================== 全局变量 ============================================
 
 # 常量定义，用于控制 OLED 屏幕的各种操作
-SET_CONTRAST        = const(0x81)  # 设置对比度，范围为 0x00 - 0xFF
-SET_ENTIRE_ON       = const(0xA4)  # 设置整个屏幕亮起
-SET_NORM_INV        = const(0xA6)  # 设置正常/反相显示模式，正常模式中高电平电亮而低电平熄灭
-SET_DISP            = const(0xAE)  # 控制屏幕开关
-SET_MEM_ADDR        = const(0x20)  # 设置页面寻址模式
-SET_COL_ADDR        = const(0x21)  # 设置列地址
-SET_PAGE_ADDR       = const(0x22)  # 设置页地址
-SET_DISP_START_LINE = const(0x40)  # 设置起始行
-SET_SEG_REMAP       = const(0xA0)  # 设置段重映射
-SET_MUX_RATIO       = const(0xA8)  # 设置显示行数
-SET_COM_OUT_DIR     = const(0xC0)  # 设置 COM 输出方向
-SET_DISP_OFFSET     = const(0xD3)  # 设置显示偏移
-SET_COM_PIN_CFG     = const(0xDA)  # 设置 COM 引脚配置
-SET_DISP_CLK_DIV    = const(0xD5)  # 设置显示时钟分频
-SET_PRECHARGE       = const(0xD9)  # 设置预充电周期
-SET_VCOM_DESEL      = const(0xDB)  # 设置 VCOMH 电压
-SET_CHARGE_PUMP     = const(0x8D)  # 设置电荷泵
+# 设置对比度，范围为 0x00 - 0xFF
+SET_CONTRAST        = const(0x81)
+# 设置整个屏幕亮起
+SET_ENTIRE_ON       = const(0xA4)
+# 设置正常/反相显示模式，正常模式中高电平电亮而低电平熄灭
+SET_NORM_INV        = const(0xA6)
+# 控制屏幕开关
+SET_DISP            = const(0xAE)
+# 设置页面寻址模式
+SET_MEM_ADDR        = const(0x20)
+# 设置列地址
+SET_COL_ADDR        = const(0x21)
+# 设置页地址
+SET_PAGE_ADDR       = const(0x22)
+# 设置起始行
+SET_DISP_START_LINE = const(0x40)
+# 设置段重映射
+SET_SEG_REMAP       = const(0xA0)
+# 设置显示行数
+SET_MUX_RATIO       = const(0xA8)
+# 设置 COM 输出方向
+SET_COM_OUT_DIR     = const(0xC0)
+# 设置显示偏移
+SET_DISP_OFFSET     = const(0xD3)
+# 设置 COM 引脚配置
+SET_COM_PIN_CFG     = const(0xDA)
+# 设置显示时钟分频
+SET_DISP_CLK_DIV    = const(0xD5)
+# 设置预充电周期
+SET_PRECHARGE       = const(0xD9)
+# 设置 VCOMH 电压
+SET_VCOM_DESEL      = const(0xDB)
+# 设置电荷泵
+SET_CHARGE_PUMP     = const(0x8D)
 
 # ======================================== 功能函数 ============================================
 
@@ -106,34 +123,60 @@ class SSD1306(framebuf.FrameBuffer):
         初始化屏幕时会发送一系列命令来设置显示模式、行数、对比度等显示参数。
         """
         for cmd in (
-            SET_DISP | 0x00,            # 关屏
-            SET_MEM_ADDR,               # 设置页面寻址模式
-            0x00,                       # 水平地址自动递增
+                # 关屏
+            SET_DISP | 0x00,
+            # 设置页面寻址模式
+            SET_MEM_ADDR,
+            # 水平地址自动递增
+            0x00,
+
             # 分辨率和布局设置
-            SET_DISP_START_LINE | 0x00, #设置GDDRAM起始行 0
-            SET_SEG_REMAP | 0x01,       # 列地址 127 映射到 SEG0
-            SET_MUX_RATIO,              # 设置显示行数
-            self.height - 1,            # 显示128行
-            SET_COM_OUT_DIR | 0x08,     # 从 COM[N] 到 COM0 扫描
-            SET_DISP_OFFSET,            #设置垂直显示偏移(向上)
-            0x00,                       # 偏移0行
-            SET_COM_PIN_CFG,            # 设置 COM 引脚配置
-            0x02 if self.width > 2 * self.height else 0x12, # 序列COM配置,禁用左右反置
+            #设置GDDRAM起始行 0
+            SET_DISP_START_LINE | 0x00,
+            # 列地址 127 映射到 SEG0
+            SET_SEG_REMAP | 0x01,
+            # 设置显示行数
+            SET_MUX_RATIO,
+            # 显示128行
+            self.height - 1,
+            # 从 COM[N] 到 COM0 扫描
+            SET_COM_OUT_DIR | 0x08,
+            #设置垂直显示偏移(向上)
+            SET_DISP_OFFSET,
+            # 偏移0行
+            0x00,
+            # 设置 COM 引脚配置
+            SET_COM_PIN_CFG,
+            # 序列COM配置,禁用左右反置
+            0x02 if self.width > 2 * self.height else 0x12,
+
             # 时序和驱动方案设置
-            SET_DISP_CLK_DIV,           # 设置时钟分频
-            0x80,                       #  无分频,第8级OSC频率
-            SET_PRECHARGE,              # 设置预充电周期
-            0x22 if self.external_vcc else 0xF1,            # 禁用外部供电
-            SET_VCOM_DESEL,             # 设置VCOMH电压
-            0x30,                       # 0.83*Vcc
+            # 设置时钟分频
+            SET_DISP_CLK_DIV,
+            #  无分频,第8级OSC频率
+            0x80,
+            # 设置预充电周期
+            SET_PRECHARGE,
+            # 禁用外部供电
+            0x22 if self.external_vcc else 0xF1,
+            # 设置VCOMH电压
+            SET_VCOM_DESEL,
+            # 0.83*Vcc
+            0x30,
             # 显示设置
             SET_CONTRAST,
-            0xFF,                       # 设置为最大对比度，级别为255
-            SET_ENTIRE_ON,              # 输出随 RAM 内容变化
-            SET_NORM_INV,               # 非反转显示
-            SET_CHARGE_PUMP,            # 充电泵设置
-            0x10 if self.external_vcc else 0x14, # 启用电荷泵
-            SET_DISP | 0x01,            # 开屏
+            # 设置为最大对比度，级别为255
+            0xFF,
+            # 输出随 RAM 内容变化
+            SET_ENTIRE_ON,
+            # 非反转显示
+            SET_NORM_INV,
+            # 充电泵设置
+            SET_CHARGE_PUMP,
+            # 启用电荷泵
+            0x10 if self.external_vcc else 0x14,
+            # 开屏
+            SET_DISP | 0x01,
         ):
             # 逐个发送指令
             # write_cmd(cmd)方法用于向OLED屏幕发送指令
@@ -267,7 +310,7 @@ class SSD1306_I2C(SSD1306):
         self.addr = addr
         # 用于临时存储数据的字节数组
         self.temp = bytearray(2)
-        self.write_list = [b"\x40", None]  # Co=0, D/C#=1
+        self.write_list = [b"\x40", None]
         super().__init__(width, height, external_vcc)
 
     def write_cmd(self, cmd: int) -> None:
