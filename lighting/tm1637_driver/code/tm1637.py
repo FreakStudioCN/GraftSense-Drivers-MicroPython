@@ -3,8 +3,7 @@
 # @Time    : 2025/01/16 10:21
 # @Author  : 侯钧瀚
 # @File    : tm1637.py
-# @Description : tm1637驱动for micropython
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
+# @Description : tm1637驱动for micropython,参考https://github.com/mcauser/micropython-tm1637
 # @License : MIT
 
 __version__ = "0.1.0"

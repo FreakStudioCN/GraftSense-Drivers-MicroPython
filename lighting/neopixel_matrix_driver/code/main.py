@@ -20,96 +20,77 @@ import json
 
 # ======================================== 全局变量 ============================================
 
+# WS2812矩阵的尺寸
+width = 16
+height = 16
+
 json_img1 = json.dumps({
-    # 4x4 图片数据示例，循环红绿蓝紫
-    "pixels": [0xF800, 0x07E0, 0x001F, 0xF81F] * 4,
+    "pixels": [0xF800, 0x07E0, 0x001F, 0xF81F] * 4,  # 4x4 图片数据示例，循环红绿蓝紫
     "width": 4,
     "description": "test image1"
 })
 
 json_img2 = json.dumps({
-    # 4x4 图片数据示例，颜色顺序倒转
-    "pixels": [0x001F, 0xF81F, 0x07E0, 0xF800] * 4,
+    "pixels": [0x001F, 0xF81F, 0x07E0, 0xF800] * 4,  # 4x4 图片数据示例，颜色顺序倒转
     "width": 4,
-    "description": "test image2"
+    "description": "图像2"
 })
 
 json_img3 = json.dumps({
-    # 4x4 图片数据示例，另一种排列
-    "pixels": [0x07E0, 0xF800, 0xF81F, 0x001F] * 4,
+    "pixels": [0x07E0, 0xF800, 0xF81F, 0x001F] * 4,  # 4x4 图片数据示例，另一种排列
     "width": 4,
-    "description": "test image3"
+    "description": "图像3"
 })
 
 # 将图片数据放入列表
 animation_frames = [json_img1, json_img2, json_img3]
 
+# 要显示的文字
+text = "welcome"
+# 字符滚动延时速度
+scroll_delay = 0.1
+
+text_json_files = [
+    "ye.json",    # 野
+    "gou.json",   # 狗
+    "mei.json",   # 没
+    "you.json",   # 有
+    "mu.json",    # 墓
+    "bei.json",   # 碑
+    "ben.json",   # 奔
+    "pao.json",   # 跑
+    "dao.json",   # 到
+    "fu.json",    # 腐
+    "lan.json",   # 烂
+    "wei.json",   # 为
+    "zhi.json",   # 止
+    "jiu.json",   # 就
+    "hao.json"    # 好
+]
+
 # ======================================== 功能函数 ============================================
 
 def color_wipe(color, delay=0.1):
-    """
-    颜色填充特效：逐像素点亮整个矩阵，形成流水灯效果。
-
-    Args:
-        color (int): 填充颜色，采用RGB565格式。
-        delay (float): 每个像素点亮的间隔时间（秒），默认0.1秒。
-
-    Notes:
-        - 函数执行完成后会清空矩阵。
-        - 效果类似于"像素从左到右、从上到下依次点亮"。
-
-    ==========================================
-
-    Color fill effect: Light up the entire matrix pixel by pixel, creating a flowing light effect.
-
-    Args:
-        color (int): Fill color in RGB565 format.
-        delay (float): Interval time for each pixel to light up (seconds), default 0.1s.
-
-    Notes:
-        - The matrix will be cleared after the function completes.
-        - The effect is similar to "pixels lighting up from left to right, top to bottom".
-    """
+    """颜色填充特效"""
     matrix.fill(0)
-    for i in range(8):
-        for j in range(8):
+    for i in range(4):
+        for j in range(4):
             matrix.pixel(i, j, color)
             matrix.show()
             time.sleep(delay)
     matrix.fill(0)
 
 def optimized_scrolling_lines():
-    """
-    优化后的滚动线条动画：包含两个阶段的动画效果。
-
-    1. 蓝色横线从上向下滚动，空白区域用绿色填充
-    2. 红色竖线在青色背景上从左向右循环滚动
-
-    Notes:
-        - 动画结束后会自动清空矩阵。
-        - 使用局部刷新和循环滚动提升性能。
-
-    ==========================================
-
-    Optimized scrolling line animation: Contains two stages of animation effects.
-
-    1. Blue horizontal line scrolls from top to bottom, empty areas filled with green
-    2. Red vertical line scrolls cyclically from left to right on cyan background
-
-    Notes:
-        - The matrix will be automatically cleared after the animation ends.
-        - Uses partial refresh and cyclic scrolling to improve performance.
-    """
+    """优化后的滚动线条动画：蓝横线下降→红竖线右移"""
     # 1. 蓝色横线从上向下滚动
     matrix.fill(0)
     matrix.show()
-    # 顶部蓝线
-    matrix.hline(0, 0, 4, NeopixelMatrix.COLOR_BLUE)
+    matrix.hline(0, 0, 8, NeopixelMatrix.COLOR_BLUE)  # 顶部蓝线
     matrix.show()
     time.sleep(0.5)
 
     # 向下滚动3次，用红色填充空白
-    for _ in range(3):
+    for _ in range(7):
         matrix.scroll(0, 1, clear_color=NeopixelMatrix.COLOR_GREEN)
         matrix.show()
         time.sleep(0.3)
@@ -118,13 +99,13 @@ def optimized_scrolling_lines():
     matrix.fill(0)
     # 左侧红线
     matrix.fill(NeopixelMatrix.COLOR_CYAN)
-    matrix.vline(0, 0, 4, NeopixelMatrix.COLOR_RED)
+    matrix.vline(0, 0, 8, NeopixelMatrix.COLOR_RED)
     matrix.show()
     time.sleep(0.5)
 
     # 向右循环滚动8次(完整循环两次)
     for _ in range(8):
-        matrix.scroll(1, 0, wrap=True)
+        matrix.scroll(1, 0,wrap=True)
         matrix.show()
         time.sleep(0.2)
 
@@ -134,29 +115,10 @@ def optimized_scrolling_lines():
 
 def animate_images(matrix, frames, delay=0.5):
     """
-    利用多个JSON格式图片数据循环播放动画。
-
-    Args:
-        matrix (NeopixelMatrix): NeopixelMatrix对象实例。
-        frames (list): 包含JSON格式图片数据的列表（元素可以是字符串或字典）。
-        delay (float): 每帧显示时间（秒），默认0.5秒。
-
-    Notes:
-        - 函数会无限循环播放动画帧。
-        - 每次切换帧前会自动刷新显示。
-
-    ==========================================
-
-    Cyclically play animation using multiple JSON format image data.
-
-    Args:
-        matrix (NeopixelMatrix): Instance of NeopixelMatrix object.
-        frames (list): List containing JSON format image data (elements can be strings or dictionaries).
-        delay (float): Display time per frame (seconds), default 0.5s.
-
-    Notes:
-        - The function will play animation frames in an infinite loop.
-        - The display will be automatically refreshed before each frame switch.
+    利用多个 JSON 格式图片数据循环播放动画
+    :param matrix: NeopixelMatrix 对象
+    :param frames: 包含 JSON 格式图片数据的列表（字符串或者字典）
+    :param delay: 每帧显示时间（秒）
     """
     while True:
         for frame in frames:
@@ -167,30 +129,7 @@ def animate_images(matrix, frames, delay=0.5):
             time.sleep(delay)
 
 def load_animation_frames():
-    """
-    从文件加载30帧动画数据，文件命名格式为"test_image_frame_000000.json"到"test_image_frame_000029.json"。
-
-    Returns:
-        list: 包含30个帧数据的列表，每个元素为解析后的JSON字典。
-              加载失败的帧会被替换为空白帧（全黑）。
-
-    Notes:
-        - 若文件不存在或加载失败，会自动插入空白帧。
-        - 每个空白帧为4x4像素的全黑矩阵。
-
-    ==========================================
-
-    Load 30 frames of animation data from files, with naming format "test_image_frame_000000.json"
-    to "test_image_frame_000029.json".
-
-    Returns:
-        list: List containing 30 frame data, each element is a parsed JSON dictionary.
-              Frames that fail to load will be replaced with blank frames (all black).
-
-    Notes:
-        - If a file does not exist or fails to load, a blank frame will be automatically inserted.
-        - Each blank frame is a 4x4 pixel all-black matrix.
-    """
+    """加载30帧动画数据"""
     frames = []
     for i in range(30):
         # 补零生成文件名：test_image_frame_000000.json 到 test_image_frame_000029.json
@@ -201,36 +140,15 @@ def load_animation_frames():
         except Exception as e:
             print("Error loading frame {}: {}".format(filename, e))
             # 如果加载失败，插入一个空白帧
-            frames.append({"pixels": [0]*16, "width": 4, "height": 4})
+            frames.append({"pixels":[0]*16, "width":4, "height":4})
     return frames
 
 def play_animation(matrix, frames, fps=30):
     """
-    播放动画并实现精确帧率控制。
-
-    Args:
-        matrix (NeopixelMatrix): NeopixelMatrix对象实例。
-        frames (list): 帧数据列表，每个元素为图片数据字典。
-        fps (int): 目标帧率（帧/秒），默认30。
-
-    Notes:
-        - 函数会无限循环播放动画。
-        - 采用时间差计算实现精确的帧率控制。
-        - 可通过修改False为True开启帧率调试输出。
-
-    ==========================================
-
-    Play animation with precise frame rate control.
-
-    Args:
-        matrix (NeopixelMatrix): Instance of NeopixelMatrix object.
-        frames (list): List of frame data, each element is an image data dictionary.
-        fps (int): Target frame rate (frames/second), default 30.
-
-    Notes:
-        - The function will play the animation in an infinite loop.
-        - Uses time difference calculation to achieve precise frame rate control.
-        - Frame rate debug output can be enabled by changing False to True.
+    播放动画（精确帧率控制）
+    :param matrix: NeopixelMatrix对象
+    :param frames: 帧数据列表
+    :param fps: 目标帧率（默认30）
     """
     frame_delay = 1 / fps
     last_time = time.ticks_ms()
@@ -249,30 +167,103 @@ def play_animation(matrix, frames, fps=30):
             time.sleep_ms(int(remaining))
 
             # 调试用帧率输出（可选）
-            if False:
-                # 设为True可打印实际帧率
+            if False:  # 设为True可打印实际帧率
                 current_time = time.ticks_ms()
                 actual_fps = 1000 / max(1, time.ticks_diff(current_time, last_time))
                 print("FPS: {:.1f}".format(actual_fps))
                 last_time = current_time
 
+def scroll_text(matrix, text, direction='left', text_color=NeopixelMatrix.COLOR_RED,
+                bg_color=NeopixelMatrix.COLOR_BLACK, delay=0.1, scroll_count=1):
+    """
+    在WS2812矩阵上滚动显示文本，支持设定滚动次数和自定义颜色对比
+
+    参数:
+        matrix: NeopixelMatrix实例
+        text: 要显示的字符串
+        direction: 滚动方向 ('left', 'right', 'up', 'down')
+        text_color: 文本颜色 (使用NeopixelMatrix.COLOR_*常量)
+        bg_color: 背景颜色 (使用NeopixelMatrix.COLOR_*常量)
+        delay: 滚动延迟(秒)
+        scroll_count: 滚动次数，默认为1
+    """
+    width = matrix.width
+    height = matrix.height
+
+    # 根据方向初始化参数
+    if direction in ('left', 'right'):
+        char_offsets = [i * width for i in range(len(text))]
+        max_shift = width * len(text)
+    else:  # 上下方向
+        char_offsets = [i * height for i in range(len(text))]
+        max_shift = height * len(text)
+
+    # 滚动指定次数
+    for _ in range(scroll_count):
+        for shift in range(max_shift + width if direction in ('left', 'right') else max_shift + height):
+            matrix.fill(bg_color)
+
+            for i, char in enumerate(text):
+                if direction == 'left':
+                    x_pos = char_offsets[i] - shift
+                    if x_pos < width and x_pos > -width:
+                        matrix.text(char, x_pos, 0, text_color)
+
+                elif direction == 'right':
+                    x_pos = width - shift + char_offsets[i]
+                    if x_pos < width and x_pos > -width:
+                        matrix.text(char, x_pos, 0, text_color)
+
+                elif direction == 'up':
+                    y_pos = char_offsets[i] - shift
+                    if y_pos < height and y_pos > -height:
+                        matrix.text(char, 0, y_pos, text_color)
+
+                elif direction == 'down':
+                    y_pos = height - shift + char_offsets[i]
+                    if y_pos < height and y_pos > -height:
+                        matrix.text(char, 0, y_pos, text_color)
+
+            matrix.show()
+            time.sleep(delay)
+
+            # 重置循环
+            if (direction in ('left', 'right') and shift == max_shift) or \
+                    (direction in ('up', 'down') and shift == max_shift):
+                break
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
 
-time.sleep(3)
-print("FreakStudio:WS2812 LED Matrix Test")
-matrix = NeopixelMatrix(8, 8, Pin(6), layout=NeopixelMatrix.LAYOUT_ROW, brightness=0.2, order=NeopixelMatrix.ORDER_BRG, flip_v=True)
+matrix = NeopixelMatrix(16, 16, Pin(6), layout=NeopixelMatrix.LAYOUT_SNAKE, brightness=0.1, order=NeopixelMatrix.ORDER_RGB, flip_h=True)
 matrix.fill(0)
 matrix.show()
 
+# matrix.load_rgb565_image('test_image.json', 0, 0)
+# matrix.show()
+
+# time.sleep(3)
+# matrix.fill(NeopixelMatrix.COLOR_RED)
+# matrix.show()
+
 # ========================================  主程序  ===========================================
 
-color_wipe(matrix.COLOR_BLUE, delay=0.1)
+while True:
+    for json_file in text_json_files:
+        matrix.fill(0)
+        matrix.load_rgb565_image(json_file, 0, 0)
+        matrix.show()
+        time.sleep(1)
+    # 最后清空屏幕（可选）
+    matrix.fill(0)
+    matrix.show()
+    time.sleep(1)
 
-# 绘制蓝色水平线
+    matrix.load_rgb565_image('v.json', 0, 0)
+    matrix.show()
+    time.sleep(1)
+
 # matrix.hline(0, 0, 4, matrix.COLOR_BLUE)
-# 绘制红色垂直线
 # matrix.vline(1, 1, 2, matrix.COLOR_RED)
 # matrix.vline(2, 2, 2, matrix.COLOR_GREEN)
 # matrix.show()
@@ -288,3 +279,15 @@ color_wipe(matrix.COLOR_BLUE, delay=0.1)
 #
 # print("Starting animation (30FPS)")
 # play_animation(matrix, animation_frames, fps=30)
+
+# # 向左滚动白色文字，蓝色背景，滚动3次
+# scroll_text(matrix, "welcome", 'left', NeopixelMatrix.COLOR_WHITE, NeopixelMatrix.COLOR_BLUE, 0.1, 3)
+#
+# # 向右滚动黑色文字，红色背景，滚动2次
+# scroll_text(matrix, "hello", 'right', NeopixelMatrix.COLOR_BLACK, NeopixelMatrix.COLOR_RED, 0.15, 2)
+#
+# # 向上滚动绿色文字，红色背景，滚动1次
+# scroll_text(matrix, "world", 'up', NeopixelMatrix.COLOR_GREEN, NeopixelMatrix.COLOR_RED, 0.2, 1)
+#
+# # 向下滚动黄色文字，青色背景，滚动4次
+# scroll_text(matrix, "micro", 'down', NeopixelMatrix.COLOR_YELLOW, NeopixelMatrix.COLOR_CYAN, 0.12, 4)

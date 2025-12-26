@@ -3,8 +3,7 @@
 # @Time    : 2025/09/16 18:00
 # @Author  : 侯钧瀚
 # @File    : heartratemonitor.py
-# @Description : MAX30102/MAX30105驱动
-# @Repository  : 参考自：https://github.com/n-elia/MAX30102-MicroPython-driver
+# @Description : MAX30102/MAX30105驱动，参考自：https://github.com/n-elia/MAX30102-MicroPython-driver
 # @License : MIT
 
 __version__ = "0.1.0"

@@ -3,7 +3,7 @@
 # @Time    : 2025/8/26 上午10:45
 # @Author  : 缪贵成
 # @File    : uv_matrix.py
-# @Description : uv紫外灯矩阵模块驱动文件
+# @Description : uv紫外灯矩阵模块驱动文件,参考代码:https://github.com/TimHanewich/MicroPython-Collection/tree/master/GUVA-S12SD
 # @License : MIT
 
 __version__ = "0.1.0"
