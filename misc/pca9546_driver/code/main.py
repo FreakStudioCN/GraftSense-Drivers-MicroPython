@@ -9,7 +9,7 @@
 from machine import Pin, I2C
 # 导入时间模块
 import time
-
+# 导入pca9546模块
 from pca9546adr import PCA9546ADR
 # ======================================== 全局变量 ============================================
 
@@ -28,20 +28,23 @@ i2c = I2C(1, scl=Pin(2), sda=Pin(3))
 
 pca = PCA9546ADR(i2c)
 
-
 # ========================================  主程序  ===========================================
 
 while True:
-    
+    # 关闭所有通道
     pca.disable_all()
+    # 打开通道0并打印iic地址
     pca.select_channel(0)
-    print("0 address",i2c.scan())
-    
+    print("0 address", i2c.scan())
+
+    # 休眠4秒
     time.sleep(4)
-    
+
+    # 关闭所有通道
     pca.disable_all()
+    # 打开通道1并打印iic地址
     pca.select_channel(1)
-    print("1 address",i2c.scan())
+    print("1 address", i2c.scan())
 
 
 
