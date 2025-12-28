@@ -6,6 +6,11 @@
 # @Description : 主要定义了SSD 1306类以及相关方法，代码参考自：https://github.com/stlehmann/micropython-ssd1306
 # @License : MIT
 
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 ========================================
 
 # micropython相关模块

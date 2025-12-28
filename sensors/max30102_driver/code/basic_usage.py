@@ -3,7 +3,7 @@
 # @Time    : 2025/09/16 18:00
 # @Author  : 侯钧瀚
 # @File    : basic_usage.py
-# @Description : MAX30102 温度和PPG数据读取示例
+# @Description : MAX30102 温度和PPG数据读取示例，参考自：https://github.com/n-elia/MAX30102-MicroPython-driver
 
 # ======================================== 导入相关模块 =========================================
 
@@ -19,14 +19,17 @@ from max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
+
 # I2C软件实例
 # I2C引脚配置：sda=Pin4, scl=Pin5
+# 快速模式：400kHz，慢速模式：100kHz
 i2c = SoftI2C(sda=Pin(4),
               scl=Pin(5),
-              freq=400000)  # 快速模式：400kHz，慢速模式：100kHz
+              freq=400000)
 
 # 传感器实例
-sensor = MAX30102(i2c=i2c)  # 需要传入一个I2C实例
+# 需要传入一个I2C实例
+sensor = MAX30102(i2c=i2c)
 
 # 扫描I2C总线以确保传感器已连接
 if sensor.i2c_address not in i2c.scan():
@@ -68,8 +71,10 @@ compute_frequency = True
 print("Starting data acquisition from RED & IR registers...", '\n')
 time.sleep(1)
 
-t_start = ticks_us()  # 采集开始时间
-samples_n = 0  # 已采集的样本数
+# 采集开始时间
+t_start = ticks_us()
+# 已采集的样本数
+samples_n = 0
 
 # ========================================  主程序  ===========================================
 

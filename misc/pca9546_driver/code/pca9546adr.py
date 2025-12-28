@@ -4,7 +4,6 @@
 # @Author  : 侯钧瀚
 # @File    : air_quality.py
 # @Description : 基于PCA9546ADR 4通道I2C多路复用模块驱动 for MicroPython
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 # @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"
@@ -62,7 +61,7 @@ class PCA9546ADR:
 
     MAX_CH = const(4)
 
-    def __init__(self, i2c, addr7=const(0x70)):
+    def __init__(self, i2c, addr7=0x70):
         """
         初始化 PCA9546ADR 实例。
 
