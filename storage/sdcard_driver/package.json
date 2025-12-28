@@ -1,7 +1,7 @@
 {
-  "name": "at24c256_driver",
+  "name": "sdcard_driver",
   "version": "1.0.0",
-  "description": "A MicroPython library to control AT24C256 EEPROM",
+  "description": "A MicroPython library to control sdcard",
   "author": "leeqingshui",
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
@@ -12,7 +12,7 @@
   ],
   "deps": [
  ],
-  "long_description": "A MicroPython library to control AT24C256 EEPROM",
+  "long_description": "A MicroPython library to control sdcard",
   "long_description_content_type": "text/markdown",
   "classifiers": [
     "Programming Language :: Python :: 3",
