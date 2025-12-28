@@ -4,9 +4,9 @@
   "description": "A MicroPython library to control CC2530 driver",
   "author": "leeqingshui",
   "author_email": "1069653183@qq.com",
-  "url": "https://github.com/hogeiha/GraftSense-Drivers-MicroPython",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["cc253x_ttl.py", "github:hogeiha/GraftSense-Drivers-MicroPython/communication/cc2530_driver/code/cc253x_ttl.py"]
+    ["cc253x_ttl.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/cc2530_driver/code/cc253x_ttl.py"]
   ],
   "deps": [
     ["micropython-machine", "latest"],
@@ -18,7 +18,7 @@
   "classifiers": [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
-    "License :: Other/Proprietary License",
+    "License :: CC BY-NC 4.0",
     "Operating System :: OS Independent"
   ],
   "python_requires": ">=3.12",
