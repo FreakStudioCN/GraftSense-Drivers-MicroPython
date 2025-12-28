@@ -6,7 +6,7 @@
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/hogeiha/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["communication/cc2530_driver/code/cc253x_ttl.py", "github:hogeiha/GraftSense-Drivers-MicroPython/communication/cc2530_driver/code/cc253x_ttl.py"]
+    ["cc253x_ttl.py", "github:hogeiha/GraftSense-Drivers-MicroPython/communication/cc2530_driver/code/cc253x_ttl.py"]
   ],
   "deps": [
     ["micropython-machine", "latest"],
@@ -26,3 +26,6 @@
     "micropython": ["machine", "time"]
   }
 }
+
+
+mpremote mip install github:hogeiha/GraftSense-Drivers-MicroPython/communication/cc2530_driver
