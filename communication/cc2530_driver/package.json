@@ -26,6 +26,3 @@
     "micropython": ["machine", "time"]
   }
 }
-
-
-mpremote mip install github:hogeiha/GraftSense-Drivers-MicroPython/communication/cc2530_driver
