@@ -1,17 +1,17 @@
 {
-  "name": "hc08_driver",
+  "name": "led_single_driver",
   "version": "1.0.0",
-  "description": "A MicroPython library to control HC08 driver",
+  "description": "A MicroPython library to control LED single driver",
   "author": "leeqingshui",
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["hc08.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/hc08_driver/code/hc08.py"]
+    ["led_single_power.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/lighting/led_single_driver/code/led_single_power.py"]
   ],
   "deps": [
 
  ],
-  "long_description": "A MicroPython library to control HC08 driver ",
+  "long_description": "A MicroPython library to control LED single driver ",
   "long_description_content_type": "text/markdown",
   "classifiers": [
     "Programming Language :: Python :: 3",

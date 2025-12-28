@@ -1,17 +1,16 @@
 {
-  "name": "hc08_driver",
+  "name": "jedm_gas_meas",
   "version": "1.0.0",
-  "description": "A MicroPython library to control HC08 driver",
+  "description": "A MicroPython library to control JEDM Gas Meas sensor",
   "author": "leeqingshui",
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["hc08.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/hc08_driver/code/hc08.py"]
+    ["jedm_gas_meas.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/jedm_gas_meas/code/jedm_gas_meas.py"]
   ],
   "deps": [
-
  ],
-  "long_description": "A MicroPython library to control HC08 driver ",
+  "long_description": "A MicroPython library to control JEDM Gas Meas sensor",
   "long_description_content_type": "text/markdown",
   "classifiers": [
     "Programming Language :: Python :: 3",

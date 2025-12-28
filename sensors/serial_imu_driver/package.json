@@ -1,17 +1,16 @@
 {
-  "name": "hc08_driver",
+  "name": "serial_imu_driver",
   "version": "1.0.0",
-  "description": "A MicroPython library to control HC08 driver",
+  "description": "A MicroPython library to control serial IMU sensors",
   "author": "leeqingshui",
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["hc08.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/hc08_driver/code/hc08.py"]
+    ["imu.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/serial_imu_driver/code/imu.py"]
   ],
   "deps": [
-
  ],
-  "long_description": "A MicroPython library to control HC08 driver ",
+  "long_description": "A MicroPython library to control serial IMU sensors",
   "long_description_content_type": "text/markdown",
   "classifiers": [
     "Programming Language :: Python :: 3",

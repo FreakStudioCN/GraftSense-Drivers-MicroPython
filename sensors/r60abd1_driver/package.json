@@ -1,17 +1,17 @@
 {
-  "name": "hc08_driver",
+  "name": "r60abd1_driver",
   "version": "1.0.0",
-  "description": "A MicroPython library to control HC08 driver",
+  "description": "A MicroPython library to control R60ABD1 sensors",
   "author": "leeqingshui",
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["hc08.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/hc08_driver/code/hc08.py"]
+    ["r60abd1.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/r60abd1_driver/code/r60abd1.py"],
+    ["data_flow_processor.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/r60abd1_driver/code/data_flow_processor.py"]
   ],
   "deps": [
-
  ],
-  "long_description": "A MicroPython library to control HC08 driver ",
+  "long_description": "A MicroPython library to control R60ABD1 sensors",
   "long_description_content_type": "text/markdown",
   "classifiers": [
     "Programming Language :: Python :: 3",

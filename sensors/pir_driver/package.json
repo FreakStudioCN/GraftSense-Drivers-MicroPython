@@ -1,17 +1,16 @@
 {
-  "name": "hc08_driver",
+  "name": "pir_driver",
   "version": "1.0.0",
-  "description": "A MicroPython library to control HC08 driver",
+  "description": "A MicroPython library to control PIR sensors",
   "author": "leeqingshui",
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["hc08.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/hc08_driver/code/hc08.py"]
+    ["pir_sensor.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/pir_driver/code/pir_sensor.py"]
   ],
   "deps": [
-
  ],
-  "long_description": "A MicroPython library to control HC08 driver ",
+  "long_description": "A MicroPython library to control PIR sensors",
   "long_description_content_type": "text/markdown",
   "classifiers": [
     "Programming Language :: Python :: 3",
