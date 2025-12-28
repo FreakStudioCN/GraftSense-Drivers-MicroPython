@@ -1,19 +1,19 @@
 {
-  "name": "cc2530_driver",
+  "name": "hc08_driver",
   "version": "1.0.0",
-  "description": "A MicroPython library to control CC2530 driver",
+  "description": "A MicroPython library to control HC08 driver",
   "author": "leeqingshui",
   "author_email": "1069653183@qq.com",
-  "url": "https://github.com/hogeiha/GraftSense-Drivers-MicroPython",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["cc253x_ttl.py", "github:hogeiha/GraftSense-Drivers-MicroPython/communication/cc2530_driver/code/cc253x_ttl.py"]
+    ["hc08.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/hc08_driver/code/hc08.py"]
   ],
   "deps": [
     ["micropython-machine", "latest"],
     ["micropython-time", "latest"]
   ],
   "version": "1.0.0",
-  "long_description": "A MicroPython library to control CC2530 driver ",
+  "long_description": "A MicroPython library to control HC08 driver ",
   "long_description_content_type": "text/markdown",
   "classifiers": [
     "Programming Language :: Python :: 3",
