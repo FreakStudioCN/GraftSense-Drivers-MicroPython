@@ -11,7 +11,7 @@
   "deps": [
 
  ],
-  "long_description": "A MicroPython library to control TAS755C driver ",
+  "long_description": "A MicroPython library to control button driver ",
   "long_description_content_type": "text/markdown",
   "classifiers": [
     "Programming Language :: Python :: 3",

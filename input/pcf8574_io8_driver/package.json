@@ -6,7 +6,8 @@
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["pcf8574_io8.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/input/pcf8574_io8_driver/code/pcf8574_io8.py"]
+    ["pcf8574_io8.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/input/pcf8574_io8_driver/code/pcf8574_io8.py"],
+    ["pcf8574.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/input/pcf8574_io8_driver/code/pcf8574.py"]
   ],
   "deps": [
 

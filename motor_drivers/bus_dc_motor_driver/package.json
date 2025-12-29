@@ -16,7 +16,7 @@
   "classifiers": [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
-    "License :: MIT License",
+    "License :: Other/Proprietary License",
     "Operating System :: OS Independent"
   ],
   "python_requires": ">=3.12",
