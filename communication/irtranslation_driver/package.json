@@ -6,14 +6,14 @@
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["ir_rx/__init__.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_rx/__init__.py"],
-    ["ir_rx/acquire.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_rx/acquire.py"],
-    ["ir_rx/nec.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_rx/nec.py"],
-    ["ir_rx/print_error.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_rx/print_error.py"],
+    ["ir_rx/__init__.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/ir_rx/__init__.py"],
+    ["ir_rx/acquire.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/ir_rx/acquire.py"],
+    ["ir_rx/nec.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/ir_rx/nec.py"],
+    ["ir_rx/print_error.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/ir_rx/print_error.py"],
     
-    ["ir_tx/__init__.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_tx/__init__.py"],
-    ["ir_tx/nec.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_tx/nec.py"],
-    ["ir_tx/rp2_rmt.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_tx/rp2_rmt.py"]
+    ["ir_tx/__init__.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/ir_tx/__init__.py"],
+    ["ir_tx/nec.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/ir_tx/nec.py"],
+    ["ir_tx/rp2_rmt.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/ir_tx/rp2_rmt.py"]
 
   ],
   "deps": [
