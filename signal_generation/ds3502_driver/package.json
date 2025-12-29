@@ -1,0 +1,26 @@
+{
+  "name": "ds3502_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control DS3502 DAC",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["ds3502.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/signal_generation/ds3502_driver/code/ds3502.py"],
+    ["dac_waveformgenerator.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/signal_generation/ds3502_driver/code/dac_waveformgenerator.py"]
+  ],
+  "deps": [
+ ],
+  "long_description": "A MicroPython library to control DS3502 DAC",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

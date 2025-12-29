@@ -1,0 +1,26 @@
+{
+  "name": "tas755c_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control TAS755C driver",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["tas_755c_eth.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/tas755c_driver/code/tas_755c_eth.py"]
+  ],
+  "deps": [
+
+ ],
+  "long_description": "A MicroPython library to control TAS755C driver ",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "bus_step_motor_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control bus step motor driver",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["bus_step_motor.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/motor_drivers/bus_step_motor_driver/code/bus_step_motor.py"],
+    ["pca9685.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/motor_drivers/bus_dc_motor_driver/code/pca9685.py"]
+  ],
+  "deps": [
+ ],
+  "long_description": "A MicroPython library to control bus step motor driver ",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

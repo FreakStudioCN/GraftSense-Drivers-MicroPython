@@ -1,0 +1,25 @@
+{
+  "name": "mcp4725_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control MCP4725 DAC",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["mcp4725.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/signal_generation/mcp4725_driver/code/mcp4725.py"]
+  ],
+  "deps": [
+ ],
+  "long_description": "A MicroPython library to control MCP4725 DAC",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: MIT License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "limit_switch_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control limit switch driver",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["limit_switch.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/input/limit_switch_driver/code/limit_switch.py"]
+  ],
+  "deps": [
+
+ ],
+  "long_description": "A MicroPython library to control limit switch driver ",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

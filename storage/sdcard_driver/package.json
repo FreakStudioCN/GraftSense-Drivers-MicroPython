@@ -1,0 +1,27 @@
+{
+  "name": "sdcard_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control sdcard",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["sdcard.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/storage/sdcard_driver/code/sdcard.py"],
+    ["AbstractBlockDevInterface.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/storage/sdcard_driver/code/AbstractBlockDevInterface.py"],
+    ["sd_block_dev.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/storage/sdcard_driver/code/sd_block_dev.py"]
+  ],
+  "deps": [
+ ],
+  "long_description": "A MicroPython library to control sdcard",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

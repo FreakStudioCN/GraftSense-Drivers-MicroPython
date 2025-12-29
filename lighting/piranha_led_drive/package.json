@@ -1,0 +1,26 @@
+{
+  "name": "piranha_led_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control piranha_led driver",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["piranha_led.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/lighting/piranha_led_drive/code/piranha_led.py"]
+  ],
+  "deps": [
+
+ ],
+  "long_description": "A MicroPython library to control piranha_led driver ",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

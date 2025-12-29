@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/5 下午10:12
 # @Author  : ben0i0d
-# @File    : hc14_lora.py
-# @Description : hc14_lora驱动
+# @File    : cc253x_ttl.py
+# @Description : cc253x_ttl驱动
 # @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"

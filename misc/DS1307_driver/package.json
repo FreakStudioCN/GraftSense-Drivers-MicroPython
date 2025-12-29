@@ -1,0 +1,26 @@
+{
+  "name": "ds1307_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control DS1307 driver",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["ds1307.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/misc/ds1307_driver/code/ds1307.py"]
+  ],
+  "deps": [
+
+ ],
+  "long_description": "A MicroPython library to control DS1307 driver ",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: MIT License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

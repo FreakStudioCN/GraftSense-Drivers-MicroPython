@@ -1,0 +1,25 @@
+{
+  "name": "pir_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control PIR sensors",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["pir_sensor.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/pir_driver/code/pir_sensor.py"]
+  ],
+  "deps": [
+ ],
+  "long_description": "A MicroPython library to control PIR sensors",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}

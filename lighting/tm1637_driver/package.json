@@ -1,0 +1,26 @@
+{
+  "name": "tm1637_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control TM1637 driver",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["tm1637.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/lighting/tm1637_driver/code/tm1637.py"]
+  ],
+  "deps": [
+
+ ],
+  "long_description": "A MicroPython library to control TM1637 driver ",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: MIT License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}
