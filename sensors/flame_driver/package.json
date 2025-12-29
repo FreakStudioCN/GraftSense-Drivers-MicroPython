@@ -6,7 +6,7 @@
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["flame_sensor.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/flame_sensorflame_sensor/code/flame_sensor.py"]
+    ["flame_sensor.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/flame_driver/code/flame_sensor.py"]
   ],
   "deps": [
  ],

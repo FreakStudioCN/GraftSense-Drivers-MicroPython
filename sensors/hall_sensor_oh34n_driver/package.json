@@ -6,7 +6,7 @@
   "author_email": "1069653183@qq.com",
   "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
   "urls": [
-    ["hall_sensor_oh34n.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/sensors/hall_sensor_oh34n_driver/code/hall_sensor_oh34n.py/code/hall_sensor_oh34n.py"]
+    ["hall_sensor_oh34n.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/hall_sensor_oh34n_driver/code/hall_sensor_oh34n.py"]
   ],
   "deps": [
  ],
