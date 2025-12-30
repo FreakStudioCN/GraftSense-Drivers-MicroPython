@@ -25,7 +25,7 @@ print("FreakStudio:HC08 test")
 
 # 初始化 UART 通信（按硬件实际接线调整 TX/RX）
 uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
-# 创建 HC14_Lora 实例
+# 创建 HC08_Lora 实例
 hc0 = HC08(uart0)
 
 # ========================================  主程序  ===========================================
