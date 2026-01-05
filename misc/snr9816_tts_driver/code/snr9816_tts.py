@@ -170,6 +170,8 @@ class SNR9816_TTS:
             bool: True if sent successfully, False if failed.
 
         """
+        if encoding is not 0x04:
+            raise ValueError("encoding must be 0x04 (UTF-8)")
         try:
             # 命令字 + 编码参数 + 数据
             length = len(data_bytes) + 2
@@ -181,37 +183,52 @@ class SNR9816_TTS:
         except:
             return False
 
-    def _check_response(self, expected_response, timeout_ms=100):
+    def _check_response(self, expected_response=None, timeout_ms=100):
         """
         内部方法：检查模块响应。
 
         Args:
-            expected_response (int): 期望的响应字节值。
+            expected_response (int|None): 期望的响应字节值。如果为None，则返回实际接收的字节
             timeout_ms (int): 超时时间，单位为毫秒，默认100ms。
 
         Returns:
-            bool: True表示收到期望响应，False表示超时或未收到。
+            如果expected_response为None: 返回实际接收的字节值（int），超时返回None
+            如果指定了expected_response: True表示收到期望响应，False表示超时或未收到期望响应
 
         ============================================
 
         Internal method: Check module response.
 
         Args:
-            expected_response (int): Expected response byte value.
+            expected_response (int|None): Expected response byte value. If None, returns actual received byte.
             timeout_ms (int): Timeout in milliseconds, default 100ms.
 
         Returns:
-            bool: True if expected response received, False if timeout or not received.
+            If expected_response is None: returns actual received byte (int), None if timeout.
+            If expected_response is specified: True if expected response received, False if timeout or not received.
         """
         start = time.ticks_ms()
         while time.ticks_diff(time.ticks_ms(), start) < timeout_ms:
             if self._uart.any():
                 response = self._uart.read(1)
-                if response and response[0] == expected_response:
-                    return True
-        return False
+                if response:
+                    received_byte = response[0]
+                    if expected_response is None:
+                        return received_byte  # 返回实际字节值
+                    elif received_byte == expected_response:
+                        return True  # 匹配期望值
+                    else:
+                        return False  # 不匹配期望值
+            # 可添加短暂延时避免CPU占用过高
+            # time.sleep_ms(1)
 
-    def synthesize_text(self, text: str) -> bool:
+        # 超时情况
+        if expected_response is None:
+            return None  # 超时返回None
+        else:
+            return False  # 超时返回False
+
+    def synthesize_text(self, text: str):
         """
         合成指定文本为语音。
 
@@ -222,7 +239,7 @@ class SNR9816_TTS:
             bool: True表示指令发送成功，False表示发送失败。
 
         Note:
-            实际使用UTF-8编码发送，方法名中的GB2312为历史遗留名称。
+            实际使用UTF-8编码发送
 
         ============================================
 
@@ -235,15 +252,14 @@ class SNR9816_TTS:
             bool: True if command sent successfully, False if failed.
 
         Note:
-            Actually uses UTF-8 encoding to send, the GB2312 in method name is a historical legacy.
+            Actually uses UTF-8 encoding to send
         """
         status = self.query_status()
         if status != "IDLE":
             print(f"Chip is busy (status: {status}), cannot synthesize now.")
             return False
 
-        # 这里假设 text 是 GB2312 编码的字符串
-        data_bytes = text.encode('gb2312')
+        data_bytes = text.encode('utf-8')
         return self._send_frame(self.cmd_synthesis, self.encoding_utf8, data_bytes)
 
     def query_status(self) -> str:
@@ -261,12 +277,13 @@ class SNR9816_TTS:
             str: "IDLE" means chip is idle, "BUSY" means chip is busy, "UNKNOWN" means status is unknown.
         """
 
-        cmd = bytes([0xFD, 0x00, 0x01, 0x21])
-        if self._uart.write(cmd):
-            if self._check_response(0x4E):
-                return "BUSY"
-            elif self._check_response(0x4F):
-                return "IDLE"
+        self.cmd = bytes([0xFD, 0x00, 0x01, 0x21])
+        self._uart.write(self.cmd)
+        self.response = self._check_response(expected_response=None, timeout_ms=100)
+        if self.response is 0x4E:
+            return "BUSY"
+        if self.response is 0x4F:
+            return "IDLE"
         return "UNKNOWN"
 
     def pause_synthesis(self) -> bool:
@@ -283,9 +300,10 @@ class SNR9816_TTS:
         Returns:
             bool: True if pause command sent successfully and acknowledgment received, False if failed.
         """
-        cmd = bytes([0XFD, 0X00, 0X01, 0X03])
-        if self._uart.write(cmd):
-            if self._check_response(0x41):
+        self.cmd = bytes([0XFD, 0X00, 0X01, 0X03])
+        self.response = self._check_response(expected_response=None, timeout_ms=100)
+        if self._uart.write(self.cmd):
+            if self.response is 0x41:
                 return True
         return False
 
@@ -303,9 +321,10 @@ class SNR9816_TTS:
         Returns:
             bool: True if resume command sent successfully and acknowledgment received, False if failed.
         """
-        cmd = bytes([0XFD, 0X00, 0X01, 0X04])
-        if self._uart.write(cmd):
-            if self._check_response(0x41):
+        self.cmd = bytes([0XFD, 0X00, 0X01, 0X04])
+        self.response = self._check_response(expected_response=None, timeout_ms=100)
+        if self._uart.write(self.cmd):
+            if self.response is 0x41:
                 return True
         return False
 
@@ -323,9 +342,10 @@ class SNR9816_TTS:
         Returns:
             bool: True if stop command sent successfully and acknowledgment received, False if failed.
         """
-        cmd = bytes([0XFD, 0X00, 0X01, 0X02])
-        if self._uart.write(cmd):
-            if self._check_response(0x41):
+        self.cmd = bytes([0XFD, 0X00, 0X01, 0X02])
+        self.response = self._check_response(expected_response=None, timeout_ms=100)
+        if self._uart.write(self.cmd):
+            if self.response is 0x41:
                 return True
         return False
 

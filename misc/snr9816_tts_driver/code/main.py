@@ -33,30 +33,72 @@ tts = SNR9816_TTS(uart)
 
 # 查看TTS 状态
 tts.query_status()
-# 设置参数
 
-# 设置声音编号 0=女声，1=男声。
-tts.set_voice(1)
-# 设置音量 0~9。
-tts.set_volume(9)
-# 设置语速 0~9。
-tts.set_speed(9)
-# 设置音调 0~9。
-tts.set_tone(9)
+# 设置参数
+# 设置声音编号 0=女声，1=男声
+while not tts.set_voice(1):
+    continue
+print("Voice set to male.")
+
+# 设置音量 0~9
+while not tts.set_volume(9):
+    time.sleep(1)
+    continue
+print("Volume set to 9.")
+
+# 设置语速 0~9
+while not tts.set_speed(9):
+    time.sleep(1)
+    continue
+print("Speed set to 9.")
+
+# 设置音调 0~9
+while not tts.set_tone(9):
+    time.sleep(1)
+    continue
+print("Tone set to 9.")
 
 # 播放铃声
-tts.play_ringtone(1)
-# 播放消息音
-tts.play_message_tone(1)
+for i in range(5):
+    while not tts.play_ringtone(i+1):
+        time.sleep(1)
+        continue
+    print(f"Playing ringtone {i+1}/5...")
+print('Ringtone playback finished.')
+
 # 播放提示音
-tts.play_alert_tone(1)
+for i in range(5):
+    while not tts.play_message_tone(i+1):
+        time.sleep(1)
+        continue
+    print(f"Playing message tone {i+1}/5...")
+print('Message tone playback finished.')
+
+# 播放警报音
+for i in range(5):
+    while not tts.play_alert_tone(i+1):
+        time.sleep(1)
+        continue
+    print(f"Playing prompt tone {i+1}/5...")
+print('Alert tone playback finished.')
 
 # 合成文本
-tts.synthesize_text("谢谢使用")
-
+while not tts.synthesize_text("谢谢使用"):
+    time.sleep(1)
+    continue
+print("Text synthesis started.")
 # 暂停合成
-tts.pause_synthesis()
+while not tts.pause_synthesis():
+    time.sleep(1)
+    continue
+print("Synthesis paused.")
 # 继续合成
-tts.resume_synthesis()
+while not tts.resume_synthesis():
+    time.sleep(1)
+    continue
+print("Synthesis resumed.")
 # 停止合成
-tts.stop_synthesis()
+while not tts.stop_synthesis():
+    time.sleep(1)
+    continue
+print("Synthesis stopped.")
