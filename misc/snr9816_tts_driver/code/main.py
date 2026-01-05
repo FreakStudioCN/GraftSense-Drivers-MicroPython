@@ -83,22 +83,22 @@ for i in range(5):
 print('Alert tone playback finished.')
 
 # 合成文本
-while not tts.synthesize_text("谢谢使用"):
+while not tts.synthesize_text("欢迎使用我司的TTS语音合[w0]成测试模块。请注意以下发音细节：这个要[=yao1]求很重[=zhong4]要[=yao4]。（避免“要[yào]求”和“重[chóng]要”的错误发音）本次会议共有[n1]25人参加。（读作“二五人”）。首先[w0]，打开设备电源。[w0]然后[w0]，按照屏幕提示进行操作。"):
     time.sleep(1)
     continue
 print("Text synthesis started.")
 # 暂停合成
-while not tts.pause_synthesis():
-    time.sleep(1)
-    continue
+tts.pause_synthesis()
+time.sleep(3)
+
 print("Synthesis paused.")
 # 继续合成
-while not tts.resume_synthesis():
-    time.sleep(1)
-    continue
+tts.resume_synthesis()
+time.sleep(3)
+
 print("Synthesis resumed.")
 # 停止合成
-while not tts.stop_synthesis():
-    time.sleep(1)
-    continue
+tts.stop_synthesis()
+time.sleep(3)
+
 print("Synthesis stopped.")

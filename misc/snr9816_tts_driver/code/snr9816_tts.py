@@ -22,6 +22,7 @@ import time
 # ======================================== 自定义类 ============================================
 
 class SNR9816_TTS:
+
     """
     SNR9816_TTS类，用于通过UART接口控制SNR9816 TTS语音合成芯片。
 
@@ -29,12 +30,12 @@ class SNR9816_TTS:
 
     Attributes:
         _uart (UART): 已配置的UART对象（波特率115200，数据位8，校验位N，停止位1）。
-        frame_header (int): 协议帧头固定值0xFD。
-        cmd_synthesis (int): 文本合成命令0x01。
-        cmd_status (int): 状态查询命令0x21。
-        cmd_pause (int): 暂停合成命令0x03。
-        cmd_resume (int): 恢复合成命令0x04。
-        cmd_stop (int): 停止合成命令0x02。
+        SNR9816_TTS.FRAME_HEADER (int): 协议帧头固定值0xFD。
+        SNR9816_TTS.CMD_SYNTHESIS (int): 文本合成命令0x01。
+        SNR9816_TTS.CMD_STATUS (int): 状态查询命令0x21。
+        SNR9816_TTS.CMD_PAUSE (int): 暂停合成命令0x03。
+        SNR9816_TTS.CMD_RESUME (int): 恢复合成命令0x04。
+        SNR9816_TTS.CMD_STOP (int): 停止合成命令0x02。
         encoding_gb2312 (int): GB2312编码标识0x01（当前未使用）。
         encoding_utf8 (int): UTF-8编码标识0x04（当前实际使用）。
 
@@ -77,12 +78,12 @@ class SNR9816_TTS:
 
     Attributes:
         _uart (UART): Configured UART object (baud rate 115200, data bits 8, parity N, stop bits 1).
-        frame_header (int): Fixed protocol frame header value 0xFD.
-        cmd_synthesis (int): Text synthesis command 0x01.
-        cmd_status (int): Status query command 0x21.
-        cmd_pause (int): Pause synthesis command 0x03.
-        cmd_resume (int): Resume synthesis command 0x04.
-        cmd_stop (int): Stop synthesis command 0x02.
+        SNR9816_TTS.FRAME_HEADER (int): Fixed protocol frame header value 0xFD.
+        SNR9816_TTS.CMD_SYNTHESIS (int): Text synthesis command 0x01.
+        SNR9816_TTS.CMD_STATUS (int): Status query command 0x21.
+        SNR9816_TTS.CMD_PAUSE (int): Pause synthesis command 0x03.
+        SNR9816_TTS.CMD_RESUME (int): Resume synthesis command 0x04.
+        SNR9816_TTS.CMD_STOP (int): Stop synthesis command 0x02.
         encoding_gb2312 (int): GB2312 encoding identifier 0x01 (currently unused).
         encoding_utf8 (int): UTF-8 encoding identifier 0x04 (currently used).
 
@@ -117,6 +118,24 @@ class SNR9816_TTS:
         2. All control commands are sent via encapsulated protocol frames.
         3. Voice parameters are set by inserting specific control text (e.g., "[v5]").
     """
+
+    # 响应标识
+    ACK = 0x41
+    # 状态标识
+    BUSY, IDLE, UNKNOWN = 0, 1, 2
+    # 协议常量
+    FRAME_HEADER = 0xFD
+    CMD_SYNTHESIS = 0x01
+    CMD_STATUS = 0x21
+    CMD_PAUSE = 0x03
+    CMD_RESUME = 0x04
+    CMD_STOP = 0x02
+    # 固定指令帧
+    query_status_cmd = bytes([0xFD, 0x00, 0x01, 0x21])
+    pause_synthesis_cmd = bytes([0XFD, 0X00, 0X01, 0X03])
+    resume_synthesis_cmd = bytes([0XFD, 0X00, 0X01, 0X04])
+    stop_synthesis_cmd = bytes([0XFD, 0X00, 0X01, 0X02])
+
     def __init__(self, uart):
         """
         构造函数，初始化SNR9816 TTS语音合成模块。
@@ -134,18 +153,12 @@ class SNR9816_TTS:
 
         """
         self._uart = uart
-        self.frame_header = 0xFD
-        self.cmd_synthesis = 0x01
-        self.cmd_status = 0x21
-        self.cmd_pause = 0x03
-        self.cmd_resume = 0x04
-        self.cmd_stop = 0x02
         # 编码方式
         # mpython 不支持 gb2312 编码，所以这里只用 utf-8
         self.encoding_gb2312 = 0x01
         self.encoding_utf8 = 0x04
 
-    def _send_frame(self, cmd, encoding, data_bytes):
+    def _send_frame(self, cmd, encoding, data_bytes)-> bool:
         """
         内部方法：发送协议帧到SNR9816模块。
 
@@ -176,14 +189,14 @@ class SNR9816_TTS:
             # 命令字 + 编码参数 + 数据
             length = len(data_bytes) + 2
             length_bytes = struct.pack('>H', length)  # 大端，2字节
-            frame = struct.pack('B', self.frame_header) + length_bytes
+            frame = struct.pack('B', SNR9816_TTS.FRAME_HEADER) + length_bytes
             frame += struct.pack('B', cmd) + struct.pack('B', encoding) + data_bytes
             self._uart.write(frame)
             return True
         except:
             return False
 
-    def _check_response(self, expected_response=None, timeout_ms=100):
+    def _check_response(self, expected_response=None, timeout_ms=100)-> int|bool|None:
         """
         内部方法：检查模块响应。
 
@@ -255,12 +268,12 @@ class SNR9816_TTS:
             Actually uses UTF-8 encoding to send
         """
         status = self.query_status()
-        if status != "IDLE":
+        if status != SNR9816_TTS.IDLE:
             print(f"Chip is busy (status: {status}), cannot synthesize now.")
             return False
 
         data_bytes = text.encode('utf-8')
-        return self._send_frame(self.cmd_synthesis, self.encoding_utf8, data_bytes)
+        return self._send_frame(SNR9816_TTS.CMD_SYNTHESIS, self.encoding_utf8, data_bytes)
 
     def query_status(self) -> str:
         """
@@ -277,14 +290,13 @@ class SNR9816_TTS:
             str: "IDLE" means chip is idle, "BUSY" means chip is busy, "UNKNOWN" means status is unknown.
         """
 
-        self.cmd = bytes([0xFD, 0x00, 0x01, 0x21])
-        self._uart.write(self.cmd)
+        self._uart.write(SNR9816_TTS.query_status_cmd)
         self.response = self._check_response(expected_response=None, timeout_ms=100)
         if self.response is 0x4E:
-            return "BUSY"
+            return SNR9816_TTS.BUSY
         if self.response is 0x4F:
-            return "IDLE"
-        return "UNKNOWN"
+            return SNR9816_TTS.IDLE
+        return SNR9816_TTS.UNKNOWN
 
     def pause_synthesis(self) -> bool:
         """
@@ -300,9 +312,8 @@ class SNR9816_TTS:
         Returns:
             bool: True if pause command sent successfully and acknowledgment received, False if failed.
         """
-        self.cmd = bytes([0XFD, 0X00, 0X01, 0X03])
         self.response = self._check_response(expected_response=None, timeout_ms=100)
-        if self._uart.write(self.cmd):
+        if self._uart.write(SNR9816_TTS.pause_synthesis_cmd):
             if self.response is 0x41:
                 return True
         return False
@@ -321,9 +332,8 @@ class SNR9816_TTS:
         Returns:
             bool: True if resume command sent successfully and acknowledgment received, False if failed.
         """
-        self.cmd = bytes([0XFD, 0X00, 0X01, 0X04])
         self.response = self._check_response(expected_response=None, timeout_ms=100)
-        if self._uart.write(self.cmd):
+        if self._uart.write(SNR9816_TTS.resume_synthesis_cmd):
             if self.response is 0x41:
                 return True
         return False
@@ -342,9 +352,8 @@ class SNR9816_TTS:
         Returns:
             bool: True if stop command sent successfully and acknowledgment received, False if failed.
         """
-        self.cmd = bytes([0XFD, 0X00, 0X01, 0X02])
         self.response = self._check_response(expected_response=None, timeout_ms=100)
-        if self._uart.write(self.cmd):
+        if self._uart.write(SNR9816_TTS.stop_synthesis_cmd):
             if self.response is 0x41:
                 return True
         return False
