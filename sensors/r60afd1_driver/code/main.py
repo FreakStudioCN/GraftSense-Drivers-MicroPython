@@ -461,7 +461,7 @@ processor = DataFlowProcessor(uart)
 
 # 创建R60AFD1实例
 # 启用调试模式（可选）
-R60AFD1.DEBUG_ENABLED = True
+R60AFD1.DEBUG_ENABLED = False
 
 device = R60AFD1(
     processor,
