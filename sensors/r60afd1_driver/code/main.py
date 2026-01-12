@@ -505,8 +505,6 @@ print("  Scene Info: %d" % device_info['scene_info'])
 # 打印功能开关状态
 func_switches = config_status['function_switches']
 print("\nFunction Switches:")
-for func_name, func_state in func_switches.items():
-    print("  %s: %s" % (func_name.replace('_', ' ').title(), "ON" if func_state else "OFF"))
 
 time.sleep(1)
 
