@@ -1731,6 +1731,39 @@ class R60AFD1:
 
         return (x, y, z)
 
+    def _parse_4byte_timestamp(self, four_bytes):
+        """
+        解析4字节时间戳数据。
+
+        Args:
+            four_bytes: 4字节的字节序列（大端序）。
+
+        Returns:
+            int: 解析后的时间戳整数。
+
+        Note:
+            - 组合成32位无符号整数（大端序）。
+
+        ==========================================
+
+        Parse 4-byte timestamp data.
+
+        Args:
+            four_bytes: 4-byte byte sequence (big-endian).
+
+        Returns:
+            int: Parsed timestamp integer.
+
+        Note:
+            - Combine into 32-bit unsigned integer (big-endian).
+        """
+        if len(four_bytes) != 4:
+            return 0
+
+        # 组合成32位无符号整数（大端序）
+        timestamp = (four_bytes[0] << 24) | (four_bytes[1] << 16) | (four_bytes[2] << 8) | four_bytes[3]
+        return timestamp
+
     def _parse_signed_16bit_special(self, two_bytes):
         """
         解析有符号16位数据（特殊格式：首位符号位 + 后15位数值位）。
@@ -1933,7 +1966,7 @@ class R60AFD1:
             # 工作时长上报
             elif command == 0x03:
                 if data and len(data) >= 4:
-                    working_time = self._parse_signed_16bit_special(data[0:4])
+                    working_time = self._parse_4byte_timestamp(data)
                     self.working_duration = working_time
                     if R60AFD1.DEBUG_ENABLED:
                         print(f"[System] Working duration: {working_time} seconds")
@@ -1953,8 +1986,11 @@ class R60AFD1:
                 if data and len(data) >= 1:
                     scene_info = data[0]
                     self.scene_info = scene_info
-                    if R60AFD1.DEBUG_ENABLED:
-                        print(f"[System] Scene info: {scene_info}")
+                    self._handle_query_response(
+                        R60AFD1.TYPE_QUERY_SCENE_INFO,
+                        scene_info,
+                        "SCENE INFO"
+                    )
 
         # 雷达安装信息
         elif control == 0x06:
@@ -2074,7 +2110,7 @@ class R60AFD1:
             # 最大能量值上报(4B)
             elif command == 0x10:
                 if data and len(data) >= 4:
-                    max_energy = self._parse_signed_16bit_special(data[0:4])
+                    max_energy = self._parse_4byte_timestamp(data)
                     self.max_energy_value = max_energy
                     if R60AFD1.DEBUG_ENABLED:
                         print(f"[Energy] Max energy value: {max_energy}"
@@ -2082,17 +2118,28 @@ class R60AFD1:
             # 人体存在判断阈值设置
             elif command == 0x11:
                 if data and len(data) >= 4:
-                    presence_threshold = self._parse_signed_16bit_special(data[0:4])
+                    presence_threshold = self._parse_4byte_timestamp(data)
                     self.presence_threshold = presence_threshold
                     self._handle_query_response(
                         R60AFD1.TYPE_SET_PRESENCE_THRESHOLD,
                         presence_threshold,
                         "SET_PRESENCE_THRESHOLD"
                     )
+            # 查询体动参数
+            elif command == 0x83:
+                if data and len(data) > 0:
+                    body_motion_param = data[0]
+                    self.movement_parameter = body_motion_param
+                    self._handle_query_response(
+                        R60AFD1.TYPE_QUERY_BODY_MOTION_PARAM,
+                        body_motion_param,
+                        "BODY MOTION PARAMETER"
+                    )
+
             # 无人时间设置(4B)
             elif command == 0x12:
                 if data and len(data) >= 4:
-                    no_person_time = self._parse_signed_16bit_special(data[0:4])
+                    no_person_time = self._parse_4byte_timestamp(data)
                     self.no_person_timeout = no_person_time
                     self._handle_query_response(
                         R60AFD1.TYPE_SET_NO_PERSON_TIME,
@@ -2170,7 +2217,7 @@ class R60AFD1:
             # 最大能量值查询(4B)
             elif command == 0x90:
                 if data and len(data) >= 4:
-                    max_energy = self._parse_signed_16bit_special(data[0:4])
+                    max_energy = self._parse_4byte_timestamp(data)
                     self.max_energy_value = max_energy
                     self._handle_query_response(
                         R60AFD1.TYPE_QUERY_MAX_ENERGY,
@@ -2180,7 +2227,7 @@ class R60AFD1:
             # 人体存在判断阈值查询
             elif command == 0x91:
                 if data and len(data) >= 4:
-                    presence_threshold = self._parse_signed_16bit_special(data[0:4])
+                    presence_threshold = self._parse_4byte_timestamp(data)
                     self.presence_threshold = presence_threshold
                     self._handle_query_response(
                         R60AFD1.TYPE_QUERY_PRESENCE_THRESHOLD,
@@ -2190,7 +2237,7 @@ class R60AFD1:
             # 无人时间查询(4B)
             elif command == 0x92:
                 if data and len(data) >= 4:
-                    no_person_time = self._parse_signed_16bit_special(data[0:4])
+                    no_person_time = self._parse_4byte_timestamp(data)
                     self.no_person_timeout = no_person_time
                     self._handle_query_response(
                         R60AFD1.TYPE_QUERY_NO_PERSON_TIME,
@@ -2218,9 +2265,8 @@ class R60AFD1:
                         auto_height,
                         "AUTO MEASURED HEIGHT"
                     )
-
             # 高度占比上报
-            if command == 0x0E:
+            elif command == 0x0E:
                 if data and len(data) >= 6:
                     height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2 = self._parse_height_data(data)
                     self.height_total_count = height_total
@@ -2230,7 +2276,6 @@ class R60AFD1:
                     self.height_ratio_15_2 = ratio_15_2
                     if R60AFD1.DEBUG_ENABLED:
                         print(f"[Height] Total: {height_total}, 0-0.5m: {ratio_0_05}%, 0.5-1m: {ratio_05_1}%, 1-1.5m: {ratio_1_15}%, 1.5-2m: {ratio_15_2}%")
-
             # 轨迹点
             elif command == 0x12:
                 if data and len(data) >= 3:
@@ -2242,7 +2287,7 @@ class R60AFD1:
                         print(f"[Track] Position X: {track_x}, Y: {track_y}")
             # 跌倒灵敏度
             elif command == 0x0D:
-                if data and len(data) >= 2:
+                if data and len(data) >= 1:
                     fall_sensitivity = data[0]
                     self.fall_sensitivity = fall_sensitivity
                     self._handle_query_response(
@@ -2265,7 +2310,7 @@ class R60AFD1:
             # 轨迹点上报频率查询(4B)
             elif command == 0x93:
                 if data and len(data) >= 4:
-                    track_frequency = self._parse_signed_16bit_special(data[0:4])
+                    track_frequency = self._parse_4byte_timestamp(data)
                     self.track_report_frequency = track_frequency
                     self._handle_query_response(
                         R60AFD1.TYPE_QUERY_TRACK_FREQUENCY,
@@ -2308,10 +2353,10 @@ class R60AFD1:
                     if R60AFD1.DEBUG_ENABLED:
                         status_text = "No fall" if self.fall_status == 0 else "Fall detected"
                         print(f"[Fall Detection] {status_text}")
-            # 跌倒时长查询(4B)
+            # 跌倒时长设置(4B)
             elif command == 0x0C:
                 if data and len(data) >= 4:
-                    fall_duration = self._parse_signed_16bit_special(data[0:4])
+                    fall_duration = self._parse_4byte_timestamp(data)
                     self.fall_duration_threshold = fall_duration
                     self._handle_query_response(
                         R60AFD1.TYPE_SET_FALL_DURATION,
@@ -2329,7 +2374,7 @@ class R60AFD1:
             # 静止驻留时长设置(4B)
             elif command == 0x0A:
                 if data and len(data) >=4:
-                    stationary_duration = self._parse_signed_16bit_special(data[0:4])
+                    stationary_duration = self._parse_4byte_timestamp(data)
                     self.static_stay_duration = stationary_duration
                     self._handle_query_response(
                         R60AFD1.TYPE_SET_STATIC_STAY_DURATION,
@@ -2365,14 +2410,13 @@ class R60AFD1:
             # 高度累积时间设置
             elif command == 0x0F:
                 if data and len(data) >= 4:
-                    height_accumulation_time = self._parse_signed_16bit_special(data[0:4])
+                    height_accumulation_time = self._parse_4byte_timestamp(data)
                     self.height_accumulation_time = height_accumulation_time
                     self._handle_query_response(
                         R60AFD1.TYPE_SET_HEIGHT_ACCUMULATION_TIME,
                         height_accumulation_time,
                         "HEIGHT ACCUMULATION TIME"
                     )
-
             # 跌倒打破高度设置
             elif command == 0x11:
                 if data and len(data) >= 2:
@@ -2400,11 +2444,10 @@ class R60AFD1:
                             height_ratio_switch,
                             "HEIGHT RATIO OFF"
                         )
-
             # 轨迹点信息上报频率设置(4B)
             elif command == 0x13:
                 if data and len(data) >= 4:
-                    track_frequency = self._parse_signed_16bit_special(data[0:4])
+                    track_frequency = self._parse_4byte_timestamp(data)
                     self.track_report_frequency = track_frequency
                     self._handle_query_response(
                         R60AFD1.TYPE_SET_TRACK_FREQUENCY,
@@ -2472,18 +2515,18 @@ class R60AFD1:
                     )
             # 静止驻留状态查询
             elif command == 0x85:
-                if data and len(data) >= 4:
-                    height_accumulation_time = self._parse_signed_16bit_special(data[0:4])
-                    self.height_accumulation_time = height_accumulation_time
+                if data and len(data) >= 1:
+                    static_stay_status = data[0]
+                    self.height_accumulation_time = static_stay_status
                     self._handle_query_response(
                         R60AFD1.TYPE_QUERY_STATIC_STAY_STATUS,
-                        height_accumulation_time,
+                        static_stay_status,
                         "QUERY STATIC STAY STATUS"
                     )
             # 静止驻留时长查询(4B)
             elif command == 0x8A:
                 if data and len(data) >= 4:
-                    stationary_duration = self._parse_signed_16bit_special(data[0:4])
+                    stationary_duration = self._parse_4byte_timestamp(data)
                     self.static_stay_duration = stationary_duration
                     self._handle_query_response(
                         R60AFD1.TYPE_QUERY_STATIC_STAY_DURATION,
@@ -2510,24 +2553,35 @@ class R60AFD1:
                         static_distance,
                         "QUERY FALL SENSITIVITY"
                     )
-            # 一段时间高度占比查询(6B)
+            # 一段时间高度占比上报(6B)
             elif command == 0x0E:
-                    if data and len(data) >= 6:
-                        height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2 = self._parse_height_data(data)
-                        self.height_total_count = height_total
-                        self.height_ratio_0_05 = ratio_0_05
-                        self.height_ratio_05_1 = ratio_05_1
-                        self.height_ratio_1_15 = ratio_1_15
-                        self.height_ratio_15_2 = ratio_15_2
-                        self._handle_query_response(
-                            R60AFD1.TYPE_QUERY_HEIGHT_RATIO,
-                            (height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2),
-                            "HEIGHT RATIO"
-                        )
+                if data and len(data) >= 6:
+                    height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2 = self._parse_height_data(data)
+                    self.height_total_count = height_total
+                    self.height_ratio_0_05 = ratio_0_05
+                    self.height_ratio_05_1 = ratio_05_1
+                    self.height_ratio_1_15 = ratio_1_15
+                    self.height_ratio_15_2 = ratio_15_2
+                    if R60AFD1.DEBUG_ENABLED:
+                        print(f"[Height] Total: {height_total}, 0-0.5m: {ratio_0_05}%, 0.5-1m: {ratio_05_1}%, 1-1.5m: {ratio_1_15}%, 1.5-2m: {ratio_15_2}%")
+            # 一段时间高度占比查询(6B)
+            elif command == 0x8E:
+                if data and len(data) >= 6:
+                    height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2 = self._parse_height_data(data)
+                    self.height_total_count = height_total
+                    self.height_ratio_0_05 = ratio_0_05
+                    self.height_ratio_05_1 = ratio_05_1
+                    self.height_ratio_1_15 = ratio_1_15
+                    self.height_ratio_15_2 = ratio_15_2
+                    self._handle_query_response(
+                        R60AFD1.TYPE_QUERY_HEIGHT_RATIO,
+                        (height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2),
+                        "HEIGHT RATIO"
+                    )
             # 高度累计时间查询(4B)
             elif command == 0x8F:
                 if data and len(data) >= 4:
-                    height_accumulation_time = self._parse_signed_16bit_special(data[0:4])
+                    height_accumulation_time = self._parse_4byte_timestamp(data)
                     self.height_accumulation_time = height_accumulation_time
                     self._handle_query_response(
                         R60AFD1.TYPE_QUERY_HEIGHT_ACCUMULATION_TIME,
@@ -2584,7 +2638,7 @@ class R60AFD1:
 
 
     def auto_measure_height(self, timeout=500):
-        """自动测高（注意：容易受干扰导致测不准）"""
+        """自动测高（注意：容易受干扰导致测不准）实测一直为00 00"""
         return self._execute_operation(R60AFD1.TYPE_AUTO_HEIGHT_MEASURE, timeout=timeout)
 
 
@@ -2755,15 +2809,22 @@ class R60AFD1:
     def set_install_angle(self, angle_x, angle_y, angle_z, timeout=200):
         """设置安装角度"""
         # 角度数据为2字节每个轴，共6字节
-        data = angle_x.to_bytes(2) + angle_y.to_bytes(2) + angle_z.to_bytes(2)
+        data = bytearray(6)
+        data[0] = (angle_x >> 8) & 0xFF
+        data[1] = angle_x & 0xFF
+        data[2] = (angle_y >> 8) & 0xFF
+        data[3] = angle_y & 0xFF
+        data[4] = (angle_z >> 8) & 0xFF
+        data[5] = angle_z & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_INSTALL_ANGLE, timeout=timeout, data=data)
-
 
     def set_install_height(self, height_cm, timeout=200):
         """设置安装高度（单位：cm）"""
         if height_cm < 0 or height_cm > 65535:
             raise ValueError("高度必须在0-65535cm范围内")
-        data = height_cm.to_bytes(2)
+        data = bytearray(2)
+        data[0] = (height_cm >> 8) & 0xFF
+        data[1] = height_cm & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_INSTALL_HEIGHT, timeout=timeout, data=data)
 
 
@@ -2771,7 +2832,9 @@ class R60AFD1:
         """设置静坐水平距离（单位：cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
             raise ValueError("静坐水平距离必须在0-300cm范围内")
-        data = distance_cm.to_bytes(2)
+        data = bytearray(2)
+        data[0] = (distance_cm >> 8) & 0xFF
+        data[1] = distance_cm & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_STATIC_DISTANCE, timeout=timeout, data=data)
 
 
@@ -2779,15 +2842,21 @@ class R60AFD1:
         """设置运动水平距离（单位：cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
             raise ValueError("运动水平距离必须在0-300cm范围内")
-        data = distance_cm.to_bytes(2)
+        data = bytearray(2)
+        data[0] = (distance_cm >> 8) & 0xFF
+        data[1] = distance_cm & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_MOTION_DISTANCE, timeout=timeout, data=data)
 
 
     def set_no_person_time(self, seconds, timeout=200):
         """设置无人时间（单位：秒，范围5-1800）"""
-        if seconds < 5 or seconds > 1800:
+        if seconds <= 5 or seconds >= 1800:
             raise ValueError("无人时间必须在5-1800秒范围内")
-        data = seconds.to_bytes(4)
+        data = bytearray(4)
+        data[0] = (seconds >> 24) & 0xFF
+        data[1] = (seconds >> 16) & 0xFF
+        data[2] = (seconds >> 8) & 0xFF
+        data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_NO_PERSON_TIME, timeout=timeout, data=data)
 
 
@@ -2795,23 +2864,35 @@ class R60AFD1:
         """设置人体存在判断阈值（范围0-0xffffffff）"""
         if threshold < 0 or threshold > 0xffffffff:
             raise ValueError("阈值必须在0-0xffffffff范围内")
-        data = threshold.to_bytes(4)
+        data = bytearray(4)
+        data[0] = (threshold >> 24) & 0xFF
+        data[1] = (threshold >> 16) & 0xFF
+        data[2] = (threshold >> 8) & 0xFF
+        data[3] = threshold & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_PRESENCE_THRESHOLD, timeout=timeout, data=data)
 
 
     def set_fall_duration(self, seconds, timeout=200):
         """设置跌倒时长（单位：秒，范围5-180）"""
-        if seconds < 5 or seconds > 180:
+        if seconds <= 5 or seconds >= 180:
             raise ValueError("跌倒时长必须在5-180秒范围内")
-        data = seconds.to_bytes(4)
+        data = bytearray(4)
+        data[0] = (seconds >> 24) & 0xFF
+        data[1] = (seconds >> 16) & 0xFF
+        data[2] = (seconds >> 8) & 0xFF
+        data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_DURATION, timeout=timeout, data=data)
 
 
     def set_static_stay_duration(self, seconds, timeout=200):
         """设置静止驻留时长（单位：秒，范围60-3600）"""
-        if seconds < 60 or seconds > 3600:
+        if seconds <= 60 or seconds >= 3600:
             raise ValueError("静止驻留时长必须在60-3600秒范围内")
-        data = seconds.to_bytes(4)
+        data = bytearray(4)
+        data[0] = (seconds >> 24) & 0xFF
+        data[1] = (seconds >> 16) & 0xFF
+        data[2] = (seconds >> 8) & 0xFF
+        data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_STATIC_STAY_DURATION, timeout=timeout, data=data)
 
 
@@ -2819,7 +2900,11 @@ class R60AFD1:
         """设置高度累积时间（单位：秒，范围0-300）"""
         if seconds < 0 or seconds > 300:
             raise ValueError("高度累积时间必须在0-300秒范围内")
-        data = seconds.to_bytes(4)
+        data = bytearray(4)
+        data[0] = (seconds >> 24) & 0xFF
+        data[1] = (seconds >> 16) & 0xFF
+        data[2] = (seconds >> 8) & 0xFF
+        data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_HEIGHT_ACCUMULATION_TIME, timeout=timeout, data=data)
 
 
@@ -2827,21 +2912,27 @@ class R60AFD1:
         """设置跌倒打破高度（单位：cm，范围0-150）"""
         if height_cm < 0 or height_cm > 150:
             raise ValueError("跌倒打破高度必须在0-150cm范围内")
-        data = height_cm.to_bytes(2)
+        data = bytearray(2)
+        data[0] = (height_cm >> 8) & 0xFF
+        data[1] = height_cm & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_BREAK_HEIGHT, timeout=timeout, data=data)
 
-
+    # 该功能查询和设置均与手册不符，查询方法和设置方法待核实后修改
     def set_track_frequency(self, seconds, timeout=200):
         """设置轨迹点上报频率（单位：秒，范围0-0xffffffff）"""
         if seconds < 0 or seconds > 0xffffffff:
             raise ValueError("轨迹点上报频率超出范围")
-        data = seconds.to_bytes(4)
+        data = bytearray(4)
+        data[0] = (seconds >> 24) & 0xFF
+        data[1] = (seconds >> 16) & 0xFF
+        data[2] = (seconds >> 8) & 0xFF
+        data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_TRACK_FREQUENCY, timeout=timeout, data=data)
 
     def set_fall_sensitivity(self, sensitivity, timeout=200):
-        """设置跌倒灵敏度（范围1-5）"""
+        """设置跌倒灵敏度（范围0-3）"""
         if sensitivity < 0 or sensitivity > 3:
-            raise ValueError("跌倒灵敏度必须在1-5范围内")
+            raise ValueError("跌倒灵敏度必须在0-3范围内")
         data = bytes([sensitivity])
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_SENSITIVITY, timeout=timeout, data=data)
 # ======================================== 初始化配置 ==========================================
