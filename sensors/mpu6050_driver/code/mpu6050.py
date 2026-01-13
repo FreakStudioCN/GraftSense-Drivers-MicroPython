@@ -1,27 +1,140 @@
-# Class to read data from the (GY-521) MPU6050 Accelerometer/Gyro Module
-# Ported to MicroPython by Warayut Poomiwatracanont JAN 2023
-# Original repo https://github.com/nickcoutsos/MPU-6050-Python
-# and https://github.com/CoreElectronics/CE-PiicoDev-MPU6050-MicroPython-Module
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2026/1/13 上午10:32
+# @Author  : hogeiha
+# @File    : mpu6050.py
+# @Description : 串口IMU驱动代码
+# @License : MIT
+
+__version__ = "0.1.0"
+__author__ = "hogeiha"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
+
+# ======================================== 导入相关模块 =========================================
 
 from math import sqrt, atan2
 from machine import Pin, SoftI2C
-from time import sleep_ms
+from time import sleep_ms, ticks_ms, ticks_diff
+
+# ======================================== 全局变量 ============================================
 
 error_msg = "\nError \n"
-i2c_err_str = "ESP32 could not communicate with module at address 0x{:02X}, check wiring"
+i2c_err_str = "not communicate with module at address 0x{:02X}, check wiring"
 
+# ======================================== 功能函数 ============================================
 
+# ======================================== 自定义类 ============================================
 
+class SimpleComplementaryFilter:
+    """
+    简单互补滤波器
+    融合加速度计和陀螺仪数据计算俯仰角和滚转角
+    """
 
+    def __init__(self, alpha=0.98):
+        """
+        初始化滤波器
 
+        参数:
+        alpha: 滤波器系数 (0.0-1.0)
+              0.98: 推荐值，98%信任陀螺仪，2%信任加速度计
+        """
+        self.alpha = alpha
+        self.last_time = None
 
-def signedIntFromBytes(x, endian="big"):
-    y = int.from_bytes(x, endian)
-    if (y >= 0x8000):
-        return -((65535 - y) + 1)
-    else:
-        return y
+        # 角度初始值
+        self.pitch = 0.0  # 俯仰角 (绕X轴)
+        self.roll = 0.0  # 滚转角 (绕Y轴)
 
+        # 陀螺仪零偏
+        self.gyro_offset_x = 0.0
+        self.gyro_offset_y = 0.0
+
+    def signedIntFromBytes(self, x, endian="big"):
+        """从字节转换为有符号整数"""
+        y = int.from_bytes(x, endian)
+        if (y >= 0x8000):
+            return -((65535 - y) + 1)
+        else:
+            return y
+    def calibrate(self, mpu, samples=100):
+        """
+        校准陀螺仪零偏
+        将传感器静止放置，然后调用此函数
+        """
+        print("正在校准陀螺仪，请保持静止...")
+
+        sum_x = 0.0
+        sum_y = 0.0
+
+        for i in range(samples):
+            gyro = mpu.read_gyro_data()
+            sum_x += gyro["x"]
+            sum_y += gyro["y"]
+            sleep_ms(10)  # 等待10ms
+
+        self.gyro_offset_x = sum_x / samples
+        self.gyro_offset_y = sum_y / samples
+
+        print(f"校准完成: X偏移={self.gyro_offset_x:.2f}, Y偏移={self.gyro_offset_y:.2f}")
+
+    def update(self, mpu):
+        """
+        更新滤波器，返回当前角度(pitch, roll)
+        """
+        # 获取当前时间
+        current_time = ticks_ms()
+
+        # 如果是第一次调用，只初始化时间
+        if self.last_time is None:
+            self.last_time = current_time
+            return self.pitch, self.roll
+
+        # 计算时间差（秒）
+        dt = ticks_diff(current_time, self.last_time) / 1000.0
+        self.last_time = current_time
+
+        # 如果时间差太小，跳过
+        if dt <= 0 or dt > 0.1:  # 避免过大或过小的时间差
+            dt = 0.01  # 默认10ms
+
+        # 读取传感器数据
+        accel = mpu.read_accel_data(g=False)  # m/s²
+        gyro = mpu.read_gyro_data()  # °/s
+
+        # 1. 从加速度计计算角度
+        ax, ay, az = accel["x"], accel["y"], accel["z"]
+
+        # 计算俯仰角 (pitch) 和滚转角 (roll)，单位：度
+        pitch_acc = math.degrees(math.atan2(ay, math.sqrt(ax * ax + az * az)))
+        roll_acc = math.degrees(math.atan2(-ax, math.sqrt(ay * ay + az * az)))
+
+        # 2. 从陀螺仪计算角度变化
+        # 减去零偏
+        gyro_y = gyro["y"] - self.gyro_offset_y  # 俯仰角变化率
+        gyro_x = gyro["x"] - self.gyro_offset_x  # 滚转角变化率
+
+        # 陀螺仪积分
+        pitch_gyro = self.pitch + gyro_y * dt
+        roll_gyro = self.roll + gyro_x * dt
+
+        # 3. 互补滤波融合
+        # alpha越大，越信任陀螺仪；alpha越小，越信任加速度计
+        self.pitch = self.alpha * pitch_gyro + (1 - self.alpha) * pitch_acc
+        self.roll = self.alpha * roll_gyro + (1 - self.alpha) * roll_acc
+
+        return self.pitch, self.roll
+
+    def get_angles(self):
+        """获取当前角度"""
+        return self.pitch, self.roll
+
+    def reset(self):
+        """重置滤波器"""
+        self.pitch = 0.0
+        self.roll = 0.0
+        self.last_time = None
 
 class MPU6050(object):
     # Global Variables
@@ -109,9 +222,9 @@ class MPU6050(object):
                     self._terminatingFailCount = self._terminatingFailCount + 1
                     print(i2c_err_str.format(self.addr))
                     return {"x": float("NaN"), "y": float("NaN"), "z": float("NaN")}
-        x = signedIntFromBytes(data[0:2])
-        y = signedIntFromBytes(data[2:4])
-        z = signedIntFromBytes(data[4:6])
+        x = self.signedIntFromBytes(data[0:2])
+        y = self.signedIntFromBytes(data[2:4])
+        z = self.signedIntFromBytes(data[4:6])
         return {"x": x, "y": y, "z": z}
 
     # Reads the temperature from the onboard temperature sensor of the MPU-6050.
@@ -119,7 +232,7 @@ class MPU6050(object):
     def read_temperature(self):
         try:
             rawData = self.i2c.readfrom_mem(self.addr, MPU6050._TEMP_OUT0, 2)
-            raw_temp = (signedIntFromBytes(rawData, "big"))
+            raw_temp = (self.signedIntFromBytes(rawData, "big"))
         except:
             print(i2c_err_str.format(self.addr))
             return float("NaN")
@@ -241,3 +354,7 @@ class MPU6050(object):
         x = atan2(a["y"], a["z"])
         y = atan2(-a["x"], a["z"])
         return {"x": x, "y": y}
+
+    # ======================================== 初始化配置 ==========================================
+
+    # ========================================  主程序  ============================================

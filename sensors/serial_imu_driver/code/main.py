@@ -94,8 +94,8 @@ try:
 
 except KeyboardInterrupt:
     # 捕获键盘中断（Ctrl+C）时的处理
-    print("程序被用户中断")
+    print("The program was interrupted by the user")
 finally:
     # 无论程序正常结束还是被中断，最终都会执行这里，确保LED关闭
     LED.off()
-    print("LED已关闭，程序退出")
+    print("The LED is off, and the program has exited.")
