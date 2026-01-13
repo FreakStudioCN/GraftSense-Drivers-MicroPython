@@ -27,7 +27,7 @@ i2c_err_str = "not communicate with module at address 0x{:02X}, check wiring"
 # ======================================== 自定义类 ============================================
 
 class ComplementaryKalmanFilter:
-    def __init__(self, dt=0.01, gyro_weight=0.98):
+    def __init__(self, dt=0.01, gyro_weight=0.98, Q_angle=0.001, Q_bias=0.003, R_measure=0.003):
         """
         初始化互补卡尔曼滤波器
 
@@ -43,9 +43,9 @@ class ComplementaryKalmanFilter:
         self.pitch = 0.0  # 俯仰角
 
         # 卡尔曼滤波器参数
-        self.Q_angle = 0.001  # 过程噪声协方差
-        self.Q_bias = 0.003  # 陀螺仪偏置噪声协方差
-        self.R_measure = 0.03  # 测量噪声协方差
+        self.Q_angle = Q_angle  # 过程噪声协方差
+        self.Q_bias = Q_bias  # 陀螺仪偏置噪声协方差
+        self.R_measure = R_measure  # 测量噪声协方差
 
         # 卡尔曼滤波器状态
         self.angle = 0.0  # 角度估计
