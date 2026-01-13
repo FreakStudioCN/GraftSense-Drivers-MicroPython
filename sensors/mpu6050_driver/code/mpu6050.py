@@ -13,7 +13,7 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
-from math import sqrt, atan2
+from math import sqrt, atan2, radians ,degrees
 from machine import Pin, SoftI2C
 from time import sleep_ms, ticks_ms, ticks_diff
 
@@ -26,115 +26,166 @@ i2c_err_str = "not communicate with module at address 0x{:02X}, check wiring"
 
 # ======================================== 自定义类 ============================================
 
-class SimpleComplementaryFilter:
-    """
-    简单互补滤波器
-    融合加速度计和陀螺仪数据计算俯仰角和滚转角
-    """
-
-    def __init__(self, alpha=0.98):
+class ComplementaryKalmanFilter:
+    def __init__(self, dt=0.01, gyro_weight=0.98):
         """
-        初始化滤波器
+        初始化互补卡尔曼滤波器
 
         参数:
-        alpha: 滤波器系数 (0.0-1.0)
-              0.98: 推荐值，98%信任陀螺仪，2%信任加速度计
+        dt: 采样时间间隔 (秒)
+        gyro_weight: 陀螺仪权重 (0-1)，值越大越相信陀螺仪数据
         """
-        self.alpha = alpha
-        self.last_time = None
+        self.dt = dt
+        self.alpha = gyro_weight  # 互补滤波系数
 
-        # 角度初始值
-        self.pitch = 0.0  # 俯仰角 (绕X轴)
-        self.roll = 0.0  # 滚转角 (绕Y轴)
+        # 初始化角度估计 (弧度)
+        self.roll = 0.0  # 横滚角
+        self.pitch = 0.0  # 俯仰角
 
-        # 陀螺仪零偏
-        self.gyro_offset_x = 0.0
-        self.gyro_offset_y = 0.0
+        # 卡尔曼滤波器参数
+        self.Q_angle = 0.001  # 过程噪声协方差
+        self.Q_bias = 0.003  # 陀螺仪偏置噪声协方差
+        self.R_measure = 0.03  # 测量噪声协方差
 
-    def signedIntFromBytes(self, x, endian="big"):
-        """从字节转换为有符号整数"""
-        y = int.from_bytes(x, endian)
-        if (y >= 0x8000):
-            return -((65535 - y) + 1)
-        else:
-            return y
-    def calibrate(self, mpu, samples=100):
+        # 卡尔曼滤波器状态
+        self.angle = 0.0  # 角度估计
+        self.bias = 0.0  # 陀螺仪偏置估计
+        self.P = [[0.0, 0.0], [0.0, 0.0]]  # 误差协方差矩阵
+
+        # 时间跟踪
+        self.last_time = ticks_ms()
+
+    def update_complementary(self, accel_angle, gyro_rate):
         """
-        校准陀螺仪零偏
-        将传感器静止放置，然后调用此函数
+        使用互补滤波更新角度估计
+
+        参数:
+        accel_angle: 从加速度计计算的角度 (弧度)
+        gyro_rate: 陀螺仪角速度 (弧度/秒)
+
+        返回:
+        滤波后的角度 (弧度)
         """
-        print("正在校准陀螺仪，请保持静止...")
-
-        sum_x = 0.0
-        sum_y = 0.0
-
-        for i in range(samples):
-            gyro = mpu.read_gyro_data()
-            sum_x += gyro["x"]
-            sum_y += gyro["y"]
-            sleep_ms(10)  # 等待10ms
-
-        self.gyro_offset_x = sum_x / samples
-        self.gyro_offset_y = sum_y / samples
-
-        print(f"校准完成: X偏移={self.gyro_offset_x:.2f}, Y偏移={self.gyro_offset_y:.2f}")
-
-    def update(self, mpu):
-        """
-        更新滤波器，返回当前角度(pitch, roll)
-        """
-        # 获取当前时间
+        # 计算时间间隔
         current_time = ticks_ms()
-
-        # 如果是第一次调用，只初始化时间
-        if self.last_time is None:
-            self.last_time = current_time
-            return self.pitch, self.roll
-
-        # 计算时间差（秒）
         dt = ticks_diff(current_time, self.last_time) / 1000.0
         self.last_time = current_time
 
-        # 如果时间差太小，跳过
-        if dt <= 0 or dt > 0.1:  # 避免过大或过小的时间差
-            dt = 0.01  # 默认10ms
+        if dt > 0:
+            # 公式1: 陀螺仪积分得到角度
+            # θ_gyro = θ_prev + ω * Δt
+            gyro_angle = self.angle + gyro_rate * dt
 
-        # 读取传感器数据
-        accel = mpu.read_accel_data(g=False)  # m/s²
-        gyro = mpu.read_gyro_data()  # °/s
+            # 公式2: 互补滤波融合
+            # θ_filtered = α * θ_gyro + (1-α) * θ_accel
+            self.angle = self.alpha * gyro_angle + (1 - self.alpha) * accel_angle
 
-        # 1. 从加速度计计算角度
-        ax, ay, az = accel["x"], accel["y"], accel["z"]
+        return self.angle
 
-        # 计算俯仰角 (pitch) 和滚转角 (roll)，单位：度
-        pitch_acc = math.degrees(math.atan2(ay, math.sqrt(ax * ax + az * az)))
-        roll_acc = math.degrees(math.atan2(-ax, math.sqrt(ay * ay + az * az)))
+    def update_kalman(self, accel_angle, gyro_rate):
+        """
+        使用卡尔曼滤波更新角度估计
 
-        # 2. 从陀螺仪计算角度变化
-        # 减去零偏
-        gyro_y = gyro["y"] - self.gyro_offset_y  # 俯仰角变化率
-        gyro_x = gyro["x"] - self.gyro_offset_x  # 滚转角变化率
+        参数:
+        accel_angle: 从加速度计计算的角度 (弧度)
+        gyro_rate: 陀螺仪角速度 (弧度/秒)
 
-        # 陀螺仪积分
-        pitch_gyro = self.pitch + gyro_y * dt
-        roll_gyro = self.roll + gyro_x * dt
+        返回:
+        滤波后的角度 (弧度)
+        """
+        # 计算时间间隔
+        current_time = ticks_ms()
+        dt = ticks_diff(current_time, self.last_time) / 1000.0
+        self.last_time = current_time
 
-        # 3. 互补滤波融合
-        # alpha越大，越信任陀螺仪；alpha越小，越信任加速度计
-        self.pitch = self.alpha * pitch_gyro + (1 - self.alpha) * pitch_acc
-        self.roll = self.alpha * roll_gyro + (1 - self.alpha) * roll_acc
+        if dt > 0:
+            # ========== 预测步骤（时间更新）==========
+            # 公式3: 预测状态
+            # x̂_k|k-1 = F_k * x̂_k-1|k-1 + B_k * u_k
+            # 其中 x = [θ, b]^T, F = [[1, -Δt], [0, 1]], u = ω
+            self.angle += (gyro_rate - self.bias) * dt
 
-        return self.pitch, self.roll
+            # 公式4: 预测误差协方差
+            # P_k|k-1 = F_k * P_k-1|k-1 * F_k^T + Q_k
+            # 这里直接展开计算
+            self.P[0][0] += dt * (dt * self.P[1][1] - self.P[0][1] - self.P[1][0] + self.Q_angle)
+            self.P[0][1] -= dt * self.P[1][1]
+            self.P[1][0] -= dt * self.P[1][1]
+            self.P[1][1] += self.Q_bias * dt
 
-    def get_angles(self):
-        """获取当前角度"""
-        return self.pitch, self.roll
+            # ========== 更新步骤（测量更新）==========
+            # 公式5: 计算卡尔曼增益
+            # K_k = P_k|k-1 * H_k^T * (H_k * P_k|k-1 * H_k^T + R_k)^{-1}
+            # 这里H = [1, 0]，所以简化为：
+            S = self.P[0][0] + self.R_measure
+            K = [self.P[0][0] / S, self.P[1][0] / S]
 
-    def reset(self):
-        """重置滤波器"""
-        self.pitch = 0.0
-        self.roll = 0.0
-        self.last_time = None
+            # 公式6: 计算测量残差
+            # ỹ_k = z_k - H_k * x̂_k|k-1
+            y = accel_angle - self.angle
+
+            # 公式7: 更新状态估计
+            # x̂_k|k = x̂_k|k-1 + K_k * ỹ_k
+            self.angle += K[0] * y
+            self.bias += K[1] * y
+
+            # 公式8: 更新误差协方差
+            # P_k|k = (I - K_k * H_k) * P_k|k-1
+            P00_temp = self.P[0][0]
+            P01_temp = self.P[0][1]
+
+            self.P[0][0] -= K[0] * P00_temp
+            self.P[0][1] -= K[0] * P01_temp
+            self.P[1][0] -= K[1] * P00_temp
+            self.P[1][1] -= K[1] * P01_temp
+
+        return self.angle
+
+    def update_roll_pitch(self, accel_data, gyro_data):
+        """
+        更新横滚角和俯仰角
+
+        参数:
+        accel_data: 加速度计数据字典 {'x': , 'y': , 'z': }
+        gyro_data: 陀螺仪数据字典 {'x': , 'y': , 'z': }
+
+        返回:
+        (roll, pitch) 横滚角和俯仰角 (弧度)
+        """
+        # 将角速度从度/秒转换为弧度/秒
+        # 公式9: ω_rad = ω_deg * π / 180
+        gyro_roll_rate = radians(gyro_data['y'])
+        gyro_pitch_rate = radians(gyro_data['x'])
+
+        # 从加速度计计算角度
+        acc_x = accel_data['x']
+        acc_y = accel_data['y']
+        acc_z = accel_data['z']
+
+        # 公式10: 加速度计横滚角（绕X轴）
+        # φ_accel = atan2(a_y, sqrt(a_x² + a_z²))
+        accel_roll = atan2(acc_y, sqrt(acc_x * acc_x + acc_z * acc_z))
+
+        # 公式11: 加速度计俯仰角（绕Y轴）
+        # θ_accel = atan2(-a_x, sqrt(a_y² + a_z²))
+        accel_pitch = atan2(-acc_x, sqrt(acc_y * acc_y + acc_z * acc_z))
+
+        # 分别滤波横滚角和俯仰角
+        # 公式12: 使用卡尔曼滤波分别估计横滚和俯仰
+        self.roll = self.update_kalman(accel_roll, gyro_roll_rate)
+        self.pitch = self.update_kalman(accel_pitch, gyro_pitch_rate)
+
+        return self.roll, self.pitch
+
+    def get_angles_degrees(self):
+        """获取角度（度）"""
+        # 公式13: 弧度转角度
+        # angle_deg = angle_rad * 180 / π
+        return degrees(self.roll), degrees(self.pitch)
+
+    def get_angles_radians(self):
+        """获取角度（弧度）"""
+        return self.roll, self.pitch
 
 class MPU6050(object):
     # Global Variables
