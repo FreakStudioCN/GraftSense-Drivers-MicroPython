@@ -37,7 +37,8 @@ class AD8232:
         self.millis_timer = time.ticks_ms()
         self.frequency = 0.0
         self.beats_per_min = 0.0
-
+        # 工作状态可能浮空，所以默认值是2 (未知)
+        self.operating_status = 2
         # 数据采集状态
         self.new_data = 0
 
