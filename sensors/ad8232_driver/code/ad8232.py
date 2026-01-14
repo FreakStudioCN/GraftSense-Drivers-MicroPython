@@ -4,7 +4,7 @@ from micropython import const
 
 
 class AD8232:
-    def __init__(self, adc_pin=26, loff_plus_pin=16, loff_minus_pin=17):
+    def __init__(self, adc_pin=26, loff_plus_pin=16, loff_minus_pin=17,sdn_pin=None):
         """
         初始化AD8232心率传感器 (Pico版本)
 
@@ -29,7 +29,8 @@ class AD8232:
         self.avg_data = 0
         self.roundrobin = 0
         self.count_data = 0
-
+        self.sdn_pin = None
+        self.lead_status = False
         # 心率计算参数
         self.period = 0
         self.last_period = 0
@@ -42,7 +43,26 @@ class AD8232:
 
         print(f"AD8232初始化完成 - ADC引脚: GP{adc_pin}")
         print(f"导联检测: LO+ GP{loff_plus_pin}, LO- GP{loff_minus_pin}")
-
+    def off(self):
+        """
+        关闭AD8232传感器 (如果有SDN引脚)
+        """
+        if hasattr(self, 'sdn_pin') and self.sdn_pin is not None:
+            self.sdn_pin.value(0)  # 设置为低电平关闭传感器
+            self.operating_status = 3
+            print("AD8232传感器已关闭")
+        else:
+            print("未配置SDN引脚，无法关闭传感器")
+    def on(self):
+        """
+        打开AD8232传感器 (如果有SDN引脚)
+        """
+        if hasattr(self, 'sdn_pin') and self.sdn_pin is not None:
+            self.sdn_pin.value(1)  # 设置为高电平打开传感器
+            self.operating_status = 1
+            print("AD8232传感器已打开")
+        else:
+            print("未配置SDN引脚，无法打开传感器")
     def read_raw(self):
         """
         读取原始ADC数据 (12位, 0-4095)
@@ -58,7 +78,8 @@ class AD8232:
         """
         # 当导联正常连接时，两个引脚都是低电平(0)
         # 当导联脱落时，至少一个引脚是高电平(1)
-        return self.loff_plus.value() == 1 or self.loff_minus.value() == 1
+        self.lead_status = self.loff_plus.value() == 1 or self.loff_minus.value() == 1
+        return self.lead_status
 
     def freq_detect(self):
         """
@@ -252,54 +273,3 @@ def example_basic():
         print(f"平均信号值: {stats['avg']}")
         print(f"最大信号值: {stats['max']}")
 
-
-def example_advanced():
-    """
-    高级示例 - 带信号质量评估
-    """
-    ecg = AD8232(adc_pin=26)
-
-    print("高级心率监测模式")
-    print("=" * 40)
-
-    try:
-        while True:
-            raw, bpm, leads_off = ecg.read_heart_rate()
-            stats = ecg.get_buffer_stats()
-
-            # 创建简单的文本图表
-            bar_length = int(raw / 4095 * 40)
-            bar = "█" * bar_length + " " * (40 - bar_length)
-
-            print(f"\033[2J\033[H")  # 清屏 (在某些终端中有效)
-
-            print("AD8232 实时心率监测")
-            print("=" * 40)
-            print(f"原始信号: [{bar}] {raw:4d}")
-            print(f"移动平均: {stats['avg']:4d} | 最大值: {stats['max']:4d}")
-            print(f"缓冲区: {stats['count']:3d}/{stats['buffer_size']}")
-            print(f"信号质量: {stats['signal_quality']:3d}%")
-
-            if leads_off:
-                print("\033[91m✗ 导联脱落 - 请检查电极连接\033[0m")
-            elif bpm is not None:
-                print(f"\033[92m♥ 心率: {bpm:6.1f} BPM\033[0m")
-            else:
-                print("正在检测心跳...")
-
-            print("=" * 40)
-            print("按Ctrl+C退出")
-
-            time.sleep_ms(100)  # 100ms更新一次显示
-
-    except KeyboardInterrupt:
-        print("\n监测结束")
-
-
-# 选择运行哪个示例
-if __name__ == "__main__":
-    # 运行基本示例
-    example_basic()
-
-    # 或运行高级示例 (取消注释)
-    # example_advanced()
