@@ -24,6 +24,13 @@ i2c_err_str = "not communicate with module at address 0x{:02X}, check wiring"
 
 # ======================================== 功能函数 ============================================
 
+def signedIntFromBytes(x, endian="big"):
+    y = int.from_bytes(x, endian)
+    if (y >= 0x8000):
+        return -((65535 - y) + 1)
+    else:
+        return y
+
 # ======================================== 自定义类 ============================================
 
 class ComplementaryKalmanFilter:
@@ -230,23 +237,12 @@ class MPU6050(object):
     _MPU6050_ADDRESS = 0x68
 
 
-    def __init__(self, bus=None, freq=None, sda=None, scl=None, addr=_MPU6050_ADDRESS):
+    def __init__(self, i2c,addr=_MPU6050_ADDRESS):
         # Checks any erorr would happen with I2C communication protocol.
         self._failCount = 0
         self._terminatingFailCount = 0
 
-        # Initializing the I2C method for ESP32
-        # Pin assignment:
-        # SCL -> GPIO 22
-        # SDA -> GPIO 21
-        self.i2c = SoftI2C(scl=Pin(22), sda=Pin(21), freq=100000)
-
-        # Initializing the I2C method for ESP8266
-        # Pin assignment:
-        # SCL -> GPIO 5
-        # SDA -> GPIO 4
-        # self.i2c = I2C(scl=Pin(5), sda=Pin(4))
-
+        self.i2c = i2c
         self.addr = addr
         try:
             # Wake up the MPU-6050 since it starts in sleep mode
@@ -273,9 +269,9 @@ class MPU6050(object):
                     self._terminatingFailCount = self._terminatingFailCount + 1
                     print(i2c_err_str.format(self.addr))
                     return {"x": float("NaN"), "y": float("NaN"), "z": float("NaN")}
-        x = self.signedIntFromBytes(data[0:2])
-        y = self.signedIntFromBytes(data[2:4])
-        z = self.signedIntFromBytes(data[4:6])
+        x = signedIntFromBytes(data[0:2])
+        y = signedIntFromBytes(data[2:4])
+        z = signedIntFromBytes(data[4:6])
         return {"x": x, "y": y, "z": z}
 
     # Reads the temperature from the onboard temperature sensor of the MPU-6050.
@@ -283,7 +279,7 @@ class MPU6050(object):
     def read_temperature(self):
         try:
             rawData = self.i2c.readfrom_mem(self.addr, MPU6050._TEMP_OUT0, 2)
-            raw_temp = (self.signedIntFromBytes(rawData, "big"))
+            raw_temp = (signedIntFromBytes(rawData, "big"))
         except:
             print(i2c_err_str.format(self.addr))
             return float("NaN")
@@ -293,6 +289,9 @@ class MPU6050(object):
     # Sets the range of the accelerometer
     # accel_range : the range to set the accelerometer to. Using a pre-defined range is advised.
     def set_accel_range(self, accel_range):
+        if accel_range not in [MPU6050._ACC_RNG_2G, MPU6050._ACC_RNG_4G, MPU6050._ACC_RNG_8G, MPU6050._ACC_RNG_16G]:
+            print("Error: Invalid accelerometer range. Range not set.")
+            return
         self.i2c.writeto_mem(self.addr, MPU6050._ACCEL_CONFIG, bytes([accel_range]))
         self._accel_range = accel_range
 
@@ -352,6 +351,9 @@ class MPU6050(object):
         return sqrt(d["x"] ** 2 + d["y"] ** 2 + d["z"] ** 2)
 
     def set_gyro_range(self, gyro_range):
+        if gyro_range not in [MPU6050._GYR_RNG_250DEG, MPU6050._GYR_RNG_500DEG, MPU6050._GYR_RNG_1000DEG, MPU6050._GYR_RNG_2000DEG]:
+            print("Error: Invalid gyroscope range. Range not set.")
+            return
         self.i2c.writeto_mem(self.addr, MPU6050._GYRO_CONFIG, bytes([gyro_range]))
         self._gyro_range = gyro_range
 
