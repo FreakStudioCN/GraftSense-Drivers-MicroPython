@@ -1,20 +1,20 @@
-# Python env   : MicroPython v1.23.0              
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/6/24 上午10:32   
-# @Author  : 李清水            
-# @File    : main.py       
-# @Description : 串口IMU类实验,主要通过串口获取IMU:JY61数据，然后通过Print函数打印数据
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2024/6/24 上午10:32
+# @Author  : 李清水
+# @File    : main.py
+# @Description : IIC获取mpu6050数据，然后通过Print函数打印数据
 
 # ======================================== 导入相关模块 ========================================
 
 # 硬件相关的模块
-from machine import UART, Pin
+from machine import Pin, SoftI2C
 # 时间相关的模块
 import time
 # 垃圾回收的模块
 import gc
 # IMU类模块
-from imu import IMU
+from mpu6050 import MPU6050, SimpleComplementaryFilter
 
 # ======================================== 全局变量 ============================================
 
@@ -36,56 +36,38 @@ time.sleep(3)
 # 打印调试信息
 print("FreakStudio : Using UART to communicate with IMU")
 
-# 创建串口对象，设置波特率为115200
-uart = UART(1, 115200)
-# 初始化uart对象，数据位为8，无校验位，停止位为1
-# 设置串口超时时间为5ms
-uart.init(bits=8,
-          parity=None,
-          stop=1,
-          tx=8,
-          rx=9,
-          timeout=5)
-
-# 创建串口对象，设置波特率为115200，用于将三轴角度数据发送到上位机
-uart_pc = UART(0, 115200)
-# 初始化uart对象，数据位为8，无校验位，停止位为1，设置串口超时时间为5ms
-uart_pc.init(bits=8,
-             parity=None,
-             stop=1,
-             tx=0,
-             rx=1,
-             timeout=5)
-
+i2c = SoftI2C(scl=Pin(5), sda=Pin(4), freq=100000)
 # 设置GPIO 25为LED输出引脚，下拉电阻使能
 LED = Pin(25, Pin.OUT, Pin.PULL_DOWN)
+# 初始化MPU6050
+mpu = MPU6050(i2c=i2c)
 
-# 初始化一个IMU对象
-imu_obj = IMU(uart)
+# 初始化互补滤波器
+filter_obj = SimpleComplementaryFilter(alpha=0.98)
+
+print("正在校准，请保持静止...")
+filter_obj.calibrate(mpu, samples=50)
+print("校准完成")
 
 # ========================================  主程序  ============================================
 try:
     while True:
         # 点亮LED灯
         LED.on()
-        # 接收陀螺仪数据
-        imu_obj.RecvData()
-        # 熄灭LED灯
-        LED.off()
+        # 获取角度数据
+        pitch, roll = filter_obj.update(mpu)
 
-        # 打印 x 轴角度
-        print(" X-axis angle : ", imu_obj.angle_x)
-        # 打印 y 轴角度
-        print(" Y-axis angle : ", imu_obj.angle_y)
-        # 打印 z 轴角度
-        print(" Z-axis angle : ", imu_obj.angle_z)
+        # 获取原始数据
+        accel = mpu.read_accel_data(g=False)
+        gyro = mpu.read_gyro_data()
+
+        # 打印数据
+        print(f"Pitch: {pitch:.1f}°, Roll: {roll:.1f}°")
+        print(f"Acceleration: X={accel['x']:.2f}, Y={accel['y']:.2f}, Z={accel['z']:.2f} m/s²")
+        print(f"Angular velocity: X={gyro['x']:.1f}, Y={gyro['y']:.1f}, Z={gyro['z']:.1f} °/s")
+        print("-" * 30)
         # 返回可用堆 RAM 的字节数
         print(" the number of RAM remaining is %d bytes ", gc.mem_free())
-
-        # 将三轴角度数据格式化成字符串
-        angle_data = "{:.2f}, {:.2f}, {:.2f}\r\n".format(imu_obj.angle_x, imu_obj.angle_y, imu_obj.angle_z)
-        # 通过串口0发送角度数据到上位机
-        uart_pc.write(angle_data)
 
         # 当可用堆 RAM 的字节数小于 80000 时，手动触发垃圾回收功能
         if gc.mem_free() < 220000:
