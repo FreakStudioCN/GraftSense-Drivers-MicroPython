@@ -21,6 +21,9 @@ class AD8232:
         self.loff_plus = machine.Pin(loff_plus_pin, machine.Pin.IN, machine.Pin.PULL_UP)
         self.loff_minus = machine.Pin(loff_minus_pin, machine.Pin.IN, machine.Pin.PULL_UP)
 
+        self.sdn_pin = sdn_pin
+        self.sdn = machine.Pin(self.sdn_pin, machine.Pin.OUT)
+
         # 数据缓冲区参数
         self.MAX_BUFFER = const(100)
         self.prev_data = [0] * self.MAX_BUFFER
@@ -29,7 +32,6 @@ class AD8232:
         self.avg_data = 0
         self.roundrobin = 0
         self.count_data = 0
-        self.sdn_pin = None
         self.lead_status = False
         # 心率计算参数
         self.period = 0
@@ -44,12 +46,13 @@ class AD8232:
 
         print(f"AD8232初始化完成 - ADC引脚: GP{adc_pin}")
         print(f"导联检测: LO+ GP{loff_plus_pin}, LO- GP{loff_minus_pin}")
+        print(f"SDN引脚: {'未配置' if sdn_pin is None else 'GP'+str(sdn_pin)}")
     def off(self):
         """
         关闭AD8232传感器 (如果有SDN引脚)
         """
-        if hasattr(self, 'sdn_pin') and self.sdn_pin is not None:
-            self.sdn_pin.value(0)  # 设置为低电平关闭传感器
+        if  self.sdn_pin is not None:
+            self.sdn.value(0)  # 设置为低电平关闭传感器
             self.operating_status = 3
             print("AD8232传感器已关闭")
         else:
@@ -58,8 +61,8 @@ class AD8232:
         """
         打开AD8232传感器 (如果有SDN引脚)
         """
-        if hasattr(self, 'sdn_pin') and self.sdn_pin is not None:
-            self.sdn_pin.value(1)  # 设置为高电平打开传感器
+        if  self.sdn_pin is not None:
+            self.sdn.value(1)  # 设置为高电平打开传感器
             self.operating_status = 1
             print("AD8232传感器已打开")
         else:
