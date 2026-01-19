@@ -25,7 +25,7 @@ time.sleep(3)
 print("FreakStudio: SNR9816 TTS Driver Example")
 
 # 创建 UART 对象，使用 UART0，波特率 115200，数据位 8，无奇偶校验，停止位 1，TX 引脚 GPIO16，RX 引脚 GPIO17
-uart = UART(0, baudrate=115200, bits=8, parity=None, stop=1, tx=Pin(16), rx=Pin(17))
+uart = UART(0, baudrate=115200, bits=8, parity=None, stop=1, tx=Pin(0), rx=Pin(1))
 # 创建 TTS 对象（使用 UTF-8 编码）
 tts = SNR9816_TTS(uart)
 
@@ -87,18 +87,21 @@ while not tts.synthesize_text("欢迎使用我司的TTS语音合[w0]成测试模
     time.sleep(1)
     continue
 print("Text synthesis started.")
+
+# 终端输入任意键暂停播放
+input ("Press any key to pause")
 # 暂停合成
 tts.pause_synthesis()
-time.sleep(3)
-
 print("Synthesis paused.")
+
+# 终端输入任意键继续合成播放
+input ("Press any key to play")
 # 继续合成
 tts.resume_synthesis()
-time.sleep(3)
-
 print("Synthesis resumed.")
+
+#终端输入任意键停止取消合成播放
+input ("Press any key to stop")
 # 停止合成
 tts.stop_synthesis()
-time.sleep(3)
-
 print("Synthesis stopped.")
