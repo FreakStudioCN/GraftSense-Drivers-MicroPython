@@ -2935,6 +2935,77 @@ class R60AFD1:
             raise ValueError("跌倒灵敏度必须在0-3范围内")
         data = bytes([sensitivity])
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_SENSITIVITY, timeout=timeout, data=data)
+
+    def close(self):
+        """
+        停止定时器，解析剩余数据帧，输出统计信息。
+
+        Raises:
+            Exception: 反初始化过程中发生错误。
+
+        Note:
+            - 停止定时器并设置运行状态为False。
+            - 重置所有查询状态。
+            - 解析剩余的数据帧。
+            - 获取并输出最终统计信息。
+            - 清空数据缓冲区。
+
+        ==========================================
+
+        Stop timer, parse remaining data frames, output statistics.
+
+        Raises:
+            Exception: Error occurred during deinitialization.
+
+        Note:
+            - Stop timer and set running status to False.
+            - Reset all query status.
+            - Parse remaining data frames.
+            - Get and output final statistics.
+            - Clear data buffer.
+        """
+        # 停止定时器
+        self._is_running = False
+        self._timer.deinit()
+
+        # 重置查询状态
+        self._query_in_progress = False
+        self._query_response_received = False
+        self._query_result = None
+        self._current_query_type = None
+
+        # 解析剩余数据帧
+        try:
+            frames = self.data_processor.read_and_parse()
+            for frame in frames:
+                # 使用 micropython.schedule 安全处理最后一帧数据
+                micropython.schedule(self.update_properties_from_frame, frame)
+        except Exception as e:
+            raise Exception(f"Failed to deinitialize timer: {str(e)}")
+
+        # 获取并输出统计信息
+        try:
+            if hasattr(self.data_processor, 'get_stats'):
+                stats = self.data_processor.get_stats()
+                if R60AFD1.DEBUG_ENABLED:
+                    print(f"{format_time()} [R60AFD1] Final statistics:")
+                    print(f"  Total bytes received: {stats.get('total_bytes_received', 0)}")
+                    print(f"  Total frames parsed: {stats.get('total_frames_parsed', 0)}")
+                    print(f"  CRC errors: {stats.get('crc_errors', 0)}")
+                    print(f"  Frame errors: {stats.get('frame_errors', 0)}")
+                    print(f"  Invalid frames: {stats.get('invalid_frames', 0)}")
+        except Exception as e:
+            raise Exception(f"Failed to get statistics: {str(e)}")
+
+        # 清空缓冲区
+        try:
+            if hasattr(self.data_processor, 'clear_buffer'):
+                self.data_processor.clear_buffer()
+        except Exception as e:
+            raise Exception(f"Failed to clear buffer: {str(e)}")
+
+        if R60AFD1.DEBUG_ENABLED:
+            print(f"{format_time()} [R60AFD1] Resources fully released")
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================
