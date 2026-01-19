@@ -3,7 +3,7 @@
 # @Time    : 2026/1/13 上午10:32
 # @Author  : hogeiha
 # @File    : mpu6050.py
-# @Description : 串口IMU驱动代码
+# @Description : mpu6050+卡尔曼滤波驱动代码,MPU6050类代码参考自：https://github.com/Lezgend/MPU6050-MicroPython
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -25,6 +25,28 @@ i2c_err_str = "not communicate with module at address 0x{:02X}, check wiring"
 # ======================================== 功能函数 ============================================
 
 def signedIntFromBytes(x, endian="big"):
+    """
+    将有符号字节数据转换为有符号整数（16位补码转换）。
+
+    Args:
+        x: 字节数据，长度为2字节（16位）。
+        endian: 字节序，可选"big"（大端序）或"little"（小端序），默认为"big"。
+
+    Returns:
+        int: 转换后的有符号整数（范围：-32768 到 32767）。
+
+    Raises:
+        无显式抛出异常，但依赖于int.from_bytes()函数的正常运作。
+
+    Note:
+        - 专门用于处理MPU6050等传感器返回的16位有符号数据。
+        - 使用补码（two's complement）表示法进行符号扩展。
+        - 公式解析：
+          当原始值 >= 0x8000（即32768）时，表示负数。
+          负数转换公式：-((65535 - y) + 1) = -(65536 - y) = y - 65536
+          例如：0xFFFF（65535）→ -1，0x8000（32768）→ -32768
+        - 正数直接返回原值。
+    """
     y = int.from_bytes(x, endian)
     if (y >= 0x8000):
         return -((65535 - y) + 1)
