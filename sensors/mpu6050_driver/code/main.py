@@ -1,8 +1,8 @@
-# Python env   : MicroPython v1.23.0              
-# -*- coding: utf-8 -*-        
-# @Time    : 2026/1/15 上午10:32   
-# @Author  : hogeiha            
-# @File    : main_mpu6050_gyro_kalman.py       
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2026/1/15 上午10:32
+# @Author  : hogeiha
+# @File    : main_mpu6050_gyro_kalman.py
 # @Description : MPU6050陀螺仪和卡尔曼滤波角度对比
 
 # ======================================== 导入相关模块 ========================================
@@ -22,14 +22,8 @@ start_time = 0
 
 # 上电延时3s
 time.sleep(3)
-print("MPU6050陀螺仪积分角度 vs 卡尔曼滤波角度对比")
-print("=" * 70)
-print("数据说明:")
-print("Gyro_Roll/Pitch: 仅使用陀螺仪积分计算的角度")
-print("Kalman_Roll/Pitch: 加速度计+陀螺仪融合的卡尔曼滤波角度")
-print("=" * 70)
+print("MPU6050 Gyroscope and Kalman Filter Angle Comparison Program")
 
-# 创建串口对象，设置波特率为115200
 # 创建串口对象，设置波特率为115200
 uart = UART(1, 115200)
 # 初始化uart对象，数据位为8，无校验位，停止位为1
@@ -50,11 +44,11 @@ i2c = SoftI2C(scl=Pin(5), sda=Pin(4), freq=100000)
 # 初始化MPU6050对象
 try:
     mpu = MPU6050(i2c)
-    print("✓ MPU6050初始化成功")
+    print("MPU6050 initialized successfully")
 
     # 创建互补卡尔曼滤波器
     filter = ComplementaryKalmanFilter(dt=0.01, gyro_weight=0.98)
-    print("✓ 卡尔曼滤波器初始化成功")
+    print("Kalman filter initialized successfully")
 
     # 陀螺仪积分角度（仅用于对比）
     gyro_roll_deg = 0.0
@@ -64,7 +58,7 @@ try:
     last_update_time = time.ticks_ms()
 
 except Exception as e:
-    print("✗ 初始化失败:", e)
+    print("Initialization failed:", e)
     while True:
         LED.on()
         time.sleep(0.5)
@@ -72,10 +66,11 @@ except Exception as e:
         time.sleep(0.5)
 
 # ========================================  主程序  ============================================
+
 try:
     # 打印表头
     print("\n" + "=" * 90)
-    print("时间(s) | 陀螺仪_Roll | 卡尔曼_Roll | 陀螺仪_Pitch | 卡尔曼_Pitch | 温度(°C)")
+    print("Time (s) | Gyroscope_Roll | Kalman_Roll | Gyroscope_Pitch | Kalman_Pitch | Temperature (°C)")
     print("-" * 90)
 
     # 开始时间记录
@@ -135,19 +130,12 @@ try:
             ))
 
             # 准备发送给上位机的数据
-            # 格式1：角度数据 - 时间,陀螺仪_Roll,卡尔曼_Roll,陀螺仪_Pitch,卡尔曼_Pitch,温度
+            # 串口发送格式：角度数据 - 陀螺仪_Roll,卡尔曼_Roll,陀螺仪_Pitch,卡尔曼_Pitch
             angle_data = "{:.2f}, {:.2f}, {:.2f}, {:.2f}\r\n".format(
                 gyro_roll_deg,
                 kalman_roll_deg,
                 gyro_pitch_deg,
                 kalman_pitch_deg,
-            )
-
-            # 格式2：原始数据 - 时间,角速度X,角速度Y,角速度Z,加速度X,加速度Y,加速度Z
-            raw_data = "{:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.3f}, {:.3f}, {:.3f}\r\n".format(
-                elapsed_time,
-                gyro_x, gyro_y, gyro_z,
-                accel_x, accel_y, accel_z
             )
 
             # 通过串口发送数据到上位机（可以根据需要选择发送哪一种格式）
@@ -164,30 +152,33 @@ try:
             time.sleep_ms(50)  # 20Hz采样率
 
             # 每50次采样重置陀螺仪积分角度（避免漂移累积）
-            static_sample_count = int(elapsed_time * 20)  # 20Hz采样率
+            # 20Hz采样率
+            static_sample_count = int(elapsed_time * 20)
+            # 检测设备是否静止（加速度模值接近9.8）
             if static_sample_count % 50 == 0 and static_sample_count > 0:
-                # 检测设备是否静止（加速度模值接近9.8）
                 accel_magnitude = (accel_x ** 2 + accel_y ** 2 + accel_z ** 2) ** 0.5
-                if 9.0 < accel_magnitude < 10.5:  # 设备相对静止
-                    gyro_roll_deg = kalman_roll_deg  # 使用卡尔曼滤波角度重置陀螺仪积分
+                # 设备相对静止
+                if 9.0 < accel_magnitude < 10.5:
+                    # 使用卡尔曼滤波角度重置陀螺仪积分
+                    gyro_roll_deg = kalman_roll_deg
                     gyro_pitch_deg = kalman_pitch_deg
                     if static_sample_count % 100 == 0:
-                        print("\n[设备静止] 重置陀螺仪积分角度...")
-                        print(f"[当前加速度模值: {accel_magnitude:.2f} g]")
+                        print("\n[Device Stationary] Resetting gyroscope integrated angle...")
+                        print(f"[Current Acceleration Magnitude]: {accel_magnitude:.2f} g]")
 
             # 垃圾回收
             if gc.mem_free() < 80000:
                 gc.collect()
-                print("[GC] 内存清理，剩余内存: {} bytes".format(gc.mem_free()))
+                print("[GC] Memory cleanup, available memory: {} bytes".format(gc.mem_free()))
 
         except Exception as e:
-            print("读取数据错误:", e)
+            print("Error reading data:", e)
             LED.off()
             time.sleep(0.1)
 
 except KeyboardInterrupt:
-    print("\n程序被用户中断")
+    print("\nThe program was interrupted by the user")
 finally:
     LED.off()
-    print("程序退出")
+    print("Program exited")
 
