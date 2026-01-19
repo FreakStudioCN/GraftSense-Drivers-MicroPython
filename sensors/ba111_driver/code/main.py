@@ -1,6 +1,6 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2025/11/4 下午5:33
+# @Time    : 2026/1/19 下午5:33
 # @Author  : hogeiha
 # @File    : main.py
 # @Description : 测试ba111_tds水质检测代码
@@ -14,9 +14,6 @@ from machine import Pin, UART
 
 # ======================================== 全局变量 ============================================
 
-uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1, tx=Pin(16), rx=Pin(17))
-sensor = BA111TDS(uart)
-
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
@@ -25,6 +22,9 @@ sensor = BA111TDS(uart)
 
 time.sleep(3)
 print("FreakStudio: test Light Intensity Sensor now")
+
+uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1, tx=Pin(16), rx=Pin(17))
+sensor = BA111TDS(uart)
 
 # 设置参数（如果需要）
 sensor.set_ntc_resistance(10000)
