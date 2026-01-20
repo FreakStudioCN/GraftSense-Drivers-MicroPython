@@ -1,4 +1,4 @@
-import machine
+from machine import ADC, Pin, Timer, UART
 import time
 from micropython import const
 
@@ -15,14 +15,14 @@ class AD8232:
             loff_minus_pin: 导联脱落检测- (GP17)
         """
         # ADC引脚初始化 (Pico的ADC)
-        self.adc = machine.ADC(adc_pin)
+        self.adc = ADC(Pin(adc_pin))
 
         # 导联脱落检测引脚
-        self.loff_plus = machine.Pin(loff_plus_pin, machine.Pin.IN, machine.Pin.PULL_UP)
-        self.loff_minus = machine.Pin(loff_minus_pin, machine.Pin.IN, machine.Pin.PULL_UP)
+        self.loff_plus = Pin(loff_plus_pin, Pin.IN, Pin.PULL_UP)
+        self.loff_minus = Pin(loff_minus_pin, Pin.IN, Pin.PULL_UP)
 
         self.sdn_pin = sdn_pin
-        self.sdn = machine.Pin(self.sdn_pin, machine.Pin.OUT)
+        self.sdn = Pin(self.sdn_pin, Pin.OUT)
 
         # 数据缓冲区参数
         self.MAX_BUFFER = const(100)
@@ -67,6 +67,7 @@ class AD8232:
             print("AD8232传感器已打开")
         else:
             print("未配置SDN引脚，无法打开传感器")
+
     def read_raw(self):
         """
         读取原始ADC数据 (12位, 0-4095)
@@ -84,114 +85,6 @@ class AD8232:
         # 当导联脱落时，至少一个引脚是高电平(1)
         self.lead_status = self.loff_plus.value() == 1 or self.loff_minus.value() == 1
         return self.lead_status
-
-    def freq_detect(self):
-        """
-        心率信号处理 - 对应Arduino的freqDetec()函数
-        逻辑与原始代码完全一致
-        """
-        # 1. 心跳检测 (缓冲区满后才开始检测)
-        if self.count_data == self.MAX_BUFFER:
-            if (self.prev_data[self.roundrobin] < self.avg_data * 1.5 and
-                    self.new_data >= self.avg_data * 1.5):
-                # 检测到心跳：计算周期
-                current_time = time.ticks_ms()
-                self.period = time.ticks_diff(current_time, self.millis_timer)
-                self.millis_timer = current_time
-                self.max_data = 0  # 重置最大值
-
-        # 2. 环形缓冲区管理
-        self.roundrobin += 1
-        if self.roundrobin >= self.MAX_BUFFER:
-            self.roundrobin = 0
-
-        # 3. 移动平均计算 (增量计算提高效率)
-        if self.count_data < self.MAX_BUFFER:
-            self.count_data += 1
-            self.sum_data += self.new_data
-        else:
-            self.sum_data += self.new_data - self.prev_data[self.roundrobin]
-
-        self.avg_data = self.sum_data // self.count_data
-
-        # 4. 更新最大值
-        if self.new_data > self.max_data:
-            self.max_data = self.new_data
-
-        # 5. 存储当前数据
-        self.prev_data[self.roundrobin] = self.new_data
-
-    def calculate_hr(self):
-        """
-        计算心率 - 对应Arduino的心率计算部分
-        返回: 心率值(BPM)或None(如果无效)
-        """
-        if self.period != self.last_period and self.period > 0:
-            # 频率 = 1000 / 周期(ms) - 转换为Hz
-            self.frequency = 1000.0 / self.period
-
-            # 转换为每分钟心跳数
-            bpm = self.frequency * 60.0
-
-            # 过滤不合理的数据 (20-200 BPM)
-            if 20.0 <= bpm <= 200.0:
-                self.beats_per_min = bpm
-                self.last_period = self.period
-                return self.beats_per_min
-
-        return None
-
-    def read_heart_rate(self):
-        """
-        完整的心率读取流程
-        返回: (原始数据, 心率BPM或None, 导联状态)
-        """
-        # 检查导联连接状态
-        leads_off = self.check_leads_off()
-
-        if leads_off:
-            # 导联脱落，不进行心率计算
-            raw_value = self.read_raw()
-            # 但仍然更新缓冲区以保持数据流
-            self.new_data = raw_value
-            self.freq_detect()
-            return raw_value, None, True
-
-        # 1. 读取原始数据
-        raw_value = self.read_raw()
-
-        # 2. 信号处理
-        self.freq_detect()
-
-        # 3. 计算心率
-        bpm = self.calculate_hr()
-
-        return raw_value, bpm, False
-
-    def get_signal_quality(self):
-        """
-        获取信号质量指标
-        返回: 信号质量百分比 (0-100%)
-        """
-        if self.max_data > 0 and self.avg_data > 0:
-            # 基于信号动态范围评估质量
-            dynamic_range = (self.max_data - min(self.prev_data)) / 4095.0
-            return min(100, int(dynamic_range * 100))
-        return 0
-
-    def get_buffer_stats(self):
-        """
-        获取缓冲区统计信息
-        返回: 字典包含统计信息
-        """
-        return {
-            'avg': self.avg_data,
-            'max': self.max_data,
-            'count': self.count_data,
-            'buffer_size': self.MAX_BUFFER,
-            'buffer_filled': self.count_data >= self.MAX_BUFFER,
-            'signal_quality': self.get_signal_quality()
-        }
 
     def reset(self):
         """

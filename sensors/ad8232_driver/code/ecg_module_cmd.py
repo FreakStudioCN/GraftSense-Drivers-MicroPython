@@ -4,10 +4,25 @@ from data_flow_processor import DataFlowProcessor
 from ad8232 import AD8232
 import micropython
 
+def voltage_to_8bit(voltage, V_min=-1.5, V_max=1.5):
+    """
+    将电压值映射到0-255
+    :param voltage: 输入的电压值
+    :param V_min: 理论最小电压
+    :param V_max: 理论最大电压
+    :return: 0-255之间的整数
+    """
+    # 限制在范围内
+    voltage_clipped = max(V_min, min(V_max, voltage))
+
+    # 线性映射
+    normalized = (voltage_clipped - V_min) / (V_max - V_min)
+    return round(normalized * 255)
+
 class AD8232_DataFlowProcessor:
 
     DEBUG_ENABLED = True  # 调试模式开关
-    def __init__(self, DataFlowProcessor,AD8232, parse_interval=10):
+    def __init__(self, DataFlowProcessor,AD8232,ECGSignalProcessor, parse_interval=10):
         """
         初始化AD8232_UART实例。
 
@@ -20,6 +35,7 @@ class AD8232_DataFlowProcessor:
             - 初始化定时器和运行状态标志。
             - 启动定时器以定期解析数据帧。
             """
+        self.ECGSignalProcessor = ECGSignalProcessor
         self.DataFlowProcessor = DataFlowProcessor
         self.AD8232 = AD8232
         self.parse_interval = parse_interval  # 解析间隔时间，单位为毫秒
@@ -73,23 +89,21 @@ class AD8232_DataFlowProcessor:
         Args:
             timer: 定时器实例。
         """
-        self.ecg_value = self.AD8232.read_raw()
+        self.ecg_value = voltage_to_8bit(self.ECGSignalProcessor.raw_val_dc)
         self.lead_status = self.AD8232.check_leads_off()
         self.operating_status = self.AD8232.operating_status
-        # self.filtered_ecg_value
-        # self.heart_rate
+        self.filtered_ecg_value = voltage_to_8bit(self.ECGSignalProcessor.filtered_val)
+        self.heart_rate = int(self.ECGSignalProcessor.heart_rate)
 
         if self.active_reporting:
             # 主动上报原始心电数据
-            data = bytearray(2)
-            data[0] = (self.ecg_value >> 8) & 0xFF
-            data[1] = self.ecg_value & 0xFF
+            data = bytearray(1)
+            data[0] = self.ecg_value & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x01, data)
 
             # 主动上报滤波后心电数据
-            data = bytearray(2)
-            data[0] = (self.filtered_ecg_value >> 8) & 0xFF
-            data[1] = self.filtered_ecg_value & 0xFF
+            data = bytearray(1)
+            data[0] = self.filtered_ecg_value & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x02, data)
 
             # 主动上报导联状态
@@ -150,9 +164,8 @@ class AD8232_DataFlowProcessor:
         # 查询原始心电数据
         if command == 0x01:
             ecg_value = self.ecg_value
-            data = bytearray(2)
-            data[0] = (ecg_value >> 8) & 0xFF
-            data[1] = ecg_value & 0xFF
+            data = bytearray(1)
+            data[0] = ecg_value & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x01, data)
             if AD8232_DataFlowProcessor.DEBUG_ENABLED:
                 print("ECG Value:", ecg_value)
@@ -160,9 +173,8 @@ class AD8232_DataFlowProcessor:
         # 滤波后心电数据
         elif command == 0x02:
             filtered_ecg_value = self.filtered_ecg_value
-            data = bytearray(2)
-            data[0] = (filtered_ecg_value >> 8) & 0xFF
-            data[1] = filtered_ecg_value & 0xFF
+            data = bytearray(1)
+            data[0] = filtered_ecg_value & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x02, data)
             if AD8232_DataFlowProcessor.DEBUG_ENABLED:
                 print("filtered_ecg Value:", filtered_ecg_value)
