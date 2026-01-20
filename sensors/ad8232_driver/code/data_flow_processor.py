@@ -107,7 +107,7 @@ class DataFlowProcessor:
             frame_data = self.buffer[current_pos:frame_end]
 
             # 验证帧尾
-            if self._validate_trailer(frame_data):
+            if not self._validate_trailer(frame_data):
                 self.stats['frame_errors'] += 1
                 # 帧尾错误，跳过这个帧头，继续查找下一个
                 processed_bytes = current_pos + 1

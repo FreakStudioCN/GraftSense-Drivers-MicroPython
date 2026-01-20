@@ -58,7 +58,6 @@ class AD8232_DataFlowProcessor:
         # 工作状态
         self.operating_status = 0
         self._start_timer()
-
     def _start_timer(self):
         """
         启动定时器。
@@ -189,8 +188,8 @@ class AD8232_DataFlowProcessor:
                 print("Lead Status:", lead_status)
         # 上报频率
         elif command == 0x04:
-            # 上报频率 1HZ, 2HZ, 5HZ
-            if data[0] in [1,2,5]:
+            # 上报频率 100HZ, 125HZ, 50HZ
+            if data[0] in [100, 125, 50]:
                 self.reporting_frequency = data[0]
                 self._report_timer.init(period=int(1000 / self.reporting_frequency), mode=Timer.PERIODIC,callback=self._report_timer_callback)
                 self.DataFlowProcessor.build_and_send_frame(0x04, bytes(data[0]))
