@@ -52,7 +52,7 @@ class AD8232_DataFlowProcessor:
         self.active_reporting = False
 
         # 上报频率
-        self.reporting_frequency = 1000  # 单位：ms
+        self.reporting_frequency = 100  # 单位：HZ
         # 导联状态
         self.lead_status = 0
         # 工作状态
@@ -79,8 +79,7 @@ class AD8232_DataFlowProcessor:
         """
         self._is_running = True
         self._timer.init(period=self.parse_interval, mode=Timer.PERIODIC, callback=self._timer_callback)
-        self._report_timer.init(period=self.reporting_frequency,mode=Timer.PERIODIC,callback=self._report_timer_callback
-        )
+        self._report_timer.init(period=int(1000/self.reporting_frequency),mode=Timer.PERIODIC,callback=self._report_timer_callback)
 
     def _report_timer_callback(self, timer):
         """
@@ -160,6 +159,8 @@ class AD8232_DataFlowProcessor:
 
         command = frame['frame_type']
         data = frame['data']
+        if len(data) == 0:
+            return
         # 在这里根据命令和数据更新属性
         # 查询原始心电数据
         if command == 0x01:
@@ -190,7 +191,8 @@ class AD8232_DataFlowProcessor:
         elif command == 0x04:
             # 上报频率 1HZ, 2HZ, 5HZ
             if data[0] in [1,2,5]:
-                self.reporting_frequency = data[0]*1000
+                self.reporting_frequency = data[0]
+                self._report_timer.init(period=int(1000 / self.reporting_frequency), mode=Timer.PERIODIC,callback=self._report_timer_callback)
                 self.DataFlowProcessor.build_and_send_frame(0x04, bytes(data[0]))
                 if AD8232_DataFlowProcessor.DEBUG_ENABLED:
                     print("Reporting Frequency set to:", self.reporting_frequency)

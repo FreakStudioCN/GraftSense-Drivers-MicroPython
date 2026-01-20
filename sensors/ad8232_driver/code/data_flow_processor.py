@@ -107,14 +107,14 @@ class DataFlowProcessor:
             frame_data = self.buffer[current_pos:frame_end]
 
             # 验证帧尾
-            if not self._validate_trailer(frame_data):
+            if self._validate_trailer(frame_data):
                 self.stats['frame_errors'] += 1
                 # 帧尾错误，跳过这个帧头，继续查找下一个
                 processed_bytes = current_pos + 1
                 continue
 
             # 验证校验和
-            if not self._calculate_crc(frame_data):
+            if frame_data[-3] != self._calculate_crc(frame_data[0:-3]):
                 self.stats['crc_errors'] += 1
                 # 校验错误，跳过这个帧，继续查找下一个
                 processed_bytes = current_pos + total_frame_len
