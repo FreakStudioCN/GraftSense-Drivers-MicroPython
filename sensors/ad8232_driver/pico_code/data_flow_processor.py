@@ -1,3 +1,18 @@
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2025/9/5 下午10:12
+# @Author  : hogeiha
+# @File    : data_flow_processor.py
+# @Description : 串口数据帧构建解析
+# @License : CC BY-NC 4.0
+
+__version__ = "0.1.0"
+__author__ = "hogeiha"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
+
+# ======================================== 导入相关模块 =========================================
+
 class DataFlowProcessor:
     """
     新协议数据处理器类。
@@ -12,7 +27,89 @@ class DataFlowProcessor:
     校验	1	    帧头+类型+长度+数据的校验和	校验帧完整性
     帧尾	2	    0x0D 0x0A	回车换行，简化上位机解析
 
+    Attributes:
+        uart (UART): UART串口通信实例。
+        buffer (bytearray): 数据接收缓冲区。
+        stats (dict): 数据流统计信息字典。
+        max_buffer_size (int): 缓冲区最大容量。
+        HEADER (bytes): 帧头常量字节序列。
+        TRAILER (bytes): 帧尾常量字节序列。
+        HEADER_LEN (int): 帧头长度。
+        TYPE_LEN (int): 帧类型字段长度。
+        LENGTH_LEN (int): 数据长度字段长度。
+        CRC_LEN (int): CRC校验字段长度。
+        TRAILER_LEN (int): 帧尾长度。
+        MIN_FRAME_LEN (int): 最小有效帧长度。
+        FRAME_TYPE_COMMAND (int): 指令帧类型标识。
+        FRAME_TYPE_DATA (int): 数据帧类型标识。
+
+    Methods:
+        __init__(): 初始化数据处理器。
+        read_and_parse(): 读取串口数据并解析完整帧。
+        _find_header(): 在缓冲区中查找帧头位置。
+        _validate_trailer(): 验证帧尾。
+        _calculate_crc(): 计算CRC校验码。
+        _parse_single_frame(): 解析单个数据帧。
+        _get_frame_type_string(): 获取帧类型的字符串描述。
+        get_stats(): 获取数据流转与解析统计信息。
+        clear_buffer(): 清空缓冲区。
+        build_and_send_frame(): 构建并发送数据帧。
+        build_and_send_command(): 构建并发送指令帧（便捷方法）。
+        build_and_send_data(): 构建并发送数据帧（便捷方法）。
+        reset_stats(): 重置统计信息。
+
+    ==========================================
+
+    New protocol data processor class.
+    Processes serial data communication according to new protocol format,
+    including data frame reception, parsing, validation, and transmission.
+
+    Protocol format:
+    Field   Bytes   Value / Description
+    Header  2       0xAA 0x55    Fixed identifier for valid frames
+    Type    1       0x01: Command frame; 0x02: Data frame    Distinguishes host commands/module data
+    Length  1       Number of bytes in following "Data" field (0~255)    Facilitates parsing
+    Data    N       Command/data content (see definitions below)    Variable length
+    CRC     1       Checksum of header+type+length+data    Verifies frame integrity
+    Trailer 2       0x0D 0x0A    Carriage return line feed, simplifies host parsing
+
+    Attributes:
+        uart (UART): UART serial communication instance.
+        buffer (bytearray): Data reception buffer.
+        stats (dict): Data flow statistics dictionary.
+        max_buffer_size (int): Maximum buffer capacity.
+        HEADER (bytes): Frame header constant byte sequence.
+        TRAILER (bytes): Frame trailer constant byte sequence.
+        HEADER_LEN (int): Header length.
+        TYPE_LEN (int): Frame type field length.
+        LENGTH_LEN (int): Data length field length.
+        CRC_LEN (int): CRC checksum field length.
+        TRAILER_LEN (int): Trailer length.
+        MIN_FRAME_LEN (int): Minimum valid frame length.
+        FRAME_TYPE_COMMAND (int): Command frame type identifier.
+        FRAME_TYPE_DATA (int): Data frame type identifier.
+
+    Methods:
+        __init__(): Initialize data processor.
+        read_and_parse(): Read serial data and parse complete frames.
+        _find_header(): Find header position in buffer.
+        _validate_trailer(): Validate frame trailer.
+        _calculate_crc(): Calculate CRC checksum.
+        _parse_single_frame(): Parse single data frame.
+        _get_frame_type_string(): Get frame type string description.
+        get_stats(): Get data flow and parsing statistics.
+        clear_buffer(): Clear buffer.
+        build_and_send_frame(): Build and send data frame.
+        build_and_send_command(): Build and send command frame (convenience method).
+        build_and_send_data(): Build and send data frame (convenience method).
+        reset_stats(): Reset statistics.
     """
+
+    # ======================================== 全局变量 ============================================
+
+    # ======================================== 功能函数 ============================================
+
+    # ======================================== 自定义类 ============================================
 
     def __init__(self, uart):
         """
@@ -20,6 +117,23 @@ class DataFlowProcessor:
 
         Args:
             uart (UART): 已初始化的串口实例，用于数据收发。
+
+        Note:
+            - 初始化时会重置所有统计计数器。
+            - 缓冲区默认最大容量为256字节。
+            - 遵循AA55开头、0D0A结尾的帧协议格式。
+
+        ==========================================
+
+        Initialize data processor.
+
+        Args:
+            uart (UART): Initialized serial port instance for data transmission/reception.
+
+        Note:
+            - All statistical counters are reset upon initialization.
+            - Default maximum buffer capacity is 256 bytes.
+            - Follows frame protocol format starting with AA55 and ending with 0D0A.
         """
         self.uart = uart
         self.buffer = bytearray()
@@ -57,6 +171,28 @@ class DataFlowProcessor:
         Returns:
             list: 解析成功的数据帧列表，每个元素为解析后的帧字典。
             []: 无完整帧或解析失败时返回空列表。
+
+        Process:
+            1. 从串口读取最多32字节数据。
+            2. 将数据追加到内部缓冲区。
+            3. 在缓冲区中查找并解析所有完整帧。
+            4. 更新相关统计信息。
+            5. 清理已处理的缓冲区数据。
+
+        ==========================================
+
+        Read serial data and parse complete frames.
+
+        Returns:
+            list: List of successfully parsed data frames, each element is a parsed frame dictionary.
+            []: Returns empty list when no complete frames are found or parsing fails.
+
+        Process:
+            1. Read up to 32 bytes of data from serial port.
+            2. Append data to internal buffer.
+            3. Find and parse all complete frames in buffer.
+            4. Update relevant statistical information.
+            5. Clean up processed buffer data.
         """
         # 读取串口数据
         data = self.uart.read(32)
@@ -153,6 +289,24 @@ class DataFlowProcessor:
 
         Returns:
             int: 找到的帧头位置索引，未找到返回-1。
+
+        Algorithm:
+            - 从start_pos开始遍历缓冲区，查找连续的0xAA 0x55字节序列。
+            - 遇到缓冲区末尾前一个字节停止搜索。
+
+        ==========================================
+
+        Find header position in buffer.
+
+        Args:
+            start_pos (int): Starting search position, defaults to 0.
+
+        Returns:
+            int: Found header position index, returns -1 if not found.
+
+        Algorithm:
+            - Traverse buffer starting from start_pos, looking for consecutive 0xAA 0x55 byte sequence.
+            - Stop search when reaching second-to-last byte of buffer.
         """
         for i in range(start_pos, len(self.buffer) - 1):
             if self.buffer[i] == self.HEADER[0] and self.buffer[i + 1] == self.HEADER[1]:
@@ -168,6 +322,24 @@ class DataFlowProcessor:
 
         Returns:
             bool: 帧尾验证通过返回True，否则返回False。
+
+        Note:
+            - 验证帧数据最后两个字节是否为0x0D 0x0A。
+            - 帧尾错误通常表示数据损坏或同步丢失。
+
+        ==========================================
+
+        Validate frame trailer.
+
+        Args:
+            frame_data (bytes|bytearray): Complete frame data.
+
+        Returns:
+            bool: Returns True if trailer validation passes, otherwise False.
+
+        Note:
+            - Verifies if last two bytes of frame data are 0x0D 0x0A.
+            - Trailer errors typically indicate data corruption or synchronization loss.
         """
         if len(frame_data) < 2:
             return False
@@ -215,6 +387,32 @@ class DataFlowProcessor:
 
         Returns:
             dict|None: 解析成功返回帧信息字典，解析失败返回None。
+
+        Frame structure:
+            - Header (2 bytes): 0xAA 0x55
+            - Frame type (1 byte): 0x01 or 0x02
+            - Data length (1 byte): 0-255
+            - Data (N bytes): Actual payload
+            - CRC (1 byte): Checksum
+            - Trailer (2 bytes): 0x0D 0x0A
+
+        ==========================================
+
+        Parse single data frame.
+
+        Args:
+            frame_data (bytes|bytearray): Complete frame data.
+
+        Returns:
+            dict|None: Returns frame information dictionary if parsing succeeds, otherwise None.
+
+        Frame structure:
+            - Header (2 bytes): 0xAA 0x55
+            - Frame type (1 byte): 0x01 or 0x02
+            - Data length (1 byte): 0-255
+            - Data (N bytes): Actual payload
+            - CRC (1 byte): Checksum
+            - Trailer (2 bytes): 0x0D 0x0A
         """
         try:
             pos = 0
@@ -272,6 +470,26 @@ class DataFlowProcessor:
 
         Returns:
             str: 帧类型字符串描述。
+
+        Supported types:
+            - 0x01: "指令帧" (Command frame)
+            - 0x02: "数据帧" (Data frame)
+            - Others: "未知帧类型(0xXX)" (Unknown frame type)
+
+        ==========================================
+
+        Get frame type string description.
+
+        Args:
+            frame_type (int): Frame type value.
+
+        Returns:
+            str: Frame type string description.
+
+        Supported types:
+            - 0x01: "Command frame"
+            - 0x02: "Data frame"
+            - Others: "Unknown frame type(0xXX)"
         """
         if frame_type == self.FRAME_TYPE_COMMAND:
             return "指令帧"
@@ -286,6 +504,33 @@ class DataFlowProcessor:
 
         Returns:
             dict: 包含所有统计信息的字典副本。
+
+        Statistics include:
+            - total_bytes_received: 总接收字节数
+            - total_frames_parsed: 总解析帧数
+            - crc_errors: CRC校验错误数
+            - frame_errors: 帧结构错误数
+            - invalid_frames: 无效帧数
+            - command_frames: 指令帧数量
+            - data_frames: 数据帧数量
+            - timeout_frames: 超时帧数量
+
+        ==========================================
+
+        Get data flow and parsing statistics.
+
+        Returns:
+            dict: Copy of dictionary containing all statistical information.
+
+        Statistics include:
+            - total_bytes_received: Total bytes received
+            - total_frames_parsed: Total frames parsed
+            - crc_errors: CRC check errors
+            - frame_errors: Frame structure errors
+            - invalid_frames: Invalid frames
+            - command_frames: Command frame count
+            - data_frames: Data frame count
+            - timeout_frames: Timeout frame count
         """
         return self.stats.copy()
 
@@ -295,6 +540,21 @@ class DataFlowProcessor:
 
         Returns:
             None
+
+        Note:
+            - 通常用于处理缓冲区溢出或重置通信状态。
+            - 不会影响统计计数器。
+
+        ==========================================
+
+        Clear buffer.
+
+        Returns:
+            None
+
+        Note:
+            - Typically used to handle buffer overflow or reset communication state.
+            - Does not affect statistical counters.
         """
         self.buffer = bytearray()
 
@@ -308,6 +568,39 @@ class DataFlowProcessor:
 
         Returns:
             bytes|None: 构建好的完整帧数据，发送失败返回None。
+
+        Frame construction process:
+            1. 验证数据长度不超过255字节。
+            2. 构建帧头+类型+长度+数据部分。
+            3. 计算CRC校验和。
+            4. 添加帧尾。
+            5. 通过UART发送完整帧。
+
+        Exceptions:
+            - 数据长度超限会打印错误信息并返回None。
+            - 发送过程中的异常会被捕获并打印错误信息。
+
+        ==========================================
+
+        Build and send data frame.
+
+        Args:
+            frame_type (int): Frame type (0x01=command frame, 0x02=data frame).
+            data (bytes): Data portion, defaults to empty bytes.
+
+        Returns:
+            bytes|None: Complete frame data if built successfully, None if sending fails.
+
+        Frame construction process:
+            1. Verify data length does not exceed 255 bytes.
+            2. Construct header+type+length+data portion.
+            3. Calculate CRC checksum.
+            4. Add trailer.
+            5. Send complete frame via UART.
+
+        Exceptions:
+            - Data length exceeding limit prints error message and returns None.
+            - Exceptions during sending are caught and error messages printed.
         """
         try:
             # 验证数据长度
@@ -354,6 +647,24 @@ class DataFlowProcessor:
 
         Returns:
             bytes|None: 构建好的完整帧数据，发送失败返回None。
+
+        Note:
+            - 内部调用build_and_send_frame方法，指定帧类型为0x01。
+            - 适用于发送控制命令、参数设置等指令操作。
+
+        ==========================================
+
+        Build and send command frame (convenience method).
+
+        Args:
+            command_data (bytes): Command data.
+
+        Returns:
+            bytes|None: Complete frame data if built successfully, None if sending fails.
+
+        Note:
+            - Internally calls build_and_send_frame method with frame type set to 0x01.
+            - Suitable for sending control commands, parameter settings, and other command operations.
         """
         return self.build_and_send_frame(self.FRAME_TYPE_COMMAND, command_data)
 
@@ -366,6 +677,24 @@ class DataFlowProcessor:
 
         Returns:
             bytes|None: 构建好的完整帧数据，发送失败返回None。
+
+        Note:
+            - 内部调用build_and_send_frame方法，指定帧类型为0x02。
+            - 适用于发送传感器读数、状态信息等数据操作。
+
+        ==========================================
+
+        Build and send data frame (convenience method).
+
+        Args:
+            sensor_data (bytes): Sensor data.
+
+        Returns:
+            bytes|None: Complete frame data if built successfully, None if sending fails.
+
+        Note:
+            - Internally calls build_and_send_frame method with frame type set to 0x02.
+            - Suitable for sending sensor readings, status information, and other data operations.
         """
         return self.build_and_send_frame(self.FRAME_TYPE_DATA, sensor_data)
 
@@ -375,6 +704,27 @@ class DataFlowProcessor:
 
         Returns:
             None
+
+        Note:
+            - 将所有统计计数器归零。
+            - 不影响缓冲区内容和通信状态。
+            - 用于开始新的数据统计周期。
+
+        ==========================================
+
+        Reset statistics.
+
+        Returns:
+            None
+
+        Note:
+            - Resets all statistical counters to zero.
+            - Does not affect buffer content or communication state.
+            - Used to start new data statistics period.
         """
         for key in self.stats:
             self.stats[key] = 0
+
+# ======================================== 初始化配置 ==========================================
+
+# ========================================  主程序  ===========================================

@@ -1,8 +1,28 @@
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2025/9/5 下午10:12
+# @Author  : hogeiha
+# @File    : ecg_signal_processor.py
+# @Description : ecg信号滤波心率计算处理
+# @License : CC BY-NC 4.0
+
+__version__ = "0.1.0"
+__author__ = "hogeiha"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
+
+# ======================================== 导入相关模块 =========================================
+
 from machine import ADC, Pin, Timer, UART
 import time
 from ulab import numpy as np
 from ulab import scipy as spy
 
+# ======================================== 全局变量 ============================================
+
+# ======================================== 功能函数 ============================================
+
+# ======================================== 自定义类 ============================================
 
 class ECGSignalProcessor:
     DEBUG_ENABLED = False
@@ -77,6 +97,55 @@ class ECGSignalProcessor:
         self.zi_lp = np.zeros((self.sos_lp.shape[0], 2), dtype=np.float)
 
     def _detect_r_peak(self, filtered_val, current_time):
+        """
+        检测R波峰值。
+
+        Args:
+            filtered_val (float): 滤波后的ECG信号值。
+            current_time (int): 当前时间戳（毫秒）。
+
+        Returns:
+            bool: 如果检测到R波返回True，否则返回False。
+
+        Process:
+            1. 幅度阈值过滤噪声。
+            2. 更新滑动检测窗口。
+            3. 计算动态检测阈值。
+            4. 斜率检测验证上升沿。
+            5. 峰值验证确保局部最大值。
+            6. 不应期验证避免重复检测。
+            7. 计算R-R间期和心率。
+
+        Note:
+            - 使用滑动窗口动态调整检测阈值。
+            - 采用多条件验证提高检测准确性。
+            - 心率限制在40-150BPM范围内。
+
+        ==========================================
+
+        Detect R-wave peak.
+
+        Args:
+            filtered_val (float): Filtered ECG signal value.
+            current_time (int): Current timestamp (milliseconds).
+
+        Returns:
+            bool: Returns True if R-wave is detected, otherwise False.
+
+        Process:
+            1. Amplitude threshold filtering for noise.
+            2. Update sliding detection window.
+            3. Calculate dynamic detection threshold.
+            4. Slope detection to verify rising edge.
+            5. Peak verification to ensure local maximum.
+            6. Refractory period verification to avoid duplicate detection.
+            7. Calculate R-R interval and heart rate.
+
+        Note:
+            - Uses sliding window for dynamic threshold adjustment.
+            - Multi-condition verification improves detection accuracy.
+            - Heart rate limited to 40-150 BPM range.
+        """
         # 过滤小幅值噪声
         if abs(filtered_val) < self.MIN_R_AMPLITUDE:
             return False
@@ -126,6 +195,43 @@ class ECGSignalProcessor:
         return True
 
     def _process_callback(self, timer):
+        """
+        主处理回调函数，由定时器周期性调用。
+
+        Args:
+            timer: 定时器实例。
+
+        Process:
+            1. 采集ADC原始数据并转换为电压值。
+            2. 去除直流分量。
+            3. 多级滤波处理（陷波->高通->低通）。
+            4. R波检测与心率计算。
+            5. 调试模式下输出数据。
+
+        Note:
+            - 采样频率由FS属性控制。
+            - 滤波器采用二阶节（SOS）结构，稳定性更好。
+            - 使用滑动平均计算直流分量。
+
+        ==========================================
+
+        Main processing callback function, periodically called by timer.
+
+        Args:
+            timer: Timer instance.
+
+        Process:
+            1. Acquire ADC raw data and convert to voltage value.
+            2. Remove DC component.
+            3. Multi-stage filtering (notch->high-pass->low-pass).
+            4. R-wave detection and heart rate calculation.
+            5. Output data in debug mode.
+
+        Note:
+            - Sampling frequency controlled by FS attribute.
+            - Filters use second-order sections (SOS) structure for better stability.
+            - Uses moving average for DC component calculation.
+        """
         if not self.running:
             return
 
@@ -154,18 +260,39 @@ class ECGSignalProcessor:
             uart_str = f"{self.raw_val_dc:.6f},{self.filtered_val:.6f}\r\n"
             self.uart.write(uart_str.encode('utf-8'))
 
-            print_str = f"原始值:{self.raw_val_dc:.6f},滤波后值:{self.filtered_val:.6f},心率:{self.heart_rate:.1f} BPM,R波间隔:{self.rr_interval:.1f} ms"
+            uart_str = f"{self.raw_val_dc:.6f},{self.filtered_val:.6f}\r\n"
+            self.uart.write(uart_str.encode('utf-8'))
+
+            print_str = f"Raw Value:{self.raw_val_dc:.6f},Filtered Value:{self.filtered_val:.6f},Heart Rate:{self.heart_rate:.1f} BPM,R-wave Interval:{self.rr_interval:.1f} ms"
             print(print_str)
 
             if r_detected:
-                r_msg = f"【R波检测】间隔:{self.rr_interval:.1f}ms | 心率:{self.heart_rate:.1f}BPM"
+                r_msg = f"【R-wave Detected】Interval:{self.rr_interval:.1f}ms | Heart Rate:{self.heart_rate:.1f}BPM"
                 print("=" * 40 + "\n" + r_msg + "\n" + "=" * 40)
 
     def start(self):
-        """启动ECG系统"""
-        print("===== 心电信号系统（100Hz+可停止+精准心率） =====")
-        print(f"采样频率：{self.FS}Hz | 陷波增强 | R波检测：极致严格")
-        print("按 Ctrl+C/Thonny停止按钮 可终止程序\n")
+        """
+         启动ECG信号处理系统。
+
+         Note:
+             - 初始化并启动采样定时器。
+             - 进入主循环等待处理。
+             - 支持通过Ctrl+C或Thonny停止按钮终止程序。
+             - 打印系统启动信息和配置参数。
+
+         ==========================================
+
+         Start ECG signal processing system.
+
+         Note:
+             - Initialize and start sampling timer.
+             - Enter main loop for processing.
+             - Supports termination via Ctrl+C or Thonny stop button.
+             - Prints system startup information and configuration parameters.
+         """
+        print("===== ECG Signal System (100Hz + Stoppable + Accurate Heart Rate) =====")
+        print(f"Sampling Frequency: {self.FS}Hz | Notch Filter Enhanced | R-wave Detection: Ultra-strict")
+        print("Press Ctrl+C/Thonny Stop Button to terminate the program\n")
         self.running = True
         self.timer.init(freq=int(self.FS), mode=Timer.PERIODIC, callback=self._process_callback)
 
@@ -176,7 +303,29 @@ class ECGSignalProcessor:
             self.stop()
 
     def stop(self):
-        """停止ECG系统"""
+        """
+         停止ECG信号处理系统。
+
+         Note:
+             - 停止定时器。
+             - 设置运行状态为False。
+             - 释放系统资源。
+             - 打印停止提示信息。
+
+         ==========================================
+
+         Stop ECG signal processing system.
+
+         Note:
+             - Stop timer.
+             - Set running status to False.
+             - Release system resources.
+             - Print stop prompt message.
+         """
         self.running = False
         self.timer.deinit()
-        print("\n程序已停止！")
+        print("\nProgram has been stopped!")
+
+        # ======================================== 初始化配置 ==========================================
+
+        # ========================================  主程序  ===========================================
