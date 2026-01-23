@@ -82,18 +82,28 @@ class CH9328:
         type_text(): Simulate typing input string.
     """
     # 4. HID修饰键码（第1字节，bit位映射）
-    MODIFIER_NONE = 0x00  # 无修饰键
-    MODIFIER_LEFT_CTRL = 0x01  # 左Ctrl
-    MODIFIER_LEFT_SHIFT = 0x02  # 左Shift
-    MODIFIER_LEFT_ALT = 0x04  # 左Alt
-    MODIFIER_LEFT_GUI = 0x08  # 左Win键
-    MODIFIER_RIGHT_CTRL = 0x10  # 右Ctrl
-    MODIFIER_RIGHT_SHIFT = 0x20  # 右Shift
-    MODIFIER_RIGHT_ALT = 0x40  # 右Alt
-    MODIFIER_RIGHT_GUI = 0x80  # 右Win键
+    # 无修饰键
+    MODIFIER_NONE = 0x00
+    # 左Ctrl
+    MODIFIER_LEFT_CTRL = 0x01
+    # 左Shift
+    MODIFIER_LEFT_SHIFT = 0x02
+    # 左Alt
+    MODIFIER_LEFT_ALT = 0x04
+    # 左Win键
+    MODIFIER_LEFT_GUI = 0x08
+    # 右Ctrl
+    MODIFIER_RIGHT_CTRL = 0x10
+    # 右Shift
+    MODIFIER_RIGHT_SHIFT = 0x20
+    # 右Alt
+    MODIFIER_RIGHT_ALT = 0x40
+    # 右Win键
+    MODIFIER_RIGHT_GUI = 0x80
 
     # 5. 普通按键HID码（参考USB HID键盘规范，部分常用键）
-    KEY_NONE = 0x00  # 无按键
+    # 无按键
+    KEY_NONE = 0x00
     KEY_A = 0x04
     KEY_B = 0x05
     KEY_C = 0x06
@@ -402,7 +412,8 @@ class CH9328:
         # 发送ASCII码（仅单个字符）
         if len(char) != 1:
             raise ValueError("send_ascii仅支持单个字符")
-        if ord(char) not in range(0x20, 0x7F):  # 仅支持可见ASCII码（0x20=空格~0x7E=~）
+        # 仅支持可见ASCII码（0x20=空格~0x7E=~）
+        if ord(char) not in range(0x20, 0x7F):
             raise ValueError("仅支持可见ASCII字符（空格~波浪号）")
         
         self.uart.write(char.encode('ascii'))
@@ -516,11 +527,16 @@ class CH9328:
         """
         # 构造键盘按下数据包：[修饰键, 保留位, 按键1, 按键2~6]（未使用按键填0）
         packet = bytes([
-            modifier,          # 第1字节：修饰键
-            0x00,              # 第2字节：保留位
-            key_code,          # 第3字节：主按键
-            0x00, 0x00, 0x00,  # 第4~6字节：未使用按键
-            0x00, 0x00         # 第7~8字节：未使用按键
+            # 第1字节：修饰键
+            modifier,
+            # 第2字节：保留位
+            0x00,
+            # 第3字节：主按键
+            key_code,
+            # 第4~6字节：未使用按键
+            0x00, 0x00, 0x00,
+            # 第7~8字节：未使用按键
+            0x00, 0x00
         ])
         self.send_hid_packet(packet)
 
