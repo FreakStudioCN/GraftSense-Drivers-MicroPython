@@ -24,7 +24,7 @@ i2c_err_str = "not communicate with module at address 0x{:02X}, check wiring"
 
 # ======================================== 功能函数 ============================================
 
-def signedIntFromBytes(x, endian="big"):
+def signedIntFromBytes(x, endian="big") -> int:
     """
     将有符号字节数据转换为有符号整数（16位补码转换）。
 
