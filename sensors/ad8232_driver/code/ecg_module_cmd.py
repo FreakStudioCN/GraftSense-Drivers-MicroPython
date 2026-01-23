@@ -140,14 +140,14 @@ class AD8232_DataFlowProcessor:
 
     DEBUG_ENABLED = True  # 调试模式开关
 
-    def __init__(self, DataFlowProcessor,AD8232,ECGSignalProcessor, parse_interval=10):
+    def __init__(self, data_flowprocessor,ad8232,ecg_signal_processor, parse_interval=10):
         """
         初始化AD8232_DataFlowProcessor实例。
 
         Args:
-            DataFlowProcessor: 已初始化的DataFlowProcessor实例。
-            AD8232: 已初始化的AD8232传感器实例。
-            ECGSignalProcessor: 已初始化的ECG信号处理器实例。
+            data_flowprocessor: 已初始化的DataFlowProcessor实例。
+            ad8232: 已初始化的AD8232传感器实例。
+            ecg_signal_processor: 已初始化的ECG信号处理器实例。
             parse_interval (int): 解析数据帧的时间间隔，单位为毫秒，默认值为10ms。
 
         Note:
@@ -161,20 +161,19 @@ class AD8232_DataFlowProcessor:
         Initialize AD8232_DataFlowProcessor instance.
 
         Args:
-            DataFlowProcessor: Initialized DataFlowProcessor instance.
-            AD8232: Initialized AD8232 sensor instance.
-            ECGSignalProcessor: Initialized ECG signal processor instance.
+            data_flowprocessor: Initialized DataFlowProcessor instance.
+            ad8232: Initialized AD8232 sensor instance.
+            ecg_signal_processor: Initialized ECG signal processor instance.
             parse_interval (int): Data frame parsing interval in milliseconds, defaults to 10ms.
-
         Note:
             - Create data parsing and reporting timers.
             - Initialize all data attributes to default values.
             - Default reporting frequency is 100Hz.
             - Start timers to begin data processing loop.
         """
-        self.ECGSignalProcessor = ECGSignalProcessor
-        self.DataFlowProcessor = DataFlowProcessor
-        self.AD8232 = AD8232
+        self.ECGSignalProcessor = ecg_signal_processor
+        self.DataFlowProcessor = data_flowprocessor
+        self.AD8232 = ad8232
         self.parse_interval = parse_interval  # 解析间隔时间，单位为毫秒
         self._timer = Timer()
         self._report_timer = Timer()

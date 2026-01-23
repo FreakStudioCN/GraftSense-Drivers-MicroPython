@@ -95,12 +95,12 @@ class AD8232_DataFlowProcessor:
     """
     DEBUG_ENABLED = False  # 调试模式开关
 
-    def __init__(self, DataFlowProcessor, parse_interval=5):
+    def __init__(self, data_flow_processor, parse_interval=5):
         """
         初始化AD8232_DataFlowProcessor客户端实例。
 
         Args:
-            DataFlowProcessor: 已初始化的DataFlowProcessor实例。
+            data_flow_processor: 已初始化的DataFlowProcessor实例。
             parse_interval (int): 解析数据帧的时间间隔，单位为毫秒，默认值为5ms。
 
         Note:
@@ -114,7 +114,7 @@ class AD8232_DataFlowProcessor:
         Initialize AD8232_DataFlowProcessor client instance.
 
         Args:
-            DataFlowProcessor: Initialized DataFlowProcessor instance.
+            data_flow_processor: Initialized DataFlowProcessor instance.
             parse_interval (int): Data frame parsing interval in milliseconds, defaults to 5ms.
 
         Note:
@@ -123,7 +123,7 @@ class AD8232_DataFlowProcessor:
             - Default reporting frequency is 100Hz.
             - Start timer to begin data parsing loop.
         """
-        self.DataFlowProcessor = DataFlowProcessor
+        self.DataFlowProcessor = data_flow_processor
         self.parse_interval = parse_interval  # 解析间隔时间，单位为毫秒
         self._timer = Timer()
         self._is_running = False

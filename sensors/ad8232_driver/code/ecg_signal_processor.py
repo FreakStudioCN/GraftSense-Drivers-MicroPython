@@ -27,9 +27,9 @@ from ulab import scipy as spy
 class ECGSignalProcessor:
     DEBUG_ENABLED = False
 
-    def __init__(self, AD8232, uart=None,fs=100.0):
+    def __init__(self, ad8232, uart=None,fs=100.0):
         # ===================== 硬件初始化 =====================
-        self.adc = AD8232.adc
+        self.adc = ad8232.adc
         if ECGSignalProcessor.DEBUG_ENABLED:
             self.uart = uart
 
@@ -96,7 +96,7 @@ class ECGSignalProcessor:
         self.zi_hp = np.zeros((self.sos_hp.shape[0], 2), dtype=np.float)
         self.zi_lp = np.zeros((self.sos_lp.shape[0], 2), dtype=np.float)
 
-    def _detect_r_peak(self, filtered_val, current_time):
+    def _detect_r_peak(self, filtered_val, current_time) -> bool:
         """
         检测R波峰值。
 
