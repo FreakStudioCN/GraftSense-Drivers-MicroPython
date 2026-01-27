@@ -863,7 +863,7 @@ class R60AFD1:
                 self._timer.deinit()
             raise DeviceInitializationError(f"Device initialization failed: {str(e)}")
 
-    def get_configuration_status(self):
+    def get_configuration_status(self) -> dict:
         """
         获取设备配置状态。
 
@@ -957,7 +957,8 @@ class R60AFD1:
                 'init_timeout': self.init_timeout
             }
         }
-    def _validate_init_parameters(self, parse_interval,max_retries, retry_delay, init_timeout):
+
+    def _validate_init_parameters(self, parse_interval: int, max_retries: int, retry_delay: int, init_timeout: int) -> None:
         """
         验证初始化参数。
 
@@ -1004,7 +1005,8 @@ class R60AFD1:
 
         if init_timeout < 1000 or init_timeout > 30000:
             raise ValueError("init_timeout must be between 1000ms and 30000ms")
-    def _execute_operation(self, operation_type, data=None, timeout=200):
+
+    def _execute_operation(self, operation_type: int, data: bytes = None, timeout: int = 200) -> tuple:
         """
         执行操作（查询或设置）的统一方法。
 
@@ -1131,7 +1133,7 @@ class R60AFD1:
             if R60AFD1.DEBUG_ENABLED:
                 print("[Operation] Operation state reset")
 
-    def _start_timer(self):
+    def _start_timer(self) -> None:
         """
         启动定时器。
 
@@ -1152,7 +1154,7 @@ class R60AFD1:
         self._is_running = True
         self._timer.init(period=self.parse_interval, mode=Timer.PERIODIC, callback=self._timer_callback)
 
-    def _timer_callback(self, timer):
+    def _timer_callback(self, timer: object) -> None:
         """
         定时器回调函数，定期解析数据帧。
 
@@ -1186,7 +1188,7 @@ class R60AFD1:
         for frame in frames:
             # 使用micropython.schedule安全地调用属性更新方法
             micropython.schedule(self.update_properties_from_frame, frame)
-    def _load_device_information(self):
+    def _load_device_information(self) -> bool:
         """
         加载设备基本信息。
 
@@ -1227,7 +1229,8 @@ class R60AFD1:
                     print(f"[Init] Warning: Failed to load {info_name}")
 
         return all_success
-    def _execute_with_retry(self, operation, operation_name, timeout=200):
+
+    def _execute_with_retry(self, operation: callable, operation_name: str, timeout: int = 200) -> bool:
         """
         带重试的执行操作。
 
@@ -1278,7 +1281,7 @@ class R60AFD1:
                         print(f"[Init] {operation_name} failed after {self.max_retries + 1} attempts: {e}")
 
         return False
-    def _wait_for_device_initialization(self, timeout=None):
+    def _wait_for_device_initialization(self, timeout: int = None) -> bool:
         """
         等待设备初始化完成。
 
@@ -1326,7 +1329,7 @@ class R60AFD1:
         if R60AFD1.DEBUG_ENABLED:
             print("[Init] Device initialization timeout")
         return False
-    def _reset_and_wait_for_initialization(self):
+    def _reset_and_wait_for_initialization(self) -> bool:
         """
         重置设备并等待初始化完成。
 
@@ -1367,7 +1370,7 @@ class R60AFD1:
 
         # 重新等待初始化完成
         return self._wait_for_device_initialization(timeout=10000)  # 10秒超时
-    def _auto_configure_device(self):
+    def _auto_configure_device(self) -> None:
         """
         自动配置设备功能。
 
@@ -1556,7 +1559,7 @@ class R60AFD1:
                 if R60AFD1.DEBUG_ENABLED:
                     print(f"[Init] Warning: {step_name} failed")
 
-    def _verify_critical_configuration(self):
+    def _verify_critical_configuration(self) -> None:
         """
            验证关键配置是否成功。
 
@@ -1606,7 +1609,7 @@ class R60AFD1:
                 self._configuration_errors.append(f"Verification failed: {verify_name}")
                 if R60AFD1.DEBUG_ENABLED:
                     print(f"[Init] Warning: {verify_name} verification failed")
-    def _complete_initialization(self):
+    def _complete_initialization(self) -> None:
         """
         完整的初始化流程。
 
@@ -1659,7 +1662,7 @@ class R60AFD1:
         elapsed_time = time.ticks_diff(time.ticks_ms(), start_time)
         if R60AFD1.DEBUG_ENABLED:
             print(f"[Init] Initialization completed in {elapsed_time}ms")
-    def _handle_query_response(self, expected_type, response_data, response_name=""):
+    def _handle_query_response(self, expected_type: int, response_data, response_name: str = "") -> None:
         """
         统一处理查询响应
 
@@ -1692,7 +1695,7 @@ class R60AFD1:
             if R60AFD1.DEBUG_ENABLED:
                 print(f"[Query] Unsolicited {response_name} response: {response_data}")
 
-    def _parse_height_data(self, data):
+    def _parse_height_data(self, data: bytes) -> tuple:
         """
         解析高度占比数据
         Args:
@@ -1717,7 +1720,7 @@ class R60AFD1:
             ratio_15_2 = data[5]
             return height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2
 
-    def _parse_angle_data(self, data_bytes):
+    def _parse_angle_data(self, data_bytes: bytes) -> tuple:
         """
         解析三轴角度数据
 
@@ -1736,7 +1739,7 @@ class R60AFD1:
 
         return (x, y, z)
 
-    def _parse_4byte_timestamp(self, four_bytes):
+    def _parse_4byte_timestamp(self, four_bytes: bytes) -> int:
         """
         解析4字节时间戳数据。
 
@@ -1769,7 +1772,7 @@ class R60AFD1:
         timestamp = (four_bytes[0] << 24) | (four_bytes[1] << 16) | (four_bytes[2] << 8) | four_bytes[3]
         return timestamp
 
-    def _parse_signed_16bit_special(self, two_bytes):
+    def _parse_signed_16bit_special(self, two_bytes: bytes) -> int:
         """
         解析有符号16位数据（特殊格式：首位符号位 + 后15位数值位）。
 
@@ -1814,7 +1817,7 @@ class R60AFD1:
             return -magnitude
         else:  # 正数
             return magnitude
-    def _parse_product_info_data(self, data_bytes):
+    def _parse_product_info_data(self, data_bytes: bytes) -> tuple:
         """
         解析产品信息数据 (可变长度字符串)。
 
@@ -1878,7 +1881,7 @@ class R60AFD1:
                 return (product_info,)
             except:
                 return ("",)
-    def update_properties_from_frame(self, frame):
+    def update_properties_from_frame(self, frame: dict) -> None:
 
         control = frame['control_byte']
         command = frame['command_byte']
@@ -2595,49 +2598,49 @@ class R60AFD1:
                     )
 
 # ============================ 系统基础查询指令 ============================
-    def reset_module(self, timeout=200):
+    def reset_module(self, timeout: int = 200) -> tuple:
         """模组复位"""
         return self._execute_operation(R60AFD1.TYPE_MODULE_RESET, timeout=timeout)
 
 
-    def query_product_model(self, timeout=200):
+    def query_product_model(self, timeout: int = 200) -> tuple:
         """查询产品型号"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_PRODUCT_MODEL, timeout=timeout)
 
 
-    def query_product_id(self, timeout=200):
+    def query_product_id(self, timeout: int = 200) -> tuple:
         """查询产品ID"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_PRODUCT_ID, timeout=timeout)
 
 
-    def query_hardware_model(self, timeout=200):
+    def query_hardware_model(self, timeout: int = 200) -> tuple:
         """查询硬件型号"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HARDWARE_MODEL, timeout=timeout)
 
 
-    def query_firmware_version(self, timeout=200):
+    def query_firmware_version(self, timeout: int = 200) -> tuple:
         """查询固件版本"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FIRMWARE_VERSION, timeout=timeout)
 
 
-    def query_init_complete(self, timeout=200):
+    def query_init_complete(self, timeout: int = 200) -> tuple:
         """查询初始化是否完成"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_INIT_COMPLETE, timeout=timeout)
 
-    def query_scene_info(self, timeout=200):
+    def query_scene_info(self, timeout: int = 200) -> tuple:
         """查询场景信息"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_SCENE_INFO, timeout=timeout)
 
 
     # ============================ 安装参数查询指令 ============================
 
-    def query_install_angle(self, timeout=200):
+    def query_install_angle(self, timeout: int = 200) -> tuple:
         """查询安装角度"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_INSTALL_ANGLE, timeout=timeout)
 
 
 
-    def query_install_height(self, timeout=200):
+    def query_install_height(self, timeout: int = 200) -> tuple:
         """查询安装高度"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_INSTALL_HEIGHT, timeout=timeout)
 
@@ -2649,161 +2652,161 @@ class R60AFD1:
 
     # ============================ 人体存在功能查询指令 ============================
 
-    def query_presence_switch(self, timeout=200):
+    def query_presence_switch(self, timeout: int = 200) -> tuple:
         """查询人体存在开关状态"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH, timeout=timeout)
 
 
-    def query_presence_status(self, timeout=200):
+    def query_presence_status(self, timeout: int = 200) -> tuple:
         """查询存在信息（有人/无人）"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HUMAN_EXISTENCE_INFO, timeout=timeout)
 
 
-    def query_motion_status(self, timeout=200):
+    def query_motion_status(self, timeout: int = 200) -> tuple:
         """查询运动信息（静止/活跃）"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HUMAN_MOTION_INFO, timeout=timeout)
 
 
-    def query_body_motion_param(self, timeout=200):
+    def query_body_motion_param(self, timeout: int = 200) -> tuple:
         """查询体动参数（0-100）"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_BODY_MOTION_PARAM, timeout=timeout)
 
 
-    def query_height_ratio(self, timeout=200):
+    def query_height_ratio(self, timeout: int = 200) -> tuple:
         """查询高度占比"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HEIGHT_RATIO, timeout=timeout)
 
 
-    def query_track_point(self, timeout=200):
+    def query_track_point(self, timeout: int = 200) -> tuple:
         """查询轨迹点信息"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_TRACK_POINT, timeout=timeout)
 
 
-    def query_track_frequency(self, timeout=200):
+    def query_track_frequency(self, timeout: int = 200) -> tuple:
         """查询轨迹点上报频率"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_TRACK_FREQUENCY, timeout=timeout)
 
 
-    def query_track_switch(self, timeout=200):
+    def query_track_switch(self, timeout: int = 200) -> tuple:
         """查询轨迹点上报开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_TRACK_SWITCH, timeout=timeout)
 
 
-    def query_static_distance(self, timeout=200):
+    def query_static_distance(self, timeout: int = 200) -> tuple:
         """查询静坐水平距离"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_STATIC_DISTANCE, timeout=timeout)
 
 
-    def query_motion_distance(self, timeout=200):
+    def query_motion_distance(self, timeout: int = 200) -> tuple:
         """查询运动水平距离"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_MOTION_DISTANCE, timeout=timeout)
 
 
-    def query_no_person_time(self, timeout=200):
+    def query_no_person_time(self, timeout: int = 200) -> tuple:
         """查询无人时间设置"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_NO_PERSON_TIME, timeout=timeout)
 
 
-    def query_presence_threshold(self, timeout=200):
+    def query_presence_threshold(self, timeout: int = 200) -> tuple:
         """查询人体存在判断阈值"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_PRESENCE_THRESHOLD, timeout=timeout)
 
 
-    def query_energy_report_switch(self, timeout=200):
+    def query_energy_report_switch(self, timeout: int = 200) -> tuple:
         """查询最大能量值上报开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_ENERGY_REPORT_SWITCH, timeout=timeout)
 
 
-    def query_max_energy(self, timeout=200):
+    def query_max_energy(self, timeout: int = 200) -> tuple:
         """查询最大能量值"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_MAX_ENERGY, timeout=timeout)
 
 
     # ============================ 跌倒检测功能查询指令 ============================
 
-    def query_fall_detection_switch(self, timeout=200):
+    def query_fall_detection_switch(self, timeout: int = 200) -> tuple:
         """查询跌倒监测开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_DETECTION_SWITCH, timeout=timeout)
 
 
-    def query_fall_status(self, timeout=200):
+    def query_fall_status(self, timeout: int = 200) -> tuple:
         """查询跌倒状态"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_STATUS, timeout=timeout)
 
 
-    def query_fall_duration(self, timeout=200):
+    def query_fall_duration(self, timeout: int = 200) -> tuple:
         """查询跌倒时长设置"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_DURATION, timeout=timeout)
 
 
-    def query_static_stay_duration(self, timeout=200):
+    def query_static_stay_duration(self, timeout: int = 200) -> tuple:
         """查询驻留时长设置"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_STATIC_STAY_DURATION, timeout=timeout)
 
 
-    def query_static_stay_switch(self, timeout=200):
+    def query_static_stay_switch(self, timeout: int = 200) -> tuple:
         """查询静止驻留开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_STATIC_STAY_SWITCH, timeout=timeout)
 
 
-    def query_static_stay_status(self, timeout=200):
+    def query_static_stay_status(self, timeout: int = 200) -> tuple:
         """查询静止驻留状态"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_STATIC_STAY_STATUS, timeout=timeout)
 
 
-    def query_height_accumulation_time(self, timeout=200):
+    def query_height_accumulation_time(self, timeout: int = 200) -> tuple:
         """查询高度累积时间"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HEIGHT_ACCUMULATION_TIME, timeout=timeout)
 
 
-    def query_fall_break_height(self, timeout=200):
+    def query_fall_break_height(self, timeout: int = 200) -> tuple:
         """查询跌倒打破高度"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_BREAK_HEIGHT, timeout=timeout)
 
 
-    def query_height_ratio_switch(self, timeout=200):
+    def query_height_ratio_switch(self, timeout: int = 200) -> tuple:
         """查询高度占比开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HEIGHT_RATIO_SWITCH, timeout=timeout)
 
 
-    def query_fall_sensitivity(self, timeout=200):
+    def query_fall_sensitivity(self, timeout: int = 200) -> tuple:
         """查询跌倒灵敏度"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_SENSITIVITY, timeout=timeout)
 
 
     # ============================ 控制指令方法 ============================
 
-    def set_presence_switch(self, enabled=True, timeout=200):
+    def set_presence_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置人体存在开关"""
         command_type = R60AFD1.TYPE_CONTROL_HUMAN_PRESENCE_ON if enabled else R60AFD1.TYPE_CONTROL_HUMAN_PRESENCE_OFF
         return self._execute_operation(command_type, timeout=timeout)
 
 
-    def set_fall_detection_switch(self, enabled=True, timeout=200):
+    def set_fall_detection_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置跌倒监测开关"""
         command_type = R60AFD1.TYPE_CONTROL_FALL_DETECTION_ON if enabled else R60AFD1.TYPE_CONTROL_FALL_DETECTION_OFF
         return self._execute_operation(command_type, timeout=timeout)
 
 
-    def set_static_stay_switch(self, enabled=True, timeout=200):
+    def set_static_stay_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置静止驻留开关"""
         command_type = R60AFD1.TYPE_CONTROL_STATIC_STAY_ON if enabled else R60AFD1.TYPE_CONTROL_STATIC_STAY_OFF
         return self._execute_operation(command_type, timeout=timeout)
 
 
-    def set_energy_report_switch(self, enabled=True, timeout=200):
+    def set_energy_report_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置能量值上报开关"""
         command_type = R60AFD1.TYPE_CONTROL_ENERGY_REPORT_ON if enabled else R60AFD1.TYPE_CONTROL_ENERGY_REPORT_OFF
         return self._execute_operation(command_type, timeout=timeout)
 
 
-    def set_height_ratio_switch(self, enabled=True, timeout=200):
+    def set_height_ratio_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置高度占比开关"""
         command_type = R60AFD1.TYPE_CONTROL_HEIGHT_RATIO_ON if enabled else R60AFD1.TYPE_CONTROL_HEIGHT_RATIO_OFF
         return self._execute_operation(command_type, timeout=timeout)
 
 
-    def set_track_switch(self, enabled=True, timeout=200):
+    def set_track_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置轨迹点上报开关（需要传入动态数据）"""
         data = bytes([0x01 if enabled else 0x00])
         return self._execute_operation(R60AFD1.TYPE_SET_TRACK_SWITCH, timeout=timeout, data=data)
@@ -2811,7 +2814,7 @@ class R60AFD1:
 
     # ============================ 参数设置指令方法 ============================
 
-    def set_install_angle(self, angle_x, angle_y, angle_z, timeout=200):
+    def set_install_angle(self, angle_x, angle_y, angle_z, timeout: int = 200) -> tuple:
         """设置安装角度"""
         # 角度数据为2字节每个轴，共6字节
         data = bytearray(6)
@@ -2823,7 +2826,7 @@ class R60AFD1:
         data[5] = angle_z & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_INSTALL_ANGLE, timeout=timeout, data=data)
 
-    def set_install_height(self, height_cm, timeout=200):
+    def set_install_height(self, height_cm, timeout: int = 200) -> tuple:
         """设置安装高度（单位：cm）"""
         if height_cm < 0 or height_cm > 65535:
             raise ValueError("Height must be within the range of 0-65535 cm")
@@ -2833,7 +2836,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_INSTALL_HEIGHT, timeout=timeout, data=data)
 
 
-    def set_static_distance(self, distance_cm, timeout=200):
+    def set_static_distance(self, distance_cm, timeout: int = 200) -> tuple:
         """设置静坐水平距离（单位：cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
             raise ValueError("The horizontal distance for sitting must be within the range of 0-300 cm.")
@@ -2843,7 +2846,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_STATIC_DISTANCE, timeout=timeout, data=data)
 
 
-    def set_motion_distance(self, distance_cm, timeout=200):
+    def set_motion_distance(self, distance_cm, timeout: int = 200) -> tuple:
         """设置运动水平距离（单位：cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
             raise ValueError("The level of movement distance must be within the range of 0-300 cm.")
@@ -2853,7 +2856,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_MOTION_DISTANCE, timeout=timeout, data=data)
 
 
-    def set_no_person_time(self, seconds, timeout=200):
+    def set_no_person_time(self, seconds, timeout: int = 200) -> tuple:
         """设置无人时间（单位：秒，范围5-1800）"""
         if seconds <= 5 or seconds >= 1800:
             raise ValueError("Idle time must be within the range of 5-1800 seconds")
@@ -2865,7 +2868,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_NO_PERSON_TIME, timeout=timeout, data=data)
 
 
-    def set_presence_threshold(self, threshold, timeout=200):
+    def set_presence_threshold(self, threshold, timeout: int = 200) -> tuple:
         """设置人体存在判断阈值（范围0-0xffffffff）"""
         if threshold < 0 or threshold > 0xffffffff:
             raise ValueError("The threshold must be within the range of 0-0xffffffff")
@@ -2877,7 +2880,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_PRESENCE_THRESHOLD, timeout=timeout, data=data)
 
 
-    def set_fall_duration(self, seconds, timeout=200):
+    def set_fall_duration(self, seconds, timeout: int = 200) -> tuple:
         """设置跌倒时长（单位：秒，范围5-180）"""
         if seconds <= 5 or seconds >= 180:
             raise ValueError("The fall duration must be between 5 and 180 seconds.")
@@ -2889,7 +2892,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_DURATION, timeout=timeout, data=data)
 
 
-    def set_static_stay_duration(self, seconds, timeout=200):
+    def set_static_stay_duration(self, seconds, timeout: int = 200) -> tuple:
         """设置静止驻留时长（单位：秒，范围60-3600）"""
         if seconds <= 60 or seconds >= 3600:
             raise ValueError("The duration of stationary stay must be within the range of 60-3600 seconds.")
@@ -2901,7 +2904,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_STATIC_STAY_DURATION, timeout=timeout, data=data)
 
 
-    def set_height_accumulation_time(self, seconds, timeout=200):
+    def set_height_accumulation_time(self, seconds, timeout: int = 200) -> tuple:
         """设置高度累积时间（单位：秒，范围0-300）"""
         if seconds < 0 or seconds > 300:
             raise ValueError("The cumulative height time must be within the range of 0-300 seconds.")
@@ -2913,7 +2916,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_HEIGHT_ACCUMULATION_TIME, timeout=timeout, data=data)
 
 
-    def set_fall_break_height(self, height_cm, timeout=200):
+    def set_fall_break_height(self, height_cm, timeout: int = 200) -> tuple:
         """设置跌倒打破高度（单位：cm，范围0-150）"""
         if height_cm < 0 or height_cm > 150:
             raise ValueError("The fall height must be between 0-150 cm")
@@ -2923,7 +2926,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_BREAK_HEIGHT, timeout=timeout, data=data)
 
     # 该功能查询和设置均与手册不符，查询方法和设置方法待核实后修改
-    def set_track_frequency(self, seconds, timeout=200):
+    def set_track_frequency(self, seconds, timeout: int = 200) -> tuple:
         """设置轨迹点上报频率（单位：秒，范围0-0xffffffff）"""
         if seconds < 0 or seconds > 0xffffffff:
             raise ValueError("The reporting frequency of trajectory points is out of range")
@@ -2934,14 +2937,14 @@ class R60AFD1:
         data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_TRACK_FREQUENCY, timeout=timeout, data=data)
 
-    def set_fall_sensitivity(self, sensitivity, timeout=200):
+    def set_fall_sensitivity(self, sensitivity, timeout: int = 200) -> tuple:
         """设置跌倒灵敏度（范围0-3）"""
         if sensitivity < 0 or sensitivity > 3:
             raise ValueError("Fall sensitivity must be within the range of 0-3")
         data = bytes([sensitivity])
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_SENSITIVITY, timeout=timeout, data=data)
 
-    def close(self):
+    def close(self) -> None:
         """
         停止定时器，解析剩余数据帧，输出统计信息。
 
