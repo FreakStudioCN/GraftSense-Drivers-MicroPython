@@ -1,4 +1,4 @@
-# Python env   : MicroPython v1.23.0
+# Python env   : MicroPython v1.26.1
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/5 下午10:12
 # @Author  : hogeiha

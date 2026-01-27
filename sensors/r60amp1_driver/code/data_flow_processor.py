@@ -1,4 +1,4 @@
-# Python env   : MicroPython v1.23.0
+# Python env   : MicroPython v1.26.1
 # -*- coding: utf-8 -*-        
 # @Time    : 2025/11/4 下午6:38   
 # @Author  : 李清水            
