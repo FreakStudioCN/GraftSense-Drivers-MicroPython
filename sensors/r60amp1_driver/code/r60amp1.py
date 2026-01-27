@@ -1,3 +1,4 @@
+# Python env   : MicroPython v1.26.1
 # -*- coding: utf-8 -*-
 # @Time    : 2025/11/4 下午5:35
 # @Author  : hogeiha
@@ -557,8 +558,8 @@ class R60AMP1:
                 self._timer.deinit()
             raise DeviceInitializationError(f"Device initialization failed: {str(e)}")
 
-    def _validate_init_parameters(self, parse_interval,
-                                  max_retries, retry_delay, init_timeout):
+    def _validate_init_parameters(self, parse_interval: int,
+                                  max_retries: int, retry_delay: int, init_timeout: int) -> None:
         """
         验证初始化参数。
 
@@ -602,7 +603,7 @@ class R60AMP1:
         if init_timeout < 1000 or init_timeout > 30000:
             raise ValueError("init_timeout must be between 1000ms and 30000ms")
 
-    def _complete_initialization(self):
+    def _complete_initialization(self) -> None:
         """
         完整的初始化流程。
 
@@ -657,7 +658,7 @@ class R60AMP1:
         if R60AMP1.DEBUG_ENABLED:
             print(f"[Init] Initialization completed in {elapsed_time}ms")
 
-    def _load_device_information(self):
+    def _load_device_information(self) -> bool:
         """
         加载设备基本信息。
 
@@ -699,7 +700,7 @@ class R60AMP1:
 
         return all_success
 
-    def _wait_for_device_initialization(self, timeout=None):
+    def _wait_for_device_initialization(self, timeout: int = None) -> bool:
         """
         等待设备初始化完成。
 
@@ -748,7 +749,7 @@ class R60AMP1:
             print("[Init] Device initialization timeout")
         return False
 
-    def _reset_and_wait_for_initialization(self):
+    def _reset_and_wait_for_initialization(self) -> bool:
         """
         重置设备并等待初始化完成。
 
@@ -790,7 +791,7 @@ class R60AMP1:
         # 重新等待初始化完成
         return self._wait_for_device_initialization(timeout=10000)  # 10秒超时
 
-    def _auto_configure_device(self):
+    def _auto_configure_device(self) -> None:
         """
         自动配置设备功能。
 
@@ -824,7 +825,7 @@ class R60AMP1:
                 if R60AMP1.DEBUG_ENABLED:
                     print(f"[Init] Warning: {step_name} failed")
 
-    def _verify_critical_configuration(self):
+    def _verify_critical_configuration(self) -> None:
         """
         验证关键配置是否成功。
 
@@ -859,7 +860,7 @@ class R60AMP1:
                 if R60AMP1.DEBUG_ENABLED:
                     print(f"[Init] Warning: {verify_name} verification failed")
 
-    def _execute_with_retry(self, operation, operation_name, timeout=200):
+    def _execute_with_retry(self, operation: callable, operation_name: str, timeout: int = 200) -> bool:
         """
         带重试的执行操作。
 
@@ -911,7 +912,7 @@ class R60AMP1:
 
         return False
 
-    def get_configuration_status(self):
+    def get_configuration_status(self) -> dict:
         """
         获取设备配置状态。
 
@@ -947,7 +948,7 @@ class R60AMP1:
             }
         }
 
-    def _start_timer(self):
+    def _start_timer(self) -> None:
         """
         启动定时器。
 
@@ -968,7 +969,7 @@ class R60AMP1:
         self._is_running = True
         self._timer.init(period=self.parse_interval, mode=Timer.PERIODIC, callback=self._timer_callback)
 
-    def _timer_callback(self, timer):
+    def _timer_callback(self, timer: object) -> None:
         """
         定时器回调函数，定期解析数据帧。
 
@@ -1003,7 +1004,7 @@ class R60AMP1:
             # 使用micropython.schedule安全地调用属性更新方法
             micropython.schedule(self.update_properties_from_frame, frame)
 
-    def _parse_trajectory_data(self, data_bytes):
+    def _parse_trajectory_data(self, data_bytes: bytes) -> list:
         """
         解析轨迹数据。
 
@@ -1063,7 +1064,7 @@ class R60AMP1:
 
         return targets
 
-    def _parse_signed_16bit_special(self, two_bytes):
+    def _parse_signed_16bit_special(self, two_bytes: bytes) -> int:
         """
         解析有符号16位数据（特殊格式：首位符号位 + 后15位数值位）。
 
@@ -1109,7 +1110,7 @@ class R60AMP1:
         else:  # 正数
             return magnitude
 
-    def _parse_product_info_data(self, data_bytes):
+    def _parse_product_info_data(self, data_bytes: bytes) -> tuple:
         """
         解析产品信息数据 (可变长度字符串)。
 
@@ -1173,7 +1174,7 @@ class R60AMP1:
             except:
                 return ("",)
 
-    def _parse_firmware_version_data(self, data_bytes):
+    def _parse_firmware_version_data(self, data_bytes: bytes) -> tuple:
         """
         解析固件版本数据 (可变长度字符串)。
 
@@ -1237,7 +1238,7 @@ class R60AMP1:
             except:
                 return ("",)
 
-    def _execute_operation(self, operation_type, data=None, timeout=200):
+    def _execute_operation(self, operation_type: int, data: bytes = None, timeout: int = 200) -> tuple:
         """
         执行操作（查询或设置）的统一方法。
 
@@ -1363,7 +1364,7 @@ class R60AMP1:
             if R60AMP1.DEBUG_ENABLED:
                 print("[Operation] Operation state reset")
 
-    def query_heartbeat(self, timeout=200):
+    def query_heartbeat(self, timeout: int = 200) -> tuple:
         """
         查询心跳包（阻塞式）
 
@@ -1375,7 +1376,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_HEARTBEAT, timeout=timeout)
 
-    def reset_module(self, timeout=500):
+    def reset_module(self, timeout: int = 500) -> tuple:
         """
         模组复位（阻塞式）
 
@@ -1387,7 +1388,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_MODULE_RESET, timeout=timeout)
 
-    def query_product_model(self, timeout=200):
+    def query_product_model(self, timeout: int = 200) -> tuple:
         """
         查询产品型号（阻塞式）
 
@@ -1399,7 +1400,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_PRODUCT_MODEL, timeout=timeout)
 
-    def query_product_id(self, timeout=200):
+    def query_product_id(self, timeout: int = 200) -> tuple:
         """
         查询产品ID（阻塞式）
 
@@ -1411,7 +1412,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_PRODUCT_ID, timeout=timeout)
 
-    def query_hardware_model(self, timeout=200):
+    def query_hardware_model(self, timeout: int = 200) -> tuple:
         """
         查询硬件型号（阻塞式）
 
@@ -1423,7 +1424,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_HARDWARE_MODEL, timeout=timeout)
 
-    def query_firmware_version(self, timeout=200):
+    def query_firmware_version(self, timeout: int = 200) -> tuple:
         """
         查询固件版本（阻塞式）
 
@@ -1435,7 +1436,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_FIRMWARE_VERSION, timeout=timeout)
 
-    def query_init_complete(self, timeout=200):
+    def query_init_complete(self, timeout: int = 200) -> tuple:
         """
         查询初始化是否完成（阻塞式）
 
@@ -1448,7 +1449,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_INIT_COMPLETE, timeout=timeout)
 
-    def enable_human_presence(self, timeout=200):
+    def enable_human_presence(self, timeout: int = 200) -> tuple:
         """
         打开人体存在功能（阻塞式）
 
@@ -1460,7 +1461,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_CONTROL_HUMAN_PRESENCE_ON, timeout=timeout)
 
-    def disable_human_presence(self, timeout=200):
+    def disable_human_presence(self, timeout: int = 200) -> tuple:
         """
         关闭人体存在功能（阻塞式）
 
@@ -1472,7 +1473,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_CONTROL_HUMAN_PRESENCE_OFF, timeout=timeout)
 
-    def query_human_presence_switch(self, timeout=200):
+    def query_human_presence_switch(self, timeout: int = 200) -> tuple:
         """
         查询人体存在开关状态（阻塞式）
 
@@ -1485,7 +1486,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH, timeout=timeout)
 
-    def query_presence_status(self, timeout=200):
+    def query_presence_status(self, timeout: int = 200) -> tuple:
         """
         查询存在信息状态（阻塞式）
 
@@ -1506,7 +1507,7 @@ class R60AMP1:
 
         return success, presence_status
 
-    def query_motion_info(self, timeout=200):
+    def query_motion_info(self, timeout: int = 200) -> tuple:
         """
         查询运动信息（阻塞式）
 
@@ -1527,7 +1528,7 @@ class R60AMP1:
 
         return success, motion_status
 
-    def query_body_motion_param(self, timeout=200):
+    def query_body_motion_param(self, timeout: int = 200) -> tuple:
         """
         查询体动参数（阻塞式）
 
@@ -1540,7 +1541,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_BODY_MOTION_PARAM, timeout=timeout)
 
-    def query_trajectory_info(self, timeout=200):
+    def query_trajectory_info(self, timeout: int = 200) -> tuple:
         """
         查询轨迹信息（阻塞式）
 
@@ -1553,7 +1554,7 @@ class R60AMP1:
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_TRAJECTORY_INFO, timeout=timeout)
 
-    def _handle_query_response(self, expected_type, response_data, response_name=""):
+    def _handle_query_response(self, expected_type, response_data, response_name="") -> None:
         """
         统一处理查询响应
 
@@ -1586,7 +1587,7 @@ class R60AMP1:
             if R60AMP1.DEBUG_ENABLED:
                 print(f"[Query] Unsolicited {response_name} response: {response_data}")
 
-    def _update_property_with_debug(self, property_name, new_value, debug_message):
+    def _update_property_with_debug(self, property_name, new_value, debug_message)-> None:
         """
         更新属性并输出调试信息。
 
@@ -1616,7 +1617,7 @@ class R60AMP1:
         if R60AMP1.DEBUG_ENABLED:
             print(debug_message)
 
-    def update_properties_from_frame(self, frame):
+    def update_properties_from_frame(self, frame)-> None:
         """
         根据解析的帧更新属性值。
 
@@ -1871,7 +1872,7 @@ class R60AMP1:
                         "Trajectory Info"
                     )
 
-    def close(self):
+    def close(self) -> None:
         """
         停止定时器，解析剩余数据帧，输出统计信息。
 
