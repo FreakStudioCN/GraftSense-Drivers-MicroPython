@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/11/4 下午5:33
-# @Author  : 李清水
+# @Author  : hogeiha
 # @File    : main.py
 # @Description : 测试R60AFD1雷达设备驱动类的代码
 # @License : CC BY-NC 4.0
@@ -12,6 +12,7 @@ from machine import UART, Pin, Timer
 import time
 from data_flow_processor import DataFlowProcessor
 from r60afd1 import R60AFD1, format_time
+from hc08 import HC08
 
 # ======================================== 全局变量 ============================================
 
@@ -455,7 +456,8 @@ print("FreakStudio: Using R60AFD1 millimeter wave information collection")
 
 # 初始化UART0：TX=16, RX=17，波特率115200
 uart = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17), timeout=0)
-
+uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9), timeout=0)
+hc0 = HC08(uart1)
 # 创建DataFlowProcessor实例
 processor = DataFlowProcessor(uart)
 
@@ -513,6 +515,19 @@ time.sleep(1)
 try:
     print("\nStarting main loop...")
     print("Press Ctrl+C to stop the program\n")
+    # 跌倒功能设置
+    # 设置安装高度为200cm
+    device.set_install_height(height_cm=240)
+    # 打破跌倒高度
+    device.set_fall_break_height(height_cm=100)
+    # 跌倒灵敏度
+    device.set_fall_sensitivity(sensitivity=3)
+    # 跌倒时长
+    device.set_fall_duration(seconds=6)
+
+    # 驻留检测设置
+    device.set_static_stay_duration(seconds=90)
+
 
     while True:
         current_time = time.ticks_ms()
@@ -521,7 +536,17 @@ try:
         if time.ticks_diff(current_time, last_print_time) >= print_interval:
             # 打印主动上报的数据
             print_report_sensor_data()
+            fall_status = device.fall_status
+            static_stay_status = device.static_stay_status
+            presence_status = device.presence_status
 
+            hc0.send_data("\n" + "=" * 40 + "\n")
+            hc0.send_data("STATUS DETECTION\n")
+            hc0.send_data("-" * 40 + "\n")
+            hc0.send_data(f"Fall Status: {fall_status}\n")
+            hc0.send_data(f"Static Stay Status: {static_stay_status}\n")
+            hc0.send_data(f"Presence Status: {presence_status}\n")
+            hc0.send_data("=" * 40 + "\n")
             # 查询并打印人体存在状态
             success, presence_status = device.query_presence_status()
             if success:

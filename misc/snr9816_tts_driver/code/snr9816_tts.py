@@ -4,6 +4,7 @@
 # @Author  : hogeiha
 # @File    : snr9816_tts.py
 # @Description : SNR9816 TTS语音合成芯片驱动模块
+# @License : CC BY-NC 4.0
 
 __version__ = "0.1.0"
 __author__ = "hogeiha"

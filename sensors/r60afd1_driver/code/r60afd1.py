@@ -1,10 +1,15 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-        
 # @Time    : 2025/11/4 下午5:35   
-# @Author  : 李清水            
+# @Author  : hogeiha
 # @File    : R60AFD1.py       
 # @Description : R60AFD1雷达设备业务处理类相关代码
 # @License : CC BY-NC 4.0
+
+__version__ = "0.1.0"
+__author__ = "hogeiha"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
@@ -2821,7 +2826,7 @@ class R60AFD1:
     def set_install_height(self, height_cm, timeout=200):
         """设置安装高度（单位：cm）"""
         if height_cm < 0 or height_cm > 65535:
-            raise ValueError("高度必须在0-65535cm范围内")
+            raise ValueError("Height must be within the range of 0-65535 cm")
         data = bytearray(2)
         data[0] = (height_cm >> 8) & 0xFF
         data[1] = height_cm & 0xFF
@@ -2831,7 +2836,7 @@ class R60AFD1:
     def set_static_distance(self, distance_cm, timeout=200):
         """设置静坐水平距离（单位：cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
-            raise ValueError("静坐水平距离必须在0-300cm范围内")
+            raise ValueError("The horizontal distance for sitting must be within the range of 0-300 cm.")
         data = bytearray(2)
         data[0] = (distance_cm >> 8) & 0xFF
         data[1] = distance_cm & 0xFF
@@ -2841,7 +2846,7 @@ class R60AFD1:
     def set_motion_distance(self, distance_cm, timeout=200):
         """设置运动水平距离（单位：cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
-            raise ValueError("运动水平距离必须在0-300cm范围内")
+            raise ValueError("The level of movement distance must be within the range of 0-300 cm.")
         data = bytearray(2)
         data[0] = (distance_cm >> 8) & 0xFF
         data[1] = distance_cm & 0xFF
@@ -2851,7 +2856,7 @@ class R60AFD1:
     def set_no_person_time(self, seconds, timeout=200):
         """设置无人时间（单位：秒，范围5-1800）"""
         if seconds <= 5 or seconds >= 1800:
-            raise ValueError("无人时间必须在5-1800秒范围内")
+            raise ValueError("Idle time must be within the range of 5-1800 seconds")
         data = bytearray(4)
         data[0] = (seconds >> 24) & 0xFF
         data[1] = (seconds >> 16) & 0xFF
@@ -2863,7 +2868,7 @@ class R60AFD1:
     def set_presence_threshold(self, threshold, timeout=200):
         """设置人体存在判断阈值（范围0-0xffffffff）"""
         if threshold < 0 or threshold > 0xffffffff:
-            raise ValueError("阈值必须在0-0xffffffff范围内")
+            raise ValueError("The threshold must be within the range of 0-0xffffffff")
         data = bytearray(4)
         data[0] = (threshold >> 24) & 0xFF
         data[1] = (threshold >> 16) & 0xFF
@@ -2875,7 +2880,7 @@ class R60AFD1:
     def set_fall_duration(self, seconds, timeout=200):
         """设置跌倒时长（单位：秒，范围5-180）"""
         if seconds <= 5 or seconds >= 180:
-            raise ValueError("跌倒时长必须在5-180秒范围内")
+            raise ValueError("The fall duration must be between 5 and 180 seconds.")
         data = bytearray(4)
         data[0] = (seconds >> 24) & 0xFF
         data[1] = (seconds >> 16) & 0xFF
@@ -2887,7 +2892,7 @@ class R60AFD1:
     def set_static_stay_duration(self, seconds, timeout=200):
         """设置静止驻留时长（单位：秒，范围60-3600）"""
         if seconds <= 60 or seconds >= 3600:
-            raise ValueError("静止驻留时长必须在60-3600秒范围内")
+            raise ValueError("The duration of stationary stay must be within the range of 60-3600 seconds.")
         data = bytearray(4)
         data[0] = (seconds >> 24) & 0xFF
         data[1] = (seconds >> 16) & 0xFF
@@ -2899,7 +2904,7 @@ class R60AFD1:
     def set_height_accumulation_time(self, seconds, timeout=200):
         """设置高度累积时间（单位：秒，范围0-300）"""
         if seconds < 0 or seconds > 300:
-            raise ValueError("高度累积时间必须在0-300秒范围内")
+            raise ValueError("The cumulative height time must be within the range of 0-300 seconds.")
         data = bytearray(4)
         data[0] = (seconds >> 24) & 0xFF
         data[1] = (seconds >> 16) & 0xFF
@@ -2911,7 +2916,7 @@ class R60AFD1:
     def set_fall_break_height(self, height_cm, timeout=200):
         """设置跌倒打破高度（单位：cm，范围0-150）"""
         if height_cm < 0 or height_cm > 150:
-            raise ValueError("跌倒打破高度必须在0-150cm范围内")
+            raise ValueError("The fall height must be between 0-150 cm")
         data = bytearray(2)
         data[0] = (height_cm >> 8) & 0xFF
         data[1] = height_cm & 0xFF
@@ -2921,7 +2926,7 @@ class R60AFD1:
     def set_track_frequency(self, seconds, timeout=200):
         """设置轨迹点上报频率（单位：秒，范围0-0xffffffff）"""
         if seconds < 0 or seconds > 0xffffffff:
-            raise ValueError("轨迹点上报频率超出范围")
+            raise ValueError("The reporting frequency of trajectory points is out of range")
         data = bytearray(4)
         data[0] = (seconds >> 24) & 0xFF
         data[1] = (seconds >> 16) & 0xFF
@@ -2932,9 +2937,80 @@ class R60AFD1:
     def set_fall_sensitivity(self, sensitivity, timeout=200):
         """设置跌倒灵敏度（范围0-3）"""
         if sensitivity < 0 or sensitivity > 3:
-            raise ValueError("跌倒灵敏度必须在0-3范围内")
+            raise ValueError("Fall sensitivity must be within the range of 0-3")
         data = bytes([sensitivity])
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_SENSITIVITY, timeout=timeout, data=data)
+
+    def close(self):
+        """
+        停止定时器，解析剩余数据帧，输出统计信息。
+
+        Raises:
+            Exception: 反初始化过程中发生错误。
+
+        Note:
+            - 停止定时器并设置运行状态为False。
+            - 重置所有查询状态。
+            - 解析剩余的数据帧。
+            - 获取并输出最终统计信息。
+            - 清空数据缓冲区。
+
+        ==========================================
+
+        Stop timer, parse remaining data frames, output statistics.
+
+        Raises:
+            Exception: Error occurred during deinitialization.
+
+        Note:
+            - Stop timer and set running status to False.
+            - Reset all query status.
+            - Parse remaining data frames.
+            - Get and output final statistics.
+            - Clear data buffer.
+        """
+        # 停止定时器
+        self._is_running = False
+        self._timer.deinit()
+
+        # 重置查询状态
+        self._query_in_progress = False
+        self._query_response_received = False
+        self._query_result = None
+        self._current_query_type = None
+
+        # 解析剩余数据帧
+        try:
+            frames = self.data_processor.read_and_parse()
+            for frame in frames:
+                # 使用 micropython.schedule 安全处理最后一帧数据
+                micropython.schedule(self.update_properties_from_frame, frame)
+        except Exception as e:
+            raise Exception(f"Failed to deinitialize timer: {str(e)}")
+
+        # 获取并输出统计信息
+        try:
+            if hasattr(self.data_processor, 'get_stats'):
+                stats = self.data_processor.get_stats()
+                if R60AFD1.DEBUG_ENABLED:
+                    print(f"{format_time()} [R60AFD1] Final statistics:")
+                    print(f"  Total bytes received: {stats.get('total_bytes_received', 0)}")
+                    print(f"  Total frames parsed: {stats.get('total_frames_parsed', 0)}")
+                    print(f"  CRC errors: {stats.get('crc_errors', 0)}")
+                    print(f"  Frame errors: {stats.get('frame_errors', 0)}")
+                    print(f"  Invalid frames: {stats.get('invalid_frames', 0)}")
+        except Exception as e:
+            raise Exception(f"Failed to get statistics: {str(e)}")
+
+        # 清空缓冲区
+        try:
+            if hasattr(self.data_processor, 'clear_buffer'):
+                self.data_processor.clear_buffer()
+        except Exception as e:
+            raise Exception(f"Failed to clear buffer: {str(e)}")
+
+        if R60AFD1.DEBUG_ENABLED:
+            print(f"{format_time()} [R60AFD1] Resources fully released")
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================

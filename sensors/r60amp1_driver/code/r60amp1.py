@@ -11,7 +11,6 @@ from machine import Timer
 import time
 import micropython
 
-
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
@@ -1365,40 +1364,87 @@ class R60AMP1:
                 print("[Operation] Operation state reset")
 
     def query_heartbeat(self, timeout=200):
-        """查询心跳包（阻塞式）"""
+        """
+        查询心跳包（阻塞式）
+
+        Args:
+            timeout: 超时时间，单位毫秒
+
+        Returns:
+            tuple: (指令发送成功状态, 心跳状态)
+        """
         return self._execute_operation(R60AMP1.TYPE_QUERY_HEARTBEAT, timeout=timeout)
 
     def reset_module(self, timeout=500):
-        """模组复位（阻塞式）"""
+        """
+        模组复位（阻塞式）
+
+        Args:
+            timeout: 超时时间，单位毫秒
+
+        Returns:
+            tuple: (指令发送成功状态, 复位结果)
+        """
         return self._execute_operation(R60AMP1.TYPE_MODULE_RESET, timeout=timeout)
 
     def query_product_model(self, timeout=200):
         """
         查询产品型号（阻塞式）
+
+        Args:
+            timeout: 超时时间，单位毫秒
+
+        Returns:
+            tuple: (指令发送成功状态, 产品型号)
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_PRODUCT_MODEL, timeout=timeout)
 
     def query_product_id(self, timeout=200):
         """
         查询产品ID（阻塞式）
+
+        Args:
+            timeout: 超时时间，单位毫秒
+
+        Returns:
+            tuple: (指令发送成功状态, 产品ID)
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_PRODUCT_ID, timeout=timeout)
 
     def query_hardware_model(self, timeout=200):
         """
         查询硬件型号（阻塞式）
+
+        Args:
+            timeout: 超时时间，单位毫秒
+
+        Returns:
+            tuple: (指令发送成功状态, 硬件型号)
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_HARDWARE_MODEL, timeout=timeout)
 
     def query_firmware_version(self, timeout=200):
         """
         查询固件版本（阻塞式）
+
+        Args:
+            timeout: 超时时间，单位毫秒
+
+        Returns:
+            tuple: (指令发送成功状态, 固件版本)
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_FIRMWARE_VERSION, timeout=timeout)
 
     def query_init_complete(self, timeout=200):
         """
         查询初始化是否完成（阻塞式）
+
+        Args:
+            timeout: 超时时间，单位毫秒
+
+        Returns:
+            tuple: (指令发送成功状态, 初始化状态)
+                    - 初始化状态: True-完成, False-未完成
         """
         return self._execute_operation(R60AMP1.TYPE_QUERY_INIT_COMPLETE, timeout=timeout)
 
@@ -1895,3 +1941,7 @@ class R60AMP1:
 
         if R60AMP1.DEBUG_ENABLED:
             print("%s [R60AMP1] Resources fully released" % format_time())
+
+# ======================================== 初始化配置 ==========================================
+
+# ========================================  主程序  ===========================================

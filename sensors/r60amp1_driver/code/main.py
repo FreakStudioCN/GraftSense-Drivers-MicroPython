@@ -12,14 +12,18 @@ from machine import UART, Pin, Timer
 import time
 from data_flow_processor import DataFlowProcessor
 from r60amp1 import R60AMP1, format_time
+from hc08 import HC08
 
 # ======================================== 全局变量 ============================================
 
+# 启用调试模式（可选）
+R60AMP1.DEBUG_ENABLED = True
+
 # 上次打印时间
 last_print_time = time.ticks_ms()
+
 # 定时打印间隔：2秒打印一次
 print_interval = 2000
-
 
 # ======================================== 功能函数 ============================================
 
@@ -79,7 +83,6 @@ def print_report_sensor_data():
         print("\nNo trajectory targets detected")
 
     print("=" * 50)
-
 
 def print_active_query_data(timeout=200):
     """
@@ -221,7 +224,6 @@ def print_active_query_data(timeout=200):
 
     print("=" * 50)
 
-
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
@@ -233,13 +235,14 @@ print("FreakStudio: Using R60AMP1 Multi-person Trajectory Radar")
 
 # 初始化UART0：TX=16, RX=17，波特率115200
 uart = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17), timeout=0)
+uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9), timeout=0)
 
+# 蓝牙
+hc0 = HC08(uart1)
 # 创建DataFlowProcessor实例
 processor = DataFlowProcessor(uart)
 
 # 创建R60AMP1实例
-# 启用调试模式（可选）
-R60AMP1.DEBUG_ENABLED = True
 
 device = R60AMP1(
     processor,
@@ -289,7 +292,18 @@ try:
         if time.ticks_diff(current_time, last_print_time) >= print_interval:
             # 打印主动上报的数据
             print_report_sensor_data()
-
+            presence_status = device.presence_status
+            motion_status = device.motion_status
+            body_motion_param = device.body_motion_param
+            trajectory_targets = device.trajectory_targets
+            hc0.send_data("=== status ===\n")
+            hc0.send_data(f"presence_status: {presence_status}\n")
+            hc0.send_data(f"motion_status: {motion_status}\n")
+            hc0.send_data(f"Body movement: {body_motion_param}\n")
+            hc0.send_data(f"Target Quantity: {len(trajectory_targets)}\n")
+            hc0.send_data("Trajectory Target:\n")
+            for i, target in enumerate(trajectory_targets):
+                hc0.send_data(f"  target{i + 1}: {target}\n")
             # 查询并打印存在状态
             success, presence_status = device.query_presence_status()
             if success:

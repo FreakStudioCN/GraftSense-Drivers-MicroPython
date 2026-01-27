@@ -1,0 +1,25 @@
+{
+  "name": "ba111_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control BA111TDS water quality detection sensor ",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["ba111_tds.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/ba111_driver/code/ba111_tds.py"]
+  ],
+  "deps": [
+ ],
+  "long_description": "A MicroPython library to control BA111TDS water quality detection sensor ",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}
