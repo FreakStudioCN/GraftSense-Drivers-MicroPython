@@ -1163,7 +1163,7 @@ class R60ABD1:
 
     def _validate_init_parameters(self, parse_interval, struggle_sensitivity,
                                   no_person_timing_duration, sleep_cutoff_duration,
-                                  max_retries, retry_delay, init_timeout):
+                                  max_retries, retry_delay, init_timeout)-> None:
         """
         验证初始化参数。
 
@@ -1226,7 +1226,7 @@ class R60ABD1:
         if init_timeout < 1000 or init_timeout > 30000:
             raise ValueError("init_timeout must be between 1000ms and 30000ms")
 
-    def _complete_initialization(self):
+    def _complete_initialization(self)-> None:
         """
         完整的初始化流程。
 
@@ -1281,7 +1281,7 @@ class R60ABD1:
         if R60ABD1.DEBUG_ENABLED:
             print(f"[Init] Initialization completed in {elapsed_time}ms")
 
-    def _load_device_information(self):
+    def _load_device_information(self)-> bool:
         """
         加载设备基本信息。
 
@@ -1323,7 +1323,7 @@ class R60ABD1:
 
         return all_success
 
-    def _wait_for_device_initialization(self, timeout=None):
+    def _wait_for_device_initialization(self, timeout=None)-> bool:
         """
         等待设备初始化完成。
 
@@ -1372,7 +1372,7 @@ class R60ABD1:
             print("[Init] Device initialization timeout")
         return False
 
-    def _reset_and_wait_for_initialization(self):
+    def _reset_and_wait_for_initialization(self)-> bool:
         """
         重置设备并等待初始化完成。
 
@@ -1414,7 +1414,7 @@ class R60ABD1:
         # 重新等待初始化完成
         return self._wait_for_device_initialization(timeout=10000)  # 10秒超时
 
-    def _auto_configure_device(self):
+    def _auto_configure_device(self)-> None:
         """
         自动配置设备功能。
 
@@ -1499,7 +1499,7 @@ class R60ABD1:
                 if R60ABD1.DEBUG_ENABLED:
                     print(f"[Init] Warning: {step_name} failed")
 
-    def _verify_critical_configuration(self):
+    def _verify_critical_configuration(self) -> None:
         """
         验证关键配置是否成功。
 
@@ -1546,7 +1546,7 @@ class R60ABD1:
                 if R60ABD1.DEBUG_ENABLED:
                     print(f"[Init] Warning: {verify_name} verification failed")
 
-    def _execute_with_retry(self, operation, operation_name, timeout=200):
+    def _execute_with_retry(self, operation, operation_name, timeout=200) -> bool:
         """
         带重试的执行操作。
 
@@ -1598,7 +1598,7 @@ class R60ABD1:
 
         return False
 
-    def get_configuration_status(self):
+    def get_configuration_status(self) -> dict:
         """
         获取设备配置状态。
 
@@ -1644,7 +1644,7 @@ class R60ABD1:
             }
         }
 
-    def _start_timer(self):
+    def _start_timer(self) -> None:
         """
         启动定时器。
 
@@ -1665,7 +1665,7 @@ class R60ABD1:
         self._is_running = True
         self._timer.init(period=self.parse_interval, mode=Timer.PERIODIC, callback=self._timer_callback)
 
-    def _timer_callback(self, timer):
+    def _timer_callback(self, timer) -> None:
         """
         定时器回调函数，定期解析数据帧。
 
@@ -1700,7 +1700,7 @@ class R60ABD1:
             # 使用micropython.schedule安全地调用属性更新方法
             micropython.schedule(self.update_properties_from_frame, frame)
 
-    def _parse_human_position_data(self, data_bytes):
+    def _parse_human_position_data(self, data_bytes) -> tuple:
         """
         解析人体方位数据 (6字节: X(2B), Y(2B), Z(2B))。
 
@@ -1737,7 +1737,7 @@ class R60ABD1:
 
         return (x, y, z)
 
-    def _parse_signed_16bit_special(self, two_bytes):
+    def _parse_signed_16bit_special(self, two_bytes) -> int:
         """
         解析有符号16位数据（特殊格式：首位符号位 + 后15位数值位）。
 
@@ -1783,7 +1783,7 @@ class R60ABD1:
         else:  # 正数
             return magnitude
 
-    def _parse_heart_rate_waveform_data(self, data_bytes):
+    def _parse_heart_rate_waveform_data(self, data_bytes) -> tuple:
         """
         解析心率波形数据 (5字节)。
 
@@ -1824,7 +1824,7 @@ class R60ABD1:
             data_bytes[4]
         )
 
-    def _parse_sleep_comprehensive_data(self, data_bytes):
+    def _parse_sleep_comprehensive_data(self, data_bytes) -> tuple:
         """
         解析睡眠综合状态数据 (8字节)。
 
@@ -1878,7 +1878,7 @@ class R60ABD1:
             data_bytes[7]  # 呼吸暂停次数: 10分钟呼吸暂停次数
         )
 
-    def _parse_sleep_statistics_data(self, data_bytes):
+    def _parse_sleep_statistics_data(self, data_bytes) -> tuple:
         """
         解析睡眠统计信息数据 (12字节)。
 
@@ -1946,7 +1946,7 @@ class R60ABD1:
             data_bytes[11]  # 呼吸暂停次数: 0~10
         )
 
-    def _parse_breath_waveform_data(self, data_bytes):
+    def _parse_breath_waveform_data(self, data_bytes) -> tuple:
         """
         解析呼吸波形数据 (5字节)。
 
@@ -1987,7 +1987,7 @@ class R60ABD1:
             data_bytes[4]
         )
 
-    def _parse_product_info_data(self, data_bytes):
+    def _parse_product_info_data(self, data_bytes) -> tuple:
         """
         解析产品信息数据 (可变长度字符串)。
 
@@ -2052,7 +2052,7 @@ class R60ABD1:
             except:
                 return ("",)
 
-    def _parse_firmware_version_data(self, data_bytes):
+    def _parse_firmware_version_data(self, data_bytes) -> tuple:
         """
         解析固件版本数据 (可变长度字符串)。
 
@@ -2116,7 +2116,7 @@ class R60ABD1:
             except:
                 return ("",)
 
-    def _execute_operation(self, operation_type, data=None, timeout=200):
+    def _execute_operation(self, operation_type, data=None, timeout=200) -> tuple:
         """
         执行操作（查询或设置）的统一方法。
 
@@ -2242,39 +2242,39 @@ class R60ABD1:
             if R60ABD1.DEBUG_ENABLED:
                 print("[Operation] Operation state reset")
 
-    def query_heartbeat(self, timeout=200):
+    def query_heartbeat(self, timeout=200) -> tuple:
         """查询心跳包（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_QUERY_HEARTBEAT, timeout=timeout)
 
-    def reset_module(self, timeout=500):
+    def reset_module(self, timeout=500) -> tuple:
         """模组复位（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_MODULE_RESET, timeout=timeout)
 
-    def query_product_model(self, timeout=200):
+    def query_product_model(self, timeout=200) -> tuple:
         """查询产品型号（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_QUERY_PRODUCT_MODEL, timeout=timeout)
 
-    def query_product_id(self, timeout=200):
+    def query_product_id(self, timeout=200) -> tuple:
         """查询产品ID（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_QUERY_PRODUCT_ID, timeout=timeout)
 
-    def query_hardware_model(self, timeout=200):
+    def query_hardware_model(self, timeout=200) -> tuple:
         """查询硬件型号（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_QUERY_HARDWARE_MODEL, timeout=timeout)
 
-    def query_firmware_version(self, timeout=200):
+    def query_firmware_version(self, timeout=200) -> tuple:
         """查询固件版本（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_QUERY_FIRMWARE_VERSION, timeout=timeout)
 
-    def query_init_complete(self, timeout=200):
+    def query_init_complete(self, timeout=200) -> tuple:
         """查询初始化是否完成（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_QUERY_INIT_COMPLETE, timeout=timeout)
 
-    def query_radar_range_boundary(self, timeout=200):
+    def query_radar_range_boundary(self, timeout=200) -> tuple:
         """查询雷达探测范围越界状态（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_QUERY_RADAR_RANGE_BOUNDARY, timeout=timeout)
 
-    def enable_human_presence(self, timeout=200):
+    def enable_human_presence(self, timeout=200) -> tuple:
         """
         打开人体存在功能（阻塞式）
 
@@ -2286,7 +2286,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_HUMAN_PRESENCE_ON, timeout=timeout)
 
-    def disable_human_presence(self, timeout=200):
+    def disable_human_presence(self, timeout=200) -> tuple:
         """
         关闭人体存在功能（阻塞式）
 
@@ -2298,7 +2298,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_HUMAN_PRESENCE_OFF, timeout=timeout)
 
-    def query_human_presence_switch(self, timeout=200):
+    def query_human_presence_switch(self, timeout=200) -> tuple:
         """
         查询人体存在开关状态（阻塞式）
 
@@ -2311,11 +2311,11 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH, timeout=timeout)
 
-    def query_presence_status(self, timeout=200):
+    def query_presence_status(self, timeout=200) -> tuple:
         """查询存在信息状态（阻塞式）"""
         return self._execute_operation(R60ABD1.TYPE_QUERY_HUMAN_EXISTENCE_INFO, timeout=timeout)
 
-    def query_human_motion_info(self, timeout=200):
+    def query_human_motion_info(self, timeout=200) -> tuple:
         """
         查询运动信息（阻塞式）
 
@@ -2339,7 +2339,7 @@ class R60ABD1:
 
         return success, motion_status
 
-    def query_human_body_motion_param(self, timeout=200):
+    def query_human_body_motion_param(self, timeout=200) -> tuple:
         """
         查询体动参数（阻塞式）
 
@@ -2352,7 +2352,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_HUMAN_BODY_MOTION_PARAM, timeout=timeout)
 
-    def query_human_distance(self, timeout=200):
+    def query_human_distance(self, timeout=200) -> tuple:
         """
         查询人体距离（阻塞式）
 
@@ -2365,7 +2365,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_HUMAN_DISTANCE, timeout=timeout)
 
-    def query_human_direction(self, timeout=200):
+    def query_human_direction(self, timeout=200) -> tuple:
         """
         查询人体方位（阻塞式）
 
@@ -2378,7 +2378,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_HUMAN_DIRECTION, timeout=timeout)
 
-    def enable_heart_rate_monitor(self, timeout=200):
+    def enable_heart_rate_monitor(self, timeout=200) -> tuple:
         """
         打开心率监测功能（阻塞式）
 
@@ -2390,7 +2390,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_HEART_RATE_MONITOR_ON, timeout=timeout)
 
-    def disable_heart_rate_monitor(self, timeout=200):
+    def disable_heart_rate_monitor(self, timeout=200) -> tuple:
         """
         关闭心率监测功能（阻塞式）
 
@@ -2402,7 +2402,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_HEART_RATE_MONITOR_OFF, timeout=timeout)
 
-    def query_heart_rate_monitor_switch(self, timeout=200):
+    def query_heart_rate_monitor_switch(self, timeout=200) -> tuple:
         """
         查询心率监测开关状态（阻塞式）
 
@@ -2415,7 +2415,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_HEART_RATE_MONITOR_SWITCH, timeout=timeout)
 
-    def enable_heart_rate_waveform_report(self, timeout=200):
+    def enable_heart_rate_waveform_report(self, timeout=200) -> tuple:
         """
         打开心率波形上报开关（阻塞式）
 
@@ -2427,7 +2427,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_HEART_RATE_WAVEFORM_REPORT_ON, timeout=timeout)
 
-    def disable_heart_rate_waveform_report(self, timeout=200):
+    def disable_heart_rate_waveform_report(self, timeout=200) -> tuple:
         """
         关闭心率波形上报开关（阻塞式）
 
@@ -2439,7 +2439,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_HEART_RATE_WAVEFORM_REPORT_OFF, timeout=timeout)
 
-    def query_heart_rate_waveform_report_switch(self, timeout=200):
+    def query_heart_rate_waveform_report_switch(self, timeout=200) -> tuple:
         """
         查询心率波形上报开关状态（阻塞式）
 
@@ -2452,7 +2452,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_HEART_RATE_WAVEFORM_REPORT_SWITCH, timeout=timeout)
 
-    def query_heart_rate_value(self, timeout=200):
+    def query_heart_rate_value(self, timeout=200) -> tuple:
         """
         查询心率数值（阻塞式）
 
@@ -2465,7 +2465,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_HEART_RATE_VALUE, timeout=timeout)
 
-    def query_heart_rate_waveform(self, timeout=200):
+    def query_heart_rate_waveform(self, timeout=200) -> tuple:
         """
         查询心率波形（阻塞式）
 
@@ -2478,7 +2478,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_HEART_RATE_WAVEFORM, timeout=timeout)
 
-    def enable_breath_monitor(self, timeout=200):
+    def enable_breath_monitor(self, timeout=200) -> tuple:
         """
         打开呼吸监测功能（阻塞式）
 
@@ -2490,7 +2490,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_BREATH_MONITOR_ON, timeout=timeout)
 
-    def disable_breath_monitor(self, timeout=200):
+    def disable_breath_monitor(self, timeout=200) -> tuple:
         """
         关闭呼吸监测功能（阻塞式）
 
@@ -2502,7 +2502,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_BREATH_MONITOR_OFF, timeout=timeout)
 
-    def query_breath_monitor_switch(self, timeout=200):
+    def query_breath_monitor_switch(self, timeout=200) -> tuple:
         """
         查询呼吸监测开关状态（阻塞式）
 
@@ -2515,7 +2515,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_BREATH_MONITOR_SWITCH, timeout=timeout)
 
-    def set_low_breath_threshold(self, threshold, timeout=200):
+    def set_low_breath_threshold(self, threshold, timeout=200) -> tuple:
         """
         设置低缓呼吸判读阈值（阻塞式）
 
@@ -2532,7 +2532,7 @@ class R60ABD1:
         data = bytes([threshold])
         return self._execute_operation(R60ABD1.TYPE_SET_LOW_BREATH_THRESHOLD, data=data, timeout=timeout)
 
-    def query_low_breath_threshold(self, timeout=200):
+    def query_low_breath_threshold(self, timeout=200) -> tuple:
         """
         查询低缓呼吸判读阈值（阻塞式）
 
@@ -2545,7 +2545,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_LOW_BREATH_THRESHOLD, timeout=timeout)
 
-    def query_breath_info(self, timeout=200):
+    def query_breath_info(self, timeout=200) -> tuple:
         """
         查询呼吸信息（阻塞式）
 
@@ -2571,7 +2571,7 @@ class R60ABD1:
 
         return success, breath_status
 
-    def query_breath_value(self, timeout=200):
+    def query_breath_value(self, timeout=200) -> tuple:
         """
         查询呼吸数值（阻塞式）
 
@@ -2584,7 +2584,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_BREATH_VALUE, timeout=timeout)
 
-    def enable_breath_waveform_report(self, timeout=200):
+    def enable_breath_waveform_report(self, timeout=200) -> tuple:
         """
         打开呼吸波形上报开关（阻塞式）
 
@@ -2596,7 +2596,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_BREATH_WAVEFORM_REPORT_ON, timeout=timeout)
 
-    def disable_breath_waveform_report(self, timeout=200):
+    def disable_breath_waveform_report(self, timeout=200) -> tuple:
         """
         关闭呼吸波形上报开关（阻塞式）
 
@@ -2608,7 +2608,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_BREATH_WAVEFORM_REPORT_OFF, timeout=timeout)
 
-    def query_breath_waveform_report_switch(self, timeout=200):
+    def query_breath_waveform_report_switch(self, timeout=200) -> tuple:
         """
         查询呼吸波形上报开关状态（阻塞式）
 
@@ -2621,7 +2621,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_BREATH_WAVEFORM_REPORT_SWITCH, timeout=timeout)
 
-    def query_breath_waveform(self, timeout=200):
+    def query_breath_waveform(self, timeout=200) -> tuple:
         """
         查询呼吸波形（阻塞式）
 
@@ -2634,7 +2634,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_BREATH_WAVEFORM, timeout=timeout)
 
-    def enable_sleep_monitor(self, timeout=200):
+    def enable_sleep_monitor(self, timeout=200) -> tuple:
         """
         打开睡眠监测功能（阻塞式）
 
@@ -2646,7 +2646,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_SLEEP_MONITOR_ON, timeout=timeout)
 
-    def disable_sleep_monitor(self, timeout=200):
+    def disable_sleep_monitor(self, timeout=200) -> tuple:
         """
         关闭睡眠监测功能（阻塞式）
 
@@ -2658,7 +2658,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_SLEEP_MONITOR_OFF, timeout=timeout)
 
-    def query_sleep_monitor_switch(self, timeout=200):
+    def query_sleep_monitor_switch(self, timeout=200) -> tuple:
         """
         查询睡眠监测开关状态（阻塞式）
 
@@ -2671,7 +2671,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_SLEEP_MONITOR_SWITCH, timeout=timeout)
 
-    def enable_abnormal_struggle_monitor(self, timeout=200):
+    def enable_abnormal_struggle_monitor(self, timeout=200) -> tuple:
         """
         打开异常挣扎状态监测（阻塞式）
 
@@ -2683,7 +2683,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_ABNORMAL_STRUGGLE_ON, timeout=timeout)
 
-    def disable_abnormal_struggle_monitor(self, timeout=200):
+    def disable_abnormal_struggle_monitor(self, timeout=200) -> tuple:
         """
         关闭异常挣扎状态监测（阻塞式）
 
@@ -2695,7 +2695,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_ABNORMAL_STRUGGLE_OFF, timeout=timeout)
 
-    def query_abnormal_struggle_switch(self, timeout=200):
+    def query_abnormal_struggle_switch(self, timeout=200) -> tuple:
         """
         查询异常挣扎状态开关（阻塞式）
 
@@ -2708,7 +2708,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_ABNORMAL_STRUGGLE_SWITCH, timeout=timeout)
 
-    def query_abnormal_struggle_status(self, timeout=200):
+    def query_abnormal_struggle_status(self, timeout=200) -> tuple:
         """
         查询异常挣扎状态（阻塞式）
 
@@ -2734,7 +2734,7 @@ class R60ABD1:
 
         return success, struggle_status
 
-    def set_struggle_sensitivity(self, sensitivity, timeout=200):
+    def set_struggle_sensitivity(self, sensitivity, timeout=200) -> tuple:
         """
         设置挣扎状态判读灵敏度（阻塞式）
 
@@ -2751,7 +2751,7 @@ class R60ABD1:
         data = bytes([sensitivity])
         return self._execute_operation(R60ABD1.TYPE_SET_STRUGGLE_SENSITIVITY, data=data, timeout=timeout)
 
-    def query_struggle_sensitivity(self, timeout=200):
+    def query_struggle_sensitivity(self, timeout=200) -> tuple:
         """
         查询挣扎状态判读灵敏度（阻塞式）
 
@@ -2764,7 +2764,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_STRUGGLE_SENSITIVITY, timeout=timeout)
 
-    def enable_no_person_timing(self, timeout=200):
+    def enable_no_person_timing(self, timeout=200) -> tuple:
         """
         打开无人计时功能（阻塞式）
 
@@ -2776,7 +2776,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_NO_PERSON_TIMING_ON, timeout=timeout)
 
-    def disable_no_person_timing(self, timeout=200):
+    def disable_no_person_timing(self, timeout=200) -> tuple:
         """
         关闭无人计时功能（阻塞式）
 
@@ -2788,7 +2788,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_CONTROL_NO_PERSON_TIMING_OFF, timeout=timeout)
 
-    def query_no_person_timing_switch(self, timeout=200):
+    def query_no_person_timing_switch(self, timeout=200) -> tuple:
         """
         查询无人计时功能开关（阻塞式）
 
@@ -2801,7 +2801,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_SWITCH, timeout=timeout)
 
-    def set_no_person_timing_duration(self, duration, timeout=200):
+    def set_no_person_timing_duration(self, duration, timeout=200) -> tuple:
         """
         设置无人计时时长（阻塞式）
 
@@ -2818,7 +2818,7 @@ class R60ABD1:
         data = bytes([duration])
         return self._execute_operation(R60ABD1.TYPE_SET_NO_PERSON_TIMING_DURATION, data=data, timeout=timeout)
 
-    def query_no_person_timing_duration(self, timeout=200):
+    def query_no_person_timing_duration(self, timeout=200) -> tuple:
         """
         查询无人计时时长（阻塞式）
 
@@ -2831,7 +2831,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_DURATION, timeout=timeout)
 
-    def set_sleep_end_duration(self, duration, timeout=200):
+    def set_sleep_end_duration(self, duration, timeout=200) -> tuple:
         """
         设置睡眠截止时长（阻塞式）
 
@@ -2848,7 +2848,7 @@ class R60ABD1:
         data = bytes([duration])
         return self._execute_operation(R60ABD1.TYPE_SET_SLEEP_END_DURATION, data=data, timeout=timeout)
 
-    def query_sleep_end_duration(self, timeout=200):
+    def query_sleep_end_duration(self, timeout=200) -> tuple:
         """
         查询睡眠截止时长（阻塞式）
 
@@ -2861,7 +2861,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_SLEEP_END_DURATION, timeout=timeout)
 
-    def query_no_person_timing_status(self, timeout=200):
+    def query_no_person_timing_status(self, timeout=200) -> tuple:
         """
         查询无人计时状态（阻塞式）
 
@@ -2888,7 +2888,7 @@ class R60ABD1:
 
         return success, timing_status
 
-    def query_bed_status(self, timeout=200):
+    def query_bed_status(self, timeout=200) -> tuple:
         """
         查询入床/离床状态（阻塞式）
 
@@ -2912,7 +2912,7 @@ class R60ABD1:
 
         return success, bed_status
 
-    def query_sleep_status(self, timeout=200):
+    def query_sleep_status(self, timeout=200) -> tuple:
         """
         查询睡眠状态（阻塞式）
 
@@ -2938,7 +2938,7 @@ class R60ABD1:
 
         return success, sleep_status
 
-    def query_awake_duration(self, timeout=200):
+    def query_awake_duration(self, timeout=200) -> tuple:
         """
         查询清醒时长（阻塞式）
 
@@ -2951,7 +2951,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_AWAKE_DURATION, timeout=timeout)
 
-    def query_light_sleep_duration(self, timeout=200):
+    def query_light_sleep_duration(self, timeout=200) -> tuple:
         """
         查询浅睡时长（阻塞式）
 
@@ -2964,7 +2964,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_LIGHT_SLEEP_DURATION, timeout=timeout)
 
-    def query_deep_sleep_duration(self, timeout=200):
+    def query_deep_sleep_duration(self, timeout=200) -> tuple:
         """
         查询深睡时长（阻塞式）
 
@@ -2977,7 +2977,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_DEEP_SLEEP_DURATION, timeout=timeout)
 
-    def query_sleep_quality_score(self, timeout=200):
+    def query_sleep_quality_score(self, timeout=200) -> tuple:
         """
         查询睡眠质量评分（阻塞式）
 
@@ -2990,7 +2990,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_SLEEP_QUALITY_SCORE, timeout=timeout)
 
-    def query_sleep_comprehensive_status(self, timeout=200):
+    def query_sleep_comprehensive_status(self, timeout=200) -> tuple:
         """
         查询睡眠综合状态（阻塞式）
 
@@ -3003,7 +3003,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_SLEEP_COMPREHENSIVE_STATUS, timeout=timeout)
 
-    def query_sleep_anomaly(self, timeout=200):
+    def query_sleep_anomaly(self, timeout=200) -> tuple:
         """
         查询睡眠异常（阻塞式）
 
@@ -3029,7 +3029,7 @@ class R60ABD1:
 
         return success, anomaly_status
 
-    def query_sleep_statistics(self, timeout=200):
+    def query_sleep_statistics(self, timeout=200) -> tuple:
         """
         查询睡眠统计（阻塞式）
 
@@ -3042,7 +3042,7 @@ class R60ABD1:
         """
         return self._execute_operation(R60ABD1.TYPE_QUERY_SLEEP_STATISTICS, timeout=timeout)
 
-    def query_sleep_quality_level(self, timeout=200):
+    def query_sleep_quality_level(self, timeout=200) -> tuple:
         """
         查询睡眠质量评级（阻塞式）
 
@@ -3068,7 +3068,7 @@ class R60ABD1:
 
         return success, quality_level
 
-    def _handle_query_response(self, expected_type, response_data, response_name=""):
+    def _handle_query_response(self, expected_type, response_data, response_name="") -> None:
         """
         统一处理查询响应
 
@@ -3101,7 +3101,7 @@ class R60ABD1:
             if R60ABD1.DEBUG_ENABLED:
                 print(f"[Query] Unsolicited {response_name} response: {response_data}")
 
-    def _update_property_with_debug(self, property_name, new_value, debug_message):
+    def _update_property_with_debug(self, property_name, new_value, debug_message) -> None:
         """
         更新属性并输出调试信息。
 
@@ -3131,7 +3131,7 @@ class R60ABD1:
         if R60ABD1.DEBUG_ENABLED:
             print(debug_message)
 
-    def update_properties_from_frame(self, frame):
+    def update_properties_from_frame(self, frame) -> None:
         """
         根据解析的帧更新属性值。
 
@@ -4035,7 +4035,7 @@ class R60ABD1:
                         "Sleep Quality Level"
                     )
 
-    def close(self):
+    def close(self)-> None:
         """
         停止定时器，解析剩余数据帧，输出统计信息。
 

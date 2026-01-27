@@ -125,7 +125,7 @@ class DataFlowProcessor:
         self.TRAILER_LEN = 2
         self.MIN_FRAME_LEN = self.HEADER_LEN + self.CONTROL_LEN + self.COMMAND_LEN + self.LENGTH_LEN + self.CRC_LEN + self.TRAILER_LEN
 
-    def read_and_parse(self):
+    def read_and_parse(self) -> list:
         """
         读取串口数据并解析完整帧。
 
@@ -243,7 +243,7 @@ class DataFlowProcessor:
 
         return frames
 
-    def _find_header(self, start_pos=0):
+    def _find_header(self, start_pos: int = 0) -> int:
         """
         在缓冲区中查找帧头位置。
 
@@ -278,7 +278,7 @@ class DataFlowProcessor:
                 return i
         return -1
 
-    def _parse_data_length(self, length_pos):
+    def _parse_data_length(self, length_pos: int) -> int:
         """
         解析数据长度（大端格式）。
 
@@ -313,7 +313,7 @@ class DataFlowProcessor:
         # 大端格式：高字节在前，低字节在后
         return (self.buffer[length_pos] << 8) | self.buffer[length_pos + 1]
 
-    def _validate_trailer(self, frame_data):
+    def _validate_trailer(self, frame_data: bytes) -> bool:
         """
         验证帧尾。
 
@@ -348,7 +348,7 @@ class DataFlowProcessor:
         return (frame_data[-2] == self.TRAILER[0] and
                 frame_data[-1] == self.TRAILER[1])
 
-    def _validate_crc(self, frame_data):
+    def _validate_crc(self, frame_data: bytes) -> bool:
         """
         验证CRC校验码。
 
@@ -388,7 +388,7 @@ class DataFlowProcessor:
 
         return calculated_crc == received_crc
 
-    def _parse_single_frame(self, frame_data):
+    def _parse_single_frame(self, frame_data: bytes) -> dict:
         """
         解析单个数据帧。
 
@@ -535,7 +535,7 @@ class DataFlowProcessor:
         """
         self.buffer = bytearray()
 
-    def build_and_send_frame(self, control_byte, command_byte, data=b''):
+    def build_and_send_frame(self, control_byte: int, command_byte: int, data: bytes = b'') -> bytes:
         """
         构建并发送数据帧。
 
@@ -608,7 +608,7 @@ class DataFlowProcessor:
             print(f"Frame building and sending error: {e}")
             return None
 
-    def _calculate_crc(self, data_bytes):
+    def _calculate_crc(self, data_bytes: bytes) -> int:
         """
         计算CRC校验码。
 
