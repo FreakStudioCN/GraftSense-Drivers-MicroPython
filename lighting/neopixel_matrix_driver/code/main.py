@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 # 导入硬件相关模块
-from machine import Pin
+from machine import Pin, UART
 # 导入WS2812驱动模块
 from neopixel_matrix import NeopixelMatrix
 import math
@@ -21,8 +21,8 @@ import json
 # ======================================== 全局变量 ============================================
 
 # WS2812矩阵的尺寸
-width = 16
-height = 16
+width = 4
+height = 1
 
 json_img1 = json.dumps({
     "pixels": [0xF800, 0x07E0, 0x001F, 0xF81F] * 4,  # 4x4 图片数据示例，循环红绿蓝紫
@@ -67,14 +67,16 @@ text_json_files = [
     "jiu.json",   # 就
     "hao.json"    # 好
 ]
+# rgb565颜色数值
+color=[0xF800,0x07E0,0x001F,0xFFE0,0x07FF,0xF81F,0xFFFF]
 
 # ======================================== 功能函数 ============================================
 
 def color_wipe(color, delay=0.1):
     """颜色填充特效"""
     matrix.fill(0)
-    for i in range(4):
-        for j in range(4):
+    for i in range(8):
+        for j in range(8):
             matrix.pixel(i, j, color)
             matrix.show()
             time.sleep(delay)
@@ -234,8 +236,8 @@ def scroll_text(matrix, text, direction='left', text_color=NeopixelMatrix.COLOR_
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
-
-matrix = NeopixelMatrix(16, 16, Pin(6), layout=NeopixelMatrix.LAYOUT_SNAKE, brightness=0.1, order=NeopixelMatrix.ORDER_RGB, flip_h=True)
+uart0 = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
+matrix = NeopixelMatrix(4, 1, Pin(6), layout=NeopixelMatrix.LAYOUT_SNAKE, brightness=0.1, order=NeopixelMatrix.ORDER_RGB, flip_h=True)
 matrix.fill(0)
 matrix.show()
 
@@ -249,20 +251,25 @@ matrix.show()
 # ========================================  主程序  ===========================================
 
 while True:
-    for json_file in text_json_files:
-        matrix.fill(0)
-        matrix.load_rgb565_image(json_file, 0, 0)
-        matrix.show()
-        time.sleep(1)
-    # 最后清空屏幕（可选）
-    matrix.fill(0)
-    matrix.show()
-    time.sleep(1)
+    # 串口发送rgb888数据
+    for i in range(0, 7):
+        matrix.fill(color[i])
+        matrix.send_pixels_via_uart(uart=uart0,start_x=0, start_y=0,end_x=3)
+        time.sleep_ms(500)
 
-    matrix.load_rgb565_image('v.json', 0, 0)
-    matrix.show()
-    time.sleep(1)
-
+    # for json_file in text_json_files:
+    #     matrix.fill(0)
+    #     matrix.load_rgb565_image(json_file, 0, 0)
+    #     matrix.show()
+    #     time.sleep(1)
+    # # 最后清空屏幕（可选）
+    # matrix.fill(0)
+    # matrix.show()
+    # time.sleep(1)
+    #
+    # matrix.load_rgb565_image('v.json', 0, 0)
+    # matrix.show()
+    # time.sleep(1)
 # matrix.hline(0, 0, 4, matrix.COLOR_BLUE)
 # matrix.vline(1, 1, 2, matrix.COLOR_RED)
 # matrix.vline(2, 2, 2, matrix.COLOR_GREEN)
