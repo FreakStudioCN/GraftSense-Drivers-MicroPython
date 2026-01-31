@@ -68,22 +68,19 @@ class NeopixelMatrix(framebuf.FrameBuffer):
     _GAMMA_TABLE_G = [round(255 * ((i / 255) ** (1 / GAMMA_GREEN))) for i in range(256)]
     _GAMMA_TABLE_B = [round(255 * ((i / 255) ** (1 / GAMMA_BLUE))) for i in range(256)]
 
-    # 图片JSON格式规范 (RGB565像素格式)
-    # 说明：该JSON用于存储RGB565格式的像素图像数据，可被图像加载方法解析渲染
+    # 图片JSON格式规范:
     # {
-    #     "pixels": [    # 必需字段 - RGB565像素数组，每个值的数值范围为0-65535（对应十六进制0x0000-0xFFFF）
-    #                    # 像素值**必须使用十进制整数**表示（如63488），禁止使用十六进制格式（如0xF800）
-    #                    # 排版建议：每个像素值单独占一行，提升JSON文件的可读性并避免解析错误
-    #         63488,     # 示例：纯红色（对应RGB565编码：R=31, G=0, B=0，十六进制0xF800转换为十进制63488）
-    #         2016,      # 示例：纯绿色（对应RGB565编码：R=0, G=63, B=0，十六进制0x07E0转换为十进制2016）
-    #         31         # 示例：纯蓝色（对应RGB565编码：R=0, G=0, B=31，十六进制0x001F转换为十进制31）
+    #     "pixels": [    # 必需 - RGB565像素数组，每个值范围0-65535
+    #         0xF800,    # 红色 (R=31, G=0, B=0)
+    #         0x07E0,    # 绿色 (R=0, G=63, B=0)
+    #         0x001F     # 蓝色 (R=0, G=0, B=31)
     #     ],
-    #     "width": 128,   # 可选字段 - 图片宽度（单位：像素），默认使用显示器宽度
-    #                     # 强制约束：像素数组长度len(pixels)必须能被width整除，否则会导致解析失败
-    #     # 以下为可选元数据字段（仅用于描述信息，不影响图像渲染逻辑）
-    #     "height": 64,   # 可选字段 - 图片高度（单位：像素），可通过公式自动计算：height = len(pixels) / width
-    #     "description": "Sample image", # 可选字段 - 图片描述信息，建议使用英文表述
-    #     "version": 1.0  # 可选字段 - 格式版本号，用于区分不同版本的规范定义
+    #     "width": 128,   # 可选 - 图片宽度(像素)，默认使用显示器宽度
+    #                     # 注: len(pixels)必须能被width整除
+    #     # 以下为可选元数据(不影响渲染):
+    #     "height": 64,   # 自动计算: len(pixels)/width
+    #     "description": "示例图片", # 别用中文描述
+    #     "version": 1.0
     # }
 
     def __init__(self, width, height, pin, layout=LAYOUT_ROW, brightness=1, order=ORDER_RGB,
@@ -278,7 +275,50 @@ class NeopixelMatrix(framebuf.FrameBuffer):
 
         # 写入所有像素数据到 WS2812 灯带，点亮屏幕
         self.np.write()
+    @micropython.native
+    def send_pixels_via_uart(self, uart, start_x=0, start_y=0, end_x=None, end_y=None):
+        """
+        将矩阵指定区域的像素数据以RGB888格式通过UART发送（工程化实现）
+        :param uart: 已初始化的machine.UART实例（用于数据发送）
+        :param start_x: 起始X坐标（默认从0开始），必须≥0且<self.width
+        :param start_y: 起始Y坐标（默认从0开始），必须≥0且<self.height
+        :param end_x: 结束X坐标（默认到矩阵边缘self.width-1），必须≥start_x且<self.width
+        :param end_y: 结束Y坐标（默认到矩阵边缘self.height-1），必须≥start_y且<self.height
+        :return: int - 实际发送的字节数（每个像素3字节，总字节数=像素数×3）
+        :raise ValueError: 当UART无效、坐标参数不合法时抛出异常
+        """
+        data =[]
+      # 如果没指定 end_x，默认整行
+        end_x = end_x if end_x is not None else self.width - 1
+        # 如果没指定 end_y，默认整列
+        end_y = end_y if end_y is not None else self.height - 1
 
+        # 检查区域参数是否合法
+        # 检查起始坐标是否合法
+        if not (0 <= start_x < self.width and 0 <= start_y < self.height):
+            raise ValueError(f'Start coordinate ({start_x},{start_y}) out of range ')
+        # 检查结束坐标是否合法
+        if not (0 <= end_x < self.width and 0 <= end_y < self.height):
+            raise ValueError(f'End coordinate ({end_x},{end_y}) out of range ')
+        # 检查区域是否合法
+        if end_x < start_x or end_y < start_y:
+            raise ValueError('Invalid area: ({x1},{y1})-({x2},{y2})'.format(x1=start_x, y1=end_x, x2=start_y, y2=end_y))
+
+        # 遍历每一行
+        for y in range(start_y, end_y + 1):
+            # 遍历每一列
+            for x in range(start_x, end_x + 1):
+                # 计算 WS2812 的实际索引
+                idx = self._pos2index(x, y)
+                # 每个像素占 2 字节，计算在 buffer 中的偏移地址
+                addr = (y * self.width + x) * 2
+                # 从 FrameBuffer 中读取 RGB565 值， 注意，FrameBuffer是小端序
+                val = (self.buffer[addr + 1] << 8) | self.buffer[addr]
+                # 转换为 RGB888 后赋值给 WS2812
+                self.np[idx] = self.rgb565_to_rgb888(val, self.brightness, self.order)
+                data=data+list(self.np[idx])
+        uart.write(bytes(data))
+        return data
     @micropython.native
     def scroll(self, xstep, ystep, clear_color=None, wrap=False):
         """
