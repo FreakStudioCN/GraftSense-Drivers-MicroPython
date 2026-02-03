@@ -16,7 +16,6 @@ __platform__ = "MicroPython v1.23"
 
 from machine import ADC, Pin, Timer, UART
 import time
-from neopixel import NeoPixel
 from micropython import const
 
 # ======================================== 全局变量 ============================================
@@ -122,7 +121,6 @@ class AD8232:
         """
         # ADC引脚初始化 (Pico的ADC)
         self.adc = ADC(Pin(adc_pin))
-        self.led = NeoPixel((Pin(16, Pin.OUT)), 1)
         # 导联脱落检测引脚
         self.loff_plus = Pin(loff_plus_pin, Pin.IN, Pin.PULL_UP)
         self.loff_minus = Pin(loff_minus_pin, Pin.IN, Pin.PULL_UP)
