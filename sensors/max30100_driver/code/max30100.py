@@ -35,6 +35,9 @@ PART_ID      = 0xFF  # Part ID, normally 0x11
 
 I2C_ADDRESS  = 0x57  # I2C address of the MAX30100 device
 
+MODE_HR = 0x02
+MODE_SPO2 = 0x03
+
 
 PULSE_WIDTH = {
     200: 0,
@@ -137,11 +140,6 @@ def _twos_complement(val, bits):
     if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
         val = val - (1 << bits)
     return val
-
-
-
-MODE_HR = 0x02
-MODE_SPO2 = 0x03
 
 # ======================================== 自定义类 ============================================
 
@@ -586,23 +584,6 @@ class MAX30100(object):
         """
         reg = self.i2c.readfrom_mem(I2C_ADDRESS, MODE_CONFIG,1)[0]
         self.i2c_write(I2C_ADDRESS, MODE_CONFIG, reg | (1 << 3))
-
-    def get_temperature(self):
-        """
-        获取当前温度值。
-
-        Returns:
-            float: 温度值，单位：摄氏度
-
-        =========================================
-        Get current temperature value.
-
-        Returns:
-            float: Temperature value in Celsius
-        """
-        intg = _twos_complement(self.i2c.readfrom_mem(I2C_ADDRESS, TEMP_INTG,1)[0])
-        frac = self.i2c.readfrom_mem(I2C_ADDRESS, TEMP_FRAC,1)[0]
-        return intg + (frac * 0.0625)
 
     def get_rev_id(self):
         """
