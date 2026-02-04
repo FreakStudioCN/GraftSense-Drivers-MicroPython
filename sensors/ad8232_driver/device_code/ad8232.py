@@ -1,5 +1,5 @@
 
-# Python env   : MicroPython v1.23.0
+# Python env   : MicroPython v1.27.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/5 下午10:12
 # @Author  : hogeiha
@@ -10,7 +10,7 @@
 __version__ = "0.1.0"
 __author__ = "hogeiha"
 __license__ = "CC BY-NC 4.0"
-__platform__ = "MicroPython v1.23"
+__platform__ = "MicroPython v1.27"
 
 # ======================================== 导入相关模块 =========================================
 
