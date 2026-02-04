@@ -1,6 +1,6 @@
 # Python env   : MicroPython v1.24.0
 # -*- coding: utf-8 -*-
-# @Time    : 2025/9/5 下午10:12
+# @Time    : 2026/2/4 下午10:12
 # @Author  : hogeiha
 # @File    : main.py
 # @Description : semg_driver 主程序（100Hz版）
@@ -90,7 +90,7 @@ def realtime_process(timer):
     uart.write(uart_str.encode('utf-8'))
 
     # 5. 调试打印
-    print_str = f"原始值:{raw_val_dc:.6f}, 滤波后值:{filtered_val:.6f}"
+    print_str = f"Original value:{raw_val_dc:.6f}, Filtered value:{filtered_val:.6f}"
     print(print_str)
 
 # ======================================== 自定义类 ============================================
@@ -107,12 +107,12 @@ adc = ADC(Pin(26))
 # 串口初始化
 uart = UART(0, baudrate=115200, tx=Pin(0), rx=Pin(1), bits=8, parity=None, stop=1)
 
-print("===== 表面肌电信号系统（100Hz版） =====")
-print(f"采样频率：{FS}Hz | 50Hz陷波抑制 | 基线漂移去除")
-print("按 Ctrl+C/Thonny停止按钮 可终止程序\n")
+print("===== Surface Electromyography System (100Hz Version) =====")
+print(f"Sampling Frequency: {FS}Hz | 50Hz Notch Filter | Baseline Drift Removal")
+print("Press Ctrl+C/Thonny Stop Button to terminate the programn")
 
-uart.write("===== 表面肌电信号系统（100Hz版） =====\r\n".encode('utf-8'))
-uart.write(f"采样频率：{FS}Hz | 输出：原始值,滤波后值\r\n".encode('utf-8'))
+uart.write("===== Surface Electromyography System (100Hz Version) =====rn".encode('utf-8'))
+uart.write(f"Sampling Frequency: {FS}Hz | Output: Raw Value, Filtered Valuern".encode('utf-8'))
 
 # 启动定时器采样
 timer = Timer(-1)
@@ -127,5 +127,5 @@ try:
 except KeyboardInterrupt:
     running = False
     timer.deinit()
-    print("\n程序已停止！")
-    uart.write("\n程序已停止！\r\n".encode('utf-8'))
+    print("nThe program has stopped!")
+    uart.write("nThe program has stopped!rn".encode('utf-8'))
