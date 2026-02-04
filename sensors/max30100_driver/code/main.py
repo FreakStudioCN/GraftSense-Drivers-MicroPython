@@ -49,6 +49,12 @@ for device in devices_list:
 # 加载默认配置
 sensor.enable_spo2()
 
+# 获取传感器ID
+part_id = sensor.get_part_id()
+# 获取芯片版本ID
+rev_id = sensor.get_rev_id()
+print(f"MAX30100 Part ID: {part_id}, Revision ID: {rev_id}")
+
 # ========================================  主程序  ===========================================
 
 while True:
@@ -67,10 +73,7 @@ while True:
         print(f"har:{har}")
     print(f"red:{red}")
     print(f"ir:{ir}")
-    # 获取传感器ID
-    # sensor.get_part_id()
-    # 获取芯片版本ID
-    # sensor.get_rev_id()
-    # 打印传感器所有寄存器值
+
+    # 打印当前传感器所有寄存器值
     print(sensor.get_registers())
     time.sleep_ms(200)
