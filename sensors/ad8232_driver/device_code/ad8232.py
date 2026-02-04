@@ -1,5 +1,4 @@
-
-# Python env   : MicroPython v1.23.0
+# Python env   : MicroPython v1.24.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/5 下午10:12
 # @Author  : hogeiha
@@ -10,7 +9,7 @@
 __version__ = "0.1.0"
 __author__ = "hogeiha"
 __license__ = "CC BY-NC 4.0"
-__platform__ = "MicroPython v1.23"
+__platform__ = "MicroPython v1.24 with ulab"
 
 # ======================================== 导入相关模块 =========================================
 
@@ -121,7 +120,6 @@ class AD8232:
         """
         # ADC引脚初始化 (Pico的ADC)
         self.adc = ADC(Pin(adc_pin))
-
         # 导联脱落检测引脚
         self.loff_plus = Pin(loff_plus_pin, Pin.IN, Pin.PULL_UP)
         self.loff_minus = Pin(loff_minus_pin, Pin.IN, Pin.PULL_UP)
