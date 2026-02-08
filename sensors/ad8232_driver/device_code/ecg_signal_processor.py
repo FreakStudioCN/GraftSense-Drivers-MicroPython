@@ -25,6 +25,98 @@ from ulab import scipy as spy
 # ======================================== 自定义类 ============================================
 
 class ECGSignalProcessor:
+    """
+           基于AD8232传感器的ECG信号处理核心类（MicroPython适配版）。
+
+           该类实现ECG信号的采集、多级数字滤波、R波峰值检测及心率计算功能，适配MicroPython
+           轻量化运行环境，通过定时器周期性采样处理，支持调试模式下的实时数据输出。
+
+           Attributes:
+               DEBUG_ENABLED (bool): 调试模式开关（类级属性），开启后通过UART/控制台输出处理数据。
+               adc (ADC): ADC外设实例，用于读取ECG传感器原始模拟信号。
+               uart (UART): UART外设实例，调试模式下输出数据（可选）。
+               FS (float): 采样频率（Hz），默认100Hz。
+               running (bool): 信号处理运行状态标志，控制定时器回调执行。
+               timer (Timer): 采样定时器实例，周期性触发信号处理回调。
+               DC_REMOVE_BASE (float): 直流分量基准值，通过滑动窗口平均计算。
+               DC_WINDOW (int): 去直流滑动窗口长度，默认20个采样点。
+               dc_buffer (ndarray): 直流分量计算缓存数组，存储最近N个原始采样值。
+               dc_idx (int): 直流缓存数组的写入索引（循环覆盖）。
+               R_WINDOW (int): R波检测滑动窗口长度，默认40个采样点。
+               R_THRESHOLD_RATIO (float): R波检测动态阈值比例，默认0.6（窗口最大值的60%）。
+               REFRACTORY_PERIOD (int): R波检测不应期（毫秒），默认500ms，避免重复检测。
+               SLOPE_THRESHOLD (float): R波上升沿斜率阈值，默认0.02，过滤噪声干扰。
+               MIN_R_AMPLITUDE (float): R波最小幅度阈值，默认0.2V，过滤小幅值噪声。
+               last_r_time (int): 上一次检测到R波的时间戳（毫秒）。
+               r_peaks (list): 存储R波检测时间戳的列表。
+               heart_rate (float): 计算得到的心率值（次/分钟），范围限制40-150BPM。
+               rr_interval (float): R-R间期平均值（毫秒），基于最近8个有效间期计算。
+               rr_intervals (list): 存储最近有效R-R间期的列表，最多保留8个值。
+               r_buffer (ndarray): R波检测滑动窗口缓存数组，存储最近N个滤波后值。
+               r_idx (int): R波检测缓存数组的写入索引（循环覆盖）。
+               filtered_val (float): 最新一次滤波后的ECG信号值。
+               raw_val_dc (float): 去除直流分量后的原始信号值。
+               sos_notch (ndarray): 50Hz陷波滤波器二阶节（SOS）系数数组。
+               sos_hp (ndarray): 0.5Hz高通滤波器二阶节（SOS）系数数组。
+               sos_lp (ndarray): 35Hz低通滤波器二阶节（SOS）系数数组。
+               zi_notch (ndarray): 陷波滤波器状态缓存，维持滤波连续性。
+               zi_hp (ndarray): 高通滤波器状态缓存，维持滤波连续性。
+               zi_lp (ndarray): 低通滤波器状态缓存，维持滤波连续性。
+
+           Methods:
+               __init__(ad8232, uart=None, fs=100.0): 初始化ECG信号处理器实例。
+               _detect_r_peak(filtered_val, current_time): 检测R波峰值，返回是否检测到R波。
+               _process_callback(timer): 定时器回调函数，执行信号采集、滤波、R波检测核心逻辑。
+               start(): 启动ECG信号处理系统，初始化定时器并进入主循环。
+               stop(): 停止ECG信号处理系统，释放定时器资源。
+
+           ==========================================
+
+           Core ECG signal processing class for AD8232 sensor (MicroPython adapted version).
+
+           This class implements ECG signal acquisition, multi-stage digital filtering, R-wave peak detection,
+           and heart rate calculation, adapted to the lightweight MicroPython runtime environment. It samples
+           and processes signals periodically via a timer, and supports real-time data output in debug mode.
+
+           Attributes:
+               DEBUG_ENABLED (bool): Debug mode switch (class-level attribute), outputs processing data via UART/console when enabled.
+               adc (ADC): ADC peripheral instance for reading raw analog signals from ECG sensor.
+               uart (UART): UART peripheral instance for debug data output (optional).
+               FS (float): Sampling frequency (Hz), default 100Hz.
+               running (bool): Signal processing running status flag, controls execution of timer callback.
+               timer (Timer): Sampling timer instance that triggers signal processing callback periodically.
+               DC_REMOVE_BASE (float): DC component reference value, calculated by moving window average.
+               DC_WINDOW (int): Moving window length for DC removal, default 20 sampling points.
+               dc_buffer (ndarray): Cache array for DC component calculation, stores recent N raw sampling values.
+               dc_idx (int): Write index of DC cache array (circular overwrite).
+               R_WINDOW (int): Moving window length for R-wave detection, default 40 sampling points.
+               R_THRESHOLD_RATIO (float): Dynamic threshold ratio for R-wave detection, default 0.6 (60% of window maximum).
+               REFRACTORY_PERIOD (int): Refractory period for R-wave detection (ms), default 500ms to avoid duplicate detection.
+               SLOPE_THRESHOLD (float): Slope threshold for R-wave rising edge, default 0.02 to filter noise interference.
+               MIN_R_AMPLITUDE (float): Minimum amplitude threshold for R-wave, default 0.2V to filter small-amplitude noise.
+               last_r_time (int): Timestamp (ms) of the last detected R-wave.
+               r_peaks (list): List storing timestamps of detected R-waves.
+               heart_rate (float): Calculated heart rate (beats per minute), limited to 40-150BPM.
+               rr_interval (float): Average R-R interval (ms), calculated based on the last 8 valid intervals.
+               rr_intervals (list): List storing recent valid R-R intervals, up to 8 values retained.
+               r_buffer (ndarray): Moving window cache array for R-wave detection, stores recent N filtered values.
+               r_idx (int): Write index of R-wave detection cache array (circular overwrite).
+               filtered_val (float): Latest filtered ECG signal value.
+               raw_val_dc (float): Raw signal value after DC component removal.
+               sos_notch (ndarray): Second-order section (SOS) coefficient array for 50Hz notch filter.
+               sos_hp (ndarray): Second-order section (SOS) coefficient array for 0.5Hz high-pass filter.
+               sos_lp (ndarray): Second-order section (SOS) coefficient array for 35Hz low-pass filter.
+               zi_notch (ndarray): Notch filter state cache to maintain filtering continuity.
+               zi_hp (ndarray): High-pass filter state cache to maintain filtering continuity.
+               zi_lp (ndarray): Low-pass filter state cache to maintain filtering continuity.
+
+           Methods:
+               __init__(ad8232, uart=None, fs=100.0): Initialize ECG signal processor instance.
+               _detect_r_peak(filtered_val, current_time): Detect R-wave peak, return whether R-wave is detected.
+               _process_callback(timer): Timer callback function that executes core logic of signal acquisition, filtering, and R-wave detection.
+               start(): Start ECG signal processing system, initialize timer and enter main loop.
+               stop(): Stop ECG signal processing system, release timer resources.
+    """
     DEBUG_ENABLED = False
 
     def __init__(self, ad8232, uart=None,fs=100.0):

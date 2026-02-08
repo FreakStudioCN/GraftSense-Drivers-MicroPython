@@ -11,7 +11,7 @@ import time
 from data_flow_processor import DataFlowProcessor
 from ad8232 import AD8232
 from machine import UART, Pin, Timer
-from ecg_module_cmd import AD8232_DataFlowProcessor
+from ecg_module_cmd import ECGModuleCMD
 from ecg_signal_processor import ECGSignalProcessor
 from machine import UART, Pin, Timer
 from neopixel import NeoPixel
@@ -40,7 +40,7 @@ ad8232=AD8232(adc_pin=26, loff_plus_pin=3, loff_minus_pin=4,sdn_pin=2)
 edg_signal = ECGSignalProcessor(ad8232=ad8232, fs=100.0)
 ad8232.on()
 # 模块串口协议接收，功能解析
-ad8232_processor = AD8232_DataFlowProcessor(data_flowprocessor=processordata,ad8232=ad8232,ecg_signal_processor=edg_signal)
+ad8232_processor = ECGModuleCMD(data_flowprocessor=processordata,ad8232=ad8232,ecg_signal_processor=edg_signal)
 # 启动模块定时器
 ad8232_processor.ECGSignalProcessor.start()
 

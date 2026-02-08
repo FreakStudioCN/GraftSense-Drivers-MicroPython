@@ -74,7 +74,7 @@ def voltage_to_16bit(voltage, V_min=-1, V_max=2):
     normalized = (voltage_clipped - V_min) / (V_max - V_min)
     return round(normalized * 65535)
 
-class AD8232_DataFlowProcessor:
+class ECGModuleCMD:
     """
            AD8232心电传感器与数据流处理器的集成类。
 
@@ -99,7 +99,7 @@ class AD8232_DataFlowProcessor:
                operating_status (int): 工作状态（0停止，1运行）。
 
            Methods:
-               __init__(): 初始化AD8232_DataFlowProcessor实例。
+               __init__(): 初始化ECGModuleCMD实例。
                _start_timer(): 启动定时器。
                _report_timer_callback(): 上报定时器回调函数。
                _timer_callback(): 解析定时器回调函数。
@@ -131,7 +131,7 @@ class AD8232_DataFlowProcessor:
                operating_status (int): Operating status (0 stopped, 1 running).
 
            Methods:
-               __init__(): Initialize AD8232_DataFlowProcessor instance.
+               __init__(): Initialize ECGModuleCMD instance.
                _start_timer(): Start timers.
                _report_timer_callback(): Reporting timer callback function.
                _timer_callback(): Parsing timer callback function.
@@ -142,7 +142,7 @@ class AD8232_DataFlowProcessor:
 
     def __init__(self, data_flowprocessor,ad8232,ecg_signal_processor, parse_interval=10):
         """
-        初始化AD8232_DataFlowProcessor实例。
+        初始化ECGModuleCMD实例。
 
         Args:
             data_flowprocessor: 已初始化的DataFlowProcessor实例。
@@ -158,7 +158,7 @@ class AD8232_DataFlowProcessor:
 
         ==========================================
 
-        Initialize AD8232_DataFlowProcessor instance.
+        Initialize ECGModuleCMD instance.
 
         Args:
             data_flowprocessor: Initialized DataFlowProcessor instance.
@@ -394,7 +394,7 @@ class AD8232_DataFlowProcessor:
             data[0] = (ecg_value >> 8) & 0xFF
             data[1] = ecg_value & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x01, data)
-            if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+            if ECGModuleCMD.DEBUG_ENABLED:
                 print("ECG Value:", ecg_value)
 
         # 滤波后心电数据
@@ -404,7 +404,7 @@ class AD8232_DataFlowProcessor:
             data[0] = (filtered_ecg_value >> 8) & 0xFF
             data[1] = filtered_ecg_value & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x02, data)
-            if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+            if ECGModuleCMD.DEBUG_ENABLED:
                 print("filtered_ecg Value:", filtered_ecg_value)
         # 脱落状态检测
         elif command == 0x03:
@@ -412,26 +412,26 @@ class AD8232_DataFlowProcessor:
             data = bytearray(1)
             data[0] = lead_status & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x03, data)
-            if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+            if ECGModuleCMD.DEBUG_ENABLED:
                 print("Lead Status:", lead_status)
         # 上报频率
         elif command == 0x04:
-            # 上报频率 100HZ, 125HZ, 50HZ
-            if data[0] in [100, 125, 50]:
+            # 上报频率 100HZ
+            if data[0] in [100]:
                 self.reporting_frequency = data[0]
                 self._report_timer.init(period=int(1000 / self.reporting_frequency), mode=Timer.PERIODIC,callback=self._report_timer_callback)
                 self.DataFlowProcessor.build_and_send_frame(0x04, bytes(data[0]))
-                if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+                if ECGModuleCMD.DEBUG_ENABLED:
                     print("Reporting Frequency set to:", self.reporting_frequency)
             else:
-                if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+                if ECGModuleCMD.DEBUG_ENABLED:
                     print("Invalid Reporting Frequency:", data[0])
 
         # 主动上报模式设置
         elif command == 0x05:
             self.active_reporting = bool(data[0])
             self.DataFlowProcessor.build_and_send_frame(0x05, bytes(data[0]))
-            if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+            if ECGModuleCMD.DEBUG_ENABLED:
                 print("Active Reporting set to:", self.active_reporting)
         # 工作状态
         elif command == 0x06:
@@ -445,9 +445,9 @@ class AD8232_DataFlowProcessor:
                 self.operating_status = data[0]
                 self.DataFlowProcessor.build_and_send_frame(0x05, bytes(data[0]))
             else:
-                if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+                if ECGModuleCMD.DEBUG_ENABLED:
                     print("Invalid Operating Status:", data[0])
-            if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+            if ECGModuleCMD.DEBUG_ENABLED:
                 print("Operating Status set to:", self.operating_status)
 
         # 查询工作状态
@@ -456,7 +456,7 @@ class AD8232_DataFlowProcessor:
             data = bytearray(1)
             data[0] = operating_status & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x07, data)
-            if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+            if ECGModuleCMD.DEBUG_ENABLED:
                 print("Operating Status:", operating_status)
         # 查询心率
         elif command == 0x08:
@@ -464,7 +464,7 @@ class AD8232_DataFlowProcessor:
             data = bytearray(1)
             data[0] = heart_rate & 0xFF
             self.DataFlowProcessor.build_and_send_frame(0x08, data)
-            if AD8232_DataFlowProcessor.DEBUG_ENABLED:
+            if ECGModuleCMD.DEBUG_ENABLED:
                 print("Heart Rate:", heart_rate)
 
 # ======================================== 初始化配置 ==========================================
