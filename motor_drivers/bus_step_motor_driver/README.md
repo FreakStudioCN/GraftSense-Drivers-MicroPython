@@ -186,7 +186,7 @@ step_motor.start_step_motion(1, BusStepMotor.FORWARD, BusStepMotor.DRIVER_MODE_S
 
 ## 许可协议
 - `pca9685.py` 采用 MIT 许可证（Adafruit 原创）
-- `bus_step_motor.py` 及扩展部分采用 CC BY-NC 4.0 许可协议  
+- `bus_step_motor.py` 及扩展部分采用 MIT 许可协议  
 署名 — 请注明原作者及项目链接  
 非商业性使用 — 禁止商业用途  
 合理引用 — 可在代码注释、文档等注明来源  

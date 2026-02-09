@@ -4,7 +4,7 @@
 # @Author  : 缪贵成
 # @File    : guva_s12sd.py
 # @Description : uv紫外线传感器驱动文件，参考代码:https://github.com/TimHanewich/MicroPython-Collection/tree/master/GUVA-S12SD
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"

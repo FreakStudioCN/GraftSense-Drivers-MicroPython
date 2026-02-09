@@ -4,11 +4,11 @@
 # @Author  : hogeiha
 # @File    : data_flow_processor.py
 # @Description : 串口数据帧构建解析
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "hogeiha"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.24 with ulab"
 
 # ======================================== 导入相关模块 =========================================

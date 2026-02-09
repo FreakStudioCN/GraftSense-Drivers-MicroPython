@@ -215,7 +215,7 @@ while True:
 如有问题或建议，请联系开发者： 📧 邮箱：1098875044@qq.com 💻 GitHub：https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 
 许可协议
-本项目除 MicroPython 官方模块外，所有驱动与扩展代码均采用 CC BY-NC 4.0 许可协议发布。
+本项目除 MicroPython 官方模块外，所有驱动与扩展代码均采用 MIT 许可协议发布。
 署名 — 请注明原作者及项目链接
 非商业性使用 — 禁止商业用途
 合理引用 — 可在代码注释、文档等注明来源

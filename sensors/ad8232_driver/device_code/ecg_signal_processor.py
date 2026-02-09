@@ -4,11 +4,11 @@
 # @Author  : hogeiha
 # @File    : ecg_signal_processor.py
 # @Description : ecg信号滤波心率计算处理
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "hogeiha"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.24 with ulab"
 
 # ======================================== 导入相关模块 =========================================

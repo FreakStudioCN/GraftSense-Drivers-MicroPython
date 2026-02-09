@@ -4,7 +4,7 @@
 # @Author  : 零高幸
 # @File    : main.py
 # @Description : 测试PiranhaLED驱动功能（标准main入口）
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 # ======================================== 导入相关模块 =========================================
 

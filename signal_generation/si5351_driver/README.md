@@ -130,7 +130,7 @@ silicon5351是一款I²C接口的时钟信号发生芯片，通过写入寄存�
 # @File    : mian.py
 # @Description : silicon5351时钟示例 for MicroPython
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 # ======================================== 导入相关模块 =========================================
 
@@ -221,7 +221,7 @@ si.disable_output(output=0)
 
 ---
 ### 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (CC BY-NC 4.0)** 许可协议发布。  
+本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
 您可以自由地：  
 - **共享** — 在任何媒介以任何形式复制、发行本作品  

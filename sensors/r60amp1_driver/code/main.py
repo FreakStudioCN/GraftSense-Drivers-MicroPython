@@ -4,7 +4,7 @@
 # @Author  : hogeiha
 # @File    : main.py
 # @Description : 测试R60AMP1多人轨迹雷达设备驱动类的代码
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 # ======================================== 导入相关模块 =========================================
 

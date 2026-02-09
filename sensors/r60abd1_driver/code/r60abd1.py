@@ -4,11 +4,11 @@
 # @Author  : 李清水            
 # @File    : r60abd1.py       
 # @Description : R60ABD1雷达设备业务处理类相关代码
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "李清水"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

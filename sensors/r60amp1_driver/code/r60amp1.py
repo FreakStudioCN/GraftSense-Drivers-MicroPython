@@ -4,7 +4,7 @@
 # @Author  : hogeiha
 # @File    : r60amp1.py
 # @Description : R60AMP1多人轨迹雷达设备业务处理类
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 # ======================================== 导入相关模块 =========================================
 

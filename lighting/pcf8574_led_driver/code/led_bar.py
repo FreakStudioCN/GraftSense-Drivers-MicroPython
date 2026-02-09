@@ -5,11 +5,11 @@
 # @File    : led_bar.py
 # @Description : 基于 PCF8574 的 8 段光条数码管驱动（仅一个 LEDBar 类）
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================

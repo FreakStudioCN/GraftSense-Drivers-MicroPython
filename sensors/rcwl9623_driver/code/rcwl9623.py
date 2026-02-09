@@ -4,11 +4,11 @@
 # @Author  : 缪贵成
 # @File    : rcwl9623.py
 # @Description : RCWL9623 收发一体超声波模块驱动，支持 GPIO/OneWire/UART/I2C 四种模式，包含详细时序注释
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "1.0.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

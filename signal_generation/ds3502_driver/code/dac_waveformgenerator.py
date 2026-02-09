@@ -4,11 +4,11 @@
 # @Author  : 李清水            
 # @File    : dac_waveformgenerator.py       
 # @Description : 使用DS3502芯片生成正弦波、三角波、锯齿波的类
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "李清水"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

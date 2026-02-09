@@ -4,11 +4,11 @@
 # @Author  : 侯钧瀚
 # @File    : air_quality.py
 # @Description : 基于PCA9546ADR 4通道I2C多路复用模块驱动 for MicroPython
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.19+"
 
 # ======================================== 导入相关模块 =========================================

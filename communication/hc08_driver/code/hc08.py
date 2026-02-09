@@ -4,11 +4,11 @@
 # @Author  : ben0i0d
 # @File    : hc08.py
 # @Description : hc08 bluetooth驱动
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "ben0i0d"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

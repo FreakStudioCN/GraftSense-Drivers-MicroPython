@@ -4,11 +4,11 @@
 # @Author  : 李清水            
 # @File    : AbstractBlockDevInterface.py
 # @Description : 定义了块设备的抽象基类 AbstractBlockDev
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "李清水"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

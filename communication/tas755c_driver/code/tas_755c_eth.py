@@ -4,7 +4,7 @@
 # @Author  : ben0i0d
 # @File    : tas755.py
 # @Description : tas755驱动
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "ben0i0d"

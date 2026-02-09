@@ -1,0 +1,29 @@
+{
+  "name": "st7789_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control gt911 driver",
+  "author": "leeqingshui",
+  "author_email": "1069653183@qq.com",
+  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "urls": [
+    ["st7789.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/lighting/st7789_driver/code/st7789.py"],
+    ["vga1_8x8.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/lighting/st7789_driver/code/vga1_8x8.py"],
+    ["vga1_16x16.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/lighting/st7789_driver/code/vga1_16x16.py"],
+    ["vga1_16x32.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/lighting/st7789_driver/code/vga1_16x32.py"]
+  ],
+  "deps": [
+
+ ],
+  "long_description": "A MicroPython library to control gt911 driver",
+  "long_description_content_type": "text/markdown",
+  "classifiers": [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent"
+  ],
+  "python_requires": ">=3.12",
+  "extras_require": {
+    "micropython": ["machine", "time"]
+  }
+}
