@@ -4,11 +4,11 @@
 # @Author  : hogeiha
 # @File    : gl5516.py
 # @Description : 基于GL5516的的光强度传感器驱动
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "hogeiha"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

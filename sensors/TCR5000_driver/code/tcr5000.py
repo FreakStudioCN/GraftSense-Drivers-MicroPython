@@ -4,11 +4,11 @@
 # @Author  : 缪贵成
 # @File    : tcr5000.py
 # @Description :基于TCR5000L的单路循迹模块驱动程序
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "缪贵成"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

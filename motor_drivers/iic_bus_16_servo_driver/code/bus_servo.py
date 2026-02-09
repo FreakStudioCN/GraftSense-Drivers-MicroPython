@@ -4,11 +4,11 @@
 # @Author  : 侯钧瀚
 # @File    : bus_servo.py
 # @Description : PCA9685 16路 PWM 驱动 for MicroPython
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "侯钧瀚"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.19+"
 
 # ======================================== 导入相关模块 =========================================

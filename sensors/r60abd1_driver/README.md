@@ -218,7 +218,7 @@ class R60ABD1:
 # @File    : mian.py
 # @Description : r60abd1毫米波驱动 for micropython
 # @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : CC BY-NC 4.0
+# @License : MIT
 # ======================================== 导入相关模块 =========================================
 
 #MicroPython 提供的硬件接口类，用于串口通信和引脚控制模块
@@ -317,7 +317,7 @@ while True:
 ---
 
 ## 许可协议
-本项目（除 MicroPython 官方模块外）采用 CC BY-NC 4.0 许可。  
+本项目（除 MicroPython 官方模块外）采用 MIT 许可。  
 - 署名：请注明原作者与项目链接。  
 - 非商业性使用：禁止商业用途。  
 - 合理引用：可在注释或文档中注明来源。

@@ -4,11 +4,11 @@
 # @Author  : leeqingshui
 # @File    : fm8118_atomization.py
 # @Description : 基于FM8118芯片的超声波雾化器驱动模块
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.1"
 __author__ = "leeqingshui"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================

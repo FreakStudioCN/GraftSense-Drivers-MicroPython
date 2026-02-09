@@ -4,11 +4,11 @@
 # @Author  : hogeiha
 # @File    : ad8232.py
 # @Description : ad8232 模块驱动
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "hogeiha"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.24 with ulab"
 
 # ======================================== 导入相关模块 =========================================

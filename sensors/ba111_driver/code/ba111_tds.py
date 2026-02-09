@@ -4,11 +4,11 @@
 # @Author  : hogeiha
 # @File    : ba111_tds.py
 # @Description : ba111_tds水质检测传感器驱动
-# @License : CC BY-NC 4.0
+# @License : MIT
 
 __version__ = "0.1.0"
 __author__ = "hogeiha"
-__license__ = "CC BY-NC 4.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
