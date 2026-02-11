@@ -1,6 +1,13 @@
-# OH34N 数字霍尔传感器驱动 - MicroPython版本
+# GraftSense-基于 OH34N 的霍尔传感器模块（MicroPython）
+
+# GraftSense-基于 OH34N 的霍尔传感器模块（MicroPython）
+
+# GraftSense 基于 OH34N 的霍尔传感器模块 MicroPython 驱动
+
+---
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -15,185 +22,107 @@
 ---
 
 ## 简介
-OH34N 是一款基于霍尔效应原理的数字输出型霍尔传感器，通过检测磁场变化输出高低电平信号（高电平表示检测到磁场，低电平表示无磁场）。该传感器具有灵敏度高、响应速度快、功耗低、抗干扰能力强等特点，广泛应用于电机转速检测、齿轮计数、位置定位、磁性开关控制、流量计量等场景。
 
-本项目提供了基于 MicroPython 的驱动代码及示例程序，支持磁场状态读取、中断回调触发、中断启用/禁用等核心功能，通过 `micropython.schedule` 确保中断回调安全执行，方便开发者快速集成到各类磁场检测与控制场景中。
-
-> **注意**：该传感器仅支持数字信号输出（DO），无法量化磁场强度，仅用于判断磁场“有无”；检测方向与磁场极性相关，需根据实际场景调整传感器安装角度。
+本项目是 **基于 OH34N 芯片的霍尔传感器模块** 的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块。模块以 OH34N 霍尔芯片为核心，通过检测磁场变化（如 N 极靠近/远离）触发数字信号跳变，支持非接触式磁场检测、电机转速检测、位置识别与计数等场景，具有响应迅速、非接触检测的优势。
 
 ---
 
 ## 主要功能
-- **磁场状态检测**：通过 `read()` 方法实时读取当前磁场检测状态（True=有磁场，False=无磁场）
-- **中断触发机制**：
-  - 支持上升沿+下降沿双触发（磁场出现/消失均能触发）
-  - 中断回调通过 `micropython.schedule` 调度，避免中断上下文执行耗时操作
-- **灵活的回调管理**：支持动态设置/修改回调函数（`set_callback()`），无需重新初始化传感器
-- **中断控制**：提供 `enable()`/`disable()` 方法，支持启用/禁用中断检测，灵活控制传感器工作模式
-- **引脚访问**：通过 `digital` 属性获取底层 GPIO 引脚对象，支持自定义硬件配置
-- **跨平台兼容**：仅依赖 MicroPython 标准库（`machine.Pin`、`micropython`），兼容树莓派 Pico 等主流开发板
+
+- **磁场状态读取**：通过 `read()` 方法直接获取当前磁场检测状态（True 表示检测到磁场，False 表示未检测到）
+- **中断回调机制**：支持设置磁场变化触发的回调函数，通过 `micropython.schedule` 确保中断安全执行
+- **中断控制**：提供 `enable()` 和 `disable()` 方法，灵活启用/禁用磁场变化中断检测
+- **消抖处理**：内置防抖逻辑，避免磁场变化时的重复触发，提升检测稳定性
+- **硬件抽象**：封装底层 GPIO 和 IRQ 操作，提供简洁易用的上层 API，降低硬件配置复杂度
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- 树莓派 Pico/Pico W
-- OH34N 数字霍尔传感器模块
-- 杜邦线若干
-- （可选）3.3V 电源模块（若开发板供电不稳定）
-- （可选）永磁体（用于测试磁场检测功能）
 
-### 模块引脚说明
-| OH34N 传感器引脚 | 功能描述 | 电压要求 | 连接说明                          |
-|------------------|----------|----------|-------------------------------|
-| VCC              | 电源正极 | 3.3V（部分模块支持 5V，需参考型号） | 连接开发板 3.3V 引脚（如 Pico 的 Pin36） |
-| GND              | 电源负极 | 接地 | 连接开发板 GND 引脚（如 Pico 的 Pin38）  |
-| DO               | 数字输出引脚 | 高电平（有磁场）/低电平（无磁场） | 连接开发板 GPIO 引脚（如 Pico 的 GP6）   |
+- **GraftSense Hall Sensor Module v1.0**（基于 OH34N 芯片，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如树莓派 Pico RP2040、ESP32 等，需具备 GPIO 中断功能）
+- 引脚连接：
 
-> **说明**：OH34N 模块无模拟输出（AO）引脚，仅通过 DO 引脚输出数字信号，可连接任意普通 GPIO 引脚（无需 ADC 功能）。
+  - 模块 DIN → MCU GPIO 引脚（如树莓派 Pico 的 GP6，需支持中断）
+  - VCC → 3.3V/5V 电源（模块兼容 3.3V 和 5V 供电）
+  - GND → MCU GND（共地确保信号参考一致）
+- 模块核心：OH34N 霍尔芯片，磁场变化时 DIN 引脚输出下降沿跳变（高电平转低电平），稳定状态下保持低电平，无持续输出信号
 
 ---
 
 ## 文件说明
-### hall_sensor_oh34n.py
-实现 OH34N 数字霍尔传感器的核心驱动逻辑，核心类 `HallSensorOH34N` 封装所有功能接口，支持磁场检测与中断控制。
 
-#### 类定义：`HallSensorOH34N`
-- **`__init__(pin: int, callback: callable = None) -> None`**  
-  初始化霍尔传感器：传入 DO 引脚编号，配置引脚为输入模式；可选绑定磁场变化回调函数；初始化中断对象（默认 None，未启用）。
-- **`read() -> bool`**  
-  读取当前磁场状态：返回 `True` 表示检测到磁场，`False` 表示未检测到，直接读取 GPIO 引脚电平值。
-- **`set_callback(callback: callable) -> None`**  
-  设置磁场变化回调函数：支持动态绑定/修改回调，回调将在中断触发时通过 `micropython.schedule` 调度执行。
-- **`_irq_handler(pin: Pin) -> None`**  
-  内部中断处理函数：中断触发时仅调度回调（不直接执行），避免在中断上下文（ISR）中进行耗时操作，确保系统稳定。
-- **`_scheduled_callback(arg: int) -> None`**  
-  内部调度函数：由 `micropython.schedule` 调用，在主线程中安全执行用户回调函数，支持打印、简单控制等操作。
-- **`enable() -> None`**  
-  启用中断检测：配置 GPIO 中断触发类型为“上升沿+下降沿”（磁场出现/消失均触发），绑定中断处理函数 `_irq_handler`。
-- **`disable() -> None`**  
-  禁用中断检测：清除中断处理函数，置空中断对象，释放中断资源，避免不必要的触发。
-- **`digital (property) -> Pin`**  
-  属性方法：返回 DO 引脚的 `Pin` 对象，支持底层硬件配置（如修改引脚拉电阻、中断触发类型等）。
-
-### main.py
-OH34N 霍尔传感器功能测试程序，演示传感器初始化、中断回调绑定、磁场状态读取、中断启用/禁用等完整流程，包含键盘中断处理，确保测试安全退出。
+| 文件名                 | 功能描述                                                                          |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| `hall_sensor_oh34n.py` | 驱动核心文件，定义 `HallSensorOH34N` 类，提供磁场检测、回调设置、中断控制等所有 API |
+| `main.py`              | 测试与演示文件，包含中断回调消抖、磁场状态轮询读取的完整示例                      |
 
 ---
 
 ## 软件设计核心思想
-### 中断安全设计
-- **回调调度机制**：通过 `micropython.schedule` 将用户回调从中断上下文调度到主线程执行，避免中断中执行打印、延时等耗时操作导致系统异常
-- **中断轻量化**：中断处理函数（`_irq_handler`）仅负责调度回调，不进行业务逻辑处理，最小化中断占用时间
 
-### 模块化与易用性
-- **功能拆分**：将磁场读取、中断控制、回调管理拆分为独立方法，接口清晰，便于调用与维护
-- **动态配置**：支持初始化后修改回调函数（`set_callback()`），无需重新创建传感器对象，提升灵活性
-- **属性化访问**：通过 `digital` 属性暴露底层引脚对象，满足开发者自定义硬件配置的需求（如设置上拉电阻）
-
-### 资源管理
-- **中断开关**：提供 `enable()`/`disable()` 方法，可在不需要检测时关闭中断，降低系统功耗，避免资源浪费
-- **状态兼容性**：中断禁用时，仍可通过 `read()` 方法轮询读取磁场状态，支持“中断触发”与“轮询”两种工作模式切换
+1. **中断安全设计**：通过 `micropython.schedule` 将用户回调调度到主线程执行，避免在中断服务函数（ISR）中执行耗时操作，确保系统稳定性
+2. **消抖机制**：通过 `flag` 和 `last_time` 实现 200ms 防抖间隔，过滤磁场变化时的抖动信号，避免重复触发回调
+3. **硬件抽象层**：封装 GPIO 和 IRQ 操作，上层调用无需关心 MCU 的中断配置细节，仅需指定引脚即可初始化
+4. **状态管理**：通过内部状态变量维护传感器检测状态，确保 `read()` 方法返回结果与实际硬件状态一致
 
 ---
 
 ## 使用说明
-### 硬件接线（树莓派 Pico 示例）
-| OH34N 传感器引脚 | Pico GPIO 引脚 | 接线功能 |
-|------------------|--------------|----------|
-| VCC              | 3.3V（Pin36）  | 传感器电源输入 |
-| GND              | GND（Pin38）   | 电源接地，确保共地避免信号干扰 |
-| DO               | GP6（Pin29）   | 数字信号输入（中断触发引脚） |
 
-> **注意**：
-> 1. 确认传感器供电电压，若模块支持 5V 供电，需调整 VCC 连接（如 Pico 的 5V 引脚），但优先使用 3.3V 以匹配开发板 GPIO 电平
-> 2. DO 引脚可连接任意普通 GPIO 引脚（无需 ADC 功能），示例中使用 GP22，实际可根据开发板引脚资源调整
+### 1. 驱动初始化
 
----
+```python
+from hall_sensor_oh34n import HallSensorOH34N
 
-### 软件依赖
-- **固件版本**：MicroPython v1.23+  
-- **内置库**：
-  - `machine.Pin`：用于 GPIO 引脚控制与中断配置
-  - `micropython`：用于安全调度中断回调
-  - `time`：用于上电延时与测试循环延时
-- **开发工具**：Thonny、PyCharm（带 MicroPython 插件）
+# 初始化霍尔传感器：DIN接GPIO引脚6，绑定回调函数（可选）
+def hall_callback():
+    print("Magnetic field detected!")
 
----
+sensor = HallSensorOH34N(pin=6, callback=hall_callback)
+```
 
-### 安装步骤
-1. **烧录固件**：将 MicroPython v1.23+ 固件烧录到树莓派 Pico
-2. **上传文件**：将 `hall_sensor_oh34n.py` 和 `main.py` 上传到 Pico 的文件系统
-3. **配置引脚**：根据硬件接线修改 `main.py` 中 `HallSensorOH34N` 初始化的 `pin` 编号（默认使用 GP22）
-4. **运行测试**：在开发工具中执行 `main.py`，用永磁体靠近/远离传感器，观察磁场状态打印与回调触发信息
+### 2. 核心操作流程
+
+| 步骤 | 操作     | 说明                                                    |
+| ---- | -------- | ------------------------------------------------------- |
+| 1    | 启用中断 | 调用 `sensor.enable()` 启用磁场变化中断检测               |
+| 2    | 回调处理 | 磁场变化时自动触发回调函数，内置 200ms 消抖避免重复触发 |
+| 3    | 轮询读取 | 调用 `sensor.read()` 实时获取磁场检测状态（True/False）   |
+| 4    | 禁用中断 | 调用 `sensor.disable()` 关闭中断检测，释放硬件资源        |
 
 ---
 
 ## 示例程序
+
+### 完整测试流程（来自 `main.py`）
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/8/25 上午9:48
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 霍尔传感器驱动测试文件(数字）
-
-# ======================================== 导入相关模块 ==========================================
-
 import time
 from hall_sensor_oh34n import HallSensorOH34N
 
-# ======================================== 全局变量 =============================================
-
-# 消抖标志位
+# 消抖标志位和时间戳
 flag = False
-# 上一次触发时间
 last_time = 0
-# 防抖间隔 200ms
 DEBOUNCE_MS = 200
 
-# ======================================== 功能函数 =============================================
-
 def hall_callback() -> None:
-    """
-        霍尔传感器的中断回调函数。
-        当检测到磁场变化时触发，并打印提示信息。
-
-    Notes:
-        此回调函数由 IRQ 中断触发，并通过 micropython.schedule 调度。
-        避免在回调中加入耗时或阻塞操作。
-
-    ==========================================
-
-        Interrupt callback for Hall sensor.
-        Triggered when magnetic field change is detected, prints notification.
-
-    Notes:
-        This callback is triggered by IRQ and scheduled via micropython.schedule.
-        Avoid long-running or blocking operations in the callback.
-    """
     global flag, last_time
     now = time.ticks_ms()
     if time.ticks_diff(now, last_time) > DEBOUNCE_MS:
         flag = True
         last_time = now
 
-# ======================================== 自定义类 ==============================================
-
-# ======================================== 初始化配置 ============================================
-
 # 上电延时
 time.sleep(3)
 print("FreakStudio: Hall Sensor OH34N Test Start ")
 
-# 初始化霍尔传感器（GP22 引脚）
+# 初始化霍尔传感器（GP6引脚）
 sensor = HallSensorOH34N(pin=6, callback=hall_callback)
 
 # 启用中断检测
 sensor.enable()
 print("Interrupt detection enabled.")
-
-# ======================================== 主程序 ===============================================
 
 try:
     while True:
@@ -207,57 +136,52 @@ except KeyboardInterrupt:
     print("Test stopped by user.")
     sensor.disable()
     print("Interrupt detection disabled.")
-
-
 ```
+
 ---
+
 ## 注意事项
 
-### 传感器特性限制
-- **检测方向**：仅对特定极性的磁场敏感（如 N 极靠近触发，S 极无响应），需通过实际测试确认有效检测方向
-- **检测距离**：有效检测距离通常为 0~5mm（随磁场强度变化），超过距离可能无法检测到磁场
-- **响应速度**：最大响应频率约 10kHz，适用于中低速磁场变化检测（如电机低速转速计量），高速场景需确认传感器规格
+1. **信号特性**：OH34N 芯片仅在磁场发生变化（如 N 极靠近/远离）时触发 DIN 引脚的下降沿跳变，稳定状态下保持低电平，无持续输出信号，建议将 MCU 对应 GPIO 配置为**下降沿中断模式**，精准捕获磁场变化事件
+2. **消抖必要性**：磁场变化时可能产生短暂抖动，需通过防抖逻辑（如示例中的 200ms 间隔）过滤重复触发，避免误报
+3. **中断安全**：回调函数通过 `micropython.schedule` 调度，不可在回调中执行耗时或阻塞操作，确保中断响应效率
+4. **磁场方向**：N 极靠近或远离传感器均可触发变化，实际使用中需根据检测场景调整磁场方向与模块的相对位置
+5. **引脚配置**：模块 DIN 引脚必须连接至 MCU 支持中断的 GPIO 引脚，不可直接连接普通输入引脚，否则无法触发中断回调
 
 ---
-
-### 硬件接线与配置注意事项
-- **电压匹配**：严格按照传感器规格选择供电电压（3.3V/5V），接反 VCC/GND 会直接烧毁模块；建议使用开发板原生 3.3V 引脚供电，避免外部电源波动导致误触发
-- **引脚选择**：DO 引脚可连接任意普通 GPIO 引脚，无需 ADC 功能；若需提高抗干扰能力，可选择带硬件上拉/下拉电阻的引脚（如 Pico 的 GPIO 支持软件配置拉电阻）
-- **共地要求**：传感器 GND 必须与开发板 GND 可靠连接，否则会出现电平漂移，导致磁场状态检测异常
-- **抗干扰布线**：DO 引脚接线尽量短（建议不超过 20cm），远离电机、继电器等强电磁干扰源；必要时可在接线间增加屏蔽层，减少信号干扰
-
----
-
-### 软件使用建议
-- **中断触发类型调整**：默认中断触发类型为 “上升沿 + 下降沿”，若仅需检测 “磁场出现”（忽略 “磁场消失”），可在 enable() 方法中修改 trigger 参数为 Pin.IRQ_RISING；仅检测 “磁场消失” 则改为 Pin.IRQ_FALLING
-- **回调函数设计**：回调函数需简短（避免循环、延时），复杂逻辑（如控制电机、发送数据）建议在回调中设置标志，主线程处理
-- **拉电阻配置**：若传感器在无磁场时状态不稳定（频繁跳变），可通过 `sensor.digital.init(Pin.IN, Pin.PULL_UP)` 或 `PULL_DOWN` 配置拉电阻，增强抗干扰能力
-- **低功耗优化**：电池供电设备中，可在不需要检测时调用 `disable()` 关闭中断，并减少 `read()` 轮询频率（如 10 秒一次），降低功耗
-
----
-
-### 环境影响
-- **温度限制**：传感器最佳工作温度为 -20℃~85℃，温度超过 85℃ 时灵敏度会下降，低于 -20℃ 可能出现数据冻结，需避免极端温度环境
-- **振动影响**：传感器内部为精密电子元件，剧烈振动可能导致引脚接触不良或芯片损坏，安装时需固定牢固（如使用螺丝或双面胶）
-- **磁场干扰**：避免在强磁场环境（如大型电磁铁附近）使用，否则会导致传感器始终处于 “有磁场” 状态，无法正常检测目标磁场变化
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine`、`micropython` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+Copyright (c) 2025 FreakStudio
 
-**版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

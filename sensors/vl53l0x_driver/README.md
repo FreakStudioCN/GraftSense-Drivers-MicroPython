@@ -1,6 +1,9 @@
-# VL53L0X激光测距模块驱动与测试程序 - MicroPython版本
+# GraftSense VL53L0X 激光测距模块 （MicroPython）
+
+# GraftSense VL53L0X 激光测距模块驱动 （MicroPython 驱动）
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -15,238 +18,157 @@
 ---
 
 ## 简介
-VL53L0X是一款基于飞行时间（ToF）技术的激光测距传感器，通过测量红外光从发射到接收的时间差实现非接触式距离测量，检测范围为30mm至2m，精度可达±3%，适用于机器人避障、物体检测、液位监测、智能安防等场景。
 
-本项目提供基于MicroPython的VL53L0X传感器驱动代码（`vl53l0x.py`）及测试程序（`main.py`），通过I2C接口实现传感器控制与数据读取，适配树莓派Pico等多种MicroPython开发板，便于开发者快速集成高精度测距功能。
-
-> **注意**：传感器在强光环境下可能出现测量偏差，建议在光线可控环境中使用；最大测距2m为理想条件下的值，实际受被测物体反射率影响可能缩短。
+本项目为 **GraftSense VL53L0X-based Laser Ranging Module V1.1** 提供了完整的 MicroPython 驱动支持，基于飞行时间（ToF）原理实现高精度距离检测。驱动支持单测、连续测距、定时测距三种工作模式，可稳定传输 0-200cm 范围内的精准测距数据（绝对精度 ±3% 以内），不受目标颜色、材质影响，刷新频率最高可达 10Hz，适用于无人机避障、智能仓储、机器人导航与距离检测等场景，为非接触式精准测距类应用提供可靠的数据交互能力。
 
 ---
 
 ## 主要功能
-- **基础测距**：单次测量与连续测量模式切换
-- **精度配置**：支持不同测量精度模式（标准/高精度/快速）
-- **I2C通信**：通过标准I2C接口实现数据交互，支持地址修改
-- **硬件控制**：内置传感器初始化、校准与低功耗管理
-- **数据校验**：测量数据有效性判断与异常值过滤
-- **跨平台兼容**：仅依赖MicroPython标准库，支持树莓派Pico、ESP32等开发板
+
+- ✅ 支持 I2C 数字通信，默认地址为 0x29（可按需配置），兼容 3.3V 电平
+- ✅ 提供三种测距模式：单测模式（单次触发）、连续测距模式（自动循环）、定时连续测距模式（自定义间隔）
+- ✅ 支持测量时间预算配置、信号速率限制、VCSEL 脉冲周期调节等参数优化
+- ✅ 内置传感器初始化校准（SPAD 配置、VHV 校准），确保测量精度
+- ✅ 提供超时检测机制，避免 I2C 通信或测量过程中阻塞
+- ✅ 遵循 Grove 接口标准，兼容主流开发板与传感器生态
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- 树莓派Pico/Pico W或其他MicroPython兼容开发板
-- VL53L0X激光测距模块（带电压转换电路版本）
-- 杜邦线（至少4根）
-- USB数据线（用于开发板供电与调试）
-- （可选）面包板（便于临时接线测试）
 
-### 模块引脚说明
-| VL53L0X引脚 | 功能描述 | 电气特性 |
-|-------------|----------|----------|
-| VCC         | 电源正极 | 3.3V（不可接5V，无电压转换电路时会损坏芯片） |
-| GND         | 电源负极 | 接地 |
-| SDA         | I2C数据线 | 双向数据传输，需上拉电阻（部分模块已内置） |
-| SCL         | I2C时钟线 | 单向时钟输入，需上拉电阻（部分模块已内置） |
-| XSHUT       | 传感器使能引脚 | 低电平禁用传感器，高电平/悬空启用（可选控制） |
+1. **核心硬件**：GraftSense VL53L0X-based Laser Ranging Module V1.1 激光测距模块（基于 VL53L0CX 芯片，内置 DC-DC 5V 转 3.3V 电路）
+2. **主控设备**：支持 MicroPython v1.23.0 及以上版本的开发板（如树莓派 Pico、ESP32 等）
+3. **接线配件**：Grove 4Pin 线（用于连接模块的 SDA、SCL、VCC、GND 引脚与开发板）
+4. **电源**：3.3V~5V 稳定电源（模块通过 DC-DC 电路转换为 3.3V 为传感器供电）
 
 ---
 
 ## 文件说明
-### 1. vl53l0x.py
-核心驱动文件，包含`VL53L0X`类，封装传感器所有操作接口：
-
-| 类/方法 | 类型 | 功能描述 |
-|---------|------|----------|
-| `VL53L0X` | 核心类 | 实现VL53L0X传感器的初始化、配置与测距功能 |
-| `__init__(i2c, address=0x29, xshut=None)` | 构造方法 | 初始化传感器实例：<br>- `i2c`：已配置的I2C总线实例<br>- `address`：传感器I2C地址（默认0x29）<br>- `xshut`：传感器使能引脚（可选，用于地址修改或硬件复位） |
-| `init()` | 实例方法 | 初始化传感器硬件，加载固件配置，完成启动序列；返回初始化是否成功 |
-| `set_address(new_address)` | 实例方法 | 修改传感器I2C地址（范围0x08-0x77），需配合XSHUT引脚使用；修改后需重新初始化 |
-| `measure_distance()` | 实例方法 | 执行单次距离测量，返回测量值（单位：mm）；超时或测量失败返回-1 |
-| `set_measurement_timing_budget(budget_us)` | 实例方法 | 设置测量时间预算（单位：微秒），值越大测量精度越高但速度越慢；范围20000-200000 |
-| `get_measurement_timing_budget()` | 实例方法 | 获取当前测量时间预算（单位：微秒），返回预算值 |
-| `set_mode(mode)` | 实例方法 | 设置测量模式：<br>- `0`：标准模式（平衡精度与速度）<br>- `1`：高精度模式（长测量时间，高分辨率）<br>- `2`：快速模式（短测量时间，低分辨率） |
-| `disable()` | 实例方法 | 通过XSHUT引脚禁用传感器（进入低功耗状态），需重新调用`init()`唤醒 |
-
-### 2. main.py
-测试主程序，无自定义类，核心功能通过函数实现：
-- 初始化I2C总线（默认引脚SDA=GP8，SCL=GP9）
-- 创建`VL53L0X`传感器实例并初始化
-- 配置测量模式（默认标准模式）
-- 循环执行距离测量并打印结果（单位：mm）
-- 处理测量超时与异常情况
-- 支持键盘中断（Ctrl+C）停止程序
 
 ---
 
 ## 软件设计核心思想
-### 分层设计
-- 底层：`VL53L0X`类封装I2C寄存器操作，实现传感器硬件控制
-- 中层：提供高层API（`measure_distance`、`set_mode`等），隐藏硬件细节
-- 高层：`main.py`实现应用场景，演示传感器在实际项目中的使用方式
 
-### 通信协议优化
-- 基于传感器数据手册实现寄存器地址映射与命令序列
-- 内置通信超时机制，避免I2C总线阻塞
-- 数据校验：对读取的原始数据进行有效性判断，过滤异常值
-
-### 灵活性设计
-- 支持I2C地址动态修改，可在同一总线连接多个传感器
-- 测量参数可配置（时间预算、模式），适配不同精度/速度需求
-- 可选XSHUT引脚控制，支持传感器电源管理与多设备协同
-
-### 跨平台兼容
-- 仅依赖MicroPython标准`machine.I2C`与`machine.Pin`接口
-- 硬件引脚通过参数注入，与具体开发板解耦
-- 不依赖任何第三方库，可直接在标准MicroPython环境运行
+1. **底层寄存器封装**：通过 I2C 寄存器读写操作封装传感器底层通信，隐藏硬件细节，提供简洁的上层 API
+2. **多模式测距支持**：支持单测、连续、定时三种测距模式，适配不同场景的实时性与功耗需求
+3. **校准与精度保障**：内置 SPAD 配置、VHV 校准等初始化流程，确保测量精度与稳定性
+4. **可配置参数优化**：支持测量时间预算、信号速率限制、VCSEL 周期等参数调节，平衡精度与响应速度
+5. **超时与异常处理**：关键操作（如校准、测距）均设置超时机制，避免硬件异常导致程序阻塞
+6. **可移植性设计**：依赖标准 MicroPython I2C 接口，便于移植到不同硬件平台
 
 ---
 
 ## 使用说明
-### 硬件接线（树莓派Pico示例）
-| VL53L0X引脚 | 树莓派Pico引脚    | 备注 |
-|-------------|--------------|------|
-| VCC         | 3.3V（物理引脚36） | 必须3.3V供电 |
-| GND         | GND（物理引脚38）  | 共地连接 |
-| SDA         | GP4          | I2C数据引脚，可根据需要修改 |
-| SCL         | GP5          | I2C时钟引脚，可根据需要修改 |
-| XSHUT       | 未连接          | 不使用地址修改功能时可悬空 |
 
-> **注意**：
-> - 若模块无电压转换电路，绝对禁止接5V电源，会直接损坏VL53L0X芯片
-> - 若I2C通信不稳定，可在SDA/SCL引脚与3.3V之间接10kΩ上拉电阻
-> - 接线前确保开发板已断电，避免热插拔损坏元件
+### 环境准备
 
-### 软件依赖
-- **固件版本**：MicroPython v1.23.0及以上（需支持`machine.I2C`的`readfrom_mem`和`writeto_mem`方法）
-- **内置库**：
-  - `machine`：用于创建I2C实例和控制GPIO引脚
-  - `time`：用于测量超时和延时操作
-- **开发工具**：Thonny、PyCharm（带MicroPython插件）或VS Code（带PyMakr插件）
+- 在开发板上烧录 **MicroPython v1.23.0+** 固件
+- 将 `vl53l0x.py` 和 `main.py` 上传至开发板文件系统
 
-### 安装步骤
-1. **烧录固件**：将MicroPython固件（如`rp2-pico-20230426-v1.20.0.uf2`）烧录到树莓派Pico（按住BOOTSEL键插入电脑，复制固件到U盘）。
-2. **上传文件**：通过开发工具将`vl53l0x.py`和`main.py`上传到Pico的根目录。
-3. **修改配置**（可选）：
-   - 若需更改I2C引脚，修改`main.py`中`i2c = I2C(0, sda=Pin(8), scl=Pin(9), freq=400000)`的`sda`和`scl`参数。
-   - 若需使用高精度模式，在`main.py`中添加`sensor.set_mode(1)`。
-4. **运行测试**：点击开发工具的"运行"按钮，查看串口输出的距离测量结果。
+### 硬件连接
+
+- 使用 Grove 线将模块的 SDA、SCL 引脚连接至开发板指定 I2C 引脚（如树莓派 Pico 的 GP4=SDA、GP5=SCL）
+- 连接 VCC（3.3V~5V）和 GND 引脚，确保供电稳定
+- 模块默认 I2C 地址为 0x29，避免与总线上其他设备地址冲突
+
+### 代码配置
+
+- 在 `main.py` 中根据硬件连接修改 I2C 初始化参数（如 `scl`、`sda` 引脚）
+- 如需修改测距模式，可调整 `start()` 方法的 `period` 参数（0 为单测，非 0 为定时测距）
+
+### 运行测试
+
+- 重启开发板，`main.py` 将自动执行 I2C 设备扫描、传感器初始化，并进入连续测距模式，实时打印距离数据
 
 ---
 
 ## 示例程序
-以下为项目示例程序的文件结构，具体实现请参考代码文件：
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/5 上午10:39
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 基于vl53l0x的激光测距模块驱动测试文件
-
-# ======================================== 导入相关模块 =========================================
-
+# 导入驱动模块
 import time
 import machine
 from vl53l0x import VL53L0X
 
-# ======================================== 全局变量 ============================================
-
-vl530_addr = None
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ===========================================
-
-time.sleep(3)
-print("FreakStudio: Testing VL53L0X Time-of-Flight sensor")
-
-# 初始化 I2C (Raspberry Pi Pico 使用 I2C0，默认引脚 GP4=SDA, GP5=SCL)
+# 初始化I2C（树莓派Pico示例）
 i2c = machine.I2C(0, scl=5, sda=4, freq=100000)
-# 开始扫描I2C总线上的设备，返回从机地址的列表
-devices_list:list[int] = i2c.scan()
-print('START I2C SCANNER')
-# 若devices list为空，则没有设备连接到I2C总线上
-if len(devices_list) == 0:
-    # 若非空，则打印从机设备地址
-    print("No i2c device !")
+
+# 扫描I2C设备并获取传感器地址
+devices = i2c.scan()
+sensor_addr = next((d for d in devices if d == 0x29), None)
+
+if sensor_addr:
+    # 初始化VL53L0X传感器
+    tof = VL53L0X(i2c, sensor_addr)
+    print("传感器初始化成功")
+    
+    try:
+        # 启动连续测距模式
+        tof.start()
+        while True:
+            distance = tof.read()
+            if 0 < distance < 2000:
+                print(f"当前距离：{distance} mm")
+            else:
+                print("超出测量范围或读取错误")
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        print("程序终止")
+    finally:
+        tof.stop()
+        print("测距停止")
 else:
-    print('i2c devices found:', len(devices_list))
-for device in devices_list:
-    if 0x20 <= device <= 0x50:
-        print("I2c hexadecimal address:", hex(device))
-        vl530_addr = device
-
-# 初始化 VL53L0X 传感器
-tof = VL53L0X(i2c, vl530_addr)
-print("VL53L0X initialized successfully")
-
-# ======================================== 主程序 ==============================================
-try:
-    # 设置为连续测量模式，周期 50ms
-    tof.start()
-    while True:
-        # 读取距离，单位 mm
-        distance = tof.read()
-        if distance > 0 and distance < 2000:
-            print("Distance: %d mm" % distance)
-        else:
-            print("Out of range or read error")
-        time.sleep(0.8)
-
-except KeyboardInterrupt:
-    print("\nProgram terminated by user")
-finally:
-    # 停止测量
-    tof.stop()
-    print("Testing completed")
-
-
+    print("未检测到VL53L0X传感器")
 ```
+
 ---
 
 ## 注意事项
-### 1. 通信问题
-- **I2C地址冲突**：默认地址为0x29，若总线上有其他设备使用该地址，需通过`set_address`方法修改（修改前需连接XSHUT引脚）。
-- **通信超时**：检查接线是否牢固、I2C频率是否过高（建议不超过400kHz），可尝试降低`freq`参数值。
-- **初始化失败**：确保传感器供电稳定，重新上电后重试；若频繁失败，可能是模块硬件故障。
 
-### 2. 测量精度
-- **环境光干扰**：避免在阳光直射或强红外光源环境下使用，必要时增加遮光罩。
-- **被测物体影响**：黑色或高吸收性表面可能导致测量距离偏短；镜面反射表面可能导致测量不稳定。
-- **距离限制**：超过2m的距离可能无法测量或误差极大，需在有效范围内使用。
+1. **地址与电平**：模块默认 I2C 地址为 0x29，仅支持 3.3V 通信，避免直接接入 5V 电平导致损坏
+2. **测量范围**：有效测量范围为 0-200cm，超出范围可能返回无效值，强光环境下精度会受影响
+3. **校准重要性**：传感器初始化时会自动执行校准，校准后精度更高，请勿随意跳过校准流程
+4. **模式选择**：
 
-### 3. 电源与硬件
-- **电压要求**：严格使用3.3V供电，即使模块带电压转换电路，也不建议长期使用5V（可能缩短寿命）。
-- **电流需求**：传感器工作时峰值电流约20mA，确保开发板3.3V输出能提供足够电流。
-- **布线长度**：I2C布线过长（超过1米）可能导致信号衰减，需缩短布线或增加上拉电阻。
-
-### 4. 软件使用
-- **模式选择**：快速模式（20ms）适合移动目标检测，高精度模式（200ms）适合静态物体测量。
-- **连续测量**：频繁测量会导致传感器发热，可能影响精度，建议添加至少100ms间隔。
-- **异常处理**：程序中需处理`measure_distance`返回-1的情况（超时或测量失败），避免错误数据导致逻辑异常。
+   - 单测模式适合 “触发一次” 的点测需求，无需额外停止操作
+   - 连续测距模式适合实时动态跟踪，需主动调用 `stop()` 停止
+   - 定时连续模式适合周期性采样，需提前通过 API 设置间隔时间
+5. **I2C 速率**：建议 I2C 频率设置为 100kHz，过高速率可能导致通信不稳定
 
 ---
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：https://github.com/FreakStudioCN  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **说明** — 代码含参考部分,出现非技术问题和署名作者无关。  
-**版权归 FreakStudio 所有。**
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

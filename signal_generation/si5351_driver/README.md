@@ -1,5 +1,9 @@
-# silicon5351时钟信号发生模块驱动 - MicroPython版本
+# GraftSense SI5351 时钟信号发生模块 (MicroPython)
+
+# GraftSense SI5351 时钟信号发生模块 (MicroPython)
+
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -10,226 +14,201 @@
 - [注意事项](#注意事项)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
+
 ---
+
 ## 简介
 
-silicon5351是一款I²C接口的时钟信号发生芯片，通过写入寄存器可以精确设置时钟信号频率输出。
+本项目为 **GraftSense SI5351-based Clock Signal Generator Module V1.0** 提供了完整的 MicroPython 驱动支持，基于 SI5351 芯片实现高精度、可编程多通道时钟信号生成。模块通过 I2C 接口配置 PLL 倍频与 Multisynth 分频，支持 4kHz~200MHz 频率输出，提供 3 路 SMA 接口输出时钟信号，适用于电子 DIY 实验、数字电路时序演示、创客项目等场景，具有频率稳定、可编程、多通道输出、高精度的优势，遵循 Grove 接口标准。
 
 ---
 
 ## 主要功能
 
-* 多通道独立时钟输出：Si5351A 可生成多达 3 路独立的时钟信号（CLK0/CLK1/CLK2），每路输出都可以独立配置为不同的频率，满足不同电路模块对时钟信号的多样化需求。
-* 宽频率范围输出：输出频率范围广泛，通常为 8kHz 至 160MHz，能够为各种对时钟频率要求不同的设备提供时钟信号。
-* 兼容MicroPython主流开发板，接口简洁易用
+- ✅ **I2C 通信**：支持标准 I2C 接口，默认地址 0x60，兼容 3.3V/5V 电平
+- ✅ **PLL 配置**：支持两路 PLL（PLLA/PLLB）倍频，整数倍频范围 15~90，支持分数倍频（分子 0~1048574，分母 1~1048575）
+- ✅ **Multisynth 分频**：支持 3 路输出通道的 Multisynth 分频，整数分频因子 4~2047，支持分数分频与附加 2^rdiv 分频（rdiv 0~7）
+- ✅ **输出控制**：支持通道使能 / 禁用，可设置输出驱动强度（2/4/6/8 mA）、相位偏移（0~255 ticks）、正交输出与反相输出
+- ✅ **禁用状态配置**：可设置输出禁用时的状态（低电平 / 高电平 / 高阻 / 永不禁用）
+- ✅ **OEB 引脚控制**：支持屏蔽 OEB 引脚对输出通道的控制，提升灵活性
+- ✅ **频率设置模式**：提供固定 PLL 调整分频（`set_freq_fixedpll`）和固定分频调整 PLL（`set_freq_fixedms`）两种频率配置方式
+- ✅ **参数校验**：内置严格的类型与范围校验，避免非法配置导致芯片工作异常
 
 ---
 
 ## 硬件要求
 
-### 推荐测试硬件
+1. **核心硬件**：GraftSense SI5351-based Clock Signal Generator Module V1.0（基于 SI5351 芯片，内置 DC-DC 5V 转 3.3V 电路，3 路 SMA 输出接口）
+2. **主控设备**：支持 MicroPython v1.23.0 及以上版本的开发板（如树莓派 Pico、ESP32 等）
+3. **接线配件**：
 
-* MicroPython开发板（如树莓派Pico）
-* silicon5351模块
-* 杜邦线若干
-* （可选）面包板
+   - Grove 4Pin 线或杜邦线：连接模块的 SDA、SCL、GND、VCC 引脚
+   - 同轴电缆：SMA 转 BNC 或 SMA 转 SMA 线缆，用于输出时钟信号
+4. **电源**：3.3V~5V 稳定电源（模块内置电平转换电路，兼容两种供电方式）
 
-### 模块引脚说明
-
-| ilicon5351引脚 | 功能描述    | 连接说明               |
-| -------- | ------- | ------------------ |
-| VDD      | 电源输入    | 接开发板3.3V           |
-| GND      | 接地      | 接开发板GND            |
-| SDA      | I²C数据   | 接开发板SDA（如Pico的GP0） |
-| SCL      | I²C时钟   | 接开发板SCL（如Pico的GP1） |
 ---
 
 ## 文件说明
-
-### silicon5351.py
-
-该文件实现 **silicon5351时钟信号发送芯片** 的核心驱动功能，仅包含 `SI5351_I2C` 类，用于通过 I²C 总线读取和设置芯片寄存器，实现时钟信号的配置与控制。
-
-类的主要方法包括：
-
-* `__init__(i2c: I2C, crystal`: float, load: int = SI5351_CRYSTAL_LOAD_10PF, address: int = SI5351_I2C_ADDRESS_DEFAULT)：初始化 Si5351 驱动对象，接收 I²C 实例、晶振频率、晶振负载电容（默认 10PF）和设备地址（默认 0x60），完成硬件绑定与初始化（等待芯片自检、禁用输出、配置晶振负载）。
-* `_read_bulk(register: int, nbytes: int) -> bytearray`：从指定寄存器连续读取 连续 n 字节数据，返回字节数组。
-* `_write_bulk(register: int, values: list[int]) -> None`：向指定寄存器连续写入字节列表数据。
-* `_read(register: int) -> int`：读取单个寄存器的 8 位值。
-* `_write(register: int, value: int) -> None`：向单个个寄存器写入 8 位值。
-* `write_config(reg: int, whole: int, num: int, denom: int, rdiv: int) -> None`：向 PLL 或 Multisynth 寄存器写入分频配置参数（整数部分、分数分子 / 分母、附加分频因子）。
-* `set_phase(output: int, div: int) -> None`：设置指定输出通道（0~2）的相位偏移（0~255 分频周期 tick）。
-* `reset_pll(pll: int) -> None`：复位指定 PLL（0=PLLA，1=PLLB），使配置生效并同步时钟。
-* `init_multisynth(output: int, integer_mode: bool) -> None`：初始化指定输出通道的 Multisynth 控制寄存器，配置分频模式、相位 / 极性和绑定的 PLL。
-* `approximate_fraction(n: int, d: int, max_denom: int) -> tuple[int, int]`：将分数 n/d 近似为分母不超过 max_denom 的分数，返回（分子，分母）元组。
-* `init_clock(output: int, pll: int, quadrature: bool = False, invert: bool = False, drive_strength`: int = SI5351_CLK_DRIVE_STRENGTH_8MA) -> None：初始化输出通道（0~2）基础参数，包括绑定的 PLL、正交 / 反相输出设置和驱动强度（2/4/6/8MA）。
-* `enable_output(output: int) -> None`：使能指定输出通道（0~2）。
-* `disable_output(output: int) -> None`：禁用指定输出通道（0~2）。
-* `setup_pll(pll: int, mul: int, num: int = 0, denom: int = 1) -> None`：配置 PLL（0=PLLA，1=PLLB）倍频参数，整数倍频（15~90）+ 分数倍频（num/denom），生成 VCO 信号。
-* `setup_multisynth(output: int, div: int, num: int = 0, denom`: int = 1, rdiv: int = 0) -> None：配置输出通道的 Multisynth 分频器，整数分频（4~2047）+ 分数分频（num/denom）+ 附加二分频（2^rdiv）。
-* `set_freq_fixedpll(output: int, freq: float) -> None`：在固定 PLL 配置下，自动计算分频参数并设置输出通道频率（需先初始化通道和 PLL）。
-* `set_freq_fixedms(output: int, freq: float) -> None`：在固定 Multisynth 配置下，自动计算 PLL 倍频参数并设置输出通道频率（需先初始化通道和分频器）。
-* `disabled_states(output: int, state: int) -> None`：设置输出通道（0~7）禁用时的状态（0 = 低电平，1 = 高电平，2 = 高阻，3 = 永不禁用）。
-* `disable_oeb(mask: int) -> None`：通过 8 位掩码禁用指定通道（0~7）的 OEB 引脚控制功能（1 = 禁用）。
-* `i2c（属性）`：返回绑定的 I²C 实例，支持直接操作硬件。
-* `crystal（属性）`：返回晶振频率值（Hz），用于校准或日志输出。
-* `address（属性）`：返回设备 I2C 地址，用于通信验证。
-
----
-
-### main.py
-
-该文件为 silicon5351 的功能测试程序
-
-`main` 函数的核心功能是：初始化 I²C 总线并创建 silicon5351 驱动实例，设置通道0输出 2Mhz的时钟信号。
 
 ---
 
 ## 软件设计核心思想
 
-* **模块化**：拆分数据读取、寄存器写入、通道选择、信号输出与关闭为独立方法，聚合调用易维护
-* **硬件解耦**：I²C 实例由应用层传入，驱动不负责硬件初始化，兼容不同开发板
+1. **分层架构**：底层封装 I2C 读写操作（`_read`/`_write`/`_read_bulk`/`_write_bulk`），上层提供 PLL/Multisynth 配置、输出控制等高层 API，分离硬件操作与业务逻辑
+2. **参数校验与容错**：对所有配置参数进行严格的类型检查（如 int/bool 校验）与范围校验（如 PLL 倍频 15~90、分频因子 4~2047），避免非法参数导致芯片异常
+3. **状态缓存机制**：缓存 PLL VCO 频率、Multisynth 分频因子、输出通道配置（PLL 选择、驱动强度、相位等），避免重复读取寄存器，提升效率
+4. **分数逼近算法**：内置基于连分数的分数逼近算法（`approximate_fraction`），将目标频率转换为芯片支持的分数分频 / 倍频参数，提升频率精度
+5. **中断安全设计**：所有 I2C 操作均在主循环上下文执行，避免在中断服务程序（ISR）中调用驱动方法，确保系统稳定性
+6. **可扩展性**：支持晶振频率、负载电容、I2C 地址等参数自定义，适配不同硬件版本
 
 ---
 
 ## 使用说明
 
-### 硬件接线（树莓派Pico示例）
+### 环境准备
 
-| DS3502引脚 | Pico引脚      | 接线功能            |
-| -------- | ----------- | --------------- |
-| VDD      | 3.3V（Pin36） | 电源输入            |
-| GND      | GND（Pin38）  | 接地              |
-| SDA      | GP0（Pin1）   | I²C数据线          |
-| SCL      | GP1（Pin2）   | I²C时钟线          |
+- 在开发板上烧录 **MicroPython v1.23.0+** 固件
+- 将 `silicon5351.py` 和 `main.py` 上传至开发板文件系统
 
----
+### 硬件连接
 
-### 软件依赖
+- 使用 Grove 线或杜邦线将模块的 **SDA** 引脚连接至开发板指定 GPIO 引脚（如树莓派 Pico 的 GP4）
+- 将模块的 **SCL** 引脚连接至开发板指定 GPIO 引脚（如树莓派 Pico 的 GP5）
+- 连接 `GND` 和 `VCC` 引脚，确保 3.3V~5V 供电稳定
+- 使用同轴电缆连接模块的 SMA 输出接口（如 CLK0）至测试设备（如示波器）
 
-* 固件：MicroPython v1.23+
-* 内置库：`machine`（I²C控制）、`time`（延时）
-* 开发工具：Thonny / PyCharm
+### 代码配置
 
----
+```python
+from machine import Pin, I2C
+from silicon5351 import SI5351_I2C
 
-### 安装步骤
+# 初始化 I2C 总线（树莓派 Pico I2C0，SDA=GP4，SCL=GP5，频率 100kHz）
+i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
 
-1. 烧录 MicroPython 固件到开发板
-2. 上传 `silicon5351.py` 和 `main.py`，修改 `main.py` 中 I²C 引脚和设备地址为实际接线配置
-3. 运行 `main.py`，通过示波器观察输出波形
+# 初始化 SI5351 芯片（晶振 25MHz，负载 10pF，I2C 地址 0x60）
+si = SI5351_I2C(i2c, crystal=25e6, load=SI5351_I2C.SI5351_CRYSTAL_LOAD_10PF)
+
+# 配置 PLL0（PLLA）倍频：25MHz * 15 = 375MHz
+si.setup_pll(pll=0, mul=15)
+
+# 初始化输出通道 0，使用 PLL0，驱动强度 8mA，不启用正交/反相输出
+si.init_clock(output=0, pll=0, drive_strength=SI5351_I2C.SI5351_CLK_DRIVE_STRENGTH_8MA)
+
+# 设置输出频率：基于固定 PLL0，分频得到 2MHz 输出
+si.set_freq_fixedpll(output=0, freq=2.0e6)
+```
+
+### 运行测试
+
+- 重启开发板，`main.py` 将自动执行：
+
+  - 配置 PLL0 为 375MHz
+  - 设置通道 0 输出 2MHz 时钟并使能
+  - 保持输出 20 秒后自动禁用通道 0
+- 使用示波器观察 SMA 输出接口的时钟信号，验证频率与波形是否符合预期
 
 ---
 
 ## 示例程序
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/09/08 10:00
-# @Author  : 侯钧瀚
-# @File    : mian.py
-# @Description : silicon5351时钟示例 for MicroPython
-# @Repository  : https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
-# @License : MIT
-
-# ======================================== 导入相关模块 =========================================
-
-#导入micropython自带库
-from machine import Pin
-#导入时间模块
+from machine import Pin, I2C
 import time
-#导入silicon5351
 from silicon5351 import SI5351_I2C
 
-# ======================================== 全局变量 ============================================
+# 全局配置
+crystal = 25e6    # 晶振频率 25MHz
+mul = 15           # PLL 倍频系数（25MHz * 15 = 375MHz）
+freq = 2.0e6       # 目标输出频率 2MHz
+quadrature = True  # 正交输出标志
+invert = False     # 反相输出标志
 
-crystal = 25e6     # 晶振频率 25 MHz
-mul = 15           # PLL 倍频系数 (25MHz * 15 = 375 MHz)
-freq = 2.0e6       # 输出频率 2 MHz（最大 200 MHz）
-quadrature = True  # 正交输出标志（最低输出频率 = PLL / 128）
-invert = False     # 反相输出标志（四相模式下忽略）
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
-# 上电延时3s
+# 上电延时
 time.sleep(3)
-# 打印调试消息
 print("FreakStudio: Use silicon5351 to output clock signals.")
-i2c = machine.I2C(0, scl=Pin(5), sda=Pin(4), freq = 100000)
 
-# 初始化 SI5351 芯片
+# 初始化 I2C
+i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
+
+# 初始化 SI5351
 si = SI5351_I2C(i2c, crystal=crystal)
-# 配置 PLL0 = 375 MHz
+
+# 配置 PLL0
 si.setup_pll(pll=0, mul=mul)
-# 初始化输出通道 0 和 1，使用 PLL0
+
+# 初始化输出通道 0
 si.init_clock(output=0, pll=0)
-# 设置输出频率为 2 MHz（基于固定 PLL）
+
+# 设置输出频率
 si.set_freq_fixedpll(output=0, freq=freq)
 
-# ========================================  主程序  ===========================================
-# 打开输出 0 和 1
+# 使能输出通道 0
 si.enable_output(output=0)
 print(f'done freq={freq} mul={mul} quadrature={quadrature} invert={invert}')
+
 # 保持输出 20 秒
 time.sleep(20)
-# 关闭输出 0
+
+# 禁用输出通道 0
 si.disable_output(output=0)
-
-
 ```
+
+---
+
 ## 注意事项
 
-### 电气特性限制
+1. **I2C 地址**：模块默认 I2C 地址为 0x60，若存在地址冲突，可通过硬件修改（需参考模块原理图）
+2. **晶振配置**：驱动默认晶振频率为 25MHz，若使用其他频率晶振，需在初始化时修改 `crystal` 参数，并确保晶振负载电容（6/8/10pF）与硬件匹配
+3. **频率范围**：
 
-* **电压限制**：DS3502 VDD 电压必须严格控制在 2.7V\~5.5V 范围内，推荐 3.3V；信号输出（P0/P1）最大不可超过 VDD，否则可能损坏芯片。
-* **电流限制**：DS3502 输出电流最大推荐 1mA（典型应用负载），过大负载可能导致电位器损坏或寄存器值异常。
+   - PLL VCO 频率范围：600MHz~900MHz（由晶振与倍频系数决定，需满足 `crystal * (mul + num/denom) ∈ [600e6, 900e6]`）
+   - 输出频率范围：最小 4kHz（由 PLL 频率与最大分频决定），最大 200MHz（由芯片规格决定）
+4. **PLL 与 Multisynth 限制**：
 
----
-
-### 硬件接线与配置注意事项
-
-* **共地要求**：DS3502 GND 必须与开发板 GND 可靠连接，否则输出电压会偏移，导致控制或测量不准确。
-* **I²C 接线可靠性**：SDA、SCL 需可靠连接，避免松动或虚接，尤其在长线或面包板测试时，可使用短而粗的杜邦线；长期应用建议焊接。
-* **I²C 地址选择**：A0 引脚决定 I²C 地址，确保与代码中 addr 配置一致，否则通信失败。
-* **干扰防护**：I²C 信号线应远离电机、继电器等强电磁干扰源，必要时加拉电阻（4.7kΩ\~10kΩ）或屏蔽线。
-
----
-
-### 环境影响
-
-* **温度限制**：DS3502 工作温度范围为 -40℃\~85℃；高温环境（>85℃）可能加速芯片老化，低温环境（<-40℃）可能影响内部电阻稳定性。
-* **湿度限制**：长期高湿环境（>85% RH）可能导致 PCB 和引脚氧化，影响 I²C 通信或输出电压稳定性；建议加防潮保护。
-* **粉尘防护**：避免灰尘直接堆积在芯片和接线处，以防接触不良或短路；必要时用干燥气体吹拂清理 PCB 表面，禁止拆解芯片内部。
+   - PLL 倍频系数：整数部分 15~90，分数部分分子 0~1048574，分母 1~1048575
+   - Multisynth 分频因子：整数部分 4~2047，分数部分同 PLL，附加 rdiv 分频 0~7（即 2^0~2^7 分频）
+5. **SMA 接口要求**：输出时钟信号需使用 50Ω 同轴电缆，避免信号反射与衰减，建议使用 SMA 转 BNC 线缆连接测试设备
+6. **禁用状态设置**：通过 `disabled_states` 方法设置输出禁用时的状态，需注意高阻状态可能导致测试设备误判
+7. **电源滤波**：模块内置电源滤波电路，若使用高频率输出（>100MHz），建议额外增加电源去耦电容，提升信号质量
+8. **中断安全**：驱动所有 I2C 操作均在主循环执行，禁止在 ISR 中调用驱动方法，避免时序错乱
 
 ---
 
-### 使用注意
+## 联系方式
 
-* **负载匹配**：建议将 DS3502 输出端接高阻负载（>10kΩ）以保证线性输出与稳定性。
-* **寄存器访问**：连续高速写入 WR 寄存器可能导致 I²C 总线拥堵或芯片响应延迟，建议控制写入频率。
-* **初始化**：上电后应先读取寄存器确认电位器状态，再进行写入操作，避免异常电压输出。
+如有任何问题或需要帮助，请通过以下方式联系开发者：
 
----
-### 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：1098875044@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
-### 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+## 许可协议
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+本项目采用 **MIT License** 开源协议，具体内容如下：
 
-**版权归 FreakStudio 所有。**
+```
+MIT License
+
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

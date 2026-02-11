@@ -1,6 +1,9 @@
-# UV紫外灯矩阵模块驱动 - MicroPython版本
+# GraftSense UV 紫外灯矩阵模块 （MicroPython）
+
+# GraftSense UV 紫外灯矩阵模块 （MicroPython）
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -12,165 +15,90 @@
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
----
-
 ## 简介
-UV紫外灯矩阵模块是由多颗UV紫外灯珠组成的阵列式发光模块，通过MOS管驱动控制整体开关与亮度，适用于紫外线杀菌消毒、固化（如UV胶固化）、荧光检测、植物生长辅助等场景。该模块相比单颗UV灯具有照射范围广、功率可控性强等优势，需配合驱动电路实现安全稳定的功率输出。
 
-本项目提供基于MicroPython的驱动代码及示例程序，支持UV矩阵的开关控制、PWM亮度调节（0~1023级）、状态切换与查询，通过标准化接口封装底层硬件操作，兼顾易用性与灵活性，方便开发者快速集成到各类UV应用场景中。
-
-> **注意**：UV紫外线（尤其是UVC波段）对人体皮肤、眼睛有伤害，使用时需做好防护措施（如佩戴防护眼镜、避免直接照射）；模块工作时会产生热量，大功率场景需搭配散热结构。
+本项目为 **GraftSense UV LED Matrix Module V1.0** 提供了完整的 MicroPython 驱动支持，基于 AO3400 MOS 管实现 4 路 UV 紫外灯阵列的开关控制与 PWM 亮度调节，适用于电子 DIY 光学实验、紫外照射演示、消毒与光学应用等场景。模块遵循 Grove 接口标准，具备驱动稳定、响应快速、功率可控的优势，同时需注意散热限制，避免长时间全亮运行。
 
 ---
 
 ## 主要功能
-- **基础开关控制**：
-  - `on()`：UV矩阵全亮（PWM占空比1023，10位最大值）
-  - `off()`：UV矩阵关闭（PWM占空比0）
-  - `toggle()`：切换UV矩阵状态（亮→灭/灭→亮），根据当前状态自动调用`on()`或`off()`
-- **亮度精准调节**：
-  - `set_brightness(duty)`：通过PWM设置亮度，占空比范围0~1023（对应0%~100%功率），超出范围抛出`ValueError`
-  - 支持10位PWM分辨率，亮度调节细腻，适配不同场景需求（如低功率消毒、高功率固化）
-- **状态查询与硬件访问**：
-  - `get_state()`：返回UV矩阵当前状态（`True`=亮，`False`=灭），便于业务逻辑判断
-  - `digital`属性：返回MOS管控制引脚的`Pin`对象，支持底层硬件配置（如引脚模式修改）
-  - `pwm`属性：返回PWM对象，支持自定义PWM参数（如动态调整频率）
-- **初始化安全配置**：默认初始化后UV矩阵为关闭状态（PWM占空比0），避免上电误触发
-- **跨平台兼容**：仅依赖MicroPython标准库（`machine.Pin`、`machine.PWM`），兼容树莓派Pico等主流开发板
+
+- ✅ **开关控制**：支持全亮（`on()`）、关闭（`off()`）与状态切换（`toggle()`）
+- ✅ **PWM 亮度调节**：通过 PWM 占空比（0–512）实现亮度无级调节，分辨率适配硬件散热限制
+- ✅ **状态反馈**：实时获取当前 UV 矩阵工作状态（亮 / 灭）
+- ✅ **硬件抽象**：封装 GPIO 与 PWM 底层操作，提供简洁的高层 API
+- ✅ **参数校验**：对 PWM 占空比范围进行严格校验，避免硬件过载
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- 树莓派Pico/Pico W
-- UV紫外灯矩阵模块（如4×4、3×3阵列，额定电压12V/24V，额定电流根据灯珠数量计算）
-- NPN型MOS管（如IRF540、IRFZ44N，需匹配UV矩阵功率，确保能承受最大工作电流）
-- 限流/分压电阻（MOS管栅极串联1kΩ~10kΩ电阻，防止GPIO过流；UV矩阵若需限流需额外配置）
-- 杜邦线若干
-- 直流电源模块（根据UV矩阵额定电压/电流选择，如12V/2A电源）
-- （可选）散热片/风扇（大功率UV矩阵工作时需强制散热，防止灯珠过热损坏）
-- （可选）UV防护眼镜、手套（操作人员防护用品）
 
-### 模块引脚说明（驱动电路）
-| 硬件组件         | 引脚/连接点       | 功能描述                                  | 连接说明                                  |
-|------------------|-------------------|-------------------------------------------|-------------------------------------------|
-| UV紫外灯矩阵     | 正极              | 电源输入                                  | 连接直流电源正极                          |
-| UV紫外灯矩阵     | 负极              | 电流输出                                  | 连接MOS管漏极（D极）                      |
-| 开发板GPIO引脚   | 信号输出          | 输出PWM控制信号                           | 连接MOS管栅极（经1kΩ电阻限流）            |
-| 直流电源         | 正极/负极         | 为UV矩阵提供功率供电                      | 负极必须与开发板GND共地，确保信号同步      |
-
-> **说明**：UV紫外灯矩阵多为高压大功率设计（如12V/24V），严禁直接由开发板GPIO供电，必须通过MOS管或专用驱动芯片隔离控制，避免GPIO引脚烧毁。
+1. **核心硬件**：GraftSense UV LED Matrix Module V1.0（内置 AO3400 MOS 管、4 颗 UV LED 及限流电阻）
+2. **主控设备**：支持 MicroPython v1.23.0+ 的开发板（如 Raspberry Pi Pico、ESP32、STM32 等）
+3. **接线配置**：
+4. **散热提示**：模块默认限流电阻下全亮会快速升温，**严禁长时间全亮运行**，若需全亮场景建议更换更大阻值的限流电阻。
 
 ---
 
 ## 文件说明
-### uv_matrix.py
-实现UV紫外灯矩阵的核心驱动逻辑，核心类`UVMatrix`封装所有功能接口，支持PWM调光与开关控制。
 
-#### 类定义：`UVMatrix`
-- **`__init__(pin: int, pwm_freq: int = 1000)`**  
-  初始化UV矩阵驱动：传入MOS管控制引脚编号，配置引脚为输出模式；创建PWM对象并设置频率（默认1000Hz）；初始化PWM占空比为0（UV矩阵关闭），`_state`状态设为`False`（灭）。
-- **`on() -> None`**  
-  开启UV矩阵全亮：设置PWM占空比为1023（10位最大值），更新`_state`为`True`，无返回值。
-- **`off() -> None`**  
-  关闭UV矩阵：设置PWM占空比为0，更新`_state`为`False`，无返回值。
-- **`toggle() -> None`**  
-  切换UV矩阵状态：若当前`_state`为`True`（亮）则调用`off()`，若为`False`（灭）则调用`on()`，无返回值。
-- **`set_brightness(duty: int) -> None`**  
-  设置UV矩阵亮度：校验`duty`是否在0~1023范围，超出则抛出`ValueError`；设置PWM占空比为`duty`，不改变`_state`状态（仅调节亮度，如“亮”状态下从全亮调为半亮）。
-- **`get_state() -> bool`**  
-  查询UV矩阵当前状态：返回`_state`（`True`=亮，`False`=灭），反映UV矩阵是否处于发光状态。
-- **`digital (property) -> Pin`**  
-  属性方法：返回绑定的MOS管控制引脚对象，支持底层硬件配置（如修改引脚拉电阻）。
-- **`pwm (property) -> PWM`**  
-  属性方法：返回PWM对象，支持自定义PWM参数（如动态调整频率、停止PWM输出）。
-
-### main.py
-UV紫外灯矩阵驱动功能测试程序，演示模块初始化、全亮/关闭、亮度调节、状态切换等完整流程，通过延时观察各操作效果，便于开发者验证驱动功能。
+表格
 
 ---
 
 ## 软件设计核心思想
-### 安全优先设计
-- **上电默认关闭**：初始化后PWM占空比设为0，UV矩阵默认不发光，避免上电误触发导致的安全风险（如UV辐射泄漏）
-- **参数合法性校验**：`set_brightness()`中严格校验占空比范围，防止无效值导致硬件异常
-- **MOS管隔离控制**：驱动逻辑基于MOS管设计，与UV矩阵高压大功率电路隔离，保护开发板GPIO引脚
 
-### 易用性与灵活性平衡
-- **简化接口**：通过`on()`/`off()`/`toggle()`实现基础控制，无需关注PWM底层细节；`set_brightness()`支持直观的0~1023级亮度调节
-- **硬件暴露机制**：通过`digital`和`pwm`属性暴露底层对象，允许开发者根据需求自定义配置（如调整PWM频率适配不同MOS管响应特性）
-- **状态一致性**：`on()`/`off()`操作同步更新`_state`状态，确保`get_state()`返回结果与实际UV矩阵状态一致
-
-### PWM调光优化
-- **10位分辨率适配**：采用0~1023级占空比（10位），亮度调节细腻，满足不同场景对UV功率的精准需求（如消毒需低功率长时间，固化需高功率短时间）
-- **默认频率选择**：1000Hz默认PWM频率兼顾MOS管开关损耗与UV灯珠响应特性，避免低频闪烁或高频过热
+1. **硬件抽象封装**：将 MOS 管驱动与 PWM 调光逻辑封装为 `UVMatrix` 类，隐藏底层 Pin/PWM 操作细节
+2. **状态同步管理**：通过 `_state` 变量维护当前工作状态，确保 API 调用与硬件状态一致
+3. **安全参数约束**：限制 PWM 占空比范围为 0–512（而非 0–1023），降低硬件发热风险
+4. **PWM 分辨率转换**：将 10 位（0–1023）占空比映射到 16 位（0–65535）`duty_u16`，适配 MicroPython PWM 接口
+5. **默认安全状态**：初始化时默认关闭 UV 矩阵，避免上电误触发
 
 ---
 
 ## 使用说明
-### 硬件接线（树莓派Pico + UV矩阵示例）
-| 硬件组件         | Pico GPIO 引脚 | 接线功能                                  |
-|------------------|--------------|-------------------------------------------|
-| NPN MOS管（G极） | GP6          | 接收PWM控制信号（经1kΩ电阻限流）          |
-| NPN MOS管（S极） | GND（Pin38）   | 接地（与UV矩阵电源、开发板共地）          |
-| UV矩阵（负极）   | MOS管（D极）     | 通过MOS管控制电流通断                     |
-| UV矩阵（正极）   | 12V电源正极      | 连接12V直流电源正极（需匹配UV矩阵额定电压）|
-| 12V电源负极      | GND（Pin38）   | 与开发板、MOS管共地                      |
 
-> **注意**：
-> 1. 必须确保所有硬件共地（开发板GND、MOS管S极、电源负极），否则PWM信号会因电平漂移无法正常控制UV矩阵
-> 2. MOS管栅极串联的1kΩ电阻不可省略，用于限制GPIO输出电流，防止MOS管栅极损坏
-> 3. 接线前需确认UV矩阵额定电压，严禁使用高于额定电压的电源
+### 初始化模块
 
-### 软件依赖
-- **固件版本**：MicroPython v1.23+  
-- **内置库**：
-  - `machine.Pin`：用于GPIO引脚控制
-  - `machine.PWM`：用于PWM亮度调节
-  - `time`：用于测试流程中的延时操作
-- **开发工具**：Thonny、PyCharm（带MicroPython插件）
+```
+from uv_matrix import UVMatrix
 
----
+# 初始化 UV 矩阵：控制引脚为 26，PWM 频率 1000Hz（默认）
+uv = UVMatrix(pin=26, pwm_freq=1000)
+```
 
-### 安装步骤
-1. **烧录固件**：将MicroPython v1.23+固件烧录到树莓派Pico
-2. **硬件准备**：
-   - 佩戴UV防护用品（眼镜、手套）
-   - 按上述接线图连接UV矩阵、MOS管、限流电阻及电源（确保断电操作）
-3. **上传文件**：将`uv_matrix.py`和`main.py`上传到Pico的文件系统
-4. **配置引脚**：根据硬件接线修改`main.py`中`UVMatrix`初始化的`pin`编号（默认使用GP14）
-5. **运行测试**：在开发工具中执行`main.py`，观察UV矩阵的开关、亮度变化及状态打印
+### 核心操作
+
+```
+# 全亮（注意：避免长时间运行）
+uv.on()
+
+# 半亮调节（占空比 512，对应 50% 亮度）
+uv.set_brightness(512)
+
+# 关闭 UV 矩阵
+uv.off()
+
+# 切换状态（亮 ↔ 灭）
+uv.toggle()
+
+# 获取当前状态（True=亮，False=灭）
+print(uv.get_state())
+```
 
 ---
 
 ## 示例程序
-```python
-# MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/8/26 上午10:45
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : uv紫外灯矩阵模块驱动测试文件
 
-# ======================================== 导入相关模块 =========================================
-
-from uv_matrix import UVMatrix
+```
 import time
-
-# ======================================== 全局变量 ============================================
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ===========================================
+from uv_matrix import UVMatrix
 
 time.sleep(3)
 print("Freak_studio:UV matrix test")
-# 初始化 UVMatrix，假设控制引脚为 6，PWM 频率 1000Hz
-uv = UVMatrix(pin=6, pwm_freq=1000)
 
-# ========================================  主程序  ===========================================
+# 初始化 UVMatrix，控制引脚为 26，PWM 频率 1000Hz
+uv = UVMatrix(pin=26, pwm_freq=1000)
 
 print("status:", uv.get_state())
 
@@ -179,7 +107,7 @@ uv.on()
 print("UV is light full:", uv.get_state())
 time.sleep(2)
 
-# 半亮调节
+# 半亮调节（占空比 512）
 uv.set_brightness(512)
 print("UV PWM duty=512")
 time.sleep(2)
@@ -195,74 +123,54 @@ print("UV toggle:", uv.get_state())
 time.sleep(2)
 uv.toggle()
 print("UV toggle:", uv.get_state())
-
-
 ```
+
 ---
+
 ## 注意事项
 
-### 安全防护限制
-- **UV 辐射防护**：
-  - 操作时必须佩戴 UV 防护眼镜、手套，避免皮肤、眼睛直接接触 UV 光线（尤其是 UVC 波段，可能导致灼伤、白内障）
-  - 测试环境需封闭或远离人员活动区域，防止辐射泄漏
-  - 严禁用 UV 矩阵照射人体、动植物或易燃物品
-- **高压安全**：UV 矩阵多为 12V/24V 高压供电，接线时必须断电操作，避免触电；电源需具备过流保护功能，防止短路烧毁
-- **温度控制**：建议不要长时间全亮 如果有全亮需求就更换电阻，否则电路板会迅速升温导致意外后果
-- **散热要求**：
-  - 大功率 UV 矩阵（如总功率 > 5W）工作时需搭配散热片 + 风扇，环境温度超过 35℃时需强制散热
-  - 单次连续工作时间建议不超过 30 分钟（根据灯珠规格调整），避免过热导致灯珠光衰或烧毁
+1. **散热风险**：默认限流电阻下全亮会导致模块快速升温，**严禁长时间全亮运行**，若需全亮场景建议更换 10Ω 及以上限流电阻
+2. **PWM 占空比限制**：`set_brightness()` 仅支持 0–512 的占空比输入，超出范围会触发 `ValueError`，避免硬件过载
+3. **初始化状态**：模块上电后默认关闭，需主动调用 `on()` 或 `toggle()` 开启
+4. **PWM 频率调整**：默认 PWM 频率为 1000Hz，可根据需求调整，但需确保频率与硬件兼容性匹配
+5. **接线正确性**：DOUT 引脚必须连接至 MCU 的 GPIO/PWM 引脚，否则无法控制 UV 矩阵
 
 ---
-
-### 硬件接线与配置注意事项
-- **共地要求**：开发板、MOS 管、UV 矩阵电源必须严格共地，否则 PWM 信号会因电平漂移导致 UV 矩阵闪烁或无法控制
-- **MOS 管选型**：
-  - 需根据 UV 矩阵最大工作电流选择 MOS 管（如 UV 矩阵额定电流 2A，需选择最大漏极电流 > 3A 的 MOS 管，预留安全余量）
-  - MOS 管导通电压需与 GPIO 输出电平匹配（如 3.3V 导通型，确保 GPIO 高电平时 MOS 管能可靠导通）
-- **限流电阻配置**：
-  - MOS 管栅极必须串联 1kΩ~10kΩ 限流电阻，防止 GPIO 输出电流过大烧毁 MOS 管栅极
-  - UV 矩阵若为多灯珠串联 / 并联，需根据灯珠额定电流配置总限流电阻，避免灯珠过流
-- **布线规范**：
-  - UV 矩阵供电线路（电源→UV 矩阵→MOS 管）需使用粗导线（如 16AWG 以上），减少线路压降
-  - PWM 控制线路（GPIO→MOS 管 G 极）需短而粗，远离电源线路，避免电磁干扰导致 PWM 信号失真
-
----
-
-### 软件使用建议
-- **PWM 频率调整**：
-  - 常规场景：1000Hz~5000Hz，平衡 MOS 管开关损耗与 UV 灯珠响应速度
-  - 高频需求（如快速亮度切换）：可提高至 10000Hz，但需确认 MOS 管开关频率上限，避免过热
-- **亮度调节逻辑**：
-  - 消毒场景：建议使用低占空比（100~300）长时间照射，避免高功率导致物品老化
-  - 固化场景：使用高占空比（800~1023）短时间照射，确保固化效果
-  - 避免频繁切换亮度（间隔 < 100ms），减少 MOS 管开关损耗
-- **中断安全**：驱动方法（`on()`/`set_brightness()`）非 ISR-safe，若需在中断中控制 UV 矩阵，需通过`micropython.schedule`调度到主线程执行
-- **资源释放**：长时间不使用时，除调用`off()`关闭 UV 矩阵外，可手动停止 PWM（`uv.pwm.deinit()`），释放硬件资源；重新使用前需重新初始化 PWM（`uv.pwm.init()`）
-
----
-
-### 环境影响
-- **温度限制**：UV 灯珠最佳工作温度为 -10℃~50℃，高温环境（>50℃）会加速灯珠光衰，低温环境（<-10℃）会导致亮度下降，需避免极端温度
-- **电压波动**：电源电压波动会直接影响 UV 输出功率，工业场景建议使用稳压电源，或在软件中增加电压补偿（如通过 ADC 读取电源电压，动态调整 PWM 占空比）
-- **电磁干扰**：MOS 管开关会产生电磁干扰，需在电源端并联 100μF 电解电容 + 0.1μF 陶瓷电容，减少对 PWM 信号及开发板的干扰
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+本项目采用 **MIT License** 开源协议，具体内容如下：
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+```
+MIT License
 
-**版权归 FreakStudio 所有。**
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

@@ -1,245 +1,302 @@
-# MicroPython CC2530 Zigbee驱动库
+# GraftSense-基于 CC2530 的 zigbee 通信模块（MicroPython）
+
+# GraftSense-基于 CC2530 的 zigbee 通信模块（MicroPython）
+
+# GraftSense 基于 CC2530 的 Zigbee 通信模块
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
-- [支持的协议](#支持的协议)
 - [硬件要求](#硬件要求)
 - [文件说明](#文件说明)
 - [软件设计核心思想](#软件设计核心思想)
 - [使用说明](#使用说明)
 - [示例程序](#示例程序)
 - [注意事项](#注意事项)
+- [联系方式](#联系方式)
 - [许可协议](#许可协议)
-
----
 
 ## 简介
 
-本项目是一个针对 **CC2530 Zigbee 模块** 的 MicroPython 设备驱动库，提供了全面的数据收发与协议封装功能。该库设计简洁、模块化，支持多种 Zigbee 通信模式，可在多种 MicroPython 兼容硬件平台上运行，适用于物联网节点开发、无线传感网络、智能家居、远程数据传输等场景。
-
-RL-CC2530-A1 模块是一个真正的片上系统（SoC）解决方案，适用于 **2.4 GHz IEEE 802.15.4、ZigBee 和 RF4CE** 等无线协议，结合了高性能 RF 收发器、增强型 8051 CPU、系统内可编程闪存和 8 KB RAM 等强大功能。
-
----
+本模块是 FreakStudio GraftSense 基于 CC2530 的 Zigbee 通信模块，通过 CC2530 芯片实现 Zigbee 低功耗组网，支持设备间无线数据传输，具备 Grove 接口适配性强、低功耗、组网灵活等优势，兼容 3.3V/5V 电平。适用于物联网传感网、智能家居联动等场景，为系统提供可靠的短距离无线通信能力。
 
 ## 主要功能
 
-* 提供非阻塞式 Zigbee 数据收发功能
-* 支持多种数据封装和解封装模式
-* 跨平台兼容：
+### 硬件层面
 
-  * 通信端：Raspberry Pi Pico / 其它 MicroPython 兼容开发板
-* 与 uasyncio 兼容，可用于异步应用
-* 提供测试程序便于验证和学习
+1. **核心接口**
 
----
+   - UART 通信接口：MRX（对应 MCU 串口 RXD，接模块 TX）、MTX（对应 MCU 串口 TXD，接模块 RX），需遵循“收发对应”规则
+   - 轻触按键：SW1（复位按键，低电平复位）、SW2（中断唤醒引脚）
+   - 天线切换：默认内置天线，可焊接 IPEX 座子切换为外置天线
+   - 电源接口：支持 3.3V/5V 供电，配备电源指示灯显示供电状态
+2. **软件层面（基于 MicroPython）**
 
-## 支持的协议 / 模式
-
-* 点对点（P2P）通信
-* 多节点广播
-* 简单的包头/校验机制
-* Zigbee 网络拓扑支持（如星型、网状网络）
-
----
+   - 自定义异常处理：覆盖数据包超限、命令失败、未入网操作等异常场景
+   - 完整配置项：支持 PANID、信道、波特率、短地址等核心参数配置
+   - 多模式数据传输：支持节点 → 协调器、协调器 → 节点、节点 → 节点、透明模式传输
+   - 状态查询：可实时查询模块入网状态（未入网/终端入网/路由入网/协调器启动中/协调器已启动）
 
 ## 硬件要求
 
-### 通信端
+### 核心电路设计
 
-* **RL-CC2530-A1 Zigbee 模块**（2.4 GHz，支持 IEEE 802.15.4 / ZigBee / RF4CE）
-* 连接导线
-* 支持 MicroPython 的开发板（如 Raspberry Pi Pico、ESP32 等）
+- CC2530 核心电路：实现 Zigbee 协议栈与无线通信，支持协调器、路由器、终端设备角色
+- DC-DC 5V 转 3.3V 电路：为 CC2530 提供稳定 3.3V 供电
+- 按键电路：实现复位与唤醒功能
+- MCU 接口电路：UART 接口与主控通信，传输 AT 指令与数据
+- 电源滤波电路：滤除电源噪声，提升通信稳定性
 
-### 接线方式（树莓派 Pico 示例）
+### 模块布局
 
-| 模块类型            | 引脚功能      | 连接说明                                   |
-| --------------- | --------- | -------------------------------------- |
-| RL-CC2530-A1 模块 | VCC       | 接开发板 3.3V（模块工作电压为 3.0~3.6V，请确认规格）      |
-| RL-CC2530-A1 模块 | GND       | 接开发板 GND（共地）                           |
-| RL-CC2530-A1 模块 | TXD       | 接开发板 GPIO RX 引脚（如 Pico 的 GP5/UART1 RX） |
-| RL-CC2530-A1 模块 | RXD       | 接开发板 GPIO TX 引脚（如 Pico 的 GP4/UART1 TX） |
-| RL-CC2530-A1 模块 | RESET/PIO | 可选，用于复位或控制模块工作状态（如 Pico 的 GP2）         |
-
----
+- 正面：CC2530 芯片、UART 接口（MRX/MTX）、按键（SW1/SW2）、电源接口（GND/VCC）、电源指示灯，接口清晰标注，便于接线调试
 
 ## 文件说明
 
-### cc253x_ttl.py
+本项目核心文件为 `cc253x_ttl.py`，包含 CC253xTTL 核心驱动类，提供 Zigbee 组网控制与数据传输的全部 API；示例程序包含 4 个独立文件：
 
-该文件实现 **RL-CC2530-A1 Zigbee TTL 模块** 的核心驱动功能，仅包含 `CC253xTTL` 类，用于处理 UART 通信、模块配置与数据收发。
-
-`CC253xTTL` 类通过封装 UART 传输与透明传输协议，提供节点与协调器间点对点通信、多节点广播、透明数据发送/接收以及模块参数配置接口。类中包含以下主要属性：
-
-* `_uart`：MicroPython UART 对象，用于与 CC253x 模块通信。
-* `role`：模块角色（协调器/路由器/终端）。
-* `baud`：串口波特率。
-* `channel`：无线信道。
-* `panid`：PANID 网络标识。
-* `seek_time`：寻找网络的超时时间（秒）。
-* `query_interval_ms`：查询间隔（毫秒）。
-* `_recv_buf`：内部接收缓冲区。
-
-类的主要方法包括：
-
-* `__init__(uart, role, ...)`
-  初始化模块驱动，设置 UART、默认参数与模块角色。
-* `read_status()`
-  查询模块是否已入网。
-* `set_query_interval(ms)`
-  设置查询间隔。
-* `reset_factory()`
-  恢复出厂设置。
-* `read_panid_channel()` / `set_panid(panid)`
-  读取或设置 PANID 与信道。
-* `set_baud(baud_idx)`
-  设置串口波特率。
-* `set_seek_time(seconds)`
-  设置寻找网络时间。
-* `enter_sleep()`
-  请求模块进入休眠模式。
-* `read_mac()` / `read_short_addr()`
-  读取模块 MAC 地址或短地址。
-* `is_joined()`
-  判断模块是否已入网。
-* `send_transparent(data)`
-  透明模式发送数据。
-* `send_node_to_coord(data)` / `send_coord_to_node(short_addr, data)`
-  节点与协调器之间的数据发送。
-* `_uart_write_raw(frame)` / `_uart_read_raw()`
-  UART 底层读写接口。
-* `_process_receive_buffer()` / `_frame_expected_length(ctrl, header_bytes)`
-  接收缓冲区解析与帧长度校验。
-
-该类支持 **协调器与节点** 的点对点通信，以及透明数据传输模式，可灵活用于物联网节点与 Zigbee 网络应用开发。
-
----
-
-### main.py
-
-该文件为 **CC253xTTL 模块功能测试程序**，无自定义类，仅包含程序入口逻辑。
-
-主程序功能：
-
-* 初始化 UART 接口与 RL-CC2530-A1 模块连接的 GPIO 引脚。
-* 创建 `CC253xTTL` 驱动实例 `cor`（协调器）和 `env`（终端）。
-* 通过 GPIO 控制模块唤醒。
-* 读取并打印模块的短地址和 MAC 地址，用于验证通信是否正常。
-* 可根据需要扩展为发送/接收测试数据的循环程序。
-
-示例流程：
-
-1. 上电延时 3 秒以确保模块初始化完成。
-2. 初始化 UART 端口（如 UART0、UART1），设置 TX/RX 引脚与波特率。
-3. 使用 GPIO 控制模块唤醒信号。
-4. 创建 `CC253xTTL` 实例并绑定 UART。
-5. 调用 `read_short_addr()`、`read_mac()` 等方法读取模块信息。
-
-该程序可用于验证 CC2530 Zigbee 模块的硬件连接、串口通信与基本功能是否正常。
-
----
+- `coord_to_node.py`：协调器向节点发送数据示例
+- `node_to_coord.py`：节点向协调器发送数据示例
+- `node_to_node.py`：节点向节点发送数据示例
+- `transparent.py`：透明传输模式示例
 
 ## 软件设计核心思想
 
-* **模块化**：UART 通信与 Zigbee 协议处理解耦，核心功能封装在 `CC253xTTL` 类中，测试程序保持简洁。
-* **事件驱动**：支持透明模式与命令响应机制，便于接入异步应用或 uasyncio 环境。
-* **硬件兼容**：支持协调器、路由器与终端角色，用户可通过 `role` 参数灵活配置。
-* **可扩展性**：提供节点间通信、透明数据传输、参数配置与休眠控制接口，方便构建 Zigbee 网络应用。
+核心类为 `CC253xTTL`，基于 MicroPython 实现，设计核心如下：
 
----
+### 1. 异常处理设计
+
+通过自定义异常类精准捕获不同异常场景，避免程序无差别崩溃：
+
+| 异常类                | 触发场景                          |
+| --------------------- | --------------------------------- |
+| PacketTooLargeError   | 发送数据包超过最大负载（32 字节） |
+| CommandFailedError    | 模块返回 ERR 或命令执行失败       |
+| NotJoinedError        | 未入网状态下执行需要网络的操作    |
+| InvalidParameterError | 参数不合法或超出范围              |
+
+### 2. 配置常量设计
+
+通过类常量固化默认配置与限制，提升代码可维护性：
+
+| 类别       | 常量                                                                                                                         | 说明                                             |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 前导码     | PREFIX = "02A879C3"                                                                                                          | AT 命令前导码                                    |
+| 默认值     | DEFAULT_BAUD = 9600<br>DEFAULT_CHANNEL = 0x0B<br>DEFAULT_PANID = 0xFFFF<br>DEFAULT_SEEK_TIME = 10<br>DEFAULT_QUERY_MS = 3000 | 默认波特率、信道、PANID、网络寻找时间、查询间隔  |
+| 限制       | MAX_USER_PAYLOAD = 32<br>TX_POST_DELAY_MS = 100                                                                              | 最大用户数据长度（32 字节）、发送后延时（100ms） |
+| 特殊短地址 | SHORTADDR_COORDINATOR = 0x0000<br>SHORTADDR_NOT_JOINED = 0xFFFE                                                              | 协调器短地址、未入网短地址                       |
+
+### 3. 核心方法设计
+
+封装核心操作方法，提供简洁易用的 API：
+
+| 方法                  | 功能                               | 参数说明                                                                  | 返回值                                                                                          |
+| --------------------- | ---------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **init**              | 初始化驱动类，设置 UART 与默认参数 | uart: UART 实例；wake: 唤醒引脚（终端设备需配置）；其余为默认参数         | 无                                                                                              |
+| read_status           | 查询入网状态                       | 无                                                                        | 状态码（'02'未入网、'06'终端入网、'07'路由入网、'08'协调器启动中、'09'协调器已启动）            |
+| set_panid             | 设置 PANID                         | panid: 0~0xFFFF                                                           | bool，成功返回 True                                                                             |
+| set_channel           | 设置信道                           | channel: 0x0B~0x1A                                                        | bool，成功返回 True                                                                             |
+| set_baud              | 设置波特率索引                     | baud_idx: 0~4（对应 9600/19200/38400/57600/115200）                       | bool，成功返回 True                                                                             |
+| set_custom_short_addr | 设置自定义短地址                   | short_addr: 0~0xFFFF                                                      | bool，成功返回 True                                                                             |
+| send_node_to_coord    | 节点向协调器发送数据               | data: 字符串（≤32 字节）                                                 | 无                                                                                              |
+| send_coord_to_node    | 协调器向节点发送数据               | short_addr: 目标短地址；data: 字符串（≤32 字节）                         | 无                                                                                              |
+| send_node_to_node     | 节点向节点发送数据                 | source_addr: 源短地址；target_addr: 目标短地址；data: 字符串（≤32 字节） | 无                                                                                              |
+| send_transparent      | 透明模式发送数据                   | data: 字节流                                                              | 无                                                                                              |
+| recv_frame            | 接收并解析一帧数据                 | 无                                                                        | tuple(mode, data, addr1, addr2)，mode 包括 transparent/node_to_node/node_to_coord/coord_to_node |
 
 ## 使用说明
 
-### 安装方法
-通过`thonny`工具调试：
-
-**`连接好硬件之后：将code下文件一起上传于根目录，点击运行按钮 `**`
-
----
+1. 硬件接线：确保 MCU 的 RX 接模块 TX（MRX）、MCU 的 TX 接模块 RX（MTX），电源接 3.3V/5V 与 GND
+2. 环境准备：确保开发环境支持 MicroPython，导入 `cc253x_ttl.py` 驱动文件
+3. 基础配置：初始化 UART 实例，创建 CC253xTTL 对象，配置 PANID、信道等核心参数
+4. 入网检查：调用 `read_status` 确认模块入网状态，入网后再执行数据传输操作
+5. 数据传输：根据场景调用对应发送方法，通过 `recv_frame` 接收并解析数据
+6. 异常处理：捕获自定义异常，处理数据包超限、命令失败等异常场景
 
 ## 示例程序
-* python
+
+### 1. 协调器向节点发送数据（coord_to_node.py）
 
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/5 下午10:11
-# @Author  : ben0i0d
-# @File    : main.py
-# @Description : cc253x_ttl测试文件
-
-# ======================================== 导入相关模块 =========================================
-
 import time
-from machine import UART,Pin
+from machine import UART, Pin
 from cc253x_ttl import CC253xTTL
 
-# ======================================== 全局变量 ============================================
+# 初始化UART
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))  # 协调器UART
+uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))    # 节点UART
 
-# ======================================== 功能函数 ============================================
+# 创建实例
+cor = CC253xTTL(uart0)  # 协调器
+env = CC253xTTL(uart1)  # 节点
 
-# ======================================== 自定义类 =============================================
+# 配置相同PANID和信道
+pamid, ch = cor.read_panid_channel()
+env.set_panid(int(pamid, 16))
+env.set_channel(int(ch, 16))
+env.set_custom_short_addr(0xFFFF)  # 设置节点短地址
 
-# ======================================== 初始化配置 ===========================================
-
-# 上电延时3s
-time.sleep(3)
-print("FreakStudio:cc253x_ttl test")
-
-uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
-uart1 = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
-key = Pin(2, mode=Pin.OUT)
-
-# 唤醒
-key.value(0)
-time.sleep(0.05)
-key.value(1)
-
-cor = CC253xTTL(uart0)
-env = CC253xTTL(uart1)
-
-# ========================================  主程序  ===========================================
-
-print(cor.read_short_addr())
-print(env.read_mac())
+# 主循环：协调器向节点发送数据
+while True:
+    cor.send_coord_to_node(0xFFFF, "coord_to_node")  # 向短地址0xFFFF的节点发送
+    time.sleep(0.5)
+    
+    # 节点接收并解析
+    mode, data, addr1, addr2 = env.recv_frame()
+    print(f"Mode: {mode}, Data: {data}, Addr1: {addr1}, Addr2: {addr2}")
+    time.sleep(1)
 ```
----
+
+### 2. 节点向协调器发送数据（node_to_coord.py）
+
+```python
+import time
+from machine import UART, Pin
+from cc253x_ttl import CC253xTTL
+
+# 初始化UART
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))  # 协调器UART
+uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))    # 节点UART
+
+# 创建实例
+cor = CC253xTTL(uart0)  # 协调器
+env = CC253xTTL(uart1)  # 节点
+
+# 配置相同PANID和信道
+pamid, ch = cor.read_panid_channel()
+env.set_panid(int(pamid, 16))
+env.set_channel(int(ch, 16))
+
+# 主循环：节点向协调器发送数据
+while True:
+    env.send_node_to_coord("node_to_coord")  # 节点向协调器发送
+    time.sleep(0.5)
+    
+    # 协调器接收并解析
+    mode, data, addr1, addr2 = cor.recv_frame()
+    print(f"Mode: {mode}, Data: {data}, Addr1: {addr1}, Addr2: {addr2}")
+    time.sleep(1)
+```
+
+### 3. 节点向节点发送数据（node_to_node.py）
+
+```python
+import time
+from machine import UART, Pin
+from cc253x_ttl import CC253xTTL
+
+# 初始化UART
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))  # 节点1 UART
+uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))    # 节点2 UART
+
+# 创建实例
+env1 = CC253xTTL(uart0)  # 节点1
+env2 = CC253xTTL(uart1)  # 节点2
+
+# 配置相同PANID和信道
+pamid = 0xC535
+ch = 0x0B
+env1.set_panid(pamid)
+env1.set_channel(ch)
+env2.set_panid(pamid)
+env2.set_channel(ch)
+
+# 设置短地址
+env1.set_custom_short_addr(0xAAFF)
+env2.set_custom_short_addr(0xFFAA)
+
+# 主循环：节点2向节点1发送数据
+while True:
+    env2.send_node_to_node(source_addr=0xAAFF, target_addr=0xFFAA, data="node_to_node")
+    time.sleep(0.5)
+    
+    # 节点1接收并解析
+    mode, data, addr1, addr2 = env1.recv_frame()
+    print(f"Mode: {mode}, Data: {data}, Addr1: {addr1}, Addr2: {addr2}")
+    time.sleep(1)
+```
+
+### 4. 透明传输模式（transparent.py）
+
+```python
+import time
+from machine import UART, Pin
+from cc253x_ttl import CC253xTTL
+
+# 初始化UART
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))  # 协调器UART
+uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))    # 节点UART
+
+# 创建实例
+cor = CC253xTTL(uart0)  # 协调器
+env = CC253xTTL(uart1)  # 节点
+
+# 配置相同PANID和信道
+pamid, ch = cor.read_panid_channel()
+env.set_panid(int(pamid, 16))
+env.set_channel(int(ch, 16))
+
+# 主循环：透明传输
+while True:
+    cor.send_transparent(b"Here is transparent")  # 协调器发送透明数据
+    time.sleep(0.5)
+    
+    # 节点接收并解析
+    mode, data, addr1, addr2 = env.recv_frame()
+    print(f"Mode: {mode}, Data: {data}, Addr1: {addr1}, Addr2: {addr2}")
+    time.sleep(1)
+```
 
 ## 注意事项
 
-* 模块工作电压为 3.0~3.6V，禁止接 5V 电源，以免烧毁模块
-* 上电后建议延时 2~3 秒再进行 UART 通信或控制操作
-* UART TX 接 MCU RX，UART RX 接 MCU TX，电平为 3.3V TTL
-* 波特率必须与模块匹配，否则无法通信
-* 协调器与节点必须使用相同 PANID 和信道才能加入网络
-* 节点未入网时短地址为 0xFFFE，协调器短地址固定为 0x0000
-* 透明模式发送数据前，确保目标节点已入网
-* GPIO RESET/PIO 或 KEY 引脚用于复位或唤醒，操作时需遵守模块手册时序
-* 高频数据传输时注意 UART 缓冲区溢出，定期读取接收缓冲
-* 避免 2.4GHz 干扰源（如 Wi-Fi 或蓝牙）影响 Zigbee 通信
-* 调试时可参考模块 LED 指示或 RSSI 信号判断网络状态
-* OTA 或远程升级时，确保网络稳定，避免升级中断导致模块不可用
+1. UART 接线规范：MCU 的 RX 对应模块的 TX，MCU 的 TX 对应模块的 RX，切勿交叉连接，否则通信失败
+2. 天线切换步骤：
 
----
+   - 内置天线：默认配置，无需额外操作
+   - 外置天线：将电感切换到指定位置，并在左上角 IPEX 焊盘焊接 IPEX 接口座子
+3. 入网状态判断：调用 `read_status` 返回状态码，需确保模块入网后再执行数据传输操作
+4. 数据长度限制：用户数据长度不得超过 32 字节，否则触发 `PacketTooLargeError`
+5. 波特率索引对应关系：
+
+   - 0 → 9600
+   - 1 → 19200
+   - 2 → 38400
+   - 3 → 57600
+   - 4 → 115200
+6. 短地址范围：自定义短地址需在 0~0xFFFF 范围内，协调器固定短地址为 0x0000，未入网时为 0xFFFE
+7. 异常处理：调用驱动方法时需捕获自定义异常，避免程序崩溃（如 `CommandFailedError` 表示命令执行失败）
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
 
----
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** : 在任何媒介以任何形式复制、发行本作品  
-- **演绎** : 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** : 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** :您不得将本作品用于商业目的。  
-- **合理引用方式** : 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **声明：** 本项目中所有内容仅可学习或者个人爱好者使用，禁止商用，不得以任何形式以此代码做任何不合理的事情，代码具体可参考这个github项目https://github.com/peterhinch/micropython_ir，发生任何事情与署名作者无关。
+Copyright (c) 2025 FreakStudio
 
-- **版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

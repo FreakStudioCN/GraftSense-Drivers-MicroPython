@@ -1,5 +1,7 @@
-# 蜂鸣器驱动 - MicroPython版本
+# GraftSense 无源蜂鸣器模块 (MicroPython)
+
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -10,190 +12,144 @@
 - [注意事项](#注意事项)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
+
 ---
+
 ## 简介
 
-蜂鸣器是一种常见的声音输出器件，可分为**有源蜂鸣器**（内部带震荡电路，接通电源即可发声）和**无源蜂鸣器**（需由PWM信号驱动产生不同频率的声音）。常用于提示音、报警器、音乐播放等场景。本项目提供基于MicroPython的驱动代码，封装GPIO控制、PWM驱动和音调调节功能，支持快速集成。
-
-> **注意**：有源蜂鸣器仅支持开/关控制，无源蜂鸣器需使用PWM输出以调节音调和频率。
+本项目为 **GraftSense Passive Buzzer Module V1.1** 提供了完整的 MicroPython 驱动支持，可通过 PWM 控制无源蜂鸣器播放音符与自定义旋律（如《小星星》）。驱动采用面向对象设计，内置音符频率映射表，支持音调调节与节奏控制，适用于电子 DIY 声音实验、报警提示设计、编程音乐与节拍演示等场景，兼容树莓派 Pico 等主流 MicroPython 设备。
 
 ---
 
 ## 主要功能
 
-* 控制有源蜂鸣器的开关（高电平/低电平输出）
-* 使用PWM驱动无源蜂鸣器产生不同音调和频率的声音
-* 支持播放简单的提示音或音阶旋律
-* 接口简洁，兼容MicroPython主流开发板
+- ✅ 支持通过 PWM 驱动无源蜂鸣器，播放单个音符或完整旋律
+- ✅ 内置音符频率映射表，覆盖 C3–B5 常用音域
+- ✅ 提供 `play_tone()`、`play_melody()`、`stop_tone()` 等核心控制方法
+- ✅ 支持自定义旋律与音符持续时间，灵活适配不同场景
+- ✅ 遵循 Grove 接口标准，兼容主流开发板与传感器生态
 
 ---
 
 ## 硬件要求
 
-### 推荐测试硬件
-
-* MicroPython开发板（如树莓派Pico）、有源或无源蜂鸣器、杜邦线2\~3根、（可选）面包板
-
-### 模块引脚说明
-
-| 蜂鸣器引脚 | 功能描述      | 连接说明                                |
-| ----- | --------- | ----------------------------------- |
-| 正极（+） | 电源输入/信号控制 | 接开发板GPIO引脚（推荐支持PWM功能的引脚，如Pico的GP15） |
-| 负极（-） | 接地        | 接开发板GND                             |
+1. **核心硬件**：GraftSense Passive Buzzer Module V1.1 无源蜂鸣器模块
+2. **主控设备**：支持 MicroPython v1.23.0 及以上版本的开发板（如树莓派 Pico 或其他 MicroPython 设备）
+3. **接线配件**：Grove 4Pin 线（用于连接模块与开发板）
+4. **电源**：3.3V / 5V 稳定电源（模块兼容 3.3V 和 5V 供电）
 
 ---
 
 ## 文件说明
 
-### buzzer.py
-
-该文件实现蜂鸣器的核心驱动功能，仅包含 `Buzzer` 类，用于通过 **PWM 信号**控制蜂鸣器播放音符和旋律。
-
-`Buzzer` 类通过封装 PWM 控制逻辑，提供蜂鸣器的音调、时长和旋律播放接口。类中包含一个私有属性：`buzzer`，为 `PWM` 实例，用于驱动蜂鸣器发声。
-
-类的主要方法包括：
-
-* `__init__(pin: int)`：初始化驱动对象，接收目标 GPIO 引脚号，完成硬件 PWM 配置。
-* `play_tone(frequency: int, duration: int)`：播放单个音符，frequency 为频率（Hz），duration 为持续时间（ms）。
-* `play_melody(melody: list)`：播放一段旋律，melody 列表中元素为二元组 `(note, duration)`，如 `("C4", 500)`。
-* `NOTE_FREQS`（常量字典）：预定义音符到频率的映射表，支持标准音阶。
-
-> 说明：方法内部使用 `duty_u16=32768` 设定 50% 占空比，保证发声效果。每个音符间默认间隔 10ms。
-
----
-
-### main.py
-
-该文件为蜂鸣器的功能测试程序，无自定义类，仅包含主循环逻辑作为程序入口。
-
-核心功能是：
-
-* 初始化与蜂鸣器连接的 GPIO 引脚，创建 `Buzzer` 驱动实例；
-* 通过调用 `play_melody()` 方法播放预定义旋律（如《小星星》）；
-* 程序支持循环播放旋律，可通过 `Ctrl+C` 手动终止。
-
-适用于验证蜂鸣器硬件连接正确性和驱动功能完整性。
-
 ---
 
 ## 软件设计核心思想
 
-* **模块化**：将音符播放、旋律播放封装为独立方法，易维护和扩展
-* **PWM 驱动**：基于 PWM 输出实现不同频率和音调控制
-* **硬件解耦**：仅依赖标准 `PWM` 接口，支持 MicroPython 主流开发板
+1. **单一职责原则**：`Buzzer` 类仅负责蜂鸣器控制，不耦合其他业务逻辑
+2. **显式依赖注入**：PWM 引脚由外部传入，提升代码可测试性与可移植性
+3. **逻辑与 I/O 分离**：音符频率映射与 PWM 控制解耦，便于扩展与维护
+4. **安全启停机制**：通过占空比（duty_u16）控制发声与停止，避免硬件损坏
+5. **可扩展性设计**：支持自定义旋律与音符频率，适配不同音乐创作需求
+6. **清晰异常策略**：通过显式方法控制播放状态，提升代码健壮性
 
 ---
 
 ## 使用说明
 
-### 硬件接线（树莓派 Pico 示例）
+### 环境准备
 
-| 蜂鸣器引脚 | Pico引脚          | 接线功能   |
-| ----- | --------------- | ------ |
-| 正极（+） | GP9（Pin12，可PWM） | 控制信号输入 |
-| 负极（-） | GND（Pin38）      | 接地     |
+- 在开发板上烧录 **MicroPython v1.23.0+** 固件
+- 将 `buzzer.py` 和 `main.py` 上传至开发板文件系统
 
-### 软件依赖
+### 硬件连接
 
-* 固件：MicroPython v1.23+
-* 内置库：`machine`（PWM控制）、`time`（延时）
-* 开发工具：Thonny / PyCharm
+- 使用 Grove 线将蜂鸣器模块的 `DOUT` 引脚连接至开发板指定 GPIO 引脚（如示例中的 GPIO 6）
+- 连接 `GND` 和 `VCC` 引脚，确保供电稳定
 
-### 安装步骤
+### 代码配置
 
-1. 烧录 MicroPython 固件到开发板
-2. 上传 `buzzer.py` 和 `main.py` 文件，确认 `Buzzer(pin=9)` 中的引脚号与实际接线一致
-3. 运行 `main.py`，蜂鸣器会循环播放《小星星》旋律
+- 在 `main.py` 中修改 `Buzzer(pin=6)` 的 `pin` 参数为实际连接的 GPIO 引脚号
+- 可自定义 `MELODY` 列表，实现不同旋律播放
+
+### 运行测试
+
+- 重启开发板，`main.py` 将自动执行，蜂鸣器循环播放《小星星》旋律
 
 ---
 
 ## 示例程序
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/19 下午9:09   
-# @Author  : 李清水            
-# @File    : main.py       
-# @Description : PWM类使用，驱动蜂鸣器播放MIDI音乐
-
-# ======================================== 导入相关模块 =========================================
-
-# 导入时间相关模块
-import time
-# 导入蜂鸣器驱动类
+# 导入驱动模块
 from buzzer import Buzzer
+import time
 
-# ======================================== 全局变量 ============================================
-
-# 小星星的旋律和节奏:即每个音符和其对应持续时间
-MELODY = [
-    ('C4', 400), ('C4', 400), ('G4', 400), ('G4', 400), ('A4', 400), ('A4', 400), ('G4', 800),
-    ('F4', 400), ('F4', 400), ('E4', 400), ('E4', 400), ('D4', 400), ('D4', 400), ('C4', 800),
-    ('G4', 400), ('G4', 400), ('F4', 400), ('F4', 400), ('E4', 400), ('E4', 400), ('D4', 800),
-    ('G4', 400), ('G4', 400), ('F4', 400), ('F4', 400), ('E4', 400), ('E4', 400), ('D4', 800),
-    ('C4', 400), ('C4', 400), ('G4', 400), ('G4', 400), ('A4', 400), ('A4', 400), ('G4', 800),
-    ('F4', 400), ('F4', 400), ('E4', 400), ('E4', 400), ('D4', 400), ('D4', 400), ('C4', 800)
-]
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
-# 上电延时3s
-time.sleep(3)
-# 打印调试信息
-print("FreakStudio : Use PWM to drive a buzzer to play MIDI music")
-# 初始化蜂鸣器对象
+# 初始化蜂鸣器（GPIO 6）
 buzzer = Buzzer(pin=6)
 
-# ========================================  主程序  ===========================================
+# 自定义旋律示例：《两只老虎》片段
+CUSTOM_MELODY = [
+    ('C4', 400), ('D4', 400), ('E4', 400), ('C4', 400),
+    ('C4', 400), ('D4', 400), ('E4', 400), ('C4', 400),
+    ('E4', 400), ('F4', 400), ('G4', 800),
+    ('E4', 400), ('F4', 400), ('G4', 800)
+]
 
-# 循环播放音乐
-while True:
-    # 播放旋律《小星星》
-    buzzer.play_melody(MELODY)
+try:
+    # 播放自定义旋律
+    buzzer.play_melody(CUSTOM_MELODY)
+    # 播放单个音符（A4，持续1秒）
+    buzzer.play_tone(440, 1000)
+finally:
+    # 确保蜂鸣器停止发声
+    buzzer.stop_tone()
 ```
+
 ---
+
 ## 注意事项
 
-### 电气特性限制
-
-* **电压限制**：蜂鸣器工作电压通常为 3.3V 或 5V，需确认型号。有源蜂鸣器一般直接接电源即可发声，无源蜂鸣器需由 PWM 信号驱动；严禁超过标称电压，否则可能烧毁蜂鸣器。
-* **电流要求**：蜂鸣器工作电流一般在 10\~30mA 左右，若选用大功率蜂鸣器（>50mA），应避免直接由 MCU GPIO 驱动，需通过三极管或 MOSFET 扩流。
-* **占空比限制**：PWM 驱动时占空比建议在 30%\~70% 之间，过低会导致声音过小，过高会加速发热。
-
-### 硬件接线与配置注意事项
-
-* **共地要求**：蜂鸣器 GND 必须与开发板 GND 可靠连接，否则可能无法正常驱动或出现杂音。
-* **引脚选择**：无源蜂鸣器需接支持 PWM 的 GPIO 引脚（如 Pico 的 GP0\~GP15 中支持 PWM 的引脚）；有源蜂鸣器只需普通 GPIO 输出即可。
-* **接线可靠性**：蜂鸣器引脚通常较细，面包板测试时需确保插入紧密，避免虚接导致断音或杂音；长期使用建议焊接。
-* **电磁干扰**：蜂鸣器发声时会产生电磁噪声，应避免靠近高精度模拟电路（如 ADC 采样），必要时在电源端并联 0.1µF 去耦电容。
-
-### 环境影响
-
-* **温度限制**：蜂鸣器典型工作温度范围为 -20℃\~70℃。高温环境会加速振膜老化，导致音量下降或失真；低温环境下振膜硬化，可能导致启动延迟或音量降低。
-* **湿度限制**：相对湿度 >85% RH 的高湿环境可能导致内部金属部件氧化，发声失真或寿命缩短。必要时需加防潮壳体。
-* **粉尘防护**：粉尘进入蜂鸣器声孔会影响音量和音质，长期在粉尘环境下应加装防尘网罩，避免堵塞声孔。
+1. **PWM 频率建议**：模块推荐输出 PWM 波形频率在 3000Hz 左右，可根据实际需求调整
+2. **占空比控制**：避免长时间高占空比（如 50%）导致蜂鸣器过热或损坏
+3. **引脚选择**：避免使用开发板上已占用的特殊功能引脚（如 UART、I2C 引脚），防止冲突
+4. **共地连接**：确保模块与开发板共地，避免信号干扰导致发声异常
+5. **用户中断**：生产环境中建议完善异常处理，在程序终止时调用 `stop_tone()` 确保蜂鸣器停止发声
 
 ---
-### 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+## 联系方式
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
-### 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+## 许可协议
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+```sql
+MIT License
 
-**版权归 FreakStudio 所有。**
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

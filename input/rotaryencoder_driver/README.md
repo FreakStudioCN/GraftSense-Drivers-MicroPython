@@ -1,5 +1,11 @@
-# 旋转编码器驱动 - MicroPython版本
+# GraftSense-基于 EC11 的旋转编码器模块（MicroPython）
+
+# GraftSense-基于 EC11 的旋转编码器模块（MicroPython）
+
+# EC11 旋转编码器 MicroPython 驱动
+
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -11,228 +17,161 @@
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
----
-
 ## 简介
-旋转编码器是一种将旋转位移转换为脉冲信号的输入元件，常用于音量调节、菜单选择、电机位置检测等场景。与电位器不同，旋转编码器不会输出模拟电压，而是通过 **A/B 两路数字信号** 反映旋转方向与步进，部分型号还带有按压开关功能。本项目提供基于 MicroPython 的驱动代码，封装了脉冲检测、方向判断、步进计数等功能，支持快速集成。
 
-> **注意**：适用于常见的 **机械式增量型旋转编码器**，不适用于高精度绝对型编码器。
-
----
+本项目是 EC11 旋转编码器的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块，通过 GPIO 中断实现旋转方向检测、计数和按键状态判断，同时提供终端彩色进度条辅助类，适用于电子 DIY 旋钮控制、机器人舵机位置调节、音量调节等场景。
 
 ## 主要功能
-* 通过 A/B 相位检测旋转方向（顺时针 / 逆时针）
-* 记录旋转步进计数，可映射为角度、菜单索引或调节值
-* 支持带按键编码器的按压事件检测
-* 兼容 MicroPython 主流开发板，接口简洁易用
 
----
+- 旋转方向检测：通过 A/B 相脉冲相位差，精准判断顺时针/逆时针旋转
+- 旋转计数：实时记录旋转步数，正值表示顺时针，负值表示逆时针，支持手动重置
+- 按键处理：支持按键按下/释放检测，按下时自动重置旋转计数
+- 软件消抖：通过定时器实现 A 相（1ms）和按键（5ms）消抖，消除机械抖动干扰
+- 进度条辅助：提供终端彩色进度条类，支持实时更新和重置，适配调试与可视化场景
 
 ## 硬件要求
-### 推荐测试硬件
 
-* MicroPython 开发板（如树莓派 Pico）
-* 机械式旋转编码器（常见型号 EC11 等）
-* 杜邦线若干、（可选）面包板
+- EC11 旋转编码器模块（GraftSense 版本，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如 ESP32、RP2040 等）
+- GPIO 引脚连接：
 
-### 模块引脚说明
-
-| 旋转编码器引脚    | 功能描述      | 连接说明                  |
-| ---------- | --------- | --------------------- |
-| A 相        | 脉冲输出 A 通道 | 接开发板 GPIO（需支持外部中断）    |
-| B 相        | 脉冲输出 B 通道 | 接开发板 GPIO（需支持外部中断）    |
-| C（公共端）     | 公共接地      | 接开发板 GND              |
-| SW（可选）     | 按键开关输出    | 接开发板 GPIO（上拉输入）       |
-| VCC（部分型号有） | 电源输入      | 接开发板 3.3V 或 5V（取决于型号） |
-
----
+  - 模块 DIN0（RE_DT / A 相）→ MCU 输入引脚
+  - 模块 DIN1（RE_CLK / B 相）→ MCU 输入引脚
+  - 模块 SW1（按键）→ MCU 输入引脚（可选，需启用内部上拉）
+- 电源：模块 VCC 接 3.3V/5V，GND 接 MCU GND
 
 ## 文件说明
 
-### ec11encoder.py
-
-该文件实现 EC11 旋转编码器的核心驱动功能，仅包含 `EC11Encoder` 类，用于处理旋转编码器的 A/B 相位信号和按键信号。
-
-`EC11Encoder` 类通过 GPIO 中断结合定时器消抖，提供对旋转方向、步进计数和按键状态的完整访问接口。类中包含主要属性：
-
-* `pin_a` / `pin_b`：分别为旋转编码器的 A 相、B 相 GPIO 引脚实例，用于捕捉脉冲信号。
-* `pin_btn`：旋转编码器按键 GPIO 引脚实例，用于检测按下/释放状态。
-* `rotation_count`：旋转累计计数，正值表示顺时针旋转，负值表示逆时针旋转。
-* `button_pressed`：布尔值，表示按键是否被按下。
-
-类的主要方法包括：
-
-* `__init__(pin_a: int, pin_b: int, pin_btn: int)`：初始化驱动对象，绑定 A/B 相与按键信号的 GPIO 引脚，并配置中断回调与消抖定时器。
-* `_handle_rotation(pin: Pin)`：A 相中断回调函数，通过检测 B 相电平判定旋转方向，并更新计数值。
-* `_check_debounce_a(t: Timer)`：处理 A 相信号消抖逻辑。
-* `_handle_button(pin: Pin)`：按键中断回调，触发后由定时器辅助消抖。
-* `_check_debounce_btn(t: Timer)`：处理按键信号消抖逻辑。
-* `get_rotation_count() -> int`：获取当前旋转累计计数值。
-* `reset_rotation_count() -> None`：清零旋转计数。
-* `is_button_pressed() -> bool`：返回当前按键状态。
-
-设计要点：
-
-* A 相采用上升沿中断触发，结合 B 相状态判断方向。
-* 按键同时支持按下与释放的检测，默认带 5ms 消抖。
-* 默认行为是：按键按下会自动清零旋转计数值。
-* 消抖时间：A 相 1ms，按键 5ms。
-
----
-
-### processbar.py
-
-该文件实现 `ProgressBar` 类，用于在终端打印一个可动态更新的进度条。
-
-`ProgressBar` 类通过控制台输出刷新实现实时进度显示，支持进度限制与颜色显示。
-
-主要属性：
-
-* `max_value`：进度条最大值，对应任务完成的总进度。
-* `bar_length`：进度条的总显示长度（默认 50 个字符）。
-
-主要方法：
-
-* `__init__(max_value: int, bar_length: int = 50)`：初始化进度条。
-* `update(current_value: int)`：刷新显示进度，传入当前进度值。
-* `reset()`：重置进度条为 0%，显示全红状态。
-
-说明：
-
-* 小于 0 的值自动置为 0，大于 `max_value` 的值自动限制为 `max_value`。
-* 已完成部分用绿色显示，未完成部分用红色显示。
-* 使用 `\r` 回车符刷新当前行，不会换行。
-
----
-
-### main.py
-该文件为旋转编码器的功能测试程序，无自定义类，仅作为应用层入口。
-
-`main` 的核心功能是：
-
-* 初始化旋转编码器 GPIO 引脚，创建 `EC11Encoder` 驱动对象。
-* 创建进度条 `ProgressBar` 实例，用于直观显示旋转进度。
-* 在循环中持续读取旋转计数值，并刷新进度条。
-* 按键被按下时，重置进度条和旋转计数。
-* 默认设置为：旋转 20 次达到进度条 100%。
-
----
+| 文件名         | 说明                                                            |
+| -------------- | --------------------------------------------------------------- |
+| ec11encoder.py | 核心驱动文件，包含 EC11Encoder 类，处理旋转方向、计数与按键逻辑 |
+| processbar.py  | 辅助类，提供终端彩色进度条显示功能，支持更新与重置              |
+| main.py        | 示例程序，演示编码器计数与进度条联动的使用方法                  |
 
 ## 软件设计核心思想
-* **模块化**：旋转检测、按键检测、进度条显示均封装为独立类，互不耦合。
-* **中断驱动**：旋转信号与按键信号均通过中断触发，结合定时器消抖，确保可靠性。
-* **可移植性**：GPIO 引脚编号由应用层指定，驱动类不负责硬件初始化，方便在不同开发板上复用。
-* **直观性**：通过进度条实时反映旋转计数值，便于功能验证和演示。
 
----
+1. 中断驱动：A 相上升沿触发中断，结合 B 相电平判断旋转方向，避免轮询占用 CPU 资源
+2. 软件消抖：通过定时器延迟检测，消除机械开关抖动导致的信号不稳定，提升可靠性
+3. 状态维护：内部维护旋转计数和按键状态，提供简洁的查询接口，减少用户手动处理复杂度
+4. 可配置性：支持可选的按键引脚，适配有无按键的不同模块版本，提升兼容性
+5. 兼容性：适配 MicroPython v1.23.0 环境，支持多种 MCU 平台，降低移植成本
+
 ## 使用说明
-### 硬件接线（树莓派Pico示例）
-| 旋转编码器引脚 | Pico引脚     | 接线功能 |
-|---------|------------|------|
-| A相      | GP6        | 信号采样 |
-| B相      | GP7        | 信号采样 |
-### 软件依赖
-- 固件：MicroPython v1.23+；内置库：`machine`、`time`（延时）；开发工具：Thonny/PyCharm
-### 安装步骤
-1. 烧录MicroPython固件到开发板
-2. 上传`potentiometer.py`和`main.py`，修改`main.py`中引脚实际接线引脚
-3. 运行`main.py`，拧动触点观察数值变化
----
-## 示例程序
+
+1. 硬件连接
+
+- 模块 DIN0（RE_DT）→ MCU GPIO（如 Pin 6）
+- 模块 DIN1（RE_CLK）→ MCU GPIO（如 Pin 7）
+- 模块 SW1（按键）→ MCU GPIO（如 Pin 8，可选，需启用内部上拉）
+- 模块 VCC → 3.3V/5V，GND → MCU GND
+
+1. 驱动初始化
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/19 下午7:46   
-# @Author  : 李清水            
-# @File    : main.py       
-# @Description : Timer类实验，读取旋转编码器的值，使用定时器做软件消抖
+from ec11encoder import EC11Encoder
+from processbar import ProgressBar
 
-# ======================================== 导入相关模块 =========================================
+# 初始化编码器（无按键版本）
+encoder = EC11Encoder(pin_a=6, pin_b=7)
 
-# 导入时间相关模块
+# 初始化编码器（带按键版本）
+# encoder = EC11Encoder(pin_a=6, pin_b=7, pin_btn=8)
+
+# 初始化进度条（最大值 20，进度条长度 50）
+progress_bar = ProgressBar(max_value=20)
+```
+
+1. 基础操作示例
+
+```python
+# 获取当前旋转计数
+current_count = encoder.get_rotation_count()
+print(f"旋转计数: {current_count}")
+
+# 重置旋转计数
+encoder.reset_rotation_count()
+
+# 查询按键状态
+if encoder.is_button_pressed():
+    print("按键被按下")
+
+# 更新进度条显示
+progress_bar.update(current_count)
+
+# 重置进度条为 0%
+progress_bar.reset()
+```
+
+## 示例程序
+
+```python
 import time
-# 导入自定义驱动模块
 from processbar import ProgressBar
 from ec11encoder import EC11Encoder
 
-# ======================================== 全局变量 ============================================
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
-# 上电延时3s
+# 上电延时 3s
 time.sleep(3)
-# 打印调试信息
 print("FreakStudio : Using GPIO read Rotary Encoder value, use software debounce by timer")
 
-# 创建EC11旋转编码器对象，使用GPIO10和GPIO11作为A相和B相，使用GPIO12作为按键
-# 如果你想改变编码器计数值变大的旋转方向（例如原本是逆时针变大，想改成顺时针变大）
-# 只需要在初始化编码器对象时，将参数 pin_a 和 pin_b 的值互换即可
+# 创建编码器和进度条对象
 encoder = EC11Encoder(pin_a=6, pin_b=7)
-# 创建终端进度条对象，用于显示进度，旋转20次达到100%
 progress_bar = ProgressBar(max_value=20)
 
-# ========================================  主程序  ===========================================
-
-# 主循环中获取旋转计数值和按键状态
+# 主循环
 while True:
-    # 获取旋转计数值
+    # 获取旋转计数并更新进度条
     current_rotation = encoder.get_rotation_count()
     print(f"Rotation count: {current_rotation}")
-    # 更新进度条
     progress_bar.update(current_rotation)
-    # 按键被按下时，重置进度条
+    
+    # 按键按下时重置进度条
     if encoder.is_button_pressed():
         progress_bar.reset()
-    # 每隔10ms秒更新一次
+    
+    # 10ms 刷新一次
     time.sleep_ms(10)
 ```
----
+
 ## 注意事项
-### 电气特性限制
 
-* **电压限制**：旋转编码器 A/B 相和 SW 按键信号为 **开关量输出**，仅能接入 GPIO 数字输入引脚，不得直接接入 ADC；VCC（部分型号提供）通常支持 3.3V 或 5V，需根据开发板电平选择，避免电平不兼容烧毁器件。
-* **上拉电阻**：大多数机械编码器为开关结构，需使用上拉电阻（内部或外部均可）确保输出稳定逻辑电平。
-* **电流限制**：旋转编码器触点最大允许电流通常 <10mA，严禁将其直接用于大电流通断。
+1. 引脚配置：A 相和 B 相引脚需配置为输入模式，按键引脚（如有）需启用内部上拉电阻，避免悬空导致误触发
+2. 中断注意：中断回调函数中避免执行耗时操作（如打印、复杂计算），仅做状态标记，防止影响系统响应
+3. 方向调整：若需反转旋转方向，只需互换 pin_a 和 pin_b 的初始化参数
+4. 消抖参数：A 相消抖 1ms、按键消抖 5ms 为默认值，可根据硬件机械特性微调
+5. 进度条显示：依赖终端支持 ANSI 颜色代码，部分串口调试工具可能无法正常显示彩色
 
-### 硬件接线与配置注意事项
+## 联系方式
 
-* **共地要求**：旋转编码器 GND 必须与开发板 GND 可靠连接，否则 A/B 相和按键信号会出现漂移或无效。
-* **接线可靠性**：旋转编码器引脚较细，面包板测试时需确保完全插入，避免虚接导致信号抖动或丢步；长期使用建议焊接固定。
-* **GPIO 引脚选择**：推荐使用支持 **外部中断** 的 GPIO 引脚连接 A/B 相，以便及时捕捉脉冲；按键信号同样可使用中断方式检测。
-* **消抖需求**：机械编码器 A/B 相和按键信号均存在抖动，必须使用 **软/硬件消抖**（如定时器消抖或 RC 滤波电路）。
+如有任何问题或需要帮助，请通过以下方式联系开发者：
 
-### 环境影响
+📧 **邮箱**：liqinghsui@freakstudio.cn
 
-* **温度限制**：机械旋转编码器推荐工作温度为 -20℃\~70℃；高温会加速触点氧化，低温可能导致润滑油变硬，增加旋转阻力。
-* **湿度限制**：高湿环境（相对湿度 >85% RH）易导致金属触点氧化、信号不稳定，建议在潮湿环境中使用防护外壳。
-* **粉尘防护**：粉尘易进入旋转结构，导致接触电阻不稳、手感变差；建议在灰尘较多环境下定期清理，避免强力吹气或液体清洗。
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
-### 使用寿命
+## 许可协议
 
-* **触点寿命**：EC11 等常见机械编码器旋转寿命一般为 **10,000\~30,000 次旋转**，按键寿命约 **100,000 次**；高频应用需考虑更高寿命的光电或磁性编码器。
-* **使用习惯**：避免快速剧烈旋转和频繁按压，会显著降低寿命。
+本项目采用 MIT License 开源协议，详见项目根目录下的 LICENSE 文件。
 
----
-### 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+```
+MIT License
 
----
-### 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
+Copyright (c) 2025 FreakStudioCN (ben0i0d / 李清水)
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-**版权归 FreakStudio 所有。**
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

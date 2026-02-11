@@ -1,180 +1,202 @@
-# MicroPython HC-08 蓝牙串口通信驱动库
+# GraftSense-基于 HC-08 的主从一体式 BLE 蓝牙模块（MicroPython）
+
+# GraftSense-基于 HC-08 的主从一体式 BLE 蓝牙模块（MicroPython）
+
+# 基于 HC-08 的主从一体式 BLE 蓝牙模块 MicroPython 驱动
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
-- [支持的协议](#支持的协议)
 - [硬件要求](#硬件要求)
 - [文件说明](#文件说明)
 - [软件设计核心思想](#软件设计核心思想)
 - [使用说明](#使用说明)
 - [示例程序](#示例程序)
 - [注意事项](#注意事项)
+- [联系方式](#联系方式)
 - [许可协议](#许可协议)
-
----
 
 ## 简介
 
-本项目是一个针对 **HC-08 蓝牙串口通信模块** 的 MicroPython 设备驱动库，提供了串口数据收发与协议封装功能。该库设计简洁、模块化，支持主从模式切换及灵活的 AT 指令配置，可在多种 MicroPython 兼容硬件平台上运行，适用于无线数据传输、智能家居控制、远程传感器通信等场景。
-
-HC-08 模块基于 **Bluetooth Specification V4.0 BLE 协议**，工作频段为 **2.4GHz ISM**，调制方式为 **GFSK**。模块最大发射功率 4dBm，接收灵敏度 -93dBm，空旷环境下可与 iPhone 4s 实现约 80 米通信距离。模块采用邮票孔封装（26.9mm × 13mm × 2.2mm），便于贴片焊接和嵌入应用系统。芯片采用 TI CC2540，内置 256 KB 存储空间，支持 AT 指令，可灵活配置角色（主/从）、串口波特率、设备名称、配对密码等参数。
-
----
+本项目是 基于 HC-08 的主从一体式 BLE 蓝牙模块 的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块，通过 UART 接口实现 AT 指令控制与透传通信，支持主从角色切换、蓝牙参数配置、低功耗模式控制和透明数据传输，适用于电子 DIY 无线控制实验、智能设备互联演示、物联网数据通信等场景。
 
 ## 主要功能
 
-* 提供非阻塞式蓝牙串口数据收发功能
-* 支持 AT 指令配置角色、波特率、名称和密码
-* 跨平台兼容：
-
-  * 通信端：Raspberry Pi Pico / 其它 MicroPython 兼容开发板
-* 与 uasyncio 兼容，可用于异步应用
-* 提供测试程序便于验证和学习
-
----
-
-## 支持的协议 / 模式
-
-* BLE 点对点（P2P）通信
-* 主/从模式切换
-* 串口透明传输
-* AT 指令配置
-
----
+- AT 指令通信：支持模块通信检测、参数查询、恢复出厂设置、重启等基础操作
+- 角色切换：可配置为主机（MASTER）或从机（SLAVE）模式，适配不同蓝牙连接场景
+- 参数配置：支持蓝牙名称、地址、波特率、校验位、射频功率等核心参数的设置与查询
+- 透传通信：提供数据发送、阻塞接收、按终止符接收等透传模式接口，支持无线数据传输
+- 低功耗控制：支持从机低功耗模式唤醒，通过发送特定字节唤醒模块
+- 参数校验：内置蓝牙名称、地址、波特率等参数的合法性校验，避免无效配置
+- 异常处理：封装 UART 操作异常，提升程序稳定性
 
 ## 硬件要求
 
-### 通信端
+- HC-08 主从一体式 BLE 蓝牙模块（GraftSense 版本，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如 ESP32、RP2040 等）
+- 引脚连接：
 
-* **HC-08 蓝牙模块**（2.4GHz BLE）
-* 连接导线
-* 支持 MicroPython 的开发板（如 Raspberry Pi Pico、ESP32 等）
-
-### 接线方式（树莓派 Pico 示例）
-
-| 模块类型     | 引脚功能     | 连接说明                                   |
-| -------- | -------- | -------------------------------------- |
-| HC-08 模块 | VCC      | 接开发板 3.3V（模块工作电压 3.0~3.6V，请确认规格）       |
-| HC-08 模块 | GND      | 接开发板 GND（共地）                           |
-| HC-08 模块 | TXD      | 接开发板 GPIO RX 引脚（如 Pico 的 GP5/UART1 RX） |
-| HC-08 模块 | RXD      | 接开发板 GPIO TX 引脚（如 Pico 的 GP4/UART1 TX） |
-| HC-08 模块 | STATE/EN | 可选，用于模块状态指示或使能控制，如 Pico 的 GP2          |
-
----
+  - 模块 MRX → MCU 串口 RXD（收发交叉，不可直接连接 TXD）
+  - 模块 MTX → MCU 串口 TXD（收发交叉，不可直接连接 RXD）
+  - 模块 VCC → 3.3V/5V 电源（模块兼容 5V、3.3V 的 TTL 通信电平）
+  - 模块 GND → MCU GND
+- 模块预留按键：SW1 用于模块复位，SW2 用于主机清除从机记忆
 
 ## 文件说明
 
-### `hc08` 文件：
-
-* 提供 **HC08 BLE 模块驱动类**，基于 UART 通信与 AT 指令。
-* 支持模块的初始化、参数配置（名称、地址、角色、波特率、射频功率等）、恢复出厂、重启等操作。
-* 封装透传模式的数据收发接口，便于与上层应用解耦。
-* 采用 **面向对象封装**，对 AT 命令进行高层抽象，用户无需直接处理串口字符串。
-
-### `main` 文件：
-
-* 示例程序，演示如何通过 `HC08` 类完成初始化、基本参数查询与数据收发。
-* 启动时延时 3 秒以等待模块稳定上电。
-* 周期性检测 UART 接收缓冲区，实时打印收到的数据。
-* 可作为后续上层应用开发的参考模板。
-
----
+| 文件名  | 说明                                                                       |
+| ------- | -------------------------------------------------------------------------- |
+| hc08.py | 核心驱动文件，包含 HC08 类，实现 AT 指令控制、参数配置、透传通信等所有功能 |
+| main.py | 示例程序，演示 UART 初始化、蓝牙参数查询和透传数据收发的使用方法           |
 
 ## 软件设计核心思想
 
-* **模块化设计**：将硬件驱动逻辑与应用分离，`hc08` 专注驱动封装，`main` 专注业务逻辑。
-* **面向对象**：通过 `HC08` 类封装参数和方法，用户通过方法调用完成蓝牙控制与数据通信。
-* **跨平台适配**：驱动基于 MicroPython 的 UART 接口，可运行于多种开发板（Pico、ESP32 等）。
-* **非阻塞操作**：提供接收函数支持 **定时/条件读取**，避免阻塞主线程。
-* **灵活扩展**：支持角色切换（主/从）、功耗模式、射频功率调整，方便应用场景扩展。
-
----
+1. 面向对象封装：通过 HC08 类统一管理蓝牙模块的所有操作，将 UART 通信、AT 指令、透传逻辑封装为独立方法
+2. UART 通信抽象：封装_send 和_recv 方法，处理 UART 数据发送与接收，支持超时控制和异常捕获
+3. AT 指令映射：将每个蓝牙配置操作（如设置名称、切换角色）对应为独立方法，简化用户调用
+4. 参数合法性校验：内置蓝牙名称（1-12 字符）、地址（12 位大写十六进制）、波特率等参数的校验逻辑，避免无效配置
+5. 透传模式适配：提供多种透传接收方式（阻塞接收、按终止符接收），适配不同数据传输场景
+6. 状态维护：内部维护蓝牙名称、角色、波特率等参数，减少重复查询开销
 
 ## 使用说明
 
-### 安装方法
-通过`thonny`工具调试：
+1. 硬件连接
 
-**`连接好硬件之后：将code下文件一起上传于根目录，点击运行按钮 `**`
+- 模块 MRX → MCU 串口 RXD（如 ESP32 的 GPIO17）
+- 模块 MTX → MCU 串口 TXD（如 ESP32 的 GPIO16）
+- 模块 VCC → 3.3V/5V 电源
+- 模块 GND → MCU GND
+- 注意：遵循 UART“收发交叉”规则，MRX 必须连接 MCU 的 RXD，MTX 必须连接 MCU 的 TXD，不可交叉连接
 
----
-
-## 示例程序
-* python
+1. 驱动初始化
 
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/5 下午10:11
-# @Author  : ben0i0d
-# @File    : main.py
-# @Description : hc08测试文件
-
-# ======================================== 导入相关模块 =========================================
-
-import time
-from machine import UART,Pin
+from machine import UART, Pin
 from hc08 import HC08
 
-# ======================================== 全局变量 ============================================
+# 初始化UART（波特率默认9600，按模块实际配置调整）
+uart = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 
-# ======================================== 功能函数 ============================================
+# 创建HC08实例
+hc08 = HC08(uart)
+```
 
-# ======================================== 自定义类 =============================================
+1. 基础操作示例
 
-# ======================================== 初始化配置 ===========================================
+```python
+# 检测模块通信是否正常
+ok, resp = hc08.check()
+print("通信检测:", ok, resp)
+
+# 查询蓝牙名称
+ok, name = hc08.get_name()
+print("蓝牙名称:", name)
+
+# 设置蓝牙名称
+ok, resp = hc08.set_name("GraftSense-BLE")
+print("设置名称:", ok, resp)
+
+# 切换为主机模式
+ok, resp = hc08.set_role(HC08.Role['MASTER'])
+print("切换角色:", ok, resp)
+
+# 查询固件版本
+ok, version = hc08.get_version()
+print("固件版本:", version)
+```
+
+1. 透传通信示例
+
+```python
+# 发送透传数据
+hc08.send_data("Hello, BLE!")
+
+# 阻塞接收透传数据（超时200ms）
+ok, data = hc08.recv_data(timeout_ms=200)
+if ok:
+    print("接收数据:", data)
+    # 回传数据
+    hc08.send_data("Received: " + data.decode())
+```
+
+## 示例程序
+
+```python
+import time
+from machine import UART, Pin
+from hc08 import HC08
 
 # 上电延时3s
+time.sleep(3)
 print("FreakStudio:HC08 test")
 
-# 初始化 UART 通信（按硬件实际接线调整 TX/RX）
-uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
-# 创建 HC14_Lora 实例
+# 初始化UART通信（按硬件实际接线调整TX/RX）
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
+# 创建HC08实例
 hc0 = HC08(uart0)
 
-# ========================================  主程序  ===========================================
+# 查询基础参数
+ok, resp = hc0.get_name()
+print(f'hc0 Name   :{resp}')
+ok, resp = hc0.get_version()
+print(f'hc0 Version:{resp}')
+ok, resp = hc0.get_role()
+print(f'hc0 Role   :{resp}')
+
+# 主循环透传数据收发
 while True:
-    
-    if hc0._uart.any():
-       print(hc0._uart.read())
+    # 阻塞接收透传数据（超时200ms）
+    ok, data = hc0.recv_data(timeout_ms=200)
+    # 当有数据成功接收时打印并回传
+    if ok:
+        print(data)
+        hc0.send_data("get data：")
+        hc0.send_data(data)
     time.sleep(0.05)
 ```
----
 
 ## 注意事项
 
-* **供电电压**：模块工作在 **3.3V**，切勿直接接入 5V，否则可能损坏。
-* **串口电平**：与 MCU 串口保持一致（3.3V TTL 电平），如需与 5V 系统通信必须加电平转换。
-* **上电延时**：模块上电后需等待 **≥3 秒** 再进行 AT 命令配置。
-* **串口波特率**：默认波特率一般为 **9600bps**，若配置过高需确保 MCU 串口能稳定支持。
-* **天线环境**：避免金属屏蔽和强电磁干扰，以保证 BLE 信号质量和通信距离。
-* **主从切换**：角色（Master/Slave）切换后需重启模块才会生效。
-* **AT 指令模式与透传模式**：进入透传通信前需先完成 AT 参数配置，避免混淆。
-* **低功耗模式**：仅在从机模式有效，进入后需外部唤醒，调试时注意避免“失联”。
-* **配对密码**：默认为 `123456`，若修改需与上位机或手机应用保持一致。
-* **兼容性**：不同固件版本的 HC08 可能支持的 AT 命令有所差异，需确认版本说明书。
-
----
+1. 收发交叉规则：模块 MRX 必须连接 MCU 的 RXD，MTX 必须连接 MCU 的 TXD，不可直接交叉连接，否则无法正常通信
+2. AT 指令模式：模块未连接蓝牙设备时进入 AT 指令模式，默认波特率为 9600，修改波特率后需同步调整 UART 配置
+3. 波特率配置：支持 1200~115200 波特率，修改后需重启模块生效，且外部 UART 必须同步调整波特率
+4. 低功耗唤醒：从机进入低功耗模式后，需发送 10 个 0xFF 字节唤醒模块，方可恢复通信
+5. 参数限制：蓝牙名称最长 12 字符，蓝牙地址为 12 位大写十六进制字符串，配置时需符合要求
+6. 供电兼容：模块兼容 5V、3.3V 的 TTL 通信电平，可直接接入主流 MCU 的 UART 接口
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
 
----
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** : 在任何媒介以任何形式复制、发行本作品  
-- **演绎** : 修改、转换或以本作品为基础进行创作  
+本项目采用 MIT License 开源协议，详见下方 LICENSE 文件内容：
 
-惟须遵守下列条件：  
-- **署名** : 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** :您不得将本作品用于商业目的。  
-- **合理引用方式** : 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **声明：** 本项目中所有内容仅可学习或者个人爱好者使用，禁止商用，不得以任何形式以此代码做任何不合理的事情，代码具体可参考这个github项目https://github.com/peterhinch/micropython_ir，发生任何事情与署名作者无关。
+```
+MIT License
 
-- **版权归 FreakStudio 所有。**
+Copyright (c) 2025 FreakStudioCN (ben0i0d)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

@@ -1,265 +1,215 @@
-# MicroPython Air530Z 驱动库
+# GraftSense-基于 Air530Z 的北斗导航模块（MicroPython）
+
+# GraftSense-基于 Air530Z 的北斗导航模块（MicroPython）
+
+# GraftSense Air530Z 北斗导航模块
 
 ## 目录
 
-* [简介](#简介)
-* [主要功能](#主要功能)
-* [支持的卫星系统](#支持的卫星系统)
-* [硬件要求](#硬件要求)
-* [文件说明](#文件说明)
-* [软件设计核心思想](#软件设计核心思想)
-* [使用说明](#使用说明)
-* [示例程序](#示例程序)
-* [注意事项](#注意事项)
-* [许可协议](#许可协议)
-
----
+- [简介](#简介)
+- [主要功能](#主要功能)
+- [硬件要求](#硬件要求)
+- [文件说明](#文件说明)
+- [软件设计核心思想](#软件设计核心思想)
+- [使用说明](#使用说明)
+- [示例程序](#示例程序)
+- [注意事项](#注意事项)
+- [联系方式](#联系方式)
+- [许可协议](#许可协议)
 
 ## 简介
 
-本项目是一个针对 **Air530Z 高性能 GNSS 定位模块** 的 MicroPython 驱动库。Air530Z 支持北斗三代、GPS、GLONASS 等多模卫星导航系统，能够实现多系统联合定位或单系统独立定位。
-模块采用射频基带一体化设计，集成了 DC/DC、LDO、射频前端、低功耗处理器、RAM、Flash 存储、RTC 与电源管理，支持通过纽扣电池或法拉电容保持 RTC 和备份 RAM 供电，从而缩短首次定位时间。
-该驱动库提供简洁的 API，方便在 MicroPython 平台上快速实现定位、授时和导航功能，适用于车载导航、精准农业、测绘测量、物联网定位节点等应用场景。
-
----
+本模块是 FreakStudio GraftSense Air530Z 北斗导航模块，基于 Air530Z 芯片实现北斗/GPS 双模定位，支持卫星定位、导航信息输出、速度与时间测量，具备高灵敏度、接口兼容性好、易于开发等优势，兼容 Grove 接口标准。适用于无人车导航、电子 DIY 定位实验、物联网定位演示等场景，为系统提供可靠的位置感知能力。
 
 ## 主要功能
 
-* 提供标准化 NMEA 数据解析
-* 支持同步与异步数据读取（兼容 `uasyncio`）
-* 提供多系统联合定位与单系统独立定位选择接口
-* 支持获取经纬度、高度、速度、时间等信息
-* 内置测试程序，便于快速验证
+基于 MicroPython 实现完整的北斗/GPS 定位控制与数据解析能力，核心功能如下：
 
----
-
-## 支持的卫星系统
-
-* **北斗三代（BDS）**
-* **GPS**
-* **GLONASS**
-* （可扩展支持 Galileo、QZSS 等，根据模块固件版本）
-
----
+1. 双模定位：支持 BDS+GPS、BDS+GLONASS、GPS Only、BDS Only 等多卫星系统组合定位
+2. 灵活配置：可通过 NMEA 指令动态调整波特率（9600/115200）、定位更新率（1/5/10 Hz）、卫星系统模式
+3. 数据解析：稳健解析 GGA、RMC、GSA、GSV 等关键 NMEA 协议消息，提取经纬度、海拔、时间、卫星数等核心定位数据
+4. 异常处理：缓存最后一次有效定位数据，无卫星信号时可回退使用，提升程序稳定性
+5. 指令交互：支持产品信息查询、启动模式配置（冷/温/热启动）等功能
 
 ## 硬件要求
 
-### 通信端
+### 核心接口
 
-* **Air530Z GNSS 模块**
-* 连接导线
-* 支持 MicroPython 的开发板（如 Raspberry Pi Pico、ESP32 等）
-* 可选：纽扣电池 / 法拉电容，用于 RTC 与备份 RAM 供电
+- UART 通信接口：
 
-### 接线方式（树莓派 Pico 示例）
+  - MRX：对应 MCU 的串口 RXD，实际连接 Air530Z 的 R1OUT 引脚
+  - MTX：对应 MCU 的串口 TXD，实际连接 Air530Z 的 T1IN 引脚
+  - ⚠️ 注意：遵循 UART“收发交叉”规则，MRX 直接接 MCU RXD，MTX 直接接 MCU TXD，切勿交叉连接
+- 电源接口：VCC（3.3V/5V 供电）、GND（接地）
+- 拨码开关：
 
-| 模块类型    | 引脚功能   | 连接说明                                   |
-| ------- | ------ | -------------------------------------- |
-| Air530Z | VCC    | 接开发板 3.3V 电源（确认电压范围符合模块规格）             |
-| Air530Z | GND    | 接开发板 GND（共地）                           |
-| Air530Z | TXD    | 接开发板 UART RX 引脚（如 Pico 的 GP5/UART1 RX） |
-| Air530Z | RXD    | 接开发板 UART TX 引脚（如 Pico 的 GP4/UART1 TX） |
-| Air530Z | PPS    | 可选，用于高精度授时信号输出                         |
-| Air530Z | V_BCKP | 可选，连接纽扣电池/法拉电容，保持 RTC 与备份 RAM          |
+  - ON/OFF：控制模块工作状态（低电平关闭，高电平/悬空正常工作）
+  - BDS_GLONASS：选择卫星系统（ON=BDS+GLONASS，OFF=BDS+GPS）
+  - ⚠️ 注意：拨码开关功能需先断电再上电生效，无法在工作中切换
 
----
+### 电路设计
+
+- Air530Z 核心电路：实现北斗/GPS 双模定位，支持多卫星系统信号接收与处理
+- 双电源切换电路：适配不同供电场景，提升兼容性
+- 电平转换电路：实现 UART 信号电平匹配，保障通信稳定
+- DC-DC 5V 转 3.3V 电路：为 Air530Z 芯片提供稳定 3.3V 供电
+- 电源滤波电路：滤除电源噪声，提升定位精度
+- 电源指示灯：直观显示模块供电状态
+
+### 模块布局
+
+- 正面：拨码开关（ON/OFF、BDS_GLONASS）、电源指示灯、UART 接口（MRX/MTX）、电源接口（GND/VCC），接口清晰标注，便于接线调试
 
 ## 文件说明
 
-### air530z.py
-
-该文件实现 **Air530Z GPS 模块驱动**,核心为 `Air530Z` 类，基于 `MicropyGPS` 进行扩展，支持 **实时定位数据解析** 与 **配置控制**;**NMEA 指令构造工具类**，用于生成带有校验和的 GPS 配置指令。，
-#### Air530Z 类
-
-`Air530Z` 继承自 `MicropyGPS`，同时组合 `NMEASender`，既能作为 **NMEA 数据解析器**，也能作为 **模块控制器** 使用。
-
-主要属性：
-
-* `_uart`：UART 串口对象，用于与 GPS 模块进行 AT/NMEA 通信。
-* `_sender`：`NMEASender` 实例，用于构造标准 NMEA 配置指令。
-
-主要方法：
-
-* `_send(sentence: str) -> bool`
-  向 GPS 模块发送一条完整的 NMEA 指令。
-* `_recv(timeout: int = 3) -> str`
-  从 GPS 模块接收响应字符串，支持超时控制（默认 3 秒）。
-* `set_baudrate(baudrate: int) -> (bool, str)`
-  设置模块波特率（常用 9600 / 115200）。
-* `set_update_rate(rate: int) -> (bool, str)`
-  设置定位更新频率（1Hz / 5Hz / 10Hz）。
-* `set_protocol(mode: int) -> (bool, str)`
-  设置协议输出模式（如 NMEA v4.1 / BDS+GPS / GPS Only）。
-* `set_system_mode(mode: int) -> (bool, str)`
-  设置系统工作模式（如 BDS+GPS / GPS Only / BDS Only）。
-* `set_startup_mode(mode: int) -> (bool, str)`
-  设置开机启动模式（冷启动 / 温启动 / 热启动）。
-* `query_product_info() -> (bool, str)`
-  查询模块信息（型号、固件版本等）。
-* `read() -> dict`
-  解析实时 NMEA 数据，返回字典，包括：
-
-  * `latitude`：纬度
-  * `longitude`：经度
-  * `satellites`：可见卫星数
-  * `altitude`：海拔
-  * `timestamp`：UTC 时间戳
-
-#### NMEASender 类
-
-`NMEASender` 专注于构造标准化的 NMEA 命令字符串，不涉及 UART 通信。
-
-主要方法：
-
-* `_checksum(sentence: str) -> str`
-  计算指令校验和（XOR 校验）。
-* `_build(body: str) -> str`
-  生成完整的 NMEA 指令（格式 `$xxxx*CS`）。
-* `set_baudrate(baud: int) -> str`
-  构造设置波特率的 NMEA 指令。
-* `set_update_rate(rate: int) -> str`
-  构造设置更新率的 NMEA 指令。
-* `set_protocol(mode: int) -> str`
-  构造设置协议输出模式的 NMEA 指令。
-* `set_system_mode(mode: int) -> str`
-  构造设置系统工作模式的 NMEA 指令。
-* `set_startup_mode(mode: int) -> str`
-  构造设置开机启动模式的 NMEA 指令。
-* `query_product_info() -> str`
-  构造查询产品信息的 NMEA 指令。
-
----
+| 文件名        | 功能说明                                                                      |
+| ------------- | ----------------------------------------------------------------------------- |
+| air530z.py    | 核心驱动文件，定义 Air530Z 类，封装模块配置、指令发送、数据读取等核心功能     |
+| nmeaparser.py | NMEA 协议解析文件，定义 NMEAParser、NMEASender 类，负责指令生成和定位数据解析 |
+| main.py       | 测试示例文件，实现北斗/GPS 定位数据的实时读取与打印，包含基础使用示范         |
 
 ## 软件设计核心思想
 
-* **双重角色**：`Air530Z` 既是 **定位数据解析器**，也是 **配置控制器**。
-* **模块化解耦**：`NMEASender` 专注于 NMEA 指令构造，`Air530Z` 负责 UART 通信与解析。
-* **标准化**：遵循 NMEA 协议，确保与其他兼容模块的互操作性。
-* **可扩展性**：用户可轻松扩展更多配置指令或解析字段。
-* **事件驱动**：通过实时读取 NMEA 数据流，持续更新位置信息，便于上层应用直接使用。
+1. 类结构分层设计：
 
----
+   - 核心类 `Air530Z` 继承自 `NMEAParser`，整合“指令发送 + 数据解析”能力，对外提供统一 API
+   - 辅助类 `NMEASender` 专注生成带校验和的 NMEA 配置指令，保证指令合法性
+   - 解析类 `NMEAParser` 专注 NMEA 句子解析，独立处理不同类型消息，降低耦合度
+2. 配置与解析分离：将 NMEA 指令生成（配置）和 NMEA 数据解析拆分为独立逻辑，便于维护和扩展
+3. 异常容错设计：缓存 `last_known_fix` 最后一次有效定位数据，无卫星信号时避免程序崩溃，提升鲁棒性
+4. 标准化接口：封装常用配置方法（`set_baudrate`/`set_system_mode` 等），参数标准化，降低使用门槛
 
 ## 使用说明
 
-### 安装方法
-通过`thonny`工具调试：
+### 基础接线
 
-**`连接好硬件之后：将code下文件一起上传于根目录，点击运行按钮 `**`
+1. 电源接线：VCC 接 3.3V/5V 电源，GND 接系统地
+2. UART 接线：MRX 接 MCU 的 RXD 引脚，MTX 接 MCU 的 TXD 引脚（切勿交叉）
+3. 拨码配置（可选）：根据需求设置 ON/OFF 和 BDS_GLONASS 拨码，配置后断电重启生效
 
----
+### 核心配置操作
+
+1. 初始化模块：绑定 UART 实例，创建 Air530Z 对象
+2. 动态配置卫星系统：通过 `set_system_mode` 方法切换 BDS+GPS/GPS Only/BDS Only 模式
+3. 读取定位数据：调用 `read` 方法自动解析 UART 数据，返回结构化定位信息
 
 ## 示例程序
-* python
+
+### 基础定位测试
 
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/5 下午10:11
-# @Author  : ben0i0d
-# @File    : main.py
-# @Description : air530z测试文件
-
-# ======================================== 导入相关模块 =========================================
-
 import time
-from machine import UART,Pin
-from air530z import Air530Z,NMEASender
+from machine import UART, Pin
+from air530z import Air530Z
 
-# ======================================== 全局变量 ============================================
-
-# ======================================== 功能函数 ============================================
-def resolve(gps, resp):
-    """
-    功能函数：解析 GPS 模块返回的 NMEA 数据，并在解析出有效定位信息时打印关键信息。  
-
-    Args:
-        gps (object): GPS 解析对象，提供 update()、timestamp、date_string() 等接口。  
-        resp (iterable): NMEA 数据序列，每个元素为一条 NMEA 语句。  
-
-    处理逻辑：
-        - 遍历输入的 NMEA 数据，逐条调用 gps.update() 进行解析。  
-        - 当解析得到有效结果时，打印时间、日期、经纬度、速度、高度以及卫星数等关键数据。  
-
-    ==========================================
-    Utility function: Parse NMEA data from GPS module and print key info when valid fix is obtained.  
-
-    Args:
-        gps (object): GPS parser instance with update(), timestamp, date_string(), etc.  
-        resp (iterable): Sequence of NMEA sentences.  
-
-    Processing:
-        - Iterate through NMEA sentences, call gps.update() on each.  
-        - If a valid fix is parsed, print timestamp, date, latitude, longitude, speed, altitude, and satellites in use.  
-    """
-    for i in resp:
-        parsed_sentence = gps.update(i)
-
-    # 每解析1个有效句子，输出一次关键数据
-    if parsed_sentence :  # 仅当定位有效时输出
-        print("="*50)
-        print(f"解析句子类型：{parsed_sentence}")
-        print(f"本地时间：{gps.timestamp[0]:02d}:{gps.timestamp[1]:02d}:{gps.timestamp[2]:.1f}")
-        print(f"本地日期：{gps.date_string(formatting='s_dmy', century='20')}")
-        print(f"纬度：{gps.latitude_string()}")
-        print(f"经度：{gps.longitude_string()}")
-        print(f"速度：{gps.speed_string(unit='kph')}")
-        print(f"海拔：{gps.altitude} 米")
-        print(f"使用卫星数：{gps.satellites_in_use} 颗")
-        print("="*50)
-
-# ======================================== 自定义类 =============================================
-
-# ======================================== 初始化配置 ===========================================
-
-# 上电延时3s
+# 上电延时3s，等待模块稳定
 time.sleep(3)
 print("FreakStudio: air530z test")
 
-# 初始化 UART 通信（按硬件实际接线调整 TX/RX）
-uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
-# 创建 HC14_Lora 实例
+# 初始化UART（按硬件接线调整TX/RX引脚）
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
+# 创建Air530Z实例
 gps = Air530Z(uart0)
-nema = NMEASender()
 
-# ========================================  主程序  ===========================================
+# 主循环：实时读取定位数据
 while True:
-    if gps._uart.any():
-        resp = gps._uart.read().decode('utf-8')
-        resolve(gps, resp)
+    try:
+        gps_data = gps.read()
+
+        if gps_data:
+            print("=" * 40)
+            print("GPS_DATA")
+            print("=" * 40)
+
+            # 打印经纬度
+            print(f"longitude: {gps_data['longitude']}°")
+            print(f"latitude: {gps_data['latitude']}°")
+
+            # 打印海拔
+            print(f"altitude: {gps_data['altitude']}")
+
+            # 打印时间戳
+            if gps_data['timestamp'] is None:
+                print("time: None")
+            else:
+                ts = gps_data['timestamp']
+                print(f"time: {ts['hour']:02d}:{ts['minute']:02d}:{ts['second']:02d}")
+
+            # 打印卫星数
+            print(f"satellites: {gps_data['satellites']}")
+            print("=" * 40)
+    except Exception as e:
+        print("Error reading GPS data:", e)
+
+    time.sleep(1)
 ```
----
+
+### 动态切换卫星系统模式
+
+```python
+# 初始化后，切换为GPS Only模式
+success, cmd = gps.set_system_mode(gps.MODE_GPS_ONLY)
+if success:
+    print(f"切换为GPS Only模式成功，发送指令：{cmd}")
+else:
+    print("切换模式失败")
+
+# 延时5秒后，切换回BDS+GPS双模模式
+time.sleep(5)
+success, cmd = gps.set_system_mode(gps.MODE_BDS_GPS)
+if success:
+    print(f"切换为BDS+GPS模式成功，发送指令：{cmd}")
+else:
+    print("切换模式失败")
+```
+
+### 示例说明
+
+1. UART 初始化：根据硬件接线配置 UART 引脚（TX=16, RX=17），波特率 9600（与模块默认一致）
+2. 定位读取：`gps.read()` 自动从 UART 接收 NMEA 数据，解析后返回位置字典
+3. 动态配置：`set_system_mode` 方法可在运行时切换卫星系统模式，无需重启模块
+4. 数据打印：实时打印经纬度、海拔、时间、卫星数，直观展示定位状态
+5. 异常处理：捕获并打印读取异常，提升程序稳定性
 
 ## 注意事项
 
-* **天线位置**：GPS 模块需要在开阔环境下使用，避免高楼、树木或金属遮挡，以确保卫星信号接收质量。
-* **冷/热启动差异**：冷启动（首次或长时间断电后）定位速度较慢，热启动（短暂断电再开机）定位速度更快。
-* **电源稳定性**：模块需稳定电源供电（常见 3.3V/5V），电压波动可能导致定位失败或模块重启。
-* **波特率匹配**：主控 MCU 与 GPS 模块 UART 波特率需保持一致，否则无法正确解析数据。
-* **更新率设置**：提高更新率（如 10Hz）会增加功耗与串口数据量，需根据应用场景权衡。
-* **协议兼容性**：部分模块支持多系统（GPS / BDS / GLONASS / Galileo），使用时需根据应用需求配置协议输出。
-* **干扰问题**：避免将 GPS 模块与 WiFi / GSM 天线靠得太近，以减少射频干扰。
-
----
+1. UART 接线规范：MRX 直接接 MCU RXD，MTX 直接接 MCU TXD，切勿交叉连接，否则通信失败
+2. 拨码开关生效条件：ON/OFF 和 BDS_GLONASS 拨码开关功能需先断电再上电生效，无法在工作中切换
+3. 定位环境要求：必须将模块放置在户外开阔场地，才能正确获取经纬度信息，室内/遮挡环境无法定位
+4. 电源稳定性：模块供电需稳定，避免电压波动导致定位精度下降
+5. NMEA 指令校验：所有配置指令需包含正确的校验和，否则模块不响应
+6. 无卫星处理：NMEAParser 会缓存最后一次有效定位数据，无卫星时可回退使用，避免程序崩溃
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
 
----
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** : 在任何媒介以任何形式复制、发行本作品  
-- **演绎** : 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** : 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** :您不得将本作品用于商业目的。  
-- **合理引用方式** : 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **声明：** 本项目中所有内容仅可学习或者个人爱好者使用，禁止商用，不得以任何形式以此代码做任何不合理的事情，代码具体可参考这个github项目https://github.com/peterhinch/micropython_ir，发生任何事情与署名作者无关。
+Copyright (c) 2025 FreakStudio
 
-- **版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

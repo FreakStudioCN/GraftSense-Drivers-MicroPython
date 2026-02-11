@@ -1,6 +1,11 @@
-# 红外热释电人体运动传感器驱动 - MicroPython版本
+# GraftSense-基于 L916 的红外热释电人体接近传感器模块（MicroPython）
+
+# GraftSense-基于 L916 的红外热释电人体接近传感器模块（MicroPython）
+
+# 基于 L916 的红外热释电人体接近传感器模块 MicroPython 驱动
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -12,123 +17,111 @@
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
----
-
 ## 简介
-红外热释电人体运动传感器（PIR Sensor）是一种能够检测人体红外线辐射变化的设备，通过感知物体温度与环境温度的差异来判断是否有人体活动。该传感器具有功耗低、灵敏度高、响应速度快等特点，广泛应用于安防系统、自动照明、智能感应设备等场景。
 
-本项目提供了基于 MicroPython 的驱动代码及示例程序，支持运动检测、回调绑定和阻塞等待等功能，方便开发者快速集成到各类感应控制场景中。
-
-> **注意**：该传感器主要用于检测人体运动，对于静止不动的物体可能无法有效检测。
+本项目是基于 L916 的红外热释电人体接近传感器模块的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块，通过 DIN 数字接口读取人体接近检测信号（高电平表示检测到人体），支持中断回调、状态轮询、阻塞等待等多种使用模式，适用于感应灯触发、小型安防预警、设备感应唤醒等场景。
 
 ---
 
 ## 主要功能
-- **运动状态检测**：实时监测是否有人体活动
-- **多种工作模式**：
-  - 中断触发模式（高效低功耗）
-  - 阻塞等待模式（简单易用）
-- **灵活的回调机制**：支持自定义运动检测触发的操作
-- **状态指示**：可选LED指示灯，直观显示检测状态
-- **状态控制**：支持启用/禁用中断检测
-- **跨平台支持**：兼容多种MicroPython开发板（树莓派Pico等）
+
+- 数字引脚适配：支持 MicroPython GPIO 数字输入模式，直接读取 DIN 接口电平
+- 中断/轮询双模式：
+
+  - 中断模式：通过 `IRQ_RISING` 触发回调（检测到人体时执行用户函数）
+  - 轮询模式：通过 `is_motion_detected()` 实时读取当前检测状态
+- 回调安全调度：使用 `micropython.schedule` 将回调调度到主线程，避免中断上下文冲突
+- 阻塞等待功能：`wait_for_motion()` 支持超时的阻塞式人体检测，适配简单场景
+- 动态回调管理：可通过 `set_callback()` 实时设置/更新回调函数，灵活切换工作模式
+- 中断开关控制：`enable()`/`disable()` 方法动态启用/禁用中断检测
+- 底层硬件访问：通过 `pin` 属性直接获取底层 `machine.Pin` 对象，支持自定义操作
+- 调试信息打印：`debug()` 方法输出引脚状态与检测结果，便于故障排查
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- 树莓派 Pico/Pico W
-- 红外热释电人体运动传感器模块（如HC-SR501等）
-- 杜邦线若干
-- 可选：LED指示灯（用于状态显示）
 
-### 模块引脚说明
-| PIR传感器引脚 | 功能描述 |
-|--------------|----------|
-| VCC          | 电源正极（3.3V-5V，具体取决于模块型号） |
-| GND          | 电源负极 |
-| OUT          | 信号输出引脚（高电平表示检测到运动） |
+- 基于 L916 的红外热释电人体接近模块（GraftSense 版本，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如 ESP32、RP2040、STM32 等）
+- 引脚连接：
+
+  - 模块 VCC → MCU 3.3V/5V 电源引脚
+  - 模块 GND → MCU GND 引脚
+  - 模块 DIN → MCU 数字 GPIO 引脚（如 ESP32 的 GPIO6）
+- 模块硬件特性：
+
+  - 内置 DC-DC 5V 转 3.3V 电路，兼容 3.3V/5V 系统供电
+  - 配备电源指示灯，直观显示模块供电状态
+  - DIN 接口输出数字电平（高电平=检测到人体，低电平=无人体）
+  - 菲涅尔透镜聚焦红外信号，限定检测区域范围
 
 ---
 
 ## 文件说明
-### pir_sensor.py
-实现了红外热释电人体运动传感器的驱动功能，核心类 `PIRSensor` 提供完整控制接口。
 
-#### 类定义：`PIRSensor`
-- **`__init__(pin: int, callback: callable = None, led_pin: int = None) -> None`**：初始化PIR传感器，参数包括传感器接入的GPIO引脚编号、可选的回调函数和指示灯引脚。
-- **`is_motion_detected() -> bool`**：检查当前是否检测到人体运动，返回布尔值表示检测状态。
-- **`set_callback(callback: callable) -> None`**：设置运动检测回调函数，回调函数会在中断中使用`micropython.schedule`调用。
-- **`enable() -> None`**：启用中断检测，在检测到运动时自动调用回调函数。
-- **`disable() -> None`**：禁用中断检测，停止触发回调函数。
-- **`wait_for_motion(timeout: int = None) -> bool`**：阻塞等待运动检测，支持超时设置（秒），超时返回False，检测到运动返回True。
-- **`pin() -> Pin`**：属性方法，返回底层GPIO Pin对象。
-
-### main.py
-示例测试程序，演示PIR传感器的完整功能测试，包括运动检测、回调设置、LED控制、超时阻塞等待等操作。
+| 文件名         | 说明                                                                      |
+| -------------- | ------------------------------------------------------------------------- |
+| pir_sensor1.py | 核心驱动文件，包含 `PIRSensor` 类，实现 GPIO 读取、中断回调、状态检测等功能 |
+| main1.py       | 测试示例程序，演示传感器初始化、回调设置、阻塞等待人体检测的使用方法      |
 
 ---
 
 ## 软件设计核心思想
-### 模块化设计
-- 将传感器操作封装为独立类，职责单一明确
-- 分离硬件控制与业务逻辑，便于维护扩展
-- 提供统一接口，简化集成难度
 
-### 中断驱动机制
-- 采用GPIO中断检测信号变化，提高响应速度
-- 使用`micropython.schedule`调度回调，避免中断中执行复杂操作
-- 支持启用/禁用中断，灵活控制工作模式
-
-### 状态管理
-- 维护运动检测状态标志，提供直观的状态查询
-- 通过状态变化触发事件，避免重复响应
-- 支持阻塞等待模式，满足不同应用场景需求
-
-### 易用性设计
-- 提供默认配置，简化初始化过程
-- 支持可选LED指示灯，便于调试和状态观察
-- 完善的错误处理，提高系统稳定性
+1. 类封装硬件操作：将 GPIO 配置、中断逻辑、状态管理封装为 `PIRSensor` 类，简化用户调用
+2. 中断安全机制：通过 `micropython.schedule` 将回调调度到主线程，避免中断上下文的资源冲突
+3. 多模式兼容：同时支持中断（异步）和轮询（同步）两种检测方式，适配不同场景需求
+4. 动态配置支持：回调函数、中断状态可实时修改，无需重新初始化传感器
+5. 资源优化：阻塞等待时设置 10ms 轮询间隔，平衡检测实时性与 CPU 资源占用
+6. 底层透明化：保留 `pin` 属性访问底层硬件对象，支持高级用户自定义扩展
 
 ---
 
 ## 使用说明
-### 硬件接线（树莓派 Pico 示例）
 
-| 传感器引脚 | Pico GPIO 引脚      |
-|------------|-------------------|
-| VCC        | 3.3V 或 5V（根据模块要求） |
-| GND        | GND               |
-| OUT        | GP6               |
+1. 硬件连接
 
-> **注意：**
-> - 确认传感器的工作电压，避免接错电源导致损坏
-> - LED需要串联限流电阻（约220Ω）后再连接到GPIO引脚
-> - 传感器初次上电需要预热时间（通常1-2分钟）
+- 模块 VCC → MCU 3.3V/5V 引脚
+- 模块 GND → MCU GND 引脚
+- 模块 DIN → MCU 数字 GPIO 引脚（如 GPIO6）
 
----
+1. 驱动初始化
 
-### 软件依赖
+```python
+from pir_sensor1 import PIRSensor
 
-- **固件版本**：MicroPython v1.23+  
-- **内置库**：
-  - `machine`（用于GPIO控制）
-  - `time`（用于延时与时间测量）
-  - `micropython`（用于回调调度）
-- **开发工具**：PyCharm 或 Thonny（推荐）
+# 初始化传感器（连接到GPIO6，可选传入回调函数）
+pir = PIRSensor(pin=6)
+```
 
----
+1. 基础操作示例
 
-### 安装步骤
+```python
+# 1. 轮询模式：检查当前是否检测到人体
+is_detected = pir.is_motion_detected()
+print(f"当前是否检测到人体：{is_detected}")
 
-1. 将 **MicroPython 固件** 烧录到树莓派 Pico  
-2. 上传 `pir_sensor.py` 和 `main.py` 到 Pico  
-3. 根据硬件连接修改 `main.py` 中的引脚配置（默认使用GP22作为传感器输入，GP21作为LED输出）  
-4. 在开发工具中运行 `main.py`，开始测试
+# 2. 设置中断回调（检测到人体时执行函数）
+def on_motion():
+    print("检测到人体接近！")
+pir.set_callback(callback=on_motion)
+
+# 3. 启用/禁用中断
+pir.enable()  # 启用中断检测
+pir.disable() # 禁用中断检测
+
+# 4. 阻塞等待人体检测（超时20秒）
+detected = pir.wait_for_motion(timeout=20000)
+if detected:
+    print("阻塞等待：检测到人体")
+else:
+    print("阻塞等待：超时未检测到人体")
+```
 
 ---
 
 ## 示例程序
+
 ```python
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
@@ -137,15 +130,11 @@
 # @File    : main1.py
 # @Description : 红外人体热释传感器驱动测试文件
 
-# ======================================== 导入相关模块 =========================================\
-
-from pir_sensor import PIRSensor
+# ======================================== 导入相关模块 =========================================
+from pir_sensor1 import PIRSensor
 import time
 
-# ======================================== 全局变量 ============================================
-
 # ======================================== 功能函数 ============================================
-
 def motion_callback():
     """
     回调函数
@@ -154,86 +143,72 @@ def motion_callback():
     """
     print("Motion detected!")
 
-# ======================================== 自定义类 ============================================
-
 # ======================================== 初始化配置 ===========================================
-
+# 上电延时3s
 time.sleep(3)
-print("FreakStudio:Infrared human body pyro-release sensor test")
+print("FreakStudio : Infrared human body pyro-release sensor test")
+
+# 创建红外人体热释传感器对象
 pir = PIRSensor(pin=6, callback=motion_callback)
 
 # ========================================  主程序  ============================================
-
 # 提示用户靠近
 print("Waiting for motion...")
-# 阻塞等待，无超时
-detected = pir.wait_for_motion(timeout=20)
+# 阻塞等待，超时20秒
+detected = pir.wait_for_motion(timeout=20000)
 
 if detected:
     # 阻塞等待检测到运动
     print("Motion detected via blocking wait!")
 else:
     print("Timeout, no motion detected.")
-
 ```
+
 ---
+
 ## 注意事项
 
-### 传感器特性
-- **检测范围**：通常为 3-7 米（具体取决于传感器型号）
-- **检测角度**：一般为 60-120 度（水平方向）
-- **延迟特性**：
-  - 触发延迟：检测到运动后约 0.5 秒输出高电平
-  - 释放延迟：运动停止后约 2-3 秒输出低电平（可通过模块电位器调节）
+1. 引脚类型限制：DIN 接口是数字信号输出，必须连接到 MCU 的数字 GPIO 引脚，不可接入模拟接口
+2. 模块预热：PIR 传感器上电后建议等待 10-30 秒预热，避免初始状态不稳定导致误触发
+3. 回调函数限制：中断回调内不可执行耗时/阻塞操作（如 `time.sleep`），否则会影响系统稳定性
+4. 阻塞等待影响：`wait_for_motion()` 会阻塞主线程，不适合需要并行执行任务的场景
+5. 检测区域范围：模块检测范围由菲涅尔透镜限定，建议人体在透镜正对区域内移动以提高检测灵敏度
+6. 电源匹配：模块支持 3.3V/5V 供电，需确保 MCU 电源引脚电压与模块要求一致，避免硬件损坏
 
 ---
-
-### 安装注意事项
-- 避免将传感器安装在热源附近（如灯具、空调出风口）
-- 避免阳光直射或强光源照射传感器
-- 安装高度建议 1.5-2.5 米，以获得最佳检测效果
-- 传感器应远离振动源，避免误触发
-
----
-
-### 使用限制
-- 无法检测静止不动的人体
-- 环境温度接近人体温度时，检测灵敏度会下降
-- 小动物可能会触发检测（根据传感器灵敏度设置）
-- 不适合用于精确的人体定位
-
----
-
-### 电源要求
-- 确保供电稳定，避免电压波动导致误触发
-- 根据传感器型号选择 3.3V 或 5V 供电
-- 电源电流应满足传感器要求（通常不超过 50mA）
-
----
-
-### 软件使用建议
-- 传感器初次上电后，建议等待 1-2 分钟预热
-- 回调函数应尽量简短，避免在中断中执行复杂操作
-- 长时间不使用时，可调用`disable()`方法降低功耗
-- 结合实际应用场景调整阻塞等待的超时时间
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+Copyright (c) 2025 FreakStudioCN (缪贵成)
 
-**版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

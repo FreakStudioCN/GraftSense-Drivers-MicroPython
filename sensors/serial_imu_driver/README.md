@@ -1,5 +1,11 @@
-# JY60串口陀螺仪驱动 - MicroPython版本
+# GraftSense-基于 JY60 的串口陀螺仪模块（MicroPython）
+
+# GraftSense-基于 JY60 的串口陀螺仪模块（MicroPython）
+
+# 基于 JY60 的串口陀螺仪模块 MicroPython 驱动
+
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -10,272 +16,202 @@
 - [注意事项](#注意事项)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
----
+
 ## 简介
 
-JY60 六轴陀螺仪是一种基于串口通信的姿态传感器，内部集成三轴加速度计与三轴陀螺仪，可实时输出加速度、角速度和姿态角（Roll、Pitch、Yaw）。相比 I²C 接口的 MPU6050，此类串口陀螺仪具有数据格式固定、无需复杂寄存器配置、即插即用的特点，广泛应用于运动检测、平衡控制、无人机姿态估算等场景。
-
-> **注意**：本模块为标准 JY60/JY61 系列串口六轴陀螺仪，数据帧固定为二进制格式，不适用于高精度惯性测量单元（IMU）或工业陀螺仪，不可用于高精度导航或测量场景。
-
----
+本项目是 基于 JY60 的串口陀螺仪模块 的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块，支持六轴 IMU（三轴加速度 + 三轴陀螺仪）数据采集与姿态解算，通过 UART 接口输出角速度、加速度和角度数据，适用于电子 DIY 运动感应实验、机器人姿态控制演示等场景。
 
 ## 主要功能
 
-* 通过 UART 读取陀螺仪输出的数据帧
-* 自动解析加速度、角速度、姿态角数据
-* 将原始值转换为物理单位（g、°/s、°）
-* 输出结构化数据包，支持快速集成
-* 兼容 MicroPython 主流开发板，接口简洁易用
-
----
+- 六轴数据采集：支持三轴加速度、三轴角速度（陀螺仪）和三轴角度（倾角）数据实时输出
+- 模式配置：可切换工作/睡眠模式、串口/I2C 传输模式、水平/垂直安装模式
+- 校准与清零：内置加速度校准和 Z 轴角度清零指令，确保测量精度
+- 数据解析：自动解析串口数据帧，完成原始数据到物理量（g、°/s、°）的转换
+- 调试支持：提供运行时间统计装饰器，便于性能分析和调试
 
 ## 硬件要求
 
-### 推荐测试硬件
+- JY60 串口陀螺仪模块（GraftSense 版本，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如树莓派 Pico RP2040 等）
+- 引脚连接：
 
-* MicroPython 开发板（如树莓派 Pico）
-* JY60 六轴串口陀螺仪模块
-* 杜邦线 4 根
-* （可选）面包板
-
----
-
-## 模块引脚说明
-
-| 模块引脚 | 功能描述 | 连接说明                          |
-| ---- | ---- | ----------------------------- |
-| VCC  | 电源输入 | 接开发板 3.3V 或 5V（根据模块标注）        |
-| GND  | 接地   | 接开发板 GND                      |
-| TXD  | 串口发送 | 接开发板 UART RX 引脚（如 Pico 的 GP1） |
-| RXD  | 串口接收 | 接开发板 UART TX 引脚（如 Pico 的 GP0） |
-
----
+  - 模块 MTX（SRX） → MCU UART_TX（如 GP8）
+  - 模块 MRX（STX） → MCU UART_RX（如 GP9）
+  - VCC → 3.3V/5V 电源
+  - GND → MCU GND
+- 模块核心：基于 JY60 六轴 IMU，通过 UART 接口输出姿态数据，支持 115200/9600 波特率切换
 
 ## 文件说明
-### imu.py
 
-该文件实现JY60串口陀螺仪的核心驱动功能，仅包含`IMU`类，用于处理陀螺仪与加速度计的数据读取与解析。
-
-`IMU`类通过封装UART通信逻辑，提供三轴加速度、角速度和角度的访问接口。类中包含传感器数据转换系数和多种控制指令，用于初始化、校准和模式切换。
-
-类的主要方法包括：
-
-* `__init__(UART_Obj: UART) -> None`：初始化IMU对象，绑定UART实例并完成加速度校准与Z轴清零。
-* `SendCMD(cmd: list[int]) -> bool`：发送控制指令到IMU，例如校准、模式切换、清零等。
-* `RecvData() -> tuple[float, ...]`：接收并解析IMU返回的数据，包括三轴加速度、角速度和角度，并更新对象属性（`angle_x`、`angle_y`、`angle_z`等）。
-* 属性如`angle_x`、`angle_y`、`angle_z`：存储当前三轴角度数据，单位为度（°）。
-
-类中常用指令包括：
-
-* `ZAXISCLEARCMD`：Z轴角度清零
-* `ACCCALBCMD`：加速度校准
-* `CONVSLEEPCMD`：睡眠/工作模式切换
-* `UARTMODECMD`、`IICMODECMD`：通信模式切换
-* `HORIZINSTCMD`、`VERTINSTCMD`：安装模式切换
-* `BAUD115200CMD`、`BAUD9600CMD`：波特率设置
-
----
-
-### main.py
-
-该文件为JY60串口陀螺仪的功能测试程序，无自定义类，仅包含程序入口循环，用于实时读取IMU数据并输出。
-
-核心功能：
-
-1. 初始化UART端口，与IMU通信
-2. 创建`IMU`对象，执行初始化和校准
-3. 循环读取三轴角度数据，打印到控制台
-4. 可选通过UART将角度数据发送到上位机
-5. 指示灯（LED）闪烁，显示程序运行状态
-6. 内存管理：当可用堆 RAM 低于阈值时，触发垃圾回收
-
----
+| 接口引脚 | 功能描述                         |
+| -------- | -------------------------------- |
+| GND      | 接地引脚                         |
+| VCC      | 电源输入引脚（3.3V/5V 兼容）     |
+| MTX      | 模块 UART_TX（对应 MCU UART_RX） |
+| MRX      | 模块 UART_RX（对应 MCU UART_TX） |
+| LED1     | 电源指示灯，上电后常亮           |
 
 ## 软件设计核心思想
 
-* **模块化**：将UART通信、数据解析、指令发送封装为独立方法
-* **硬件解耦**：IMU对象接受外部UART实例，兼容不同开发板
-* **实时性**：支持循环采样和上位机数据传输
-* **内存优化**：结合垃圾回收管理长时间运行
-
----
+1. 协议解析轻量化：针对 JY60 模块 0x55 帧头的串口通信协议，设计轻量级数据解析逻辑，适配 MicroPython 的 MCU 资源限制，仅解析核心数据帧（加速度、角速度、角度），减少内存占用；
+2. 易用性封装：将硬件控制、指令发送、数据解析等底层操作封装为高内聚的 IMU 类，对外暴露简洁的方法（RecvData、SendCMD）和类属性，降低开发者使用门槛；
+3. 自动化校准：初始化阶段自动执行加速度校准和 Z 轴角度清零，无需手动发送指令，提升使用便捷性；
+4. 兼容性适配：支持 115200/9600 双波特率，兼容 3.3V/5V 供电，适配主流 MicroPython 开发板（如 RP2040）。
 
 ## 使用说明
 
-### 硬件接线（树莓派 Pico 示例）
+### 硬件连接
 
-| JY60模块引脚 | Pico引脚   | 接线功能            |
-| -------- |----------| --------------- |
-| VCC      | 3.3V/5V  | 电源输入（按模块丝印选择）   |
-| GND      | GND      | 接地              |
-| TX       | GP9 (RX) | IMU → Pico 数据输入 |
-| RX       | GP8 (TX) | Pico → IMU 数据输出 |
-| LED      | GP25     | 板载LED指示（可选）     |
+- 模块 MTX 引脚连接至 MCU 的 UART_RX（如 GP9）
+- 模块 MRX 引脚连接至 MCU 的 UART_TX（如 GP8）
+- VCC 引脚连接至 3.3V 或 5V 电源，GND 引脚连接至 MCU GND
 
-> ⚠️ 注意：JY60 默认串口波特率一般为 **9600bps**，如果买的模块说明书上有差异，请以实际参数为准。
+### 驱动初始化
 
----
-
-### 软件依赖
-
-* 固件：MicroPython v1.23+
-* 内置库：`machine`（UART、Pin 控制）、`time`（延时）、`gc`（内存管理）
-
----
-
-### 安装步骤
-
-1. 烧录 **MicroPython 固件** 到 Pico
-2. 上传 `imu.py`（JY60 驱动类）和 `main.py`（示例代码）到开发板
-3. 根据实际接线修改 `UART` 端口和波特率，例如：
-
-   ```python
-   uart = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
-   ```
-4. 运行 `main.py`，在 REPL/串口终端观察输出的三轴角度数据（Roll、Pitch、Yaw）
-
----
-
-## 示例程序
 ```python
-# Python env   : MicroPython v1.23.0              
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/6/24 上午10:32   
-# @Author  : 李清水            
-# @File    : main.py       
-# @Description : 串口IMU类实验,主要通过串口获取IMU:JY61数据，然后通过Print函数打印数据
-
-# ======================================== 导入相关模块 ========================================
-
-# 硬件相关的模块
-from machine import UART, Pin
-# 时间相关的模块
-import time
-# 垃圾回收的模块
-import gc
-# IMU类模块
+from machine import UART
 from imu import IMU
-
-# ======================================== 全局变量 ============================================
-
-# 程序运行时间变量
-run_time: int = 0
-# 程序起始时间点变量
-start_time: int = 0
-# 程序结束时间点变量
-end_time: int = 0
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
-# 上电延时3s
-time.sleep(3)
-# 打印调试信息
-print("FreakStudio : Using UART to communicate with IMU")
 
 # 创建串口对象，设置波特率为115200
 uart = UART(1, 115200)
-# 初始化uart对象，数据位为8，无校验位，停止位为1
-# 设置串口超时时间为5ms
-uart.init(bits=8,
-          parity=None,
-          stop=1,
-          tx=4,
-          rx=5,
-          timeout=5)
+uart.init(bits=8, parity=None, stop=1, tx=8, rx=9, timeout=5)
 
-# 创建串口对象，设置波特率为115200，用于将三轴角度数据发送到上位机
-uart_pc = UART(0, 115200)
-# 初始化uart对象，数据位为8，无校验位，停止位为1，设置串口超时时间为5ms
-uart_pc.init(bits=8,
-             parity=None,
-             stop=1,
-             tx=0,
-             rx=1,
-             timeout=5)
+# 初始化IMU对象（自动执行加速度校准和Z轴清零）
+imu_obj = IMU(uart)
+```
 
-# 设置GPIO 25为LED输出引脚，下拉电阻使能
-LED = Pin(25, Pin.OUT, Pin.PULL_DOWN)
+### 核心控制方法
 
-# 初始化一个IMU对象
+| 方法/属性            | 功能描述                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| SendCMD(cmd)         | 发送控制指令（如校准、模式切换、波特率设置）                                                            |
+| RecvData()           | 接收并解析 IMU 数据，返回(acc_x, acc_y, acc_z, temp, gyro_x, gyro_y, gyro_z, angle_x, angle_y, angle_z) |
+| WORK_MODE/SLEEP_MODE | 工作/睡眠模式常量                                                                                       |
+| UART_MODE/IIC_MODE   | 串口/I2C 传输模式常量                                                                                   |
+| HORIZ_INST/VERT_INST | 水平/垂直安装模式常量                                                                                   |
+
+## 示例程序
+
+### 基础姿态数据读取
+
+```python
+import time
+from machine import UART
+from imu import IMU
+
+# 初始化串口
+uart = UART(1, 115200)
+uart.init(bits=8, parity=None, stop=1, tx=8, rx=9, timeout=5)
+
+# 初始化IMU
 imu_obj = IMU(uart)
 
-# ========================================  主程序  ============================================
+# 上电延时3s
+time.sleep(3)
+print("FreakStudio: Using UART to communicate with IMU")
 
+# 循环读取姿态数据
 while True:
-    # 点亮LED灯
-    LED.on()
-    # 接收陀螺仪数据
-    imu_obj.RecvData()
-    # 熄灭LED灯
-    LED.off()
-
-    # 打印 x 轴角度
-    print(" X-axis angle : ", imu_obj.angle_x)
-    # 打印 y 轴角度
-    print(" Y-axis angle : ", imu_obj.angle_y)
-    # 打印 z 轴角度
-    print(" Z-axis angle : ", imu_obj.angle_z)
-    # 返回可用堆 RAM 的字节数
-    print(" the number of RAM remaining is %d bytes ", gc.mem_free())
-
-    # 将三轴角度数据格式化成字符串
-    angle_data = "{:.2f}, {:.2f}, {:.2f}\r\n".format(imu_obj.angle_x, imu_obj.angle_y, imu_obj.angle_z)
-    # 通过串口0发送角度数据到上位机
-    uart_pc.write(angle_data)
-
-    # 当可用堆 RAM 的字节数小于 80000 时，手动触发垃圾回收功能
-    if gc.mem_free() < 220000:
-        # 手动触发垃圾回收功能
-        gc.collect()
+    # 接收并解析数据
+    acc_x, acc_y, acc_z, temp, gyro_x, gyro_y, gyro_z, angle_x, angle_y, angle_z = imu_obj.RecvData()
+    
+    # 打印角度数据
+    print("X-axis angle:", angle_x)
+    print("Y-axis angle:", angle_y)
+    print("Z-axis angle:", angle_z)
+    
+    time.sleep(0.1)
 ```
----
+
+### 完整示例（含 LED 指示和上位机数据转发）
+
+```python
+import time
+from machine import UART, Pin
+import gc
+from imu import IMU
+
+# 初始化串口
+uart = UART(1, 115200)
+uart.init(bits=8, parity=None, stop=1, tx=8, rx=9, timeout=5)
+
+# 初始化上位机串口
+uart_pc = UART(0, 115200)
+uart_pc.init(bits=8, parity=None, stop=1, tx=0, rx=1, timeout=5)
+
+# 初始化LED
+LED = Pin(25, Pin.OUT, Pin.PULL_DOWN)
+
+# 初始化IMU
+imu_obj = IMU(uart)
+
+try:
+    while True:
+        LED.on()
+        # 接收陀螺仪数据
+        imu_obj.RecvData()
+        LED.off()
+
+        # 打印角度数据
+        print("X-axis angle:", imu_obj.angle_x)
+        print("Y-axis angle:", imu_obj.angle_y)
+        print("Z-axis angle:", imu_obj.angle_z)
+        print("Free RAM:", gc.mem_free())
+
+        # 格式化并转发角度数据到上位机
+        angle_data = "{:.2f}, {:.2f}, {:.2f}\r\n".format(imu_obj.angle_x, imu_obj.angle_y, imu_obj.angle_z)
+        uart_pc.write(angle_data)
+
+        # 内存不足时触发垃圾回收
+        if gc.mem_free() < 220000:
+            gc.collect()
+
+except KeyboardInterrupt:
+    print("Program interrupted by user")
+finally:
+    LED.off()
+    print("LED off, program exited.")
+```
+
 ## 注意事项
 
-### 电气特性限制
+1. 校准要求：加速度校准和 Z 轴角度清零时，传感器必须保持水平/垂直且静止，否则校准结果无效
+2. 串口交叉连接：模块 MTX 对应 MCU UART_RX，模块 MRX 对应 MCU UART_TX，需注意交叉连接，避免收发方向错误
+3. 波特率切换：支持 115200 和 9600 波特率切换，发送波特率指令后需重新初始化 UART 对象
+4. 数据帧格式：IMU 输出数据帧以 0x55 为帧头，包含加速度（0x51）、角速度（0x52）、角度（0x53）三种类型，驱动自动识别并解析
+5. 资源占用：RecvData()方法为阻塞式调用，需注意在实时系统中合理安排调用频率
+6. 环境条件：避免在高温、高湿或强电磁干扰环境下使用，以免影响测量精度
 
-* **电压限制**：JY60 模块工作电压通常为 **3.3V 或 5V**（请以模块丝印或说明书为准），严禁超过标称电压，否则可能烧毁传感器芯片；UART 接口电平需与开发板匹配，必要时使用电平转换器。
-* **通信电流与接口**：UART 接口仅用于数据传输，电流极小，不能直接驱动大电流负载；避免在通信线上并联高功率器件。
-* **传感器损耗**：内部 MEMS 结构存在寿命限制，过大冲击或频繁剧烈振动可能导致零偏漂移或损坏；长期使用时应避免强烈机械冲击。
+## 联系方式
 
----
+如有任何问题或需要帮助，请通过以下方式联系开发者：
 
-### 硬件接线与配置注意事项
+📧 **邮箱**：liqinghsui@freakstudio.cn
 
-* **共地要求**：IMU 模块 **GND 必须与开发板 GND 共地**，否则 UART 信号会出现通信错误或数据异常。
-* **接线可靠性**：模块引脚较细，面包板测试时需确保插入稳固；长期使用建议焊接或采用杜邦端子连接。
-* **接口选择**：确认开发板的 **UART 引脚**是否正确配置，并与 JY60 模块对应；切勿将普通 GPIO 误作 UART 引脚。
-* **干扰防护**：通信信号线应尽量短且避免靠近电机、继电器等强电磁干扰源；必要时可采用屏蔽线或滤波电容提升抗干扰能力。
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
----
+## 许可协议
 
-### 环境影响
+```
+MIT License
 
-* **温度限制**：典型工作温度范围为 **-40℃ \~ 85℃**，超出此范围可能导致零偏漂移或测量异常。
-* **湿度限制**：高湿环境（相对湿度 >85% RH）容易造成电路板氧化或传感器受潮，影响测量精度与通信稳定性；必要时加装防潮外壳。
-* **振动与冲击防护**：JY60 对高频振动和冲击较为敏感，长期暴露可能导致零偏漂移或测量异常；安装时建议增加减震措施。
-* **磁干扰防护**：本模块主要依靠陀螺仪和加速度计计算姿态，不含磁力计，故不受磁场影响。但若使用扩展含磁力计的型号，应避免靠近强磁体。
+Copyright (c) 2026 FreakStudioCN
 
----
-### 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
----
-### 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
-
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
-
-**版权归 FreakStudio 所有。**
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

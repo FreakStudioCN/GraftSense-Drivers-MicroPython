@@ -1,6 +1,13 @@
-# 震动马达驱动 - MicroPython版本
+# GraftSense-基于 MOS 管的震动马达模块（MicroPython）
+
+# GraftSense-基于 MOS 管的震动马达模块（MicroPython）
+
+# GraftSense 震动马达模块（基于 MOS 管）MicroPython 驱动
+
+---
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -15,162 +22,113 @@
 ---
 
 ## 简介
-震动马达（又称振动电机、偏心马达）是一种通过偏心转子高速旋转产生离心力，从而实现振动效果的小型执行器，广泛应用于智能穿戴设备（如手环、手表）、游戏手柄、振动反馈设备、告警装置、医疗设备（如按摩仪）等场景。该马达具有体积小、功耗低、控制简单等特点，通过PWM（脉冲宽度调制）可实现振动强度的精准调节。
 
-本项目提供基于MicroPython的驱动代码及示例程序，支持震动马达的开关控制、PWM强度调节（0~1023级）、状态切换与查询，针对树莓派Pico优化PWM兼容性（10位占空比转16位输出），封装标准化接口，方便开发者快速集成到各类振动反馈场景中。
-
-> **注意**：不同型号震动马达的额定电压/电流不同，需匹配合理的驱动电路（如小功率可直驱，大功率需MOS管），避免开发板GPIO引脚过载；长时间高功率运行可能导致马达发热，需控制连续工作时间。
+本项目是 **基于 MOS 管的震动马达模块** 的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块，通过 PWM 信号控制 LCM1234A3523F 震动马达的开关与转速，支持触觉反馈、智能报警、设备提醒等场景的可靠驱动需求。
 
 ---
 
 ## 主要功能
-- **基础振动控制**：
-  - `on()`：马达全速振动（PWM占空比1023，对应最大振动强度）
-  - `off()`：马达停止振动（PWM占空比0）
-  - `toggle()`：切换马达状态（振动→停止/停止→振动），根据当前状态自动调用对应方法
-- **精准强度调节**：
-  - `set_brightness(duty)`：通过PWM设置振动强度，占空比范围0~1023（0%~100%强度），超出范围抛出`ValueError`
-  - 针对树莓派Pico优化：自动将10位占空比（0~1023）转换为16位PWM值（`duty×64`），适配MicroPython Pico的`duty_u16()`接口
-- **状态查询与硬件访问**：
-  - `get_state()`：返回马达当前状态（`True`=振动中，`False`=停止），便于业务逻辑判断
-  - `digital`属性：返回控制引脚的`Pin`对象，支持底层硬件配置（如引脚模式修改）
-  - `pwm`属性：返回PWM对象，支持自定义PWM参数（如动态调整频率）
-- **初始化安全配置**：默认初始化后马达为停止状态（PWM占空比0），避免上电误触发振动
-- **跨平台兼容**：核心逻辑仅依赖MicroPython标准库（`machine.Pin`、`machine.PWM`），经树莓派Pico验证，兼容多数支持MicroPython的开发板
+
+- **开关控制**：提供 `on()`（全速启动）、`off()`（停止）、`toggle()`（状态切换）三种基础控制方式
+- **PWM 强度调节**：支持 0–1023 级 PWM 占空比设置，实现马达转速的精准调节
+- **状态查询**：通过 `get_state()` 实时获取马达当前运行状态（震动中/停止）
+- **PWM 频率配置**：初始化时可自定义 PWM 频率（默认 1000Hz），适配不同马达特性
+- **硬件抽象**：封装底层 PWM 与 GPIO 操作，提供简洁易用的上层 API
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- 树莓派Pico/Pico W
-- 震动马达（如1027/130型微型震动马达，额定电压3.3V/5V，额定电流50mA~200mA）
-- （可选）NPN型MOS管（如SS8050，用于驱动大功率马达，若马达电流>100mA需配置）
-- （可选）限流电阻（MOS管栅极串联1kΩ电阻，或直驱时串联22Ω~100Ω电阻保护GPIO）
-- 杜邦线若干
-- （可选）3.3V/5V电源模块（若开发板GPIO供电不足，需外部供电）
 
-### 模块引脚说明（两种驱动方案）
-| 驱动方案       | 硬件组件         | 引脚/连接点       | 功能描述                                  | 连接说明                     |
-|----------------|------------------|-------------------|-------------------------------------------|--------------------------|
-| **直驱方案**   | 震动马达         | 正极              | 电源输入                                  | 连接开发板3.3V引脚（如Pico的Pin36） |
-|                | 震动马达         | 负极              | 电流输出                                  | 连接开发板GPIO引脚（如Pico的GP12）  |
-|                | NPN MOS管        | 栅极（G极）       | 控制信号输入                              | 串联1kΩ电阻后连接开发板GPIO引脚（GP6） |
-                    | 负极与开发板GND共地                       |
+- **GraftSense 震动马达模块 v1.0**（基于 AO3400A MOS 管驱动，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如树莓派 Pico RP2040、ESP32 等）
+- 引脚连接：
 
-> **说明**：
-> - 小功率马达（电流<50mA，如1027型3.3V马达）可采用直驱方案，GPIO直接控制负极通断；
-> - 中大功率马达（电流>100mA）必须使用MOS管驱动，避免GPIO引脚因过流烧毁。
+  - 模块 DOUT → MCU GPIO（如 GP6，用于 PWM 信号输入）
+  - VCC → 3.3V/5V 电源
+  - GND → MCU GND
+- 模块核心：以 AO3400A MOS 管为驱动核心，内置续流二极管（1N4007W）和限流电阻，保障电路安全
 
 ---
 
 ## 文件说明
-### vibration_motor.py
-实现震动马达的核心驱动逻辑，核心类`VibrationMotor`封装所有功能接口，针对树莓派Pico优化PWM兼容性，支持直驱与MOS管驱动两种方案。
 
-#### 类定义：`VibrationMotor`
-- **`__init__(pin: int, pwm_freq: int = 1000)`**  
-  初始化震动马达驱动：传入控制引脚编号（直驱时为马达负极引脚，MOS驱动时为MOS管G极引脚），配置引脚为输出模式；创建PWM对象并设置频率（默认1000Hz）；初始化PWM占空比为0（马达停止），`_state`状态设为`False`（停止）。  
-  *关键优化*：使用`duty_u16()`接口，自动适配树莓派Pico的16位PWM输出。
-- **`on() -> None`**  
-  启动马达全速振动：设置PWM占空比为`1023×64`（10位最大值转换为16位值），更新`_state`为`True`，无返回值。
-- **`off() -> None`**  
-  停止马达振动：设置PWM占空比为0，更新`_state`为`False`，无返回值。
-- **`toggle() -> None`**  
-  切换马达状态：若当前`_state`为`True`（振动中）则调用`off()`，若为`False`（停止）则调用`on()`，无返回值。
-- **`set_brightness(duty: int) -> None`**  
-  设置马达振动强度：校验`duty`是否在0~1023范围，超出则抛出`ValueError`；将`duty`转换为16位PWM值（`duty×64`）并写入，不改变`_state`状态（如“振动中”可从全速调为半速）。
-- **`get_state() -> bool`**  
-  查询马达当前状态：返回`_state`（`True`=振动中，`False`=停止），反映马达实际工作状态。
-- **`digital (property) -> Pin`**  
-  属性方法：返回绑定的控制引脚对象，支持底层硬件配置（如修改引脚拉电阻、中断配置）。
-- **`pwm (property) -> PWM`**  
-  属性方法：返回PWM对象，支持自定义PWM参数（如动态调整频率、停止PWM输出）。
-
-### main.py
-震动马达驱动功能测试程序，演示马达初始化、全速振动、半速振动、低速振动、停止等完整流程，支持键盘中断安全退出，同时提示REPL环境下的直接操作方法。
+| 文件名               | 功能描述                                                     |
+| -------------------- | ------------------------------------------------------------ |
+| `vibration_motor.py` | 驱动核心文件，定义 `VibrationMotor` 类，提供马达控制的所有 API |
+| `main.py`            | 测试与演示文件，包含全速、半速、低速运行演示函数及交互引导   |
 
 ---
 
 ## 软件设计核心思想
-### 硬件兼容性优化
-- **Pico PWM适配**：针对树莓派Pico的`duty_u16()`接口（16位占空比），自动将用户友好的10位占空比（0~1023）转换为16位值（`duty×64`），无需开发者手动计算，降低使用门槛
-- **双驱动方案兼容**：驱动逻辑不绑定特定硬件连接方式，既支持小功率直驱，也支持中大功率MOS管驱动，仅需根据马达功率调整硬件接线，软件无需修改
 
-### 易用性与安全性平衡
-- **简化控制接口**：通过`on()`/`off()`/`toggle()`实现基础振动控制，`set_brightness()`支持直观的强度调节，接口命名符合用户直觉，无需关注底层PWM细节
-- **参数合法性校验**：`set_brightness()`中严格限制占空比范围，防止无效值导致硬件异常或马达损坏
-- **上电默认停止**：初始化后PWM占空比设为0，避免上电误触发振动，减少设备启动时的意外反馈
-
-### 振动强度精准控制
-- **10位分辨率支持**：采用0~1023级占空比（10位），振动强度调节细腻，可满足不同场景需求（如穿戴设备的弱振动提醒、游戏手柄的强振动反馈）
-- **频率优化**：默认1000Hz PWM频率，兼顾马达响应速度与振动平稳性，避免低频导致的“卡顿感”或高频导致的马达过热
+1. **硬件抽象层**：将底层 PWM 与 GPIO 操作封装在 `VibrationMotor` 类中，上层调用无需关心硬件细节
+2. **状态管理**：通过 `_state` 属性维护马达运行状态，确保 `toggle()` 等方法的行为一致性
+3. **PWM 适配**：将 10 位占空比（0–1023）映射到 MicroPython 的 16 位 `duty_u16` 接口，兼容 RP2040 等平台
+4. **易用性优先**：提供 `demo_full()`、`demo_half()` 等演示函数，降低用户上手门槛
 
 ---
 
 ## 使用说明
-### 硬件接线（树莓派Pico + 直驱方案示例）
-| 硬件组件     | Pico GPIO 引脚 | 接线功能                                  |
-|----------|--------------|-------------------------------------------|
-| 信号       | GP6          | 振动控制信号（PWM输出）                    |
 
-> **注意**：
-> 1. 直驱方案仅适用于3.3V、电流<50mA的小功率马达，若马达额定电压为5V，需使用MOS管驱动并搭配5V电源
-> 2. 若未接限流电阻，首次测试时建议先使用低占空比（如`set_brightness(200)`），避免电流过大烧毁GPIO
-> 3. 所有硬件需共地，MOS管驱动时需确保电源负极与Pico GND可靠连接
+### 1. 驱动初始化
 
-### 软件依赖
-- **固件版本**：MicroPython v1.23+  
-- **内置库**：
-  - `machine.Pin`：用于GPIO引脚控制
-  - `machine.PWM`：用于PWM振动强度调节
-  - `time`：用于测试流程中的延时操作
-- **开发工具**：Thonny、PyCharm（带MicroPython插件）
+```python
+from vibration_motor import VibrationMotor
 
----
+# 初始化震动马达：DOUT接GP6，PWM频率默认1000Hz
+motor = VibrationMotor(pin=6, pwm_freq=1000)
+```
 
-### 安装步骤
-1. **烧录固件**：将MicroPython v1.23+固件烧录到树莓派Pico
-2. **硬件接线**：
-   - 小功率马达：按直驱方案连接马达正负极与GPIO引脚（可选串联限流电阻）
-   - 中大功率马达：按MOS管驱动方案连接电源、MOS管、马达与开发板（确保断电操作）
-3. **上传文件**：将`vibration_motor.py`和`main.py`上传到Pico的文件系统
-4. **配置引脚**：根据硬件接线修改`main.py`中`VibrationMotor`初始化的`pin`编号（默认使用GP12）
-5. **运行测试**：在开发工具中执行`main.py`，观察马达的振动状态与强度变化
+### 2. 核心控制方法
+
+| 方法                   | 功能描述                                              |
+| ---------------------- | ----------------------------------------------------- |
+| `on()`                 | 启动马达，以全速（PWM 占空比 1023）运行               |
+| `off()`                | 停止马达，PWM 占空比设为 0                            |
+| `toggle()`             | 切换马达状态（震动中 → 停止，停止 → 全速震动）      |
+| `set_brightness(duty)` | 设置震动强度，`duty` 范围 0–1023（0=停止，1023=全速） |
+| `get_state()`          | 返回当前状态：`True`=震动中，`False`=停止             |
 
 ---
 
 ## 示例程序
+
+### 基础控制演示
+
 ```python
-# MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/8/26 上午11:41
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 震动马达驱动测试文件
-
-# ======================================== 导入相关模块 =========================================
-
 import time
 from vibration_motor import VibrationMotor
 
-# ======================================== 全局变量 ============================================
+# 初始化马达
+motor = VibrationMotor(pin=6)
 
-# ======================================== 功能函数 ============================================
+# 全速运行2秒
+motor.on()
+print("Motor running at full speed...")
+time.sleep(2)
+motor.off()
+print("Motor stopped")
+
+# 半速运行2秒
+motor.set_brightness(512)
+print("Motor running at half speed...")
+time.sleep(2)
+motor.off()
+print("Motor stopped")
+
+# 切换状态
+motor.toggle()  # 启动
+time.sleep(1)
+motor.toggle()  # 停止
+```
+
+### 完整测试程序（来自 `main.py`）
+
+```python
+import time
+from vibration_motor import VibrationMotor
 
 def demo_full() -> None:
-    """
-    震动马达全速运行演示 2 秒。
-    Notes:
-        调用 motor.on() 开启全速，sleep 2 秒后关闭。
-        可用于 REPL 交互测试马达全速运行。
-
-    ==========================================
-
-    Demonstrate vibration motor running at full speed for 2 seconds.
-    Notes:
-        Uses motor.on() to run at full speed, then stops after 2 seconds.
-        Suitable for interactive REPL testing.
-    """
     print(">>> Motor running at full speed for 2 seconds")
     motor.on()
     time.sleep(2)
@@ -178,44 +136,13 @@ def demo_full() -> None:
     print(">>> Motor stopped")
 
 def demo_half() -> None:
-    """
-    震动马达半速运行演示 2 秒。
-
-    Notes:
-        调用 motor.set_brightness(512) 设置半速，sleep 2 秒后关闭。
-        可用于 REPL 交互测试马达中速运行。
-
-    ==========================================
-
-    Demonstrate vibration motor running at half speed for 2 seconds.
-
-    Notes:
-        Uses motor.set_brightness(512) for half speed, then stops after 2 seconds.
-        Suitable for interactive REPL testing.
-    """
     print(">>> Motor running at half speed for 2 seconds")
     motor.set_brightness(512)
     time.sleep(2)
     motor.off()
     print(">>> Motor stopped")
 
-
 def demo_low() -> None:
-    """
-    震动马达低速运行演示 2 秒。
-
-    Notes:
-        调用 motor.set_brightness(400) 设置低速，sleep 2 秒后关闭。
-        可用于 REPL 交互测试马达低速运行。
-
-    ==========================================
-
-    Demonstrate vibration motor running at low speed for 2 seconds.
-
-    Notes:
-        Uses motor.set_brightness(400) for low speed, then stops after 2 seconds.
-        Suitable for interactive REPL testing.
-    """
     print(">>> Motor running at low speed for 2 seconds")
     motor.set_brightness(400)
     time.sleep(2)
@@ -223,21 +150,6 @@ def demo_low() -> None:
     print(">>> Motor stopped")
 
 def show_methods() -> None:
-    """
-    打印 REPL 可用操作方法列表。
-
-    Notes:
-        显示 motor 对象的方法以及 demo_* 演示函数。
-        适合用户在 REPL 中快速了解可用操作。
-
-    ==========================================
-
-    Print the list of available REPL methods.
-
-    Notes:
-        Shows motor object methods and demo_* functions.
-        Useful for interactive REPL guidance.
-    """
     print("Available methods:")
     print("motor.on()")
     print("motor.off()")
@@ -249,82 +161,66 @@ def show_methods() -> None:
     print("demo_low()")
     print("show_methods()")
 
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
+# 上电延时
 time.sleep(3)
 print("FreakStudio:Vibration motor test")
 
-# 默认引脚 12，PWM 频率 1000Hz
-motor = VibrationMotor(pin=6, pwm_freq=1000)
+# 初始化马达
+motor = VibrationMotor(pin=6)
 
-# ========================================  主程序  ===========================================
-
+# 打印可用方法
 show_methods()
 
-
+# 执行演示
+demo_full()
+demo_half()
+demo_low()
 ```
+
 ---
+
 ## 注意事项
 
-### 硬件安全限制
-- **功率匹配**：
-  - 直驱方案：仅支持 3.3V、电流 <50mA 的小功率马达（如 1027 型），严禁直驱 5V 或电流> 100mA 的马达
-  - MOS 驱动方案：根据马达额定电流选择 MOS 管（如马达电流 200mA，选择最大漏极电流 > 500mA 的 MOS 管，预留安全余量）
-- **限流保护**：
-  - 直驱时必须串联 22Ω~100Ω 限流电阻，防止马达堵转或启动瞬间电流过大烧毁 GPIO
-  - MOS 管栅极必须串联 1kΩ~10kΩ 电阻，限制 GPIO 输出电流，保护 MOS 管栅极
-- **发热控制**：
-  - 连续振动时间建议不超过 10 秒（大功率马达不超过 5 秒），避免马达过热导致寿命缩短
-  - 高占空比（>800）振动时，需定期暂停（如工作 5 秒、休息 10 秒），防止马达温度过高
+1. **PWM 占空比限制**：`set_brightness(duty)` 的 `duty` 必须在 0–1023 之间，超出范围将抛出 `ValueError`
+2. **散热与寿命**：避免马达长时间全速运行，防止过热导致寿命缩短或损坏
+3. **引脚配置**：模块 DOUT 为 PWM 输入引脚，需确保 MCU 引脚支持 PWM 功能（如 RP2040 的 GP6 支持 PWM）
+4. **默认状态**：初始化后马达默认处于停止状态，需主动调用 `on()` 或 `set_brightness()` 启动
+5. **硬件保护**：模块内置续流二极管和限流电阻，无需额外添加保护电路，但需避免电源反接
 
 ---
-
-### 硬件接线与配置注意事项
-- **电压匹配**：马达额定电压必须与供电电压一致（3.3V 马达接 3.3V，5V 马达接 5V），电压过高会烧毁马达，过低则振动无力
-- **共地要求**：MOS 管驱动时，电源负极、MOS 管 S 极、开发板 GND 必须严格共地，否则 PWM 信号会因电平漂移导致马达不振动或闪烁
-- **接线可靠性**：马达引脚较细，接线时需确保接触良好，避免虚接导致的振动不稳定；可焊接杜邦线或使用端子座固定
-- **抗干扰布线**：PWM 控制线路（GPIO→马达 / MOS 管）需短而粗，远离电机、继电器等强电磁干扰源，避免信号失真导致振动强度波动
-
----
-
-### 软件使用建议
-- **PWM 频率调整**：
-  - 常规场景：1000Hz~2000Hz，平衡马达振动平稳性与功耗
-  - 弱振动需求：可降低频率至 500Hz，配合低占空比（100~300）实现细腻振动
-  - 强振动需求：提高频率至 3000Hz，配合高占空比（800~1023）增强振动反馈
-- **强度调节逻辑**：
-  - 提醒场景（如穿戴设备）：占空比 100~300，避免振动过强影响用户体验
-  - 反馈场景（如游戏手柄）：占空比 500~1023，确保用户能清晰感知振动
-  - 避免频繁切换强度（间隔 < 50ms），减少 PWM 写入次数，降低系统资源占用
-- **中断安全**：驱动方法（`on()`/`set_brightness()`）非 ISR-safe，若需在中断中控制马达，需通过`micropython.schedule`调度到主线程执行
-- **资源释放**：长时间不使用马达时，除调用`off()`停止振动外，可手动停止 PWM（`motor.pwm.deinit()`）；重新使用前需重新初始化 PWM（`motor.pwm.init()`）
-
----
-
-### 环境影响
-- **温度限制**：震动马达最佳工作温度为 -10℃~60℃，高温环境（>60℃）会加速马达内部线圈老化，低温环境（<-10℃）会导致润滑油凝固，影响转动灵活性
-- **电压波动**：电源电压波动会直接影响振动强度，电池供电设备中需监测电压变化，通过`set_brightness()`动态补偿（如电压下降时适当提高占空比）
-- **振动传递**：马达安装时需固定牢固，避免因自身松动导致的额外噪音；可通过海绵垫、硅胶套等缓冲材料减少振动向设备主体的传递
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+Copyright (c) 2025 FreakStudio
 
-**版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
