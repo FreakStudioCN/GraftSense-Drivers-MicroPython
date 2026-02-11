@@ -98,7 +98,7 @@ class BH1750:
 
         Raises:
             TypeError: 当 address 不是 int 或 i2c 不是 I2C 实例时。
-            ValueError: 当 address 不在 0x03 - 0x77 范围时。
+            ValueError: 当 address 不是 0x23 或 0x5C时。
 
         Notes:
             初始化时会写入默认测量时间和测量模式。
@@ -113,15 +113,15 @@ class BH1750:
 
         Raises:
             TypeError: If address is not int or i2c is not an I2C instance.
-            ValueError: If address is out of range 0x03 - 0x77.
+            ValueError: If address is not 0x23 or 0x5C.
 
         Notes:
             Writes default measurement time and mode during initialization.
         """
         if not isinstance(address, int):
             raise TypeError("address must be an integer")
-        if not (0x21 <= address <= 0x5E):
-            raise ValueError("address must be in range 0x03 - 0x77")
+        if not (address == 0x23 or address == 0x5C):
+            raise ValueError("address must be 0x23 or 0x5C")
             # 避免直接导入 machine.I2C（兼容性），用 duck typing 检查
         if not hasattr(i2c, "writeto") or not hasattr(i2c, "readfrom_into"):
             raise TypeError("i2c must be a machine.I2C instance")
