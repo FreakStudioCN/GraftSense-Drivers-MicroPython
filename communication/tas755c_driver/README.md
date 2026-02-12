@@ -231,7 +231,7 @@ tas.send_data("http.request.test".encode())while True:if tas.has_data():print(ta
 ```
 MIT License
 
-Copyright (c) 2025 FreakStudio
+Copyright (c) 2026 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

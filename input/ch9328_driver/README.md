@@ -196,7 +196,7 @@ ch9328.type_text("Hello from Mode 3!")
 ```
 MIT License
 
-Copyright (c) 2025 FreakStudio
+Copyright (c) 2026 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

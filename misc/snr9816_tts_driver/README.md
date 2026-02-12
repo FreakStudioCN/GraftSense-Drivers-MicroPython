@@ -216,7 +216,7 @@ tts.synthesize_text("欢迎使用我司的TTS语音合[w0]成测试模块。请�
 ```
 MIT License
 
-Copyright (c) 2025 FreakStudio
+Copyright (c) 2026 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
