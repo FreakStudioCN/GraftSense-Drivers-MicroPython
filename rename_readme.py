@@ -1,3 +1,10 @@
+# Python env   : Python v3.12.0
+# -*- coding: utf-8 -*-
+# @Time    : 2026/2/12 下午6:36
+# @Author  : 李清水
+# @File    : rename_readme.py
+# @Description : 递归重命名项目中所有.md文件为README.md（同目录多文件自动加数字后缀）
+
 import os
 
 def rename_md_to_readme_recursive(root_folder):
