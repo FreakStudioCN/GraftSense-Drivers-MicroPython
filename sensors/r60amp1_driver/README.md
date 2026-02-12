@@ -245,12 +245,10 @@ finally:
 
 ## 许可协议
 
-本项目采用 MIT 开源许可协议：
-
 ```
 MIT License
 
-Copyright (c) [年份] FreakStudioCN
+Copyright (c) 2025 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -270,7 +268,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
----
-
-是否需要我帮你生成一份 **快速上手的接线与调试 checklist**，方便你直接打印使用？

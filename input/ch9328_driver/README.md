@@ -193,12 +193,10 @@ ch9328.type_text("Hello from Mode 3!")
 
 ## 许可协议
 
-本项目采用 MIT 开源许可协议，完整协议内容如下：
-
 ```
 MIT License
 
-Copyright (c) [年份] FreakStudioCN
+Copyright (c) 2025 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -218,5 +216,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
----

@@ -171,7 +171,7 @@ except KeyboardInterrupt:
 
 ## 许可协议
 
-```sql
+```
 MIT License
 
 Copyright (c) 2025 FreakStudio

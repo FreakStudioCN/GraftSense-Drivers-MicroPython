@@ -150,12 +150,10 @@ while True:
 
 ## 许可协议
 
-本项目采用 MIT License 开源协议，详见项目根目录下的 LICENSE 文件。
-
 ```
 MIT License
 
-Copyright (c) 2025 FreakStudioCN (ben0i0d / 李清水)
+Copyright (c) 2025 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

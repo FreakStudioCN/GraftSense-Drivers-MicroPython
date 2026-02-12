@@ -274,8 +274,6 @@ while True:
 
 ## 许可协议
 
-本项目采用 **MIT License** 开源协议，具体内容如下：
-
 ```
 MIT License
 

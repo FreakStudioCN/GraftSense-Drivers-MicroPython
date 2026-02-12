@@ -213,12 +213,10 @@ tts.synthesize_text("欢迎使用我司的TTS语音合[w0]成测试模块。请�
 
 ## 许可协议
 
-本项目采用 MIT 开源许可协议：
-
 ```
 MIT License
 
-Copyright (c) 2026 hogeiha
+Copyright (c) 2025 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -238,5 +236,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
----

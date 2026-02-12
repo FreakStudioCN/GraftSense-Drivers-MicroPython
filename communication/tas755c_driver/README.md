@@ -228,8 +228,6 @@ tas.send_data("http.request.test".encode())while True:if tas.has_data():print(ta
 
 ## 许可协议
 
-本项目采用 **MIT License** 开源协议，具体内容如下：
-
 ```
 MIT License
 
