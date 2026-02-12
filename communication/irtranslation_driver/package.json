@@ -3,32 +3,41 @@
   "version": "1.0.0",
   "description": "A MicroPython library to control irtranslation_driver",
   "author": "leeqingshui",
-  "author_email": "1069653183@qq.com",
-  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
   "urls": [
-    ["ir_rx/__init__.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_rx/__init__.py"],
-    ["ir_rx/acquire.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_rx/acquire.py"],
-    ["ir_rx/nec.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_rx/nec.py"],
-    ["ir_rx/print_error.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_rx/print_error.py"],
-    
-    ["ir_tx/__init__.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_tx/__init__.py"],
-    ["ir_tx/nec.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_tx/nec.py"],
-    ["ir_tx/rp2_rmt.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/communication/irtranslation_driver/code/ir_tx/rp2_rmt.py"]
-
-  ],
-  "deps": [
-
- ],
-  "long_description": "A MicroPython library to control irtranslation_driver ",
-  "long_description_content_type": "text/markdown",
-  "classifiers": [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "License :: MIT License",
-    "Operating System :: OS Independent"
-  ],
-  "python_requires": ">=3.12",
-  "extras_require": {
-    "micropython": ["machine", "time"]
-  }
+    [
+      "ir_rx/__init__.py",
+      "ir_rx/ir_rx/__init__.py"
+    ],
+    [
+      "ir_rx/acquire.py",
+      "ir_rx/ir_rx/acquire.py"
+    ],
+    [
+      "ir_rx/nec.py",
+      "ir_rx/ir_rx/nec.py"
+    ],
+    [
+      "ir_rx/print_error.py",
+      "ir_rx/ir_rx/print_error.py"
+    ],
+    [
+      "ir_tx/__init__.py",
+      "ir_tx/ir_tx/__init__.py"
+    ],
+    [
+      "ir_tx/nec.py",
+      "ir_tx/ir_tx/nec.py"
+    ],
+    [
+      "ir_tx/rp2_rmt.py",
+      "ir_tx/ir_tx/rp2_rmt.py"
+    ]
+  ]
 }
