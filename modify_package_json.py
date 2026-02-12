@@ -1,7 +1,13 @@
+# Python env   : Python v3.12.0
+# -*- coding: utf-8 -*-
+# @Time    : 2026/2/12 下午6:36
+# @Author  : 李清水
+# @File    : modify_package_json.py
+# @Description : 批量修改package.json文件，支持urls路径转换、字段标准化及备份清理
+
 import os
 import json
 import shutil
-
 
 def backup_file(file_path):
     """备份文件，生成 .bak 后缀的备份文件"""

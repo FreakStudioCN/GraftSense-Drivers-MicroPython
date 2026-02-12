@@ -3,24 +3,17 @@
   "version": "1.0.0",
   "description": "A MicroPython library to control ds1302 driver",
   "author": "leeqingshui",
-  "author_email": "1069653183@qq.com",
-  "url": "https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
   "urls": [
-    ["ds1302.py", "github:FreakStudioCN/GraftSense-Drivers-MicroPython/misc/ds1302_driver/code/ds1302.py"]
-  ],
-  "deps": [
-
- ],
-  "long_description": "A MicroPython library to control ds1302 driver",
-  "long_description_content_type": "text/markdown",
-  "classifiers": [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "License :: Other/Proprietary License",
-    "Operating System :: OS Independent"
-  ],
-  "python_requires": ">=3.12",
-  "extras_require": {
-    "micropython": ["machine", "time"]
-  }
+    [
+      "ds1302.py",
+      "code/ds1302.py"
+    ]
+  ]
 }
