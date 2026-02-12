@@ -59,7 +59,7 @@ def rename_md_to_readme_recursive(root_folder):
 # 请替换为你的根文件夹路径
 # Windows示例：root_folder = "C:\\Users\\你的用户名\\Desktop\\测试文件夹"
 # Linux/macOS示例：root_folder = "/Users/你的用户名/Desktop/测试文件夹"
-root_folder = "D:\GraftSense-Drivers-MicroPython"
+root_folder = "./"
 # ============================================================
 
 # 执行递归重命名
