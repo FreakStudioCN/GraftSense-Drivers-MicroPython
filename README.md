@@ -124,3 +124,5 @@ python rename_readme.py
 - GitHub 仓库：[https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython](https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython)
 
 如有问题或建议，欢迎提交 Issue 或 Pull Request 参与贡献！
+
+![图片描述](docs/freakstudio.png)
