@@ -1,6 +1,9 @@
-# TCS34725 颜色识别模块驱动 - MicroPython版本
+# GraftSense TCS34725 颜色识别模块 (MicroPython)
+
+# GraftSense TCS34725 颜色识别模块驱动(MicroPython)
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -15,228 +18,179 @@
 ---
 
 ## 简介
-TCS34725是一款高精度RGB颜色识别传感器，集成了红外滤光片和16位ADC，可精确检测环境光和物体表面颜色。该模块支持I2C通信接口，工作电压范围为2.7V-3.6V，适用于颜色检测、光强度测量、产品分拣、环境光适应等场景。
 
-本项目提供基于MicroPython的TCS34725模块驱动代码及测试程序，实现传感器初始化、参数配置、颜色数据采集与转换等功能，可直接与支持MicroPython的开发板（如树莓派Pico）配合使用。
+本项目为 **GraftSense TCS34725-based Color Recognition Module V1.1** 提供了完整的 MicroPython 驱动支持，基于 TCS34725 芯片实现高精度 RGB 颜色识别与环境光数据采集。驱动支持传感器激活 / 关闭、积分时间与增益调节、原始 RGBC 数据读取及色温和亮度转换，并提供中断阈值配置功能，内置补光电路可改善暗光环境下的检测效果，适用于颜色分类实验、智能设备色彩感知、工业检测颜色辨别等场景，为颜色感知类应用提供精准的数字信号交互能力。
 
 ---
 
 ## 主要功能
-- 传感器基础控制：支持激活/休眠模式切换、强制采样触发
-- 参数灵活配置：可设置积分时间（6.5ms-700ms）和增益（1x/4x/16x/60x）
-- 数据采集功能：获取原始RGB清晰值（R/G/B/C）和红外值（IR）
-- 颜色转换处理：支持RGB值转HSV格式、计算色温（CCT）和光照强度（Lux）
-- 阈值检测功能：可设置低/高阈值，实现颜色触发报警功能
-- 多平台兼容：适配支持MicroPython的各类开发板，无需修改核心代码
+
+- ✅ 支持 I2C 通信，默认地址 0x29，兼容 3.3V/5V 电平
+- ✅ 提供传感器激活 / 关闭控制，可自动管理补光 LED 状态
+- ✅ 支持积分时间（2.4~614.4ms）与增益（1/4/16/60）调节，平衡检测精度与灵敏度
+- ✅ 可读取原始 RGBC 四通道数据，或转换为相关色温（CCT）与亮度（Lux）
+- ✅ 提供中断阈值配置功能，支持持续周期与上下阈值设置，便于触发式检测
+- ✅ 内置补光控制电路，可通过拨码开关打开补光，改善暗光环境检测效果
+- ✅ 提供辅助函数，支持将原始 RGBC 数据转换为标准 RGB 值或 HTML 颜色代码
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- 支持MicroPython的开发板（如树莓派Pico/Pico W）
-- TCS34725颜色识别模块（带I2C接口和LED补光灯）
-- 杜邦线（公对母，至少4根）
-- （可选）面包板（便于临时接线测试）
-- （可选）3.3V电源模块（开发板供电不足时使用）
 
-### 模块引脚说明
-| TCS34725模块引脚 | 功能描述 | 开发板连接建议 |
-|------------------|----------|---------------|
-| VCC              | 电源正极 | 3.3V |
-| GND              | 电源负极 | GND（需与开发板共地） |
-| SDA              | I2C数据引脚 | 开发板I2C SDA引脚（如树莓派Pico的GP4） |
-| SCL              | I2C时钟引脚 | 开发板I2C SCL引脚（如树莓派Pico的GP5） |
-| LED              | 补光灯控制引脚 | 开发板GPIO（可选，如不接则默认常亮） |
+1. **核心硬件**：GraftSense TCS34725-based Color Recognition Module V1.1（基于 TCS34725 芯片，内置补光 LED 与 DC-DC 5V 转 3.3V 电路）
+2. **主控设备**：支持 MicroPython v1.23.0 及以上版本的开发板（如树莓派 Pico、ESP32 等）
+3. **接线配件**：Grove 4Pin 线或杜邦线，用于连接模块的 SDA、SCL、GND、VCC 引脚
+4. **电源**：3.3V~5V 稳定电源（模块内置电平转换电路，兼容两种供电方式）
 
 ---
 
 ## 文件说明
-### 1. main.py
-核心测试文件，包含`TCS34725`类及测试逻辑，主要功能如下：
 
-- **核心类 `TCS34725`**：封装传感器控制逻辑
-  - `__init__(self, i2c, address=0x29)`：初始化传感器；参数`i2c`为MicroPython的I2C对象，`address`为传感器I2C地址（默认0x29）
-  - `activate(self)`：激活传感器（从休眠模式唤醒）
-  - `deactivate(self)`：使传感器进入休眠模式（低功耗）
-  - `set_integration_time(self, it)`：设置积分时间（影响采样精度和响应速度）
-  - `set_gain(self, gain)`：设置增益（影响灵敏度，低光环境需提高增益）
-  - `get_raw_data(self)`：获取原始RGBIR数据（返回元组：(clear, red, green, blue, ir)）
-  - `calculate_colour_temperature(self, r, g, b)`：计算色温（CCT）
-  - `calculate_lux(self, r, g, b)`：计算光照强度（Lux）
-  - `rgb_to_hsv(self, r, g, b)`：将RGB值转换为HSV格式
-  - `set_interrupt_thresholds(self, low, high)`：设置中断阈值
-  - `clear_interrupt(self)`：清除中断标志
-
-- **测试逻辑**：
-  - 初始化I2C总线和传感器对象
-  - 配置积分时间和增益参数
-  - 循环采集颜色数据并打印（原始RGB值、色温、光照强度、HSV值、HEX颜色码）
-  - 支持键盘中断（Ctrl+C）终止程序
+表格
 
 ---
 
 ## 软件设计核心思想
-1. **硬件抽象层设计**：将传感器寄存器操作封装在类方法中，隐藏底层I2C通信细节，用户无需了解寄存器地址即可操作
-2. **参数自适应配置**：通过积分时间和增益组合，实现不同光照环境下的最佳采样效果（强光用短积分时间+低增益，弱光用长积分时间+高增益）
-3. **数据转换标准化**：提供RGB到HSV、HEX的转换功能，将原始传感器数据转换为更易理解的颜色格式
-4. **低功耗优化**：支持休眠/激活模式切换，闲置时可进入休眠模式降低功耗（电流从12mA降至0.5mA）
-5. **异常处理机制**：对I2C通信错误、参数范围超限等情况进行捕获和处理，提高程序稳定性
+
+1. **寄存器抽象**：通过 `_register8()` 和 `_register16()` 方法封装 TCS34725 寄存器读写操作，隐藏底层 I2C 通信细节，提供简洁的上层接口
+2. **状态机管理**：通过 `active()` 方法统一管理传感器电源与 ADC 使能状态，自动控制补光 LED 开关，简化用户操作
+3. **参数校验**：对积分时间、增益、中断阈值等参数进行合法性校验，避免非法值导致传感器工作异常
+4. **数据转换**：内置 RGBC 到 XYZ 颜色空间的线性变换及色温近似算法，支持直接输出色温和亮度，无需用户额外计算
+5. **中断支持**：提供完整的中断阈值配置与清除接口，适配触发式检测场景，降低 CPU 占用
 
 ---
 
 ## 使用说明
-### 1. 硬件接线
-1. 确认开发板I2C引脚（如树莓派Pico的GP4=SDA，GP5=SCL）
-2. 连接电源引脚：模块VCC→开发板3.3V，模块GND→开发板GND
-3. 连接I2C引脚：模块SDA→开发板SDA，模块SCL→开发板SCL
-4. （可选）连接LED引脚：模块LED→开发板GPIO（如GP6），用于控制补光灯
 
-### 2. 软件准备
-- 烧录MicroPython固件到开发板（推荐v1.20.0及以上版本）
-- 安装支持MicroPython的开发工具（如Thonny、uPyCraft）
+### 环境准备
 
-### 3. 程序运行
-1. 将`main.py`文件上传到开发板根目录
-2. 连接开发板到电脑，打开开发工具并选择对应端口
-3. 运行程序，传感器将开始采集颜色数据并通过串口输出
+- 在开发板上烧录 **MicroPython v1.23.0+** 固件
+- 将 `tcs34725_color.py` 上传至开发板文件系统
+
+### 硬件连接
+
+- 使用 Grove 线或杜邦线将模块的 **SDA** 引脚连接至开发板指定 GPIO 引脚（如树莓派 Pico 的 GP4）
+- 将模块的 **SCL** 引脚连接至开发板指定 GPIO 引脚（如树莓派 Pico 的 GP5）
+- 连接 `GND` 和 `VCC` 引脚，确保 3.3V~5V 供电稳定
+- 若需补光，可通过模块上的拨码开关打开补光电路
+
+### 代码配置
+
+```python
+import machine
+from tcs34725_color import TCS34725, html_hex
+
+# 初始化 I2C 总线
+i2c = machine.I2C(id=0, sda=machine.Pin(4), scl=machine.Pin(5), freq=400000)
+
+# 初始化 TCS34725 传感器（地址 0x29，补光 LED 引脚为 GP25）
+sensor = TCS34725(i2c, address=0x29, led_pin=25)
+
+# 设置积分时间 50ms，增益 4x
+sensor.integration_time(50)
+sensor.gain(4)
+```
+
+### 数据读取
+
+```python
+# 读取原始 RGBC 数据
+r, g, b, c = sensor.read(raw=True)
+print(f"Raw RGBC: R={r}, G={g}, B={b}, C={c}")
+
+# 读取色温和亮度
+cct, lux = sensor.read()
+print(f"Color Temperature: {cct:.2f}K, Illuminance: {lux:.2f}")
+
+# 转换为 HTML 颜色代码
+rgb_data = sensor.read(raw=True)
+hex_color = html_hex(rgb_data)
+print(f"HTML Color: #{hex_color}")
+```
 
 ---
 
 ## 示例程序
-以下是`main.py`中的核心测试代码片段：
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/16 下午8:17
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 基于TCS34725的颜色识别模块驱动文件测试
-
-# ======================================== 导入相关模块 =========================================
-
+import machine
 import time
-from machine import I2C, Pin
-from tcs34725_color import TCS34725, html_rgb, html_hex
+from tcs34725_color import TCS34725, html_hex
 
-# ======================================== 全局变量 ============================================
+# 初始化 I2C
+i2c = machine.I2C(id=0, sda=machine.Pin(4), scl=machine.Pin(5), freq=400000)
 
-tcs_addr = None
-# ======================================== 功能函数 ============================================
+# 初始化传感器，启用补光 LED
+sensor = TCS34725(i2c, address=0x29, led_pin=25)
+sensor.active(True)  # 激活传感器并点亮补光 LED
 
-# ======================================== 自定义类 ============================================
+# 配置检测参数
+sensor.integration_time(100)  # 积分时间 100ms
+sensor.gain(16)               # 增益 16x
 
-# ======================================== 初始化配置 ===========================================
+try:
+    while True:
+        # 读取颜色数据
+        r, g, b, c = sensor.read(raw=True)
+        cct, lux = sensor.read()
+        hex_color = html_hex((r, g, b, c))
+        
+        # 打印结果
+        print(f"RGBC: R={r:4d}, G={g:4d}, B={b:4d}, C={c:4d} | "
+              f"CCT: {cct:5.1f}K, Lux: {lux:6.1f} | "
+              f"Color: #{hex_color}")
+        
+        time.sleep(1)
 
-time.sleep(3)
-print("FreakStudio:test TCS34725 color recognition sensor")
-# 根据硬件修改引脚
-i2c = I2C(0, scl=Pin(1), sda=Pin(0), freq=100000)
-# 开始扫描I2C总线上的设备，返回从机地址的列表
-devices_list:list[int] = i2c.scan()
-print('START I2C SCANNER')
-# 若devices list为空，则没有设备连接到I2C总线上
-if len(devices_list) == 0:
-    # 若非空，则打印从机设备地址
-    print("No i2c device !")
-else:
-    print('i2c devices found:', len(devices_list))
-for device in devices_list:
-    if 0x60 <= device <= 0x7A:
-        print("I2c hexadecimal address:", hex(device))
-        tcs_addr = device
-
-sensor = TCS34725(i2c, tcs_addr)
-# 获取并打印传感器 ID
-led = Pin(2, Pin.OUT)
-sensor_id = sensor.sensor_id()
-print(f"Sensor ID: 0x{sensor_id:02X}")
-time.sleep(3)
-# 激活
-print("Testing sensor activation...")
-sensor.active(True, led)
-print("Sensor activated:", sensor.active())
-time.sleep(3)
-
-# 积分时间
-print("Testing integration time setting...")
-sensor.integration_time(24.0)  # 设置 24ms
-print("Integration time set to:", sensor.integration_time(), "ms")
-time.sleep(3)
-
-print("Testing gain setting...")
-# 设置增益为 4
-sensor.gain(4)
-print("Gain set to:", sensor.gain(None))
-time.sleep(3)
-
-print("Testing threshold setting...")
-# 设置阈值  小于100和大于2000，连续五次超范围触发中断
-sensor.threshold(cycles=5, min_value=100, max_value=2000)
-print("Threshold set. Reading back values...")
-print("Threshold (cycles, min, max):", sensor.threshold())
-time.sleep(3)
-
-# ========================================  主程序  ============================================
-
-while True:
-    try:
-        # 数据读取测试
-        print("Testing color and lux data reading...")
-        data_raw = sensor.read(raw=True)
-        print("Raw data (R, G, B, C):", data_raw)
-        # 色温和光照强度
-        cct, lux = sensor.read(raw=False)
-        print(f"Calculated CCT: {cct:.2f} K, Lux: {lux:.2f}")
-        time.sleep(3)
-        """
-        # 中断测试
-        print("Testing interrupt clear...")
-        print("Interrupt status before clear:", sensor.interrupt())
-        sensor.interrupt(False)
-        print("Interrupt cleared. Status now:", sensor.interrupt())
-        time.sleep(3)
-        """
-        # HTML RGB / HEX 测试
-        print("Testing html_rgb and html_hex conversion...")
-        rgb = html_rgb(data_raw)
-        hex_color = html_hex(data_raw)
-        print("RGB values:", rgb)
-        print("HEX string:", hex_color)
-        time.sleep(3)
-    except Exception as e:
-        print(" stopping program...")
-
-
+except KeyboardInterrupt:
+    sensor.active(False)  # 关闭传感器并熄灭补光 LED
+    print("Color sensing stopped.")
 ```
----
-## 注意事项
-- **电源要求**：TCS34725 模块仅支持 3.3V 供电，严禁接 5V 电源，否则会烧毁传感器
-- **I2C 地址冲突**：模块默认 I2C 地址为 0x29，若与其他 I2C 设备地址冲突，需检查硬件接线或更换设备
-- **环境光干扰**：检测颜色时应避免强光直射或杂散光干扰，必要时使用补光灯（通过 LED 引脚控制）
-- **积分时间与增益选择**：
-  - 强光环境：建议使用短积分时间（如 6.5ms）+ 低增益（1x）
-  - 弱光环境：建议使用长积分时间（如 700ms）+ 高增益（60x）
-- **校准需求**：高精度颜色检测前需进行白平衡校准（可通过白色物体采集数据进行修正）
-- **连接线长度**：I2C 连接线不宜过长（建议≤20cm），否则可能导致通信不稳定~~~~
 
 ---
+
+## 注意事项
+
+1. **地址与电平**：模块默认 I2C 地址为 0x29，仅支持 3.3V 通信，5V 主控需确保引脚电平兼容
+2. **补光使用**：补光电路可通过拨码开关独立控制，也可通过 `led_pin` 参数由软件控制，避免长时间高亮度补光导致功耗过高
+3. **积分时间与增益**：积分时间越长、增益越大，检测精度越高，但响应速度越慢，需根据场景平衡配置
+4. **环境干扰**：强光或多光源环境可能影响颜色识别精度，建议在均匀光照条件下使用，或通过补光电路稳定光照
+5. **中断配置**：中断阈值设置后，需通过 `interrupt(False)` 手动清除中断标志，避免重复触发
+
+---
+
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：https://github.com/FreakStudioCN 
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 machine 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+```sql
+MIT License
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。 
-- **说明** — 代码含参考部分,出现非技术问题和署名作者无关。  
-**版权归 FreakStudio 所有。**
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

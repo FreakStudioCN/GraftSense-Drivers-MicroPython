@@ -1,6 +1,9 @@
-# TTL 转 RS485 模块驱动与测试程序 - MicroPython版本
+# GraftSense-隔离型 TTL 转 RS485 模块（MicroPython）
+
+# GraftSense-隔离型 TTL 转 RS485 模块（MicroPython）
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -12,259 +15,151 @@
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
----
-
 ## 简介
-TTL 转 RS485 模块是一种常用的串行通信转换设备，可将 TTL 电平信号转换为 RS485 差分信号，显著提升通信距离（最远可达数百米）和抗干扰能力，广泛应用于工业控制、智能家居、远程数据采集等场景。
 
-本项目提供基于 MicroPython 的 TTL 转 RS485 模块驱动代码（`ttl_rs485.py`）及完整测试程序（`main.py`），支持半双工通信、Modbus CRC16 校验、数据收发与回传验证，适配多种 MicroPython 兼容开发板，便于开发者快速实现远距离串行通信功能。
-
-> **注意**：本驱动适用于半双工 RS485 通信场景，暂不支持全双工模式；不适用于对通信实时性要求极高的安全关键领域（如医疗设备、航空航天控制）。
-
----
+本驱动是 GraftSense 项目的一部分，专为 MicroPython 环境设计，用于控制隔离型 TTL 转 RS485 通信模块。它封装了模块的 UART 通信逻辑，提供简洁的 API 实现串口配置与环回测试，适配工业总线通信、电子 DIY 远程数据传输、嵌入式多设备联网等场景。模块内置信号隔离与电源滤波电路，具备强抗干扰能力，是长距离、多设备 RS485 通信的理想选择。
 
 ## 主要功能
-- **完整通信能力**：
-  - 基础数据发送（`send` 方法）与阻塞读取（`read` 方法）
-  - 半双工核心操作（`write_then_read` 方法），先发送后读取
-  - 输入缓冲区清空（`flush_input` 方法），避免数据残留干扰
-- **Modbus 适配**：内置 `crc16_modbus` 静态方法，支持 Modbus/RTU 协议的 CRC16 校验计算
-- **灵活配置**：
-  - 可自定义写后额外等待时间（`set_turnaround` 方法），适配不同模块响应速度
-  - 支持调试模式，打印收发数据详情，便于问题排查
-  - 可选 UART 资源清理（`close` 方法），优化资源占用
-- **跨平台兼容**：仅依赖 MicroPython 标准库（`machine.UART`、`time`），支持树莓派 Pico、ESP32、ESP8266 等开发板
-- **自动适配**：初始化时可自动读取 UART 波特率，无需手动重复配置
 
----
+- ✅ UART 灵活配置：支持自定义串口波特率、引脚映射，适配 Raspberry Pi Pico/ESP32 等不同开发板
+- ✅ 环回测试验证：实现数据自发自收，快速验证模块通信链路完整性
+- ✅ 数据编解码收发：支持字符串/字节流的 UTF-8 编码发送与解码接收，避免乱码
+- ✅ 通信状态检测：实时检测串口接收状态，直观提示连接异常
+- ✅ 安全资源管理：捕获键盘中断信号，安全终止测试流程并释放串口资源
 
 ## 硬件要求
-### 推荐测试硬件
-- MicroPython 兼容开发板（如树莓派 Pico/Pico W、ESP32、ESP8266）
-- 隔离型 TTL 转 RS485 模块（如基于 MAX485、SN75176 芯片的模块）
-- 杜邦线若干
-- （可选）USB 转 RS485 模块（用于辅助调试电脑与开发板的 RS485 通信）
 
-### 模块引脚说明
-| TTL 转 RS485 模块引脚 | 功能描述 | 开发板连接建议 |
-|-----------------------|----------|----------------|
-| VCC                   | 电源正极（3.3V-5V，需与模块规格匹配） | 开发板 3.3V 或 5V 引脚 |
-| GND                   | 电源负极 | 开发板 GND 引脚（共地） |
-| TX                    | TTL 电平发送引脚 | 开发板 UART RX 引脚（交叉通信） |
-| RX                    | TTL 电平接收引脚 | 开发板 UART TX 引脚（交叉通信） |
-| DE                    | 发送使能引脚（高电平有效） | （部分模块自动控制，无需接线；手动控制时接开发板 GPIO 引脚） |
-| RE                    | 接收使能引脚（低电平有效） | （部分模块与 DE 短接，同 DE 引脚连接逻辑） |
-| A                     | RS485 差分信号 A 端 | 与通信对方模块的 A 端连接 |
-| B                     | RS485 差分信号 B 端 | 与通信对方模块的 B 端连接 |
-
----
+1. 核心硬件：GraftSense 隔离型 TTL 转 RS485 模块（带 A+/B-差分接口、电源指示灯）
+2. 主控设备：支持 MicroPython v1.23.0 及以上版本的开发板（Raspberry Pi Pico/ESP32 等）
+3. 接线配件：杜邦线（UART 串口/电源连接）、双绞线（RS485 总线传输，降低干扰）
+4. 电源：5V 稳定直流电源（模块内置 DC-DC 转换，工作电流约 50mA）
+5. 可选配件：120Ω 终端电阻（RS485 总线两端使用，避免信号反射）
 
 ## 文件说明
-### 1. ttl_rs485.py
-核心驱动文件，包含 `TTL_RS485` 类，封装 TTL 转 RS485 模块的所有操作接口，具体类与方法说明如下：
 
-| 类/方法 | 类型 | 功能描述 |
-|---------|------|----------|
-| `TTL_RS485` | 核心类 | 驱动隔离型 TTL 转 RS485 模块，提供半双工通信、CRC16 计算等完整功能 |
-| `__init__(uart: UART, baud: int = None, turnaround_ms: int = None, debug: bool = False)` | 构造方法 | 初始化驱动实例：<br>- `uart`：已配置的 UART 实例（需提前指定 TX/RX 引脚、波特率等）<br>- `baud`：波特率（可选，默认自动读取 UART 波特率或使用 115200）<br>- `turnaround_ms`：写后额外等待时间（可选，默认基于波特率自动估算）<br>- `debug`：是否启用调试模式（可选，默认关闭） |
-| `send(data: bytes) -> int` | 实例方法 | 直接向 UART 发送字节数据，返回实际发送的字节数；调试模式下打印发送详情 |
-| `read(nbytes: int = 0, timeout_ms: int = 1000) -> bytes` | 实例方法 | 阻塞读取 UART 数据：<br>- `nbytes`：目标读取字节数（0 表示读取所有可用字节）<br>- `timeout_ms`：读取超时时间（默认 1000ms）<br>返回读取到的字节（空字节表示超时或无数据）；调试模式下打印读取详情 |
-| `write_then_read(tx: bytes, rx_expected: int = 0, timeout_ms: int = 1000) -> bytes` | 实例方法 | 半双工核心操作：先发送 `tx` 数据，等待发送完成+额外等待时间后，读取数据；<br>- `rx_expected`：期望读取的字节数（0 表示读取所有可用字节）<br>- `timeout_ms`：读取超时时间（默认 1000ms）<br>返回读取到的字节 |
-| `flush_input() -> None` | 实例方法 | 清空 UART 输入缓冲区，避免历史残留数据干扰后续读取；调试模式下打印清空提示 |
-| `set_turnaround(ms: int) -> None` | 实例方法 | 自定义写后额外等待时间（单位：ms），适配不同模块的响应延迟；调试模式下打印配置结果 |
-| `crc16_modbus(data: bytes) -> int` | 静态方法 | 计算 Modbus/RTU 协议的 CRC16 校验值，输入待校验字节数据，返回 16 位 CRC 整数 |
-| `close(deinit_uart: bool = False) -> None` | 实例方法 | 资源清理：<br>- `deinit_uart`：是否调用 `uart.deinit()` 释放 UART 资源（可选，默认不释放）<br>调试模式下打印关闭提示；注意：`uart.deinit()` 并非所有 MicroPython 端口都支持 |
-
-### 2. main.py
-测试主程序，支持「发送端（master）」与「接收端（slave）」两种角色，可直接运行验证模块通信功能：
-- 无自定义类，核心逻辑通过调用 `TTL_RS485` 类实现
-- 初始化时配置 UART 接口（指定 TX/RX 引脚、波特率 115200 等参数）
-- 「发送端（master）」模式：循环发送带计数的测试数据，接收回传数据并验证一致性
-- 「接收端（slave）」模式：持续监听接收数据，收到数据后立即回传，实现数据 echo 功能
-- 支持键盘中断（Ctrl+C）停止程序，并自动调用 `close` 方法清理资源
-
----
+| 文件名         | 功能说明                                                     |
+| -------------- | ------------------------------------------------------------ |
+| `ttl_rs485.py` | 核心驱动文件，封装 UART 初始化、数据收发、环回测试等核心逻辑 |
+| `main.py`      | 环回测试示例程序，可直接运行验证模块通信功能                 |
+| `README.md`    | 模块使用说明文档，包含硬件接线、API 使用、注意事项等         |
+| `datasheet/`   | 模块硬件规格书、引脚定义图、电路原理图（如有）               |
 
 ## 软件设计核心思想
-### 1. 分层解耦设计
-- 底层：依赖 MicroPython 标准 `UART` 类实现硬件通信，不重复造轮子
-- 中层：`TTL_RS485` 类封装半双工逻辑、CRC 校验、缓冲区管理等核心能力，对外提供统一接口
-- 高层：`main.py` 作为应用层，通过调用中层接口实现具体测试场景，便于开发者参考扩展
 
-### 2. 半双工通信优化
-- 自动估算发送耗时：基于波特率和数据长度计算发送所需时间，确保发送完成后再切换到接收状态
-- 可配置等待时间：提供 `set_turnaround` 方法，允许开发者根据模块实际响应速度调整，避免因模块延迟导致数据丢失
-
-### 3. 数据可靠性保障
-- 超时机制：`read` 和 `write_then_read` 方法均支持超时配置，避免程序因无数据接收而永久阻塞
-- CRC 校验：内置 Modbus/RTU 标准 CRC16 计算，适配工业常用通信协议，便于扩展到实际项目
-- 缓冲区清理：`flush_input` 方法可主动清空残留数据，避免历史数据干扰当前通信
-
-### 4. 易用性与可调试性
-- 调试模式：启用后打印收发数据的十六进制格式，直观排查通信问题
-- 自动适配：初始化时自动读取 UART 波特率，减少手动配置步骤
-- 角色切换：`main.py` 中通过修改 `role` 变量即可切换发送/接收模式，无需修改核心逻辑
-
----
+1. **UART 抽象封装**：将串口初始化、数据收发封装为通用方法，隐藏不同开发板的硬件差异，提升代码复用性
+2. **上电稳定机制**：初始化前添加 3 秒延时，等待模块电源滤波电路与信号隔离芯片稳定
+3. **统一编解码**：所有字符串数据均使用 UTF-8 编码/解码，避免不同设备间的字符集乱码问题
+4. **异常容错处理**：串口接收添加短延时确保数据完整，捕获 `KeyboardInterrupt` 保证程序安全退出
+5. **硬件无关设计**：仅依赖 MicroPython 标准 `UART` 和 `Pin` 接口，无需修改代码即可适配不同主控板
 
 ## 使用说明
-### 1. 硬件接线（树莓派 Pico 示例）
-以「树莓派 Pico + 自动控制 DE/RE 的 TTL 转 RS485 模块」为例，接线如下：
 
-| TTL 转 RS485 模块引脚 | 树莓派 Pico 引脚    | 备注 |
-|------------------|----------------|------|
-| VCC              | 3.3V           | 若模块支持 5V，也可接 Pico 5V 引脚 |
-| GND              | GND            | 必须共地，否则通信不稳定 |
-| TX/DI            | GP5（UART 1 RX） | Pico UART 1 的 RX 引脚，与模块 TX 交叉连接 |
-| RX/RO            | GP4（UART 1 TX） | Pico UART 1 的 TX 引脚，与模块 RX 交叉连接 |
-| DE/RE            | 无需接线           | 模块自动控制发送/接收使能 |
-| A                | 对方模块 A 端       | 与另一块 RS485 模块的 A 端直接连接 |
-| B                | 对方模块 B 端       | 与另一块 RS485 模块的 B 端直接连接 |
+### 环境准备
 
-> **注意**：
-> - 若使用手动控制 DE/RE 的模块，需将 DE/RE 引脚接开发板 GPIO 引脚，并在代码中添加引脚电平控制逻辑（发送时置高，接收时置低）。
-> - 多设备通信时，所有模块的 A 端互联、B 端互联，且必须共地。
+1. 确保开发板已刷入 MicroPython v1.23.0 及以上版本固件
+2. 通过 Thonny/ampy 等工具，将 `ttl_rs485.py` 和 `main.py` 上传至开发板根目录
 
-### 2. 软件依赖
-- **固件版本**：MicroPython v1.23.0 及以上（需支持 `machine.UART` 的 `any()`、`init()` 方法）
-- **内置库**：
-  - `machine`：用于创建 UART 实例、配置 GPIO 引脚（仅手动控制 DE/RE 时需 GPIO）
-  - `time`：用于延时、超时计时、 ticks 计算
-- **开发工具**：Thonny、PyCharm（带 MicroPython 插件）或 VS Code（带 PyMakr 插件）
+### 硬件接线
 
-### 3. 安装步骤
-1. **烧录固件**：将 MicroPython 固件烧录到目标开发板（参考开发板官方文档）。
-2. **上传文件**：将 `ttl_rs485.py` 和 `main.py` 两个文件上传到开发板根目录。
-3. **配置角色**：打开 `main.py`，修改 `role` 变量：
-   - 作为发送端：`role = 'master'`
-   - 作为接收端：`role = 'slave'`
-   - （可选）调整 UART 配置：若需修改 TX/RX 引脚、波特率，修改 `uart0.init(...)` 中的参数（如 `tx=Pin(0)`、`rx=Pin(1)`、`baudrate=9600`）。
-4. **运行测试**：在开发工具中运行 `main.py`，查看串口输出日志，验证通信是否正常。
+| 模块引脚 | 开发板连接目标 | 备注                          |
+| -------- | -------------- | ----------------------------- |
+| VCC      | 5V             | 请勿接 3.3V，否则模块供电不足 |
+| GND      | GND            | 共地保证信号参考一致          |
+| MRX      | UART RX 引脚   | 对应驱动中 TX 配置（如 Pin9） |
+| MTX      | UART TX 引脚   | 对应驱动中 RX 配置（如 Pin8） |
+| A+/B-    | 双绞线         | 环回测试可短接 A+ 与 B-       |
 
----
+### 基础使用流程
 
 ## 示例程序
-### 1. ttl_rs485.py 核心代码（完整代码见项目文件）
+
+完整的 UART 环回测试代码（`main.py`）如下，可直接运行验证模块功能：
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/4 下午5:16
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : ttl转rs485驱动测试程序
-
-# ======================================== 导入相关模块 =========================================
-
-import time
 from machine import UART, Pin
-from ttl_rs485 import TTL_RS485
+import time
 
-# ======================================== 全局变量 ============================================
+count = 1  # 测试消息计数器
 
-VALID_ROLES = ("master", "slave")
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ===========================================
-
+# 上电延时3秒，等待模块电源与信号电路稳定
 time.sleep(3)
-print("FreakStudio:TTL to RS485 module test")
-# 角色选择
-# 发送端: role = 'master'
-# 接收端: role = 'slave'
-# 修改为 'slave' 即为接收端
-role = 'master'
-if role not in VALID_ROLES:
-    raise ValueError("Invalid role! Must be one of %s, but got '%s'" % (VALID_ROLES, role))
-uart0 = UART(1, baudrate=115200)
-uart0.init(baudrate=115200, bits=8, tx=Pin(0), rx=Pin(1), parity=None, stop=1)
+print("FreakStudio: UART loopback test started. Sending data every 2 seconds...")
 
-rs485 = TTL_RS485(uart0, debug=True)
-print("=== TTL_RS485 Test Started: Role -> %s ===" % role)
-
-# ========================================  主程序  ============================================
+# 初始化UART1：波特率9600，TX=Pin8，RX=Pin9（根据实际接线调整）
+uart = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 
 try:
-    if role == 'master':
-        count = 0
-        while True:
-            count += 1
-            # 前两个固定参数,count取第八位作为第三个字节，右移八位取第八位作为第四个字节
-            test_data = bytes([0x01, 0x02, count & 0xFF, (count >> 8) & 0xFF])
-            print("[Loop %d] Sending data: %s" % (count, test_data.hex()))
+    while True:
+        # 构造带计数器的测试消息
+        test_msg = f"Test message {count}: Hello, UART loopback!"
+        print(f"\nSent: {test_msg}")
 
-            # 发送并等待回传
-            received = rs485.write_then_read(test_data, rx_expected=len(test_data), timeout_ms=500)
-            print("Received back:", received.hex())
+        # 发送消息（UTF-8编码）
+        uart.write(test_msg.encode('utf-8'))
 
-            if received == test_data:
-                print("loop:Data verified successfully")
-            else:
-                print("loop:data verified failed")
+        # 短延时确保数据完整接收
+        time.sleep(0.1)
 
-            time.sleep(2)
+        # 读取并打印接收数据
+        if uart.any():
+            received = uart.read(uart.any()).decode('utf-8')
+            print(f"Received: {received}")
+        else:
+            print("Received: No data (check connections)")
 
-    elif role == 'slave':
-        while True:
-            data_in = rs485.read(timeout_ms=500)
-            if data_in:
-                print("Received data:", data_in.hex())
-                # 回传收到的数据
-                rs485.send(data_in)
-                print("Data echoed back")
-            time.sleep(0.01)
-
+        # 计数器自增，间隔2秒发送下一条
+        count += 1
+        time.sleep(2)
 except KeyboardInterrupt:
-    print("===program Stopped===")
-finally:
-    rs485.close()
-
+    # 捕获用户中断，安全退出
+    print("\nTest stopped by user")
 ```
----
+
+### 测试说明
+
+1. 连接方式：将模块 TXD 与 RXD 短接（或 RS485 A+ 与 B-短接），实现数据自发自收
+2. 预期结果：每 2 秒输出一条发送消息，且接收内容与发送内容完全一致
+3. 故障排查：若无接收数据，优先检查 MRX/MTX 引脚是否交叉、波特率是否匹配、模块供电是否正常
+
 ## 注意事项
-### 1. 通信参数匹配
-- 波特率一致性：确保发送端与接收端的 UART 波特率完全一致（默认 115200，支持 9600、19200 等常见波特率），波特率不匹配会导致数据乱码或无法接收。
-- 数据位/停止位/校验：默认配置为 8 位数据位、1 位停止位、无校验，修改时需确保两端参数统一（通过 `uart0.init(...)` 调整）。
-- 引脚交叉连接：开发板 UART 的 TX 需连接 RS485 模块的 RX，开发板 UART 的 RX 需连接 RS485 模块的 TX，交叉通信才能正常收发。
 
-### 2. 半双工模式限制
-- 发送/接收时序：半双工模式下同一时间只能发送或接收，`write_then_read` 方法已内置发送耗时估算+额外等待时间，若仍出现数据丢失，可通过 `set_turnaround(ms)` 增大等待时间（如 `rs485.set_turnaround(5)`）。
-- 手动控制 DE/RE：若使用需手动控制 DE/RE 引脚的模块，需在 `send` 前将 DE/RE 置高（发送使能），`read` 前将 DE/RE 置低（接收使能），避免发送时干扰接收。
+1. **UART 引脚连接**：MRX 对应 MCU 的 RXD，MTX 对应 MCU 的 TXD，交叉连接会导致通信完全失败
+2. **驱动安装**：使用 USB 转 485 适配器（FT232 芯片）时，需从 FTDI 官网（[https://ftdichip.com/drivers/vcp-drivers/](https://ftdichip.com/drivers/vcp-drivers/)）安装对应驱动
+3. **RS485 总线优化**：总线两端必须加装 120Ω 终端电阻，且使用双绞线传输，减少电磁干扰
+4. **半双工约束**：同一时间仅能有一个设备发送数据，需通过主从协议协调多设备通信
+5. **传输距离适配**：长距离传输（>500 米）需将波特率降至 9600bps 以下，保证数据可靠性
+6. **隔离保护特性**：模块的隔离设计可保护 MCU 免受总线浪涌影响，请勿短接隔离端引脚
 
-### 3. 电源与接地
-- 电源稳定性：RS485 模块供电需稳定（3.3V/5V 需与模块规格匹配），电压波动会导致通信中断；远距离通信时建议单独为模块供电，避免与开发板共享电源导致压降。
-- 必须共地：发送端与接收端（及所有 RS485 设备）必须共地，否则差分信号参考电平不一致，会出现严重干扰或通信失败。
-
-### 4. 布线与抗干扰
-- 通信距离：普通双绞线（如网线）下，RS485 通信距离建议不超过 100 米（波特率 115200 时），距离更远需降低波特率（如 9600 波特率可支持 500 米以上）。
-- 避免干扰源：RS485 线路需远离强电（如 220V 电源线）、变频器、电机等干扰源，必要时使用屏蔽线并将屏蔽层单端接地（仅一端接地，避免形成地环流）。
-- 终端电阻：通信距离超过 50 米或总线上设备超过 10 个时，建议在总线两端（最远的两个设备）的 A、B 引脚之间并联 120Ω 终端电阻，减少信号反射。
-
-### 5. 软件使用限制
-- 非 ISR 安全：`TTL_RS485` 类的所有方法均不支持在中断服务函数（ISR）中调用，中断中调用 UART 操作可能导致数据错乱。
-- UART 资源管理：若开发板需同时使用多个 UART 设备，需确保 `uart0` 实例的编号（如 `UART(1)`）不与其他设备冲突，避免资源抢占。
-- 调试模式影响：调试模式（`debug=True`）会打印详细日志，可能轻微影响通信实时性，实际项目部署时建议关闭（`debug=False`）。
-
----
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：https://github.com/FreakStudioCN
 
----
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **说明** — 代码含参考部分,出现非技术问题和署名作者无关。  
-**版权归 FreakStudio 所有。**
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

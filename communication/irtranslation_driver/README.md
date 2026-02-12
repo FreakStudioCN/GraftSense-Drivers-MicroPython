@@ -1,230 +1,163 @@
-# MicroPython IR 红外收发驱动库
+# GraftSense 红外收发模块驱动（MicroPython）
+
+# GraftSense 红外收发模块驱动驱动（MicroPython）
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
-- [支持的协议](#支持的协议)
 - [硬件要求](#硬件要求)
 - [文件说明](#文件说明)
 - [软件设计核心思想](#软件设计核心思想)
 - [使用说明](#使用说明)
 - [示例程序](#示例程序)
 - [注意事项](#注意事项)
+- [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
 ---
 
 ## 简介
-本项目是一个针对红外（IR）遥控器的MicroPython设备驱动库，提供了全面的红外信号接收（解码）和发射（编码）功能。该库设计简洁、模块化，支持多种主流红外通信协议，可在多种MicroPython兼容硬件平台上运行，适用于遥控设备开发、红外信号分析等场景。
+
+本项目为 **GraftSense IR Receiver v1.1（基于 TSOP34138 的红外接收模块）** 提供了完整的 MicroPython 驱动支持，支持红外信号的接收解码与发射，兼容 NEC 协议（包括 NEC_8、NEC_16 及三星变体），并提供协议嗅探与回放功能。驱动采用分层设计，在树莓派 Pico 等 RP2 平台上通过 PIO 实现高性能红外发射，适用于红外遥控实验、智能家居控制演示、电子 DIY 无线控制等场景，为非接触式红外交互提供可靠的信号处理能力。
 
 ---
 
 ## 主要功能
-- 提供非阻塞式红外接收和解码功能
-- 支持多种红外协议的信号编码和发射
-- 跨平台兼容：
-  - 接收端：Raspberry Pi Pico
-  - 发射端：Raspberry Pi Pico（RP2）
-- 与uasyncio兼容，可用于异步应用
-- 提供测试程序便于验证和学习
 
----
+- ✅ 支持 NEC 协议解码：包含 NEC_8（8 位地址）、NEC_16（16 位地址）及三星 NEC 变体
+- ✅ 支持红外信号发射：通过 PWM/PIO 生成 38kHz 载波，发送 NEC 协议指令
+- ✅ 提供协议嗅探与回放：捕获原始红外脉冲序列，支持协议识别与数据存储
+- ✅ RP2 平台专属优化：使用 PIO 状态机实现高精度脉冲发射，降低 CPU 占用
+- ✅ 回调机制解耦：接收信号后自动触发用户回调，支持地址、命令及重复码解析
+- ✅ 完善的错误处理：定义多种异常码（如 REPEAT、BADSTART 等），便于调试
+- ✅ 遵循 Grove 接口标准，兼容主流开发板与传感器生态
 
-## 支持的协议
-- NEC协议（包括8位地址、16位地址及三星变体）
 ---
 
 ## 硬件要求
 
-### 接收端
-- 红外接收芯片（需与遥控器载波频率匹配）：
-  - 38KHz：Vishay TSOP4838或兼容型号
-  - 36KHz/40KHz：相应频率的接收芯片
-- 连接导线
-- 支持MicroPython的开发板
-### 发射端
-- 红外LED
-- 晶体管（用于驱动LED，提供足够电流）
-- 限流电阻
-- 本程序支持的开发板：Raspberry Pi Pico（RP2）
-- 连接导线
-### 接线方式（树莓派pico）
-| 模块类型       | 引脚功能   | 连接说明                                                                 |
-|----------------|------------|--------------------------------------------------------------------------|
-| 红外接收模块   | VCC        | 接开发板 3.3V 或 5V（根据模块规格选择，多数支持 3.3V-5V）              |
-| 红外接收模块   | GND        | 接开发板 GND（共地）                                                    |
-| 红外接收模块   | OUT        | 接开发板 GPIO 输入引脚（任意一个支持输入的 GPIO，如 Pico 的 GP17）         |
-| 红外发射模块   | VCC        | 接开发板 3.3V 或 5V（同上）                                             |
-| 红外发射模块   | GND        | 接开发板 GND（共地）                                                    |
-| 红外发射模块   | DATA       | 接开发板 GPIO 输出引脚（任意一个支持输出的 GPIO，如 Pico 的 GP16）         |
+1. **核心硬件**：GraftSense IR Receiver v1.1 红外接收模块（基于 TSOP34138 芯片，支持 38kHz 载波解调）
+2. **主控设备**：支持 MicroPython v1.23.0 及以上版本的开发板（如树莓派 Pico、ESP32 等，RP2 平台支持 PIO 发射优化）
+3. **接线配件**：Grove 4Pin 线（用于连接模块的 DIN、GND、VCC 引脚与开发板）
+4. **电源**：3.3V~5V 稳定电源（模块兼容 3.3V 和 5V 供电，内置滤波电路）
+
 ---
 
 ## 文件说明
 
-### `ir_rx` 目录（红外接收/解码）
-1. **`__init__.py`**  
-   - `IR_RX`：接收端基类，所有接收协议类的父类。负责处理红外信号的边缘检测、时序记录和解码触发。
-
-2. **`acquire.py`**  
-   无类定义，提供捕获和分析红外脉冲序列的函数，辅助识别未知协议。
-
-3. **`nec.py`**  
-   - `NEC_ABC`：NEC协议抽象基类
-   - `NEC_8`：8位地址的NEC协议解码类
-   - `NEC_16`：16位地址的NEC协议解码类
-   - `SAMSUNG`：三星特有的NEC变体协议解码类
-
-4. **`print_error.py`**  
-   无类定义，提供错误信息处理功能，将错误码转换为可读文本。
-
-### `ir_tx` 目录（红外发射/编码）
-1. **`__init__.py`**  
-   - `IR`：发射端基类，所有发射协议类的父类。封装硬件控制和脉冲生成逻辑，支持多平台。
-   - `Player`：用于直接发送自定义脉冲序列的类。
-
-2. **`nec.py`**  
-   - `NEC`：实现NEC协议编码功能，用于生成符合NEC协议的脉冲序列和重复码。
-
-3. **`rp2_rmt.py`**  
-   - `RP2_RMT`：为Raspberry Pi Pico（RP2芯片）实现模拟RMT功能的类，通过PIO生成精确脉冲序列。
-
-### `main`文件：
-   无定义类，传入自定义回调函数即可
-
 ---
 
 ## 软件设计核心思想
-- **模块化设计**：将接收和发射功能分离为`ir_rx`和`ir_tx`两个独立模块
-- **面向对象**：通过基类抽象公共逻辑，具体协议通过子类实现，便于扩展
-- **跨平台适配**：针对不同硬件特性（如RMT模块、PIO）进行适配，确保多平台兼容性
-- **非阻塞操作**：接收和发射操作设计为非阻塞模式，提高系统响应性
-- **协议扩展性**：新协议可通过继承基类并实现特定方法轻松添加
+
+1. **分层架构**：将发射（`ir_tx`）与接收（`ir_rx`）功能分离，降低模块耦合，便于扩展其他协议
+2. **协议抽象**：通过 `NEC_ABC` 基类封装 NEC 协议核心逻辑，子类实现不同地址模式（8 位 / 16 位）与三星变体
+3. **硬件加速**：RP2 平台使用 PIO 状态机实现红外发射，将脉冲生成卸载到硬件，提升实时性与 CPU 利用率
+4. **回调驱动**：接收解码完成后通过回调函数通知用户，解耦硬件检测与业务逻辑
+5. **可移植性**：核心协议逻辑依赖标准 MicroPython 接口，PIO 驱动仅作为平台专属优化，不影响核心功能移植
+6. **错误码设计**：定义统一的异常码体系，便于快速定位协议解析或硬件通信问题
 
 ---
 
 ## 使用说明
 
-### 安装方法
-通过`thonny`工具调试：
+### 环境准备
 
-**`连接好硬件之后：将main文件置于根目录，同ir_rx和ir_tx一起上传后，点击运行按钮 `**`
-## 基本使用流程
+- 在开发板上烧录 **MicroPython v1.23.0+** 固件
+- 将 `ir_tx`、`ir_rx` 目录及 `main.py` 上传至开发板文件系统
 
-### 接收端
-1. 导入对应协议的接收类
-2. 初始化接收对象，指定接收引脚和回调函数
-3. 回调函数处理解码后的地址和数据
+### 硬件连接
 
-### 发射端
-1. 导入对应协议的发射类
-2. 初始化发射对象，指定发射引脚和载波频率
-3. 调用发送方法发送地址和数据
+- **接收模块**：使用 Grove 线将模块的 `DIN` 引脚连接至开发板指定 GPIO 引脚（如示例中的 GPIO 14），连接 `GND` 和 `VCC` 引脚
+- **发射模块**：将红外发射管连接至开发板指定 GPIO 引脚（如示例中的 GPIO 6），确保供电稳定
+- **注意**：RP2 平台使用 PIO 发射时，需确保引脚与状态机配置匹配
+
+### 代码配置
+
+- 在 `main.py` 中修改 `TX_PIN` 和 `RX_PIN` 为实际连接的 GPIO 引脚号
+- 如需切换协议，可替换 `NEC_16` 为 `NEC_8` 或 `SAMSUNG`，并调整回调函数参数
+
+### 运行测试
+
+- 重启开发板，`main.py` 将自动执行，循环发送 NEC 信号并实时打印接收到的地址、命令及重复码信息
 
 ---
 
 ## 示例程序
-* python
+
+### NEC 协议收发测试（main.py）
 
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/8/26 下午10:11
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : nec_16协议基于树莓派pico的测试文件  已通过
-
-# ======================================== 导入相关模块 =========================================
-
 import time
 from machine import Pin
 from ir_tx.nec import NEC
-# nec_16三个参数 回调函数中
 from ir_rx.nec import NEC_16
 
-# ======================================== 全局变量 ============================================
-
-# ======================================== 功能函数 ============================================
-
-# 如果使用nec_8需要传入不定长参数，，此处是nec_16
-
 def ir_callback(addr: int, cmd: int, repeat: bool) -> None:
-    """
-    NEC 协议接收回调函数（3 参数版）。
-
-    Args:
-        addr (int): 接收到的地址
-        cmd (int): 接收到的命令码
-        repeat (bool): 是否为重复码 (True = 是, False = 否)
-
-    Notes:
-        回调函数由 NEC 接收模块调用，非 ISR-safe。
-        输出接收到的数据到串口。
-
-    ==========================================
-
-    NEC IR signal receive callback (3-parameter version).
-
-    Args:
-        addr (int): Received address
-        cmd (int): Received command
-        repeat (bool): Repeat flag (True = yes, False = no)
-    Notes:
-        Called by NEC IR receiver. Not ISR-safe.
-        Prints received data to REPL.
-    """
     print(f"[RX] Address=0x{addr:04X}, Cmd=0x{cmd:02X}, Repeat={repeat}")
-
-# ======================================== 自定义类 =============================================
-
-# ======================================== 初始化配置 ===========================================
 
 time.sleep(3)
 print("FreakStudio:Infrared transceiver test")
-# 发射管接 GP15
-TX_PIN = Pin(15, Pin.OUT)
-# 接收头接 GP14
-RX_PIN = Pin(14, Pin.IN)
-# 38kHz 发射
-ir_tx = NEC(TX_PIN, freq=38000)
-# 接收 NEC
-ir_rx = NEC_16(RX_PIN, ir_callback)
-print("[System] Ready... TX=GP15, RX=GP14")
 
-# ========================================  主程序  ===========================================
+TX_PIN = Pin(6, Pin.OUT)
+RX_PIN = Pin(14, Pin.IN)
+
+ir_tx = NEC(TX_PIN, freq=38000)
+ir_rx = NEC_16(RX_PIN, ir_callback)
+
+print("[System] Ready... TX=GP6, RX=GP14")
+
 while True:
     print("[TX] Sending NEC signal...")
-    # 地址=0x10, 命令=0x20
     ir_tx.transmit(0x10, 0x20)
     time.sleep(2)
 ```
+
 ---
 
 ## 注意事项
-- 红外接收芯片需与遥控器使用的载波频率匹配
-- 发射红外信号时，确保红外 LED 有足够驱动电流
-- 避免在强光环境下使用，可能干扰红外接收
-- 不同平台的引脚配置可能不同，需根据实际硬件调整
+
+1. **载波频率**：模块默认支持 38kHz 载波，发射时需设置 `freq=38000`，避免与其他设备干扰
+2. **电平兼容**：模块输出低电平有效（无有效信号时为高电平），需确保主控 GPIO 输入模式配置正确
+3. **平台限制**：`rp2_rmt.py` 仅支持 RP2 平台（如树莓派 Pico），其他平台需使用通用 PWM 发射实现
+4. **回调函数**：回调函数应保持简洁，避免执行耗时操作，确保不阻塞中断处理
+5. **环境干扰**：强光环境可能影响红外接收灵敏度，建议在室内或弱光环境下使用
+6. **重复码处理**：NEC 协议支持长按重复码，回调函数中通过 `repeat` 参数区分首次触发与长按重复
 
 ---
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** : 在任何媒介以任何形式复制、发行本作品  
-- **演绎** : 修改、转换或以本作品为基础进行创作  
+```sql
+MIT License
 
-惟须遵守下列条件：  
-- **署名** : 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** :您不得将本作品用于商业目的。  
-- **合理引用方式** : 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **声明：** 本项目中所有内容仅可学习或者个人爱好者使用，禁止商用，不得以任何形式以此代码做任何不合理的事情，代码具体可参考这个github项目https://github.com/peterhinch/micropython_ir，发生任何事情与署名作者无关。
+Copyright (c) 2025 FreakStudio
 
-- **版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

@@ -1,6 +1,11 @@
-# BMP280 温湿度气压传感器驱动 - MicroPython版本
+# GraftSense-基于 BMP280 芯片的大气压强温度传感器模块（MicroPython）
+
+# GraftSense-基于 BMP280 芯片的大气压强温度传感器模块（MicroPython）
+
+# GraftSense 基于 BMP280 的大气压强温度传感器模块
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -12,236 +17,188 @@
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
----
-
 ## 简介
-BMP280 是一款集成温度、湿度和气压测量功能的高精度传感器，采用 I2C 通信接口，广泛应用于气象监测、环境控制、物联网设备等场景。该传感器具有低功耗、高精度、宽测量范围等特点，能够同时提供环境温度（°C）、相对湿度（%）和大气压强（hPa）数据，并支持海拔高度和露点温度计算。
 
-本项目提供基于 MicroPython 的 BMP280 驱动代码（浮点型版本）及测试程序，方便开发者快速集成传感器功能。
-
----
+本模块是 FreakStudio GraftSense 基于 BMP280 的大气压强温度传感器模块，通过 BMP280 芯片实现高精度环境气压与温度测量（兼容湿度扩展），支持 30000~110000 Pa 气压范围、-40~85 °C 温度范围，具备高精度、低功耗、接口简单等优势，兼容 Grove 接口标准。适用于电子 DIY 气象实验、天气监测演示、物联网环境感知等场景，为系统提供精准的大气环境数据交互能力。
 
 ## 主要功能
-- **多参数测量**：同时采集温度、湿度和气压数据
-- **扩展计算**：支持海拔高度（基于气压）和露点温度（基于温湿度）计算
-- **采样精度配置**：可设置不同的采样精度（1~16次采样）
-- **数据格式化**：提供原始浮点数据和格式化字符串输出
-- **校准补偿**：内置传感器校准参数读取与数据补偿算法
-- **跨平台支持**：兼容所有支持 MicroPython 的硬件平台（如 ESP32、ESP8266、树莓派 Pico 等）
 
----
+### 硬件层面核心能力
+
+- 高精度测量：支持 30000~110000 Pa 气压范围、-40~85 °C 温度范围测量，可扩展湿度检测能力
+- 灵活的 I2C 配置：支持通过拨码开关切换 2 个 I2C 地址（0x76/0x77），可同时挂载 2 个模块无冲突
+- 宽电压兼容：支持 3.3V/5V 供电，内置 DC-DC 转换电路保障芯片稳定供电
+- 直观状态指示：配备电源指示灯，便于快速确认模块供电状态
+
+### 软件层面核心能力
+
+- 完整的数据校准：自动加载芯片内置校准参数，实现温压湿数据精准补偿
+- 多维度数据输出：支持原始数据、校准后浮点数据、格式化字符串数据输出
+- 衍生计算能力：基于气压自动计算海拔高度，基于温湿度计算露点温度
+- 灵活的工作模式：支持睡眠、单次触发、连续测量三种工作模式，可调节过采样倍数平衡精度与功耗
 
 ## 硬件要求
-### 推荐测试硬件
-- 支持 MicroPython 的开发板（如 ESP32、ESP8266、树莓派 Pico）
-- BMP280 传感器模块
-- 杜邦线若干
 
-### 模块引脚说明
-| BMP280 引脚 | 功能描述                          |
-|-----------|-------------------------------|
-| VCC       | 电源正极                          |
-| GND       | 电源负极                          |
-| SCL       | I2C 时钟线                       |
-| SDA       | I2C 数据线                       |
-| CSB       | 芯片选择（I2C模式下接高电平，默认内部上拉）       |
-| SDO       | 地址选择（接GND时地址为0x76，接VCC时为0x77） |
+### 核心接口
 
----
+- I2C 通信接口：SDA（数据）、SCL（时钟），支持标准 I2C 通信速率，兼容 3.3V/5V 电平
+- 地址选择拨码开关：通过 ADDR 引脚电平切换，配置两种 I2C 地址：
+
+  - 拨码 0（LOW）→ 地址 0x76
+  - 拨码 1（HIGH）→ 地址 0x77
+  - 支持 2 个模块同时挂载于同一 I2C 总线（地址唯一），保障多设备协同采集
+- 电源接口：VCC（3.3V/5V 供电）、GND（接地）
+- 电源指示灯：直观显示模块供电状态
+
+### 电路与布局要求
+
+- 核心电路：需包含 BMP280 核心电路、DC-DC 5V 转 3.3V 电路、地址选择电路、MCU 接口电路、电源滤波电路
+- 模块布局：正面需清晰布局 BMP280 芯片、ADDR 拨码开关、I2C 接口（SDA/SCL）、电源接口（GND/VCC）、电源指示灯，接口标注清晰
+
+### 供电要求
+
+- 输入电压：3.3V/5V DC
+- 电源稳定性：需保障电源纹波小，建议配合滤波电路使用，避免影响测量精度
+
 ## 文件说明
-### bmP280_float.py
-核心驱动文件，包含 `BMP280` 类实现传感器控制：
 
-- **类 `BMP280`**：BMP280 传感器控制核心类，提供完整的数据读取与处理功能
-  
-  - `__init__()`：初始化传感器，加载校准参数，配置采样模式和 I2C 通信
-  - `read_raw_data(result)`：读取原始温度、气压、湿度数据到指定数组
-  - `read_compensated_data(result=None)`：返回经过校准的浮点型温度(°C)、气压(Pa)和湿度(%)
-  - `sealevel`（属性）：获取或设置海平面标准气压（Pa），用于海拔计算
-  - `altitude`（属性）：根据当前气压和海平面气压计算海拔高度（米）
-  - `dew_point`（属性）：基于当前温度和湿度计算露点温度（°C）
-  - `values`（属性）：返回格式化的温度("xx.xxC")、气压("xxxx.xxhPa")、湿度("xx.xx%")字符串元组
-
-### main.py
-测试程序文件，主要功能：
-
-- 初始化 I2C 总线和 BMP280 传感器实例
-- 循环读取传感器数据（温度、气压、湿度、海拔、露点）
-- 打印原始数据和格式化数据，验证传感器工作状态
-- 支持键盘中断（Ctrl+C）优雅终止程序
-
----
+| 文件名          | 功能说明                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------ |
+| bmp280_float.py | 核心驱动文件，包含 BMP280 浮点型版本的类定义，实现传感器初始化、数据读取、校准补偿、衍生计算等核心功能 |
+| main.py         | 示例程序文件，实现 I2C 总线初始化、传感器扫描、温压湿数据采集、海拔计算与结果打印等功能                |
 
 ## 软件设计核心思想
-### 校准补偿机制
-- 读取传感器内置的校准参数（dig_Tx、dig_Px、dig_Hx系列）
-- 基于校准参数对原始数据进行补偿计算，提高测量精度
-- 温度数据用于气压和湿度的补偿计算（t_fine变量传递）
 
-### 分层设计
-- 底层：原始数据读取（read_raw_data）
-- 中层：数据补偿转换（read_compensated_data）
-- 高层：应用级计算（altitude、dew_point）和格式化输出（values）
-
-### 资源优化
-- 使用复用缓冲区（bytearray和array）减少内存分配
-- 通过属性（@property）封装常用计算，实现按需计算
-- 限制测量范围（如湿度0~100%，温度-40~85°C）确保数据有效性
-
-### 接口抽象
-- 统一的I2C接口，屏蔽不同硬件平台的差异
-- 灵活的采样模式配置，支持单一模式或分别配置温湿度气压采样精度
-
----
+1. **面向对象设计**：封装 BMP280 类，将传感器的硬件操作、数据存储、计算逻辑封装为独立的类属性和方法，提高代码复用性和可维护性
+2. **内存优化**：内部复用缓冲区（_l1_barray/_l8_barray/_l3_resultarray），减少频繁的内存分配与释放，提升 MicroPython 环境下的运行性能
+3. **精准校准机制**：初始化时自动读取芯片的校准寄存器（dig_T1~dig_T3/dig_P1~dig_P9/dig_H1~dig_H6），基于 t_fine 温度微调变量实现温压湿数据的精准补偿
+4. **参数化配置**：通过类常量定义 I2C 地址、过采样模式、工作模式、超时时间等配置项，便于灵活调整传感器工作参数
+5. **异常防护**：对关键参数（如海平面气压、过采样模式）设置合法范围校验，避免无效参数导致计算异常
 
 ## 使用说明
-### 硬件接线（树莓派pico 示例）
 
-| BMP280 引脚 | GPIO 引脚 |
-|-----------|---------|
-| VCC       | 5V      |
-| GND       | GND     |
-| SCL       | GPIO5   |
-| SDA       | GPIO4   |
+### 硬件接线
 
-> **注意：**
-> - 传感器仅支持5V供电
-> - 不同开发板的I2C引脚可能不同，请根据实际硬件修改
-> - SDO引脚接地时I2C地址为0x76，接VCC时为0x77
+1. 将模块的 VCC 引脚连接到主控板的 3.3V/5V 电源引脚
+2. 将模块的 GND 引脚连接到主控板的接地引脚
+3. 将模块的 SDA 引脚连接到主控板的 I2C SDA 引脚
+4. 将模块的 SCL 引脚连接到主控板的 I2C SCL 引脚
+5. 根据需求设置 ADDR 拨码开关（0 或 1），确定传感器 I2C 地址
 
----
+### 环境准备
 
-### 软件依赖
-- **固件版本**：MicroPython v1.19+
-- **内置库**：
-  - `machine`（用于I2C和GPIO控制）
-  - `time`（用于延时）
-  - `struct`、`array`、`micropython`（驱动内部使用）
-- **开发工具**：PyCharm 或 Thonny（推荐）
+1. 主控板需烧录 MicroPython 固件
+2. 将 bmp280_float.py 文件上传到主控板文件系统
+3. 确保主控板支持 I2C 总线操作
 
----
+### 基本使用流程
 
-### 安装步骤
-1. 将 MicroPython 固件烧录到开发板
-2. 上传 `bmp280_float.py` 和 `main.py` 到开发板
-3. 根据硬件连接修改 `main.py` 中的I2C引脚配置
-4. 运行 `main.py` 开始测试
-
----
+1. 初始化 I2C 总线，指定 SCL、SDA 引脚和通信频率
+2. 扫描 I2C 总线，确认 BMP280 传感器的地址
+3. 创建 BMP280 类实例，传入 I2C 实例和传感器地址
+4. 调用相关方法读取温压湿数据，或获取海拔、露点等衍生数据
+5. 根据需求处理和输出数据
 
 ## 示例程序
+
+以下是 main.py 中的核心示例代码，实现环境温压湿实时采集与海拔计算：
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/9 上午11:25
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 基于BMP280的大气压强温湿度传感器模块驱动测试程序
-
-# ======================================== 导入相关模块 =========================================
-
 import time
 from machine import I2C
 from bmp280_float import BMP280
 
-# ======================================== 全局变量 =============================================
-
-bmp_addr = None
-
-# ======================================== 功能函数 =============================================
-
-# ======================================== 自定义类 =============================================
-
-# ======================================== 初始化配置 ============================================
-
+# 初始化配置
 time.sleep(3)
 print("FreakStudio:Testing BMP280 pressure, temperature, and humidity sensor")
-# 注意：引脚号根据实际硬件修改
-i2c = I2C(0, scl=5, sda=4, freq=100000)
-# 开始扫描I2C总线上的设备，返回从机地址的列表
-devices_list:list[int] = i2c.scan()
+
+# 初始化I2C总线（I2C1，SCL=3，SDA=2，100kHz）
+i2c = I2C(1, scl=3, sda=2, freq=100000)
+
+# 扫描I2C设备，获取BMP280地址
+devices_list = i2c.scan()
 print('START I2C SCANNER')
-# 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
-    # 若非空，则打印从机设备地址
     print("No i2c device !")
 else:
     print('i2c devices found:', len(devices_list))
-for device in devices_list:
-    if 0x60 <= device <= 0x7A:
-        print("I2c hexadecimal address:", hex(device))
-        bmp_addr = device
+    for device in devices_list:
+        if 0x60 <= device <= 0x7A:
+            print("I2c hexadecimal address:", hex(device))
+            bmp_addr = device
 
+# 创建BMP280传感器实例
 bmp = BMP280(i2c=i2c, address=bmp_addr)
 
-# ======================================== 主程序 ===============================================
+# 主循环：持续采集温压湿并计算海拔
 try:
     print("FreakStudio: Testing BMP280 sensor (Temperature, Humidity, Pressure)")
     while True:
-        # 获取浮点数温湿度和气压
+        # 获取校准后的温压湿数据
         temp, press, hum = bmp.read_compensated_data()
-        # 转换气压单位为 hPa（1 hPa = 100 Pa）
+        # 转换气压为百帕（hPa）
         press_hpa = press / 100.0
-        # 计算海拔高度
-        sea_level_hpa = 1013.25
-        altitude = 44330.0 * (1.0 - (press_hpa / sea_level_hpa) ** 0.1903)
-        # 打印浮点信息
+        # 计算海拔高度（基于默认海平面气压1013.25 hPa）
+        altitude = 44330.0 * (1.0 - (press_hpa / 1013.25) ** 0.1903)
+        
+        # 打印结果
         print("Temperature: {:.2f} °C | Humidity: {:.2f}% | Pressure: {:.2f} hPa".format(
             temp, hum, press_hpa
         ))
-        print(altitude)
+        print("Altitude: {:.2f} m".format(altitude))
         time.sleep(2)
 except KeyboardInterrupt:
     print("\nTest stopped")
+```
 
+### 示例说明
 
+1. I2C 初始化：使用 GPIO3（SCL）和 GPIO2（SDA）初始化 I2C，扫描总线获取 BMP280 地址（0x76 或 0x77）
+2. 传感器初始化：创建 BMP280 实例，自动加载芯片校准参数
+3. 数据采集：循环调用 read_compensated_data 获取校准后的温压湿数据
+4. 衍生计算：将气压转换为百帕，基于海平面气压计算海拔高度
+5. 结果打印：格式化输出温度、湿度、气压和海拔信息
+
+## 注意事项
+
+1. I2C 地址匹配：ADDR 拨码 0 对应地址 0x76，拨码 1 对应 0x77，代码中 address 参数需与拨码设置一致，否则通信失败
+2. 过采样模式合法性：过采样模式必须为 BMP280_OSAMPLE_1~BMP280_OSAMPLE_16，超出范围会触发 ValueError
+3. 海平面气压范围：sealevel 属性需设置在 30000~120000 Pa 之间，超出范围将被忽略，避免海拔计算异常
+4. 湿度限制：湿度计算结果会被限制在 0~100% 范围内，避免出现无效值
+5. ISR 安全限制：I2C 操作不是 ISR-safe，禁止在中断服务程序中调用传感器方法
+6. 校准数据加载：初始化时会自动读取芯片校准寄存器，确保温压湿补偿计算准确
+7. 缓冲区复用：类内部复用缓冲区（_l1_barray/_l8_barray/_l3_resultarray），减少内存分配，提升性能
+
+## 联系方式
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+
+## 许可协议
 
 ```
----
-## 注意事项
-### 电源要求
-- 必须使用 3.3V 电源供电，接 5V 会损坏传感器
-- 确保电源稳定，避免电压波动影响测量精度
-- 长距离接线时建议在 SDA 和 SCL 线上添加 10K 上拉电阻
+MIT License
 
-### 测量范围
-| 参数 | 测量范围 | 精度 |
-|------|----------|------|
-| 温度 | -40 ~ 85 °C | ±1.0 °C |
-| 湿度 | 0 ~ 100 %RH | ±3 %RH |
-| 气压 | 300 ~ 1100 hPa | ±1 hPa |
+Copyright (c) 2025 FreakStudio
 
-### 采样模式
-- 采样次数越多，精度越高，但功耗和测量时间也越长
-- 推荐模式：BMP280_OSAMPLE_8（平衡精度和效率）
-- 可通过 tuple 分别设置湿度、温度、气压的采样模式，例如 `mode=(BMP280_OSAMPLE_16, BMP280_OSAMPLE_8, BMP280_OSAMPLE_4)`
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-### 海拔计算
-- 海拔高度计算依赖海平面气压设置（默认 101325 Pa）
-- 可通过 `bmp.sealevel = 101300` 调整海平面气压值（单位 Pa）
-- 实际应用中建议根据当地海拔校准海平面气压
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-### 软件限制
-- I2C 操作非 ISR-safe，不要在中断服务程序中调用
-- 传感器初始化时会读取校准数据，需确保 I2C 通信正常
-- 连续读取间隔建议不小于 100ms，避免数据不稳定
----
-## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 邮箱：10696531183@qq.com  
-💻 GitHub：https://github.com/FreakStudioCN
----
-## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
-
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
-
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。
-- **声明** —代码含有参考部分，产生问题与署名作者无关。
-
-**版权归 FreakStudio 所有。**
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

@@ -1,5 +1,9 @@
-# PiranhaLED MicroPython驱动
+# GraftSense 食人鱼 LED 灯模块 (MicroPython)
+
+# GraftSense 食人鱼 LED 灯模块驱动 (MicroPython)
+
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -10,226 +14,143 @@
 - [注意事项](#注意事项)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
+
 ---
+
 ## 简介
 
-PiranhaLED（食人鱼LED）是一种高亮度、大功率的发光二极管，采用方形透明封装与四引脚结构，具有宽角度发光和良好的散热性能。常用于装饰照明、显示屏背光、车灯、指示灯等场景。本项目提供基于MicroPython的驱动代码，封装PWM调光、亮度归一化控制等功能，支持快速集成。
-
-> **注意**：适用于普通照明与指示应用，不适用于需恒流驱动的高精度光学测量场景，使用时需注意限流电阻。
+本项目为 **GraftSense Piranha LED module v1.1** 提供了完整的 MicroPython 驱动支持，可用于控制共阳极或共阴极连接方式的食人鱼 LED 灯模块。驱动采用面向对象设计，支持 LED 的点亮、熄灭、状态翻转及状态查询，同时提供清晰的异常处理机制，适用于树莓派 Pico 等 MicroPython 设备，可广泛应用于电子 DIY、创客互动、趣味装饰等场景。
 
 ---
 
 ## 主要功能
 
-* 控制PiranhaLED的开关与亮度，支持PWM调光（0\~100%）
-* 输出归一化亮度比例（0.0\~1.0），便于统一控制接口
-* 聚合返回完整状态数据，支持外部传入PWM实例适配不同硬件
-* 兼容MicroPython主流开发板，接口简洁易用
+- ✅ 支持共阴极（高电平点亮）和共阳极（低电平点亮）两种 LED 连接方式
+- ✅ 提供 `on()`、`off()`、`toggle()` 等核心控制方法
+- ✅ 支持查询 LED 当前点亮状态（`is_on()`）
+- ✅ 内置参数校验与异常捕获，提升代码健壮性
+- ✅ 遵循 Grove 接口标准，兼容主流开发板
 
 ---
 
 ## 硬件要求
 
-### 推荐测试硬件
-
-* MicroPython开发板（如树莓派Pico）、PiranhaLED（任意颜色）、限流电阻（220Ω\~1KΩ，视供电电压而定）、杜邦线若干、（可选）面包板
-
-### 模块引脚说明
-
-| PiranhaLED引脚 | 功能描述 | 连接说明               |
-| ------------ | ---- | ------------------ |
-| 正极（长脚/对角一对）  | 电源输入 | 串联限流电阻后接开发板PWM输出引脚 |
-| 负极（短脚/另一对）   | 接地   | 接开发板GND            |
+1. **核心硬件**：GraftSense Piranha LED module v1.1 食人鱼 LED 灯模块（三极管驱动电路）
+2. **主控设备**：支持 MicroPython v1.23.0 及以上版本的开发板（如树莓派 Pico 或其他 MicroPython 设备）
+3. **接线配件**：Grove 4Pin 线（用于连接模块与开发板）
+4. **电源**：3.3V / 5V 稳定电源（模块兼容 3.3V 和 5V 供电）
 
 ---
 
 ## 文件说明
-### piranha_led.py
-
-该文件实现 PiranhaLED 的核心驱动功能，仅包含 `PiranhaLED` 类，用于处理 LED 的点亮、熄灭、翻转与状态查询。
-
-`PiranhaLED` 类通过封装 GPIO 引脚控制逻辑，提供对 LED 的统一访问接口。类中包含两个核心属性：`_pin` 用于存储绑定的引脚对象，负责实际的电平输出；`_polarity` 用于存储 LED 的极性类型（共阳极或共阴极），确保控制逻辑正确。
-
-类的主要方法包括：
-
-* `__init__(pin_number: int, polarity: int = POLARITY_CATHODE)`：初始化 LED 对象，接收 GPIO 引脚号和极性参数，完成硬件接口绑定与参数校验。
-* `on() -> None`：点亮 LED，内部自动处理不同极性的电平输出。
-* `off() -> None`：熄灭 LED，确保输出为安全电平。
-* `toggle() -> None`：翻转 LED 状态（开灯变关灯，关灯变开灯）。
-* `is_on() -> bool`：查询 LED 是否点亮，基于当前引脚电平与极性判断，返回布尔值。
-
----
-### main.py
-该文件为 PiranhaLED 的功能测试程序，无额外自定义类，仅作为标准 `main` 入口。
-
-`main` 部分的核心功能是：初始化与 LED 相连的引脚，创建 `PiranhaLED` 驱动实例，并执行多种控制动作：
-
-1. 循环闪烁指定次数（演示 `on/off` 方法）
-2. 演示 `toggle` 功能，实现状态翻转
-3. 在退出前确保 LED 熄灭，保证硬件安全
-程序支持通过全局参数配置 LED 引脚号、闪烁次数、间隔时间，以及极性模式（共阳极或共阴极）。用户可通过 Ctrl+C 手动中断测试，适用于验证 LED 的硬件连接正确性与驱动功能完整性。
 
 ---
 
 ## 软件设计核心思想
 
-* **模块化**：将 LED 控制逻辑与测试程序分离，核心驱动与应用解耦
-* **极性适配**：支持共阳极与共阴极两种接法，通过极性参数自动处理电平反转
-* **硬件解耦**：GPIO 引脚对象由应用层传入，驱动类不负责底层硬件初始化，兼容不同开发板
-* **安全性**：异常统一封装，确保出错时能捕获并处理，退出时自动关闭 LED
+1. **单一职责原则**：`PiranhaLED` 类仅负责 LED 控制，不耦合其他业务逻辑
+2. **显式依赖注入**：Pin 对象由外部传入或通过引脚号创建，提升可测试性
+3. **最小副作用**：构造函数不执行硬件操作，避免阻塞与意外行为
+4. **逻辑与 I/O 分离**：通过 `_calculate_output` 函数封装电平计算逻辑，与硬件操作解耦
+5. **清晰异常策略**：对 GPIO 操作进行异常捕获，抛出明确的 `RuntimeError` 便于调试
+6. **兼容设计**：通过极性常量支持共阳极 / 共阴极两种硬件连接方式，提升灵活性
 
 ---
+
 ## 使用说明
-### 硬件接线（树莓派Pico示例）
 
-| PiranhaLED引脚 | Pico引脚               | 接线功能                |
-| ------------ | -------------------- | ------------------- |
-| 正极（长脚，对角一对）  | GP0（Pin1） → 串联限流电阻后接 | LED驱动信号（PWM/GPIO输出） |
-| 负极（短脚，对角另一对） | GND（Pin38）           | 接地                  |
+### 环境准备
 
-> ⚠️ 注意：必须串联限流电阻（220Ω\~1KΩ，具体取值依供电电压和LED功耗而定），否则可能烧坏LED或开发板引脚。
+- 在开发板上烧录 **MicroPython v1.23.0+** 固件
+- 将 `piranha_led.py` 和 `main.py` 上传至开发板文件系统
 
----
+### 硬件连接
 
-### 软件依赖
+- 使用 Grove 线将 LED 模块的 `DOUT` 引脚连接至开发板指定 GPIO 引脚（如示例中的 GPIO 6）
+- 连接 `GND` 和 `VCC` 引脚，确保供电稳定
 
-* 固件：MicroPython v1.23+
-* 内置库：`machine`（GPIO控制）、`time`（延时）
-* 开发工具：Thonny / PyCharm / mpremote
+### 代码配置
 
----
+- 在 `main.py` 中修改 `LED_PIN` 为实际连接的 GPIO 引脚号
+- 根据 LED 连接方式设置 `IS_ANODE`：`True` 表示共阳极，`False` 表示共阴极
 
-### 安装步骤
+### 运行测试
 
-1. 烧录 MicroPython 固件到开发板
-2. 上传 `piranha_led.py` 和 `main.py` 到开发板文件系统
-3. 根据实际接线修改 `main.py` 中的 `LED_PIN` 和 `IS_ANODE` 参数
-4. 运行 `main.py`，观察 LED 的闪烁与 toggle 控制效果
+- 重启开发板，`main.py` 将自动执行，LED 会进行闪烁和翻转演示
 
 ---
 
 ## 示例程序
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/08/19 12:45
-# @Author  : 零高幸
-# @File    : main.py
-# @Description : 测试PiranhaLED驱动功能（标准main入口）
-# @License : MIT
-
-# ======================================== 导入相关模块 =========================================
-
-# 导入标准库
-import time
-# 导入自定义食人鱼LED灯驱动模块
+# 导入驱动模块
 from piranha_led import PiranhaLED, POLARITY_CATHODE, POLARITY_ANODE
+import time
 
-# ======================================== 全局变量 ============================================
-
-# 🔧 测试配置
-LED_PIN = 0
-TEST_COUNT = 3
-BLINK_INTERVAL = 1.0
-# 设置为True如果是共阳极LED
-IS_ANODE = False
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置区 =========================================
-
-# 上电延时3s
-time.sleep(3)
-# 打印调试消息
-print("FreakStudio: Using Running Led Code")
-
-# 初始化LED对象
-led = PiranhaLED(
-    pin_number=LED_PIN,
-    polarity=POLARITY_ANODE if IS_ANODE else POLARITY_CATHODE
-)
-
-# ======================================== 主程序 ==============================================
+# 初始化LED（GPIO 6，共阴极）
+led = PiranhaLED(pin_number=6, polarity=POLARITY_CATHODE)
 
 try:
-    # 执行3次闪烁测试
-    for _ in range(TEST_COUNT):
+    # 闪烁3次
+    for _ in range(3):
         led.on()
-        time.sleep(BLINK_INTERVAL)
-
+        time.sleep(1)
         led.off()
-        time.sleep(BLINK_INTERVAL)
+        time.sleep(1)
+    
+    # 翻转状态
+    led.toggle()  # 点亮
+    time.sleep(1)
+    led.toggle()  # 熄灭
 
-    # 演示toggle功能
-    # 开灯
-    led.toggle()
-    time.sleep(BLINK_INTERVAL)
-
-    # 关灯
-    led.toggle()
-    time.sleep(BLINK_INTERVAL)
-
-except KeyboardInterrupt:
-    # 用户手动中断（如Ctrl+C）
-    pass
-except Exception as e:
-    # 捕获其他异常（可选：记录日志）
-    pass
 finally:
-    # 确保LED关闭，安全退出
-    led.off()
+    led.off()  # 确保安全退出
 ```
----
-明白啦 ✅ 我来帮你把 **注意事项** 从滑动变阻器版本改写为 **PiranhaLED** 版本，保留原有的分层结构（电气特性限制 / 硬件接线与配置注意事项 / 环境影响），并结合 LED 的实际特点：
 
 ---
 
 ## 注意事项
-### 电气特性限制
 
-* **电压限制**：PiranhaLED 正向工作电压通常为 2.0\~3.6V（视颜色而定，如红光 \~2.0V、蓝/白光 \~3.0V）。驱动电压严禁直接超过额定值，否则会烧毁 LED 芯片。
-* **电流限制**：推荐工作电流 20mA 左右（最大不超过 30mA）。必须串联合适的限流电阻（220Ω\~1KΩ），避免 LED 长时间过流导致过热损坏。
-* **功率限制**：部分高亮 PiranhaLED 功率可达 0.5W\~1W，需保证开发板 GPIO 引脚驱动能力（推荐使用三极管/MOSFET 或 LED 驱动芯片）。
-
----
-
-### 硬件接线与配置注意事项
-
-* **共地要求**：LED 电路的 GND 必须与开发板 GND 共地，否则会导致 LED 无法正常点亮或出现电平异常。
-* **极性识别**：PiranhaLED 采用四脚封装，成对对角脚相连，长脚为正极，短脚为负极。接线时务必区分正负极，否则会导致 LED 不亮。
-* **限流电阻**：GPIO 输出电流有限，必须在 LED 回路中串联电阻，阻值根据供电电压与 LED 正向压降计算：
-  `R = (Vcc - Vf) / If`
-  例如：3.3V 供电，白光 LED（Vf≈3.0V），If=20mA → R≈15Ω，实际可选 220Ω\~330Ω 以保证安全余量。
-* **PWM 调光**：若使用 PWM 控制亮度，推荐频率为 500Hz\~2kHz，过低可能引起肉眼可见的闪烁，过高则可能超出开发板定时器分辨率。
+1. **硬件极性**：共阳极 LED 需将 `polarity` 设为 `POLARITY_ANODE`，共阴极设为 `POLARITY_CATHODE`，否则 LED 状态与预期相反
+2. **引脚选择**：避免使用开发板上已占用的特殊功能引脚（如 UART、I2C 引脚），防止冲突
+3. **电源保护**：模块通过三极管驱动 LED，无需额外限流电阻，但需确保供电电压在 3.3V-5V 范围内
+4. **异常处理**：生产环境中建议完善异常日志记录，便于排查问题
+5. **用户中断**：`main.py` 中已处理 `KeyboardInterrupt`，可通过 Ctrl+C 安全终止程序
 
 ---
 
-### 环境影响
+## 联系方式
 
-* **温度限制**：最佳工作温度为 -20℃\~60℃。高温（>80℃）可能导致 LED 光衰加速，低温（<-20℃）会降低发光效率。
-* **湿度限制**：高湿环境（>85%RH）中，水汽可能渗透 LED 封装导致金属引脚氧化，需防潮存放或增加防护涂层。
-* **散热要求**：高功率 PiranhaLED 长时间点亮会产生显著热量，若不良好散热可能导致光通量下降或永久损坏。建议在 PCB 上增加散热铜箔或外接铝基板。
-* **静电防护**：LED 芯片对静电较敏感，装配或接线时需避免直接用手触摸引脚，建议使用防静电手环或工具。
+如有任何问题或需要帮助，请通过以下方式联系开发者：
 
----
-### 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
-### 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+## 许可协议
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+```
+MIT License
 
-**版权归 FreakStudio 所有。**
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

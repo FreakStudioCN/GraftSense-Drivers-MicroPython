@@ -1,5 +1,7 @@
-# 触控按键驱动 - MicroPython版本
-## 目录
+# GraftSense TTP223 触控按键模块 （MicroPython）
+
+# GraftSense TTP223 触控按键模块驱动 （MicroPython）
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -10,209 +12,159 @@
 - [注意事项](#注意事项)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
+
 ---
 
 ## 简介
 
-触控按键是一种基于电容感应或触摸传感芯片实现的输入设备，能够检测人体手指触碰并输出数字信号。相比传统机械按键，触控按键具有无机械磨损、响应灵敏、寿命长等优点，广泛应用于家电控制面板、灯具开关、多媒体交互等场景。
-本项目提供基于 MicroPython 的驱动代码，封装 GPIO 读取、状态检测与事件回调功能，支持快速集成。
-
-> **注意**：适用于常见电容式触控模块（如 TTP223 系列），不适用于需要模拟位置检测的电位器或高精度电容传感器。
+本项目为 **GraftSense Touch Button v1.3（基于 TTP223 的电容式触控按键模块）** 提供了完整的 MicroPython 驱动支持，可实现电容式触摸检测与开关信号输出。驱动支持四种工作模式（同步轻触、反向轻触、自锁、反向自锁），内置软件消抖机制与回调触发功能，适用于电子 DIY 触控实验、智能开关演示、嵌入式交互界面项目，兼容树莓派 Pico 等主流 MicroPython 设备。
 
 ---
 
 ## 主要功能
 
-* 读取 GPIO 数字电平（0/1），判断触摸状态（触摸/未触摸）
-* 支持轮询或事件回调方式检测按键状态
-* 聚合返回完整状态数据，接口简洁，适配多种触控模块
+- ✅ 支持电容式触摸检测，无机械磨损，操作直观、响应灵敏
+- ✅ 提供四种工作模式：同步轻触、反向轻触、自锁模式、反向自锁模式
+- ✅ 内置软件消抖机制，可自定义消抖时间（0-100ms，默认 50ms）
+- ✅ 支持按下 / 释放回调函数，解耦业务逻辑与硬件检测
+- ✅ 可配置空闲电平（高 / 低），适配不同模块工作模式
+- ✅ 提供实时状态查询接口，便于程序逻辑判断
+- ✅ 遵循 Grove 接口标准，兼容主流开发板与传感器生态
 
 ---
 
 ## 硬件要求
 
-### 推荐测试硬件
-
-* MicroPython 开发板（如树莓派 Pico）
-* 电容式触控按键模块（如 TTP223）
-* 杜邦线 3 根、（可选）面包板
-
-### 模块引脚说明
-
-| 触控按键模块引脚 | 功能描述 | 连接说明                 |
-| -------- | ---- | -------------------- |
-| VCC      | 电源输入 | 接开发板 3.3V（部分模块支持 5V） |
-| OUT      | 信号输出 | 接开发板 GPIO 输入引脚       |
-| GND      | 接地   | 接开发板 GND             |
+1. **核心硬件**：GraftSense Touch Button v1.3 触控按键模块（基于 TTP223 芯片，支持四种工作模式配置）
+2. **主控设备**：支持 MicroPython v1.23.0 及以上版本的开发板（如树莓派 Pico、ESP32 等）
+3. **接线配件**：Grove 4Pin 线（用于连接模块的 DIN、GND、+5V 引脚与开发板）
+4. **电源**：5V 稳定电源（模块通过 + 5V 引脚供电，内置电平适配电路）
 
 ---
 
 ## 文件说明
-### touchkey.py
-
-该文件实现 **触控/机械按键** 的核心驱动功能，仅包含 `TouchKey` 类，用于处理按键信号读取、防抖和状态管理。
-
-`TouchKey` 类通过封装 GPIO 输入与定时器防抖逻辑，提供按键状态检测、事件回调等功能。类中包含以下主要属性：
-
-* `_pin`：用于存储 GPIO 引脚对象，负责读取按键输出信号。
-* `_idle_state`：定义空闲状态电平（高电平=1 或 低电平=0），用于区分按下/释放状态。
-* `_debounce_time`：防抖时间（单位 ms，默认 50），避免机械按键或触摸抖动导致的误判。
-
-类的主要方法包括：
-
-* `__init__(pin_num: int, idle_state: int, debounce_time: int = 50, press_callback: callable = None, release_callback: callable = None)`
-  初始化驱动对象，绑定 GPIO 引脚，设置空闲状态、防抖时间和回调函数。
-* `_irq_handler(pin)`
-  中断触发函数，用于捕获电平变化并启动防抖定时器。
-* `_debounce_handler()`
-  定时器防抖处理函数，在设定的延时后确认电平变化，触发回调。
-* `get_state() -> bool`
-  返回当前按键逻辑状态（True = 按下，False = 释放）。
-
-该类支持 **机械按键** 与 **电容触控模块（如 TTP223）**，通过调整 `idle_state` 参数即可兼容不同默认电平逻辑。
-
----
-
-### main.py
-
-该文件为 **触控按键的功能测试程序**，无自定义类，仅包含程序入口逻辑。
-
-主程序功能：
-
-* 初始化与触控按键模块连接的 GPIO 引脚。
-* 创建 `TouchKey` 驱动实例，并传入回调函数 `on_press` / `on_release`。
-* 在循环中周期性调用 `get_state()` 方法，实时打印按键状态（Pressed / Released）。
-* 支持通过 `Ctrl+C` 手动终止测试。
-
-该程序可用于验证按键硬件连接正确性、防抖逻辑与回调触发功能是否正常。
 
 ---
 
 ## 软件设计核心思想
 
-* **模块化**：按键检测与应用逻辑解耦，核心功能封装在 `TouchKey` 类中，测试程序保持简洁。
-* **防抖适配**：通过中断 + 定时器实现防抖，避免因触摸/机械抖动导致的误触发。
-* **硬件兼容**：支持机械按键和电容触控模块，用户可通过 `idle_state` 参数灵活适配。
-* **事件驱动**：支持按下/释放回调，方便扩展为应用层的交互事件。
+1. **中断 + 定时器消抖**：通过 GPIO 双边缘中断触发检测，配合定时器延迟消抖，避免电容触摸或机械抖动导致的误触发
+2. **回调机制解耦**：支持按下 / 释放回调函数，将硬件检测与业务逻辑分离，提升代码可维护性
+3. **可配置空闲电平**：通过 `idle_state` 参数适配模块不同工作模式，确保状态判断准确
+4. **状态机稳定检测**：通过 `last_stable_state` 记录稳定状态，仅在电平变化有效时触发回调，避免频繁误报
+5. **参数校验与容错**：对引脚号、消抖时间等入口参数进行合法性校验，提升代码健壮性
 
 ---
 
 ## 使用说明
-### 硬件接线（树莓派 Pico 示例）
 
-| 触控按键模块引脚 | Pico引脚                      | 接线功能   |
-| -------- | --------------------------- | ------ |
-| VCC      | 3.3V（Pin36）                 | 电源输入   |
-| OUT      | GP15（Pin21，可更换任意 GPIO 输入引脚） | 按键信号输入 |
-| GND      | GND（Pin38）                  | 接地     |
----
-### 软件依赖
+### 环境准备
 
-* 固件：MicroPython v1.23+
-* 内置库：`machine`（GPIO 控制）、`time`（延时）、`utime`（可选）
-* 开发工具：Thonny / PyCharm / mpremote
----
-### 安装步骤
+- 在开发板上烧录 **MicroPython v1.23.0+** 固件
+- 将 `touchkey.py` 和 `main.py` 上传至开发板文件系统
 
-1. 烧录 MicroPython 固件到开发板
-2. 上传 `touchkey.py` 和 `main.py` 到开发板
-3. 修改 `main.py` 中 `pin_num=15` 为实际接线的 GPIO 引脚
-4. 运行 `main.py`，触摸按键模块，观察串口输出 **Pressed / Released** 状态变化
+### 硬件连接
+
+- 使用 Grove 线将模块的 `DIN` 引脚连接至开发板指定 GPIO 引脚（如示例中的 GPIO 15）
+- 连接 `GND` 和 `+5V` 引脚，确保 5V 供电稳定
+- 根据需求通过 `STG`/`SLH` 短路点配置工作模式（详见注意事项）
+
+### 代码配置
+
+- 在 `main.py` 中修改 `TouchKey` 初始化参数：
+  - `pin_num`：实际连接的 GPIO 引脚号
+  - `idle_state`：根据模块工作模式设置空闲电平（高 / 低）
+  - `debounce_time`：消抖时间（0-100ms，默认 50ms）
+  - `press_callback`/`release_callback`：自定义按下 / 释放回调函数
+
+### 运行测试
+
+- 重启开发板，`main.py` 将自动执行，实时打印按键状态，并在按下 / 释放时触发回调
 
 ---
 
 ## 示例程序
-```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/8/28 上午11:22
-# @Author  : ben0i0d
-# @File    : main.py
-# @Description : 触控按键驱动测试文件
 
-# ======================================== 导入相关模块 =========================================
-
-# 导入时间相关模块
+```
+# 导入驱动模块
 import time
-# 导入按钮驱动模块
 from touchkey import TouchKey
 
-# ======================================== 全局变量 ============================================
-
-# ======================================== 功能函数 ============================================
-
+# 自定义回调函数
 def on_press():
     print("Button pressed")
 
 def on_release():
     print("Button released")
 
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ===========================================
-
-# 上电延时3s
-time.sleep(3)
-print("FreakStudio:Testing Button")
-
-# 创建 TouchKey 对象
-button = TouchKey(pin_num=15, idle_state=TouchKey.high, debounce_time=50, press_callback=on_press, release_callback=on_release)
-
-# ========================================  主程序  ============================================
+# 初始化触控按键（GPIO 15，空闲电平为高，消抖50ms）
+button = TouchKey(
+    pin_num=15,
+    idle_state=TouchKey.high,
+    debounce_time=50,
+    press_callback=on_press,
+    release_callback=on_release
+)
 
 try:
     while True:
+        # 查询当前状态
         state = button.get_state()
         print("Current button state:", "Pressed" if state else "Released")
         time.sleep(0.5)
-
 except KeyboardInterrupt:
     print("Exit button test program")
 ```
----
-👌 我来帮你把 **滑动变阻器的注意事项** 改写成 **触控按键（TouchKey 模块）** 的注意事项，逻辑保持完整，但内容替换为触控按键实际需要关心的问题：
 
 ---
 
 ## 注意事项
-### 电气特性限制
-* **电压限制**：触控按键模块（如 TTP223）通常工作在 **2.5V\~5.5V** 范围，使用树莓派 Pico 时应接 **3.3V** 电源，避免直接接 5V 导致 GPIO 损坏。
-* **电流消耗**：触控按键模块功耗极低（典型值 < 10µA，触发时 < 1mA），一般无需额外电源设计，但请确保电源稳压良好。
-* **输出电平**：模块的 OUT 引脚输出与 VCC 一致，即接 3.3V 时输出高电平为 3.3V。若接 5V，请确认开发板 GPIO 是否 **5V 容忍**，否则需加电平转换。
+
+1. **工作模式配置**：通过模块上的 `STG`/`SLH` 短路点实现四种模式，需对应设置 `idle_state`：
+
+   - STG=0、SLH=0（同步轻触）：无触摸时 DIN 输出高电平，触摸后输出低电平 → `idle_state=TouchKey.high`
+   - STG=0、SLH=1（反向轻触）：无触摸时 DIN 输出低电平，触摸后输出高电平 → `idle_state=TouchKey.low`
+   - STG=1、SLH=0（自锁模式）：上电初始 DIN 为低电平，触摸后电平翻转 → `idle_state=TouchKey.low`
+   - STG=1、SLH=1（反向自锁）：上电初始 DIN 为高电平，触摸后电平翻转 → `idle_state=TouchKey.high`
+2. **LED 指示灯**：仅当 STG=0、SLH=0 时，用户按下按键后模块 LED 会自动亮起
+3. **消抖时间**：消抖时间过短可能导致误触发，过长则响应延迟，建议根据触摸灵敏度调整（0-100ms）
+4. **回调函数**：回调函数应保持简洁，避免执行耗时操作，确保不阻塞中断处理
+5. **电源与电平**：模块供电为 5V，DIN 引脚输出电平与模块工作模式对应，需确保主控 GPIO 电平兼容
 
 ---
 
-### 硬件接线与配置注意事项
-* **共地要求**：触控按键模块 GND 必须与开发板 GND 共地，否则会出现触摸无效或误触发。
-* **接线可靠性**：使用面包板测试时需确保 OUT 引脚与 GPIO 插牢，长期使用建议焊接排针或导线，避免接触不良。
-* **GPIO 引脚选择**：触控按键只需数字输入引脚，不可接 ADC 或特殊功能引脚（如 SWD）。
-* **干扰防护**：电容式触控模块对电磁干扰较敏感，OUT 信号线应避免与电机、继电器等大电流器件平行布线，必要时可加 RC 滤波。
+## 联系方式
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
-### 环境影响
-* **温度限制**：触控按键模块推荐工作温度为 -20℃\~70℃。过高温度可能导致芯片性能下降，过低温度可能使电容检测灵敏度降低。
-* **湿度限制**：高湿环境（>85%RH）可能改变电容值，引发灵敏度异常甚至误触发。需为模块加防潮外壳，避免直接暴露在水汽中。
-* **表面污染**：触控面若被灰尘、油污或水滴覆盖，会改变电容特性，影响触控灵敏度。建议定期用干净柔软的布擦拭，避免使用化学溶剂。
-* **外部材料影响**：触控按键支持一定厚度的绝缘覆盖层（如亚克力、玻璃）。若增加外壳，应控制厚度 ≤5mm，并选用介电常数合适的材料，否则会导致检测不灵敏。
+## 许可协议
 
----
-### 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+```sql
+MIT License
 
----
-### 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
+Copyright (c) 2025 FreakStudio
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-**版权归 FreakStudio 所有。**
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

@@ -1,6 +1,13 @@
-# MG系列气体传感器驱动 - MicroPython版本
+# GraftSense-MG811 二氧化碳传感器模块（MicroPython）
+
+# GraftSense-MG811 二氧化碳传感器模块（MicroPython）
+
+# GraftSense MG 系列气体传感器模块
+
+---
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -16,289 +23,156 @@
 
 ## 简介
 
-MG811 和 MG812 系列气体传感器是一类基于固态电化学/氧化物原理的气体检测设备，主要用于检测二氧化碳（CO₂）浓度。该系列传感器具有高灵敏度、快速响应、耐用性强等特点，广泛应用于室内空气质量监测、温室环境检测、科研实验等场景。
-
-> **注意**：MG811/MG812 适用于参考性 CO₂ 浓度检测，不能替代精密工业级 CO₂ 测量仪器。
-
-本项目提供了基于 MicroPython 的驱动代码及示例程序，方便开发者快速接入 MG811/MG812 传感器，实现 CO₂ 浓度检测功能。
+本项目是 **FreakStudio GraftSense MG 系列气体传感器模块** 的 MicroPython 驱动库，基于 MG811、MG812 等电化学气体传感器实现，支持 CO₂ 等气体浓度检测。模块通过模拟输出（AIN）和数字输出（DIN）与主控通信，内置高阻抗运放（CA3140）和电压比较器（LM393），可广泛应用于电子 DIY 空气质量监测实验、智能环境监控演示等场景。
 
 ---
 
 ## 主要功能
 
-* **传感器支持**：
-
-  * MG811（高灵敏 CO₂ 检测，适用于 0–10,000 ppm 范围）
-  * MG812（高灵敏 CO₂ 检测，适用于 0–5,000 ppm 范围，可用于低浓度环境）
-  * 支持自定义传感器标定曲线
-* **核心检测指标**：
-
-  * 电压值（V）
-  * CO₂ 浓度（ppm）
-* **中断支持**：通过外接比较器可实现阈值报警（可选）
-* **数据处理**：
-
-  * 多采样平均滤波
-  * 多项式或对数浓度转换
-* **统一接口**：提供 `read_voltage()` 和 `read_ppm()` 标准接口，便于快速集成
-* **跨平台支持**：兼容多种 MicroPython 开发板（树莓派 Pico 等）
+- 支持 **模拟电压读取**（通过 ADC 引脚采集放大后的传感器信号）和 **数字中断触发**（通过 DIN 引脚检测阈值超限）
+- 提供 **内置多项式模型**（MG811、MG812）和 **自定义多项式** 两种方式，实现电压到气体浓度（ppm）的转换
+- 支持 **多采样平均** 功能，提升检测稳定性，可配置采样次数和间隔
+- 内置中断安全机制，通过 `micropython.schedule` 避免中断回调阻塞，支持上升沿/下降沿触发
+- 提供资源释放接口，确保中断和引脚资源正确回收
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
 
-* 树莓派 Pico/Pico W
-* MG811 或 MG812 CO₂ 传感器模块
-* 杜邦线若干
-* 10kΩ 电阻（用于分压或模块外接负载，部分模块已集成）
+- **主控板**：支持 MicroPython 的开发板（如 ESP32、RP2040 等），需具备 ADC 引脚和 GPIO 引脚
+- **传感器模块**：GraftSense MG 系列气体传感器模块（如 MG811 二氧化碳传感器模块）
+- **引脚连接**：
 
-### 模块引脚说明
-
-| 传感器引脚 | 功能描述                           |
-| ----- | ------------------------------ |
-| VCC   | 电源正极（5V 推荐，部分模块可用 3.3V，但性能略下降） |
-| GND   | 电源负极                           |
-| AOUT  | 模拟输出（连接 ADC 读取电压）              |
-| DOUT  | 数字输出（阈值报警，可选）                  |
+  - AIN：模拟输出引脚，连接至主控 ADC 引脚
+  - DIN：数字输出引脚，连接至主控 GPIO 引脚（用于中断触发）
+- **供电**：3.3V 或 5V（根据模块要求，需稳定供电以保证检测精度）
 
 ---
 
 ## 文件说明
 
-### mgx.py
+| 文件名    | 功能描述                                                          |
+| --------- | ----------------------------------------------------------------- |
+| `mgx.py`  | 核心驱动类，封装传感器电压读取、ppm 计算、中断回调及资源管理逻辑  |
+| `main.py` | 示例程序，演示传感器初始化、电压/ppm 读取、中断回调及资源释放流程 |
 
-实现了 MG811/MG812 CO₂ 传感器的驱动功能，核心类 `MGX` 提供完整控制接口。
-
-#### 类定义：`MGX`
-
-* **`__init__(adc_pin: int, comp_pin: int = None, callback: callable = None, rl_ohm: float = 10000, vref: float = 3.3) -> None`**
-  初始化传感器，参数包括 ADC 引脚编号、可选比较器引脚、可选中断回调函数、负载电阻和参考电压。
-
-* **`read_voltage() -> float`**
-  读取当前传感器模拟电压值（V）。
-
-* **`read_ppm(samples: int = 1, delay_ms: int = 0) -> float`**
-  读取 CO₂ 浓度（ppm），支持多次采样平均和延时。
-
-* **`select_builtin(sensor_name: str) -> None`**
-  选择内置标定模型（MG811 或 MG812）。
-
-* **`set_custom_polynomial(coeffs: list[float]) -> None`**
-  设置用户自定义多项式，用于电压→ppm 转换。
-
-* **`enable_interrupt() -> None`** / **`disable_interrupt() -> None`**
-  启用或禁用比较器中断，并在触发时调用回调函数。
-
-* **`deinit() -> None`**
-  释放传感器资源，取消中断。
-
----
-
-### main.py
-
-示例程序，演示 MG811/MG812 传感器功能，包括电压读取、CO₂ 浓度计算和中断回调。
 ---
 
 ## 软件设计核心思想
 
-### 模块化设计
-
-* 将传感器操作封装为独立类，职责单一
-* 分离硬件控制与业务逻辑，便于维护
-* 提供统一接口，简化集成难度
-
-### 中断驱动机制
-
-* 支持比较器引脚中断，快速响应阈值变化
-* 使用 `micropython.schedule` 调度回调，避免中断中执行复杂操作
-* 可启用/禁用中断，灵活控制
-
-### 状态管理
-
-* 保存最新电压和 ppm 值，提供查询接口
-* 支持阻塞/非阻塞读取
-* 避免重复触发回调
-
-### 易用性设计
-
-* 默认延时和负载电阻配置，简化初始化
-* 可选中断回调，支持用户自定义逻辑
-* 完善异常处理，提高稳定性
+1. **分层封装**：将 ADC 原始值读取、电压转换、ppm 计算分离，降低耦合度，提升可维护性。
+2. **中断安全**：使用 `micropython.schedule` 将中断回调逻辑调度至主线程执行，避免在 ISR 中执行耗时操作。
+3. **灵活配置**：支持内置传感器多项式（MG811、MG812）和用户自定义多项式，适配不同传感器和环境。
+4. **资源管理**：提供 `deinit` 接口，确保中断和引脚资源在程序结束时正确释放，避免资源泄漏。
+5. **采样优化**：支持多采样平均，通过多次采样取平均提升检测稳定性，降低噪声影响。
 
 ---
 
 ## 使用说明
 
-### 硬件接线（树莓派 Pico 示例）
+### 1. 导入模块
 
-| 传感器引脚 | Pico GPIO 引脚         |
-| ----- | -------------------- |
-| VCC   | 5V 或 3.3V（MG811推荐5V） |
-| GND   | GND                  |
-| AOUT  | GP26 (ADC0)          |
-| DOUT  | GP15 (可选，中断比较器输出)    |
+### 2. 初始化 ADC 和 GPIO
 
-> **注意**：MG811/MG812 传感器上电后需预热（通常 1\~3 分钟），并确保负载电阻接入正确。
+### 3. 定义中断回调函数
 
----
+### 4. 创建 MGX 实例
 
-### 软件依赖
+### 5. 选择传感器模型
 
-* **固件版本**：MicroPython v1.23+
-* **内置库**：`machine`, `time`, `micropython`
-* **开发工具**：Thonny 或 PyCharm
+### 6. 读取数据
+
+### 7. 释放资源
 
 ---
+
 ## 示例程序
+
+以下为 `main.py` 中的核心演示代码：
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/08/20 10:21
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 测试MG系列气体传感器模块驱动程序
-
-# ======================================== 导入相关模块 =========================================
-
 from machine import Pin, ADC
 import time
 from time import sleep
 from mgx import MGX
 
-# ======================================== 全局变量 ============================================
-
-# ======================================== 功能函数 ============================================
-
-# 用户回调函数
+# 中断回调函数
 def mg_callback(voltage: float) -> None:
-    """
-    当比较器引脚触发中断时调用该函数，打印当前电压值。
-
-    Args:
-        voltage (float): 电压值 (单位: V)。
-
-    ==========================================
-
-    This function is called when the comparator pin triggers an IRQ,
-    and prints the measured voltage.
-
-    Args:
-        voltage (float): Voltage value in volts.
-
-    """
     print("[IRQ] Voltage: {:.3f} V".format(voltage))
 
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
-# 上电延时3s
+# 初始化配置
 time.sleep(3)
-# 打印调试消息
 print("Measuring Gas Concentration with MG Series Gas Sensor Modules")
 
-# Pico ADC0 (GPIO26)
 adc = ADC(Pin(26))
-# Comparator output (GPIO15, optional)
 comp = Pin(19, Pin.IN)
 mg = MGX(adc, comp, mg_callback, rl_ohm=10000, vref=3.3)
-
-# 选择内置多项式（MG811,MG812）
 mg.select_builtin("MG811")
 
-# 传入自定义的多项式
-# mq.set_custom_polynomial([1.0, -2.5, 3.3])
-
-# ========================================  主程序  ===========================================
-
+# 主程序
 print("===== MG Sensor Test Program Started =====")
 try:
     while True:
-        # 读取电压
         v = mg.read_voltage()
         print("Voltage: {:.3f} V".format(v))
-
-        # 读取 ppm（5 次采样，间隔 200 ms）
+        
         ppm = mg.read_ppm(samples=5, delay_ms=200)
         print("Gas concentration: {:.2f} ppm".format(ppm))
-
+        
         print("-" * 40)
-        # 主循环间隔
         sleep(2)
 except KeyboardInterrupt:
     print("User interrupted, exiting program...")
 finally:
     mg.deinit()
     print("Sensor resources released.")
-
 ```
+
 ---
 
 ## 注意事项
-### 传感器特性
 
-* **检测气体**：主要检测 CO₂ 浓度
-* **检测范围**：0–5,000 ppm（MG812）或 0–10,000 ppm（MG811），具体取决于型号
-* **响应特性**：
-
-  * 响应时间：约 10–30 秒达到 90% 浓度变化
-  * 恢复时间：约 30–60 秒从高浓度恢复到基线
-* **温湿度影响**：高温高湿环境可能影响测量精度
+1. **传感器预热**：电化学传感器（如 MG811）需要预热时间（通常几分钟），预热后检测结果更稳定。
+2. **多项式标定**：内置多项式为通用模型，实际使用中需根据环境（温度、湿度、干扰气体）进行标定，或使用自定义多项式提升精度。
+3. **中断回调**：中断回调函数应避免耗时操作，复杂逻辑建议通过 `schedule` 调度至主线程执行。
+4. **供电稳定**：传感器对供电电压敏感，需使用稳定的 3.3V 或 5V 电源，避免电压波动导致检测误差。
+5. **版本兼容**：本库基于 MicroPython v1.23 开发，低版本可能存在兼容性问题。
+6. **阈值调节**：模块上的可调电阻（R10）可调节电压比较器的阈值，影响 DIN 引脚的触发条件，需根据实际需求调整。
 
 ---
 
-### 安装注意事项
-
-* 避免将传感器安装在热源附近（如空调出风口、加热器）
-* 避免阳光直射或强光源直接照射
-* 安装高度建议 1–2 米，以获得较均匀的空气采样
-* 确保空气流通，避免密闭角落导致 CO₂ 浓度积累影响读数
-
----
-
-### 使用限制
-
-* 仅用于参考性 CO₂ 浓度测量，不能替代精密仪器
-* 对快速瞬时浓度变化的响应有限
-* 不适合检测其他气体（非 CO₂）
-* 不适用于高精度安全监测或工业排放控制
-
----
-
-### 电源要求
-
-* 确保供电稳定，避免电压波动导致测量异常
-* MG811/MG812 推荐 5V 供电（部分模块可用 3.3V，但灵敏度下降）
-* 电源电流应满足传感器要求（通常 < 150 mA，模块化通常 < 50 mA）
-
----
-
-### 软件使用建议
-
-* 传感器初次上电后，建议预热 1–3 分钟以稳定读数
-* 回调函数应尽量简短，避免在中断中执行复杂操作
-* 长时间不使用时，可通过 `deinit()` 或禁用中断降低功耗
-* 可根据应用场景调整采样次数、延时和多项式校准参数
-
----
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+Copyright (c) 2025 FreakStudio
 
-**版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

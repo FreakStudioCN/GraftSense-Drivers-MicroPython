@@ -1,6 +1,11 @@
-# 滚珠震动传感器驱动 - MicroPython版本
+# GraftSense-基于 SW-18010P 的弹簧式震动传感器模块（MicroPython）
+
+# GraftSense-基于 SW-18010P 的弹簧式震动传感器模块（MicroPython）
+
+# GraftSense SW-18010P Spring Vibration Sensor Module
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -15,165 +20,114 @@
 ---
 
 ## 简介
-滚珠震动传感器是一种基于机械滚珠结构的触发式传感器，通过震动导致滚珠接触/分离实现电路通断，进而输出数字信号。该传感器具有成本低、响应灵敏、结构耐用等特点，广泛应用于设备震动监测、安防报警、智能玩具互动、工业设备状态检测等场景。
 
-> **注意**：不适用于高精度震动频率/幅度测量，仅支持震动有无的定性检测。
-
-本项目提供了基于 MicroPython 的驱动代码及示例程序，支持震动检测、中断回调、消抖处理等功能，方便开发者快速集成滚珠震动传感器。
+本项目是 **GraftSense 系列基于 SW-18010P 的弹簧式震动传感器模块**，属于 FreakStudio 开源硬件项目。模块以 SW-18010P 弹簧式震动传感器为核心，配合 LM393 电压比较器，将机械震动转化为稳定的数字信号输出，广泛适用于防震报警装置、敲击触发实验、电子 DIY 互动感应应用等场景。
 
 ---
 
 ## 主要功能
-- **双模式震动检测**：
-  - 轮询模式：通过 `read()` 方法主动读取当前震动状态
-  - 中断模式：通过 GPIO 中断触发回调，低功耗高效检测
-- **消抖处理**：可配置消抖时间（默认50ms），避免机械抖动导致误触发
-- **回调机制**：支持绑定自定义回调函数，震动触发时自动执行
-- **状态查询**：通过 `get_status()` 获取传感器当前状态（上次状态、消抖时间、回调绑定情况）
-- **资源管理**：提供 `init()`/`deinit()` 方法，支持传感器初始化与资源释放
-- **跨平台兼容**：仅依赖 MicroPython 标准库，兼容树莓派 Pico 等主流开发板
+
+- **数字信号输出**：静止时 DIN 输出高电平，震动时输出低电平，配合双指示灯直观显示模块通电与震动触发状态。
+- **中断回调绑定**：支持绑定自定义回调函数，在检测到震动时自动触发，通过 `micropython.schedule` 调度执行，确保中断安全。
+- **消抖机制**：内置消抖时间配置，可设置触发间隔，避免震动抖动导致的误触发。
+- **状态查询接口**：提供 `read()` 实时读取震动状态，以及 `get_status()` 获取包含最后状态、消抖时间、回调绑定状态的完整信息字典。
+- **灵敏度可调**：通过板载电位器 R10 微调比较器阈值，控制震动触发的灵敏度。
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- 树莓派 Pico/Pico W
-- 滚珠震动传感器模块（如 SW-420 等）
-- 杜邦线若干
-- （可选）3.3V/5V 电源模块（若开发板供电不足）
 
-### 模块引脚说明
-| 滚珠震动传感器引脚 | 功能描述 | 电压要求 |
-|--------------------|----------|----------|
-| VCC                | 电源正极 | 3.3V - 5V（具体参考传感器型号） |
-| GND                | 电源负极 | 接地 |
-| OUT                | 信号输出引脚 | 高电平（震动触发）/低电平（无震动） |
+- **核心元件**：SW-18010P 弹簧式震动传感器、LM393 电压比较器，内置电源滤波与指示灯电路。
+- **供电**：3.3V 或 5V 直流供电，模块兼容 Grove 接口标准，连接便捷。
+- **引脚连接**：
+
+  - DIN：数字输出引脚，必须连接 MCU 支持中断功能的 GPIO 引脚（如示例中引脚 6）。
+  - VCC/GND：电源引脚，遵循 Grove 接口定义。
+- **灵敏度调节**：通过板载电位器 R10（10kΩ）微调比较器阈值，适应不同震动检测场景。
 
 ---
 
 ## 文件说明
-### vibration_sensor.py
-实现滚珠震动传感器的核心驱动逻辑，核心类 `VibrationSensor` 封装所有功能接口。
 
-#### 类定义：`VibrationSensor`
-- **`__init__(pin: Pin, callback: callable = None, debounce_ms: int = 50) -> None`**  
-  初始化传感器：绑定 GPIO 引脚对象、设置可选回调函数、配置消抖时间（默认50ms），初始化状态变量（上次触发时间、上次状态）。
-- **`init(self) -> None`**  
-  初始化模块：将引脚配置为输入模式，若已设置回调函数则启用 GPIO 中断（上升沿+下降沿触发）。
-- **`deinit(self) -> None`**  
-  释放资源：禁用 GPIO 中断，清除中断对象引用，避免资源泄漏。
-- **`read(self) -> bool`**  
-  读取当前震动状态：返回 `True` 表示检测到震动，`False` 表示无震动，同步更新 `_last_state` 变量。
-- **`_irq_handler(self, pin: Pin) -> None`**  
-  内部中断处理函数：带消抖逻辑（触发间隔需超过 `debounce_ms`），更新传感器状态，调度用户回调。
-- **`_scheduled_callback(self, arg: int) -> None`**  
-  内部调度函数：通过 `micropython.schedule` 在主线程安全执行用户回调，避免中断内耗时操作。
-- **`get_status(self) -> dict`**  
-  返回传感器状态字典：包含 `last_state`（上次检测状态）、`debounce_ms`（当前消抖时间）、`callback_set`（是否绑定回调）。
-
-### main.py
-滚珠震动传感器功能测试程序，演示传感器初始化、中断回调、状态轮询、状态查询等完整流程。
+- `vibration_sensor.py`：震动传感器驱动文件，封装了中断配置、消抖逻辑、状态读取与回调调度等核心功能，提供统一的操作接口。
+- `main.py`：驱动测试程序，演示了传感器初始化、中断回调绑定、实时状态轮询及状态查询的完整流程。
 
 ---
 
 ## 软件设计核心思想
-### 模块化与封装
-- 将震动检测、中断控制、消抖处理等逻辑封装为独立方法，通过统一类接口对外提供服务
-- 隐藏底层硬件操作细节（如 GPIO 中断配置、消抖计时），降低开发难度
 
-### 中断与消抖优化
-- **中断触发**：采用 GPIO 上升沿+下降沿双触发，确保震动开始/结束均能被检测
-- **消抖机制**：通过 `_last_trigger` 记录上次有效触发时间，过滤短于 `debounce_ms` 的抖动信号
-- **安全回调**：使用 `micropython.schedule` 调度回调，避免中断上下文执行复杂逻辑导致系统异常
-
-### 状态管理
-- 维护 `_last_state` 变量记录传感器最新状态，支持轮询与中断模式下的状态同步
-- 提供 `get_status()` 方法，方便开发者实时查询传感器配置与运行状态
-
-### 跨平台兼容
-- 仅依赖 MicroPython 标准库（`machine`、`time`、`micropython`），不绑定特定硬件平台
-- 引脚初始化由应用层传入 `Pin` 对象，驱动层不负责硬件配置，提升复用性
+- **中断安全设计**：中断处理函数仅更新状态并调度回调，通过 `micropython.schedule` 在主线程执行用户回调，避免 ISR 内耗时操作。
+- **消抖机制**：通过 `_last_trigger` 记录上次有效触发时间，仅当触发间隔超过配置的消抖时间时才更新状态并触发回调，有效抑制抖动误触发。
+- **状态管理**：通过 `_last_state` 保存最后一次有效震动状态，支持实时读取与状态查询，便于上层应用逻辑判断。
+- **资源复用**：驱动不负责创建 GPIO 引脚实例，仅复用外部传入的 Pin 对象，便于硬件平台适配与资源管理。
 
 ---
 
 ## 使用说明
-### 硬件接线（树莓派 Pico 示例）
-| 滚珠震动传感器引脚 | Pico GPIO 引脚 | 接线说明 |
-|--------------------|--------------|----------|
-| VCC                | 3.3V（Pin36）  | 传感器电源输入 |
-| GND                | GND（Pin38）   | 电源接地 |
-| OUT                | GP6          | 信号输出到开发板 |
 
-> **注意**：
-> 1. 确认传感器供电电压，避免 5V 传感器接 3.3V 导致灵敏度不足，或 3.3V 传感器接 5V 烧毁模块
-> 2. 若使用其他开发板，需对应调整 GPIO 引脚编号
+1. **硬件连接**：
+
+   - 将模块 VCC 接 3.3V/5V，GND 接地，DIN 引脚连接 MCU 支持中断的 GPIO 引脚（如引脚 6）。
+   - 通过板载电位器 R10 调节震动灵敏度，顺时针旋转降低灵敏度，逆时针旋转提高灵敏度。
+2. **初始化配置**：
+
+   ```python
+   ```
+
+from machine import Pin
+from vibration_sensor import VibrationSensor
+
+def vibration_callback():
+print("Vibration detected!")
+
+# 初始化传感器，绑定引脚 6，设置回调函数，消抖时间 10ms
+
+sensor = VibrationSensor(pin=Pin(6), callback=vibration_callback, debounce_ms=10)
+sensor.init()  # 启用中断
+
+```
+
+3. **状态读取**：
+	```python
+# 实时读取震动状态
+current_state = sensor.read()  # 返回 True/False
+# 获取完整状态字典
+status = sensor.get_status()  # {"last_state": bool, "debounce_ms": int, "callback_set": bool}
+```
+
+4. **资源释放**：
+   ```python
+   ```
+
+sensor.deinit()  # 禁用中断，释放资源
+
+```
 
 ---
 
-### 软件依赖
-- **固件版本**：MicroPython v1.23+  
-- **内置库**：
-  - `machine`：用于 GPIO 引脚控制、中断配置
-  - `time`：用于延时、时间差计算（消抖）
-  - `micropython`：用于安全调度回调函数
-- **开发工具**：Thonny、PyCharm（带 MicroPython 插件）
 
----
-
-### 安装步骤
-1. **烧录固件**：将 MicroPython v1.23+ 固件烧录到树莓派 Pico
-2. **上传文件**：将 `vibration_sensor.py` 和 `main.py` 上传到 Pico 的文件系统
-3. **配置引脚**：根据硬件接线修改 `main.py` 中 `Pin(15)` 的引脚编号（对应传感器 OUT 引脚）
-4. **运行测试**：在开发工具中执行 `main.py`，开始震动检测测试
-
----
 
 ## 示例程序
+
 ```python
 # MicroPython v1.23.0
-# -*- coding: utf-8 -*-   
-# @Time    : 2025/8/23 下午4:08
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 滚珠震动传感器驱动测试文件
-
-# ======================================== 导入相关模块 ==========================================
-
 import time
 from machine import Pin
 from vibration_sensor import VibrationSensor
 
-# ======================================== 全局变量 =============================================
-
-# ======================================== 功能函数 ==============================================
-
 def vibration_callback() -> None:
     """
     震动回调函数，在检测到震动时触发。
-
-    Notes：
-        该函数由中断触发，通过 micropython.schedule 调度执行。
-    ==========================================
-    Vibration callback function, triggered when vibration is detected.
-
-    Notes:
-        This function is called from interrupt, scheduled via micropython.schedule.
     """
     print("Vibration detected callback triggered!")
-
-# ======================================== 自定义类 =============================================
-
-# ======================================== 初始化配置 ============================================
 
 # 上电延时，确保硬件稳定
 time.sleep(3)
 print("FreakStudio: Vibration Sensor Test Start")
-# 初始化震动传感器，GPIO 引脚 15 输入，回调函数处理
-sensor = VibrationSensor(pin=Pin(1), callback=vibration_callback, debounce_ms=10)
+# 初始化震动传感器，GPIO 引脚 6 输入，回调函数处理
+sensor = VibrationSensor(pin=Pin(6), callback=vibration_callback, debounce_ms=10)
 sensor.init()
 print("Sensor initialized with callback and debounce 50ms.")
-
-# ======================================== 主程序 ===============================================
 
 try:
     start_time = time.ticks_ms()
@@ -198,56 +152,54 @@ finally:
     # 安全释放资源
     sensor.deinit()
     print("Sensor deinitialized. Test completed.")
-
 ```
+
 ---
+
 ## 注意事项
 
-### 传感器特性限制
-- **检测范围**：仅支持定性检测（震动有无），无法测量震动频率、幅度等参数
-- **触发阈值**：不同型号传感器触发灵敏度不同，剧烈震动才会触发（轻微震动可能无响应）
-- **恢复时间**：震动结束后，需等待滚珠复位（约 10-50ms）才能再次检测
+1. **中断引脚要求**：DIN 引脚必须连接 MCU 支持中断功能的 GPIO 引脚，否则无法启用中断回调。
+2. **消抖时间设置**：消抖时间过短可能导致误触发，过长则会丢失有效震动信号，需根据实际场景调整（默认 50ms）。
+3. **回调函数限制**：回调函数通过 `micropython.schedule` 调度执行，应避免耗时操作，防止阻塞主线程。
+4. **灵敏度调节**：通过板载电位器 R10 调节灵敏度时，需缓慢旋转并测试，避免阈值设置过高或过低导致检测失效。
+5. **硬件连接**：遵循 Grove 接口标准连接，确保 VCC、GND、DIN 引脚连接正确，避免反向供电损坏模块。
 
 ---
-
-### 硬件接线注意事项
-- **电压匹配**：严格按照传感器规格选择供电电压（3.3V/5V），避免接反 VCC/GND 烧毁模块
-- **布线规范**：传感器 OUT 引脚接线尽量短，远离强干扰源（如电机、继电器），避免信号干扰
-- **供电稳定**：若多个传感器同时工作，建议使用外部电源模块，避免开发板供电不足导致误触发
-
----
-
-### 软件配置建议
-- **消抖时间调整**：
-  - 若环境震动频繁（如电机附近），可增大 `debounce_ms`（如 100ms）减少误触发
-  - 若需检测快速震动，可减小 `debounce_ms`（如 20ms），但需避免抖动误触发
-- **回调函数设计**：回调函数需简短（避免循环、延时），复杂逻辑建议在回调中设置标志，主线程处理
-- **资源释放**：长时间不使用传感器时，调用 `deinit()` 释放中断资源，降低系统功耗
-
----
-
-### 环境影响
-- **温度限制**：避免在高温（>60℃）、低温（<-10℃）环境使用，否则会影响滚珠灵活性
-- **湿度限制**：传感器内部为机械结构，高湿环境（>80% RH）可能导致金属部件生锈，缩短寿命
-- **安装固定**：传感器需固定安装，避免自身晃动导致误触发（建议使用螺丝或双面胶固定）
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine`、`time` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+本项目采用 MIT 开源许可协议，完整协议内容如下：
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+```
+MIT License
 
-**版权归 FreakStudio 所有。**
+Copyright (c) [年份] FreakStudioCN
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

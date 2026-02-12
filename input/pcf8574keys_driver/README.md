@@ -1,5 +1,9 @@
-# PCF8574 五向按键测试程序 - MicroPython版本
+# GraftSense 基于 PCF8574 的五向按键模块 （MicroPython）
+
+# GraftSense 基于 PCF8574 的五向按键模块 （MicroPython）
+
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -10,271 +14,219 @@
 - [注意事项](#注意事项)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
----
+
 ## 简介
-PCF8574 是一款 I2C 接口的 GPIO 扩展芯片，可通过 2 根 I2C 引脚扩展 8 路 GPIO 口，广泛用于资源受限的嵌入式系统中扩展外设接口。本项目基于 PCF8574 芯片实现五向按键（上、下、左、右、中）的状态检测，提供按键消抖、状态回调、批量读取等功能，适用于智能设备控制、小型人机交互界面、嵌入式系统输入等场景。
 
-> **注意**：该程序仅适用于基于 PCF8574 芯片的按键扩展方案，不支持其他型号 GPIO 扩展芯片；按键检测精度受消抖时间参数影响，需根据实际硬件调整。
-本项目提供基于 MicroPython 的驱动代码（`pcf8574.py`、`pcf8574keys.py`）及测试主程序（`main.py`），方便开发者快速接入五向按键模块，实现稳定的按键状态读取与交互功能。
+本项目为 **GraftSense PCF8574-based 5-Way Button Module V1.0** 提供了完整的 MicroPython 驱动支持，基于 PCF8574 I/O 扩展芯片实现五向按键（上、下、左、右、中心）与两路轻触开关（SW1/SW2）的集中管理，支持定时器消抖、状态回调与 LED 控制，适用于电子 DIY 实验、机器人方向控制、嵌入式界面交互等场景。模块通过 A0/A1/A2 跳线支持 8 种 I2C 地址（0x20–0x27），具备节省主控 I/O 接口、响应灵敏、多按键集中管理的优势。
+
 ---
+
 ## 主要功能
-- **I2C 接口扩展**：通过 PCF8574 芯片将 I2C 总线扩展为 GPIO 口，实现五向按键的集中式连接
-- **按键消抖处理**：内置消抖逻辑，过滤按键机械抖动导致的误触发，默认消抖时间 50ms（可配置）
-- **状态回调机制**：支持按键按下/释放状态变化的回调函数，便于实时响应按键事件
-- **批量状态读取**：提供 `read_all()` 接口，一次性读取所有五向按键的当前状态
-- **灵活的引脚映射**：支持自定义按键与 PCF8574 引脚的映射关系，适配不同硬件接线
-- **跨平台兼容**：仅依赖 MicroPython 标准库，兼容 ESP32、ESP8266、树莓派 Pico 等开发板
-- **资源释放优化**：程序终止时自动释放 I2C 总线资源，避免硬件占用冲突
+
+- ✅ **五向按键 + 双开关输入**：支持上、下、左、右、中心五向按键及 SW1/SW2 轻触开关的状态读取
+- ✅ **定时器消抖**：内置 10ms 定时器扫描 + 20ms 消抖逻辑，消除按键机械抖动干扰
+- ✅ **状态回调机制**：按键状态变化时触发自定义回调函数，支持实时交互响应
+- ✅ **LED 控制**：通过 SW1 开启模块 LED、SW2 关闭 LED，提供直观状态反馈
+- ✅ **I2C 地址可配置**：通过 A0/A1/A2 跳线设置 8 种 I2C 地址（0x20–0x27），适配多设备级联
+- ✅ **中断支持（可选）**：支持 INT 引脚触发中断，结合回调实现低功耗状态检测
+- ✅ **状态缓存管理**：缓存按键状态，避免频繁 I2C 读取，提升响应效率
+
 ---
+
 ## 硬件要求
-### 推荐测试硬件
-- MicroPython 兼容开发板（ESP32/ESP8266/树莓派 Pico）
-- PCF8574 I2C GPIO 扩展模块
-- 五向按键模块（含上、下、左、右、中 5 路按键）
-- 杜邦线若干（至少 4 根：VCC、GND、SCL、SDA）
-- （可选）面包板（便于临时接线测试）
 
-### 模块引脚说明
-| PCF8574 引脚 | 功能描述 | 电气特性 |
-|--------------|----------|----------|
-| VCC          | 电源正极 | 3.3V-5V（宽电压兼容） |
-| GND          | 电源负极 | 接地，需与开发板共地 |
-| SCL          | I2C 时钟线 | 单向时钟输入，需接开发板对应 I2C SCL 引脚 |
-| SDA          | I2C 数据线 | 双向数据传输，需接开发板对应 I2C SDA 引脚 |
-| P0-P7        | 扩展 GPIO 口 | 可配置为输入/输出，本项目中作为按键输入引脚 |
+1. **核心硬件**：GraftSense PCF8574-based 5-Way Button Module V1.0（内置 PCF8574 芯片、五向按键、SW1/SW2 开关、LED 指示灯）
+2. **主控设备**：支持 MicroPython v1.23.0+ 的开发板（如 Raspberry Pi Pico、ESP32、STM32 等）
+3. **接线配置**：
+4. 表格
+5. **地址设置**：通过模块背面 A0/A1/A2 跳线设置 I2C 地址：
 
-| 五向按键模块引脚 | 功能描述 |
-|------------------|----------|
-| UP              | 上方向按键 |
-| DOWN            | 下方向按键 |
-| LEFT            | 左方向按键 |
-| RIGHT           | 右方向按键 |
-| CENTER          | 中间确认按键 |
-| GND             | 按键公共地 |
+   - A0/A1/A2 全下拉 → 地址 0x20
+   - A0/A1/A2 全上拉 → 地址 0x27
+   - 其余组合对应 0x21–0x26（详见模块背面地址表）
+
 ---
+
 ## 文件说明
-### 1. pcf8574.py
-核心类为 `PCF8574`，用于实现 PCF8574 芯片的 I2C 通信与 GPIO 控制，各方法作用如下：
-- `__init__(self, i2c, address=0x20)`：初始化 PCF8574 实例，建立与芯片的 I2C 通信连接；参数 `i2c` 为应用层已初始化的 I2C 实例，`address` 为芯片的 I2C 地址（默认 0x20，可通过芯片 A0/A1/A2 引脚调整）。
-- `read(self) -> int`：读取 8 路 GPIO 口的当前整体状态，返回 1 字节整数；整数的每一位对应 1 路引脚，1 表示高电平，0 表示低电平。
-- `write(self, value)`：向 8 路 GPIO 口写入控制数据，设置输出状态；参数 `value` 为 1 字节整数，每一位对应 1 路引脚的输出电平（1 高电平，0 低电平）。
-- `set_pin(self, pin, value)`：单独控制某一路 GPIO 口的输出状态；参数 `pin` 为引脚编号（0-7），`value` 为输出电平（True 高电平，False 低电平）。
-- `get_pin(self, pin) -> bool`：单独读取某一路 GPIO 口的输入状态；参数 `pin` 为引脚编号（0-7），返回布尔值（True 高电平，False 低电平）。
 
-### 2. pcf8574keys.py
-核心类为 `PCF8574Keys`，基于 `PCF8574` 类封装五向按键的状态管理与消抖逻辑，各方法作用如下：
-- `__init__(self, pcf, keys_map, debounce_time=50, callback=None)`：初始化五向按键实例；参数 `pcf` 为已初始化的 `PCF8574` 实例，`keys_map` 为按键名称与 PCF8574 引脚的映射字典（如 {"UP":4}），`debounce_time` 为按键消抖时间（默认 50ms），`callback` 为按键状态变化时触发的回调函数（参数为按键名称和状态）。
-- `read_all(self) -> dict`：读取所有五向按键的当前稳定状态（已消抖），返回字典；字典键为按键名称（如 "UP"），值为布尔值（True 表示按键按下，False 表示释放）。
-- `update(self)`：主动更新所有按键状态，检测状态变化；若某按键当前状态与上一次状态不一致，触发 `callback` 回调函数；建议在主循环中定期调用（如每 10ms 一次）以实时监测按键。
-- `_debounce(self, pin) -> bool`：内部消抖辅助方法，读取指定 PCF8574 引脚的稳定状态；参数 `pin` 为引脚编号，在 `debounce_time` 内多次采样，仅当连续结果一致时返回状态（True 按下，False 释放），过滤机械抖动干扰。
+表格
 
-### 3. main.py
-无自定义类，为测试主程序，核心逻辑通过函数调用实现：
-- 初始化 I2C 总线：配置 I2C 引脚（默认 SCL=GPIO17、SDA=GPIO16）与通信频率，创建 I2C 实例。
-- 实例化硬件类：创建 `PCF8574` 实例（指定 I2C 地址 0x20）和 `PCF8574Keys` 实例（配置按键-引脚映射与回调函数）。
-- 定义回调函数：`key_callback(key_name, state)`，当按键状态变化时触发，打印按键名称与状态（"press" 按下或 "release" 释放）。
-- 主循环逻辑：每 500ms 调用 `read_all()` 批量读取按键状态并打印，同时调用 `update()` 更新状态并检测变化；支持键盘中断（Ctrl+C）终止程序，打印退出信息。
 ---
+
 ## 软件设计核心思想
-### 分层设计
-- 底层：`pcf8574.py` 封装 PCF8574 芯片的 I2C 通信与 GPIO 操作，屏蔽硬件寄存器细节，提供通用 GPIO 控制接口。
-- 中层：`pcf8574keys.py` 基于底层驱动，聚焦按键场景，补充消抖、状态缓存、回调等专用逻辑，形成按键控制模块。
-- 高层：`main.py` 作为应用示例，组合调用底层与中层模块，演示完整使用流程，降低开发者移植难度。
 
-### 消抖逻辑设计
-- 采用“时间窗口+多次采样”机制：在 `debounce_time` 内多次读取引脚状态，仅当连续采样结果一致时确认状态，避免单次采样受机械抖动影响。
-- 状态缓存优化：通过 `last_states` 记录上一次按键状态，仅在当前状态与缓存状态不一致时触发回调，减少无效的状态处理，提升效率。
+1. **分层驱动架构**：底层 `PCF8574` 类负责 I2C 通信与 GPIO 操作，上层 `PCF8574Keys` 类专注按键管理，解耦硬件细节与业务逻辑
+2. **定时器消抖机制**：10ms 定时器周期性扫描按键状态，结合 20ms 消抖时间过滤机械抖动，确保状态稳定
+3. **状态缓存优化**：缓存按键状态，仅在定时器扫描时更新，避免频繁 I2C 读取，提升响应效率
+4. **回调触发逻辑**：按键状态变化时自动触发回调函数，支持实时交互响应，避免轮询开销
+5. **参数校验防护**：对 I2C 地址（0x20–0x27）、引脚编号（0–7）、按键名称等进行严格校验，防止无效配置损坏硬件
+6. **中断安全设计**：中断回调通过 `micropython.schedule` 调度，避免在 ISR 中执行耗时 I2C 操作，提升系统稳定性
 
-### 接口解耦
-- 硬件初始化分离：I2C 实例由应用层创建并传入 `PCF8574` 类，驱动不绑定具体硬件引脚，适配 ESP32、树莓派 Pico 等不同开发板。
-- 回调函数注入：按键状态的处理逻辑通过 `callback` 参数注入，开发者可灵活扩展功能（如控制 LED、发送串口指令等），无需修改驱动代码。
-
-### 跨平台兼容
-- 依赖最小化：仅使用 MicroPython 标准库（`machine`、`time`），不依赖硬件平台专属 API，确保在不同 MicroPython 开发板上均可运行。
-- 配置参数化：I2C 引脚、设备地址、按键映射、消抖时间等均通过参数配置，修改 `main.py` 中的参数即可适配不同硬件接线，无需改动驱动文件。
 ---
+
 ## 使用说明
-### 硬件接线（树莓派pico 示例）
-| PCF8574 引脚 |  GPIO 引脚 | 五向按键模块连接 | 备注 |
-|--------------|----------------|------------------|------|
-| VCC          | 3.3V           | -                | 若模块支持 5V 可接 5V，避免过压损坏 |
-| GND          | GND            | GND（按键公共地） | 必须与开发板共地，否则按键状态检测异常 |
-| SCL          | GPIO17         | -                | 需与开发板 I2C SCL 引脚对应，不同开发板引脚不同 |
-| SDA          | GPIO16         | -                | 需与开发板 I2C SDA 引脚对应，不同开发板引脚不同 |
-| P0           | -              | RIGHT 按键        | 按 `keys_map` 配置，可根据接线修改映射关系 |
-| P1           | -              | DOWN 按键         | 按 `keys_map` 配置，可根据接线修改映射关系 |
-| P2           | -              | LEFT 按键         | 按 `keys_map` 配置，可根据接线修改映射关系 |
-| P3           | -              | CENTER 按键       | 按 `keys_map` 配置，可根据接线修改映射关系 |
-| P4           | -              | UP 按键           | 按 `keys_map` 配置，可根据接线修改映射关系 |
 
-> **注意：**
-> - 若按键状态始终为“释放”或“按下”，检查 PCF8574 引脚是否配置上拉电阻（部分模块已内置，无内置时需外接 10kΩ 上拉电阻至 VCC）。
-> - 树莓派 Pico 常用 I2C 引脚：I2C 0（SCL=GP1、SDA=GP0）、I2C 1（SCL=GP3、SDA=GP2），需根据实际使用的 I2C 总线调整接线。
+### 初始化流程
 
-### 软件依赖
-- **固件版本**：MicroPython v1.23.0 及以上  
-- **内置库**：
-  - `machine`：提供 I2C 总线初始化、GPIO 控制功能
-  - `time`：提供时间戳记录、延时功能，用于消抖与循环间隔控制
-- **开发工具**：推荐 Thonny（操作简单，支持 MicroPython 直接运行与调试）、PyCharm（需安装 MicroPython 插件）
+```
+from machine import I2C, Pin
+from pcf8574 import PCF8574
+from pcf8574keys import PCF8574Keys, KEYS_MAP
+import time
 
-### 安装步骤
-1. **烧录固件**：根据开发板型号（如 ESP32、树莓派 Pico）下载对应 MicroPython 固件，通过烧录工具（如 esptool、Raspberry Pi Imager）烧录到开发板。
-2. **上传文件**：通过开发工具将 `pcf8574.py`、`pcf8574keys.py`、`main.py` 三个文件上传到开发板根目录。
-3. **修改配置**：打开 `main.py`，根据硬件接线修改 I2C 引脚（`SCL_PIN`、`SDA_PIN`）、PCF8574 地址（`PCF8574_ADDR`）、按键-引脚映射（`KEYS_MAP`）。
-4. **运行测试**：在开发工具中运行 `main.py`，操作五向按键，通过串口监视器查看按键状态打印信息（按下/释放）。
+# 初始化 I2C（示例：Raspberry Pi Pico I2C0，SDA=GP4，SCL=GP5，400kHz）
+i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=400000)
+
+# 扫描 I2C 设备，获取 PCF8574 地址
+devices = i2c.scan()
+pcf_addr = None
+for dev in devices:
+    if 0x20 <= dev <= 0x27:
+        pcf_addr = dev
+        break
+
+if not pcf_addr:
+    raise ValueError("PCF8574 not found on I2C bus!")
+
+# 创建 PCF8574 实例
+pcf = PCF8574(i2c, pcf_addr)
+
+# 创建五向按键管理实例（使用默认 KEYS_MAP）
+keys = PCF8574Keys(pcf, KEYS_MAP)
+```
+
+### 核心操作
+
+```
+# 读取单个按键状态（True=按下，False=未按下）
+print("UP key state:", keys.read_key('UP'))
+
+# 读取所有按键状态
+all_states = keys.read_all()
+print("All keys state:", all_states)
+
+# 通过 SW1/SW2 控制 LED
+if keys.read_key('SW1'):
+    keys.led_on()
+if keys.read_key('SW2'):
+    keys.led_off()
+
+# 释放资源（程序结束时调用）
+keys.deinit()
+```
+
+### 自定义回调函数
+
+```
+def key_callback(key_name, state):
+    print(f"Key {key_name} changed to {'pressed' if state else 'released'}")
+
+# 初始化时绑定回调
+keys = PCF8574Keys(pcf, KEYS_MAP, callback=key_callback)
+```
+
 ---
+
 ## 示例程序
-```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/8 上午11:42
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 五向按键测试文件
 
-# ======================================== 导入相关模块 =========================================
-
+```
 from machine import I2C, Pin
 import time
 from pcf8574 import PCF8574
-from pcf8574keys import PCF8574Keys
+from pcf8574keys import PCF8574Keys, KEYS_MAP
 
-# ======================================== 全局变量 ============================================
-
-# I2C配置
+# I2C 配置
 I2C_ID = 0
-# 根据实际硬件修改
-SCL_PIN = 1
-# 根据实际硬件修改
-SDA_PIN = 0
-
+SCL_PIN = 5
+SDA_PIN = 4
 PCF8574_ADDR = None
 
-# 五向按键引脚映射（根据实际接线修改）
-KEYS_MAP = {
-    'UP': 4,
-    'DOWN': 1,
-    'LEFT': 2,
-    'RIGHT': 0,
-    'CENTER': 3
-}
-
-# ======================================== 功能函数 ============================================
-
-def key_callback(key_name, state):
-    """
-    按键事件回调函数，当按键状态发生变化时调用此函数。
-
-    Args:
-        key_name (str): 按键名称或标识符，用于区分不同按键。
-        state (bool): 按键状态，True 表示按下，False 表示释放。
-
-    Raises:
-        TypeError: 当key_name不是str类型或者state不是bool类型抛出异常。
-        ValueError: 当key_name不在 KEYS_MAP 中时抛出。
-
-    ===========================================
-
-    Key event callback function, this function is called when the key state changes.
-
-    Args:
-        key_name (str): The name or identifier of the key, used to differentiate between different keys.
-        state (bool): The key state, True indicates pressed, False indicates released.
-
-    Raises:
-        TypeError: Throw an exception when key_name is not of type str or state is not of type bool.
-        ValueError: Raised when key_name is not defined in KEYS_MAP.
-    """
-    # 参数校验
-    if not isinstance(key_name, str):
-        raise TypeError(f"key_name must be a str, got {type(key_name).__name__}")
-    if key_name not in KEYS_MAP:
-        raise ValueError(f"Unknown key_name '{key_name}', must be one of {list(KEYS_MAP.keys())}")
-    if not isinstance(state, bool):
-        raise TypeError(f"state must be a bool, got {type(state).__name__}")
-    status = "press" if state else "release"
-    print(f"key {key_name} {status}")
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
+# 上电延时
 time.sleep(3)
 print("FreakStudio:PCF8574 Five-way Button Test Program")
-# 初始化I2C
+
+# 初始化 I2C
 i2c = I2C(I2C_ID, scl=Pin(SCL_PIN), sda=Pin(SDA_PIN), freq=400000)
-# 开始扫描I2C总线上的设备，返回从机地址的列表
-devices_list: list[int] = i2c.scan()
-print('START I2C SCANNER')
-# 若devices list为空，则没有设备连接到I2C总线上
-if len(devices_list) == 0:
-    # 若非空，则打印从机设备地址
-    print("No i2c device !")
+
+# 扫描 I2C 设备
+devices_list = i2c.scan()
+if not devices_list:
+    print("No I2C device found!")
 else:
-    # 遍历从机设备地址列表
-    print('i2c devices found:', len(devices_list))
-for device in devices_list:
-    # 判断设备地址是否为的PCF8574地址
-    if 0x20 <= device <= 0x28:
-        # 假设第一个找到的设备是PCF8574地址
-        print("I2c hexadecimal address:", hex(device))
-        PCF8574_ADDR = device
-# 初始化PCF8574
+    print(f"I2C devices found: {len(devices_list)}")
+    for device in devices_list:
+        if 0x20 <= device <= 0x27:
+            print(f"I2C hexadecimal address: {hex(device)}")
+            PCF8574_ADDR = device
+
+# 初始化 PCF8574 与五向按键
 pcf = PCF8574(i2c, PCF8574_ADDR)
-# 初始化五向按键
-keys = PCF8574Keys(pcf, KEYS_MAP, key_callback)
+keys = PCF8574Keys(pcf, KEYS_MAP)
 
-# ========================================  主程序  ============================================
-
-try:
-    while True:
-        # 打印当前所有按键状态
-        all_states = keys.read_all()
-        print("status:", {k: "press" if v else "release" for k, v in all_states.items()})
-        # 500ms刷新一次状态显示
-        time.sleep(0.5)
-except KeyboardInterrupt:
-    print("test stop")
-finally:
-    keys.deinit()
-    print("Resource release")
+# 主循环
+while True:
+    # 打印所有按键状态
+    all_states = keys.read_all()
+    print(all_states)
+    
+    # SW1 控制 LED 开启，SW2 控制 LED 关闭
+    if keys.read_key('SW1'):
+        keys.led_on()
+    if keys.read_key('SW2'):
+        keys.led_off()
+    
+    # 100ms 刷新一次
+    time.sleep(0.1)
 ```
+
 ---
+
 ## 注意事项
-### 1. 硬件连接问题
-- **电源匹配**：PCF8574 模块若为 3.3V 版本，不可接 5V 电源；5V 版本可兼容 3.3V，但需确认模块是否带电压转换电路，避免芯片烧毁。
-- **共地要求**：PCF8574 的 GND 必须与开发板 GND 直接连接，否则 I2C 通信会因电平参考不一致导致失败或数据异常。
-- **上拉电阻**：PCF8574 引脚为开漏输出，作为按键输入时需上拉（模块内置或外接）；无上天拉时，按键按下/释放状态可能无法正确检测。
 
-### 2. 软件配置问题
-- **I2C 地址冲突**：若同一 I2C 总线连接多个设备，需确保各设备地址不同（PCF8574 地址可通过 A0/A1/A2 引脚调整，范围 0x20-0x27），避免通信冲突。
-- **消抖时间调整**：若按键仍有误触发，可增大 `debounce_time`（如 100ms）；若按键响应迟钝，可适当减小（如 30ms），需根据按键机械特性调整。
-- **循环间隔控制**：主循环中 `update()` 调用间隔建议不超过 `debounce_time` 的一半（如消抖 50ms 时，间隔 20ms），确保不遗漏按键状态变化。
+1. **I2C 地址约束**：PCF8574 仅支持 0x20–0x27 作为 I2C 地址，通过 A0/A1/A2 跳线设置，超出范围将触发 `ValueError`
+2. **按键映射匹配**：`KEYS_MAP` 需与模块实际引脚接线一致，修改时需确保引脚编号（0–7）与硬件对应
+3. **消抖时间调整**：默认消抖时间为 20ms，可通过修改 `DEBOUNCE_MS` 全局变量适配不同按键的机械特性
+4. **定时器扫描频率**：内部定时器扫描周期为 10ms，请勿修改，否则会影响消抖效果与响应速度
+5. **中断回调限制**：中断回调函数需轻量，避免执行耗时操作（如串口打印、复杂计算），建议通过 `micropython.schedule` 调度
+6. **I2C 操作安全**：所有 I2C 读写操作非 ISR-safe，禁止在中断处理函数中直接调用，需通过调度机制间接执行
+7. **LED 默认状态**：模块 LED 默认关闭，需通过 SW1 开启，SW2 关闭，硬件上 LED 由 PCF8574 引脚 6 控制
 
-### 3. 性能与稳定性
-- **采样频率**：单次按键检测（`read_all()`+`update()`）耗时约 1-2ms，建议每秒采样不超过 100 次，避免占用过多 CPU 资源影响其他功能。
-- **资源释放**：程序终止时需通过键盘中断（Ctrl+C）触发资源释放逻辑，避免直接断电导致 I2C 总线处于异常状态，影响下次启动。
-- **环境干扰**：强电磁环境（如电机、继电器附近）可能干扰 I2C 通信，建议使用屏蔽线连接 SCL/SDA 引脚，或增加 100nF 滤波电容（靠近 PCF8574 VCC-GND 引脚）。
 ---
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：https://github.com/FreakStudioCN
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+本项目采用 **MIT License** 开源协议，具体内容如下：
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **说明** — 代码含参考部分,出现非技术问题和署名作者无关。  
-**版权归 FreakStudio 所有。**
+```
+MIT License
+
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

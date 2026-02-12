@@ -1,216 +1,204 @@
-# MicroPython HC14 LoRa动库
+# GraftSense-基于 HC-14 的 Lora 通信模块（MicroPython）
+
+# GraftSense-基于 HC-14 的 Lora 通信模块（MicroPython）
+
+# 基于 HC-14 的 LoRa 通信模块 MicroPython 驱动
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
-- [支持的协议](#支持的协议)
 - [硬件要求](#硬件要求)
 - [文件说明](#文件说明)
 - [软件设计核心思想](#软件设计核心思想)
 - [使用说明](#使用说明)
 - [示例程序](#示例程序)
 - [注意事项](#注意事项)
+- [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
----
-
 ## 简介
-本项目是一个针对 HC14 LoRa 模块 的 MicroPython 设备驱动库，提供了全面的数据收发与协议封装功能。该库设计简洁、模块化，支持多种主流 LoRa 通信模式，可在多种 MicroPython 兼容硬件平台上运行，适用于物联网节点开发、无线传感网络、远程数据传输等场景。
 
----
+本项目是 基于 HC-14 的 LoRa 通信模块 的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块，通过 UART 接口实现 AT 指令控制与透明数据传输，支持低功耗远距离无线通信，适用于电子 DIY 无线通信实验、远程数据采集演示、物联网远距离数据传输等场景。
 
 ## 主要功能
 
-* 提供非阻塞式 LoRa 数据收发功能
-* 支持多种数据封装和解封装模式
-* 跨平台兼容：
-
-  * 通信端：Raspberry Pi Pico / 其它 MicroPython 兼容开发板
-* 与 uasyncio 兼容，可用于异步应用
-* 提供测试程序便于验证和学习
-
----
-
-## 支持的协议 / 模式
-
-* 点对点（P2P）通信
-* 多节点广播
-* 简单的包头/校验机制
-
----
+- AT 指令通信：支持模块通信检测、参数查询、恢复出厂设置、版本查询等基础操作
+- 参数配置：支持串口波特率（1200~115200）、无线信道（1~50）、无线速率（1~8）、发射功率（6~20dBm）等核心参数的设置与查询
+- 透传通信：提供数据发送（自动分包）、阻塞接收（按静默超时判断包完整性）等透传模式接口，支持远距离无线数据传输
+- 参数校验：内置波特率、信道、速率、功率等参数的合法性校验，避免无效配置
+- 异常处理：封装 UART 操作异常，提升程序稳定性
+- 资源管理：提供 close()方法释放 UART 资源，确保模块安全关闭
 
 ## 硬件要求
 
-### 通信端
+- HC-14 LoRa 通信模块（GraftSense 版本，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如 ESP32、RP2040 等）
+- 引脚连接：
 
-* **HC14 LoRa 模块**（433MHz/470MHz/868MHz/915MHz，根据需求选择）
-* 连接导线
-* 支持 MicroPython 的开发板（如 Raspberry Pi Pico、ESP32 等）
+  - 模块 MRX → MCU 串口 RXD（收发交叉，不可直接连接 TXD）
+  - 模块 MTX → MCU 串口 TXD（收发交叉，不可直接连接 RXD）
+  - 模块 VCC → 3.3V/5V 电源
+  - 模块 GND → MCU GND
+- 天线选择：提供双天线接口，ANT 引脚可焊接弹簧天线，ANT1 为 IPEX20279-001E-03 插座适配同轴天线（二者仅选其一）
+- 模块按键与指示灯：
 
-### 接线方式（树莓派 Pico 示例）
-
-| 模块类型         | 引脚功能    | 连接说明                                   |
-| ------------ | ------- | -------------------------------------- |
-| HC14 LoRa 模块 | VCC     | 接开发板 3.3V（HC14 模块一般工作在 3.3V，请确认规格）     |
-| HC14 LoRa 模块 | GND     | 接开发板 GND（共地）                           |
-| HC14 LoRa 模块 | TXD     | 接开发板 GPIO RX 引脚（如 Pico 的 GP5/UART1 RX） |
-| HC14 LoRa 模块 | RXD     | 接开发板 GPIO TX 引脚（如 Pico 的 GP4/UART1 TX） |
-| HC14 LoRa 模块 | AUX/SET | 可选，用于配置模块工作模式（拉高/拉低控制），如 Pico 的 GP2    |
-
----
+  - KEY 引脚：用于 AT 指令模式切换（上电置低进入 AT 模式，释放后退出，串口默认 9600,N,1）
+  - STA 引脚：忙碌指示输出（平时高电平，通信忙碌时输出低电平，可外接 LED）
 
 ## 文件说明
 
-### hc14_lora.py
-
-该文件实现 **HC14 LoRa 模块驱动类**，仅包含 `HC14_Lora` 类，用于通过 UART 接口控制 HC14 模块，支持参数配置与透明传输通信。
-
-`HC14_Lora` 类通过封装 AT 命令交互与透传数据接口，提供模块配置、维护与数据收发功能。类中包含以下主要属性：
-
-* `_uart`：MicroPython UART 对象，用于与 HC14 模块通信。
-* `baud`：当前串口波特率（默认 9600，可查询/设置）。
-* `channel`：无线信道编号（1–50）。
-* `rate`：无线速率参数（S 值，1–8）。
-* `power`：发射功率（6–20 dBm）。
-* `firmware_version`：固件版本信息字符串。
-* `in_at_mode`：标识模块是否处于 AT 命令模式。
-* `_line_terminator`：AT 命令结束符（默认 `\r\n`）。
-
-类的主要方法包括：
-
-* `__init__(uart, baud=9600, line_terminator=b'\r\n')`
-  初始化驱动对象，绑定 UART，并配置默认参数。
-* `test_comm()`
-  测试 AT 通信是否正常。
-* `reset_defaults()`
-  恢复出厂设置。
-* `get_baud()` / `set_baud(baud)`
-  查询/设置串口波特率。
-* `get_channel()` / `set_channel(ch)`
-  查询/设置信道。
-* `get_rate()` / `set_rate(s)`
-  查询/设置无线速率。
-* `get_power()` / `set_power(p_dbm)`
-  查询/设置发射功率。
-* `get_version()`
-  查询固件版本信息。
-* `get_params()`
-  一次性获取所有关键参数。
-* `transparent_send(data, wait_between_packets_s=0.01)`
-  在透传模式下发送数据（支持自动分包）。
-* `transparent_recv(max_total_bytes=1024)`
-  在透传模式下接收数据。
-* `close()`
-  关闭 UART 资源。
-
----
-
-### main.py
-
-该文件为 **HC14 LoRa 测试程序**，无自定义类，仅包含程序入口逻辑。
-
-主程序功能：
-
-* 上电后延时 3 秒，确保模块稳定启动。
-* 通过 **KEY 引脚** 控制模块进入 AT 模式。
-* 创建 `HC14_Lora` 驱动实例，并进行以下操作：
-
-  * 测试 AT 通信是否正常
-  * 获取固件版本信息
-  * 批量读取模块关键参数
-* 切换至透传模式，执行循环收发：
-
-  * 接收远端数据并打印
-  * 自动回发带前缀的应答消息
-
-该程序可用于验证 **模块接线正确性、AT 配置功能与透传通信是否正常**。
-
----
+| 文件名       | 说明                                                                            |
+| ------------ | ------------------------------------------------------------------------------- |
+| hc14_lora.py | 核心驱动文件，包含 HC14_Lora 类，实现 AT 指令控制、参数配置、透传通信等所有功能 |
+| main.py      | 示例程序，演示 UART 初始化、LoRa 参数配置和透传数据收发的使用方法               |
 
 ## 软件设计核心思想
 
-* **模块化**：驱动与应用分离，`HC14_Lora` 负责底层交互，主程序专注逻辑。
-* **面向对象**：通过类封装参数和方法，统一管理模块状态，接口清晰。
-* **模式分离**：支持 **AT 命令模式** 与 **透传模式**，保证配置和通信的灵活性。
-* **跨平台**：基于 MicroPython 的标准库，支持 Raspberry Pi Pico、ESP32 等常见硬件。
-* **非阻塞通信**：透传接收接口可循环调用，适合异步框架与事件驱动系统。
-* **易调试性**：提供通信检测与参数批量获取功能，简化开发调试流程。
-
----
+1. 面向对象封装：通过 HC14_Lora 类统一管理 LoRa 模块的所有操作，将 UART 通信、AT 指令、透传逻辑封装为独立方法
+2. UART 通信抽象：封装_send 和_recv 方法，处理 UART 数据发送与接收，支持超时控制和异常捕获
+3. AT 指令映射：将每个 LoRa 配置操作（如设置信道、调整功率）对应为独立方法，简化用户调用
+4. 透传分包机制：根据无线速率自动分包发送，避免单包数据超限导致传输失败
+5. 接收超时逻辑：通过静默超时（quiet_ms）判断透传包完整性，结合最大超时（timeout_ms）避免死等
+6. 参数合法性校验：内置波特率、信道、速率、功率等参数的范围校验，避免无效配置
 
 ## 使用说明
 
-### 安装方法
-通过`thonny`工具调试：
+1. 硬件连接
 
-**`连接好硬件之后：将code下文件一起上传于根目录，点击运行按钮 `**`
+- 模块 MRX → MCU 串口 RXD（如 ESP32 的 GPIO17）
+- 模块 MTX → MCU 串口 TXD（如 ESP32 的 GPIO16）
+- 模块 VCC → 3.3V/5V 电源
+- 模块 GND → MCU GND
+- 天线选择：焊接弹簧天线或连接 IPEX 同轴天线（二选一）
+- 注意：遵循 UART“收发交叉”规则，MRX 必须连接 MCU 的 RXD，MTX 必须连接 MCU 的 TXD，不可交叉连接
 
----
-
-## 示例程序
-* python
+1. 驱动初始化
 
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/5 下午10:11
-# @Author  : ben0i0d
-# @File    : main.py
-# @Description : hc14_lora测试文件
-
-# ======================================== 导入相关模块 =========================================
-
-import time
 from machine import UART, Pin
 from hc14_lora import HC14_Lora
 
-# ======================================== 全局变量 ============================================
+# 初始化UART（波特率默认9600，按模块实际配置调整）
+uart = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 
-# ======================================== 功能函数 ============================================
+# 创建HC14_Lora实例
+lora = HC14_Lora(uart)
+```
 
-# ======================================== 自定义类 =============================================
+1. 基础操作示例
 
-# ======================================== 初始化配置 ===========================================
+```python
+# 检测AT通信是否正常
+ok, resp = lora.test_comm()
+print("AT通信检测:", ok, resp)
 
-# 上电延时 3s，给模块稳定时间
+# 查询当前信道
+ok, channel = lora.get_channel()
+print("当前信道:", channel)
+
+# 设置信道为7
+ok, resp = lora.set_channel(7)
+print("设置信道:", ok, resp)
+
+# 设置发射功率为20dBm
+ok, resp = lora.set_power(20)
+print("设置功率:", ok, resp)
+
+# 查询固件版本
+ok, version = lora.get_version()
+print("固件版本:", version)
+```
+
+1. 透传通信示例
+
+```python
+# 发送透传数据（自动分包）
+data = b"Hello, LoRa!"
+ok, result = lora.transparent_send(data)
+print("发送结果:", ok, result)
+
+# 接收透传数据（超时5000ms，静默2300ms判断包结束）
+ok, received = lora.transparent_recv(timeout_ms=5000, quiet_ms=2300)
+if ok:
+    print("接收数据:", received)
+```
+
+## 示例程序
+
+```python
+import time
+from machine import UART, Pin
+import urandom
+from hc14_lora import HC14_Lora
+
+# LoRa参数配置
+channel = 7
+data_len = 80
+reply = bytes([urandom.getrandbits(8) for _ in range(data_len)])
+power = 20
+rate = 7
+
+# 上电延时3s
 time.sleep(3)
-
-# KEY 引脚拉低，进入AT模式
-key0 = Pin(2, Pin.OUT)
-key0.value(0)
-
 print("FreakStudio: HC14_Lora Test Start")
 
-# 初始化 UART 通信（按硬件实际接线调整 TX/RX）
-uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+# 初始化UART（按硬件实际接线调整TX/RX）
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
+uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 
-# 创建 HC14_Lora 实例
+# 创建HC14_Lora实例（接收端和发送端）
 hc0 = HC14_Lora(uart0)
+hc1 = HC14_Lora(uart1)
 
-# ======================================== 主程序 ===========================================
-
-# 测试 AT 通信
-ok, resp = hc0.test_comm()
+# 保持按下两个模块按钮进入AT配置模式
+# 测试接收端AT通信
+ok, resp0 = hc0.test_comm()
 if ok:
-    print("[OK] AT 通信正常:", resp)
+    print("[OK] AT通信正常:", resp0)
+    hc0.set_channel(channel)
+    hc0.set_rate(rate)
+    hc0.set_power(power)
 else:
-    print("[ERR] AT 通信失败")
+    print("[ERR] AT通信失败")
 
-# 获取固件版本
+# 获取接收端版本和参数
 ok, resp = hc0.get_version()
 if ok:
-    print("固件版本:", resp)
-
-# 获取所有关键参数
+    print("接收端固件版本:", resp)
 ok, params = hc0.get_params()
 if ok:
-    print("当前参数:", params)
+    print("接收端当前参数:", params)
 
-key0.value(1)
-time.sleep(0.25)
+# 测试发送端AT通信
+ok, resp1 = hc1.test_comm()
+if ok:
+    print("[OK] AT通信正常:", resp1)
+    hc1.set_channel(channel)
+    hc1.set_rate(rate)
+    hc1.set_power(power)
+else:
+    print("[ERR] AT通信失败")
 
-print("进入透传模式，等待接收数据...")
+# 获取发送端版本和参数
+ok, resp = hc1.get_version()
+if ok:
+    print("发送端固件版本:", resp)
+ok, params = hc1.get_params()
+if ok:
+    print("发送端当前参数:", params)
 
+# 等待用户松开按钮进入透传模式
+time.sleep(2)
+print("进入透传模式，等待数据...")
+
+# 发送数据并记录时间
+hc1.transparent_send(reply)
+print("发送数据:", reply)
+start_ms = time.ticks_ms()
+print(f"发送时间: {start_ms} ms")
+
+# 循环接收数据
 while True:
     ok, resp = hc0.transparent_recv()
     if not ok:
@@ -220,48 +208,58 @@ while True:
             msg = resp.decode("utf-8")
         except UnicodeError:
             msg = str(resp)
-        print("收到:", msg)
-
-        # 回发带前缀的数据
-        reply = f"pico:{msg}".encode("utf-8")
-        hc0.transparent_send(reply)
-        print("发送:", reply)
+        end_ms = time.ticks_ms()
+        elapsed_ms = time.ticks_diff(end_ms, start_ms)
+        print("接收数据:", msg)
+        print(f"耗时: {elapsed_ms} ms")
 ```
----
 
 ## 注意事项
 
-* **供电电压**：HC14 模块工作电压为 **3.3V**，切勿直接接入 5V，否则可能烧毁模块。
-* **串口电平**：采用 **3.3V TTL 电平**，如需接入 5V MCU，请添加电平转换。
-* **上电延时**：模块上电后需等待 **≥3 秒** 再进入 AT 配置模式，以确保内部稳定。
-* **KEY 引脚**：拉低进入 **AT 配置模式**，拉高为 **透传模式**，切换模式后需短暂延时。
-* **串口波特率**：默认 **9600 bps**，修改波特率后需同步调整 MCU 端口设置。
-* **信道选择**：信道编号范围为 **1–50**，不同节点需保证在相同信道上才能通信。
-* **发射功率**：功率范围 **6–20 dBm**，过高会增加功耗，过低会影响通信距离。
-* **天线环境**：需保持天线无遮挡，避免金属物体或强电磁干扰影响通信质量。
-* **透传模式**：在透传模式下发送的数据不可包含 AT 命令关键字，避免模块误判。
-* **配置保存**：修改 AT 参数后需确认是否已保存到模块，否则掉电后会恢复默认值。
+1. 收发交叉规则：模块 MRX 必须连接 MCU 的 RXD，MTX 必须连接 MCU 的 TXD，不可直接交叉连接，否则无法正常通信
+2. AT 模式进入：KEY 引脚置低后上电进入 AT 模式，释放 KEY 引脚后退出，串口默认波特率为 9600,N,1
+3. 天线选择：必须焊接弹簧天线或连接 IPEX 同轴天线（二选一），无天线时禁止上电，避免损坏模块射频电路
+4. 参数范围：
 
----
+- 波特率：1200、2400、4800、9600、19200、38400、57600、115200
+- 信道：1~50（整数）
+- 无线速率：1~8（整数，速率越高单包最大字节数越大）
+- 发射功率：6~20dBm（整数，功率越高传输距离越远，功耗越大）
+
+1. 透传分包：发送数据时会根据无线速率自动分包，速率 8 时单包最大 250 字节，速率 1 时单包最大 40 字节
+2. 接收超时：transparent_recv 通过静默超时（quiet_ms）判断包完整性，默认 2300ms，可根据传输距离调整
+3. 供电要求：模块兼容 3.3V/5V 电源，确保供电稳定，避免电压波动导致通信异常
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
 
----
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** : 在任何媒介以任何形式复制、发行本作品  
-- **演绎** : 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** : 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** :您不得将本作品用于商业目的。  
-- **合理引用方式** : 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **声明：** 本项目中所有内容仅可学习或者个人爱好者使用，禁止商用，不得以任何形式以此代码做任何不合理的事情，代码具体可参考这个github项目https://github.com/peterhinch/micropython_ir，发生任何事情与署名作者无关。
+Copyright (c) 2025 FreakStudioCN (ben0i0d)
 
-- **版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

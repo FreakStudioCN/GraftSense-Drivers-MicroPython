@@ -1,5 +1,11 @@
-# DS1307 RTC 实时时钟模块驱动 - MicroPython版本
+# GraftSense-基于 DS1307 芯片的 RTC 实时时钟模块（MicroPython）
+
+# GraftSense-基于 DS1307 芯片的 RTC 实时时钟模块（MicroPython）
+
+# GraftSense 基于 DS1307 的 RTC 实时时钟模块
+
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -10,221 +16,217 @@
 - [注意事项](#注意事项)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
----
+
 ## 简介
-DS1307是一款基于I2C通信接口的实时时钟（RTC）模块，可精准提供年、月、日、时、分、秒及星期信息，内置备用电池接口，断电后仍能保持时钟运行，适用于嵌入式系统时间同步、数据采集时间戳记录、智能设备定时控制等场景。
 
-> **注意**：该模块时间精度受环境温度影响，长期使用需定期校准；不支持闰年自动修正，需通过软件逻辑补充。
-本项目提供基于 MicroPython 的 DS1307 驱动代码及测试程序，方便开发者快速接入模块，实现时钟读写、时间同步（如同步至开发板内部RTC）等功能，适配树莓派Pico、ESP32等多种MicroPython开发板。
----
+本模块是 FreakStudio GraftSense 基于 DS1307 芯片的 RTC 实时时钟模块，通过 DS1307 芯片实现精准时间记录与掉电计时功能，采用 I2C 通信接口，具备掉电走时、接口简单、功耗低等核心优势，兼容 Grove 接口标准。适用于创客项目时间记录、嵌入式设备计时、工业仪表时间同步等场景，为系统提供可靠的实时时钟数据交互能力。
+
 ## 主要功能
-- **I2C通信支持**：通过标准I2C接口与模块通信，默认设备地址0x68
-- **完整时间读写**：支持读取/设置年、月、日、时、分、秒、星期信息
-- **时间格式转换**：提供BCD码与十进制数据的双向转换，适配模块数据格式
-- **内部RTC同步**：支持将DS1307时间同步至开发板内部RTC（如树莓派Pico RTC）
-- **振荡器控制**：可启用/禁用模块振荡器，实现低功耗管理
-- **跨平台兼容**：仅依赖MicroPython标准库，兼容树莓派Pico、ESP32等开发板
-- **简洁接口**：提供`datetime`属性统一读写时间，`datetimeRTC`属性适配开发板内部RTC格式
----
+
+### 硬件层面
+
+- 支持 I2C 标准通信，兼容 3.3V/5V 电平，接口遵循 Grove 标准，接线简单
+- 内置锂电池供电回路，掉电后仍可维持精准计时，48mAh 锂电池在 25℃ 下可工作十年
+- 32.768kHz 高精度晶振，保障计时准确性，支持秒/分/时/日/月/年全维度时间记录
+- 5V 转 3.3V 稳压电路 + 电源滤波设计，适配主流嵌入式系统供电，抗干扰能力强
+
+### 软件层面
+
+- 基于 MicroPython 封装 DS1307 驱动类，支持时间的读写、振荡器启停控制
+- 提供兼容 MicroPython 内置 RTC 的时间格式，可直接同步系统时间
+- 内置 BCD/十进制自动转换逻辑，适配 DS1307 寄存器编码规则
+- 自动处理年份补全（两位年份 →20xx）、星期格式转换（0-6→1-7）等细节
+
 ## 硬件要求
-### 推荐测试硬件
-- MicroPython兼容开发板（树莓派Pico/ESP32/ESP8266）
-- DS1307 RTC模块（带备用电池座）
-- 备用电池（如CR2032纽扣电池）
-- 杜邦线若干（至少4根：VCC、GND、SCL、SDA）
-- （可选）面包板（便于临时接线测试）
 
-### 模块引脚说明
-| DS1307 引脚 | 功能描述 | 电气特性 |
-|-------------|----------|----------|
-| VCC         | 电源正极 | 3.3V-5V（宽电压兼容） |
-| GND         | 电源负极 | 接地，需与开发板共地 |
-| SCL         | I2C时钟线 | 单向时钟输入，需接开发板对应I2C SCL引脚 |
-| SDA         | I2C数据线 | 双向数据传输，需接开发板对应I2C SDA引脚 |
-| BAT         | 备用电池接口 | 接入3V纽扣电池，断电后维持时钟运行 |
----
+### 核心接口
+
+- I2C 通信接口：
+
+  - 支持标准 I2C 通信速率，固定 I2C 设备地址为 0x68，兼容 3.3V/5V 电平
+  - 引脚定义：SDA（I2C 数据）、SCL（I2C 时钟）、VCC（供电）、GND（接地），遵循 Grove 接口标准
+- 锂电池座子：用于掉电后维持计时，DS1307 在掉电后仍能正常计时；若采用 48mAh 锂电池，在 25℃ 下可工作十年（数据手册）
+- 电源指示灯：LED1 常亮表示模块供电正常
+
+### 电路设计
+
+- DS1307 核心电路：DS1307 芯片负责实时时钟计时，支持秒、分、时、日、月、年等时间数据读写，以及 56 字节 RAM 数据存取
+- 时钟晶振：32.768kHz 晶振提供精准计时基准
+- DC-DC 5V 转 3.3V 电路：适配 5V 供电系统，为 DS1307 提供稳定 3.3V 工作电压
+- 上拉电阻：R1/R2 为 I2C 总线提供上拉，保障通信稳定性
+- 电源滤波：C1/C4/C5 滤波电容抑制电源噪声，提升计时精度
+
+### 模块布局
+
+- 正面：DS1307 芯片、锂电池座子、I2C 接口（SDA/SCL）、电源接口（VCC/GND）、电源指示灯（LED1），接口清晰标注，便于接线调试与快速部署
+
 ## 文件说明
-### 1. ds1307.py
-实现DS1307模块的I2C通信与时间控制，核心类`DS1307`提供统一接口，各方法作用如下：
-- `__init__(self, i2c, address=0x68)`：初始化DS1307实例，建立与模块的I2C通信；参数`i2c`为应用层已初始化的I2C实例，`address`为模块I2C地址（默认0x68）。
-- `_bcd2dec(self, bcd)`：内部辅助方法，将模块返回的BCD码数据转换为十进制，用于时间读取后的数据解析。
-- `_dec2bcd(self, dec)`：内部辅助方法，将十进制时间数据转换为BCD码，用于时间设置前的数据编码。
-- `datetime(self, value=None)`：属性方法，读取或设置模块时间；无参数时返回当前时间元组（格式：(年, 月, 日, 时, 分, 秒, 星期, None)），传入时间元组时更新模块时间。
-- `datetimeRTC(self)`：属性方法，读取模块时间并转换为开发板内部RTC适配格式（如树莓派Pico RTC格式：(年, 月, 日, None, 时, 分, 秒, None)），便于同步时间。
-- `disable_oscillator(self, value)`：属性方法，启用或禁用模块振荡器；`value=True`禁用（低功耗），`value=False`启用（正常计时）。
 
-### 2. main.py
-DS1307测试主程序，无自定义类，核心逻辑通过函数调用实现：
-- 初始化I2C总线：配置I2C引脚（默认树莓派Pico：SCL=GP1、SDA=GP0）与通信频率（100kHz）。
-- 扫描I2C设备：检测DS1307模块是否正常连接（默认地址0x68），打印扫描结果。
-- 实例化DS1307：创建`DS1307`类实例，建立与模块的通信。
-- 测试振荡器控制：禁用并重新启用振荡器，验证模块计时功能恢复。
-- 时间读写测试：读取当前模块时间，设置新时间后再次读取验证，打印时间变化。
-- 内部RTC同步：读取DS1307的RTC适配格式时间，同步至开发板内部RTC，打印同步前后的内部RTC时间。
-- 异常处理：捕获键盘中断（Ctrl+C），打印退出信息，确保程序优雅终止。
----
+| 文件名    | 功能说明                                                                           |
+| --------- | ---------------------------------------------------------------------------------- |
+| ds1307.py | DS1307 RTC 模块的核心驱动文件，封装了 DS1307 类及所有时间操作、寄存器交互方法      |
+| main.py   | 模块使用示例文件，包含 I2C 初始化、设备扫描、时间读写、系统 RTC 同步等完整演示代码 |
+| README.md | 模块说明文档，包含功能介绍、硬件要求、使用方法、注意事项等全量信息                 |
+
 ## 软件设计核心思想
-### 分层设计
-- 底层：`ds1307.py`封装I2C通信与BCD码转换，屏蔽模块硬件细节，提供时间读写接口。
-- 高层：`main.py`作为应用层，演示模块初始化、时间读写、内部RTC同步等完整流程，便于开发者参考移植。
-### 数据格式适配
-- 模块存储时间采用BCD码格式（如十进制12对应BCD码0x12），通过`_bcd2dec`和`_dec2bcd`方法实现与十进制数据的转换，降低开发者使用门槛。
-- 提供`datetimeRTC`属性，自动调整时间元组格式以适配不同开发板内部RTC的要求，减少格式转换的重复代码。
-### 接口简洁性
-- 通过`datetime`属性统一时间读写操作，读取时返回直观的十进制时间元组，设置时直接传入时间元组，无需关注底层寄存器地址与数据格式。
-- 振荡器控制通过`disable_oscillator`属性实现，取值为布尔值，逻辑直观，避免复杂的寄存器位操作。
-### 跨平台兼容
-- 仅依赖MicroPython标准库（`machine.I2C`、`machine.RTC`、`time`），不依赖开发板专属API，确保在树莓派Pico、ESP32等平台均可运行。
-- I2C引脚与频率通过参数配置，开发者可根据实际硬件接线修改`main.py`中的I2C初始化代码，无需改动驱动文件。
----
+
+核心类：DS1307（RTC 驱动）
+
+基于 MicroPython 实现，封装 DS1307 实时时钟的操作，核心设计思想如下：
+
+### 1. 核心属性
+
+| 属性                | 类型      | 说明                               |
+| ------------------- | --------- | ---------------------------------- |
+| i2c                 | I2C       | I2C 总线实例，用于与 DS1307 通信   |
+| addr                | int       | DS1307 的 I2C 地址（默认 0x68）    |
+| buf                 | bytearray | 7 字节缓冲区，用于读写时间寄存器   |
+| buf1                | bytearray | 1 字节缓冲区，用于单字节寄存器操作 |
+| _disable_oscillator | bool      | 振荡器禁用状态标志                 |
+
+### 2. 核心方法
+
+| 方法/属性                          | 功能                                | 参数说明                                                          | 返回值                                                                                          |
+| ---------------------------------- | ----------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| datetime（属性，可读写）           | 获取/设置当前日期时间               | 设置时传入元组：(year, month, day, hour, minute, second, weekday) | 获取时返回元组：(year, month, day, hour, minute, second, weekday, None)                         |
+| datetimeRTC（属性）                | 获取兼容 MicroPython RTC 的时间格式 | 无                                                                | 元组：(year, month, day, None, hour, minute, second, None)，可直接用于 machine.RTC().datetime() |
+| disable_oscillator（属性，可读写） | 获取/设置振荡器禁用状态             | 设置时传入 bool：True 禁用，False 启用                            | 获取时返回 bool：True 表示振荡器禁用（计时停止）                                                |
+| _bcd2dec(bcd: int)                 | BCD 转十进制（内部工具方法）        | bcd: BCD 编码值                                                   | 十进制数值                                                                                      |
+| _dec2bcd(decimal: int)             | 十进制转 BCD（内部工具方法）        | decimal: 十进制数值                                               | BCD 编码值                                                                                      |
+
+### 3. 设计关键点
+
+- 数据格式适配：自动完成 BCD/十进制转换，屏蔽 DS1307 寄存器的编码细节，简化上层使用
+- 兼容性设计：提供 datetimeRTC 属性，直接适配 MicroPython 内置 RTC 的时间格式，降低系统集成成本
+- 异常场景处理：自动补全年份（2 位 →4 位）、转换星期格式，避免用户手动处理硬件底层规则
+- 资源优化：使用固定缓冲区（buf/buf1）减少内存频繁分配，提升嵌入式场景下的运行效率
+
 ## 使用说明
-### 硬件接线（树莓派Pico示例）
-| DS1307 引脚 | 树莓派Pico GPIO引脚 | 备注 |
-|-------------|----------------|------|
-| VCC         | 3.3V（物理引脚36）   | 也可接5V引脚（模块支持宽电压） |
-| GND         | GND（物理引脚38）    | 必须与开发板共地 |
-| SCL         | GP5            | I2C 0时钟引脚，可根据开发板I2C总线调整 |
-| SDA         | GP4            | I2C 0数据引脚，可根据开发板I2C总线调整 |
-| BAT         | CR2032纽扣电池     | 断电后维持时钟运行，正负极需正确安装 |
 
-> **注意：**
-> - 若I2C通信失败，检查SCL/SDA引脚是否接错，或在引脚与3.3V之间接10kΩ上拉电阻（部分DS1307模块已内置上拉电阻）。
-> - 备用电池需正确安装，避免反接损坏模块；无备用电池时，断电后模块时间会重置。
-> - 不同开发板I2C引脚不同（如ESP32常用I2C 0：SCL=GPIO22、SDA=GPIO21），需根据开发板手册调整接线。
----
-### 软件依赖
-- **固件版本**：MicroPython v1.23.0及以上  
-- **内置库**：
-  - `machine`：用于创建I2C实例、控制开发板内部RTC
-  - `time`：用于时间延时与计时验证
-- **开发工具**：Thonny、PyCharm（带MicroPython插件）或VS Code（带PyMakr插件）
----
-### 安装步骤
-1. **烧录固件**：根据开发板型号下载对应MicroPython固件，通过烧录工具（如Raspberry Pi Imager、esptool）烧录到开发板。
-2. **硬件接线**：按照硬件接线说明连接DS1307模块与开发板，安装备用电池。
-3. **上传文件**：通过开发工具将`ds1307.py`和`main.py`上传到开发板根目录。
-4. **修改配置**：打开`main.py`，根据实际硬件接线修改I2C引脚（`scl=Pin(1)`、`sda=Pin(0)`）和I2C总线编号（如`I2C(0)`）。
-5. **运行测试**：在开发工具中运行`main.py`，通过串口监视器查看I2C扫描结果、时间读写日志及内部RTC同步情况。
----
+### 前置准备
+
+1. 硬件接线：将模块的 SDA/SCL 分别连接到开发板的 I2C 对应引脚（示例中为 Pin4/Pin5），VCC 接 5V/3.3V，GND 接地
+2. 安装依赖：确保开发板已烧录 MicroPython 固件，无需额外安装第三方库
+3. 电池安装：为模块安装锂电池（注意极性），确保掉电计时功能可用
+
+### 基本使用流程
+
+1. 初始化 I2C 总线，扫描并确认 DS1307 设备地址（默认 0x68）
+2. 创建 DS1307 类实例，建立与模块的通信连接
+3. （可选）启用振荡器（默认应启用，禁用会停止计时）
+4. 读写时间：设置指定时间，或读取当前计时时间
+5. （可选）将 DS1307 时间同步到开发板内置 RTC，实现系统时间校准
+
 ## 示例程序
+
+以下是 main.py 中的核心示例代码，实现 DS1307 的时间设置、读取与系统 RTC 同步：
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/9/8 下午4:52
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : rtc时钟测试  设置时间读取时间 设置pico rtc时间
-
-# ======================================== 导入相关模块 =========================================
-
 from machine import Pin, I2C, RTC
 import ds1307
 import time
 
-# ======================================== 全局变量 ============================================
-
-DS1307_ADDRESS = None
-
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ===========================================
-
+# 初始化配置
 time.sleep(3)
 print("FreakStudio: test ds1307 RTC now")
+
+# 初始化I2C总线（SCL=Pin5, SDA=Pin4, 频率100kHz）
 i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
-# 开始扫描I2C总线上的设备，返回从机地址的列表
-devices_list:list[int]=i2c.scan()
+
+# 扫描I2C设备，定位DS1307地址
+devices_list = i2c.scan()
 print('START I2C SCANNER')
-# 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
-    # 若非空，则打印从机设备地址
     print("No i2c device !")
 else:
-    # 遍历从机设备地址列表
     print('i2c devices found:', len(devices_list))
-for device in devices_list:
-    # 判断设备地址是否为的ds1307地址
-    if 0x60 <= device <= 0x70:
-        # 假设第一个找到的设备是ds1307地址
-        print("I2c hexadecimal address:", hex(device))
-        DS1307_ADDRESS = device
+    for device in devices_list:
+        if 0x60 <= device <= 0x70:  # 筛选DS1307地址范围
+            print("I2c hexadecimal address:", hex(device))
+            DS1307_ADDRESS = device
 
+# 初始化DS1307实例
 ds1307rtc = ds1307.DS1307(i2c, DS1307_ADDRESS)
 print("DS1307 attributes:", dir(ds1307rtc))
 
-# ========================================  主程序  ============================================
-
-
-# 振荡器开关测试
+# 振荡器开关测试（禁用会停止计时）
 ds1307rtc.disable_oscillator = True
 print("disable_oscillator =", ds1307rtc.disable_oscillator)
-
 ds1307rtc.disable_oscillator = False
 print("disable_oscillator =", ds1307rtc.disable_oscillator, "\n")
 
 # 读取当前时间
 print("Current DS1307 datetime:", ds1307rtc.datetime, "\n")
 
-# 设置时间
-# 参数：(year, month, day, hour, minute, second, weekday, None)
+# 设置时间：(2025年9月17日 17:47:17，星期6)
 ds1307rtc.datetime = (2025, 9, 17, 17, 47, 17, 6)
-
-# 再次读取时间
 print("After setting datetime:", ds1307rtc.datetime)
 
-# 等待 3.9 秒再读取
+# 等待3.9秒后再次读取，验证计时
 time.sleep(3.9)
 print("After 3.9s:", ds1307rtc.datetime, "\n")
 
-# 获取 Pico RTC 格式时间
+# 获取兼容Pico RTC的时间格式
 print("DS1307 datetime formatted for Pico RTC:", ds1307rtc.datetimeRTC, "\n")
 
-# 打印 Pico 内部 RTC 时间
+# 同步到Pico内部RTC
 print("Pico internal RTC time:", time.localtime(), "\n")
-
-# 设置 Pico RTC
 rtc = RTC()
 rtc.datetime(ds1307rtc.datetimeRTC)
 print("Pico RTC set from DS1307, now:", time.localtime())
+```
 
+### 示例说明
 
+1. I2C 初始化与设备扫描：通过 I2C 总线扫描定位 DS1307 地址，确保通信正常
+2. 振荡器控制：测试振荡器禁用/启用，验证计时启停功能
+3. 时间设置与读取：设置指定时间后读取，验证计时准确性
+4. 系统 RTC 同步：将 DS1307 时间同步到 MicroPython 内置 RTC，实现系统时间校准
+
+## 注意事项
+
+1. I2C 地址固定：DS1307 的 I2C 地址为 0x68，不可修改，需确保总线上无地址冲突
+2. 锂电池安装：安装锂电池时注意极性（+/-标识），避免反接损坏模块；锂电池寿命与容量相关，48mAh 电池在 25℃ 下可工作约十年
+3. 时间格式限制：
+
+- 年份仅支持 2000-2099（驱动自动补全 20xx）
+- 星期（weekday）需传入 0-6（对应周一到周日，驱动内部转换为 1-7 存储）
+
+1. 振荡器控制：禁用振荡器（disable_oscillator=True）会停止 DS1307 计时，仅在低功耗待机场景使用，恢复计时需重新启用
+2. 掉电计时依赖电池：掉电后计时功能完全依赖锂电池，电池耗尽后时间会重置，需重新设置
+
+## 联系方式
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+
+## 许可协议
+
+```
+MIT License
+
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
 
 ---
-## 注意事项
-### 1. 时间精度与校准
-- **温度影响**：DS1307 在 25℃环境下精度约为 ±2ppm（每月误差约 1 分钟），温度偏离越大误差越大，长期使用需通过软件定期校准（如对比 NTP 时间）。
-- **闰年处理**：模块不支持闰年自动修正，2 月 29 日需通过软件判断并手动调整日期，避免时间跳变。
-- **时间格式**：星期参数取值范围为 0-6（0 = 周日，1 = 周一...6 = 周六），设置时需遵循此规则，否则时间读取异常。
-
-### 2. 硬件连接问题
-- **电源匹配**：模块虽支持 3.3V-5V 供电，但 5V 供电时 I2C 引脚电平为 5V，需确认开发板 I2C 引脚是否耐受 5V（如树莓派 Pico I2C 引脚为 3.3V，需通过电平转换模块连接，避免损坏开发板）。
-- **备用电池**：备用电池仅在主电源断电时维持时钟运行，主电源正常时模块优先使用主电源；电池电量耗尽会导致时间重置，需定期更换。
-- **I2C 通信**：若多设备共用 I2C 总线，需确保各设备地址不同（DS1307 地址固定为 0x68，无法修改），避免地址冲突；通信不稳定时可降低 I2C 频率（如 50kHz）或增加上拉电阻。
-
-### 3. 软件使用问题
-- **时间设置顺序**：设置时间时需传入完整的 8 元组（年、月、日、时、分、秒、星期、None），缺失参数会导致设置失败，建议通过 `TEST_DATETIME` 等常量定义完整时间。
-- **内部 RTC 兼容性**：不同开发板内部 RTC 格式可能不同（如部分 ESP32 RTC 时间元组无星期参数），需根据开发板手册调整 `datetimeRTC` 属性的返回格式，或修改 `main.py` 中的同步逻辑。
-- **振荡器禁用**：禁用振荡器（`disable_oscillator=True`）后，模块停止计时，需重新启用并重新设置时间才能恢复正常，此功能仅用于低功耗场景（如电池供电设备）。
-
-## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：https://github.com/FreakStudioCN
----
-## 许可协议
-本项目中，除 `machine`、`time` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
-
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
-
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。 
-- **声明** — 内含参考文档，注意辨别。
-
-**版权归 FreakStudio 所有。**

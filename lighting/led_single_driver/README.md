@@ -1,6 +1,13 @@
-# 大功率单颗LED驱动 - MicroPython版本
+# GraftSense-基于 OC7140 的大功率单灯珠 LED 模块（MicroPython）
+
+# GraftSense-基于 OC7140 的大功率单灯珠 LED 模块（MicroPython）
+
+# GraftSense 基于 OC7140 的大功率单灯珠 LED 模块 MicroPython 驱动
+
+---
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -15,169 +22,90 @@
 ---
 
 ## 简介
-大功率单颗LED驱动模块用于控制高功率LED的开关、状态切换及亮度调节，通过PWM（脉冲宽度调制）技术实现平滑调光，适用于需要高亮度照明或动态光效的场景，如智能照明系统、工业指示灯、舞台灯光、户外显示设备等。相比普通小功率LED，大功率LED需匹配合理的驱动电路（如限流电阻、MOS管），本驱动通过MicroPython的PWM接口实现精准控制，兼顾亮度调节精度与硬件安全性。
 
-本项目提供基于MicroPython的驱动代码及示例程序，支持LED全开/关闭、状态切换、PWM亮度调节（0~1023级）及状态查询，内置参数校验与错误处理，确保驱动稳定性与易用性，方便开发者快速集成到大功率LED控制场景中。
-
-> **注意**：大功率LED工作时会产生热量，需搭配散热结构（如散热片）；驱动电路需根据LED额定电流/电压配置限流电阻或MOS管，避免直接由GPIO引脚供电导致硬件损坏。
+本项目是 **基于 OC7140 的大功率单灯珠 LED 模块** 的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块。模块以 OC7140 恒流驱动芯片为核心，通过 PWM 信号调节 LED 驱动电流的有效导通时间，实现高亮 LED 的亮度连续控制，基础恒流约 0.333mA，适用于电子 DIY 照明实验、智能照明演示、视觉反馈项目等场景。
 
 ---
 
 ## 主要功能
-- **基础控制**：
-  - `on()`：LED全亮（PWM占空比100%）
-  - `off()`：LED关闭（PWM占空比0%）
-  - `toggle()`：切换LED当前状态（亮→灭/灭→亮）
-- **亮度调节**：
-  - `set_brightness(duty)`：通过PWM设置亮度，占空比范围0~1023（对应0%~100%亮度）
-  - 自动将0~1023占空比转换为16位PWM值（0~65535），适配MicroPython PWM接口
-- **状态查询**：
-  - `get_state()`：返回LED当前状态（True=亮，False=灭）
-  - `digital`属性：获取绑定的GPIO引脚对象，支持底层硬件配置
-  - `pwm`属性：获取PWM对象，支持自定义PWM参数（如频率调整）
-- **参数校验与错误处理**：
-  - 初始化时校验PWM频率（1~20000Hz），超出范围抛出`ValueError`
-  - PWM写入失败时抛出`RuntimeError`，便于问题排查
-- **跨平台兼容**：仅依赖MicroPython标准库（`machine.Pin`、`machine.PWM`），兼容树莓派Pico等主流开发板
+
+- **开关控制**：支持 `on()`（全亮）、`off()`（关闭）、`toggle()`（状态切换）三种基础控制方式
+- **PWM 亮度调节**：支持 0–1023 级 PWM 占空比设置，将 10 位占空比映射到 16 位 `duty_u16` 接口，实现亮度连续调节
+- **PWM 频率配置**：初始化时可自定义 PWM 频率（1–1000Hz），适配不同 LED 驱动需求
+- **状态查询**：通过 `get_state()` 实时获取 LED 当前状态（亮/灭）
+- **硬件抽象**：封装底层 PWM 与 GPIO 操作，提供简洁易用的上层 API，内置参数校验和错误处理机制
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- 树莓派Pico/Pico W
-- 大功率LED（如1W/3W LED，额定电压2V~3.6V，额定电流350mA~1A）
-- 限流电阻（根据LED参数计算，如3W LED搭配2Ω/2W电阻）
-- NPN型MOS管（如IRF520，用于驱动大功率LED，避免GPIO直接供电）
-- 杜邦线若干
-- 12V/5V电源模块（根据LED功率选择，需匹配LED额定电压）
-- （可选）散热片（用于大功率LED散热）
 
-### 模块引脚说明（驱动电路）
-| 硬件组件   | 引脚/连接点       | 功能描述                                  | 连接说明                   |
-|----------|-------------------|-------------------------------------------|------------------------|
-| 大功率LED  | 正极              | 电源输入                                  | 连接电源正极                 |
-| 大功率LED  | 负极              | 电流输出                                  | 连接MOS管漏极（D极）           |
-| NPN MOS管  | 栅极（G极）       | 控制信号输入                              | 连接开发板GPIO引脚（如Pico的GP6） |
-| NPN MOS管  | 源极（S极）       | 电流接地                                  | 连接电源负极与开发板GND（共地）      |
-| 开发板GPIO引脚 | 信号输出          | 输出PWM控制信号                           | 连接MOS管栅极（G极）                      |
+- **GraftSense High Power LED Module v1.1**（基于 OC7140 恒流驱动，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如树莓派 Pico RP2040、ESP32 等，需具备 PWM 输出引脚）
+- 引脚连接：
 
-> **说明**：若直接控制小功率LED（如20mA以下），可省略MOS管，GPIO引脚通过限流电阻直接连接LED负极；大功率LED必须使用MOS管或驱动芯片，避免GPIO引脚过载。
+  - 模块 DOUT → MCU PWM 引脚（如树莓派 Pico 的 GP14，支持 PWM 输出）
+  - VCC → 5V 电源（模块核心 OC7140 需 5V 供电）
+  - GND → MCU GND（共地确保 PWM 信号参考一致）
+- 模块核心：以 OC7140 为恒流驱动芯片，R1（300mΩ）为电流检测电阻，基础电流约 0.333mA，PWM 调光通过改变平均电流实现亮度调节
 
 ---
 
 ## 文件说明
-### led_single_power.py
-实现大功率单颗LED的核心驱动逻辑，核心类`PowerLED`封装所有功能接口，支持PWM调光与状态控制。
 
-#### 类定义：`PowerLED`
-- **`__init__(pin: int, pwm_freq: int = 1000) -> None`**  
-  初始化LED驱动：传入GPIO引脚编号，配置引脚为输出模式；设置PWM频率（默认1000Hz，范围1~20000Hz）；创建PWM对象并初始化占空比为0（LED关闭），初始化状态为`False`（灭）。
-- **`on() -> None`**  
-  开启LED全亮：设置PWM占空比为65535（16位最大值，对应100%亮度），更新状态为`True`；PWM写入失败时抛出`RuntimeError`。
-- **`off() -> None`**  
-  关闭LED：设置PWM占空比为0，更新状态为`False`；PWM写入失败时抛出`RuntimeError`。
-- **`toggle() -> None`**  
-  切换LED状态：若当前为亮（`_state=True`）则调用`off()`，若为灭（`_state=False`）则调用`on()`；PWM写入失败时抛出`RuntimeError`。
-- **`set_brightness(duty: int) -> None`**  
-  设置LED亮度：校验占空比`duty`（0~1023），超出范围抛出`ValueError`；将`duty`转换为16位PWM值（`duty * 65535 / 1023`）并写入PWM；更新状态为`duty > 0`（非零占空比即视为亮）；PWM写入失败时抛出`RuntimeError`。
-- **`get_state() -> bool`**  
-  查询LED当前状态：返回`_state`（`True`=亮，`False`=灭），仅反映内部状态，不实时读取硬件引脚。
-- **`digital (property) -> Pin`**  
-  属性方法：返回绑定的GPIO引脚对象，支持底层配置（如引脚模式修改）。
-- **`pwm (property) -> PWM`**  
-  属性方法：返回PWM对象，支持自定义PWM参数（如动态调整频率）。
-
-### main.py
-大功率LED驱动功能测试程序，演示LED初始化、全开/关闭、状态切换、PWM亮度调节等完整流程，包含异常捕获，确保测试稳定执行。
+| 文件名                | 功能描述                                                                    |
+| --------------------- | --------------------------------------------------------------------------- |
+| `led_single_power.py` | 驱动核心文件，定义 `PowerLED` 类，提供 LED 开关、亮度调节、状态查询等所有 API |
+| `main.py`             | 测试与演示文件，包含 LED 开关、状态切换、逐步调光等完整测试流程             |
 
 ---
 
 ## 软件设计核心思想
-### PWM调光优化
-- **占空比适配**：将用户友好的0~1023级占空比自动转换为MicroPython PWM所需的16位值（0~65535），简化开发者使用，无需关注底层数据格式
-- **频率限制**：初始化时限制PWM频率为1~20000Hz，避免低频导致的LED闪烁或高频导致的硬件负担
 
-### 状态一致性管理
-- **内部状态同步**：所有控制方法（`on()`/`off()`/`toggle()`/`set_brightness()`）均同步更新`_state`变量，确保`get_state()`返回的状态与实际LED状态一致
-- **自动状态判断**：`set_brightness()`中通过`duty > 0`自动判断LED是否为“亮”状态，无需手动设置
-
-### 错误处理与容错
-- **参数校验**：对PWM频率、亮度占空比等输入参数进行合法性校验，提前抛出明确异常，避免无效操作导致硬件异常
-- **异常捕获**：PWM写入操作包裹在`try-except`块中，捕获底层错误并转换为更易理解的`RuntimeError`，附带错误原因，便于问题排查
-
-### 灵活性与可扩展性
-- **属性暴露**：通过`digital`和`pwm`属性暴露底层引脚与PWM对象，支持开发者根据需求自定义硬件配置（如调整PWM频率、设置引脚拉电阻）
-- **无硬件依赖封装**：驱动仅负责信号输出，不绑定特定LED功率或驱动电路，适配小功率直驱、大功率MOS管驱动等多种硬件方案
+1. **硬件抽象层**：将底层 PWM 与 GPIO 操作封装在 `PowerLED` 类中，上层调用无需关心 MCU 的 PWM 配置细节，仅需指定引脚和频率即可初始化
+2. **状态管理**：通过 `_state` 属性维护 LED 当前状态，确保 `toggle()` 等方法的行为一致性，避免状态与实际输出不一致
+3. **PWM 适配机制**：将用户输入的 10 位占空比（0–1023）线性映射到 MicroPython 的 16 位 `duty_u16` 接口，兼容 RP2040 等平台的 PWM 实现
+4. **鲁棒性设计**：内置参数校验（PWM 频率范围、占空比范围）和错误处理（try-except 捕获 PWM 操作异常），提升代码稳定性
+5. **易用性优先**：提供 `on()`、`off()` 等直观方法，降低用户上手门槛，同时支持属性访问底层 Pin 和 PWM 对象，满足高级需求
 
 ---
 
 ## 使用说明
-### 硬件接线（树莓派Pico + 大功率LED示例,跟据实际硬件条件进行处理）
-| 硬件组件         | Pico GPIO 引脚 | 接线功能                                  |
-|--------------|--------------|-------------------------------------------|
-| NPN MOS管（G极） | GP6          | 接收PWM控制信号                           |
-| NPN MOS管（S极） | GND（Pin38）   | 接地（与电源、LED共地）                    |
-| 大功率LED（负极）   | MOS管（D极）     | 通过MOS管控制电流通断                     |
-| 大功率LED（正极）   | 限流电阻         | 串联限流电阻后连接12V电源正极              |
-| 5V电源         | 正极/负极        | 为LED提供功率供电（负极与Pico GND共地）    |
 
-> **注意**：
-> 1. 限流电阻阻值计算方式：`R = (电源电压 - LED额定电压) / LED额定电流`（如12V电源、3V/1A LED，需`R=(12-3)/1=9Ω`，功率选2W以上）
-> 2. 必须确保所有硬件共地（Pico GND、MOS管S极、电源负极），否则PWM信号无法正常控制
+### 1. 驱动初始化
 
----
+```python
+from led_single_power import PowerLED
 
-### 软件依赖
-- **固件版本**：MicroPython v1.23+  
-- **内置库**：
-  - `machine.Pin`：用于GPIO引脚控制
-  - `machine.PWM`：用于PWM亮度调节
-  - `time`：用于测试延时
-- **开发工具**：Thonny、PyCharm（带MicroPython插件）
+# 初始化大功率LED：DOUT接PWM引脚14，PWM频率默认1000Hz
+led = PowerLED(pin=14, pwm_freq=1000)
+```
 
----
+### 2. 核心控制方法
 
-### 安装步骤
-1. **烧录固件**：将MicroPython v1.23+固件烧录到树莓派Pico
-2. **硬件接线**：按上述接线图连接大功率LED、MOS管、限流电阻及电源
-3. **上传文件**：将`led_single_power.py`和`main.py`上传到Pico的文件系统
-4. **配置引脚**：根据硬件接线修改`main.py`中`PowerLED`初始化的`pin`编号（默认使用GP15）
-5. **运行测试**：在开发工具中执行`main.py`，观察LED的开关、切换及亮度变化效果
+| 方法                   | 功能描述                                          |
+| ---------------------- | ------------------------------------------------- |
+| `on()`                 | 打开 LED，以全亮（PWM 占空比 1023）运行           |
+| `off()`                | 关闭 LED，PWM 占空比设为 0                        |
+| `toggle()`             | 切换 LED 状态（亮 → 灭，灭 → 全亮）             |
+| `set_brightness(duty)` | 设置亮度，`duty` 范围 0–1023（0=关闭，1023=全亮） |
+| `get_state()`          | 返回当前状态：`True`=亮，`False`=灭               |
 
 ---
 
 ## 示例程序
+
+### 完整测试流程（来自 `main.py`）
+
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2025/8/25 上午11:53
-# @Author  : 缪贵成
-# @File    : main.py
-# @Description : 大功率单颗led驱动测试文件，包括开关，切换，pwm控制亮度
-
-# ======================================== 导入相关模块 =========================================
-
-# 导入时间相关模块
 import time
-# 导入第三方模块
 from led_single_power import PowerLED
 
-# ======================================== 全局变量 =============================================
-
-# ======================================== 功能函数 =============================================
-
-# ======================================== 自定义类 =============================================
-
-# ======================================== 初始化配置 ===========================================
-
-# 上电延时3s
+# 上电延时
 time.sleep(3)
 print("FreakStudio: Test high-power LED lights")
 
-# 创建实例，使用GP15引脚
-led = PowerLED(pin=25, pwm_freq=1000)
-
-# ======================================== 主程序 ==============================================
+# 创建实例，使用GP14引脚
+led = PowerLED(pin=14, pwm_freq=1000)
 
 # 打开 LED
 try:
@@ -219,61 +147,53 @@ try:
 except RuntimeError as e:
     print("Error turning LED OFF at the end:", e)
 
-print(" PowerLED Test End ")
-
+print("PowerLED Test End")
 ```
+
 ---
+
 ## 注意事项
 
-### 硬件安全限制
-- **功率匹配**：
-  - 小功率 LED（<20mA）：可由 GPIO 直接驱动（需串联 150Ω~220Ω 限流电阻）
-  - 大功率 LED（>100mA）：必须使用 MOS 管或 LED 驱动芯片，严禁 GPIO 直接供电，否则会烧毁开发板引脚
-- **限流电阻配置**：根据 LED 额定参数计算限流电阻阻值与功率，避免电阻过小导致 LED 过流烧毁，或电阻过大导致亮度不足
-- **散热要求**：大功率 LED（>1W）工作时需搭配散热片，环境温度超过 40℃时需增加风扇强制散热，防止 LED 因过热损坏
+1. **PWM 引脚要求**：模块 DOUT 引脚必须连接至 MCU 的 PWM 输出引脚，不可直接连接普通 GPIO 引脚，否则无法实现亮度调节
+2. **恒流与散热**：模块基础恒流约 0.333mA，全亮时平均电流最大，避免长时间全亮导致 LED 和模块过热，必要时增加散热措施
+3. **PWM 操作限制**：PWM 相关操作（`on()`、`off()`、`set_brightness()`）非 ISR-safe，不可在中断服务函数中直接调用，如需在中断中触发，可使用 `micropython.schedule` 延迟执行
+4. **参数范围**：PWM 频率需在 1–1000Hz 之间，占空比需在 0–1023 之间，超出范围将抛出 `ValueError`
+5. **供电稳定性**：模块供电需稳定 5V，避免电压波动导致 OC7140 恒流输出异常，影响 LED 亮度一致性
 
 ---
-
-### 硬件接线与配置注意事项
-- **共地要求**：所有硬件（开发板、电源、MOS 管、LED）必须共地，否则 PWM 信号会因电平漂移无法正常控制 LED
-- **MOS 管选型**：NPN 型 MOS 管的导通电压需与 GPIO 输出电平匹配（如 3.3V 导通的 MOS 管），确保 GPIO 高电平时 MOS 管能可靠导通
-- **电源稳定性**：大功率 LED 供电电源需满足额定电流要求（如 3W LED 需 1A 以上电源），避免电源功率不足导致 LED 闪烁或亮度不稳定
-- **布线规范**：LED 供电线路（电源→限流电阻→LED→MOS 管）需使用粗导线（如 16AWG 以上），减少线路压降；PWM 控制线路（GPIO→MOS 管 G 极）需短而粗，远离强干扰源
-
----
-
-### 软件使用建议
-- **PWM 频率调整**：
-  - 照明场景：选择 1000Hz~5000Hz，避免低频闪烁（人眼可见）
-  - 动态光效场景：可提高频率至 10000Hz~20000Hz，平衡响应速度与硬件负担
-- **亮度调节步进**：`set_brightness()`的占空比步进建议≥8（即`range(0,1024,8)`），过小步进会导致亮度变化不明显，且增加 PWM 写入次数
-- **中断安全**：驱动方法（如`on()`/`set_brightness()`）非 ISR-safe，若需在中断中控制 LED，需通过`micropython.schedule`调度到主线程执行
-- **资源释放**：长时间不使用 LED 时，建议调用`off()`关闭 LED，减少功耗与硬件损耗；若需彻底释放资源，可手动停止 PWM（`led.pwm.deinit()`）
-
----
-
-### 环境影响
-- **温度限制**：LED 最佳工作温度为 -20℃~60℃，高温环境（>60℃）会导致 LED 光衰加速，低温环境（<-20℃）会导致亮度下降，需避免极端温度
-- **电压波动**：电源电压波动会直接影响 LED 亮度，工业场景建议使用稳压电源
-- **电磁干扰**：大功率 LED 驱动电路（尤其是 MOS 管开关）会产生电磁干扰，需在电源端并联电容（如 100μF 电解电容 + 0.1μF 陶瓷电容），减少对 PWM 信号的干扰
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+```
+MIT License
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+Copyright (c) 2025 FreakStudio
 
-**版权归 FreakStudio 所有。**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

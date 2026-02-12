@@ -1,6 +1,9 @@
-# PN532 NFC模块驱动 - MicroPython版本
+# GraftSense-基于 PN532 的 NFC 通信模块（MicroPython）
+
+# GraftSense-基于 PN532 的 NFC 通信模块（MicroPython）
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -15,129 +18,71 @@
 ---
 
 ## 简介
-PN532是一款高性能NFC近场通信芯片，支持多种卡型读写（Mifare Classic、NTAG2XX等）和通信接口。该芯片广泛应用于移动支付、身份识别、数据传输、门禁系统等场景。
 
-本项目提供基于MicroPython的PN532模块驱动代码及测试程序，支持通过UART接口与模块通信，方便开发者快速实现NFC卡片的检测与数据读写功能。
+本项目是 **GraftSense 系列基于 PN532 芯片的 NFC 通信模块**，属于 FreakStudio 开源硬件项目。模块基于恩智浦 PN5321A3HN/C106,55 芯片，支持 13.56MHz 近场通信，可实现 NFC 卡片读写、设备模拟与点对点交互，广泛适用于电子 DIY、门禁系统演示、物联网智能识别等场景。
 
 ---
 
 ## 主要功能
-- **多种卡型支持**：
-  - Mifare Classic系列（1K/4K）
-  - NTAG2XX系列
-  - 其他符合ISO 14443 Type A标准的卡片
-- **完整操作集**：
-  - 卡片检测与激活
-  - 数据块读写
-  - 卡片UID获取
-  - 模块固件版本查询
-- **低功耗支持**：提供休眠与唤醒功能
-- **统一接口**：通过`PN532`类提供一致操作方法
-- **跨平台兼容**：支持ESP32、ESP8266、树莓派Pico等MicroPython开发板
+
+- **协议支持**：完美支持 ISO/IEC 14443 Type A（Mifare Classic/Ultralight 等）、Type B，兼容 ISO/IEC 15693（远距离卡）、Felica（索尼卡）及 NFC Forum Tag1~Tag5 标准。
+- **工作模式**：支持卡模式（模拟 IC 卡）、读写器模式（读取 NFC 卡片）、点对点模式（设备间直连通信）。
+- **接口丰富**：支持 UART、SPI、I2C 三种主机接口，适配不同 MCU 平台，遵循 Grove 接口标准便于快速集成。
+- **应用场景**：门禁系统、NFC 贴纸读写、智能卡识别、物联网设备交互等。
 
 ---
 
 ## 硬件要求
-### 推荐测试硬件
-- ESP32/ESP8266/树莓派Pico开发板
-- PN532 NFC模块（UART接口版本）
-- Mifare Classic或NTAG2XX系列测试卡片
-- 杜邦线若干
 
-### 模块引脚说明
-| PN532引脚 | 功能描述 |
-|-----------|----------|
-| VCC       | 电源正极（3.3V，注意：部分模块支持5V） |
-| GND       | 电源负极 |
-| TX        | UART发送引脚 |
-| RX        | UART接收引脚 |
-| RST       | 复位引脚（低电平有效） |
-| SDA       | I2C数据引脚（本项目未使用） |
-| SCL       | I2C时钟引脚（本项目未使用） |
-| SS        | SPI片选引脚（本项目未使用） |
+- **核心芯片**：PN5321A3HN/C106,55（或兼容 PN532 系列芯片）。
+- **供电**：3.3V 直流供电，模块内置电源滤波与电平转换电路。
+- **接口连接**：UART 模式下，模块 MRX 需接 MCU RXD，MTX 需接 MCU TXD，切勿交叉连接。
+- **通信距离**：有效近场通信距离不超过 4 厘米，符合 NFC 标准。
+- **工作频率**：13.56MHz，仅支持 IC 卡，不支持 125kHz 低频 ID 卡（如 EM4100）。
 
 ---
 
 ## 文件说明
-### pn532.py
-包含`PN532`基类，提供NFC功能的核心接口：
-- `__init__(uart, rst_pin, debug=False)`：初始化PN532模块，建立与硬件的连接
-- `wake_up()`：唤醒休眠状态的模块并验证通信连接
-- `get_firmware_version()`：获取模块固件版本信息，返回版本号
-- `sam_configuration()`：配置安全访问模块(SAM)，设置卡片读取模式
-- `read_passive_target()`：检测并激活附近的NFC卡片，返回卡片UID
-- `mifare_classic_read_block(block_number)`：读取Mifare Classic卡片指定块的数据
-- `mifare_classic_write_block(block_number, data)`：向Mifare Classic卡片指定块写入数据
-- `ntag2xx_write_page(page_number, data)`：向NTAG2XX系列卡片指定页写入数据
 
-### pn532_uart.py
-包含`PN532_UART`类，继承自`PN532`基类，实现UART通信功能：
-- `__init__(uart, rst_pin, debug=False)`：初始化UART通信接口
-- `_write(data)`：通过UART发送数据帧到PN532模块
-- `_read()`：通过UART从PN532模块接收数据帧并解析
-
-### main.py
-无类定义，包含测试主函数`main()`：
-- 初始化硬件接口和PN532模块
-- 执行模块自检（固件版本查询、SAM配置）
-- 循环检测NFC卡片并输出卡片UID
-- 提供可扩展的卡片读写测试框架
+| 文件名 | 说明 |
+|--------|------|
+| `main.py` | 测试程序，演示 Mifare Classic 卡片的 ID 读取、块认证与读写操作 |
+| `pn532.py` | PN532 驱动核心库，定义了基类 `PN532`，提供高层 NFC 功能接口 |
+| `pn532_uart.py` | UART 通信实现，继承自 `PN532` 基类，实现 UART 相关的低层 I/O 方法 |
 
 ---
 
 ## 软件设计核心思想
-### 分层设计
-- 底层：UART通信协议实现（`pn532_uart.py`）
-- 中层：PN532命令封装与解析（`pn532.py`）
-- 高层：应用级API与测试流程（`main.py`）
 
-### 通信协议
-- 基于PN532的帧格式实现数据收发
-- 包含校验机制确保数据完整性
-- 实现命令超时重试机制
-
-### 跨平台兼容
-- 仅依赖MicroPython标准库
-- 硬件接口通过参数注入，与具体平台解耦
-- 统一的错误处理机制
+- **协议栈抽象**：基于 PN532 芯片的多功能 NFC 协议栈，屏蔽底层硬件差异，提供统一的读写与模式切换接口。
+- **模式适配**：通过接口配置实现卡模式、读写器模式、点对点模式的快速切换，满足不同应用场景需求。
+- **兼容性设计**：遵循 Grove 接口标准与主流 MCU 通信协议，降低集成成本，提升模块复用性。
 
 ---
 
 ## 使用说明
-### 硬件接线
-#### 以树莓派pico示例
-| PN532引脚 | GPIO引脚 |
-|-----------|----------|
-| VCC       | 3.3V     |
-| GND       | GND      |
-| TX        | GPIO4    |
-| RX        | GPIO5    |
-| RST       | GPIO15   |
 
-> **注意：**
-> - 确认模块工作电压，避免使用5V损坏3.3V模块
-> - 接线前确保开发板已断电
-> - 可根据实际需求修改引脚配置
+1. **硬件连接**：
 
----
+   - 将模块 VCC 接 3.3V，GND 接地。
+   - UART 模式下：MRX → MCU RXD，MTX → MCU TXD；SPI/I2C 模式下按对应引脚连接。
+2. **初始化配置**：
 
-### 软件依赖
-- **固件版本**：MicroPython v1.23.0+
-- **内置库**：
-  - `machine`（GPIO与UART控制）
-  - `time`（延时功能）
+   - 根据所选接口（UART/SPI/I2C）初始化通信参数，如波特率（UART）、时钟频率（SPI/I2C）。
+   - 检测 PN532 芯片是否在线，确认通信正常。
+3. **模式选择**：
 
----
+   - 读写器模式：用于读取/写入 NFC 卡片（如 Mifare Classic）。
+   - 卡模式：模拟 IC 卡，支持无电刷卡（如公交/门禁场景）。
+   - 点对点模式：实现两个 NFC 设备间的数据传输。
+4. **卡片操作**：
 
-### 安装步骤
-1. 将MicroPython固件烧录到开发板
-2. 上传`pn532.py`、`uart.py`和`main.py`到开发板
-3. 根据硬件连接修改`main.py`中的引脚配置
-4. 运行`main.py`开始测试
+   - 读取卡片 UID、存储数据，写入时需注意卡片加密权限（如 Mifare Classic 默认密码 `0xFFFFFFFFFFFF`）。
 
 ---
 
 ## 示例程序
+
 ```python
 # MicroPython v1.23.0
 # -*- coding: utf-8 -*-   
@@ -150,7 +95,7 @@ PN532是一款高性能NFC近场通信芯片，支持多种卡型读写（Mifare
 
 import time
 from machine import UART, Pin
-from uart import PN532_UART
+from pn532_uart import PN532_UART
 from pn532 import MIFARE_CMD_AUTH_A
 
 # ======================================== 全局变量 ============================================
@@ -161,58 +106,77 @@ from pn532 import MIFARE_CMD_AUTH_A
 
 # ======================================== 初始化配置 ===========================================
 
+# 上电延时3s
 time.sleep(3)
+# 打印调试信息
 print("FreakStudio: Test NFC module functionality")
 
-# UART 初始化 (根据硬件实际引脚调整)
+# 初始化UART1端口，波特率115200（PN532串口默认波特率），TX=Pin8，RX=Pin9
 uart = UART(1, baudrate=115200, tx=Pin(8), rx=Pin(9))
-# 可选：Reset引脚
+# 可选：Reset引脚（若硬件接了复位引脚，取消注释并修改引脚号）
 # reset_pin = Pin(15, Pin.OUT)
 
-# 创建 PN532 实例
+# 创建 PN532 实例：传入串口对象，不使用复位引脚，启用调试模式（打印收发数据）
 nfc = PN532_UART(uart, reset=None, debug=True)
 
-# 初始化 PN532
+# 打印初始化提示，告知用户正在初始化PN532模块
 print("Initializing PN532...")
+# 可选：硬件复位PN532（若复位引脚已配置，取消注释）
 # nfc.reset()
 
 # 获取固件版本
 try:
+    # 读取PN532固件版本（返回元组：硬件版本、固件版本、支持的卡类型）
     version = nfc.firmware_version
+    # 打印固件版本信息，确认模块正常响应
     print("PN532 firmware version:", version)
 except RuntimeError as e:
+    # 捕获通信异常，打印错误信息
     print("Failed to read firmware version:", e)
+    # 延时3秒后继续，避免频繁报错
     time.sleep(3)
 
-# 配置 SAM (用于读卡)
+# 配置 SAM (Secure Access Module)：启用读卡模式，必须调用才能检测卡片
 nfc.SAM_configuration()
+# 打印SAM配置完成提示
 print("PN532 SAM configured")
+# 延时3秒，确保SAM配置生效
 time.sleep(3)
 
 # ======================================== 主程序 =============================================
 
+# 无限循环：持续检测NFC卡片，实现卡片读写测试
 while True:
     try:
+        # 打印等待卡片提示，明确当前状态
         print("---- Waiting for card (Mifare Classic) ----")
+        # 被动读取卡片UID：超时1000ms，无卡片返回None，有卡片返回UID字节串
         uid = nfc.read_passive_target(timeout=1000)
 
+        # 判断是否检测到卡片（UID为None表示无卡片）
         if uid is None:
             print("No card detected")
             time.sleep(2)
             continue
 
+        # 打印检测到的卡片UID（转换为十六进制列表，便于查看）
         print("Card detected UID:", [hex(i) for i in uid])
         time.sleep(2)
 
         # ==================== Mifare Classic 测试 ====================
+        # Mifare Classic卡默认A密钥（6字节），多数空白卡/公交卡使用此密钥
         key_default = b"\xFF\xFF\xFF\xFF\xFF\xFF"
+        # 测试操作的块号：Block4为Mifare Classic 1K卡的第一个数据块（前3块为厂商块）
         block_num = 4
 
+        # 认证Block4：使用A密钥、卡片UID认证，认证成功才能读写
         if nfc.mifare_classic_authenticate_block(uid, block_num, MIFARE_CMD_AUTH_A, key_default):
             print(f"Block {block_num} authentication successful")
             time.sleep(1)
 
+            # 读取Block4数据：成功返回16字节数据，失败返回None
             data = nfc.mifare_classic_read_block(block_num)
+            # 判断是否读取到有效数据
             if data:
                 print(f"Read block {block_num} data:", [hex(i) for i in data])
             time.sleep(1)
@@ -239,50 +203,59 @@ while True:
     except Exception as e:
         print("Error:", e)
         time.sleep(2)
-
-
 ```
+
 ---
 
 ## 注意事项
-### 通信问题
-- 确保 UART 波特率与模块一致（默认通常为 115200）
-- 过长的杜邦线可能导致通信不稳定
-- 避免与其他 UART 设备共用同一总线
 
-### 卡片兼容性
-- Mifare Classic 4K 卡片需要特殊处理扇区结构
-- NTAG2XX 系列卡片有不同的页大小和容量
-- 部分加密卡片需要密钥才能读写数据
+1. **接口连接**：UART 模式下必须严格遵循 MRX→RXD、MTX→TXD 的连接规则，否则通信失败。
+2. **协议限制**：模块仅支持 13.56MHz IC 卡，无法识别 125kHz 低频 ID 卡（如老式门禁卡）。
+3. **加密安全**：
 
-### 电源要求
-- 建议使用 3.3V 稳定电源
-- 模块在读写操作时电流会增大，确保电源能提供足够电流
-
-### 使用环境
-- 避免金属环境影响 NFC 信号
-- 卡片与模块距离建议保持在 5cm 以内
-- 高温高湿环境可能影响模块性能
+   - 无法破解加密卡，仅能读写已知密码或默认密码的区块。
+   - 模拟卡 ID 第一字节固定为 `0x08`，部分门禁系统可能拒绝模拟卡。
+4. **通信距离**：有效交互距离 ≤4cm，需将卡片/设备贴近模块天线区域。
+5. **电源稳定性**：避免供电电压波动，建议使用 3.3V 稳压电源，防止模块复位或通信异常。
 
 ---
 
 ## 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：https://github.com/FreakStudioCN
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ---
 
 ## 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+本项目采用 MIT 开源许可协议，完整协议内容如下：
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
-- **说明** — 代码含参考部分,出现非技术问题和署名作者无关。  
-**版权归 FreakStudio 所有。**
+```
+MIT License
+
+Copyright (c) [年份] FreakStudioCN
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+###

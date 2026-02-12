@@ -1,6 +1,9 @@
-# TM1637 四位数码管驱动 - MicroPython版本
+# GraftSense TM1637 4 位数码管驱动模块 （MicroPython）
+
+# GraftSense TM1637 4 位数码管驱动模块 （MicroPython）
 
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -15,208 +18,199 @@
 ---
 
 ## 简介
-本项目为基于 TM1637 芯片的四位七段数码管显示模块 MicroPython 驱动，支持亮度调节、数字/字符串/十六进制/温度显示、滚动文本等功能。广泛应用于时钟、温度计、计数器等嵌入式场景。
+
+本项目为 **GraftSense TM1637 4-Digit Display Module V1.0** 提供了完整的 MicroPython 驱动支持，基于 TM1637 芯片实现 4 位共阳数码管的高效驱动。驱动支持数字 / 字符 / 十六进制 / 温度显示、亮度调节、冒号点亮、文本滚动等丰富功能，采用双线串行输出（CLK/DIO），兼容 Grove 接口标准，适用于计时器显示、传感器数据展示、设备状态提示、创客项目数值显示等场景，为系统提供精准的数码管显示控制能力。
 
 ---
 
 ## 主要功能
-- **亮度调节**：支持 0-7 级亮度设置
-- **数字显示**：整数、双数、十六进制、温度等多种格式
-- **字符串显示**：支持 4 字符显示与冒号点亮
-- **滚动显示**：支持文本滚动动画
-- **原始段码写入**：可自定义显示内容
-- **高兼容性**：适配 MicroPython 标准库
+
+- ✅ 支持 0–7 级亮度调节，适配不同环境显示需求
+- ✅ 提供高层 API：字符串显示、单个整数（-999~9999）显示、双数（-9~99）带冒号显示、十六进制显示、温度（-9~99）显示
+- ✅ 支持文本滚动显示，适配长信息展示场景
+- ✅ 支持原始段码写入，可自定义显示图案（如中横杠、特殊符号）
+- ✅ 底层严格遵循 TM1637 时序协议，实现 START/STOP 信号、自动地址递增、显示控制
+- ✅ 内置字符编码表，支持数字（0-9）、字母（a-z/A-Z）、空格、破折号、星号等字符显示
+- ✅ 参数校验完善，对亮度、显示位置等非法值抛出明确异常，提升代码健壮性
 
 ---
 
 ## 硬件要求
 
-### 推荐测试硬件
-- 树莓派 Pico/Pico W 或其他 MicroPython 兼容开发板
-- TM1637 四位数码管模块
-- 杜邦线若干
-
-### 模块引脚说明
-| TM1637 引脚 | 功能描述         |
-|-------------|------------------|
-| VCC         | 电源正极（3.3V-5V） |
-| GND         | 电源负极         |
-| CLK         | 时钟引脚         |
-| DIO         | 数据引脚         |
+1. **核心硬件**：GraftSense TM1637 4-Digit Display Module V1.0（基于 TM1637 芯片，4 位共阳数码管，支持 3.3V/5V 兼容）
+2. **主控设备**：支持 MicroPython v1.23.0 及以上版本的开发板（如树莓派 Pico、ESP32 等）
+3. **接线配件**：Grove 4Pin 线或杜邦线，用于连接模块的 CLK（对应 DOUT1）、DIO（对应 DOUT0）、GND、VCC 引脚
+4. **电源**：3.3V~5V 稳定电源（模块内置 DC-DC 5V 转 3.3V 电路，兼容两种供电方式）
 
 ---
 
 ## 文件说明
 
-### code/tm1637.py
-TM1637 显示驱动核心类，提供高层 API（亮度、数字、字符串、滚动等显示）。
-#### 类定义
-```python
-class TM1637:
-    """
-    TM1637 四位数码管驱动类，支持亮度调节、数字/字符串显示、滚动等功能。
-
-    Attributes:
-        clk (Pin): machine.Pin 实例，用于 CLK 引脚。
-        dio (Pin): machine.Pin 实例，用于 DIO 引脚。
-        brightness (int): 亮度级别，范围 0-7。
-        colon (bool): 冒号显示状态。
-    """
-    ...class TM1637(object):
-    """
-       基于 TM1637 的四位七段数码管显示驱动类（MicroPython）。
-       提供位/段写入、亮度调节、数字/字符串/十六进制/温度显示与滚动显示等高层 API；
-       底层严格按 TM1637 时序实现（START/STOP、自动地址递增、显示控制）。
-
-       Attributes:
-           clk (Pin): 时钟引脚（输出模式）
-           dio (Pin): 数据引脚（输出模式）
-           _brightness (int): 当前亮度（0–7）
-
-       Methods:
-           __init__(clk, dio, brightness=7): 初始化引脚与默认亮度；写入数据与显示控制命令以启用显示。
-           brightness(val): 设置并应用亮度（0–7）；越大越亮；非法值抛 `ValueError`。
-           write(segments, pos=0): 从给定起始位写入原始段码（自动地址递增）；pos 超界抛 `ValueError`。
-           encode_digit(digit): 将 0–9 编码为七段段码；返回单字节。
-           encode_string(string): 将字符串（≤4 字符）批量编码为段码数组。
-           encode_char(char): 编码单字符（0–9、a–z/A–Z、空格、破折号、星号）；不支持则抛 `ValueError`。
-           hex(val): 以 4 位十六进制显示（小写）。
-           number(num): 显示整数（-999..9999），自动裁剪到范围。
-           numbers(num1, num2, colon=True): 显示两个 2 位整数（-9..99），可选显示冒号。
-           temperature(num): 显示温度（-9..99），越界显示 “lo/hi”，并追加 ℃ 符号。
-           show(string, colon=False): 直接显示字符串（≤4），可选点亮冒号位。
-           scroll(string, delay=250): 左移滚动显示字符串；`delay` 为步进毫秒。
-
-       Notes:
-           - 使用 TM1637 的时序控制，避免在 ISR 或中断上下文中直接操作。
-           - 显示亮度范围为 0–7，设置过高可能导致功耗增加。
-           - 本类设计用于支持常见的 4 位显示模块，并支持可选冒号。
-
-       ==========================================
-
-       TM1637-based driver for 4-digit 7-segment displays (MicroPython).
-       Provides high-level APIs for segment writes, brightness control, numeric/string/hex/temperature
-       rendering, and text scrolling, while implementing low-level TM1637 timing
-       (START/STOP, auto address increment, display control).
-
-       Attributes:
-           clk (Pin): Clock pin (output).
-           dio (Pin): Data pin (output).
-           _brightness (int): Current brightness level (0–7).
-
-       Methods:
-           __init__(clk, dio, brightness=7): Initialize pins/brightness and send init commands.
-           brightness(val): Set and apply display brightness in [0..7]; out-of-range values raise `ValueError`.
-           write(segments, pos=0): Write raw segment bytes starting at position; validates `pos`.
-           encode_digit(digit): Encode a decimal digit (0–9) to a segment byte.
-           encode_string(string): Encode a short string (≤4 chars) into segment bytes.
-           encode_char(char): Encode a single char; unsupported chars raise `ValueError`.
-           hex(val): Display a 16-bit value as 4-digit hex (lowercase).
-           number(num): Display an integer within [-999, 9999] (clamped).
-           numbers(num1, num2, colon=True): Display two 2-digit integers with optional colon.
-           temperature(num): Show temperature value with ℃ indicator and out-of-range handling.
-           show(string, colon=False): Show a short string with optional colon.
-           scroll(string, delay=250): Scroll text left with step delay (ms).
-
-       Notes:
-           - Operates with TM1637 timing control; avoid direct calls from ISR or interrupt contexts.
-           - Brightness range is 0–7; excessive settings may increase power consumption.
-           - Designed for common 4-digit displays with optional colon support.
-   """
-
-    def __init__(self, clk, dio, brightness=7):
-```
-### code/main.py
-示例主程序，演示各类显示效果（亮度调节、数字、字符串、温度、滚动等）。
-
 ---
 
 ## 软件设计核心思想
 
-### 高层 API 封装
-- 统一接口，简化显示操作
-- 支持多种显示模式和自定义内容
-
-### 时序精确控制
-- 严格遵循 TM1637 通信协议
-- 采用低级引脚操作确保兼容性
-
-### 易用性与扩展性
-- 亮度、显示内容、动画均可灵活配置
-- 便于集成到各类 MicroPython 项目
+1. **分层架构**：底层实现 TM1637 时序协议（START/STOP、字节写入、命令控制），上层封装易用的显示 API，分离硬件操作与业务逻辑
+2. **字符编码抽象**：通过内置 `_SEGMENTS` 编码表统一处理数字、字母、特殊符号的七段显示映射，支持灵活的字符扩展
+3. **参数校验与容错**：对亮度（0-7）、显示位置（0-5）、数值范围（如温度 -9~99）等进行合法性校验，避免非法操作导致硬件异常
+4. **时序严格性**：严格遵循 TM1637 数据传输时序，通过微秒级延迟确保通信稳定，避免数据错乱
+5. **可扩展性**：支持原始段码写入，允许用户自定义显示图案，适配特殊场景的显示需求
+6. **易用性优先**：提供 `show()`、`number()`、`temperature()` 等高层方法，降低使用门槛，无需关注底层协议细节
 
 ---
 
 ## 使用说明
 
-### 硬件接线（树莓派 Pico 示例）
+### 环境准备
 
-| TM1637 引脚 | Pico GPIO 引脚 |
-|-------------|----------------|
-| VCC         | 3.3V 或 5V     |
-| GND         | GND            |
-| CLK         | GP4            |
-| DIO         | GP5            |
+- 在开发板上烧录 **MicroPython v1.23.0+** 固件
+- 将 `tm1637.py` 和 `main.py` 上传至开发板文件系统
 
-> **注意：**
-> - CLK/DIO 可根据实际需求修改为其他 GPIO
-> - 确保电源电压与模块兼容
+### 硬件连接
 
----
+- 使用 Grove 线或杜邦线将模块的 **CLK（DOUT1）** 引脚连接至开发板指定 GPIO 引脚（如示例中的 Pin 5）
+- 将模块的 **DIO（DOUT0）** 引脚连接至开发板指定 GPIO 引脚（如示例中的 Pin 4）
+- 连接 `GND` 和 `VCC` 引脚，确保 3.3V~5V 供电稳定
 
-### 软件依赖
+### 代码配置
 
-- **固件版本**：MicroPython v1.23.0+
-- **内置库**：
-  - `machine`（GPIO 控制）
-  - `time`（延时）
-- **开发工具**：PyCharm 或 Thonny（推荐）
+- 在 `main.py` 中修改 `TM1637` 初始化参数：
 
----
+```
+tm = tm1637.TM1637(clk=Pin(5), dio=Pin(4), brightness=4)
+```
 
-### 安装步骤
+### 运行测试
 
-1. 烧录 MicroPython 固件到开发板
-2. 上传 `code/tm1637.py` 和 `code/main.py` 到开发板
-3. 根据硬件连接修改 `main.py` 中的引脚配置
-4. 运行 `main.py`，观察数码管显示效果
+- 重启开发板，`main.py` 将自动执行，循环演示亮度调节、各类显示效果与文本滚动功能
 
 ---
 
 ## 示例程序
 
 ```python
+# 导入模块
 from machine import Pin
 import tm1637
 import time
 
-tm = tm1637.TM1637(clk=Pin(4), dio=Pin(5))
+# 初始化 TM1637 驱动（CLK=Pin5, DIO=Pin4, 亮度=4）
+tm = tm1637.TM1637(clk=Pin(5), dio=Pin(4), brightness=4)
 
+# 1. 亮度调节演示
+def demo_brightness(disp):
+    for b in range(0, 8):
+        disp.brightness(b)
+        disp.show("b{:>3d}".format(b))
+        time.sleep_ms(300)
+    disp.brightness(4)
+    time.sleep_ms(400)
+
+# 2. 字符串与冒号显示
+def demo_show(disp):
+    disp.show("dEMo")
+    time.sleep_ms(800)
+    disp.show(" A01", True)  # 点亮冒号
+    time.sleep_ms(800)
+
+# 3. 双数带冒号显示
+def demo_numbers(disp):
+    disp.numbers(12, 34, colon=True)  # 显示 "12:34"
+    time.sleep_ms(800)
+    disp.numbers(-9, 99, colon=True)  # 显示 "-9:99"
+    time.sleep_ms(800)
+
+# 4. 单个整数显示
+def demo_number(disp):
+    for n in (0, 7, 42, 256, 9999, -999, -1234):
+        disp.number(n)
+        time.sleep_ms(600)
+
+# 5. 十六进制显示
+def demo_hex(disp):
+    for v in (0x0, 0x5A, 0xBEEF, 0x1234, 0xFFFF):
+        disp.hex(v)
+        time.sleep_ms(600)
+
+# 6. 温度显示
+def demo_temperature(disp):
+    for t in (-15, -9, 0, 25, 37, 99, 120):
+        disp.temperature(t)  # 越界显示 "lo"/"hi" + ℃
+        time.sleep_ms(700)
+
+# 7. 文本滚动
+def demo_scroll(disp):
+    disp.scroll("HELLO TM1637  ", delay=180)
+
+# 8. 原始段码写入
+def demo_raw_write(disp):
+    DASH = 0x40
+    BLANK = 0x00
+    disp.write([DASH, DASH, DASH, DASH], pos=0)  # 显示 "----"
+    time.sleep_ms(800)
+    disp.write([BLANK, BLANK, BLANK, BLANK], pos=0)  # 清空显示
+    time.sleep_ms(800)
+
+# 主循环演示所有功能
 while True:
-    tm.brightness(4)
-    tm.show("dEMo", colon=True)
-    tm.numbers(12, 34, colon=True)
-    tm.number(256)
-    tm.hex(0xBEEF)
-    tm.temperature(25)
-    tm.scroll("HELLO TM1637  ", delay=180)
-    time.sleep(1)
+    demo_brightness(tm)
+    demo_show(tm)
+    demo_numbers(tm)
+    demo_number(tm)
+    demo_hex(tm)
+    demo_temperature(tm)
+    demo_scroll(tm)
+    demo_raw_write(tm)
 ```
-## 注意事项
-**显示范围限制**
-- 单次最多显示 4 字符
-- 数字范围：-999 ~ 9999
-- 温度范围：-9 ~ 99，超出显示 lo/hi
-**电源要求**
-- 推荐 5V 供电，确保电源稳定
-**环境因素**
-- 避免高温高湿环境
-**联系方式**
-如有问题或建议，请联系开发者： 📧 邮箱：1098875044@qq.com 💻 GitHub：https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 
-许可协议
-本项目除 MicroPython 官方模块外，所有驱动与扩展代码均采用 MIT 许可协议发布。
-署名 — 请注明原作者及项目链接
-非商业性使用 — 禁止商业用途
-合理引用 — 可在代码注释、文档等注明来源
-版权归 FreakStudio 所有。
+---
+
+## 注意事项
+
+1. **亮度范围**：亮度值需在 0-7 之间，设置过高会增加模块功耗，建议默认使用 4-5 级亮度
+2. **时序依赖**：底层操作严格依赖 TM1637 时序，避免在中断服务程序（ISR）中直接调用驱动方法，防止时序错乱
+3. **显示范围**：
+
+   - `number()`：支持 -999~9999，超出范围会自动裁剪
+   - `temperature()`：支持 -9~99，越界显示 "lo"/"hi" 并追加 ℃ 符号
+   - `numbers()`：支持 -9~99，用于双数带冒号显示
+4. **引脚连接**：CLK 和 DIO 引脚需正确连接，避免接反导致通信失败；若使用 Grove 接口，需确保引脚定义与模块一致
+5. **共阳适配**：模块为共阳数码管，驱动已适配共阳显示逻辑，无需额外修改
+
+---
+
+## 联系方式
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+
+---
+
+## 许可协议
+
+```sql
+MIT License
+
+Copyright (c) 2025 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

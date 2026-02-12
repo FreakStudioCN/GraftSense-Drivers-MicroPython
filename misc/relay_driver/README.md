@@ -1,5 +1,11 @@
-# 单通道继电器驱动 - MicroPython版本
+# GraftSense-基于 G6KU 的磁保持继电器模块（MicroPython）
+
+# GraftSense-基于 G6KU 的磁保持继电器模块（MicroPython）
+
+# 基于 G6KU 的磁保持继电器模块 MicroPython 驱动
+
 ## 目录
+
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
@@ -10,275 +16,189 @@
 - [注意事项](#注意事项)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
----
 
 ## 简介
 
-单通道继电器是一种常用的电气控制器件，可以通过单片机或开发板的 GPIO 输出控制低压信号，从而驱动高电压/大电流负载，实现电路的开关控制。广泛应用于智能家居、电机启停、照明控制等场景。本项目提供基于 MicroPython 的驱动代码，封装继电器的初始化、开关控制、状态查询功能，支持快速集成。
-
-> **注意**：适用于单通道低电平触发或高电平触发的机械继电器模块，不适用于固态继电器或高频快速切换场景，不可直接控制超过继电器额定电流的负载。
-
----
+本项目是 基于 G6KU 的磁保持继电器模块 的 MicroPython 驱动库，适配 FreakStudio GraftSense 传感器模块，支持普通继电器和磁保持继电器两种类型，通过 GPIO 引脚实现继电器吸合/释放/切换控制，适用于电子 DIY 自动控制实验、智能家居开关演示、低功耗开关等场景。
 
 ## 主要功能
 
-* 控制继电器开关（开/关）
-* 查询当前继电器状态
-* 支持外部传入 GPIO 引脚，适配不同开发板
-* 兼容 MicroPython 主流开发板，接口简洁易用
-
----
-
-## 硬件要求
-
-### 推荐测试硬件
-
-* MicroPython 开发板（如树莓派 Pico）
-* 单通道继电器模块（5V 触发）
-* 杜邦线若干
-* （可选）负载设备（灯泡/电机等）
-
-### 模块引脚说明
-
-| 继电器引脚 | 功能描述   | 连接说明                       |
-| ----- | ------ |----------------------------|
-| VCC   | 电源输入   | 接开发板 3.3V 或 5V（依模块要求）      |
-| GND   | 接地     | 接开发板 GND                   |
-| IN    | 控制信号输入 | 接开发板 GPIO 引脚（如 Pico 的 GP6） |
-| COM   | 公共端    | 接负载电源输入                    |
-| NO    | 常开端    | 接负载电源输出（通电闭合）              |
-| NC    | 常闭端    | 接负载电源输出（通电断开）              |
-
----
+- 双类型支持：兼容普通单线圈继电器和双稳态磁保持继电器（需 H 桥驱动）
+- 控制逻辑：吸合（on）、释放（off）、状态切换（toggle）
+- 非阻塞脉冲：磁保持继电器通过定时器实现 50ms 脉冲控制，避免阻塞 MCU
+- 状态查询：支持普通继电器实时状态查询，磁保持继电器记录最后操作状态
+- 资源管理：提供 deinit 方法释放定时器和 GPIO 资源，确保安全状态
 
 ## 硬件要求
-### 推荐测试硬件
-- MicroPython开发板（如树莓派Pico）、线性滑动变阻器（1KΩ~100KΩ）、杜邦线3根、（可选）面包板
-### 模块引脚说明
-| 滑动变阻器引脚 | 功能描述 | 连接说明 |
-|--------------|----------|----------|
-| 固定端1（左） | 电源输入 | 接开发板3.3V |
-| 滑动触点（中间） | 信号输出 | 接开发板ADC引脚（如Pico的GP26/ADC0） |
-| 固定端2（右） | 接地 | 接开发板GND |
----
+
+- GraftSense 磁保持继电器模块（基于 G6KU，遵循 Grove 接口标准）
+- 支持 MicroPython 的 MCU（如 ESP32、RP2040 等）
+- 引脚连接：
+
+  - 模块 DOUT0 → MCU GPIO（普通继电器控制引脚，或磁保持 H 桥 IN2 引脚）
+  - 模块 DOUT1 → MCU GPIO（磁保持 H 桥 IN1 引脚，普通继电器无需）
+  - 大功率负载 → 模块弹簧式接线端子 A、B
+- 电源：模块 VCC/GND 接 MCU 对应电源引脚，注意大功率负载的供电安全
 
 ## 文件说明
 
-### relay.py
-
-该文件实现单通道继电器的核心驱动功能，仅包含 `RelayController` 类，用于处理普通继电器和磁保持继电器两种类型的控制逻辑。
-
-`RelayController` 类通过封装 GPIO 控制逻辑，提供继电器的多维度操作接口。类中包含的关键属性有：
-
-* `pin1`：普通继电器时为控制引脚；磁保持继电器时为 H 桥的 IN1 引脚。
-* `pin2`：仅磁保持继电器需要，为 H 桥的 IN2 引脚。
-* `_pulse_timer`：磁保持继电器短脉冲模式下的定时器，用于自动复位引脚。
-* `relay_type`：继电器类型（'normal' 或 'latching'）。
-
-类的主要方法包括：
-
-* `__init__(relay_type: str, pin1: int, pin2: int = None)`：初始化继电器控制器，配置控制引脚和定时器。
-* `_reset_pins(timer: Timer = None)`：定时器回调函数，脉冲结束后复位所有引脚（磁保持继电器专用）。
-* `on() -> None`：吸合继电器（普通继电器给高电平，磁保持继电器发送正向短脉冲）。
-* `off() -> None`：释放继电器（普通继电器给低电平，磁保持继电器发送反向短脉冲）。
-* `toggle() -> None`：切换继电器状态（仅普通继电器可用）。
-* `deinit() -> None`：释放资源，包括定时器和 GPIO 引脚。
-* `get_state() -> bool`：获取继电器当前状态（仅普通继电器准确）。
-
----
-
-### main.py
-
-该文件为继电器的功能测试与应用示例，无自定义类，仅包含测试逻辑和用户函数。
-
-`main.py` 的核心功能是：
-
-1. 初始化与继电器连接的 GPIO 引脚。
-2. 创建 `RelayController` 驱动实例。
-3. 演示继电器的基本开关操作（on → 延时 → off）。
-4. 实现“继电器音乐”功能：通过预定义的节奏表 `MUSIC_NOTES`，调用 `relay.toggle()` 按节拍快速切换继电器，实现机械声的节奏播放。
-
-程序支持无限循环播放音乐节奏，并通过 `time.sleep()` 控制间隔。用户可通过修改 `MUSIC_NOTES` 定义不同的节奏模式，实现简单的“继电器打击乐”效果。
-
----
+| 文件名   | 说明                                                                |
+| -------- | ------------------------------------------------------------------- |
+| relay.py | 核心驱动文件，包含 RelayController 类，支持两种继电器类型的控制逻辑 |
+| main.py  | 示例程序，演示继电器开关控制和“继电器音乐”节奏效果                |
 
 ## 软件设计核心思想
 
-* **模块化**：驱动与应用分离，`relay.py` 专注继电器控制逻辑，`main.py` 负责业务实现。
-* **兼容性**：同时支持普通继电器和磁保持继电器，适配不同场景。
-* **硬件解耦**：继电器控制引脚由应用层传入，驱动不负责硬件初始化，兼容不同开发板。
-* **可扩展性**：通过 `MUSIC_NOTES` 配置，轻松实现自定义节奏模式。
-
----
+1. 类型适配：通过类属性 RELAY_TYPES 区分普通继电器和磁保持继电器，统一控制接口
+2. 非阻塞脉冲：磁保持继电器使用定时器实现 50ms 脉冲，脉冲结束后自动复位引脚，避免阻塞 MCU
+3. 状态跟踪：内部维护_last_state 属性，记录最后一次操作状态，适配磁保持继电器无实时反馈的特性
+4. 安全设计：deinit 方法释放定时器资源并将继电器置于释放状态，避免意外导通
+5. 兼容性：适配 MicroPython v1.23.0 环境，支持主流 MCU 平台
 
 ## 使用说明
 
-### 硬件接线（树莓派 Pico 示例）
+1. 硬件连接
 
-| 继电器模块引脚 | Pico引脚            | 接线功能        |
-| ------- |-------------------| ----------- |
-| VCC     | 3.3V / 5V（Pin36）  | 电源输入        |
-| GND     | GND（Pin38）        | 接地          |
-| IN      | GP27 / GP28 / GP6 | 控制信号输入      |
-| COM     | 负载电源输入            | 公共端         |
-| NO      | 负载电源输出            | 常开端（上电吸合闭合） |
-| NC      | 负载电源输出            | 常闭端（上电吸合断开） |
+- 普通继电器：模块 DOUT0 → MCU GPIO（如 Pin14）
+- 磁保持继电器：模块 DOUT0 → MCU GPIO（如 Pin15），DOUT1 → MCU GPIO（如 Pin14）
+- 大功率负载：通过模块 A、B 接线端子连接，注意正负极标识
+- 模块 VCC/GND → MCU 对应电源引脚
 
-### 软件依赖
+1. 驱动初始化
 
-* 固件：MicroPython v1.23+
-* 内置库：`machine`（Pin/Timer 控制）、`time`（延时）
-* 开发工具：Thonny / PyCharm
-
-### 安装步骤
-
-1. 烧录 MicroPython 固件到开发板。
-2. 上传 `relay.py` 和 `main.py`，修改 `main.py` 中的 GPIO 引脚配置为实际接线引脚。
-3. 运行 `main.py`，观察继电器的开关动作和“音乐节奏”效果。
-
----
-## 示例程序
 ```python
-# Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-
-# @Time    : 2024/7/28 下午3:00
-# @Author  : 李清水
-# @File    : main.py
-# @Description : 继电器测试例程
+# 吸合继电器
+relay.on()
 
-# ======================================== 导入相关模块 ========================================
+# 释放继电器
+relay.off()
 
-# 导入时间相关的模块
-import time
-# 导入继电器模块
+# 切换状态（普通继电器直接取反，磁保持继电器根据记录状态切换）
+relay.toggle()
+
+# 查询状态（普通继电器返回实时电平，磁保持返回最后记录状态）
+if relay.get_state():
+    print("继电器吸合")
+else:
+    print("继电器释放")
+
+# 释放资源
+relay.deinit()
+```
+
+1. 基础操作示例
+   ```python
+   ```
+
 from relay import RelayController
 
-# ======================================== 全局变量 ============================================
+# 初始化普通继电器（单引脚）
 
-# 继电器配置：在XIAO-RP2040开发板上
-# 如果是 'normal' 类型继电器，使用GP6
-RELAY_TYPE = 'normal'   # 'normal' 或 'latching'
-RELAY_PIN1 = 27           # 控制引脚1
-RELAY_PIN2 = 28           # 控制引脚2（磁保持继电器需要）
-RELAY_PIN3 = 6           # 控制引脚3
+relay = RelayController('normal', pin1=14)
+
+# 初始化磁保持继电器（双引脚）
+
+# relay = RelayController('latching', pin1=14, pin2=15)
+
+```
+
+## 示例程序
+
+```python
+import time
+from relay import RelayController
+
+# 上电延时3s
+time.sleep(3)
+print("FreakStudio: Using GraftPort to control relay")
+
+# 初始化继电器控制器（普通继电器示例）
+RELAY_TYPE = 'normal'
+RELAY_PIN1 = 14
+relay = RelayController(RELAY_TYPE, RELAY_PIN1)
 
 # 音乐节奏定义 (单位：毫秒)
-# 每个元组表示 (持续时间, 是否在结束时切换)
 MUSIC_NOTES = [
-    # 前奏强节奏
-    (50, True), (50, False), (50, True), (50, False),  # 快速连续4拍
-    (100, True), (100, False),  # 放慢2拍
-    (50, True), (50, False), (50, True), (50, False),  # 重复快速4拍
-
-    # 主歌部分
-    (150, True), (50, True), (200, False),  # 重-轻-长停顿
-    (100, True), (100, True), (100, True), (100, False),  # 连续三连击
-    (80, True), (80, True), (160, False),  # 双拍+长停顿
-    (60, True), (60, True), (60, True), (60, True), (120, False),  # 快速四连击
-
-    # 副歌高潮
-    (40, True), (40, False), (40, True), (40, False),  # 超高速8分音符
+    (50, True), (50, False), (50, True), (50, False),
+    (100, True), (100, False),
+    (50, True), (50, False), (50, True), (50, False),
+    (150, True), (50, True), (200, False),
+    (100, True), (100, True), (100, True), (100, False),
+    (80, True), (80, True), (160, False),
+    (60, True), (60, True), (60, True), (60, True), (120, False),
     (40, True), (40, False), (40, True), (40, False),
-    (200, True), (200, False),  # 强重拍
-    (300, True), (100, True), (200, False),  # 长-短组合
-
-    # 桥段变速
+    (40, True), (40, False), (40, True), (40, False),
+    (200, True), (200, False),
+    (300, True), (100, True), (200, False),
     (120, True), (80, True), (120, True), (80, False),
     (200, True), (50, True), (50, True), (200, False),
-
-    # 结尾渐慢
     (150, True), (150, False),
     (200, True), (200, False),
     (300, True), (300, False)
 ]
-# ======================================== 功能函数 ============================================
 
-# 简易音乐播放函数
 def play_relay_music():
     for duration, should_toggle in MUSIC_NOTES:
-        # 切换继电器状态
         relay.toggle()
         time.sleep_ms(duration)
         if should_toggle:
-            # 再次切换回来
             relay.toggle()
-            # 添加小间隔防止连续切换太快
             time.sleep_ms(50)
 
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
-# 上电延时3s
-time.sleep(3)
-# 打印调试信息
-print("FreakStudio: Using ESP32 WiFi to control relay")
-
-# 初始化继电器控制器
-if RELAY_TYPE == 'latching':
-    relay = RelayController(RELAY_TYPE, RELAY_PIN1, RELAY_PIN2)
-else:
-    relay = RelayController(RELAY_TYPE, RELAY_PIN3)
-
-# ========================================  主程序  ===========================================
-
-# 打开继电器
+# 基础开关测试
 relay.on()
-# 延时1s
-time.sleep(1)
-# 关闭继电器
+print('relay.on')
+time.sleep(5)
 relay.off()
+print('relay.off')
 
-# 继电器开合音乐
+# 继电器开合音乐循环
 while True:
     print("Playing relay music...")
     play_relay_music()
-    # 每段音乐间隔1秒
     time.sleep(1)
 ```
----
 
 ## 注意事项
 
-### 电气特性限制
+1. 类型区分：磁保持继电器必须提供两个引脚（pin1 和 pin2），普通继电器仅需一个引脚
+2. 脉冲控制：磁保持继电器通过 50ms 脉冲触发吸合/释放，脉冲结束后自动复位引脚，无需持续供电
+3. 状态查询：磁保持继电器的 get_state()返回最后一次操作记录的状态，非实时反馈；普通继电器返回实时引脚电平
+4. 功耗特性：正常情况下（无论吸合与否）功耗为 0.09W，控制开合瞬间功耗在 0.12W 左右
+5. 负载安全：大功率负载需通过模块接线端子连接，避免直接通过 MCU 引脚供电，防止过载损坏
 
-* **电源电压**：继电器模块的供电电压必须符合规格（常见为 5V，部分可支持 3.3V）；若供电电压过高会烧毁继电器线圈，过低则无法吸合。
-* **触点电流**：继电器的触点开关电流不能超过额定值（如 10A/250VAC 或 10A/30VDC），否则会导致触点烧蚀、粘连甚至熔断。
-* **浪涌电流**：感性负载（电机、变压器等）在通断瞬间可能产生浪涌电流，应加 RC 吸收电路或二极管（反向并联在线圈两端）保护继电器与控制电路。
-* **频繁切换**：机械继电器不适合高频切换（>10Hz），过快切换会导致线圈过热、触点寿命急剧下降，若需要高频控制应选用固态继电器。
+## 联系方式
 
-### 硬件接线与配置注意事项
+如有任何问题或需要帮助，请通过以下方式联系开发者：
 
-* **共地要求**：继电器模块的 GND 必须与开发板 GND 共地，否则 GPIO 信号电平无效，继电器无法正常吸合。
-* **控制信号**：确认继电器模块是高电平触发还是低电平触发，GPIO 输出需与之匹配，避免逻辑反转造成误动作。
-* **负载接线**：继电器的 **COM、NO、NC** 三个端子接线需符合负载控制逻辑，严禁电源火线与地线直接短接。
-* **接线可靠性**：大电流负载接线需使用端子螺丝或焊接，避免因虚接导致发热、打火或损坏。
+📧 **邮箱**：liqinghsui@freakstudio.cn
 
-### 环境影响
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
-* **温度限制**：继电器推荐工作温度范围为 -20℃ \~ 70℃，高温会导致线圈电阻升高、吸力下降，低温会使动作延迟甚至失效。
-* **湿度限制**：高湿环境（相对湿度 >85% RH）容易导致继电器内部金属触点氧化、绝缘下降，应避免直接暴露在潮湿环境中。
-* **电磁干扰**：继电器切换时可能产生电磁干扰，布线时应避免信号线与强电线路并行，可加 RC 吸收电路或光耦隔离模块。
-* **机械寿命**：普通继电器的机械寿命通常在 10⁵ \~ 10⁷ 次，电气寿命受负载类型影响更大；高频或高功率场景需定期检查继电器是否存在触点粘连或动作异常。
+## 许可协议
 
----
+本项目采用 MIT License 开源协议，详见项目根目录下的 LICENSE 文件。
 
-### 联系方式
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：10696531183@qq.com  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
+```
+MIT License
 
----
-### 许可协议
-本项目中，除 `machine` 等 MicroPython 官方模块（MIT 许可证）外，所有由作者编写的驱动与扩展代码均采用 **知识共享署名-非商业性使用 4.0 国际版 (MIT)** 许可协议发布。  
+Copyright (c) 2024 FreakStudioCN (李清水)
 
-您可以自由地：  
-- **共享** — 在任何媒介以任何形式复制、发行本作品  
-- **演绎** — 修改、转换或以本作品为基础进行创作  
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-惟须遵守下列条件：  
-- **署名** — 您必须给出适当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。  
-- **非商业性使用** — 您不得将本作品用于商业目的。  
-- **合理引用方式** — 可在代码注释、文档、演示视频或项目说明中明确来源。  
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-**版权归 FreakStudio 所有。**
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
