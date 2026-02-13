@@ -1,9 +1,5 @@
 # GraftSense-WS2812 矩阵模块（MicroPython）
 
-# GraftSense-WS2812 矩阵模块（MicroPython）
-
-# GraftSense WS2812 LED 矩阵模块
-
 ## 目录
 
 - [简介](#简介)
@@ -17,115 +13,203 @@
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
+---
+
 ## 简介
 
-本项目是 FreakStudio GraftSense WS2812 LED 矩阵模块 的 MicroPython 驱动库，基于 8×8 WS2812B-5050 RGB 灯珠实现，支持可编程彩色 LED 显示、图案与动画控制。模块采用单线串行通信接口，仅需 1 根数据线即可实现数据传输，兼容常用主控的 IO 电平，可通过 DOUT 接口级联扩展，适用于创客项目创意灯光展示、智能显示面板、装饰照明等场景。
+本项目是 **FreakStudio GraftSense WS2812 LED矩阵模块** 的MicroPython驱动库，专为嵌入式开发场景设计。它提供了灵活的图形绘制、动画控制和色彩管理能力，适用于电子DIY灯光秀、创客编程、信息显示与装饰等场景。模块兼容Grove接口标准，支持级联扩展，可轻松构建更大尺寸的灯光矩阵。
+
+---
 
 ## 主要功能
 
-- 支持 8×8 RGB LED 矩阵 显示，可通过级联扩展更大尺寸矩阵
-- 提供 丰富的绘图 API：填充、像素绘制、直线、文本、滚动等，基于 FrameBuffer 实现
-- 支持 RGB565 格式图片加载与显示，可通过 JSON 文件或字符串导入图像数据
-- 内置 动画播放 功能，支持多帧循环播放和精确帧率控制
-- 支持 UART 数据发送，可将矩阵像素数据以 RGB888 格式通过串口发送，适配光链驱动
-- 提供 亮度调节、Gamma 校正和三色平衡 功能，提升显示效果
-- 支持多种矩阵布局（行优先/蛇形）、翻转和旋转，适配不同安装场景
+- **矩阵布局适配**：支持行优先（row）和蛇形（snake）两种像素排列方式，兼容不同硬件设计
+- **颜色顺序配置**：支持RGB、GRB、BGR等6种颜色输出顺序，适配各类WS2812模块
+- **色彩管理**：内置Gamma校正、亮度调节和三色通道平衡，提升显示色准与视觉效果
+- **高效刷新**：支持局部刷新和全屏刷新，减少不必要的像素数据传输
+- **图形绘制**：继承`framebuf`模块，提供点、线、填充、滚动等基础图形操作
+- **图像支持**：支持JSON格式的RGB565图像数据，可直接从字符串或文件加载并显示
+- **动画扩展**：提供循环滚动和普通滚动两种动画模式，支持自定义帧率控制
+- **串口输出**：支持通过UART发送RGB888像素数据，适用于光链像素场景
+
+---
 
 ## 硬件要求
 
-- 主控板：支持 MicroPython 的开发板（如 Raspberry Pi Pico、ESP32 等），需具备至少 1 个 GPIO 引脚（用于 DIN 数据输入）和 UART 接口（可选，用于光链驱动）
-- LED 矩阵模块：GraftSense WS2812 LED 矩阵模块（V1.0 版本，8×8 灯珠）
-- 供电：模块需 5V 外部电源输入，最大输出功率可达 10W，需确保电源最大可输出 2A 以保证稳定运行
-- 引脚连接：
+- **核心模块**：FreakStudio GraftSense WS2812 LED矩阵模块（如8×8、16×16等尺寸）
+- **开发环境**：MicroPython v1.23.0 及以上版本（如Raspberry Pi Pico等开发板）
+- **连接方式**：WS2812 DIN引脚连接至开发板GPIO（示例中使用Pin(6)），模块需5V独立供电
+- **电源规格**：模块含64个WS2812B-5050RGB灯珠时，5V供电下最大功耗可达10W，需确保电源输入稳定可靠
 
-  - DIN：数据输入引脚，连接至主控 GPIO 引脚
-  - DOUT：数据输出引脚，用于级联下一个模块
-  - VIN/GND：电源输入引脚，接入 5V 电源
+---
 
 ## 文件说明
 
-| 文件名             | 功能描述                                                                 |
-| ------------------ | ------------------------------------------------------------------------ |
-| neopixel_matrix.py | 核心驱动类，封装矩阵显示、绘图、图片加载、动画播放及 UART 发送等逻辑     |
-| main.py            | 示例程序，演示矩阵初始化、颜色填充、动画播放、文本滚动及 UART 发送等功能 |
-| test_image.json    | 示例图片数据文件，包含 16×16 RGB565 格式像素数据，用于测试图片加载功能  |
+| 文件名               | 功能描述                                                                 |
+|----------------------|--------------------------------------------------------------------------|
+| `neopixel_matrix.py` | 核心驱动库，定义`NeopixelMatrix`类，封装所有矩阵控制与显示功能           |
+| `main.py`            | 测试与示例代码，包含颜色填充、滚动动画、图像播放等功能演示               |
+
+---
 
 ## 软件设计核心思想
 
-1. FrameBuffer 驱动：基于 MicroPython 的 FrameBuffer 实现绘图功能，提供与标准图形库一致的 API，降低学习成本。
-2. 灵活布局支持：支持行优先和蛇形两种矩阵布局，可通过翻转和旋转参数适配不同安装方向。
-3. 色彩管理：内置 Gamma 校正和三色平衡算法，提升显示色彩的准确性和一致性；支持亮度调节，避免过亮或过暗。
-4. 工程化扩展：提供 UART 数据发送接口，支持光链驱动级联，满足大规模矩阵显示需求。
-5. 资源优化：使用 micropython.native 装饰器优化关键函数，提升运行效率；支持局部刷新，减少不必要的 LED 写入操作。
+1. **复用图形能力**：继承`framebuf.FrameBuffer`，直接复用MicroPython内置的图形绘制API，降低开发门槛
+2. **性能优化**：通过`memoryview`管理缓冲区，结合`@micropython.native`装饰器加速关键函数，适配嵌入式资源限制
+3. **灵活适配**：通过布局、颜色顺序、翻转/旋转等参数配置，兼容不同硬件模块的物理设计
+4. **分离渲染逻辑**：将图像加载、色彩处理与像素输出解耦，支持扩展更多图像格式和输出方式
+5. **工程化设计**：提供参数校验、异常处理和文档化接口，提升代码可维护性与易用性
+
+---
 
 ## 使用说明
 
-1. 导入模块
-2. 初始化矩阵
-3. 基本绘图
-4. 加载图片
-5. 动画播放
-6. UART 数据发送
+### 1. 环境准备
+
+- 安装MicroPython v1.23.0到目标开发板
+- 将`neopixel_matrix.py`上传至开发板文件系统
+
+### 2. 初始化矩阵
+
+```python
+from machine import Pin
+from neopixel_matrix import NeopixelMatrix
+
+# 初始化8×8矩阵，连接至Pin(6)，蛇形布局，亮度0.2，BRG颜色顺序
+matrix = NeopixelMatrix(
+    width=8,
+    height=8,
+    pin=Pin(6),
+    layout=NeopixelMatrix.LAYOUT_SNAKE,
+    brightness=0.2,
+    order=NeopixelMatrix.ORDER_BRG,
+    flip_v=True
+)
+```
+
+### 3. 基础操作
+
+```python
+# 清空矩阵
+matrix.fill(0)
+# 绘制红色像素
+matrix.pixel(2, 3, NeopixelMatrix.COLOR_RED)
+# 绘制蓝色水平线
+matrix.hline(0, 0, 8, NeopixelMatrix.COLOR_BLUE)
+# 刷新显示
+matrix.show()
+```
+
+### 4. 图像显示
+
+```python
+# 从JSON字符串显示图像
+json_img = json.dumps({
+    "pixels": [0xF800, 0x07E0, 0x001F] * 16,
+    "width": 4
+})
+matrix.show_rgb565_image(json_img, offset_x=2, offset_y=2)
+matrix.show()
+
+# 从文件加载图像
+matrix.load_rgb565_image('test_image.json')
+matrix.show()
+```
+
+---
 
 ## 示例程序
 
-以下为 main.py 中的核心演示代码：
+### 颜色填充特效
 
 ```python
-from machine import Pin, UART
-from neopixel_matrix import NeopixelMatrix
-import time
-import json
+def color_wipe(color, delay=0.1):
+    matrix.fill(0)
+    for i in range(MATRIX_WIDTH):
+        for j in range(MATRIX_HEIGHT):
+            matrix.pixel(i, j, color)
+            matrix.show()
+            time.sleep(delay)
+    matrix.fill(0)
 
-# 初始化UART和矩阵
-uart0 = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
-matrix = NeopixelMatrix(4, 1, Pin(6), layout=NeopixelMatrix.LAYOUT_SNAKE, brightness=0.1, order=NeopixelMatrix.ORDER_RGB, flip_h=True)
-matrix.fill(0)
-matrix.show()
-
-# 颜色列表
-colors = [
-    NeopixelMatrix.COLOR_RED,
-    NeopixelMatrix.COLOR_GREEN,
-    NeopixelMatrix.COLOR_BLUE,
-    NeopixelMatrix.COLOR_YELLOW,
-    NeopixelMatrix.COLOR_CYAN,
-    NeopixelMatrix.COLOR_MAGENTA,
-    NeopixelMatrix.COLOR_WHITE
-]
-
-# 循环显示颜色并通过UART发送
-while True:
-    for color in colors:
-        matrix.fill(color)
-        matrix.send_pixels_via_uart(uart=uart0, start_x=0, start_y=0, end_x=3)
-        time.sleep_ms(500)
+# 调用示例
+color_wipe(NeopixelMatrix.COLOR_GREEN)
 ```
+
+### 滚动线条动画
+
+```python
+def optimized_scrolling_lines():
+    # 蓝色横线从上向下滚动，背景绿色
+    matrix.fill(0)
+    matrix.hline(0, 0, 8, NeopixelMatrix.COLOR_BLUE)
+    matrix.show()
+    time.sleep(0.5)
+    for _ in range(8):
+        matrix.scroll(0, 1, clear_color=NeopixelMatrix.COLOR_GREEN)
+        matrix.show()
+        time.sleep(0.3)
+    
+    # 红色竖线在青色背景上循环滚动
+    matrix.fill(NeopixelMatrix.COLOR_CYAN)
+    matrix.vline(0, 0, 8, NeopixelMatrix.COLOR_RED)
+    matrix.show()
+    time.sleep(0.5)
+    for _ in range(8):
+        matrix.scroll(1, 0, wrap=True)
+        matrix.show()
+        time.sleep(0.2)
+    matrix.fill(0)
+    matrix.show()
+
+# 调用示例
+optimized_scrolling_lines()
+```
+
+### JSON图像动画播放
+
+```python
+animation_frames = [json_img1, json_img2, json_img3]
+
+def animate_images(matrix, frames, delay=0.5):
+    while True:
+        for frame in frames:
+            matrix.show_rgb565_image(frame)
+            matrix.show()
+            time.sleep(delay)
+
+# 调用示例
+animate_images(matrix, animation_frames, delay=0.5)
+```
+
+---
 
 ## 注意事项
 
-1. 供电安全：模块最大输出功率可达 10W，需使用 5V/2A 以上电源供电，避免电源过载导致模块损坏。
-2. 级联扩展：通过 DOUT 接口级联时，需确保数据传输稳定，避免过长的数据线导致信号衰减。
-3. 亮度调节：过高的亮度会增加功耗和发热，建议根据实际场景合理设置亮度（默认 0.1）。
-4. Gamma 校正：内置 Gamma 校正系数可根据实际显示效果调整，提升色彩准确性。
-5. 图片格式：图片数据需为 RGB565 格式，可通过 JSON 文件或字符串导入，确保像素数组长度与宽度匹配。
-6. 版本兼容：本库基于 MicroPython v1.23 开发，低版本可能存在兼容性问题。
-7. 局部刷新：使用 show(x1, y1, x2, y2)进行局部刷新，可提升显示效率，减少 LED 写入操作。
+1. **电源容量**：模块使用64个WS2812B-5050RGB灯珠时，5V供电下最大功耗可达10W，需确保电源输入足够且稳定，避免压降导致异常
+2. **串口功能限制**：`send_pixels_via_uart`串口输出功能**仅适用于[光链像素](https://github.com/FreakStudioCN/NeoPixDot)**，普通WS2812模块不支持该功能
+3. **布局与颜色顺序**：需根据实际硬件模块调整`layout`和`order`参数，否则像素显示位置和颜色会出现错乱
+4. **内存限制**：大尺寸矩阵或高帧率动画可能占用较多内存，需优化代码或降低分辨率/帧率
+5. **散热设计**：高亮度运行时模块发热明显，建议增加散热措施，避免长时间满负荷工作
+
+---
 
 ## 联系方式
 
-如有任何问题或需要帮助，请通过以下方式联系开发者：
+如有任何问题或需要帮助，请通过以下方式联系开发者：  
+📧 **邮箱**：<liqinghsui@freakstudio.cn>  
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)  
 
-📧 **邮箱**：liqinghsui@freakstudio.cn
-
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+---
 
 ## 许可协议
 
-```
+本项目采用 **MIT License** 开源协议。
+
+```text
 MIT License
 
-Copyright (c) 2026 FreakStudio
+Copyright (c) 2025 李清水 (FreakStudio)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
