@@ -2,7 +2,7 @@
   "name": "max30100_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control MAX30100 sensor",
-  "author": "leeqingshui",
+  "author": "kontakt",
   "license": "MIT",
   "chips": "all",
   "fw": "all",

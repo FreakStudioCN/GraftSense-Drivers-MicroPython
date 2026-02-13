@@ -2,7 +2,7 @@
   "name": "pn532_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control PN532 driver",
-  "author": "leeqingshui",
+  "author": "luiz-brandao",
   "license": "MIT",
   "chips": "all",
   "fw": "all",

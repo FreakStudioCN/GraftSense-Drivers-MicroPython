@@ -2,7 +2,7 @@
   "name": "vl53l0x_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control VL53L0X sensors",
-  "author": "leeqingshui",
+  "author": "uceeatz",
   "license": "MIT",
   "chips": "all",
   "fw": "all",

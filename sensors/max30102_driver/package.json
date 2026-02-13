@@ -2,7 +2,7 @@
   "name": "max30102_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control MAX30102 sensor",
-  "author": "leeqingshui",
+  "author": "n-elia",
   "license": "MIT",
   "chips": "all",
   "fw": "all",
