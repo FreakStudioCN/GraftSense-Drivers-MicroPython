@@ -2,7 +2,7 @@
   "name": "ssd1306_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control SSD1306 driver",
-  "author": "leeqingshui",
+  "author": "stlehmann",
   "license": "MIT",
   "chips": "all",
   "fw": "all",

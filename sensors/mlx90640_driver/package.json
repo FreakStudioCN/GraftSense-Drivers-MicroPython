@@ -2,7 +2,7 @@
   "name": "mlx_90640_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control MLX90640 sensors",
-  "author": "leeqingshui",
+  "author": "michael-sulyak",
   "license": "MIT",
   "chips": "all",
   "fw": "all",

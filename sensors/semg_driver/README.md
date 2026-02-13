@@ -252,12 +252,10 @@ except KeyboardInterrupt:
 
 ## 许可协议
 
-本项目采用 MIT 开源许可协议，完整协议内容如下：
-
 ```
 MIT License
 
-Copyright (c) [年份] FreakStudioCN
+Copyright (c) 2026 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -2,7 +2,7 @@
   "name": "tcs34725_color_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control TCS34725 color sensors",
-  "author": "leeqingshui",
+  "author": "adafruit",
   "license": "MIT",
   "chips": "all",
   "fw": "all",

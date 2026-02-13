@@ -243,7 +243,7 @@ while True:
 ```
 MIT License
 
-Copyright (c) 2025 FreakStudioCN (ben0i0d)
+Copyright (c) 2026 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
