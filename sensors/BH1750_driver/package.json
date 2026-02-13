@@ -2,7 +2,7 @@
   "name": "bh1750_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control BH1750 driver",
-  "author": "leeqingshui",
+  "author": "octaprog7",
   "license": "MIT",
   "chips": "all",
   "fw": "all",
