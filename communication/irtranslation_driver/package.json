@@ -13,31 +13,31 @@
   "urls": [
     [
       "ir_rx/__init__.py",
-      "ir_rx/ir_rx/__init__.py"
+      "code/ir_rx/__init__.py"
     ],
     [
       "ir_rx/acquire.py",
-      "ir_rx/ir_rx/acquire.py"
+      "code/ir_rx/acquire.py"
     ],
     [
       "ir_rx/nec.py",
-      "ir_rx/ir_rx/nec.py"
+      "code/ir_rx/nec.py"
     ],
     [
       "ir_rx/print_error.py",
-      "ir_rx/ir_rx/print_error.py"
+      "code/ir_rx/print_error.py"
     ],
     [
       "ir_tx/__init__.py",
-      "ir_tx/ir_tx/__init__.py"
+      "code/ir_tx/__init__.py"
     ],
     [
       "ir_tx/nec.py",
-      "ir_tx/ir_tx/nec.py"
+      "code/ir_tx/nec.py"
     ],
     [
       "ir_tx/rp2_rmt.py",
-      "ir_tx/ir_tx/rp2_rmt.py"
+      "code/ir_tx/rp2_rmt.py"
     ]
   ]
 }
