@@ -159,15 +159,16 @@ git config --local core.hooksPath NUL
 git config --local --unset core.hooksPath
 ```
 
+
 # 📜 许可协议
 
 本仓库所有驱动程序（除 MicroPython 官方模块和参考的相关模块外）均采用MIT许可协议。
 
 # 📞 联系方式
 
+如有问题或建议，欢迎提交 Issue 或 Pull Request 参与贡献！
+
 - 邮箱：10696531183@qq.com
 - GitHub 仓库：[https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython](https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython)
-
-如有问题或建议，欢迎提交 Issue 或 Pull Request 参与贡献！
 
 ![图片描述](docs/freakstudio.jpg)
