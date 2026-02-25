@@ -9,7 +9,6 @@ import os
 import json
 import shutil
 
-
 def backup_file(file_path):
     """备份文件，生成 .bak 后缀的备份文件"""
     backup_path = f"{file_path}.bak"
@@ -18,7 +17,6 @@ def backup_file(file_path):
         return True, f"已备份至 {backup_path}"
     except Exception as e:
         return False, f"备份失败: {str(e)}"
-
 
 def extract_parent_dir_from_url(url):
     """从原urls的路径中提取.py文件的上一级目录名"""
