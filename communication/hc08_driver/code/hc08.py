@@ -275,6 +275,7 @@ class HC08:
         except Exception:
             return (False, "recv error")
 
+
     # AT指令
     def check(self) -> (bool, str | None):
         """
