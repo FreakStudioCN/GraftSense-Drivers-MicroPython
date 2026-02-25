@@ -65,7 +65,7 @@ while True:
 
     # 协调器接收并且输出
     mode, data, addr1, addr2 = env.recv_frame()
-    print(f"   Coordinator Received Data:")
+    print("Coordinator Received Data:")
     print(f"   Mode: {mode}")
     print(f"   Data: {data}")
     print(f"   Address 1: {addr1}")

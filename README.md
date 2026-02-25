@@ -17,19 +17,20 @@
 
 ```plantuml
 GraftSense-Drivers-MicroPython/
-├── input/                # 输入类模块（如按钮、摇杆、编码器等）
-├── storage/              # 存储类模块（如SD卡、Flash等）
-├── misc/                 # 杂项功能模块
-├── lighting/             # 发光/显示类模块（如LED、NeoPixel等）
-├── signal_generation/    # 信号发生类模块（如PWM、波形生成等）
-├── motor_drivers/        # 电机驱动类模块（如直流电机、步进电机、舵机等）
-├── signal_acquisition/   # 信号采集类模块（如ADC、传感器数据采集等）
-├── sensors/              # 传感器类模块（如温湿度、气压、红外、超声波等）
-├── communication/        # 通信类模块（如UART、I2C、SPI、蓝牙等）
-├── docs/                 # 详细文档、应用说明和项目截图
-├── list_package_info.py  # 可视化扫描工具，查看所有package.json配置
-├── modify_package_json.py # 批量修改工具，标准化urls路径和字段
-└── rename_readme.py      # 批量重命名工具，统一README.md文件名
+├── input/                  # 输入类模块（如按钮、摇杆、编码器等）
+├── storage/                # 存储类模块（如SD卡、Flash等）
+├── misc/                   # 杂项功能模块
+├── lighting/               # 发光/显示类模块（如LED、NeoPixel等）
+├── signal_generation/      # 信号发生类模块（如PWM、波形生成等）
+├── motor_drivers/          # 电机驱动类模块（如直流电机、步进电机、舵机等）
+├── signal_acquisition/     # 信号采集类模块（如ADC、传感器数据采集等）
+├── sensors/                # 传感器类模块（如温湿度、气压、红外、超声波等）
+├── communication/          # 通信类模块（如UART、I2C、SPI、蓝牙等）
+├── docs/                   # 详细文档、应用说明和项目截图
+├── list_package_info.py    # 可视化扫描工具，查看所有package.json配置
+├── modify_package_json.py  # 批量修改工具，标准化urls路径和字段
+└── rename_readme.py        # 批量重命名工具，统一README.md文件名
+└── .pre-commit-config.yaml # pre-commit 钩子配置文件
 ```
 
 # 📦 包管理与安装（支持 mip /mpremote/upypi）
@@ -113,6 +114,44 @@ python rename_readme.py
 ![图片描述](docs/4.png)
 ![图片描述](docs/5.png)
 ![图片描述](docs/6.png)
+
+# 🧹 代码规范与提交检查
+
+`.pre-commit-config.yaml` 是仓库的 `pre-commit` 钩子配置文件，用于定义代码提交前需要执行的检查规则，核心作用：
+* 指定要使用的代码检查工具（如 `black`、`flake8`）及对应版本；
+* 配置工具的运行参数（如 `black` 的行长度、`flake8` 忽略的错误码）；
+* 实现「提交代码前自动执行规范检查」，避免不合规代码推送到远程仓库。
+
+开发过程中需遵循代码规范，确保提交的代码符合质量要求，以下是核心操作说明：
+
+## 依赖安装
+开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具：
+```bash
+# 安装black（代码格式化工具）和flake8（代码语法/规范检查工具）
+pip install black flake8 pre-commit
+```
+
+## 推送前手动检查
+每次代码推送至远程仓库前，建议手动执行全量检查，提前发现规范问题：
+```bash
+# 执行所有pre-commit钩子检查（包含black格式化、flake8语法检查）
+pre-commit run --all-files
+```
+
+## 特殊情况说明
+部分检查报错是由于 MicroPython（mpy）与标准 Python（py）语法 / 内置对象差异导致的误报，并非代码实际功能问题。
+
+## 临时跳过钩子推送（谨慎使用）
+若需临时跳过检查推送代码，可执行以下命令临时禁用 Git 钩子：
+```bash
+# 临时禁用本地Git钩子（Windows系统）
+git config --local core.hooksPath NUL
+```
+⚠️ 重要提醒：推送完成后，务必执行以下命令恢复钩子配置，避免后续提交永久跳过检查：
+```bash
+# 恢复本地Git钩子配置
+git config --local --unset core.hooksPath
+```
 
 # 📜 许可协议
 

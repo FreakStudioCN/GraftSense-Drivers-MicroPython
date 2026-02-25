@@ -223,7 +223,7 @@ class HC14_Lora:
             # 50ms 确保回传稳定
             time.sleep(0.05)
             return (True, None)
-        except Exception as e:
+        except Exception:
             return (False, "send error")
 
     def _recv(self) -> (bool, None | str):
@@ -256,7 +256,7 @@ class HC14_Lora:
                 return True, resp.decode("utf-8").strip().split(":")[1]
             except:
                 return True, resp.decode("utf-8").strip()
-        except Exception as e:
+        except Exception:
             return (False, "recv error")
 
     def test_comm(self) -> (bool, None | str):

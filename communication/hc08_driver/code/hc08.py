@@ -241,7 +241,7 @@ class HC08:
             # 50ms 确保回传稳定
             time.sleep(0.05)
             return (True, None)
-        except Exception as e:
+        except Exception:
             return (False, "send error")
 
     def _recv(self, timeout_ms=None) -> (bool, str | None):
@@ -272,7 +272,7 @@ class HC08:
             if resp == None:
                 return False, "RECV NONE"
             return True, resp.decode("utf-8").strip()
-        except Exception as e:
+        except Exception:
             return (False, "recv error")
 
     # AT指令
