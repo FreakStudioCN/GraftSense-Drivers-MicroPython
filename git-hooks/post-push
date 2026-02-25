@@ -3,21 +3,8 @@
 chcp 65001 > nul 2>&1
 setlocal enabledelayedexpansion
 
-echo [INFO] Checking git hooks config status...
-echo.
-
-:: Get core.hooksPath config
-for /f "tokens=*" %%i in ('git config --local --get core.hooksPath 2^>nul') do set HOOKS_PATH=%%i
-
-:: Check and restore config
-if not defined HOOKS_PATH (
-    echo [INFO] Git hooks not disabled, no need to restore
-) else if "!HOOKS_PATH!"=="NUL" (
-    git config --local --unset core.hooksPath
-    echo [SUCCESS] Git hooks restored (core.hooksPath cleared)
-) else (
-    echo [INFO] Git hooks not disabled (current: !HOOKS_PATH!), no need to restore
-)
+git config --local --unset core.hooksPath
+echo [SUCCESS] Git hooks restored (core.hooksPath cleared)
 
 echo.
 exit /b 0
