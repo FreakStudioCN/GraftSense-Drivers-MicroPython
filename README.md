@@ -27,9 +27,13 @@ GraftSense-Drivers-MicroPython/
 ├── sensors/                # 传感器类模块（如温湿度、气压、红外、超声波等）
 ├── communication/          # 通信类模块（如UART、I2C、SPI、蓝牙等）
 ├── docs/                   # 详细文档、应用说明和项目截图
+├── git-hooks/              # Git 钩子脚本目录
+│   ├── pre-commit          # 提交前自动检查钩子（依赖安装+代码规范检查）
+│   └── post-push           # 推送后自动恢复钩子配置（Windows 兼容版）
+├── init-hooks.bat          # Windows 一键初始化 Git 钩子脚本
 ├── list_package_info.py    # 可视化扫描工具，查看所有package.json配置
 ├── modify_package_json.py  # 批量修改工具，标准化urls路径和字段
-└── rename_readme.py        # 批量重命名工具，统一README.md文件名
+├── rename_readme.py        # 批量重命名工具，统一README.md文件名
 └── .pre-commit-config.yaml # pre-commit 钩子配置文件
 ```
 
@@ -122,6 +126,8 @@ python rename_readme.py
 * 配置工具的运行参数（如 `black` 的行长度、`flake8` 忽略的错误码）；
 * 实现「提交代码前自动执行规范检查」，避免不合规代码推送到远程仓库。
 
+仓库已内置 Windows 兼容版 Git 钩子脚本，开发工程师只需执行以下步骤完成初始化：
+
 通过下面命令进行安装：
 开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具：
 ```bash
@@ -137,8 +143,18 @@ pre-commit install
 pip install black flake8 pre-commit
 ```
 
+接着在仓库根目录，双击运行 `init-hooks.bat`，该脚本会自动：
+* 检查仓库根目录和钩子模板文件；
+* 将 git-hooks/ 目录下的 pre-commit、post-push 钩子复制到 .git/hooks/；
+* 初始化 pre-commit 配置。
+
+初始化完成后，后续提交代码时，pre-commit 钩子会自动执行：
+* 检查并自动安装 black/flake8/pre-commit 依赖；
+* 执行代码格式化（black）和规范检查（flake8）；
+* 若检查不通过，会阻止提交，提示修复问题。
+
 ## 推送前手动检查
-每次代码推送至远程仓库前，建议手动执行全量检查，提前发现规范问题：
+我们也可以使用下面命令手动执行全量检查，提前发现规范问题：
 ```bash
 # 执行所有pre-commit钩子检查（包含black格式化、flake8语法检查）
 pre-commit run --all-files
