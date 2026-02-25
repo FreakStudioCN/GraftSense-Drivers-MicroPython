@@ -165,3 +165,5 @@ git config --local --unset core.hooksPath
 如有问题或建议，欢迎提交 Issue 或 Pull Request 参与贡献！
 
 ![图片描述](docs/freakstudio.jpg)
+
+感谢感谢！！！
