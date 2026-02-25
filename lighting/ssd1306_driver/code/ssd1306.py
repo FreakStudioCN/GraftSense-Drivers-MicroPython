@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/7/3 下午9:34   
-# @Author  : 李清水            
+# -*- coding: utf-8 -*-
+# @Time    : 2024/7/3 下午9:34
+# @Author  : 李清水
 # @File    : SSD1306.py
 # @Description : 主要定义了SSD 1306类以及相关方法，代码参考自：https://github.com/stlehmann/micropython-ssd1306
 # @License : MIT
@@ -15,8 +15,10 @@ __platform__ = "MicroPython v1.23"
 
 # micropython相关模块
 from micropython import const
+
 # 帧缓冲区相关的模块
 import framebuf
+
 # 硬件相关的模块
 from machine import I2C
 
@@ -24,43 +26,44 @@ from machine import I2C
 
 # 常量定义，用于控制 OLED 屏幕的各种操作
 # 设置对比度，范围为 0x00 - 0xFF
-SET_CONTRAST        = const(0x81)
+SET_CONTRAST = const(0x81)
 # 设置整个屏幕亮起
-SET_ENTIRE_ON       = const(0xA4)
+SET_ENTIRE_ON = const(0xA4)
 # 设置正常/反相显示模式，正常模式中高电平电亮而低电平熄灭
-SET_NORM_INV        = const(0xA6)
+SET_NORM_INV = const(0xA6)
 # 控制屏幕开关
-SET_DISP            = const(0xAE)
+SET_DISP = const(0xAE)
 # 设置页面寻址模式
-SET_MEM_ADDR        = const(0x20)
+SET_MEM_ADDR = const(0x20)
 # 设置列地址
-SET_COL_ADDR        = const(0x21)
+SET_COL_ADDR = const(0x21)
 # 设置页地址
-SET_PAGE_ADDR       = const(0x22)
+SET_PAGE_ADDR = const(0x22)
 # 设置起始行
 SET_DISP_START_LINE = const(0x40)
 # 设置段重映射
-SET_SEG_REMAP       = const(0xA0)
+SET_SEG_REMAP = const(0xA0)
 # 设置显示行数
-SET_MUX_RATIO       = const(0xA8)
+SET_MUX_RATIO = const(0xA8)
 # 设置 COM 输出方向
-SET_COM_OUT_DIR     = const(0xC0)
+SET_COM_OUT_DIR = const(0xC0)
 # 设置显示偏移
-SET_DISP_OFFSET     = const(0xD3)
+SET_DISP_OFFSET = const(0xD3)
 # 设置 COM 引脚配置
-SET_COM_PIN_CFG     = const(0xDA)
+SET_COM_PIN_CFG = const(0xDA)
 # 设置显示时钟分频
-SET_DISP_CLK_DIV    = const(0xD5)
+SET_DISP_CLK_DIV = const(0xD5)
 # 设置预充电周期
-SET_PRECHARGE       = const(0xD9)
+SET_PRECHARGE = const(0xD9)
 # 设置 VCOMH 电压
-SET_VCOM_DESEL      = const(0xDB)
+SET_VCOM_DESEL = const(0xDB)
 # 设置电荷泵
-SET_CHARGE_PUMP     = const(0x8D)
+SET_CHARGE_PUMP = const(0x8D)
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # SSD1306 OLED屏幕类
 class SSD1306(framebuf.FrameBuffer):
@@ -128,15 +131,14 @@ class SSD1306(framebuf.FrameBuffer):
         初始化屏幕时会发送一系列命令来设置显示模式、行数、对比度等显示参数。
         """
         for cmd in (
-                # 关屏
+            # 关屏
             SET_DISP | 0x00,
             # 设置页面寻址模式
             SET_MEM_ADDR,
             # 水平地址自动递增
             0x00,
-
             # 分辨率和布局设置
-            #设置GDDRAM起始行 0
+            # 设置GDDRAM起始行 0
             SET_DISP_START_LINE | 0x00,
             # 列地址 127 映射到 SEG0
             SET_SEG_REMAP | 0x01,
@@ -146,7 +148,7 @@ class SSD1306(framebuf.FrameBuffer):
             self.height - 1,
             # 从 COM[N] 到 COM0 扫描
             SET_COM_OUT_DIR | 0x08,
-            #设置垂直显示偏移(向上)
+            # 设置垂直显示偏移(向上)
             SET_DISP_OFFSET,
             # 偏移0行
             0x00,
@@ -154,7 +156,6 @@ class SSD1306(framebuf.FrameBuffer):
             SET_COM_PIN_CFG,
             # 序列COM配置,禁用左右反置
             0x02 if self.width > 2 * self.height else 0x12,
-
             # 时序和驱动方案设置
             # 设置时钟分频
             SET_DISP_CLK_DIV,
@@ -280,6 +281,7 @@ class SSD1306(framebuf.FrameBuffer):
 
         pass
 
+
 class SSD1306_I2C(SSD1306):
     """
     基于I2C接口的SSD1306 OLED屏幕类，继承自 `SSD1306` 类。
@@ -341,6 +343,7 @@ class SSD1306_I2C(SSD1306):
 
         self.write_list[1] = buf
         self.i2c.writevto(self.addr, self.write_list)
+
 
 # ======================================== 初始化配置 ===========================================
 

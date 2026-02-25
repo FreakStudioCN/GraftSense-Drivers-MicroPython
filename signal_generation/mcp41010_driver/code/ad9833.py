@@ -1,1 +1,1 @@
-signal_generation/ad9833_driver/code/ad9833.py
+signal_generation / ad9833_driver / code / ad9833.py

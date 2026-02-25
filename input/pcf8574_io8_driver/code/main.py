@@ -9,10 +9,13 @@
 
 # 导入I2C和Pin模块
 from machine import I2C, Pin
+
 # 导入时间模块
 import time
+
 # 导入PCF8574和PCF8574IO8模块
 from pcf8574 import PCF8574
+
 # 导入PCF8574IO8模块
 from pcf8574_io8 import PCF8574IO8
 
@@ -34,7 +37,7 @@ i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
@@ -42,7 +45,7 @@ if len(devices_list) == 0:
     print("No i2c device !")
 else:
     # 遍历从机设备地址列表
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
 for device in devices_list:
     # 判断设备地址是否为的PCF8574地址
     if 0x20 <= device <= 0x28:
@@ -71,13 +74,13 @@ time.sleep(3)
 # ========================================  主程序  ============================================
 
 # 控制端口2的引脚2闪烁
-io8.set_port(1,0)
+io8.set_port(1, 0)
 time.sleep(1)
-io8.set_port(1,2)
+io8.set_port(1, 2)
 time.sleep(1)
-io8.set_port(1,0)
+io8.set_port(1, 0)
 time.sleep(1)
-io8.set_port(1,2)
+io8.set_port(1, 2)
 
 while True:
     # 引脚0为低电平时（not 1 → False，not 0 → True）

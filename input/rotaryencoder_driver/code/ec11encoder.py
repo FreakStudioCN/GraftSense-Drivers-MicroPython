@@ -21,6 +21,7 @@ from machine import Pin, Timer
 
 # ======================================== 自定义类 ============================================
 
+
 class EC11Encoder:
     """
     EC11Encoder 类，用于处理 EC11 旋转编码器的信号。6
@@ -28,7 +29,7 @@ class EC11Encoder:
     支持旋转方向检测和按键状态判断。通过定时器消抖确保信号稳定，
     并提供旋转计数和按键状态查询功能。
 
-    Attributes: 
+    Attributes:
         pin_a (Pin): A 相信号的 GPIO 引脚实例。
         pin_b (Pin): B 相信号的 GPIO 引脚实例。
         pin_btn (Pin): 按键信号的 GPIO 引脚实例。
@@ -112,8 +113,8 @@ class EC11Encoder:
         # 初始化A相和B相的GPIO引脚，设置为输入模式
         self.pin_a = Pin(pin_a, Pin.IN)
         self.pin_b = Pin(pin_b, Pin.IN)
-        
-        # 判断按键引脚有没有注册       
+
+        # 判断按键引脚有没有注册
         if pin_btn is not None:
             # 初始化按键引脚，设置为输入模式，并启用内部上拉电阻
             self.pin_btn = Pin(pin_btn, Pin.IN, Pin.PULL_UP)
@@ -125,7 +126,7 @@ class EC11Encoder:
 
         # 消抖相关：定时器
         # A相消抖定时器
-        self.debounce_timer_a   = Timer(-1)
+        self.debounce_timer_a = Timer(-1)
         # 按键消抖定时器
         self.debounce_timer_btn = Timer(-1)
 
@@ -137,7 +138,7 @@ class EC11Encoder:
 
         # 为A相引脚设置中断处理，只检测上升沿（避免重复计数）
         self.pin_a.irq(trigger=Pin.IRQ_RISING, handler=self._handle_rotation)
-        # 判断按键引脚有没有注册       
+        # 判断按键引脚有没有注册
         if pin_btn is not None:
             # 为按键引脚设置中断处理，检测按键的按下（下降沿）和释放（上升沿）
             self.pin_btn.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=self._handle_button)
@@ -154,7 +155,7 @@ class EC11Encoder:
 
         ==========================================
 
-        Interrupt callback for handling phase A rising edge 
+        Interrupt callback for handling phase A rising edge
         and determining rotation direction using phase B state.
 
         Args:
@@ -183,7 +184,7 @@ class EC11Encoder:
 
         ==========================================
 
-        Debounce timer callback for phase A.  
+        Debounce timer callback for phase A.
         Checks if phase A is stable HIGH and updates rotation count.
 
         Args:
@@ -220,7 +221,7 @@ class EC11Encoder:
 
         ==========================================
 
-        Interrupt callback for button press/release, 
+        Interrupt callback for button press/release,
         starts debounce timer.
 
         Args:
@@ -249,7 +250,7 @@ class EC11Encoder:
 
         ==========================================
 
-        Debounce timer callback for button.  
+        Debounce timer callback for button.
         Determines button state and updates the status flag.
 
         Args:
@@ -312,6 +313,7 @@ class EC11Encoder:
             bool: True if button is pressed, False otherwise.
         """
         return self.button_pressed
+
 
 # ======================================== 初始化配置 ==========================================
 

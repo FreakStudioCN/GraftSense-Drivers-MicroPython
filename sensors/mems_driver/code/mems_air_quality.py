@@ -18,62 +18,65 @@ import time
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class MEMSAirQuality:
     """
-        MEMS空气质量传感器类，用于读取和转换4路MEMS传感器数据。
+    MEMS空气质量传感器类，用于读取和转换4路MEMS传感器数据。
 
-        Attributes:
-            CH20 (int): CH20传感器通道常量，值为0。
-            SMK (int): SMK传感器通道常量，值为1。
-            VOC (int): VOC传感器通道常量，值为2。
-            CO (int): CO传感器通道常量，值为3。
-            DEFAULT_SENSORS_POLY (list): 默认传感器校准多项式系数列表。
-            SENSORS_POLY (list): 当前传感器校准多项式系数列表。
+    Attributes:
+        CH20 (int): CH20传感器通道常量，值为0。
+        SMK (int): SMK传感器通道常量，值为1。
+        VOC (int): VOC传感器通道常量，值为2。
+        CO (int): CO传感器通道常量，值为3。
+        DEFAULT_SENSORS_POLY (list): 默认传感器校准多项式系数列表。
+        SENSORS_POLY (list): 当前传感器校准多项式系数列表。
 
-        Methods:
-            __init__(ads1115, adc_rate: int = 7) -> None: 初始化MEMS空气质量监测模块。
-            read_voltage(sensor: int) -> float: 读取指定传感器的原始电压值。
-            set_custom_polynomial(sensor: int, coeffs: List[float]) -> None: 设置传感器的自定义多项式系数。
-            select_builtin(sensor: int) -> None: 恢复指定传感器的内置多项式系数。
-            get_polynomial(sensor: int) -> List[float]: 获取指定传感器的多项式系数。
-            show_all_polynomials() -> None: 显示所有传感器的当前多项式系数。
-            read_ppm(sensor: int, samples: int = 1, delay_ms: int = 0) -> float: 读取气体浓度值(ppm)。
+    Methods:
+        __init__(ads1115, adc_rate: int = 7) -> None: 初始化MEMS空气质量监测模块。
+        read_voltage(sensor: int) -> float: 读取指定传感器的原始电压值。
+        set_custom_polynomial(sensor: int, coeffs: List[float]) -> None: 设置传感器的自定义多项式系数。
+        select_builtin(sensor: int) -> None: 恢复指定传感器的内置多项式系数。
+        get_polynomial(sensor: int) -> List[float]: 获取指定传感器的多项式系数。
+        show_all_polynomials() -> None: 显示所有传感器的当前多项式系数。
+        read_ppm(sensor: int, samples: int = 1, delay_ms: int = 0) -> float: 读取气体浓度值(ppm)。
 
-        Notes:
-            支持4种传感器类型：CH20、SMK、VOC、CO。
-            使用ADS1115 ADC芯片进行模拟信号采集。
-            提供多项式校准功能，支持自定义系数。
+    Notes:
+        支持4种传感器类型：CH20、SMK、VOC、CO。
+        使用ADS1115 ADC芯片进行模拟信号采集。
+        提供多项式校准功能，支持自定义系数。
 
-        ==========================================
+    ==========================================
 
-        MEMS Air Quality Sensor Class for reading and converting data from 4-channel MEMS sensors.
+    MEMS Air Quality Sensor Class for reading and converting data from 4-channel MEMS sensors.
 
-        Attributes:
-            CH20 (int): CH20 sensor channel constant, value 0.
-            SMK (int): SMK sensor channel constant, value 1.
-            VOC (int): VOC sensor channel constant, value 2.
-            CO (int): CO sensor channel constant, value 3.
-            DEFAULT_SENSORS_POLY (list): Default sensor calibration polynomial coefficients list.
-            SENSORS_POLY (list): Current sensor calibration polynomial coefficients list.
+    Attributes:
+        CH20 (int): CH20 sensor channel constant, value 0.
+        SMK (int): SMK sensor channel constant, value 1.
+        VOC (int): VOC sensor channel constant, value 2.
+        CO (int): CO sensor channel constant, value 3.
+        DEFAULT_SENSORS_POLY (list): Default sensor calibration polynomial coefficients list.
+        SENSORS_POLY (list): Current sensor calibration polynomial coefficients list.
 
-        Methods:
-            __init__(ads1115, adc_rate: int = 7) -> None: Initialize MEMS air quality monitoring module.
-            read_voltage(sensor: int) -> float: Read raw voltage value from specified sensor.
-            set_custom_polynomial(sensor: int, coeffs: List[float]) -> None: Set custom polynomial coefficients for sensor.
-            select_builtin(sensor: int) -> None: Restore built-in polynomial coefficients for sensor.
-            get_polynomial(sensor: int) -> List[float]: Get polynomial coefficients for specified sensor.
-            show_all_polynomials() -> None: Display current polynomial coefficients for all sensors.
-            read_ppm(sensor: int, samples: int = 1, delay_ms: int = 0) -> float: Read gas concentration value (ppm).
+    Methods:
+        __init__(ads1115, adc_rate: int = 7) -> None: Initialize MEMS air quality monitoring module.
+        read_voltage(sensor: int) -> float: Read raw voltage value from specified sensor.
+        set_custom_polynomial(sensor: int, coeffs: List[float]) -> None: Set custom polynomial coefficients for sensor.
+        select_builtin(sensor: int) -> None: Restore built-in polynomial coefficients for sensor.
+        get_polynomial(sensor: int) -> List[float]: Get polynomial coefficients for specified sensor.
+        show_all_polynomials() -> None: Display current polynomial coefficients for all sensors.
+        read_ppm(sensor: int, samples: int = 1, delay_ms: int = 0) -> float: Read gas concentration value (ppm).
 
-        Notes:
-            Supports 4 sensor types: CH20, SMK, VOC, CO.
-            Uses ADS1115 ADC chip for analog signal acquisition.
-            Provides polynomial calibration with support for custom coefficients.
-        """
+    Notes:
+        Supports 4 sensor types: CH20, SMK, VOC, CO.
+        Uses ADS1115 ADC chip for analog signal acquisition.
+        Provides polynomial calibration with support for custom coefficients.
+    """
+
     CH20, SMK, VOC, CO = 0, 1, 2, 3
     # 默认多项式参数（只读）
-    DEFAULT_SENSORS_POLY = [[0.0, 100.0, -20.0],[0.0, 100.0, -20.0],[0.0, 100.0, -20.0],[0.0, 100.0, -20.0]]
+    DEFAULT_SENSORS_POLY = [[0.0, 100.0, -20.0], [0.0, 100.0, -20.0], [0.0, 100.0, -20.0], [0.0, 100.0, -20.0]]
+
     def __init__(self, ads1115, adc_rate: int = 7):
         """
         初始化监测模块，传入 ADS1115 实例，指定采样率（0-7），适配 4 路 MEMS 传感器。
@@ -101,7 +104,7 @@ class MEMSAirQuality:
         """
 
         # 验证 ads1115 对象是否看起来像 ADS1115 驱动
-        required_methods = ('read_rev', 'conversion_start', 'set_conv')
+        required_methods = ("read_rev", "conversion_start", "set_conv")
         for m in required_methods:
             if not hasattr(ads1115, m):
                 raise TypeError("ads1115 object must provide method: {}".format(m))
@@ -115,7 +118,7 @@ class MEMSAirQuality:
         self.ads = ads1115
         self.adc_rate = adc_rate
         self.sensor = None
-        
+
     def read_voltage(self, sensor):
         """
         读取指定传感器的电压值。
@@ -141,17 +144,10 @@ class MEMSAirQuality:
         Raises:
             ValueError: If sensor type is invalid.
         """
-        valid_sensors = [
-            MEMSAirQuality.CH20,
-            MEMSAirQuality.SMK,
-            MEMSAirQuality.VOC,
-            MEMSAirQuality. CO
-        ]
+        valid_sensors = [MEMSAirQuality.CH20, MEMSAirQuality.SMK, MEMSAirQuality.VOC, MEMSAirQuality.CO]
 
         if sensor not in valid_sensors:
-            raise ValueError("Invalid sensor type: {}. Must be one of: {}".format(
-                sensor, valid_sensors
-            ))
+            raise ValueError("Invalid sensor type: {}. Must be one of: {}".format(sensor, valid_sensors))
         # 2. 字符串转通道号（核心步骤）
         channel = sensor
         self.sensor = sensor
@@ -164,7 +160,7 @@ class MEMSAirQuality:
         voltage = self.ads.raw_to_v(raw_adc)
         return voltage
 
-    def set_custom_polynomial(self,sensor, coeffs:list[float]) -> None:
+    def set_custom_polynomial(self, sensor, coeffs: list[float]) -> None:
         """
         设置指定传感器的多项式系数。
 
@@ -187,17 +183,10 @@ class MEMSAirQuality:
             ValueError: If sensor type is invalid or coefficients list length is not 3.
         """
         # 检查传感器类型是否有效
-        valid_sensors = [
-            MEMSAirQuality.CH20,  # 0
-            MEMSAirQuality.SMK,  # 1
-            MEMSAirQuality.VOC,  # 2
-            MEMSAirQuality.CO  # 3
-        ]
+        valid_sensors = [MEMSAirQuality.CH20, MEMSAirQuality.SMK, MEMSAirQuality.VOC, MEMSAirQuality.CO]  # 0  # 1  # 2  # 3
 
         if sensor not in valid_sensors:
-            raise ValueError("Invalid sensor type: {}. Must be one of: {}".format(
-                sensor, valid_sensors
-            ))
+            raise ValueError("Invalid sensor type: {}. Must be one of: {}".format(sensor, valid_sensors))
         # 检查系数列表长度是否为3
         if len(coeffs) != 3:
             raise ValueError(f"The coefficient list must contain 3 values, but received {len(coeffs)}.")
@@ -227,17 +216,10 @@ class MEMSAirQuality:
             ValueError: If sensor type is invalid.
         """
         # 检查传感器类型是否有效
-        valid_sensors = [
-            MEMSAirQuality.CH20,  # 0
-            MEMSAirQuality.SMK,  # 1
-            MEMSAirQuality.VOC,  # 2
-            MEMSAirQuality.CO  # 3
-        ]
+        valid_sensors = [MEMSAirQuality.CH20, MEMSAirQuality.SMK, MEMSAirQuality.VOC, MEMSAirQuality.CO]  # 0  # 1  # 2  # 3
 
         if sensor not in valid_sensors:
-            raise ValueError("Invalid sensor type: {}. Must be one of: {}".format(
-                sensor, valid_sensors
-            ))
+            raise ValueError("Invalid sensor type: {}. Must be one of: {}".format(sensor, valid_sensors))
         self.SENSORS_POLY[sensor] = MEMSAirQuality.DEFAULT_SENSORS_POLY[sensor]
 
     def get_polynomial(self, sensor) -> list[float]:
@@ -267,17 +249,10 @@ class MEMSAirQuality:
             ValueError: If sensor type is invalid.
         """
         # 检查传感器类型是否有效
-        valid_sensors = [
-            MEMSAirQuality.CH20,  # 0
-            MEMSAirQuality.SMK,  # 1
-            MEMSAirQuality.VOC,  # 2
-            MEMSAirQuality.CO  # 3
-        ]
+        valid_sensors = [MEMSAirQuality.CH20, MEMSAirQuality.SMK, MEMSAirQuality.VOC, MEMSAirQuality.CO]  # 0  # 1  # 2  # 3
 
         if sensor not in valid_sensors:
-            raise ValueError("Invalid sensor type: {}. Must be one of: {}".format(
-                sensor, valid_sensors
-            ))
+            raise ValueError("Invalid sensor type: {}. Must be one of: {}".format(sensor, valid_sensors))
 
         # 如果传感器类型有效，返回对应的多项式
         return self.SENSORS_POLY[sensor]
@@ -290,13 +265,13 @@ class MEMSAirQuality:
 
         Display current polynomial coefficients for all sensors.
         """
-        sensor_names = ['CO2', 'VOC', 'PM2.5', 'PM10']
+        sensor_names = ["CO2", "VOC", "PM2.5", "PM10"]
         for i, name in enumerate(sensor_names):
             coeffs = self.SENSORS_POLY[i]
             print(f"{name} polynomial coefficients: {coeffs}")
 
     @staticmethod
-    def _eval_poly(coeffs:list[float], x):
+    def _eval_poly(coeffs: list[float], x):
         """
         计算多项式值。
 
@@ -324,7 +299,8 @@ class MEMSAirQuality:
             res += a * p
             p *= x
         return res
-    def read_ppm(self,sensor, samples=1, delay_ms=0):
+
+    def read_ppm(self, sensor, samples=1, delay_ms=0):
         """
         读取气体浓度 (ppm)。
 
@@ -384,6 +360,7 @@ class MEMSAirQuality:
             return float("nan")
         # 计算所有有效采样值的平均值并返回
         return sum(vals) / len(vals)
+
 
 # ======================================== 初始化配置 ==========================================
 

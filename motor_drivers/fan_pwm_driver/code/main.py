@@ -9,6 +9,7 @@
 
 # 导入时间相关模块
 import time
+
 # 导入风扇驱动模块
 from fan_pwm import FanPWM
 

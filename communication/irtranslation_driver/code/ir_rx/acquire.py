@@ -25,6 +25,7 @@ from . import IR_RX
 
 # ======================================== 自定义类 ============================================
 
+
 class IR_GET(IR_RX):
     """
     该类继承自 IR_RX，用于获取原始红外脉冲序列，并尝试识别常见协议类型。
@@ -94,7 +95,7 @@ class IR_GET(IR_RX):
             If display=True, pulses and protocol detection are printed.
         """
         self.display = display
-        super().__init__(pin, nedges, twait, lambda *_ : None)
+        super().__init__(pin, nedges, twait, lambda *_: None)
         self.data = None
 
     def decode(self, _) -> None:
@@ -121,8 +122,10 @@ class IR_GET(IR_RX):
             If display=True, prints pulse details and protocol detection.
             Method is triggered automatically by timer callback.
         """
+
         def near(v, target):
             return target * 0.8 < v < target * 1.2
+
         lb = self.edge - 1
         if lb < 3:
             return  # Noise
@@ -137,48 +140,48 @@ class IR_GET(IR_RX):
 
         if self.display:
             for x, e in enumerate(burst):
-                print('{:03d} {:5d}'.format(x, e))
+                print("{:03d} {:5d}".format(x, e))
             print()
             ok = False
             if near(burst[0], 9000) and lb == 67:
-                print('NEC')
+                print("NEC")
                 ok = True
 
             if not ok and near(burst[0], 2400) and near(burst[1], 600):
                 try:
-                    nbits = {25:12, 31:15, 41:20}[lb]
+                    nbits = {25: 12, 31: 15, 41: 20}[lb]
                 except KeyError:
                     pass
                 else:
                     ok = True
-                    print('Sony {}bit'.format(nbits))
+                    print("Sony {}bit".format(nbits))
 
             if not ok and near(burst[0], 889):
                 if near(duration, 24892) and near(max(burst), 1778):
-                    print('Philps RC-5')
+                    print("Philps RC-5")
                     ok = True
 
             if not ok and near(burst[0], 2666) and near(burst[1], 889):
                 if near(duration, 22205) and near(burst[1], 889) and near(burst[2], 444):
-                    print('Philips RC-6 mode 0')
+                    print("Philips RC-6 mode 0")
                     ok = True
 
             if not ok and near(burst[0], 2000) and near(burst[1], 1000):
                 if near(duration, 19000):
-                    print('Microsoft MCE edition protocol.')
-                    print('Protocol start {} {} Burst length {} duration {}'.format(burst[0], burst[1], lb, duration))
+                    print("Microsoft MCE edition protocol.")
+                    print("Protocol start {} {} Burst length {} duration {}".format(burst[0], burst[1], lb, duration))
                     ok = True
 
             if not ok and near(burst[0], 4500) and near(burst[1], 4500) and lb == 67:
-                print('Samsung')
+                print("Samsung")
                 ok = True
 
             if not ok and near(burst[0], 3500) and near(burst[1], 1680):
-                print('Unsupported protocol. Panasonic?')
+                print("Unsupported protocol. Panasonic?")
                 ok = True
 
             if not ok:
-                print('Unknown protocol start {} {} Burst length {} duration {}'.format(burst[0], burst[1], lb, duration))
+                print("Unknown protocol start {} {} Burst length {} duration {}".format(burst[0], burst[1], lb, duration))
 
             print()
         self.data = burst
@@ -215,6 +218,7 @@ class IR_GET(IR_RX):
 
 # ======================================== 初始化配置 ==========================================
 
+
 # ========================================  主程序  ===========================================
 def test() -> list:
     """
@@ -240,15 +244,15 @@ def test() -> list:
     """
     time.sleep(3)
     print("Freak Studio: acquire test")
-    if platform == 'pyboard':
-        pin = Pin('X3', Pin.IN)
-    elif platform == 'esp8266':
+    if platform == "pyboard":
+        pin = Pin("X3", Pin.IN)
+    elif platform == "esp8266":
         freq(160000000)
         pin = Pin(13, Pin.IN)
-    elif platform == 'esp32' or platform == 'esp32_LoBo':
+    elif platform == "esp32" or platform == "esp32_LoBo":
         pin = Pin(23, Pin.IN)
-    elif platform == 'rp2':
+    elif platform == "rp2":
         pin = Pin(16, Pin.IN)
     irg = IR_GET(pin)
-    print('Waiting for IR data...')
+    print("Waiting for IR data...")
     return irg.acquire()

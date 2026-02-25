@@ -13,7 +13,7 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
-#导入模块用于数据打包和解包
+# 导入模块用于数据打包和解包
 import ustruct
 from machine import I2C, Pin
 
@@ -22,6 +22,7 @@ from machine import I2C, Pin
 # ======================================== 功能函数 =============================================
 
 # ======================================== 自定义类 =============================================
+
 
 class SensorBase:
     """
@@ -90,7 +91,7 @@ class SensorBase:
         """
         data = self.i2c.readfrom_mem(self.address, register, 2)
         # 小端字节序，H表示16位无符号整数，返回一个元组，取第0个数据表示取元组的数据
-        return ustruct.unpack('<H', data)[0]
+        return ustruct.unpack("<H", data)[0]
 
     def _read_temp(self, register: int) -> float:
         """
@@ -142,7 +143,7 @@ class SensorBase:
         Notes:
             Reads register 0x06 internally using _read_temp.
         """
-        #从环境温度寄存器里面读取值
+        # 从环境温度寄存器里面读取值
         return self._read_temp(self._REGISTER_TA)
 
     def read_object(self) -> float:
@@ -273,6 +274,7 @@ class SensorBase:
         """
         return self.read_object2()
 
+
 class MLX90614(SensorBase):
     """
     MLX90614 传感器驱动类，支持单区/双区热电堆版本。
@@ -354,7 +356,7 @@ class MLX90614(SensorBase):
         self.i2c = i2c
         self.address = address
         _config1 = i2c.readfrom_mem(address, 0x25, 2)
-        _dz = ustruct.unpack('<H', _config1)[0] & (1 << 6)
+        _dz = ustruct.unpack("<H", _config1)[0] & (1 << 6)
         self.dual_zone = True if _dz else False
 
     def read(self) -> dict:
@@ -405,6 +407,7 @@ class MLX90614(SensorBase):
             This method is simply an alias of read(), provided for interface consistency.
         """
         return self.read()
+
 
 class MLX90615(SensorBase):
     """
@@ -481,6 +484,7 @@ class MLX90615(SensorBase):
         self.i2c = i2c
         self.address = address
         self.dual_zone = False
+
 
 # ======================================== 初始化配置 ===========================================
 

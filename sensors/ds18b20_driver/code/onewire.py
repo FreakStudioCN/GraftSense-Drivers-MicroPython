@@ -15,6 +15,7 @@ __platform__ = "MicroPython v1.23"
 
 # 导入时间相关的模块
 import time
+
 # 导入硬件相关的模块
 import machine
 from micropython import const
@@ -24,6 +25,7 @@ from micropython import const
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 定义单总线通信类
 class OneWire:
@@ -52,7 +54,7 @@ class OneWire:
         crc8(data: bytearray) -> int: 执行 CRC 校验。
         scan() -> list[bytearray]: 扫描并返回所有 ROM ID。
         _search_rom(l_rom: bytearray, diff: int) -> tuple[bytearray, int]: 搜索 ROM 设备。
-    
+
     ==========================================
 
     OneWire class for communication via the OneWire protocol,
@@ -81,13 +83,14 @@ class OneWire:
         scan() -> list[bytearray]: Scan and return all ROM IDs.
         _search_rom(l_rom: bytearray, diff: int) -> tuple[bytearray, int]: Search for ROM devices.
     """
+
     # 单总线通信的ROM命令
-    CMD_SEARCHROM   = const(0xf0)  # 搜索命令
-    CMD_READROM     = const(0x33)  # 读取ROM ID命令
-    CMD_MATCHROM    = const(0x55)  # 匹配ROM ID命令
-    CMD_SKIPROM     = const(0xcc)  # 同时寻址所有器件命令
+    CMD_SEARCHROM = const(0xF0)  # 搜索命令
+    CMD_READROM = const(0x33)  # 读取ROM ID命令
+    CMD_MATCHROM = const(0x55)  # 匹配ROM ID命令
+    CMD_SKIPROM = const(0xCC)  # 同时寻址所有器件命令
     # 高电平值
-    PULLUP_ON       = 1
+    PULLUP_ON = 1
 
     def __init__(self, pin: machine.Pin) -> None:
         """
@@ -110,10 +113,8 @@ class OneWire:
         self.disable_irq = machine.disable_irq
         self.enable_irq = machine.enable_irq
         # CRC校验查表法需要的两个bytes表
-        self.crctab1 = (b"\x00\x5E\xBC\xE2\x61\x3F\xDD\x83"
-                        b"\xC2\x9C\x7E\x20\xA3\xFD\x1F\x41")
-        self.crctab2 = (b"\x00\x9D\x23\xBE\x46\xDB\x65\xF8"
-                        b"\x8C\x11\xAF\x32\xCA\x57\xE9\x74")
+        self.crctab1 = b"\x00\x5E\xBC\xE2\x61\x3F\xDD\x83" b"\xC2\x9C\x7E\x20\xA3\xFD\x1F\x41"
+        self.crctab2 = b"\x00\x9D\x23\xBE\x46\xDB\x65\xF8" b"\x8C\x11\xAF\x32\xCA\x57\xE9\x74"
 
     def reset(self, required: bool = False) -> bool:
         """
@@ -386,13 +387,12 @@ class OneWire:
         crc = 0
         # 使用for循环遍历输入数据data的每个字节
         for i in range(len(data)):
-           # 将当前crc值与当前字节值进行异或运算,并将结果重新赋值给crc
-           crc ^= data[i]
-           # 取 crc 值的低 4 位作为索引,从 self.crctab1 表中查找对应的值
-           # 取 crc 值的高 4 位作为索引,从 self.crctab2 表中查找对应的值
-           # 将上述两个查找结果进行异或运算,得到新的 crc 值
-           crc = (self.crctab1[crc & 0x0f] ^
-                  self.crctab2[(crc >> 4) & 0x0f])
+            # 将当前crc值与当前字节值进行异或运算,并将结果重新赋值给crc
+            crc ^= data[i]
+            # 取 crc 值的低 4 位作为索引,从 self.crctab1 表中查找对应的值
+            # 取 crc 值的高 4 位作为索引,从 self.crctab2 表中查找对应的值
+            # 将上述两个查找结果进行异或运算,得到新的 crc 值
+            crc = self.crctab1[crc & 0x0F] ^ self.crctab2[(crc >> 4) & 0x0F]
         return crc
 
     def scan(self) -> list[bytearray]:
@@ -415,7 +415,7 @@ class OneWire:
         rom = False
 
         # 从0到255搜索所有ROM ID
-        for i in range(0xff):
+        for i in range(0xFF):
             rom, diff = self._search_rom(rom, diff)
             # 如果搜索成功,则将 ROM ID 添加到列表中
             if rom:
@@ -492,6 +492,7 @@ class OneWire:
             rom[byte] = r_b
         # 返回搜索到的 rom 值和下一个差异位置 next_diff
         return rom, next_diff
+
 
 # ======================================== 初始化配置 ==========================================
 

@@ -30,12 +30,7 @@ print("MPU6050 Gyroscope and Kalman Filter Angle Comparison Program")
 uart = UART(1, 115200)
 # 初始化uart对象，数据位为8，无校验位，停止位为1
 # 设置串口超时时间为5ms
-uart.init(bits=8,
-          parity=None,
-          stop=1,
-          tx=8,
-          rx=9,
-          timeout=5)
+uart.init(bits=8, parity=None, stop=1, tx=8, rx=9, timeout=5)
 
 # 设置GPIO 25为LED输出引脚
 LED = Pin(25, Pin.OUT, Pin.PULL_DOWN)
@@ -45,20 +40,20 @@ i2c = SoftI2C(scl=Pin(5), sda=Pin(4), freq=100000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 遍历从机设备地址列表
     for device in devices_list:
         print("I2C hexadecimal address: ", hex(device))
         if device == 0x68 or device == 0x69:
             MPU6050_ADDRESS = device
-mpu = MPU6050(i2c = i2c, addr= MPU6050_ADDRESS)
+mpu = MPU6050(i2c=i2c, addr=MPU6050_ADDRESS)
 
 print("MPU6050 initialized successfully")
 
@@ -113,8 +108,8 @@ try:
 
             # 更新陀螺仪积分角度（仅使用陀螺仪）
             if dt > 0 and dt < 0.1:  # 防止时间间隔异常
-                gyro_roll_deg += gyro_data['y'] * dt  # Roll对应陀螺仪Y轴
-                gyro_pitch_deg += gyro_data['x'] * dt  # Pitch对应陀螺仪X轴
+                gyro_roll_deg += gyro_data["y"] * dt  # Roll对应陀螺仪Y轴
+                gyro_pitch_deg += gyro_data["x"] * dt  # Pitch对应陀螺仪X轴
 
             # 使用卡尔曼滤波器更新角度估计（加速度计+陀螺仪融合）
             kalman_roll_rad, kalman_pitch_rad = filter.update_roll_pitch(accel_data, gyro_data)
@@ -122,25 +117,32 @@ try:
             kalman_pitch_deg = degrees(kalman_pitch_rad)
 
             # 提取角速度和加速度原始数据
-            gyro_x = gyro_data['x']
-            gyro_y = gyro_data['y']
-            gyro_z = gyro_data['z']
+            gyro_x = gyro_data["x"]
+            gyro_y = gyro_data["y"]
+            gyro_z = gyro_data["z"]
 
-            accel_x = accel_data['x']
-            accel_y = accel_data['y']
-            accel_z = accel_data['z']
+            accel_x = accel_data["x"]
+            accel_y = accel_data["y"]
+            accel_z = accel_data["z"]
 
             # 打印完整数据（包含角速度和加速度）
-            print("%7.2f | %10.2f° | %10.2f° | %11.2f° | %11.2f° | %6.1f°C | %5.1f/%5.1f/%5.1f | %4.2f/%4.2f/%4.2f" % (
-                elapsed_time,
-                gyro_roll_deg,
-                kalman_roll_deg,
-                gyro_pitch_deg,
-                kalman_pitch_deg,
-                temperature,
-                gyro_x, gyro_y, gyro_z,
-                accel_x, accel_y, accel_z
-            ))
+            print(
+                "%7.2f | %10.2f° | %10.2f° | %11.2f° | %11.2f° | %6.1f°C | %5.1f/%5.1f/%5.1f | %4.2f/%4.2f/%4.2f"
+                % (
+                    elapsed_time,
+                    gyro_roll_deg,
+                    kalman_roll_deg,
+                    gyro_pitch_deg,
+                    kalman_pitch_deg,
+                    temperature,
+                    gyro_x,
+                    gyro_y,
+                    gyro_z,
+                    accel_x,
+                    accel_y,
+                    accel_z,
+                )
+            )
 
             # 准备发送给上位机的数据
             # 串口发送格式：角度数据 - 陀螺仪_Roll,卡尔曼_Roll,陀螺仪_Pitch,卡尔曼_Pitch
@@ -169,7 +171,7 @@ try:
             static_sample_count = int(elapsed_time * 20)
             # 检测设备是否静止（加速度模值接近9.8）
             if static_sample_count % 50 == 0 and static_sample_count > 0:
-                accel_magnitude = (accel_x ** 2 + accel_y ** 2 + accel_z ** 2) ** 0.5
+                accel_magnitude = (accel_x**2 + accel_y**2 + accel_z**2) ** 0.5
                 # 设备相对静止
                 if 9.0 < accel_magnitude < 10.5:
                     # 使用卡尔曼滤波角度重置陀螺仪积分
@@ -194,4 +196,3 @@ except KeyboardInterrupt:
 finally:
     LED.off()
     print("Program exited")
-

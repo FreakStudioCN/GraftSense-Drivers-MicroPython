@@ -26,7 +26,7 @@ speaker = LMSpeaker(pin=26, freq=1000)
 # ========================================  主程序  ============================================
 
 print("Play the single tone 440Hz (A4, lasting 3 second) ")
-speaker.play_tone(440, 1.0)   # 播放 A4 音符
+speaker.play_tone(440, 1.0)  # 播放 A4 音符
 time.sleep(3)
 
 print("Play the note sequence (simple melody).")

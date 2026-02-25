@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/18 下午12:15   
-# @Author  : 李清水            
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/18 下午12:15
+# @Author  : 李清水
 # @File    : AbstractBlockDevInterface.py
 # @Description : 定义了块设备的抽象基类 AbstractBlockDev
 # @License : MIT
@@ -18,6 +18,7 @@ __platform__ = "MicroPython v1.23"
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义抽象基类 AbstractBlockDev，表示块设备的基本操作接口
 class AbstractBlockDev:
@@ -80,6 +81,7 @@ class AbstractBlockDev:
             - Simple interface needs to automatically handle erase
             - Extended interface prohibits implicit erase
     """
+
     # 标准操作码常量（类属性）
     # 设备初始化
     IOCTL_INIT = 1
@@ -96,31 +98,31 @@ class AbstractBlockDev:
 
     def __init__(self) -> None:
         """
-            初始化块设备抽象基类。
+        初始化块设备抽象基类。
 
-            Args:
-                None
+        Args:
+            None
 
-            Returns:
-                None
+        Returns:
+            None
 
-            Note:
-                - 必须至少支持 ioctl(4) 获取块数量
-                - 实现 littlefs 需额外支持 ioctl(6) 块擦除
+        Note:
+            - 必须至少支持 ioctl(4) 获取块数量
+            - 实现 littlefs 需额外支持 ioctl(6) 块擦除
 
-            ==========================================
+        ==========================================
 
-            Initialize abstract base class for block device.
+        Initialize abstract base class for block device.
 
-            Args:
-                None
+        Args:
+            None
 
-            Returns:
-                None
+        Returns:
+            None
 
-            Note:
-                - Must at least support ioctl(4) to get block count
-                - To implement littlefs, need to additionally support ioctl(6) block erase
+        Note:
+            - Must at least support ioctl(4) to get block count
+            - To implement littlefs, need to additionally support ioctl(6) block erase
         """
         pass
 
@@ -253,6 +255,7 @@ class AbstractBlockDev:
             NotImplementedError: If subclass does not implement this method
         """
         raise NotImplementedError("sub class must implement this method")
+
 
 # ======================================== 初始化配置 ==========================================
 

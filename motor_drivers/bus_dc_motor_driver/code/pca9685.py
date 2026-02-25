@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/1/16 上午10:21   
-# @Author  : 李清水            
-# @File    : pca9685.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/1/16 上午10:21
+# @Author  : 李清水
+# @File    : pca9685.py
 # @Description : PCA9685 16路PWM驱动芯片的驱动模块，参考代码：https://github.com/adafruit/micropython-adafruit-pca9685/blob/master/pca9685.py
 # @License : MIT
 
@@ -14,8 +14,10 @@ __platform__ = "MicroPython v1.23"
 
 # 导入打包解包相关模块
 import ustruct
+
 # 导入时间相关模块
 import time
+
 # 导入硬件相关模块
 from machine import I2C
 
@@ -24,6 +26,7 @@ from machine import I2C
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class PCA9685:
     """
@@ -167,12 +170,12 @@ class PCA9685:
         # 进入休眠模式
         self._write(0x00, (old_mode & 0x7F) | 0x10)
         # 设置预分频器
-        self._write(0xfe, prescale)
+        self._write(0xFE, prescale)
         # 恢复Mode1
         self._write(0x00, old_mode)
         time.sleep_us(5)
         # 启用自动递增
-        self._write(0x00, old_mode | 0xa1)
+        self._write(0x00, old_mode | 0xA1)
 
     def pwm(self, index: int, on: int, off: int) -> None:
         """
@@ -194,7 +197,7 @@ class PCA9685:
             on (int): High time of the PWM signal.
             off (int): Low time of the PWM signal.
         """
-        data = ustruct.pack('<HH', on, off)
+        data = ustruct.pack("<HH", on, off)
         # 0x06为LED0输出和亮度控制字节地址
         self.i2c.writeto_mem(self.address, 0x06 + 4 * index, data)
 
@@ -242,6 +245,7 @@ class PCA9685:
             self.pwm(index, 0, value)
 
         return value
+
 
 # ======================================== 初始化配置 ==========================================
 

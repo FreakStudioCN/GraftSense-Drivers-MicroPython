@@ -29,14 +29,14 @@ i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 # 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     # 若非空，则打印从机设备地址
     print("No i2c device !")
 else:
     # 遍历从机设备地址列表
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
 for device in devices_list:
     # 判断设备地址是否为的BH_1750地址
     if 0x21 <= device <= 0x5E:
@@ -50,11 +50,7 @@ sensor = BH1750(bh_addr, i2c)
 # ========================================  主程序  ============================================
 
 print("one time measure")
-sensor.configure(
-    measurement_mode=BH1750.MEASUREMENT_MODE_ONE_TIME,
-    resolution=BH1750.RESOLUTION_HIGH,
-    measurement_time=69
-)
+sensor.configure(measurement_mode=BH1750.MEASUREMENT_MODE_ONE_TIME, resolution=BH1750.RESOLUTION_HIGH, measurement_time=69)
 for i in range(5):
     lux = sensor.measurement
     print("One-time lux =", lux)
@@ -64,11 +60,7 @@ time.sleep(2)
 
 # --- Continuous measurement test ---
 print("\n>>> Continuous measurement mode <<<")
-sensor.configure(
-    measurement_mode=BH1750.MEASUREMENT_MODE_CONTINUOUSLY,
-    resolution=BH1750.RESOLUTION_HIGH,
-    measurement_time=69
-)
+sensor.configure(measurement_mode=BH1750.MEASUREMENT_MODE_CONTINUOUSLY, resolution=BH1750.RESOLUTION_HIGH, measurement_time=69)
 for i in range(5):
     lux = sensor.measurement
     print("Continuous lux =", lux)

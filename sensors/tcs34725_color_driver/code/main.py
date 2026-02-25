@@ -27,14 +27,14 @@ print("FreakStudio:test TCS34725 color recognition sensor")
 # 根据硬件修改引脚
 i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
-devices_list:list[int] = i2c.scan()
-print('START I2C SCANNER')
+devices_list: list[int] = i2c.scan()
+print("START I2C SCANNER")
 # 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     # 若非空，则打印从机设备地址
     print("No i2c device !")
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
 for device in devices_list:
     if device == 0x29:
         print("I2c hexadecimal address:", hex(device))

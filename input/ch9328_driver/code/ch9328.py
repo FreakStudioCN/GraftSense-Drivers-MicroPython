@@ -22,6 +22,7 @@ import time
 
 # ======================================== 自定义类 ============================================
 
+
 class CH9328:
     """
     CH9328 UART转USB HID键盘模拟器驱动类。
@@ -81,6 +82,7 @@ class CH9328:
         hotkey(): Trigger hotkey combination.
         type_text(): Simulate typing input string.
     """
+
     # 4. HID修饰键码（第1字节，bit位映射）
     # 无修饰键
     MODIFIER_NONE = 0x00
@@ -218,51 +220,166 @@ class CH9328:
     KEY_KP_DOT = 0x63
     KEY_MENU = 0x65
 
-    KEYBOARD_MODE = [0 , 1, 2, 3]
+    KEYBOARD_MODE = [0, 1, 2, 3]
 
     # 字符到HID键码的映射（基本ASCII）
     CHAR_TO_HID = {
         # 小写字母
-        'a': KEY_A, 'b': KEY_B, 'c': KEY_C, 'd': KEY_D, 'e': KEY_E,
-        'f': KEY_F, 'g': KEY_G, 'h': KEY_H, 'i': KEY_I, 'j': KEY_J,
-        'k': KEY_K, 'l': KEY_L, 'm': KEY_M, 'n': KEY_N, 'o': KEY_O,
-        'p': KEY_P, 'q': KEY_Q, 'r': KEY_R, 's': KEY_S, 't': KEY_T,
-        'u': KEY_U, 'v': KEY_V, 'w': KEY_W, 'x': KEY_X, 'y': KEY_Y, 'z': KEY_Z,
-
+        "a": KEY_A,
+        "b": KEY_B,
+        "c": KEY_C,
+        "d": KEY_D,
+        "e": KEY_E,
+        "f": KEY_F,
+        "g": KEY_G,
+        "h": KEY_H,
+        "i": KEY_I,
+        "j": KEY_J,
+        "k": KEY_K,
+        "l": KEY_L,
+        "m": KEY_M,
+        "n": KEY_N,
+        "o": KEY_O,
+        "p": KEY_P,
+        "q": KEY_Q,
+        "r": KEY_R,
+        "s": KEY_S,
+        "t": KEY_T,
+        "u": KEY_U,
+        "v": KEY_V,
+        "w": KEY_W,
+        "x": KEY_X,
+        "y": KEY_Y,
+        "z": KEY_Z,
         # 数字（不需要Shift）
-        '1': KEY_1, '2': KEY_2, '3': KEY_3, '4': KEY_4, '5': KEY_5,
-        '6': KEY_6, '7': KEY_7, '8': KEY_8, '9': KEY_9, '0': KEY_0,
-
+        "1": KEY_1,
+        "2": KEY_2,
+        "3": KEY_3,
+        "4": KEY_4,
+        "5": KEY_5,
+        "6": KEY_6,
+        "7": KEY_7,
+        "8": KEY_8,
+        "9": KEY_9,
+        "0": KEY_0,
         # 符号（不需要Shift）
-        ' ': KEY_SPACE, '-': KEY_MINUS, '=': KEY_EQUAL,
-        '[': KEY_LEFT_BRACKET, ']': KEY_RIGHT_BRACKET,
-        '\\': KEY_BACKSLASH, ';': KEY_SEMICOLON, "'": KEY_APOSTROPHE,
-        '`': KEY_GRAVE, ',': KEY_COMMA, '.': KEY_PERIOD, '/': KEY_SLASH,
-
+        " ": KEY_SPACE,
+        "-": KEY_MINUS,
+        "=": KEY_EQUAL,
+        "[": KEY_LEFT_BRACKET,
+        "]": KEY_RIGHT_BRACKET,
+        "\\": KEY_BACKSLASH,
+        ";": KEY_SEMICOLON,
+        "'": KEY_APOSTROPHE,
+        "`": KEY_GRAVE,
+        ",": KEY_COMMA,
+        ".": KEY_PERIOD,
+        "/": KEY_SLASH,
         # 需要Shift的字符（大写字母和符号）
-        'A': KEY_A, 'B': KEY_B, 'C': KEY_C, 'D': KEY_D, 'E': KEY_E,
-        'F': KEY_F, 'G': KEY_G, 'H': KEY_H, 'I': KEY_I, 'J': KEY_J,
-        'K': KEY_K, 'L': KEY_L, 'M': KEY_M, 'N': KEY_N, 'O': KEY_O,
-        'P': KEY_P, 'Q': KEY_Q, 'R': KEY_R, 'S': KEY_S, 'T': KEY_T,
-        'U': KEY_U, 'V': KEY_V, 'W': KEY_W, 'X': KEY_X, 'Y': KEY_Y, 'Z': KEY_Z,
-        '!': KEY_1, '@': KEY_2, '#': KEY_3, '$': KEY_4, '%': KEY_5,
-        '^': KEY_6, '&': KEY_7, '*': KEY_8, '(': KEY_9, ')': KEY_0,
-        '_': KEY_MINUS, '+': KEY_EQUAL,
-        '{': KEY_LEFT_BRACKET, '}': KEY_RIGHT_BRACKET,
-        '|': KEY_BACKSLASH, ':': KEY_SEMICOLON, '"': KEY_APOSTROPHE,
-        '~': KEY_GRAVE, '<': KEY_COMMA, '>': KEY_PERIOD, '?': KEY_SLASH,
-
+        "A": KEY_A,
+        "B": KEY_B,
+        "C": KEY_C,
+        "D": KEY_D,
+        "E": KEY_E,
+        "F": KEY_F,
+        "G": KEY_G,
+        "H": KEY_H,
+        "I": KEY_I,
+        "J": KEY_J,
+        "K": KEY_K,
+        "L": KEY_L,
+        "M": KEY_M,
+        "N": KEY_N,
+        "O": KEY_O,
+        "P": KEY_P,
+        "Q": KEY_Q,
+        "R": KEY_R,
+        "S": KEY_S,
+        "T": KEY_T,
+        "U": KEY_U,
+        "V": KEY_V,
+        "W": KEY_W,
+        "X": KEY_X,
+        "Y": KEY_Y,
+        "Z": KEY_Z,
+        "!": KEY_1,
+        "@": KEY_2,
+        "#": KEY_3,
+        "$": KEY_4,
+        "%": KEY_5,
+        "^": KEY_6,
+        "&": KEY_7,
+        "*": KEY_8,
+        "(": KEY_9,
+        ")": KEY_0,
+        "_": KEY_MINUS,
+        "+": KEY_EQUAL,
+        "{": KEY_LEFT_BRACKET,
+        "}": KEY_RIGHT_BRACKET,
+        "|": KEY_BACKSLASH,
+        ":": KEY_SEMICOLON,
+        '"': KEY_APOSTROPHE,
+        "~": KEY_GRAVE,
+        "<": KEY_COMMA,
+        ">": KEY_PERIOD,
+        "?": KEY_SLASH,
         # 特殊字符（回车、制表符等）
-        '\n': KEY_ENTER, '\t': KEY_TAB, '\b': KEY_BACKSPACE,
+        "\n": KEY_ENTER,
+        "\t": KEY_TAB,
+        "\b": KEY_BACKSPACE,
     }
 
     # 需要Shift键的字符集合
     SHIFT_CHARS = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
-        '_', '+', '{', '}', '|', ':', '"', '~', '<', '>', '?'
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
+        "!",
+        "@",
+        "#",
+        "$",
+        "%",
+        "^",
+        "&",
+        "*",
+        "(",
+        ")",
+        "_",
+        "+",
+        "{",
+        "}",
+        "|",
+        ":",
+        '"',
+        "~",
+        "<",
+        ">",
+        "?",
     }
+
     def __init__(self, uart=UART):
         """
         初始化CH9328实例。
@@ -327,34 +444,34 @@ class CH9328:
 
     def crlf(self):
         """
-         发送回车换行符（CR/LF），根据当前模式选择不同的控制字符。
+        发送回车换行符（CR/LF），根据当前模式选择不同的控制字符。
 
-         该方法根据设备当前的工作模式发送相应的回车换行控制字符：
-         - 当模式为0时，发送ESC字符（0x1B）
-         - 当模式为2时，发送'('字符（0x28）
+        该方法根据设备当前的工作模式发送相应的回车换行控制字符：
+        - 当模式为0时，发送ESC字符（0x1B）
+        - 当模式为2时，发送'('字符（0x28）
 
-         Note:
-             - 仅支持模式0和模式2，其他模式不执行任何操作。
-             - 直接通过UART发送原始字节数据。
-             - 调用前需要确保设备已初始化并处于正确的模式。
-             - 此方法不验证发送是否成功，也不等待响应。
+        Note:
+            - 仅支持模式0和模式2，其他模式不执行任何操作。
+            - 直接通过UART发送原始字节数据。
+            - 调用前需要确保设备已初始化并处于正确的模式。
+            - 此方法不验证发送是否成功，也不等待响应。
 
-         ==========================================
+        ==========================================
 
-         Send carriage return/line feed (CR/LF) characters, selecting different control
-         characters based on the current mode.
+        Send carriage return/line feed (CR/LF) characters, selecting different control
+        characters based on the current mode.
 
-         This method sends the corresponding carriage return/line feed control character
-         according to the device's current working mode:
-         - When mode is 0, sends ESC character (0x1B)
-         - When mode is 2, sends '(' character (0x28)
+        This method sends the corresponding carriage return/line feed control character
+        according to the device's current working mode:
+        - When mode is 0, sends ESC character (0x1B)
+        - When mode is 2, sends '(' character (0x28)
 
-         Note:
-             - Only supports modes 0 and 2, other modes perform no operation.
-             - Sends raw byte data directly via UART.
-             - Ensure the device is initialized and in the correct mode before calling.
-             - This method does not verify if transmission was successful, nor does it wait for a response.
-         """
+        Note:
+            - Only supports modes 0 and 2, other modes perform no operation.
+            - Sends raw byte data directly via UART.
+            - Ensure the device is initialized and in the correct mode before calling.
+            - This method does not verify if transmission was successful, nor does it wait for a response.
+        """
         # 验证current_mode是否等于0或2
         if self.current_mode not in (0, 2):
             # 返回当前模式，说明不可用
@@ -363,16 +480,15 @@ class CH9328:
 
         # 验证通过，执行相应操作
         if self.current_mode == 0:
-            send_byte = b'\x1b'
+            send_byte = b"\x1b"
             self.uart.write(send_byte)
         elif self.current_mode == 2:
-            send_byte = b'\x28'
+            send_byte = b"\x28"
             self.uart.write(send_byte)
         time.sleep_ms(50)
 
         # 返回成功标志
         return True
-
 
     def send_ascii(self, char: str) -> None:
         """
@@ -408,15 +524,15 @@ class CH9328:
         if self.current_mode == 3:
             print("警告：透传模式（Mode3）不支持send_ascii，建议使用send_hid_packet")
             return
-        
+
         # 发送ASCII码（仅单个字符）
         if len(char) != 1:
             raise ValueError("send_ascii仅支持单个字符")
         # 仅支持可见ASCII码（0x20=空格~0x7E=~）
         if ord(char) not in range(0x20, 0x7F):
             raise ValueError("仅支持可见ASCII字符（空格~波浪号）")
-        
-        self.uart.write(char.encode('ascii'))
+
+        self.uart.write(char.encode("ascii"))
         # 避免数据堆积，连键
         time.sleep_ms(1)
 
@@ -489,7 +605,7 @@ class CH9328:
         if len(packet) != 8:
             print("错误：HID数据包必须为8字节")
             return False
-        
+
         # 2. 发送数据包
         try:
             self.uart.write(packet)
@@ -526,18 +642,23 @@ class CH9328:
             - Unused key positions filled with 0x00.
         """
         # 构造键盘按下数据包：[修饰键, 保留位, 按键1, 按键2~6]（未使用按键填0）
-        packet = bytes([
-            # 第1字节：修饰键
-            modifier,
-            # 第2字节：保留位
-            0x00,
-            # 第3字节：主按键
-            key_code,
-            # 第4~6字节：未使用按键
-            0x00, 0x00, 0x00,
-            # 第7~8字节：未使用按键
-            0x00, 0x00
-        ])
+        packet = bytes(
+            [
+                # 第1字节：修饰键
+                modifier,
+                # 第2字节：保留位
+                0x00,
+                # 第3字节：主按键
+                key_code,
+                # 第4~6字节：未使用按键
+                0x00,
+                0x00,
+                0x00,
+                # 第7~8字节：未使用按键
+                0x00,
+                0x00,
+            ]
+        )
         self.send_hid_packet(packet)
 
     def release_key(self, key_code: int = None, modifier: int = MODIFIER_NONE) -> None:
@@ -567,7 +688,7 @@ class CH9328:
             - Simplified processing, suitable for single key press scenarios.
         """
         # 全0数据包→释放所有按键（手册示例标准释放方式）
-        release_packet = b'\x00\x00\x00\x00\x00\x00\x00\x00'
+        release_packet = b"\x00\x00\x00\x00\x00\x00\x00\x00"
         self.send_hid_packet(release_packet)
 
     def tap_key(self, key_code: int, modifier: int = MODIFIER_NONE, delay: int = 50) -> None:
@@ -664,14 +785,15 @@ class CH9328:
             if char not in CH9328.CHAR_TO_HID:
                 print(f"警告：字符{char}不支持，跳过发送")
                 continue
-            
+
             # 判断是否需要Shift修饰键（大写字母）
             modifier = CH9328.MODIFIER_LEFT_SHIFT if char.isupper() else CH9328.MODIFIER_NONE
             key_code = CH9328.CHAR_TO_HID[char]
-            
+
             # 发送单个字符（单击）
             self.tap_key(key_code, modifier, delay=delay)
             time.sleep_ms(delay)
+
 
 # ======================================== 初始化配置 ==========================================
 

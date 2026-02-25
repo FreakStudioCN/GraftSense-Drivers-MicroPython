@@ -22,6 +22,7 @@ import time
 
 # ======================================== 自定义类 ============================================
 
+
 class BA111TDS:
     """
     BA111TDS水质检测传感器驱动类。
@@ -103,12 +104,7 @@ class BA111TDS:
     ERROR_RESPONSE_SUFFIX = bytes([0x00, 0x00, 0x00, 0xAE])
 
     # 错误代码映射
-    ERROR_CODES = {
-        0x01: "Command Frame Exception",
-        0x02: "Busy coding",
-        0x03: "Calibration failed",
-        0x04: "Detection temperature out of range"
-    }
+    ERROR_CODES = {0x01: "Command Frame Exception", 0x02: "Busy coding", 0x03: "Calibration failed", 0x04: "Detection temperature out of range"}
 
     def __init__(self, uart: UART):
         """
@@ -358,8 +354,7 @@ class BA111TDS:
             return True
 
         # 检查是否为错误响应格式
-        if (response[0] == self.ERROR_RESPONSE_PREFIX[0] and
-                response[5] == self.ERROR_RESPONSE_SUFFIX[3]):
+        if response[0] == self.ERROR_RESPONSE_PREFIX[0] and response[5] == self.ERROR_RESPONSE_SUFFIX[3]:
             # 获取错误码
             error_code = response[1]
             if error_code in self.ERROR_CODES:
@@ -396,12 +391,7 @@ class BA111TDS:
             return False
 
         # 构建参数（4字节大端序）
-        parameters = bytes([
-            (resistance >> 24) & 0xFF,
-            (resistance >> 16) & 0xFF,
-            (resistance >> 8) & 0xFF,
-            resistance & 0xFF
-        ])
+        parameters = bytes([(resistance >> 24) & 0xFF, (resistance >> 16) & 0xFF, (resistance >> 8) & 0xFF, resistance & 0xFF])
 
         # 构建指令帧
         frame = self._build_frame(self.SET_NTC_RESISTANCE, parameters)
@@ -418,8 +408,7 @@ class BA111TDS:
             return True
 
         # 检查是否为错误响应
-        if (response[0] == self.ERROR_RESPONSE_PREFIX[0] and
-                response[5] == self.ERROR_RESPONSE_SUFFIX[3]):
+        if response[0] == self.ERROR_RESPONSE_PREFIX[0] and response[5] == self.ERROR_RESPONSE_SUFFIX[3]:
             error_code = response[1]
             if error_code in self.ERROR_CODES:
                 print(f"Failed to set NTC resistor: {self.ERROR_CODES[error_code]}")
@@ -454,12 +443,7 @@ class BA111TDS:
             return False
 
         # 构建参数（第1-2字节为B值，第3-4字节为0）
-        parameters = bytes([
-            (b_value >> 8) & 0xFF,
-            b_value & 0xFF,
-            0x00,
-            0x00
-        ])
+        parameters = bytes([(b_value >> 8) & 0xFF, b_value & 0xFF, 0x00, 0x00])
 
         # 构建指令帧
         frame = self._build_frame(self.SET_NTC_B, parameters)
@@ -476,8 +460,7 @@ class BA111TDS:
             return True
 
         # 检查是否为错误响应
-        if (response[0] == self.ERROR_RESPONSE_PREFIX[0] and
-                response[5] == self.ERROR_RESPONSE_SUFFIX[3]):
+        if response[0] == self.ERROR_RESPONSE_PREFIX[0] and response[5] == self.ERROR_RESPONSE_SUFFIX[3]:
             error_code = response[1]
             if error_code in self.ERROR_CODES:
                 print(f"Failed to set NTC B value: {self.ERROR_CODES[error_code]}")
@@ -485,6 +468,7 @@ class BA111TDS:
                 print(f"Failed to set NTC B value: unknown error code 0x{error_code:02X}")
 
         return False
+
 
 # ======================================== 初始化配置 ==========================================
 

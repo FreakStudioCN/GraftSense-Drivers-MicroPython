@@ -8,11 +8,14 @@
 # ======================================== 导入相关模块 =========================================
 
 from machine import I2C, Pin
-#导入pcf8574模块
+
+# 导入pcf8574模块
 from pcf8574 import PCF8574
-#导入基于PCF8574芯片的八段光条数码管模块
+
+# 导入基于PCF8574芯片的八段光条数码管模块
 from led_bar import LEDBar
-#时间相关模块
+
+# 时间相关模块
 import time
 
 # ======================================== 全局变量 ============================================
@@ -31,14 +34,14 @@ print("FreakStudio: Test PCF8574 Eight-Segment LED Display Module ")
 i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 遍历从机设备地址列表
     for device in devices_list:
         # 判断设备地址是否为PCF8575的地址

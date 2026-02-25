@@ -9,6 +9,7 @@ import os
 import json
 import shutil
 
+
 def backup_file(file_path):
     """备份文件，生成 .bak 后缀的备份文件"""
     backup_path = f"{file_path}.bak"
@@ -18,19 +19,20 @@ def backup_file(file_path):
     except Exception as e:
         return False, f"备份失败: {str(e)}"
 
+
 def extract_parent_dir_from_url(url):
     """从原urls的路径中提取.py文件的上一级目录名"""
     # 分割路径
-    parts = url.split('/')
+    parts = url.split("/")
     # 找到最后一个.py文件的位置
     for i, part in reversed(list(enumerate(parts))):
-        if part.endswith('.py'):
+        if part.endswith(".py"):
             # 返回上一级目录名
             if i > 0:
                 return parts[i - 1]
             else:
-                return ''  # 如果.py文件在根目录，返回空
-    return ''
+                return ""  # 如果.py文件在根目录，返回空
+    return ""
 
 
 def delete_bak_files_recursive(root_dir):
@@ -46,7 +48,7 @@ def delete_bak_files_recursive(root_dir):
     # 递归遍历所有目录
     for dir_path, _, _ in os.walk(root_dir):
         # 跳过隐藏目录
-        if os.path.basename(dir_path).startswith('.'):
+        if os.path.basename(dir_path).startswith("."):
             continue
 
         bak_file_path = os.path.join(dir_path, "package.json.bak")
@@ -83,7 +85,7 @@ def modify_single_package_json(package_json_path):
         with open(package_json_path, "r", encoding="utf-8") as f:
             content = f.read()
             # 移除UTF-8 BOM头（解决常见解析错误）
-            if content.startswith('\ufeff'):
+            if content.startswith("\ufeff"):
                 content = content[1:]
             original_data = json.loads(content)
     except json.JSONDecodeError as e:
@@ -100,18 +102,14 @@ def modify_single_package_json(package_json_path):
     dir_name = os.path.basename(os.path.dirname(package_json_path))
     new_data["name"] = original_data.get("name", dir_name)
     new_data["version"] = original_data.get("version", "1.0.0")
-    new_data["description"] = original_data.get("description",
-                                                f"A MicroPython library for {new_data['name']} module")
+    new_data["description"] = original_data.get("description", f"A MicroPython library for {new_data['name']} module")
     new_data["author"] = original_data.get("author", "unknown")
 
     # 新增固定字段
     new_data["license"] = "MIT"
     new_data["chips"] = "all"
     new_data["fw"] = "all"
-    new_data["_comments"] = {
-        "chips": "该包支持运行的芯片型号，all表示无芯片限制",
-        "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-    }
+    new_data["_comments"] = {"chips": "该包支持运行的芯片型号，all表示无芯片限制", "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"}
 
     # 4. 处理urls字段（兼容数组/对象两种格式）
     original_urls = original_data.get("urls", [])
@@ -178,7 +176,7 @@ def batch_modify_package_json_recursive(project_root):
     # 递归遍历所有目录
     for dir_path, _, _ in os.walk(project_root):
         # 跳过隐藏目录
-        if os.path.basename(dir_path).startswith('.'):
+        if os.path.basename(dir_path).startswith("."):
             continue
 
         package_json_path = os.path.join(dir_path, "package.json")

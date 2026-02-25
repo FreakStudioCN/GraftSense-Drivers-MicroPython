@@ -22,18 +22,19 @@ from machine import Timer
 DEBOUNCE_MS = 20
 # 五向按键引脚映射（根据实际接线修改）
 KEYS_MAP = {
-    'UP': 0,
-    'DOWN': 3,
-    'LEFT': 1,
-    'RIGHT': 2,
-    'CENTER': 4,
-    'SW1':5,
-    'SW2':7,
+    "UP": 0,
+    "DOWN": 3,
+    "LEFT": 1,
+    "RIGHT": 2,
+    "CENTER": 4,
+    "SW1": 5,
+    "SW2": 7,
 }
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class PCF8574Keys:
     """
@@ -83,7 +84,6 @@ class PCF8574Keys:
     """
 
     def __init__(self, pcf: object, keys: dict, callback: callable = None):
-
         """
         初始化五向按键模块对象，并启动定时器进行轮询消抖。
 
@@ -130,7 +130,7 @@ class PCF8574Keys:
         self._state = {k: False for k in keys.keys()}
         self._last_state = self._state.copy()
         self._last_time = {k: 0 for k in keys.keys()}
-        self._pcf.port =0b01000000
+        self._pcf.port = 0b01000000
         # create timer for periodic scanning
         self._timer = Timer(-1)
         self._timer.init(period=10, mode=Timer.PERIODIC, callback=self._scan_keys)
@@ -142,7 +142,7 @@ class PCF8574Keys:
         Turn on the button module LED.
 
         """
-        self._pcf.port =0b00000000
+        self._pcf.port = 0b00000000
 
     def led_off(self):
         """
@@ -151,7 +151,7 @@ class PCF8574Keys:
         Turn off the button module LED.
 
         """
-        self._pcf.port =0b01000000
+        self._pcf.port = 0b01000000
 
     def _scan_keys(self, t):
         """
@@ -275,7 +275,7 @@ class PCF8574Keys:
         self._keys.clear()
         self._pcf = None
 
+
 # ======================================== 初始化配置 ===========================================
 
 # ========================================  主程序  ============================================
-

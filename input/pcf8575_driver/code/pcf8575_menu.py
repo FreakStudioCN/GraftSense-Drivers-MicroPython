@@ -1,20 +1,24 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/25 下午3:02   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/25 下午3:02
+# @Author  : 李清水
+# @File    : main.py
 # @Description : I2C类实验，使用PCF8575芯片读取5D摇杆数据并控制OLED屏幕菜单
 
 # ======================================== 导入相关模块 =========================================
 
 # 硬件相关的模块
 from machine import I2C, Pin
+
 # 时间相关的模块
 import time
+
 # 导入自定义的PCF8575类
 from pcf8575 import PCF8575
+
 # 导入OLED屏幕相关模块
 from SSD1306 import SSD1306_I2C
+
 # 导入自定义OLED菜单库
 from menu import SimpleOLEDMenu
 
@@ -26,13 +30,7 @@ PCF8575_ADDRESS = 0
 OLED_ADDRESS = 0
 
 # 五向按键的定义
-KEYS = {
-    0b1000000011111111 : "UP",
-    0b0000100011111111 : "DOWN",
-    0b0100000011111111 : "LEFT",
-    0b0010000011111111 : "RIGHT",
-    0b0001000011111111 : "CENTER"
-}
+KEYS = {0b1000000011111111: "UP", 0b0000100011111111: "DOWN", 0b0100000011111111: "LEFT", 0b0010000011111111: "RIGHT", 0b0001000011111111: "CENTER"}
 
 # 记录当前按下的按键
 current_key = None
@@ -42,6 +40,7 @@ value = 10
 param = 0
 
 # ======================================== 功能函数 ============================================
+
 
 def led_on() -> None:
     """
@@ -60,6 +59,7 @@ def led_on() -> None:
     LED.value(1)
     print("LED ON")
 
+
 def led_off() -> None:
     """
     关闭LED灯。
@@ -77,6 +77,7 @@ def led_off() -> None:
     LED.value(0)
     print("LED OFF")
 
+
 def print_message() -> None:
     """
     OLED屏幕显示提示消息。
@@ -93,6 +94,7 @@ def print_message() -> None:
     # 显示提示消息
     menu.show_message("No Sub Option")
 
+
 def view_variable() -> None:
     """
     OLED屏幕显示变量值。
@@ -108,6 +110,7 @@ def view_variable() -> None:
 
     # 显示变量值
     menu.show_message(f"Variable: {value}")
+
 
 def set_parameter() -> None:
     """
@@ -127,7 +130,8 @@ def set_parameter() -> None:
     # 显示参数值
     menu.show_message(f"Parameter: {param}")
 
-def detect_interrupt(pin : Pin) -> None:
+
+def detect_interrupt(pin: Pin) -> None:
     """
     中断处理函数，当PCF8575芯片端口的输入引脚状态发生改变时触发。
 
@@ -175,6 +179,7 @@ def detect_interrupt(pin : Pin) -> None:
                 # 打印当前选中的菜单项
                 print("Select Menu: {}".format(menu.get_current_menu_name()))
 
+
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
@@ -192,14 +197,14 @@ i2c_pcf8575 = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c_pcf8575.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 便利从机设备地址列表
     for device in devices_list:
         # 判断设备地址是否为PCF8575的地址
@@ -216,14 +221,14 @@ i2c_oled = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c_oled.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 便利从机设备地址列表
     for device in devices_list:
         if device >= 0x3C and device <= 0x3D:
@@ -231,7 +236,7 @@ else:
             OLED_ADDRESS = device
 
 # 创建SSD1306 OLED屏幕的实例，宽度为128像素，高度为64像素，不使用外部电源
-oled = SSD1306_I2C(i2c_oled, OLED_ADDRESS, 128, 64,False)
+oled = SSD1306_I2C(i2c_oled, OLED_ADDRESS, 128, 64, False)
 
 # 打印PCF8575各个端口状态
 print("PCF8575 16 bits state: {:016b}".format(pcf8575.port))
@@ -255,8 +260,8 @@ menu.add_menu("Option10")
 menu.add_menu("Option11")
 menu.add_menu("Option12")
 menu.add_menu("LED Option")
-menu.add_menu("Variable Option",enter_callback=view_variable)
-menu.add_menu("Parameter Option",enter_callback=set_parameter)
+menu.add_menu("Variable Option", enter_callback=view_variable)
+menu.add_menu("Parameter Option", enter_callback=set_parameter)
 
 # 在Option1下添加子菜单
 menu.add_menu("Sub Option1", parent_name="Option1", enter_callback=print_message)

@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/3/21 下午7:13   
-# @Author  : 李清水            
-# @File    : dac_waveformgenerator.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/3/21 下午7:13
+# @Author  : 李清水
+# @File    : dac_waveformgenerator.py
 # @Description : 使用DS3502芯片生成正弦波、三角波、锯齿波的类
 # @License : MIT
 
@@ -15,8 +15,10 @@ __platform__ = "MicroPython v1.23"
 
 # 导入数学库用于计算正弦波
 import math
+
 # 导入硬件模块
 from machine import Timer
+
 # 导入ds3502模块用于控制数字电位器芯片
 from ds3502 import DS3502
 
@@ -25,6 +27,7 @@ from ds3502 import DS3502
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class WaveformGenerator:
     """
@@ -88,8 +91,16 @@ class WaveformGenerator:
         - Raises ValueError if parameters are out of range.
     """
 
-    def __init__(self, dac: 'DS3502', frequency: float = 1, amplitude: float = 1.65, offset: float = 1.65,
-                 waveform: str = 'sine', rise_ratio: float = 0.5, vref: float = 3.3) -> None:
+    def __init__(
+        self,
+        dac: "DS3502",
+        frequency: float = 1,
+        amplitude: float = 1.65,
+        offset: float = 1.65,
+        waveform: str = "sine",
+        rise_ratio: float = 0.5,
+        vref: float = 3.3,
+    ) -> None:
         """
         初始化波形发生器。
 
@@ -130,7 +141,7 @@ class WaveformGenerator:
             raise ValueError(f"Offset must be between 0 and {vref}V.")
         if not (0 <= amplitude + offset <= vref):
             raise ValueError(f"Amplitude + offset must be between 0 and {vref}V.")
-        if waveform not in ['sine', 'square', 'triangle']:
+        if waveform not in ["sine", "square", "triangle"]:
             raise ValueError("Waveform must be 'sine', 'square', or 'triangle'.")
         if not (0 <= rise_ratio <= 1):
             raise ValueError("Rise ratio must be between 0 and 1.")
@@ -180,6 +191,7 @@ class WaveformGenerator:
         Returns:
             list[int]: List of DAC values corresponding to waveform samples.
         """
+
         # 将电压值转换为 DS3502 值的函数
         def to_dac_value(voltage):
             # DS3502 的分辨率为 7 位，电压范围为 0 到 vref
@@ -189,14 +201,14 @@ class WaveformGenerator:
         samples = []
 
         # 根据选定的波形生成采样点数据
-        if self.waveform == 'sine':
+        if self.waveform == "sine":
             # 正弦波
             for i in range(self.sample_rate):
                 angle = 2 * math.pi * i / self.sample_rate
                 voltage = self.offset + self.amplitude * math.sin(angle)
                 samples.append(to_dac_value(voltage))
 
-        elif self.waveform == 'square':
+        elif self.waveform == "square":
             # 方波
             for i in range(self.sample_rate):
                 if i < self.sample_rate // 2:
@@ -207,15 +219,15 @@ class WaveformGenerator:
                     voltage = self.offset - self.amplitude
                 samples.append(to_dac_value(voltage))
 
-        elif self.waveform == 'triangle':
+        elif self.waveform == "triangle":
             # 三角波
             for i in range(self.sample_rate):
                 if i < self.sample_rate * self.rise_ratio:
-                    voltage = self.offset + 2 * self.amplitude * (
-                            i / (self.sample_rate * self.rise_ratio)) - self.amplitude
+                    voltage = self.offset + 2 * self.amplitude * (i / (self.sample_rate * self.rise_ratio)) - self.amplitude
                 else:
-                    voltage = self.offset + 2 * self.amplitude * (
-                            (self.sample_rate - i) / (self.sample_rate * (1 - self.rise_ratio))) - self.amplitude
+                    voltage = (
+                        self.offset + 2 * self.amplitude * ((self.sample_rate - i) / (self.sample_rate * (1 - self.rise_ratio))) - self.amplitude
+                    )
                 samples.append(to_dac_value(voltage))
 
         return samples
@@ -271,6 +283,7 @@ class WaveformGenerator:
         """
         self.timer.deinit()
         self.index = 0
+
 
 # ======================================== 初始化配置 ==========================================
 

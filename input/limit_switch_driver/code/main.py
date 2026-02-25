@@ -14,6 +14,7 @@ from limit_switch import LimitSwitch
 
 # ======================================== 功能函数 ==============================================
 
+
 def switch_callback(state: bool):
     """
     用户回调函数，当限位开关状态变化且消抖完成后被调用。
@@ -36,6 +37,7 @@ def switch_callback(state: bool):
         print("Limit switch released (open)")
     else:
         print("Limit switch pressed (closed)")
+
 
 # ======================================== 自定义类 =============================================
 
@@ -63,4 +65,3 @@ except KeyboardInterrupt:
     # 停止测试
     print("Test stopped by user.")
     switch.disable()
-

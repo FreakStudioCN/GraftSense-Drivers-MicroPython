@@ -1,14 +1,15 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/4/14 上午10:44   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/4/14 上午10:44
+# @Author  : 李清水
+# @File    : main.py
 # @Description : WS2812矩阵驱动库相关测试代码
 
 # ======================================== 导入相关模块 =========================================
 
 # 导入硬件相关模块
 from machine import Pin
+
 # 导入WS2812驱动模块
 from neopixel_matrix import NeopixelMatrix
 import math
@@ -21,34 +22,41 @@ import json
 # ======================================== 全局变量 ============================================
 
 # 修改：新增矩阵尺寸配置（默认8x8，可根据实际灯板修改）
-MATRIX_WIDTH = 8    # 矩阵宽度（列数）
-MATRIX_HEIGHT = 8   # 矩阵高度（行数）
+MATRIX_WIDTH = 8  # 矩阵宽度（列数）
+MATRIX_HEIGHT = 8  # 矩阵高度（行数）
 
-json_img1 = json.dumps({
-    # 4x4 图片数据示例，循环红绿蓝紫
-    "pixels": [0xF800, 0x07E0, 0x001F, 0xF81F] * 4,
-    "width": 4,
-    "description": "test image1"
-})
+json_img1 = json.dumps(
+    {
+        # 4x4 图片数据示例，循环红绿蓝紫
+        "pixels": [0xF800, 0x07E0, 0x001F, 0xF81F] * 4,
+        "width": 4,
+        "description": "test image1",
+    }
+)
 
-json_img2 = json.dumps({
-    # 4x4 图片数据示例，颜色顺序倒转
-    "pixels": [0x001F, 0xF81F, 0x07E0, 0xF800] * 4,
-    "width": 4,
-    "description": "test image2"
-})
+json_img2 = json.dumps(
+    {
+        # 4x4 图片数据示例，颜色顺序倒转
+        "pixels": [0x001F, 0xF81F, 0x07E0, 0xF800] * 4,
+        "width": 4,
+        "description": "test image2",
+    }
+)
 
-json_img3 = json.dumps({
-    # 4x4 图片数据示例，另一种排列
-    "pixels": [0x07E0, 0xF800, 0xF81F, 0x001F] * 4,
-    "width": 4,
-    "description": "test image3"
-})
+json_img3 = json.dumps(
+    {
+        # 4x4 图片数据示例，另一种排列
+        "pixels": [0x07E0, 0xF800, 0xF81F, 0x001F] * 4,
+        "width": 4,
+        "description": "test image3",
+    }
+)
 
 # 将图片数据放入列表
 animation_frames = [json_img1, json_img2, json_img3]
 
 # ======================================== 功能函数 ============================================
+
 
 def color_wipe(color, delay=0.1):
     """
@@ -83,6 +91,7 @@ def color_wipe(color, delay=0.1):
             time.sleep(delay)
     matrix.fill(0)
 
+
 def optimized_scrolling_lines():
     """
     优化后的滚动线条动画：包含两个阶段的动画效果。
@@ -109,13 +118,13 @@ def optimized_scrolling_lines():
     matrix.fill(0)
     matrix.show()
     # 修改：适配不同宽度，横线长度改为矩阵宽度的一半（保持原4/8的比例）
-    hline_length = MATRIX_WIDTH 
+    hline_length = MATRIX_WIDTH
     matrix.hline(0, 0, hline_length, NeopixelMatrix.COLOR_BLUE)
     matrix.show()
     time.sleep(0.5)
 
     # 修改：滚动次数适配矩阵高度（原3次对应8行，改为高度//3）
-    scroll_times = MATRIX_HEIGHT 
+    scroll_times = MATRIX_HEIGHT
     for _ in range(scroll_times):
         matrix.scroll(0, 1, clear_color=NeopixelMatrix.COLOR_GREEN)
         matrix.show()
@@ -140,6 +149,7 @@ def optimized_scrolling_lines():
     # 3. 结束清除
     matrix.fill(0)
     matrix.show()
+
 
 def animate_images(matrix, frames, delay=0.5):
     """
@@ -174,6 +184,7 @@ def animate_images(matrix, frames, delay=0.5):
             matrix.show()
             # 等待一定时间后切换到下一帧
             time.sleep(delay)
+
 
 def load_animation_frames():
     """
@@ -210,8 +221,9 @@ def load_animation_frames():
         except Exception as e:
             print("Error loading frame {}: {}".format(filename, e))
             # 修改：空白帧尺寸适配全局配置（若需固定4x4可改回[width:4, height:4]）
-            frames.append({"pixels": [0]*(MATRIX_WIDTH*MATRIX_HEIGHT), "width": MATRIX_WIDTH, "height": MATRIX_HEIGHT})
+            frames.append({"pixels": [0] * (MATRIX_WIDTH * MATRIX_HEIGHT), "width": MATRIX_WIDTH, "height": MATRIX_HEIGHT})
     return frames
+
 
 def play_animation(matrix, frames, fps=30):
     """
@@ -265,6 +277,7 @@ def play_animation(matrix, frames, fps=30):
                 print("FPS: {:.1f}".format(actual_fps))
                 last_time = current_time
 
+
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
@@ -272,7 +285,9 @@ def play_animation(matrix, frames, fps=30):
 time.sleep(3)
 print("FreakStudio:WS2812 LED Matrix Test")
 # 修改：替换硬编码的8x8为全局尺寸变量
-matrix = NeopixelMatrix(MATRIX_WIDTH, MATRIX_HEIGHT, Pin(6), layout=NeopixelMatrix.LAYOUT_ROW, brightness=0.2, order=NeopixelMatrix.ORDER_BRG, flip_v=True)
+matrix = NeopixelMatrix(
+    MATRIX_WIDTH, MATRIX_HEIGHT, Pin(6), layout=NeopixelMatrix.LAYOUT_ROW, brightness=0.2, order=NeopixelMatrix.ORDER_BRG, flip_v=True
+)
 matrix.fill(0)
 matrix.show()
 

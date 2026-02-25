@@ -22,6 +22,7 @@ import time
 
 # ======================================== 自定义类 =============================================
 
+
 class PowerLED:
     """
     单颗功率 LED 驱动类，支持全开、关闭、亮度调节及状态查询。
@@ -240,6 +241,7 @@ class PowerLED:
             Pin: Bound GPIO pin object.
         """
         return self._pin
+
     @property
     def pwm(self) -> PWM:
         """
@@ -256,6 +258,7 @@ class PowerLED:
             PWM: PWM object for brightness control.
         """
         return self._pwm
+
 
 # ======================================== 初始化配置 ============================================
 

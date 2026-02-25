@@ -1,5 +1,5 @@
 # MicroPython v1.23.0
-# -*- coding: utf-8 -*-   
+# -*- coding: utf-8 -*-
 # @Time    : 2025/8/24 下午3:37
 # @Author  : 缪贵成
 # @File    : main.py

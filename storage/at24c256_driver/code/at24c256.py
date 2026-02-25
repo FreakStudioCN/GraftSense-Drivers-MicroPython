@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/27 上午10:44   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/27 上午10:44
+# @Author  : 李清水
+# @File    : main.py
 # @Description : I2C类实验。读写外部EEPROM芯片AT24C256
 # @License : MIT
 
@@ -21,6 +21,7 @@ import time
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class AT24CXX:
     """
@@ -79,6 +80,7 @@ class AT24CXX:
         Page size is 64 bytes, cross-page writing will be automatically segmented.
         Address range is 0 to chip_size-1, exceeding range will raise ValueError.
     """
+
     # 类常量：定义 EEPROM 不同容量
     # 4KiB
     AT24C32 = 4096
@@ -90,6 +92,7 @@ class AT24CXX:
     AT24C256 = 32768
     # 64KiB
     AT24C512 = 65536
+
     def __init__(self, i2c, chip_size=AT24C512, addr=0x50):
         """
         初始化 AT24CXX 类实例。
@@ -115,8 +118,7 @@ class AT24CXX:
             ValueError: If chip capacity is not in supported range.
         """
         # 判断EEPROM芯片容量是否在AT24CXX类定义的范围内
-        if chip_size not in [AT24CXX.AT24C32, AT24CXX.AT24C64, AT24CXX.AT24C128,
-                             AT24CXX.AT24C256, AT24CXX.AT24C512]:
+        if chip_size not in [AT24CXX.AT24C32, AT24CXX.AT24C64, AT24CXX.AT24C128, AT24CXX.AT24C256, AT24CXX.AT24C512]:
             raise ValueError("chip_size is not in the range of AT24CXX")
 
         self.i2c = i2c
@@ -161,7 +163,7 @@ class AT24CXX:
         """
         # 检查地址是否在有效范围内
         if address < 0 or address > self.max_address:
-            raise ValueError('address is out of range')
+            raise ValueError("address is out of range")
 
         # 检查数据是否在有效范围内
         if data < 0 or data > 255:
@@ -315,6 +317,7 @@ class AT24CXX:
 
         # 从指定起始地址读取指定长度的数据
         return self.i2c.readfrom_mem(self.addr, start_address, length, addrsize=16)
+
 
 # ======================================== 初始化配置 ==========================================
 

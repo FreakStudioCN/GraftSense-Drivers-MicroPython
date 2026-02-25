@@ -23,9 +23,7 @@ from max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
 # I2C软件实例
 # I2C引脚配置：sda=Pin4, scl=Pin5
 # 快速模式：400kHz，慢速模式：100kHz
-i2c = SoftI2C(sda=Pin(4),
-              scl=Pin(5),
-              freq=400000)
+i2c = SoftI2C(sda=Pin(4), scl=Pin(5), freq=400000)
 
 # 传感器实例
 # 需要传入一个I2C实例
@@ -48,7 +46,7 @@ else:
 # LED功率：最大 (50.0mA - 检测距离约12英寸)
 # 平均采样数：8
 # 脉冲宽度：411
-print("Setting up sensor with default configuration.", '\n')
+print("Setting up sensor with default configuration.", "\n")
 sensor.setup_sensor()
 
 # 也可以逐个调整配置参数
@@ -62,13 +60,13 @@ sensor.set_active_leds_amplitude(MAX30105_PULSE_AMP_MEDIUM)
 time.sleep(1)
 
 # readTemperature()方法允许提取芯片温度（单位：°C）
-print("Reading temperature in °C.", '\n')
+print("Reading temperature in °C.", "\n")
 print(sensor.read_temperature())
 
 # 选择是否计算采集频率
 compute_frequency = True
 
-print("Starting data acquisition from RED & IR registers...", '\n')
+print("Starting data acquisition from RED & IR registers...", "\n")
 time.sleep(1)
 
 # 采集开始时间

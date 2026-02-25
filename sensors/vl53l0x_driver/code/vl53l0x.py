@@ -26,16 +26,16 @@ _EXTSUP_HV = const(0x89)
 _MSRC_CONFIG = const(0x60)
 _FINAL_RATE_RTN_LIMIT = const(0x44)
 _SYSTEM_SEQUENCE = const(0x01)
-_SPAD_REF_START = const(0x4f)
-_SPAD_ENABLES = const(0xb0)
-_REF_EN_START_SELECT = const(0xb6)
-_SPAD_NUM_REQUESTED = const(0x4e)
-_INTERRUPT_GPIO = const(0x0a)
-_INTERRUPT_CLEAR = const(0x0b)
+_SPAD_REF_START = const(0x4F)
+_SPAD_ENABLES = const(0xB0)
+_REF_EN_START_SELECT = const(0xB6)
+_SPAD_NUM_REQUESTED = const(0x4E)
+_INTERRUPT_GPIO = const(0x0A)
+_INTERRUPT_CLEAR = const(0x0B)
 _GPIO_MUX_ACTIVE_HIGH = const(0x84)
 _RESULT_INTERRUPT_STATUS = const(0x13)
 _RESULT_RANGE_STATUS = const(0x14)
-_OSC_CALIBRATE = const(0xf8)
+_OSC_CALIBRATE = const(0xF8)
 _MEASURE_PERIOD = const(0x04)
 
 SYSRANGE_START = 0x00
@@ -95,7 +95,7 @@ FINAL_RANGE_CONFIG_TIMEOUT_MACROP_LO = 0x72
 CROSSTALK_COMPENSATION_PEAK_RATE_MCPS = 0x20
 
 MSRC_CONFIG_TIMEOUT_MACROP = 0x46
-#软件复位相关
+# 软件复位相关
 SOFT_RESET_GO2_SOFT_RESET_N = 0xBF
 IDENTIFICATION_MODEL_ID = 0xC0
 IDENTIFICATION_REVISION_ID = 0xC2
@@ -123,6 +123,7 @@ ALGO_PHASECAL_CONFIG_TIMEOUT = 0x30
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class VL53L0X:
     """
@@ -205,6 +206,7 @@ class VL53L0X:
         - Sensor hardware configuration and calibration are performed during initialization to ensure proper operation.
         - Measurement results are in millimeters, invalid values may be returned when out of range.
     """
+
     # 默认i2c地址0x29，部分手册描述0x52,根据实际情况进行修改
     def __init__(self, i2c, address=None):
         """
@@ -237,36 +239,33 @@ class VL53L0X:
             The initialization process will call the init() method for hardware configuration.
         """
         # 检查 i2c 参数是否为有效的 machine.I2C 实例
-        if not hasattr(i2c, 'readfrom_mem') or not hasattr(i2c, 'writeto_mem'):
+        if not hasattr(i2c, "readfrom_mem") or not hasattr(i2c, "writeto_mem"):
             raise TypeError("i2c must be a valid machine.I2C  instance")
-        
+
         # 检查 address 是否为合法的 I2C 地址
         if not isinstance(address, int) or address != 0x29:
             raise ValueError(" The I2C address must be 0x29.")
-        
+
         self.i2c = i2c
         self.address = address
         self.init()
         self._started = False
         self.measurement_timing_budget_us = 0
         self.set_measurement_timing_budget(self.measurement_timing_budget_us)
-        self.enables = {"tcc": 0,
-                        "dss": 0,
-                        "msrc": 0,
-                        "pre_range": 0,
-                        "final_range": 0}
-        self.timeouts = {"pre_range_vcsel_period_pclks": 0,
-                         "msrc_dss_tcc_mclks": 0,
-                         "msrc_dss_tcc_us": 0,
-                         "pre_range_mclks": 0,
-                         "pre_range_us": 0,
-                         "final_range_vcsel_period_pclks": 0,
-                         "final_range_mclks": 0,
-                         "final_range_us": 0
-                         }
+        self.enables = {"tcc": 0, "dss": 0, "msrc": 0, "pre_range": 0, "final_range": 0}
+        self.timeouts = {
+            "pre_range_vcsel_period_pclks": 0,
+            "msrc_dss_tcc_mclks": 0,
+            "msrc_dss_tcc_us": 0,
+            "pre_range_mclks": 0,
+            "pre_range_us": 0,
+            "final_range_vcsel_period_pclks": 0,
+            "final_range_mclks": 0,
+            "final_range_us": 0,
+        }
         self.vcsel_period_type = ["VcselPeriodPreRange", "VcselPeriodFinalRange"]
 
-    def _registers(self, register, values=None, _struct='B') -> tuple:
+    def _registers(self, register, values=None, _struct="B") -> tuple:
         """
         读写传感器寄存器（内部方法）。
 
@@ -304,7 +303,7 @@ class VL53L0X:
         data = struct.pack(_struct, *values)
         self.i2c.writeto_mem(self.address, register, data)
 
-    def _register(self, register, value=None, _struct='B') -> int:
+    def _register(self, register, value=None, _struct="B") -> int:
         """
         读写单个传感器寄存器（内部方法）。
 
@@ -426,15 +425,14 @@ class VL53L0X:
         # I2C standard mode
         self._config(
             (0x88, 0x00),
-
             (0x80, 0x01),
-            (0xff, 0x01),
+            (0xFF, 0x01),
             (0x00, 0x00),
         )
         self._stop_variable = self._register(0x91)
         self._config(
             (0x00, 0x01),
-            (0xff, 0x00),
+            (0xFF, 0x00),
             (0x80, 0x00),
         )
 
@@ -443,21 +441,20 @@ class VL53L0X:
         self._flag(_MSRC_CONFIG, 4, True)
 
         # rate_limit = 0.25
-        self._register(_FINAL_RATE_RTN_LIMIT, int(0.1 * (1 << 7)),
-                       _struct='>H')
+        self._register(_FINAL_RATE_RTN_LIMIT, int(0.1 * (1 << 7)), _struct=">H")
 
-        self._register(_SYSTEM_SEQUENCE, 0xff)
+        self._register(_SYSTEM_SEQUENCE, 0xFF)
 
         spad_count, is_aperture = self._spad_info()
-        spad_map = bytearray(self._registers(_SPAD_ENABLES, _struct='6B'))
+        spad_map = bytearray(self._registers(_SPAD_ENABLES, _struct="6B"))
 
         # set reference spads
         self._config(
-            (0xff, 0x01),
+            (0xFF, 0x01),
             (_SPAD_REF_START, 0x00),
-            (_SPAD_NUM_REQUESTED, 0x2c),
-            (0xff, 0x00),
-            (_REF_EN_START_SELECT, 0xb4),
+            (_SPAD_NUM_REQUESTED, 0x2C),
+            (0xFF, 0x00),
+            (_REF_EN_START_SELECT, 0xB4),
         )
 
         spads_enabled = 0
@@ -467,26 +464,22 @@ class VL53L0X:
             elif spad_map[i // 8] & (1 << (i >> 2)):
                 spads_enabled += 1
 
-        self._registers(_SPAD_ENABLES, spad_map, _struct='6B')
+        self._registers(_SPAD_ENABLES, spad_map, _struct="6B")
 
         self._config(
-            (0xff, 0x01),
+            (0xFF, 0x01),
             (0x00, 0x00),
-
-            (0xff, 0x00),
+            (0xFF, 0x00),
             (0x09, 0x00),
             (0x10, 0x00),
             (0x11, 0x00),
-
             (0x24, 0x01),
             (0x25, 0xFF),
             (0x75, 0x00),
-
             (0xFF, 0x01),
             (0x4E, 0x2C),
             (0x48, 0x00),
             (0x30, 0x20),
-
             (0xFF, 0x00),
             (0x30, 0x09),
             (0x54, 0x00),
@@ -506,18 +499,15 @@ class VL53L0X:
             (0x64, 0x00),
             (0x65, 0x00),
             (0x66, 0xA0),
-
             (0xFF, 0x01),
             (0x22, 0x32),
             (0x47, 0x14),
             (0x49, 0xFF),
             (0x4A, 0x00),
-
             (0xFF, 0x00),
             (0x7A, 0x0A),
             (0x7B, 0x00),
             (0x78, 0x21),
-
             (0xFF, 0x01),
             (0x23, 0x34),
             (0x42, 0x00),
@@ -528,17 +518,14 @@ class VL53L0X:
             (0x0E, 0x06),
             (0x20, 0x1A),
             (0x43, 0x40),
-
             (0xFF, 0x00),
             (0x34, 0x03),
             (0x35, 0x44),
-
             (0xFF, 0x01),
             (0x31, 0x04),
             (0x4B, 0x09),
             (0x4C, 0x05),
             (0x4D, 0x04),
-
             (0xFF, 0x00),
             (0x44, 0x00),
             (0x45, 0x20),
@@ -550,14 +537,11 @@ class VL53L0X:
             (0x72, 0xFE),
             (0x76, 0x00),
             (0x77, 0x00),
-
             (0xFF, 0x01),
             (0x0D, 0x01),
-
             (0xFF, 0x00),
             (0x80, 0x01),
             (0x01, 0xF8),
-
             (0xFF, 0x01),
             (0x8E, 0x01),
             (0x00, 0x01),
@@ -579,7 +563,7 @@ class VL53L0X:
         self._register(_SYSTEM_SEQUENCE, 0x02)
         self._calibrate(0x00)
 
-        self._register(_SYSTEM_SEQUENCE, 0xe8)
+        self._register(_SYSTEM_SEQUENCE, 0xE8)
 
     def _spad_info(self) -> tuple:
         """
@@ -609,19 +593,16 @@ class VL53L0X:
         """
         self._config(
             (0x80, 0x01),
-            (0xff, 0x01),
+            (0xFF, 0x01),
             (0x00, 0x00),
-
-            (0xff, 0x06),
+            (0xFF, 0x06),
         )
         self._flag(0x83, 3, True)
         self._config(
-            (0xff, 0x07),
+            (0xFF, 0x07),
             (0x81, 0x01),
-
             (0x80, 0x01),
-
-            (0x94, 0x6b),
+            (0x94, 0x6B),
             (0x83, 0x00),
         )
         for timeout in range(_IO_TIMEOUT):
@@ -636,17 +617,16 @@ class VL53L0X:
         value = self._register(0x92)
         self._config(
             (0x81, 0x00),
-            (0xff, 0x06),
+            (0xFF, 0x06),
         )
         self._flag(0x83, 3, False)
         self._config(
-            (0xff, 0x01),
+            (0xFF, 0x01),
             (0x00, 0x01),
-
-            (0xff, 0x00),
+            (0xFF, 0x00),
             (0x80, 0x00),
         )
-        count = value & 0x7f
+        count = value & 0x7F
         is_aperture = bool(value & 0b10000000)
         return count, is_aperture
 
@@ -716,10 +696,10 @@ class VL53L0X:
             (0x80, 0x00),
         )
         if period:
-            oscilator = self._register(_OSC_CALIBRATE, _struct='>H')
+            oscilator = self._register(_OSC_CALIBRATE, _struct=">H")
             if oscilator:
                 period *= oscilator
-            self._register(_MEASURE_PERIOD, period, _struct='>H')
+            self._register(_MEASURE_PERIOD, period, _struct=">H")
             self._register(_SYSRANGE_START, 0x04)
         else:
             self._register(_SYSRANGE_START, 0x02)
@@ -798,7 +778,7 @@ class VL53L0X:
             time.sleep_ms(1)
         else:
             raise RuntimeError("timeout")
-        value = self._register(_RESULT_RANGE_STATUS + 10, _struct='>H')
+        value = self._register(_RESULT_RANGE_STATUS + 10, _struct=">H")
         self._register(_INTERRUPT_CLEAR, 0x01)
         return value
 
@@ -833,7 +813,7 @@ class VL53L0X:
         self._register(0x44, limit_Mcps * (1 << 7))
         return True
 
-    def decode_Vcsel_period(self, reg_val) ->int:
+    def decode_Vcsel_period(self, reg_val) -> int:
         """
         解码VCSEL周期寄存器值。
 
@@ -859,7 +839,7 @@ class VL53L0X:
         Notes:
             Convert the VCSEL period value stored in the register to the actual period value.
         """
-        return ((reg_val + 1) << 1)
+        return (reg_val + 1) << 1
 
     def encode_Vcsel_period(self, period_pclks) -> int:
         """
@@ -887,7 +867,7 @@ class VL53L0X:
         Notes:
             Convert the actual VCSEL period value to register storage format.
         """
-        return (((period_pclks) >> 1) - 1)
+        return ((period_pclks) >> 1) - 1
 
     def set_Vcsel_pulse_period(self, type, period_pclks) -> bool:
         """
@@ -937,12 +917,10 @@ class VL53L0X:
             self._register(PRE_RANGE_CONFIG_VALID_PHASE_LOW, 0x08)
             self._register(PRE_RANGE_CONFIG_VCSEL_PERIOD, vcsel_period_reg)
 
-            new_pre_range_timeout_mclks = self.timeout_microseconds_to_Mclks(self.timeouts["pre_range_us"],
-                                                                             period_pclks)
+            new_pre_range_timeout_mclks = self.timeout_microseconds_to_Mclks(self.timeouts["pre_range_us"], period_pclks)
             self._register(PRE_RANGE_CONFIG_TIMEOUT_MACROP_HI, int(self.encode_timeout(new_pre_range_timeout_mclks)))
 
-            new_msrc_timeout_mclks = self.timeout_microseconds_to_Mclks(self.timeouts["msrc_dss_tcc_us"],
-                                                                        period_pclks)
+            new_msrc_timeout_mclks = self.timeout_microseconds_to_Mclks(self.timeouts["msrc_dss_tcc_us"], period_pclks)
             self._register(MSRC_CONFIG_TIMEOUT_MACROP, 255 if new_msrc_timeout_mclks > 256 else (new_msrc_timeout_mclks - 1))
         elif type == self.vcsel_period_type[1]:
             if period_pclks == 8:
@@ -1068,15 +1046,21 @@ class VL53L0X:
         """
         self.timeouts["pre_range_vcsel_period_pclks"] = self.get_vcsel_pulse_period(self.vcsel_period_type[0])
         self.timeouts["msrc_dss_tcc_mclks"] = int(self._register(MSRC_CONFIG_TIMEOUT_MACROP)) + 1
-        self.timeouts["msrc_dss_tcc_us"] = int(self.timeout_Mclks_to_microseconds(self.timeouts["msrc_dss_tcc_mclks"], self.timeouts["pre_range_vcsel_period_pclks"]))
+        self.timeouts["msrc_dss_tcc_us"] = int(
+            self.timeout_Mclks_to_microseconds(self.timeouts["msrc_dss_tcc_mclks"], self.timeouts["pre_range_vcsel_period_pclks"])
+        )
         self.timeouts["pre_range_mclks"] = self.decode_timeout(self._register(PRE_RANGE_CONFIG_TIMEOUT_MACROP_HI))
-        self.timeouts["pre_range_us"] = int(self.timeout_Mclks_to_microseconds(self.timeouts["pre_range_mclks"],self.timeouts["pre_range_vcsel_period_pclks"]))
+        self.timeouts["pre_range_us"] = int(
+            self.timeout_Mclks_to_microseconds(self.timeouts["pre_range_mclks"], self.timeouts["pre_range_vcsel_period_pclks"])
+        )
         self.timeouts["final_range_vcsel_period_pclks"] = self.get_vcsel_pulse_period(self.vcsel_period_type[1])
         self.timeouts["final_range_mclks"] = self.decode_timeout(self._register(FINAL_RANGE_CONFIG_TIMEOUT_MACROP_HI))
 
         if self.enables["pre_range"]:
             self.timeouts["final_range_mclks"] -= self.timeouts["pre_range_mclks"]
-        self.timeouts["final_range_us"] = int(self.timeout_Mclks_to_microseconds(self.timeouts["final_range_mclks"],self.timeouts["final_range_vcsel_period_pclks"]))
+        self.timeouts["final_range_us"] = int(
+            self.timeout_Mclks_to_microseconds(self.timeouts["final_range_mclks"], self.timeouts["final_range_vcsel_period_pclks"])
+        )
 
     def timeout_Mclks_to_microseconds(self, timeout_period_mclks, vcsel_period_pclks) -> float:
         """
@@ -1138,7 +1122,7 @@ class VL53L0X:
             Calculate macro period based on VCSEL period, then convert to Mclks.
         """
         macro_period_ns = self.calc_macro_period(vcsel_period_pclks)
-        return (((timeout_period_us * 1000) + (macro_period_ns / 2)) / macro_period_ns)
+        return ((timeout_period_us * 1000) + (macro_period_ns / 2)) / macro_period_ns
 
     def calc_macro_period(self, vcsel_period_pclks) -> float:
         """
@@ -1166,7 +1150,7 @@ class VL53L0X:
         Notes:
             Macro period is calculated based on VCSEL period and used for timeout unit conversion.
         """
-        return (((2304 * (vcsel_period_pclks) * 1655) + 500) / 1000)
+        return ((2304 * (vcsel_period_pclks) * 1655) + 500) / 1000
 
     def decode_timeout(self, reg_val) -> int:
         """
@@ -1342,6 +1326,7 @@ class VL53L0X:
         self._register(SYSTEM_INTERRUPT_CLEAR, 0x01)
         self._register(SYSRANGE_START, 0x00)
         return True
+
 
 # ======================================== 初始化配置 ===========================================
 

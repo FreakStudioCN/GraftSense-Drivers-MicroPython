@@ -7,12 +7,15 @@
 
 # ======================================== 导入相关模块 =========================================
 
-#导入时间模块
+# 导入时间模块
 import time
+
 # 导入MicroPython标准库模块
 from machine import Pin, I2C
+
 # 导入总线舵机控制器模块
 from bus_servo import BusPWMServoController
+
 # 导入PCA9685模块
 from pca9685 import PCA9685
 
@@ -36,20 +39,20 @@ i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 遍历从机设备地址列表
     for device in devices_list:
         # 判断设备地址是否为PCF8575的地址
         if device >= 0x40 and device <= 0x4F:
             print("I2C hexadecimal address: ", hex(device))
-pca = PCA9685(i2c,  address = device)
+pca = PCA9685(i2c, address=device)
 
 # 创建控制器（50Hz 常用于舵机）
 srv = BusPWMServoController(pca, freq=50)

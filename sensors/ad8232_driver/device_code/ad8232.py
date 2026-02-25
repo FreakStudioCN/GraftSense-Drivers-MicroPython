@@ -23,6 +23,7 @@ from micropython import const
 
 # ======================================== 自定义类 ============================================
 
+
 class AD8232:
     """
     AD8232心率传感器驱动类（适用于Raspberry Pi Pico）。
@@ -96,7 +97,8 @@ class AD8232:
         read_raw(): Read raw ADC data.
         check_leads_off(): Check if leads are detached.
     """
-    def __init__(self, adc_pin=26, loff_plus_pin=16, loff_minus_pin=17,sdn_pin=None):
+
+    def __init__(self, adc_pin=26, loff_plus_pin=16, loff_minus_pin=17, sdn_pin=None):
         """
         初始化AD8232心率传感器 (Pico版本)
 
@@ -150,6 +152,7 @@ class AD8232:
         print(f"AD8232 initialization complete - ADC pin: GP{adc_pin}")
         print(f"Lead detection: LO+ GP{loff_plus_pin}, LO- GP{loff_minus_pin}")
         print(f"SDN pin: {'Not configured' if sdn_pin is None else 'GP' + str(sdn_pin)}")
+
     def off(self):
         """
         关闭AD8232传感器 (如果有SDN引脚)
@@ -166,12 +169,13 @@ class AD8232:
             - This function only works if the `sdn_pin` parameter was provided during initialization.
             - Turning off the sensor sets its operating status (`operating_status`) to 3.
         """
-        if  self.sdn_pin is not None:
+        if self.sdn_pin is not None:
             self.sdn.value(0)  # 设置为低电平关闭传感器
             self.operating_status = 3
             print("AD8232 sensor has been turned off")
         else:
             print("SDN pin is not configured, unable to turn off the sensor")
+
     def on(self):
         """
         打开AD8232传感器 (如果有SDN引脚)
@@ -188,7 +192,7 @@ class AD8232:
             - This function only works if the `sdn_pin` parameter was provided during initialization.
             - Turning on the sensor sets its operating status (`operating_status`) to 1.
         """
-        if  self.sdn_pin is not None:
+        if self.sdn_pin is not None:
             self.sdn.value(1)  # 设置为高电平打开传感器
             self.operating_status = 1
             print("The AD8232 sensor is turned on")
@@ -236,6 +240,7 @@ class AD8232:
         # 当导联脱落时，至少一个引脚是高电平(1)
         self.lead_status = self.loff_plus.value() == 1 or self.loff_minus.value() == 1
         return self.lead_status
+
 
 # ======================================== 初始化配置 ==========================================
 

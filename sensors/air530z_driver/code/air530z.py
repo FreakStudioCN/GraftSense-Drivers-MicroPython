@@ -25,13 +25,14 @@ import time
 
 # ======================================== 自定义类 ============================================
 
+
 class NMEASender:
     """
-    NMEASender 类，用于生成并封装通用 NMEA 配置指令字符串。  
-    提供波特率、更新率、协议模式、系统模式、开机启动模式等配置命令的构造方法，  
-    并支持产品信息查询。  
+    NMEASender 类，用于生成并封装通用 NMEA 配置指令字符串。
+    提供波特率、更新率、协议模式、系统模式、开机启动模式等配置命令的构造方法，
+    并支持产品信息查询。
 
-    本类仅负责生成带有校验和的完整 NMEA 指令字符串，不涉及 UART/串口的发送操作。  
+    本类仅负责生成带有校验和的完整 NMEA 指令字符串，不涉及 UART/串口的发送操作。
 
     Methods:
         _checksum(sentence: str) -> str:
@@ -53,12 +54,12 @@ class NMEASender:
 
     ==========================================
 
-    NMEASender class for constructing general NMEA configuration commands.  
-    Provides methods to generate commands for baud rate, update rate, protocol  
-    mode, system mode, startup mode, and product info query.  
+    NMEASender class for constructing general NMEA configuration commands.
+    Provides methods to generate commands for baud rate, update rate, protocol
+    mode, system mode, startup mode, and product info query.
 
-    This class only generates valid NMEA sentences with checksums,  
-    but does not handle UART/serial transmission.  
+    This class only generates valid NMEA sentences with checksums,
+    but does not handle UART/serial transmission.
 
     Methods:
         _checksum(sentence: str) -> str:
@@ -81,19 +82,19 @@ class NMEASender:
 
     def _checksum(self, sentence: str) -> str:
         """
-        计算 NMEA 校验和（XOR 累加方式）。  
+        计算 NMEA 校验和（XOR 累加方式）。
 
         Args:
-            sentence (str): 不包含起始符 '$' 和校验符号 '*' 的 NMEA 主体字符串。  
+            sentence (str): 不包含起始符 '$' 和校验符号 '*' 的 NMEA 主体字符串。
 
         Returns:
-            str: 两位大写十六进制校验和字符串。  
+            str: 两位大写十六进制校验和字符串。
 
         ==========================================
-        Compute NMEA checksum using XOR accumulation.  
+        Compute NMEA checksum using XOR accumulation.
 
         Args:
-            sentence (str): NMEA body string (without '$' and '*').  
+            sentence (str): NMEA body string (without '$' and '*').
 
         Returns:
             str: Two-digit uppercase hexadecimal checksum string.
@@ -105,19 +106,19 @@ class NMEASender:
 
     def _build(self, body: str) -> str:
         """
-        构造完整的 NMEA 指令字符串。  
+        构造完整的 NMEA 指令字符串。
 
         Args:
-            body (str): NMEA 指令主体内容，不包含起始符和校验符号。  
+            body (str): NMEA 指令主体内容，不包含起始符和校验符号。
 
         Returns:
-            str: 带有起始符 `$` 和校验和 `*` 的完整 NMEA 指令。  
+            str: 带有起始符 `$` 和校验和 `*` 的完整 NMEA 指令。
 
         ==========================================
-        Build a complete NMEA sentence string.  
+        Build a complete NMEA sentence string.
 
         Args:
-            body (str): NMEA command body (without start '$' or checksum '*').  
+            body (str): NMEA command body (without start '$' or checksum '*').
 
         Returns:
             str: Full NMEA sentence with '$' prefix and '*' checksum.
@@ -128,19 +129,19 @@ class NMEASender:
     # ---------------- 配置方法 ----------------
     def set_baudrate(self, baud: int) -> str:
         """
-        生成设置波特率的 NMEA 指令。  
+        生成设置波特率的 NMEA 指令。
 
         Args:
-            baud (int): 波特率值，例如 9600, 115200。  
+            baud (int): 波特率值，例如 9600, 115200。
 
         Returns:
-            str: 完整 NMEA 指令字符串。  
+            str: 完整 NMEA 指令字符串。
 
         ==========================================
-        Build NMEA command for setting baud rate.  
+        Build NMEA command for setting baud rate.
 
         Args:
-            baud (int): Baud rate value (e.g., 9600, 115200).  
+            baud (int): Baud rate value (e.g., 9600, 115200).
 
         Returns:
             str: Full NMEA command string.
@@ -149,19 +150,19 @@ class NMEASender:
 
     def set_update_rate(self, rate: int) -> str:
         """
-        生成设置更新率的 NMEA 指令。  
+        生成设置更新率的 NMEA 指令。
 
         Args:
-            rate (int): 更新率（单位 Hz）。  
+            rate (int): 更新率（单位 Hz）。
 
         Returns:
-            str: 完整 NMEA 指令字符串。  
+            str: 完整 NMEA 指令字符串。
 
         ==========================================
-        Build NMEA command for setting update rate.  
+        Build NMEA command for setting update rate.
 
         Args:
-            rate (int): Update rate (in Hz).  
+            rate (int): Update rate (in Hz).
 
         Returns:
             str: Full NMEA command string.
@@ -170,19 +171,19 @@ class NMEASender:
 
     def set_protocol(self, mode: int) -> str:
         """
-        生成设置协议模式的 NMEA 指令。  
+        生成设置协议模式的 NMEA 指令。
 
         Args:
-            mode (int): 协议模式编号。  
+            mode (int): 协议模式编号。
 
         Returns:
-            str: 完整 NMEA 指令字符串。  
+            str: 完整 NMEA 指令字符串。
 
         ==========================================
-        Build NMEA command for setting protocol mode.  
+        Build NMEA command for setting protocol mode.
 
         Args:
-            mode (int): Protocol mode identifier.  
+            mode (int): Protocol mode identifier.
 
         Returns:
             str: Full NMEA command string.
@@ -191,19 +192,19 @@ class NMEASender:
 
     def set_system_mode(self, mode: int) -> str:
         """
-        生成设置系统工作模式的 NMEA 指令。  
+        生成设置系统工作模式的 NMEA 指令。
 
         Args:
-            mode (int): 系统模式编号。  
+            mode (int): 系统模式编号。
 
         Returns:
-            str: 完整 NMEA 指令字符串。  
+            str: 完整 NMEA 指令字符串。
 
         ==========================================
-        Build NMEA command for setting system mode.  
+        Build NMEA command for setting system mode.
 
         Args:
-            mode (int): System mode identifier.  
+            mode (int): System mode identifier.
 
         Returns:
             str: Full NMEA command string.
@@ -212,19 +213,19 @@ class NMEASender:
 
     def set_startup_mode(self, mode: int) -> str:
         """
-        生成设置开机启动模式的 NMEA 指令。  
+        生成设置开机启动模式的 NMEA 指令。
 
         Args:
-            mode (int): 启动模式编号。  
+            mode (int): 启动模式编号。
 
         Returns:
-            str: 完整 NMEA 指令字符串。  
+            str: 完整 NMEA 指令字符串。
 
         ==========================================
-        Build NMEA command for setting startup mode.  
+        Build NMEA command for setting startup mode.
 
         Args:
-            mode (int): Startup mode identifier.  
+            mode (int): Startup mode identifier.
 
         Returns:
             str: Full NMEA command string.
@@ -233,28 +234,29 @@ class NMEASender:
 
     def query_product_info(self) -> str:
         """
-        生成查询产品信息的 NMEA 指令。  
+        生成查询产品信息的 NMEA 指令。
 
         Returns:
-            str: 完整 NMEA 指令字符串。  
+            str: 完整 NMEA 指令字符串。
 
         ==========================================
-        Build NMEA command for querying product info.  
+        Build NMEA command for querying product info.
 
         Returns:
             str: Full NMEA command string.
         """
         return self._build("PCAS10,0")
 
+
 class Air530Z(NMEAParser):
     """
-    Air530Z GPS 模块驱动类  
-    - 继承自 MicropyGPS，用于直接解析 GPS NMEA 数据  
-    - 内部组合 NMEASender，用于构造并发送配置指令  
-    - 提供 UART 通信下的 AT/NMEA 配置方法  
-    - 提供实时位置/状态数据解析接口  
+    Air530Z GPS 模块驱动类
+    - 继承自 MicropyGPS，用于直接解析 GPS NMEA 数据
+    - 内部组合 NMEASender，用于构造并发送配置指令
+    - 提供 UART 通信下的 AT/NMEA 配置方法
+    - 提供实时位置/状态数据解析接口
 
-    本类既可作为 GPS 数据解析器，也可作为配置控制器使用。  
+    本类既可作为 GPS 数据解析器，也可作为配置控制器使用。
 
     Methods:
         _send(sentence: str) -> bool:
@@ -278,13 +280,13 @@ class Air530Z(NMEAParser):
 
     ==========================================
 
-    Air530Z GPS module driver class  
-    - Inherits from MicropyGPS for direct NMEA parsing  
-    - Composes NMEASender to construct and send configuration commands  
-    - Provides AT/NMEA configuration APIs over UART  
-    - Exposes real-time data parsing interface  
+    Air530Z GPS module driver class
+    - Inherits from MicropyGPS for direct NMEA parsing
+    - Composes NMEASender to construct and send configuration commands
+    - Provides AT/NMEA configuration APIs over UART
+    - Exposes real-time data parsing interface
 
-    This class can be used both as a GPS data parser and as a configuration controller.  
+    This class can be used both as a GPS data parser and as a configuration controller.
 
     Methods:
         _send(sentence: str) -> bool:
@@ -350,13 +352,13 @@ class Air530Z(NMEAParser):
     # ---------------- 初始化 ----------------
     def __init__(self, uart: UART):
         """
-        初始化 Air530Z 模块驱动。  
+        初始化 Air530Z 模块驱动。
 
         Args:
-            uart (UART): 用于与 GPS 模块通信的 UART 实例。  
+            uart (UART): 用于与 GPS 模块通信的 UART 实例。
 
         ==========================================
-        Initialize Air530Z driver.  
+        Initialize Air530Z driver.
 
         Args:
             uart (UART): UART instance for GPS module communication.
@@ -365,47 +367,48 @@ class Air530Z(NMEAParser):
         self._sender = NMEASender()
         self._parser = NMEAParser()
         self.last_known_fix = {}
+
     # ---------------- 内部方法 ----------------
     def _send(self, sentence: str) -> bool:
         """
-        私有方法：发送一条 NMEA 配置指令到 GPS 模块。  
+        私有方法：发送一条 NMEA 配置指令到 GPS 模块。
 
         Args:
-            sentence (str): 完整的 NMEA 指令字符串。  
+            sentence (str): 完整的 NMEA 指令字符串。
 
         Returns:
-            bool: True 表示发送成功，False 表示失败。  
+            bool: True 表示发送成功，False 表示失败。
 
         ==========================================
-        Private method: Send an NMEA command to GPS module.  
+        Private method: Send an NMEA command to GPS module.
 
         Args:
-            sentence (str): Full NMEA command string.  
+            sentence (str): Full NMEA command string.
 
         Returns:
             bool: True if sent successfully, False otherwise.
         """
         try:
-            self._uart.write(f'{sentence}\r\n'.encode())
+            self._uart.write(f"{sentence}\r\n".encode())
             return True
         except Exception:
             return False
 
     def _recv(self) -> str:
         """
-        私有方法：接收 GPS 模块返回的 NMEA 响应。  
+        私有方法：接收 GPS 模块返回的 NMEA 响应。
 
         Args:
-            timeout (int): 超时时间，默认 3 秒。  
+            timeout (int): 超时时间，默认 3 秒。
 
         Returns:
-            str: 返回的 NMEA 响应字符串，若超时则返回空字符串。  
+            str: 返回的 NMEA 响应字符串，若超时则返回空字符串。
 
         ==========================================
-        Private method: Receive NMEA response from GPS module.  
+        Private method: Receive NMEA response from GPS module.
 
         Args:
-            timeout (int): Timeout duration in seconds (default 3).  
+            timeout (int): Timeout duration in seconds (default 3).
 
         Returns:
             str: Received NMEA response string, or empty string if timeout.
@@ -413,26 +416,26 @@ class Air530Z(NMEAParser):
         try:
             if self._uart.any():
                 resp = self._uart.read()
-            return True, resp.decode('utf-8', errors='ignore')
+            return True, resp.decode("utf-8", errors="ignore")
         except Exception as e:
-            return False,'RECV NONE'
+            return False, "RECV NONE"
 
     # ---------------- API 方法 ----------------
     def set_baudrate(self, baudrate: int) -> (bool, str):
         """
-        设置 GPS 模块波特率。  
+        设置 GPS 模块波特率。
 
         Args:
-            baudrate (int): 波特率值，仅支持 9600 或 115200。  
+            baudrate (int): 波特率值，仅支持 9600 或 115200。
 
         Returns:
-            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)  
+            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)
 
         ==========================================
-        Set GPS module baud rate.  
+        Set GPS module baud rate.
 
         Args:
-            baudrate (int): Baud rate (supports 9600 or 115200).  
+            baudrate (int): Baud rate (supports 9600 or 115200).
 
         Returns:
             tuple(bool, str): (Success flag, NMEA command or error message)
@@ -445,19 +448,19 @@ class Air530Z(NMEAParser):
 
     def set_update_rate(self, rate: int) -> (bool, str):
         """
-        设置定位更新率（Hz）。  
+        设置定位更新率（Hz）。
 
         Args:
-            rate (int): 更新率值，仅支持 1Hz、5Hz、10Hz。  
+            rate (int): 更新率值，仅支持 1Hz、5Hz、10Hz。
 
         Returns:
-            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)  
+            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)
 
         ==========================================
-        Set GPS update rate (Hz).  
+        Set GPS update rate (Hz).
 
         Args:
-            rate (int): Update rate (supports 1Hz, 5Hz, 10Hz).  
+            rate (int): Update rate (supports 1Hz, 5Hz, 10Hz).
 
         Returns:
             tuple(bool, str): (Success flag, NMEA command or error message)
@@ -470,19 +473,19 @@ class Air530Z(NMEAParser):
 
     def set_protocol(self, mode: int) -> (bool, str):
         """
-        设置协议模式（NMEA 输出格式）。  
+        设置协议模式（NMEA 输出格式）。
 
         Args:
-            mode (int): 协议模式编号，仅支持 V4.1、BDS+GPS、GPS Only。  
+            mode (int): 协议模式编号，仅支持 V4.1、BDS+GPS、GPS Only。
 
         Returns:
-            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)  
+            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)
 
         ==========================================
-        Set NMEA protocol mode.  
+        Set NMEA protocol mode.
 
         Args:
-            mode (int): Protocol mode (supports V4.1, BDS+GPS, GPS Only).  
+            mode (int): Protocol mode (supports V4.1, BDS+GPS, GPS Only).
 
         Returns:
             tuple(bool, str): (Success flag, NMEA command or error message)
@@ -495,19 +498,19 @@ class Air530Z(NMEAParser):
 
     def set_system_mode(self, mode: int) -> (bool, str):
         """
-        设置工作系统模式（卫星系统选择）。  
+        设置工作系统模式（卫星系统选择）。
 
         Args:
-            mode (int): 模式编号，仅支持 BDS+GPS、GPS Only、BDS Only。  
+            mode (int): 模式编号，仅支持 BDS+GPS、GPS Only、BDS Only。
 
         Returns:
-            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)  
+            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)
 
         ==========================================
-        Set working system mode (satellite system selection).  
+        Set working system mode (satellite system selection).
 
         Args:
-            mode (int): Mode (supports BDS+GPS, GPS Only, BDS Only).  
+            mode (int): Mode (supports BDS+GPS, GPS Only, BDS Only).
 
         Returns:
             tuple(bool, str): (Success flag, NMEA command or error message)
@@ -520,19 +523,19 @@ class Air530Z(NMEAParser):
 
     def set_startup_mode(self, mode: int) -> (bool, str):
         """
-        设置开机启动模式。  
+        设置开机启动模式。
 
         Args:
-            mode (int): 模式编号，仅支持冷启动、温启动、热启动。  
+            mode (int): 模式编号，仅支持冷启动、温启动、热启动。
 
         Returns:
-            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)  
+            tuple(bool, str): (是否成功发送, 对应的 NMEA 指令字符串或错误信息)
 
         ==========================================
-        Set startup mode.  
+        Set startup mode.
 
         Args:
-            mode (int): Mode (supports cold, warm, hot start).  
+            mode (int): Mode (supports cold, warm, hot start).
 
         Returns:
             tuple(bool, str): (Success flag, NMEA command or error message)
@@ -545,13 +548,13 @@ class Air530Z(NMEAParser):
 
     def query_product_info(self) -> (bool, str):
         """
-        查询产品信息（型号、固件版本等）。  
+        查询产品信息（型号、固件版本等）。
 
         Returns:
-            tuple(bool, str): (是否成功发送, 模块返回的响应字符串)  
+            tuple(bool, str): (是否成功发送, 模块返回的响应字符串)
 
         ==========================================
-        Query product information (model, firmware version, etc.).  
+        Query product information (model, firmware version, etc.).
 
         Returns:
             tuple(bool, str): (Success flag, response string from module)
@@ -564,50 +567,51 @@ class Air530Z(NMEAParser):
     # ---------------- 实时数据接口 ----------------
     def read(self) -> dict:
         """
-        读取并解析 GPS 实时数据。  
-        - 自动从 UART 接收 NMEA 字符串  
-        - 调用 MicropyGPS 的 update 方法逐字符解析  
-        - 返回包含位置信息的字典  
+        读取并解析 GPS 实时数据。
+        - 自动从 UART 接收 NMEA 字符串
+        - 调用 MicropyGPS 的 update 方法逐字符解析
+        - 返回包含位置信息的字典
 
         Returns:
-            dict: 包含以下字段:  
-                - latitude (float): 纬度  
-                - longitude (float): 经度  
-                - satellites (int): 正在使用的卫星数量  
-                - altitude (float): 海拔高度（米）  
-                - timestamp (tuple): 时间戳 (h, m, s)  
+            dict: 包含以下字段:
+                - latitude (float): 纬度
+                - longitude (float): 经度
+                - satellites (int): 正在使用的卫星数量
+                - altitude (float): 海拔高度（米）
+                - timestamp (tuple): 时间戳 (h, m, s)
 
         ==========================================
-        Read and parse GPS real-time data.  
-        - Reads NMEA sentences from UART  
-        - Parses them using MicropyGPS `update` method  
-        - Returns a dictionary of position information  
+        Read and parse GPS real-time data.
+        - Reads NMEA sentences from UART
+        - Parses them using MicropyGPS `update` method
+        - Returns a dictionary of position information
 
         Returns:
-            dict: Fields include:  
-                - latitude (float): Latitude  
-                - longitude (float): Longitude  
-                - satellites (int): Number of satellites in use  
-                - altitude (float): Altitude (meters)  
+            dict: Fields include:
+                - latitude (float): Latitude
+                - longitude (float): Longitude
+                - satellites (int): Number of satellites in use
+                - altitude (float): Altitude (meters)
                 - timestamp (tuple): Timestamp (h, m, s)
         """
         if self._uart.any():
-                data = self._uart.read()
-                # 使用NMEAParser的feed方法批量处理数据
-                self.feed(data)
+            data = self._uart.read()
+            # 使用NMEAParser的feed方法批量处理数据
+            self.feed(data)
 
-                # 从last_known_fix获取最新的有效定位数据
-                fix = self.last_known_fix
+            # 从last_known_fix获取最新的有效定位数据
+            fix = self.last_known_fix
 
-                # 构建返回的数据结构，保持与原来相似的格式
-                result = {
-                    "latitude": fix.get('latitude'),
-                    "longitude": fix.get('longitude'),
-                    "satellites": fix.get('num_satellites', 0),
-                    "altitude": fix.get('altitude'),
-                    "timestamp": fix.get('time', [0, 0, 0.0])
-                }
-                return result
+            # 构建返回的数据结构，保持与原来相似的格式
+            result = {
+                "latitude": fix.get("latitude"),
+                "longitude": fix.get("longitude"),
+                "satellites": fix.get("num_satellites", 0),
+                "altitude": fix.get("altitude"),
+                "timestamp": fix.get("time", [0, 0, 0.0]),
+            }
+            return result
+
 
 # ======================================== 初始化配置 ==========================================
 

@@ -13,10 +13,12 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
-#导入硬件模块
+# 导入硬件模块
 from machine import Pin, time_pulse_us
-#导入时间相关模块
+
+# 导入时间相关模块
 import time
+
 # 导入MicroPython中常量相关
 from micropython import const
 
@@ -25,6 +27,7 @@ from micropython import const
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class RCWL9623:
     """
@@ -95,6 +98,7 @@ class RCWL9623:
         _read_i2c() -> float | None:
             Distance measurement implementation for I2C mode (internal method).
     """
+
     # 工作模式常量
     GPIO_MODE, ONEWIRE_MODE, UART_MODE, I2C_MODE = [0, 1, 2, 3]
     # 固定I2C通信地址
@@ -546,5 +550,6 @@ class RCWL9623:
         except Exception as e:
             raise RuntimeError("I2C read error: %s" % e)
         return None
+
 
 # ========================================  主程序  ===========================================

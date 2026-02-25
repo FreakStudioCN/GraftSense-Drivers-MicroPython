@@ -13,9 +13,10 @@ from mlx90614 import MLX90614, MLX90615
 
 # ======================================== 全局变量 =============================================
 
-mlx61xaddr=None
+mlx61xaddr = None
 
 # ======================================== 功能函数 =============================================
+
 
 def test_sensor_realtime(sensor, name="Sensor", interval=1.0):
     """
@@ -66,7 +67,7 @@ def test_sensor_realtime(sensor, name="Sensor", interval=1.0):
 
             # ================= 公共方法测试 =================
             ambient = sensor.read_ambient()  # 读取环境温度
-            obj = sensor.read_object()       # 读取物体温度
+            obj = sensor.read_object()  # 读取物体温度
             # 双温区时读取第二路物体温度，否则为 None
             obj2 = sensor.read_object2() if sensor.dual_zone else None
 
@@ -106,6 +107,7 @@ def test_sensor_realtime(sensor, name="Sensor", interval=1.0):
         # 用户按 Ctrl+C 时退出循环
         print("\nRealtime testing stopped")
 
+
 # ======================================== 自定义类 =============================================
 
 # ======================================== 初始化配置 ===========================================
@@ -118,13 +120,13 @@ print("FreakStudio: MLX90614 test start ")
 i2c = I2C(0, scl=5, sda=4, freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 # 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     # 若非空，则打印从机设备地址
     print("No i2c device !")
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
 for device in devices_list:
     if 0x5A <= device <= 0x5D:
         print("I2c hexadecimal address:", hex(device))

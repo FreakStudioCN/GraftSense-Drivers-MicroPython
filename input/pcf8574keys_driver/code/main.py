@@ -36,7 +36,7 @@ i2c = I2C(I2C_ID, scl=Pin(SCL_PIN), sda=Pin(SDA_PIN), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
@@ -44,7 +44,7 @@ if len(devices_list) == 0:
     print("No i2c device !")
 else:
     # 遍历从机设备地址列表
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
 for device in devices_list:
     # 判断设备地址是否为的PCF8574地址
     if 0x20 <= device <= 0x28:
@@ -64,9 +64,9 @@ while True:
     all_states = keys.read_all()
     print(all_states)
     # 查看SW1和SW2按键状态，控制LED灯开关
-    if keys.read_key('SW1') == True:
+    if keys.read_key("SW1") == True:
         keys.led_on()
-    if keys.read_key('SW2') == True:
+    if keys.read_key("SW2") == True:
         keys.led_off()
     # 100ms刷新一次状态显示
     time.sleep(0.1)

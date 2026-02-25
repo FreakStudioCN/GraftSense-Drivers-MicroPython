@@ -22,56 +22,57 @@ from pcf8574 import PCF8574
 
 # ======================================== 自定义类 ============================================
 
+
 class LEDBar:
     """
-        基于 PCF8574 的 8 位 LED 灯条驱动类。
-        提供单个/多个 LED 控制、全局清除，以及电平显示（点亮前 N 个 LED）功能。
-        常用于电平指示、进度显示和调试输出。
+    基于 PCF8574 的 8 位 LED 灯条驱动类。
+    提供单个/多个 LED 控制、全局清除，以及电平显示（点亮前 N 个 LED）功能。
+    常用于电平指示、进度显示和调试输出。
 
-        Attributes:
-            pcf (PCF8574): 已初始化好的 PCF8574 实例，用于控制 I/O 扩展口。
+    Attributes:
+        pcf (PCF8574): 已初始化好的 PCF8574 实例，用于控制 I/O 扩展口。
 
-        Methods:
-            __init__(pcf8574: PCF8574):
-                初始化 LEDBar 并清空所有 LED。
-            set_led(index: int, value: bool) -> None:
-                点亮或熄灭指定 LED。
-            set_all(value: int) -> None:
-                设置所有 LED 的状态（8 位二进制数）。
-            display_level(level: int) -> None:
-                根据 level 值点亮前 N 个 LED。
-            clear() -> None:
-                熄灭所有 LED。
+    Methods:
+        __init__(pcf8574: PCF8574):
+            初始化 LEDBar 并清空所有 LED。
+        set_led(index: int, value: bool) -> None:
+            点亮或熄灭指定 LED。
+        set_all(value: int) -> None:
+            设置所有 LED 的状态（8 位二进制数）。
+        display_level(level: int) -> None:
+            根据 level 值点亮前 N 个 LED。
+        clear() -> None:
+            熄灭所有 LED。
 
-        Notes:
-            - 需要依赖 PCF8574 I/O 扩展芯片，需通过 I2C 初始化。
-            - 操作非中断安全（I2C 驱动限制），不建议在 ISR 中直接调用。
+    Notes:
+        - 需要依赖 PCF8574 I/O 扩展芯片，需通过 I2C 初始化。
+        - 操作非中断安全（I2C 驱动限制），不建议在 ISR 中直接调用。
 
-        ==========================================
+    ==========================================
 
-        8-bit LED bar driver based on PCF8574.
-        Provides per-LED control, batch update, and level display (light up first N LEDs).
-        Commonly used for level indicators, progress display, and debugging.
+    8-bit LED bar driver based on PCF8574.
+    Provides per-LED control, batch update, and level display (light up first N LEDs).
+    Commonly used for level indicators, progress display, and debugging.
 
-        Attributes:
-            pcf (PCF8574): Pre-initialized PCF8574 instance for controlling I/O expander.
+    Attributes:
+        pcf (PCF8574): Pre-initialized PCF8574 instance for controlling I/O expander.
 
-        Methods:
-            __init__(pcf8574: PCF8574):
-                Initialize LEDBar and clear all LEDs.
-            set_led(index: int, value: bool) -> None:
-                Turn ON/OFF a specific LED.
-            set_all(value: int) -> None:
-                Set all LEDs at once (8-bit binary).
-            display_level(level: int) -> None:
-                Light up the first N LEDs based on level.
-            clear() -> None:
-                Turn off all LEDs.
+    Methods:
+        __init__(pcf8574: PCF8574):
+            Initialize LEDBar and clear all LEDs.
+        set_led(index: int, value: bool) -> None:
+            Turn ON/OFF a specific LED.
+        set_all(value: int) -> None:
+            Set all LEDs at once (8-bit binary).
+        display_level(level: int) -> None:
+            Light up the first N LEDs based on level.
+        clear() -> None:
+            Turn off all LEDs.
 
-        Notes:
-            - Requires PCF8574 I/O expander initialized via I2C.
-            - Not ISR-safe due to I2C driver limitations.
-        """
+    Notes:
+        - Requires PCF8574 I/O expander initialized via I2C.
+        - Not ISR-safe due to I2C driver limitations.
+    """
 
     def __init__(self, pcf8574: "PCF8574") -> None:
         """
@@ -102,7 +103,7 @@ class LEDBar:
 
         Notes:
             All LEDs will be cleared on initialization.
-    """
+        """
         required_methods = ["check", "pin", "toggle"]
         for method in required_methods:
             if not hasattr(pcf8574, method) or not callable(getattr(pcf8574, method)):
@@ -198,6 +199,7 @@ class LEDBar:
         Turn off all LEDs.
         """
         self.set_all(0x00)
+
 
 # ======================================== 初始化配置 ==========================================
 

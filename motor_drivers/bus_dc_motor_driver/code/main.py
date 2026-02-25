@@ -1,18 +1,21 @@
 # Python env   : MicroPython v1.23.0 on Raspberry Pi Pico
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/1/19 上午10:57   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/1/19 上午10:57
+# @Author  : 李清水
+# @File    : main.py
 # @Description : 总线电机扩展板示例程序
 
 # ======================================== 导入相关模块 =========================================
 
 # 导入硬件相关模块
 from machine import Pin, I2C
+
 # 导入时间相关模块
 import time
+
 # 导入自定义模块
 from pca9685 import PCA9685
+
 # 导入直流电机控制模块
 from bus_dc_motor import BusDCMotor
 
@@ -37,14 +40,14 @@ i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 遍历从机设备地址列表
     for device in devices_list:
         # 判断地址是否在0x40到0x4F之间，如果是，则为PCA9685芯片地址

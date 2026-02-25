@@ -1,13 +1,14 @@
 # Python env   : MicroPython v1.23.0 on Raspberry Pi Pico
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/1/19 上午10:57   
-# @Author  : 侯钧瀚           
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/1/19 上午10:57
+# @Author  : 侯钧瀚
+# @File    : main.py
 # @Description : iic扫描测试程序
 
 # ======================================== 导入相关模块 =========================================
 
 from machine import Pin, I2C
+
 # 导入时间相关模块
 import time
 

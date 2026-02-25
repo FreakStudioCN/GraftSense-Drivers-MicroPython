@@ -18,6 +18,7 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 自定义类 ============================================
 
+
 class ProgressBar:
     """
     终端进度条类，用于在终端显示一个可更新的进度条。
@@ -108,8 +109,8 @@ class ProgressBar:
         block = int(self.bar_length * progress)
 
         # 绿色表示进度，红色表示剩余
-        bar = '\033[92m' + '█' * block + '\033[91m' + '-' * (self.bar_length - block) + '\033[0m'
-        print(f"\r[{bar}]", end='')
+        bar = "\033[92m" + "█" * block + "\033[91m" + "-" * (self.bar_length - block) + "\033[0m"
+        print(f"\r[{bar}]", end="")
 
     def reset(self) -> None:
         """
@@ -129,7 +130,8 @@ class ProgressBar:
         Returns:
             None
         """
-        print(f"\r\033[91m[{'-' * self.bar_length}]\033[0m", end='')
+        print(f"\r\033[91m[{'-' * self.bar_length}]\033[0m", end="")
+
 
 # ======================================== 初始化配置 ===========================================
 

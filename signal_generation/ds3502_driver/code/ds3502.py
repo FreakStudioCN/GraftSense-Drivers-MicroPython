@@ -15,8 +15,10 @@ __platform__ = "MicroPython v1.23"
 
 # 导入时间相关模块
 import time
+
 # 导入MicroPython相关模块
 from micropython import const
+
 # 导入硬件相关模块
 from machine import I2C
 
@@ -25,6 +27,7 @@ from machine import I2C
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # DS3502数字电位器自定义类
 class DS3502:
@@ -159,7 +162,7 @@ class DS3502:
         """
         # 发送从设备地址，设置R/W位为0，进行假写操作
         # 写入CR的地址
-        self.i2c.writeto_mem(self.addr, DS3502.REG_CONTROL, b'')
+        self.i2c.writeto_mem(self.addr, DS3502.REG_CONTROL, b"")
 
         # 生成重复的START条件以保持通信
         # 读取CR寄存器的值
@@ -223,7 +226,7 @@ class DS3502:
         """
         # 发送从设备地址，进行假写操作，准备读取WR寄存器
         # 写入WR的地址
-        self.i2c.writeto_mem(self.addr, DS3502.REG_WIPER, b'')
+        self.i2c.writeto_mem(self.addr, DS3502.REG_WIPER, b"")
 
         # 生成重复的START条件以保持通信
         # 读取WR寄存器的值
@@ -231,6 +234,7 @@ class DS3502:
 
         # 返回读取的滑动位置值
         return data[0]
+
 
 # ======================================== 初始化配置 ==========================================
 

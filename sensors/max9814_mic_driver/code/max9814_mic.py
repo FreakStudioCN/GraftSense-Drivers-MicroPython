@@ -21,6 +21,7 @@ from machine import Pin, ADC
 
 # ======================================== 自定义类 ============================================
 
+
 class MAX9814Mic:
     """
     该类封装 MAX9814 驻极体电容式麦克风模块，提供 ADC 读取、增益控制、基线校准和声音检测功能。
@@ -320,12 +321,12 @@ class MAX9814Mic:
             Not ISR-safe.
         """
         return {
-            'enabled': self._enabled,
-            'high_gain': self._high_gain,
-            'has_gain_control': self._gain_pin is not None,
-            'has_shdn_control': self._shdn_pin is not None,
-            'current_reading': self.read(),
-            'current_voltage': self.read_voltage()
+            "enabled": self._enabled,
+            "high_gain": self._high_gain,
+            "has_gain_control": self._gain_pin is not None,
+            "has_shdn_control": self._shdn_pin is not None,
+            "current_reading": self.read(),
+            "current_voltage": self.read_voltage(),
         }
 
     def get_average_reading(self, samples: int = 10) -> int:
@@ -491,6 +492,7 @@ class MAX9814Mic:
         if samples <= 0:
             raise ValueError("samples must > 0")
         return self.get_average_reading(samples)
+
 
 # ======================================== 初始化配置 ===========================================
 

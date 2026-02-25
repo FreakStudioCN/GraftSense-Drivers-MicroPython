@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0 on Raspberry Pi Pico
-# -*- coding: utf-8 -*-        
+# -*- coding: utf-8 -*-
 # @Time    : 2025/4/18
-# @Author  : zker         
-# @File    : touchkey.py       
+# @Author  : zker
+# @File    : touchkey.py
 # @Description : 触控按键库函数
 
 __version__ = "0.1.0"
@@ -20,6 +20,7 @@ from machine import Pin, Timer
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class TouchKey:
     """
@@ -52,29 +53,30 @@ class TouchKey:
             release_callback: Callback function triggered on button release.
 
     """
+
     high, low = (1, 0)
 
-    def __init__(self, pin_num: int, idle_state: int, debounce_time: int=50, press_callback: callable=None, release_callback: callable=None):
+    def __init__(self, pin_num: int, idle_state: int, debounce_time: int = 50, press_callback: callable = None, release_callback: callable = None):
         """
         初始化TouchButton 实列 。
-        
+
         该实列用于控制机械或触摸按键，通过更改函数参数的值来更改闲置状态电平。
-        
+
         Args:
             pin_num（int）:接收按键信号GPIO编号，用于提供输出信号
             idle_stete（int）:用于设置空闲状态电平（high = 1， low = 0）
             debounce_time（int）:用于设置防抖电平（默认50ms）
             press_callback：按下回调函数
             release_callback：松开回调函数
-        
+
         Returns:
                None: 此方法没有返回值。
-               
-        Raises:     
+
+        Raises:
                 None: 该方法不抛出异常。
-        
+
          =================================
-         
+
         Initialize a TouchButton instance
 
         This instance is used to control mechanical or touch buttons by modifying the idle state level through function parameter values.
@@ -116,21 +118,21 @@ class TouchKey:
         # 根据空闲状态配置引脚的上拉/下拉电阻
         pull = Pin.PULL_UP if idle_state == 1 else Pin.PULL_DOWN
         self.pin = Pin(pin_num, Pin.IN, pull)
-        
+
         # 初始化稳定状态为当前实际引脚值
         self.last_stable_state = self.pin.value()
-        
+
         # 配置双边缘触发中断
         self.pin.irq(
-            #设置中断触发的条件
+            # 设置中断触发的条件
             trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING,
-            #定义中断发生时执行的函数
-            handler=self._irq_handler
+            # 定义中断发生时执行的函数
+            handler=self._irq_handler,
         )
-        
+
         # 防抖定时器None表示未激活
         self.debounce_timer = None
- 
+
     def _irq_handler(self, pin):
         """
         设置定时器相关参数。
@@ -172,7 +174,7 @@ class TouchKey:
             # 单触发模式
             mode=Timer.ONE_SHOT,
             # 时间到后执行函数
-            callback=lambda t: self._debounce_handler()
+            callback=lambda t: self._debounce_handler(),
         )
 
     def _debounce_handler(self):
@@ -215,7 +217,6 @@ class TouchKey:
             self.last_stable_state = current_value
         self.debounce_timer = None
 
-
     def get_state(self):
         """
         此方法用于获取状态
@@ -239,6 +240,7 @@ class TouchKey:
 
         """
         return self.last_stable_state != self.idle_state
+
 
 # ======================================== 初始化配置 ==========================================
 

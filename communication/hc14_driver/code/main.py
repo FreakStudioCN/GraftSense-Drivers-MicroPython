@@ -9,12 +9,16 @@
 
 # 时间相关模块
 import time
+
 # 引脚相关模块
 from machine import UART, Pin
+
 # 生成随机数模块
 import urandom
+
 # 常量模块
 from micropython import const
+
 # HC14_Lora 驱动模块
 from hc14_lora import HC14_Lora
 
@@ -55,15 +59,15 @@ hc1 = HC14_Lora(uart1)
 
 # ======================================== 主程序 ===========================================
 
-#保持按下两个模块按钮进入AT配置模式
+# 保持按下两个模块按钮进入AT配置模式
 # 测试 AT 通信
 ok, resp0 = hc0.test_comm()
 if ok:
     print("[OK] AT communication normal:", resp0)
     # 配置LoRa模块的通信信道为7
-    hc0.set_channel(channel)  
+    hc0.set_channel(channel)
     # 配置LoRa模块的传输速率（具体速率需参考模块手册）
-    hc0.set_rate(rate)     
+    hc0.set_rate(rate)
     # 配置LoRa模块的发射功率为20dBm
     hc0.set_power(power)
 else:
@@ -83,9 +87,9 @@ ok, resp1 = hc1.test_comm()
 if ok:
     print("[OK] AT communication normal:", resp1)
     # 配置LoRa模块的通信信道为7
-    hc1.set_channel(channel)  
+    hc1.set_channel(channel)
     # 配置LoRa模块的传输速率（具体速率需参考模块手册）
-    hc1.set_rate(rate)     
+    hc1.set_rate(rate)
     # 配置LoRa模块的发射功率为20dBm
     hc1.set_power(power)
 else:

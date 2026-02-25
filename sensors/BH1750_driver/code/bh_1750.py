@@ -23,6 +23,7 @@ from time import sleep_ms
 
 # ======================================== 自定义类 ============================================
 
+
 class BH1750:
     """
     该类用于控制 BH1750 数字环境光传感器，支持测量模式、分辨率、测量时间的配置，
@@ -77,6 +78,7 @@ class BH1750:
         - Methods performing I2C are not ISR-safe.
         - Lux calculation depends on configured resolution and measurement time.
     """
+
     MEASUREMENT_MODE_CONTINUOUSLY = const(1)
     MEASUREMENT_MODE_ONE_TIME = const(2)
 
@@ -164,26 +166,16 @@ class BH1750:
         Notes:
             Writes configuration to registers immediately.
         """
-        if measurement_mode not in (
-                BH1750.MEASUREMENT_MODE_CONTINUOUSLY,
-                BH1750.MEASUREMENT_MODE_ONE_TIME):
+        if measurement_mode not in (BH1750.MEASUREMENT_MODE_CONTINUOUSLY, BH1750.MEASUREMENT_MODE_ONE_TIME):
             raise ValueError("measurement_mode must be 1 (continuous) or 2 (one-time)")
 
         # Check resolution
-        if resolution not in (
-                BH1750.RESOLUTION_HIGH,
-                BH1750.RESOLUTION_HIGH_2,
-                BH1750.RESOLUTION_LOW):
+        if resolution not in (BH1750.RESOLUTION_HIGH, BH1750.RESOLUTION_HIGH_2, BH1750.RESOLUTION_LOW):
             raise ValueError("resolution must be 0 (high), 1 (high2), or 2 (low)")
 
         # Check measurement time
         if not (BH1750.MEASUREMENT_TIME_MIN <= measurement_time <= BH1750.MEASUREMENT_TIME_MAX):
-            raise ValueError(
-                "measurement_time must be between {0} and {1}".format(
-                    BH1750.MEASUREMENT_TIME_MIN,
-                    BH1750.MEASUREMENT_TIME_MAX
-                )
-            )
+            raise ValueError("measurement_time must be between {0} and {1}".format(BH1750.MEASUREMENT_TIME_MIN, BH1750.MEASUREMENT_TIME_MAX))
 
         self._measurement_mode = measurement_mode
         self._resolution = resolution
@@ -244,7 +236,7 @@ class BH1750:
         Reset sensor, clear illuminance data register.
 
         """
-        self._i2c.writeto(self._address, bytearray(b'\x07'))
+        self._i2c.writeto(self._address, bytearray(b"\x07"))
 
     def power_on(self):
         """
@@ -255,7 +247,7 @@ class BH1750:
         Power on the BH1750 sensor.
 
         """
-        self._i2c.writeto(self._address, bytearray(b'\x01'))
+        self._i2c.writeto(self._address, bytearray(b"\x01"))
 
     def power_off(self):
         """
@@ -266,7 +258,7 @@ class BH1750:
         Power off the BH1750 sensor.
 
         """
-        self._i2c.writeto(self._address, bytearray(b'\x00'))
+        self._i2c.writeto(self._address, bytearray(b"\x00"))
 
     @property
     def measurement(self) -> float:
@@ -328,6 +320,7 @@ class BH1750:
             if self._measurement_mode == BH1750.MEASUREMENT_MODE_CONTINUOUSLY:
                 base_measurement_time = 16 if self._measurement_time == BH1750.RESOLUTION_LOW else 120
                 sleep_ms(math.ceil(base_measurement_time * self._measurement_time / BH1750.MEASUREMENT_TIME_DEFAULT))
+
 
 # ======================================== 初始化配置 ===========================================
 

@@ -22,7 +22,7 @@ import dht
 # 延时等待设备初始化
 time.sleep(3)
 # 打印调试信息
-print('FreakStudio : Using OneWire to read DHT22 sensor')
+print("FreakStudio : Using OneWire to read DHT22 sensor")
 
 # 延时1s，等待DHT22传感器上电完成
 time.sleep(1)
@@ -40,10 +40,3 @@ while True:
     except Exception as e:
         print("Read error:", e)
     time.sleep(2)
-
-
-
-
-
-
-

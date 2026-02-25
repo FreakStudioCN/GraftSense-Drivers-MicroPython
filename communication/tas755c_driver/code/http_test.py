@@ -10,6 +10,7 @@
 # 导入硬件相关模块
 import time
 from machine import UART, Pin
+
 # 导入第三方驱动模块
 from tas_755c_eth import TAS_755C_ETH
 
@@ -45,7 +46,7 @@ tas.set_ip_config(
     # 子网掩码
     subnet="255.255.255.0",
     # DNS服务器地址(这里使用阿里云公共DNS)
-    dns="223.5.5.5"
+    dns="223.5.5.5",
 )
 
 # 配置TCP/UDP参数
@@ -59,7 +60,7 @@ tas.set_tcp_config(
     # 远程服务器IP（与通信主机IP一致，需要用户自己查看修改）
     # 域名需解析请加引号'"域名"'
     # IP地址不需加引号"IP地址"
-    remote_address='192.168.2.97'
+    remote_address="192.168.2.97",
 )
 
 tas.set_http_config(
@@ -68,7 +69,7 @@ tas.set_http_config(
     # 请求方法 (0=POST, 1=GET)。
     method=0,
     # 是否返回 Header (0=否, 1=是)。
-    header_return=1
+    header_return=1,
 )
 
 # 保存当前设置并重启使配置生效
@@ -93,7 +94,5 @@ tas.send_data("http.request.test")
 while True:
     # 读取数据
     if tas.has_data():
-        print(tas.read_data().decode('utf-8'))
+        print(tas.read_data().decode("utf-8"))
         time.sleep(5)
-
-

@@ -23,6 +23,7 @@ from . import IR_RX
 
 # ======================================== 自定义类 ============================================
 
+
 class NEC_ABC(IR_RX):
     """
     NEC 协议解码基类，用于标准 NEC、扩展 NEC 和 Samsung IR 信号的解码。
@@ -150,19 +151,20 @@ class NEC_ABC(IR_RX):
                 raise RuntimeError(self.REPEAT if self.edge == 4 else self.BADREP)
             else:
                 raise RuntimeError(self.BADSTART)
-            addr = val & 0xff
-            cmd = (val >> 16) & 0xff
-            if cmd != (val >> 24) ^ 0xff:
+            addr = val & 0xFF
+            cmd = (val >> 16) & 0xFF
+            if cmd != (val >> 24) ^ 0xFF:
                 raise RuntimeError(self.BADDATA)
-            if addr != ((val >> 8) ^ 0xff) & 0xff:
+            if addr != ((val >> 8) ^ 0xFF) & 0xFF:
                 if not self._extended:
                     raise RuntimeError(self.BADADDR)
-                addr |= val & 0xff00
+                addr |= val & 0xFF00
             self._addr = addr
         except RuntimeError as e:
             cmd = e.args[0]
             addr = self._addr if cmd == self.REPEAT else 0
         self.do_callback(cmd, addr, 0, self.REPEAT)
+
 
 class NEC_16(NEC_ABC):
     """
@@ -272,6 +274,8 @@ class SAMSUNG(NEC_ABC):
             No exceptions are raised.
         """
         super().__init__(pin, True, True, callback, *args)
+
+
 class NEC_8(NEC_ABC):
     """
     NEC 8-bit 地址协议接收类。
@@ -359,6 +363,7 @@ class NEC_8(NEC_ABC):
         """
 
         super().__init__(pin, False, False, callback, *args)
+
 
 # ======================================== 初始化配置 ==========================================
 

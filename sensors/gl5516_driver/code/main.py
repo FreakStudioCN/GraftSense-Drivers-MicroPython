@@ -26,13 +26,13 @@ adc = GL5516(26)
 # 设置最小值
 input("Place sensor in LOW light environment and press Enter to set minimum light...")
 adc.set_min_light()
-print(f'min_light:{adc.min_light}')
+print(f"min_light:{adc.min_light}")
 time.sleep(1)
 
 # 设置最大值
 input("Place sensor in HIGH light environment and press Enter to set minimum light...")
 adc.set_max_light()
-print(f'max_light:{adc.max_light}')
+print(f"max_light:{adc.max_light}")
 time.sleep(1)
 
 # ======================================== 主程序 ===============================================

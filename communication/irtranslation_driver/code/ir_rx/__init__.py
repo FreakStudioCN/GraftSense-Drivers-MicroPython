@@ -18,6 +18,7 @@ from time import ticks_us
 
 # ======================================== 自定义类 ============================================
 
+
 class IR_RX:
     """
     该类是红外接收器基类，用于捕获和解析红外遥控信号。
@@ -164,7 +165,6 @@ class IR_RX:
             self.edge += 1
 
     def do_callback(self, cmd: int, addr: int, ext: int, thresh: int = 0) -> None:
-
         """
         执行用户回调函数或错误处理函数。
 
@@ -238,6 +238,7 @@ class IR_RX:
         """
         self._pin.irq(handler=None)
         self.tim.deinit()
+
 
 # ======================================== 初始化配置 ==========================================
 

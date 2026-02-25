@@ -9,7 +9,8 @@
 
 # 导入硬件相关模块
 import time
-from machine import UART,Pin
+from machine import UART, Pin
+
 # 导入第三方驱动模块
 from cc253x_ttl import CC253xTTL
 
@@ -35,23 +36,23 @@ cor = CC253xTTL(uart0)
 # 路由器
 env = CC253xTTL(uart1)
 
-#将路由器与协调器设置成相同PAMID
+# 将路由器与协调器设置成相同PAMID
 while cor.read_status() is None:
     pass
 while env.read_status() is None:
     pass
 
-#获取协调器PAMID与通道
-pamid,ch=cor.read_panid_channel()
+# 获取协调器PAMID与通道
+pamid, ch = cor.read_panid_channel()
 print(f"cor:pamid:{pamid},channel:{ch}")
-while env.set_panid(int(pamid,16)) is False:
+while env.set_panid(int(pamid, 16)) is False:
     pass
-while env.set_channel(int(ch,16)) is False:
+while env.set_channel(int(ch, 16)) is False:
     pass
 
-#输出路由器PAMID与通道
+# 输出路由器PAMID与通道
 time.sleep(0.5)
-pamid,ch=env.read_panid_channel()
+pamid, ch = env.read_panid_channel()
 print(f"env:pamid:{pamid},channel:{ch}")
 
 # ========================================  主程序  ===========================================
@@ -60,7 +61,7 @@ while True:
     # 路由器对协调器发送
     env.send_node_to_coord("node_to_coord")
     time.sleep(0.5)
-    
+
     # 协调器接收并且输出
     mode, data, addr1, addr2 = cor.recv_frame()
     print(f"   Coordinator Received Data:")
@@ -70,4 +71,3 @@ while True:
     print(f"   Address 1: {addr1}")
     print(f"   Address 2: {addr2}")
     time.sleep(1)
-

@@ -10,14 +10,15 @@
 # 导入硬件相关模块
 import time
 from machine import UART, Pin
+
 # 导入第三方驱动模块
 from cc253x_ttl import CC253xTTL
 
 # ======================================== 全局变量 ============================================
 
 # 协调器的pamid和信道（具体情况修改）
-pamid =0xc535
-ch = 0x0b
+pamid = 0xC535
+ch = 0x0B
 
 # ======================================== 功能函数 ============================================
 
@@ -61,25 +62,25 @@ while env2.set_channel(ch) is False:
 
 # 输出路由器PAMID与通道
 time.sleep(0.5)
-pamid,ch=env1.read_panid_channel()
+pamid, ch = env1.read_panid_channel()
 print(f"cor1:pamid:{pamid},channel:{ch}")
 time.sleep(0.5)
-pamid,ch=env2.read_panid_channel()
+pamid, ch = env2.read_panid_channel()
 print(f"cor2:pamid:{pamid},channel:{ch}")
 
 # 路由器1地址为0xaaff
-while env1.set_custom_short_addr(0xaaff)[0] is False:
+while env1.set_custom_short_addr(0xAAFF)[0] is False:
     pass
 
 # 路由器2地址为0xffaa
-while env2.set_custom_short_addr(0xffaa)[0] is False:
+while env2.set_custom_short_addr(0xFFAA)[0] is False:
     pass
 
 # ========================================  主程序  ===========================================
 
 while True:
     # 协调器对路由器发送
-    env2.send_node_to_node(source_addr=0xaaff ,target_addr=0xffaa ,data="node_to_node")
+    env2.send_node_to_node(source_addr=0xAAFF, target_addr=0xFFAA, data="node_to_node")
     time.sleep(0.5)
     # 协调器接收并且输出
     mode, data, addr1, addr2 = env1.recv_frame()

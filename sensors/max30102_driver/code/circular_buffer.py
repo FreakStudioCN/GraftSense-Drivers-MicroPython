@@ -21,6 +21,7 @@ from ucollections import deque
 
 # ======================================== 自定义类 ============================================
 
+
 class CircularBuffer(object):
     """
     基于 deque 的简易环形缓冲区实现。
@@ -57,6 +58,7 @@ class CircularBuffer(object):
         - The original `pop_head` behavior is preserved verbatim; it is unusual
           for a ring buffer, so use with care.
     """
+
     def __init__(self, max_size):
         """
         初始化。
@@ -98,16 +100,16 @@ class CircularBuffer(object):
 
     def is_empty(self):
         """
-           判断是否为空。
+        判断是否为空。
 
-           Returns:
-               bool: 是否为空。
+        Returns:
+            bool: 是否为空。
 
-           =========================================
-           Check if empty.
+        =========================================
+        Check if empty.
 
-           Returns:
-               bool: True if empty.
+        Returns:
+            bool: True if empty.
         """
         return not bool(self.data)
 

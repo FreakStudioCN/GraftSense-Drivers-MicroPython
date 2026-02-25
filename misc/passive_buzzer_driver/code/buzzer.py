@@ -15,6 +15,7 @@ __platform__ = "MicroPython v1.23"
 
 # 导入时间相关模块
 import time
+
 # 导入硬件相关的模块
 from machine import Pin, PWM
 
@@ -22,14 +23,33 @@ from machine import Pin, PWM
 
 # 音符到频率的映射
 NOTE_FREQS = {
-    'C4': 261, 'D4': 293, 'E4': 329, 'F4': 349, 'G4': 392, 'A4': 440, 'B4': 493,
-    'C5': 523, 'D5': 587, 'E5': 659, 'F5': 698, 'G5': 784, 'A5': 880, 'B5': 987,
-    'C3': 130, 'D3': 146, 'E3': 164, 'F3': 174, 'G3': 196, 'A3': 220, 'B3': 246
+    "C4": 261,
+    "D4": 293,
+    "E4": 329,
+    "F4": 349,
+    "G4": 392,
+    "A4": 440,
+    "B4": 493,
+    "C5": 523,
+    "D5": 587,
+    "E5": 659,
+    "F5": 698,
+    "G5": 784,
+    "A5": 880,
+    "B5": 987,
+    "C3": 130,
+    "D3": 146,
+    "E3": 164,
+    "F3": 174,
+    "G3": 196,
+    "A3": 220,
+    "B3": 246,
 }
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class Buzzer:
     """
@@ -56,8 +76,8 @@ class Buzzer:
 
     Buzzer class for driving a buzzer via PWM to play tones and melodies.
 
-    This class encapsulates control logic for the buzzer, supporting 
-    both single tone playback and melody playback. By adjusting PWM 
+    This class encapsulates control logic for the buzzer, supporting
+    both single tone playback and melody playback. By adjusting PWM
     frequency and duty cycle, different pitches and durations can be produced.
 
     Attributes:
@@ -144,7 +164,7 @@ class Buzzer:
 
         Args:
             melody (list): List of (note, duration) tuples.
-                           note is note name (e.g., 'C4'), 
+                           note is note name (e.g., 'C4'),
                            duration is duration in milliseconds.
 
         Returns:
@@ -158,6 +178,7 @@ class Buzzer:
                 self.play_tone(frequency, duration)
             # 每个音符之间的间隔
             time.sleep_ms(10)
+
     def stop_tone(self) -> None:
         """
         停止播放
@@ -165,6 +186,7 @@ class Buzzer:
         stop playing
         """
         self.buzzer.duty_u16(0)
+
 
 # ======================================== 初始化配置 ==========================================
 

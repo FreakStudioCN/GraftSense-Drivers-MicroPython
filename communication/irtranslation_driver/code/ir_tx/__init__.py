@@ -14,7 +14,8 @@ __platform__ = "MicroPython v1.23"
 # ======================================== 导入相关模块 =========================================
 
 from sys import platform
-RP2 = platform == 'rp2'
+
+RP2 = platform == "rp2"
 if RP2:
     from .rp2_rmt import RP2_RMT
 from array import array
@@ -30,6 +31,7 @@ STOP = const(0)  # End of data
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class IR:
     """
@@ -119,7 +121,7 @@ class IR:
         """
         self._rmt = RP2_RMT(pin_pulse=None, carrier=(pin, cfreq, duty))
         asize += 1
-        self._arr = array('H', (0 for _ in range(asize)))
+        self._arr = array("H", (0 for _ in range(asize)))
         self._mva = memoryview(self._arr)
         self.verbose = verbose
         self.carrier = False
@@ -169,7 +171,7 @@ class IR:
         """
         return self._rmt.busy()
 
-    def transmit(self, addr: int, data: int, toggle: int=0, validate: bool=False) -> None:
+    def transmit(self, addr: int, data: int, toggle: int = 0, validate: bool = False) -> None:
         """
         发送红外信号，子类需实现 tx() 方法。
 
@@ -249,7 +251,7 @@ class IR:
             self.aptr += 1
             self.carrier = not self.carrier
             if self.verbose:
-                print('append', t, 'carrier', self.carrier)
+                print("append", t, "carrier", self.carrier)
 
     def add(self, t: int) -> None:
         """
@@ -278,8 +280,9 @@ class IR:
         """
         assert t > 0
         if self.verbose:
-            print('add', t)
+            print("add", t)
         self._arr[self.aptr - 1] += t
+
 
 class Player(IR):
     """
@@ -307,7 +310,7 @@ class Player(IR):
         Used to play known pulse sequences.
     """
 
-    def __init__(self, pin, freq: int=38000, verbose: bool=False, asize: int=68) -> None:
+    def __init__(self, pin, freq: int = 38000, verbose: bool = False, asize: int = 68) -> None:
         """
         初始化 Player 对象。
 
@@ -357,6 +360,7 @@ class Player(IR):
             self._arr[x] = t
         self.aptr = x + 1
         self.trigger()
+
 
 # ======================================== 初始化配置 ==========================================
 

@@ -22,6 +22,7 @@ import micropython
 
 # ======================================== 自定义类 ============================================
 
+
 class AD8232_DataFlowProcessor:
     """
     AD8232心电传感器UART数据流处理客户端类。
@@ -93,6 +94,7 @@ class AD8232_DataFlowProcessor:
         query_module_status(): Query module operating status.
         query_heart_rate(): Query heart rate value.
     """
+
     DEBUG_ENABLED = False  # 调试模式开关
 
     def __init__(self, data_flow_processor, parse_interval=5):
@@ -258,8 +260,8 @@ class AD8232_DataFlowProcessor:
             - Only updates local properties, does not send response frames.
             - Data validity checks are relatively simple.
         """
-        command = frame['frame_type']
-        data = frame['data']
+        command = frame["frame_type"]
+        data = frame["data"]
         if len(data) == 0:
             return
         # 在这里根据命令和数据更新属性
@@ -614,6 +616,7 @@ class AD8232_DataFlowProcessor:
         # AA 55 08 01 00 08 0D 0A
         self.DataFlowProcessor.build_and_send_frame(0x08, bytes([0x00]))
         return self.heart_rate
+
 
 # ======================================== 初始化配置 ==========================================
 

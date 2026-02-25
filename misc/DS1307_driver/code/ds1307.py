@@ -26,6 +26,7 @@ _CONTROL_REGISTER = const(0x07)
 
 # ======================================== 自定义类 ============================================
 
+
 class DS1307:
     """
     该类控制 DS1307 实时时钟芯片，提供时间读取、设置和振荡器控制功能。
@@ -147,17 +148,16 @@ class DS1307:
         """
         self.i2c.readfrom_mem_into(self.addr, _DATETIME_REGISTER, self.buf)
         hr24 = False if (self.buf[2] & 0x40) else True
-        _datetime = (self._bcd2dec(self.buf[6]) + 2000,
-                     self._bcd2dec(self.buf[5]),
-                     self._bcd2dec(self.buf[4]),
-                     self._bcd2dec(self.buf[2]) if hr24 else
-                     self._bcd2dec((self.buf[2] & 0x1f))
-                     + 12 if (self.buf[2] & 0x20) else 0,
-                     self._bcd2dec(self.buf[1]),  # minutes
-                     self._bcd2dec(self.buf[0] & 0x7f),  # seconds, remove oscilator disable flag
-                     self.buf[3] - 1,
-                     None  # unknown number of days since start of year
-                     )
+        _datetime = (
+            self._bcd2dec(self.buf[6]) + 2000,
+            self._bcd2dec(self.buf[5]),
+            self._bcd2dec(self.buf[4]),
+            self._bcd2dec(self.buf[2]) if hr24 else self._bcd2dec((self.buf[2] & 0x1F)) + 12 if (self.buf[2] & 0x20) else 0,
+            self._bcd2dec(self.buf[1]),  # minutes
+            self._bcd2dec(self.buf[0] & 0x7F),  # seconds, remove oscilator disable flag
+            self.buf[3] - 1,
+            None,  # unknown number of days since start of year
+        )
         return _datetime
 
     @datetime.setter
@@ -275,7 +275,7 @@ class DS1307:
         self._disable_oscillator = value
         self.i2c.readfrom_mem_into(self.addr, _DATETIME_REGISTER, self.buf1)
         # preserve seconds
-        self.buf1[0] &= 0x7f
+        self.buf1[0] &= 0x7F
         self.buf1[0] |= self._disable_oscillator << 7
         self.i2c.writeto_mem(self.addr, _DATETIME_REGISTER, self.buf1)
 
@@ -334,6 +334,7 @@ class DS1307:
             Internal helper for datetime conversion.
         """
         return ((decimal // 10) << 4) + (decimal % 10)
+
 
 # ======================================== 初始化配置 ===========================================
 

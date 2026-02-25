@@ -15,6 +15,7 @@ from max9814_mic import MAX9814Mic
 
 # ======================================== 功能函数 ============================================
 
+
 def get_formatted_time() -> str:
     """
     获取格式化时间字符串 (HH:MM:SS)。
@@ -41,6 +42,7 @@ def get_formatted_time() -> str:
     t = time.localtime()
     # 格式化输出时分秒
     return "{:02d}:{:02d}:{:02d}".format(t[3], t[4], t[5])
+
 
 def test_basic_reading() -> None:
     """
@@ -87,13 +89,12 @@ def test_basic_reading() -> None:
             normalized = mic.read_normalized()
             # 电压值 (V)
             voltage = mic.read_voltage()
-            print("[{}] Raw:{:5d} | Norm:{:.3f} | Volt:{:.3f}V".format(
-                get_formatted_time(), raw_value, normalized, voltage
-            ))
+            print("[{}] Raw:{:5d} | Norm:{:.3f} | Volt:{:.3f}V".format(get_formatted_time(), raw_value, normalized, voltage))
             # 延时 0.5 秒
             time.sleep(0.5)
     except KeyboardInterrupt:
         print("\n[{}] Basic test interrupted".format(get_formatted_time()))
+
 
 def test_with_gain_control() -> None:
     """
@@ -151,6 +152,7 @@ def test_with_gain_control() -> None:
     except KeyboardInterrupt:
         print("\n[{}] Gain test interrupted".format(get_formatted_time()))
 
+
 def test_sound_detection() -> None:
     """
     声音检测测试：基于阈值判断环境是否有声音。
@@ -202,20 +204,17 @@ def test_sound_detection() -> None:
             if is_sound:
                 # 获取峰值
                 peak = mic.get_peak_reading(samples=20)
-                print("[{}] SOUND! Current:{} Peak:{}".format(
-                    get_formatted_time(), current_value, peak
-                ))
+                print("[{}] SOUND! Current:{} Peak:{}".format(get_formatted_time(), current_value, peak))
                 silent_count = 0
             else:
                 silent_count += 1
                 # 每检测 50 次安静，打印一次状态
                 if silent_count % 50 == 0:
-                    print("[{}] Silent... Current:{} (Th:{})".format(
-                        get_formatted_time(), current_value, threshold
-                    ))
+                    print("[{}] Silent... Current:{} (Th:{})".format(get_formatted_time(), current_value, threshold))
             time.sleep(0.6)
     except KeyboardInterrupt:
         print("\n[{}] Detection stopped".format(get_formatted_time()))
+
 
 # ======================================== 自定义类 =============================================
 

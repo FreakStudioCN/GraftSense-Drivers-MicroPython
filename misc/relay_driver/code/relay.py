@@ -21,6 +21,7 @@ from machine import Pin, Timer
 
 # ======================================== 自定义类 ============================================
 
+
 class RelayController:
     """
     RelayController类用于控制单通道继电器，支持普通继电器和磁保持继电器两种类型。
@@ -87,12 +88,13 @@ class RelayController:
         deinit() -> None:
             Release resources, including timer and GPIO pins.
     """
+
     # 类属性：继电器类型字典
     RELAY_TYPES = {
         # 普通单线圈继电器
-        'normal': 'Standard single-coil relay',
+        "normal": "Standard single-coil relay",
         # 双稳态磁保持继电器(需H桥驱动)
-        'latching': 'Bistable latching relay (requires H-bridge)'
+        "latching": "Bistable latching relay (requires H-bridge)",
     }
 
     def __init__(self, relay_type: str, pin1: int, pin2: int = None) -> None:
@@ -151,7 +153,7 @@ class RelayController:
         self._pulse_timer = Timer(-1)
 
         # 磁保持继电器需要两个引脚
-        if self.relay_type == 'latching':
+        if self.relay_type == "latching":
             if pin2 is None:
                 raise ValueError("Latching relay requires both pin1 and pin2 for H-bridge control")
             self.pin2 = Pin(pin2, Pin.OUT)
@@ -192,7 +194,7 @@ class RelayController:
         Raises:
             None: This method does not raise any exceptions.
         """
-        if self.relay_type == 'normal':
+        if self.relay_type == "normal":
             return bool(self.pin1.value())
         else:
             return self._last_state
@@ -228,7 +230,7 @@ class RelayController:
             None: This method does not raise any exceptions.
         """
         self.pin1.value(0)
-        if hasattr(self, 'pin2'):
+        if hasattr(self, "pin2"):
             self.pin2.value(0)
 
     def on(self) -> None:
@@ -262,7 +264,7 @@ class RelayController:
         Raises:
             None: This method does not raise any exceptions.
         """
-        if self.relay_type == 'normal':
+        if self.relay_type == "normal":
             # 普通继电器直接给高电平
             self.pin1.value(1)
         else:
@@ -274,9 +276,7 @@ class RelayController:
             # 开始正向脉冲
             self.pin1.value(1)
             # 设置50ms后自动复位（非阻塞）
-            self._pulse_timer.init(mode=Timer.ONE_SHOT,
-                                   period=50,
-                                   callback=self._reset_pins)
+            self._pulse_timer.init(mode=Timer.ONE_SHOT, period=50, callback=self._reset_pins)
         self._last_state = True
 
     def off(self) -> None:
@@ -310,7 +310,7 @@ class RelayController:
         Raises:
             None: This method does not raise any exceptions.
         """
-        if self.relay_type == 'normal':
+        if self.relay_type == "normal":
             # 普通继电器直接给低电平
             self.pin1.value(0)
         else:
@@ -320,9 +320,7 @@ class RelayController:
             self.pin1.value(0)
             # 开始反向脉冲
             self.pin2.value(1)
-            self._pulse_timer.init(mode=Timer.ONE_SHOT,
-                                   period=50,
-                                   callback=self._reset_pins)
+            self._pulse_timer.init(mode=Timer.ONE_SHOT, period=50, callback=self._reset_pins)
         self._last_state = False
 
     def toggle(self) -> None:
@@ -355,7 +353,7 @@ class RelayController:
         Raises:
             None: This method does not raise any exceptions.
         """
-        if self.relay_type == 'normal':
+        if self.relay_type == "normal":
             # 普通继电器直接取反
             self.pin1.value(not self.pin1.value())
             self._last_state = bool(self.pin1.value())
@@ -399,6 +397,7 @@ class RelayController:
         self._pulse_timer.deinit()
         # 确保继电器处于安全状态
         self.off()
+
 
 # ======================================== 初始化配置 ==========================================
 

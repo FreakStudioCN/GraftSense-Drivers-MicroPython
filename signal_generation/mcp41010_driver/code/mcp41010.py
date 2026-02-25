@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/12/27 上午11:09   
-# @Author  : 李清水            
-# @File    : mcp41010.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/12/27 上午11:09
+# @Author  : 李清水
+# @File    : mcp41010.py
 # @Description : MCP41010数字电位器芯片的驱动程序
 # 这部分代码由 leeqingshui 开发，采用 MIT 协议。
 
@@ -16,6 +16,7 @@ from machine import Pin, SPI
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # MCP41010单通道数字电位器自定义类
 class MCP41010:
@@ -66,12 +67,14 @@ class MCP41010:
         self.cs.value(1)
 
         # 使用的SPI外设
-        self.spi = SPI(spi_id,
-                       baudrate=1000000,    # SPI时钟频率（1 MHz）
-                       polarity=0,          # 时钟空闲时为低电平
-                       phase=0,             # 数据在时钟上升沿采样
-                       sck=Pin(clk_pin),    # 时钟SCK引脚
-                       mosi=Pin(mosi_pin))  # 数据MOSI引脚
+        self.spi = SPI(
+            spi_id,
+            baudrate=1000000,  # SPI时钟频率（1 MHz）
+            polarity=0,  # 时钟空闲时为低电平
+            phase=0,  # 数据在时钟上升沿采样
+            sck=Pin(clk_pin),  # 时钟SCK引脚
+            mosi=Pin(mosi_pin),
+        )  # 数据MOSI引脚
         self.max_value = max_value
 
     def set_value(self, value: int) -> None:
@@ -140,6 +143,7 @@ class MCP41010:
         self.spi.write(bytearray([command_byte, data_byte]))
         # CS拉高以结束通信
         self.cs.value(1)
+
 
 # ======================================== 初始化配置 ==========================================
 

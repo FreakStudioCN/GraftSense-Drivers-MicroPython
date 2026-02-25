@@ -15,6 +15,7 @@ __platform__ = "MicroPython v1.19+"
 
 # 导入micropython内置库
 import sys
+
 # 导入常量模块
 from micropython import const
 
@@ -22,80 +23,82 @@ from micropython import const
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class SI5351_I2C:
     """
-       基于 SI5351 的 I2C 时钟发生器驱动类。支持配置 PLL 倍频、Multisynth 分频，
-       控制输出通道的使能、相位、极性和驱动能力，可产生多路可调频率的时钟信号。
+    基于 SI5351 的 I2C 时钟发生器驱动类。支持配置 PLL 倍频、Multisynth 分频，
+    控制输出通道的使能、相位、极性和驱动能力，可产生多路可调频率的时钟信号。
 
-       Attributes:
-           i2c: MicroPython 或 CircuitPython 的 I2C 实例。
-           crystal (int): 晶振频率（Hz）。
-           address (int): I2C 地址，默认 0x60。
-           vco (dict): PLL VCO 频率缓存 {pll_id: vco_freq}。
-           pll (dict): 输出通道使用的 PLL 选择 {output: pll_id}。
-           quadrature (dict): 是否启用正交输出 {output: bool}。
-           invert (dict): 是否启用反相输出 {output: bool}。
-           drive_strength (dict): 输出驱动能力配置 {output: 驱动等级}。
-           div (dict): Multisynth 分频缓存 {output: divisor}。
+    Attributes:
+        i2c: MicroPython 或 CircuitPython 的 I2C 实例。
+        crystal (int): 晶振频率（Hz）。
+        address (int): I2C 地址，默认 0x60。
+        vco (dict): PLL VCO 频率缓存 {pll_id: vco_freq}。
+        pll (dict): 输出通道使用的 PLL 选择 {output: pll_id}。
+        quadrature (dict): 是否启用正交输出 {output: bool}。
+        invert (dict): 是否启用反相输出 {output: bool}。
+        drive_strength (dict): 输出驱动能力配置 {output: 驱动等级}。
+        div (dict): Multisynth 分频缓存 {output: divisor}。
 
-       Methods:
-           __init__(i2c, crystal, load, address): 初始化并配置晶振与寄存器。
-           _read_bulk(register, nbytes): 从寄存器批量读取字节。
-           _write_bulk(register, values): 向寄存器批量写入字节。
-           _read(register): 读取单个寄存器。
-           _write(register, value): 写入单个寄存器。
-           write_config(...): 写入 PLL 或 Multisynth 的配置。
-           set_phase(output, div): 设置输出相位。
-           reset_pll(pll): 复位 PLL。
-           init_multisynth(output, integer_mode): 初始化 Multisynth 输出。
-           approximate_fraction(...): 分数逼近算法。
-           init_clock(...): 初始化输出通道状态。
-           enable_output(output): 使能指定输出。
-           disable_output(output): 禁用指定输出。
-           setup_pll(pll, mul, num, denom): 配置 PLL 倍频。
-           setup_multisynth(...): 配置 Multisynth 分频。
-           set_freq_fixedpll(output, freq): 在固定 PLL 下设置输出频率。
-           set_freq_fixedms(output, freq): 在固定 Multisynth 下设置输出频率。
-           disabled_states(output, state): 设置输出禁用时的状态。
-           disable_oeb(mask): 屏蔽 OEB 引脚对输出的控制。
-       ==========================================
-       I2C driver for the SI5351 clock generator. Supports PLL multiplication,
-       Multisynth division, and control of output enable, phase, polarity,
-       and drive strength, allowing generation of multiple adjustable clocks.
+    Methods:
+        __init__(i2c, crystal, load, address): 初始化并配置晶振与寄存器。
+        _read_bulk(register, nbytes): 从寄存器批量读取字节。
+        _write_bulk(register, values): 向寄存器批量写入字节。
+        _read(register): 读取单个寄存器。
+        _write(register, value): 写入单个寄存器。
+        write_config(...): 写入 PLL 或 Multisynth 的配置。
+        set_phase(output, div): 设置输出相位。
+        reset_pll(pll): 复位 PLL。
+        init_multisynth(output, integer_mode): 初始化 Multisynth 输出。
+        approximate_fraction(...): 分数逼近算法。
+        init_clock(...): 初始化输出通道状态。
+        enable_output(output): 使能指定输出。
+        disable_output(output): 禁用指定输出。
+        setup_pll(pll, mul, num, denom): 配置 PLL 倍频。
+        setup_multisynth(...): 配置 Multisynth 分频。
+        set_freq_fixedpll(output, freq): 在固定 PLL 下设置输出频率。
+        set_freq_fixedms(output, freq): 在固定 Multisynth 下设置输出频率。
+        disabled_states(output, state): 设置输出禁用时的状态。
+        disable_oeb(mask): 屏蔽 OEB 引脚对输出的控制。
+    ==========================================
+    I2C driver for the SI5351 clock generator. Supports PLL multiplication,
+    Multisynth division, and control of output enable, phase, polarity,
+    and drive strength, allowing generation of multiple adjustable clocks.
 
-       Attributes:
-           i2c: MicroPython or CircuitPython I2C instance.
-           crystal (int): Crystal frequency (Hz).
-           address (int): I2C address (default 0x60).
-           vco (dict): Cached PLL VCO frequencies {pll_id: vco_freq}.
-           pll (dict): PLL selection for each output {output: pll_id}.
-           quadrature (dict): Quadrature output enable {output: bool}.
-           invert (dict): Inverted output enable {output: bool}.
-           drive_strength (dict): Output drive strength {output: level}.
-           div (dict): Cached Multisynth divisors {output: divisor}.
+    Attributes:
+        i2c: MicroPython or CircuitPython I2C instance.
+        crystal (int): Crystal frequency (Hz).
+        address (int): I2C address (default 0x60).
+        vco (dict): Cached PLL VCO frequencies {pll_id: vco_freq}.
+        pll (dict): PLL selection for each output {output: pll_id}.
+        quadrature (dict): Quadrature output enable {output: bool}.
+        invert (dict): Inverted output enable {output: bool}.
+        drive_strength (dict): Output drive strength {output: level}.
+        div (dict): Cached Multisynth divisors {output: divisor}.
 
-       Methods:
-           __init__(i2c, crystal, load, address): Initialize crystal and registers.
-           _read_bulk(register, nbytes): Read multiple bytes from a register.
-           _write_bulk(register, values): Write multiple bytes to a register.
-           _read(register): Read a single register.
-           _write(register, value): Write a single register.
-           write_config(...): Configure PLL or Multisynth registers.
-           set_phase(output, div): Set phase offset for an output.
-           reset_pll(pll): Reset a PLL (A or B).
-           init_multisynth(output, integer_mode): Initialize a Multisynth output.
-           approximate_fraction(...): Fraction approximation helper.
-           init_clock(...): Initialize output channel state.
-           enable_output(output): Enable a clock output.
-           disable_output(output): Disable a clock output.
-           setup_pll(pll, mul, num, denom): Configure PLL frequency multiplier.
-           setup_multisynth(...): Configure Multisynth divider.
-           set_freq_fixedpll(output, freq): Set output frequency with fixed PLL.
-           set_freq_fixedms(output, freq): Set output frequency with fixed Multisynth.
-           disabled_states(output, state): Set disabled state for outputs.
-           disable_oeb(mask): Disable OEB pin control for given outputs.
-       """
+    Methods:
+        __init__(i2c, crystal, load, address): Initialize crystal and registers.
+        _read_bulk(register, nbytes): Read multiple bytes from a register.
+        _write_bulk(register, values): Write multiple bytes to a register.
+        _read(register): Read a single register.
+        _write(register, value): Write a single register.
+        write_config(...): Configure PLL or Multisynth registers.
+        set_phase(output, div): Set phase offset for an output.
+        reset_pll(pll): Reset a PLL (A or B).
+        init_multisynth(output, integer_mode): Initialize a Multisynth output.
+        approximate_fraction(...): Fraction approximation helper.
+        init_clock(...): Initialize output channel state.
+        enable_output(output): Enable a clock output.
+        disable_output(output): Disable a clock output.
+        setup_pll(pll, mul, num, denom): Configure PLL frequency multiplier.
+        setup_multisynth(...): Configure Multisynth divider.
+        set_freq_fixedpll(output, freq): Set output frequency with fixed PLL.
+        set_freq_fixedms(output, freq): Set output frequency with fixed Multisynth.
+        disabled_states(output, state): Set disabled state for outputs.
+        disable_oeb(mask): Disable OEB pin control for given outputs.
+    """
+
     SI5351_I2C_ADDRESS_DEFAULT = const(0x60)
 
     SI5351_CRYSTAL_LOAD_6PF = const(1)
@@ -240,7 +243,7 @@ class SI5351_I2C:
         Raises:
             TypeError: 如果参数类型不正确。
             ValueError: 如果参数值超出允许范围。
-            
+
         ==========================================
         Write PLL or Multisynth configuration.
 
@@ -256,10 +259,7 @@ class SI5351_I2C:
             ValueError: If argument values are out of range.
         """
         # 类型检查
-        for name, value in zip(
-                ["reg", "whole", "num", "denom", "rdiv"],
-                [reg, whole, num, denom, rdiv]
-        ):
+        for name, value in zip(["reg", "whole", "num", "denom", "rdiv"], [reg, whole, num, denom, rdiv]):
             if not isinstance(value, int):
                 raise TypeError(f"{name} must be an int")
 
@@ -279,16 +279,19 @@ class SI5351_I2C:
         P3 = denom
 
         # 写入寄存器
-        self._write_bulk(reg, [
-            (P3 & 0x0FF00) >> 8,
-            (P3 & 0x000FF),
-            (P1 & 0x30000) >> 16 | rdiv << 4,
-            (P1 & 0x0FF00) >> 8,
-            (P1 & 0x000FF),
-            (P3 & 0xF0000) >> 12 | (P2 & 0xF0000) >> 16,
-            (P2 & 0x0FF00) >> 8,
-            (P2 & 0x000FF)
-        ])
+        self._write_bulk(
+            reg,
+            [
+                (P3 & 0x0FF00) >> 8,
+                (P3 & 0x000FF),
+                (P1 & 0x30000) >> 16 | rdiv << 4,
+                (P1 & 0x0FF00) >> 8,
+                (P1 & 0x000FF),
+                (P3 & 0xF0000) >> 12 | (P2 & 0xF0000) >> 16,
+                (P2 & 0x0FF00) >> 8,
+                (P2 & 0x000FF),
+            ],
+        )
 
     def set_phase(self, output, div):
         """
@@ -301,7 +304,7 @@ class SI5351_I2C:
         Raises:
             TypeError: 如果 output 或 div 不是 int。
             ValueError: 如果 output 或 div 不在允许范围内。
-            
+
         ==========================================
         Set phase offset for a given output.
 
@@ -354,8 +357,10 @@ class SI5351_I2C:
         # 值检查
         if pll not in (0, 1):
             raise ValueError("pll must be 0 (PLLA) or 1 (PLLB)")
-        if pll == 0: value = self.SI5351_PLL_RESET_A
-        if pll == 1: value = self.SI5351_PLL_RESET_B
+        if pll == 0:
+            value = self.SI5351_PLL_RESET_A
+        if pll == 1:
+            value = self.SI5351_PLL_RESET_B
         self._write(self.SI5351_REGISTER_PLL_RESET, value)
 
     def init_multisynth(self, output, integer_mode):
@@ -485,11 +490,7 @@ class SI5351_I2C:
 
     ###
 
-    def __init__(self,
-                 i2c,
-                 crystal,
-                 load=SI5351_CRYSTAL_LOAD_10PF,
-                 address=SI5351_I2C_ADDRESS_DEFAULT):
+    def __init__(self, i2c, crystal, load=SI5351_CRYSTAL_LOAD_10PF, address=SI5351_I2C_ADDRESS_DEFAULT):
         """
         初始化 SI5351 对象：
 
@@ -513,9 +514,7 @@ class SI5351_I2C:
         and sets the crystal load value.
         """
         # 值检查
-        allowed_loads = (self.SI5351_CRYSTAL_LOAD_6PF,
-                         self.SI5351_CRYSTAL_LOAD_8PF,
-                         self.SI5351_CRYSTAL_LOAD_10PF)
+        allowed_loads = (self.SI5351_CRYSTAL_LOAD_6PF, self.SI5351_CRYSTAL_LOAD_8PF, self.SI5351_CRYSTAL_LOAD_10PF)
         if load not in allowed_loads:
             raise ValueError(f"load must be one of {allowed_loads}")
         if not 0x00 <= address <= 0x7F:
@@ -532,7 +531,7 @@ class SI5351_I2C:
         # wait until chip initializes before writing registers
         while self._read(self.SI5351_REGISTER_DEVICE_STATUS) & 0x80:
             pass
-        # disable outputs 
+        # disable outputs
         self._write(self.SI5351_REGISTER_OUTPUT_ENABLE_CONTROL, 0xFF)
         # power down all 8 output drivers
         values = [self.SI5351_CLK_POWERDOWN] * 8
@@ -540,8 +539,7 @@ class SI5351_I2C:
         # set crystal load value
         self._write(self.SI5351_REGISTER_CRYSTAL_LOAD, load << 6)
 
-    def init_clock(self, output, pll, quadrature=False, invert=False,
-                   drive_strength=SI5351_CLK_DRIVE_STRENGTH_8MA):
+    def init_clock(self, output, pll, quadrature=False, invert=False, drive_strength=SI5351_CLK_DRIVE_STRENGTH_8MA):
         """
         初始化指定的时钟输出 (clkout)。
 
@@ -597,7 +595,7 @@ class SI5351_I2C:
             self.SI5351_CLK_DRIVE_STRENGTH_2MA,
             self.SI5351_CLK_DRIVE_STRENGTH_4MA,
             self.SI5351_CLK_DRIVE_STRENGTH_6MA,
-            self.SI5351_CLK_DRIVE_STRENGTH_8MA
+            self.SI5351_CLK_DRIVE_STRENGTH_8MA,
         )
         if drive_strength not in allowed_drives:
             raise ValueError(f"drive_strength must be one of {allowed_drives}")
@@ -618,7 +616,7 @@ class SI5351_I2C:
         Raises:
             TypeError: 如果 output 不是 int。
             ValueError: 如果 output 不在允许范围内。
-            
+
         ==========================================
         Enable the given clock output.
 
@@ -758,17 +756,20 @@ class SI5351_I2C:
         """
 
         if type(div) is not int or div < 4:
-            raise ValueError('bad multisynth divisor：div (int): Integer divider [4-2047].')
-        if output == 0: reg = self.SI5351_REGISTER_MULTISYNTH0_PARAMETERS_1
-        if output == 1: reg = self.SI5351_REGISTER_MULTISYNTH1_PARAMETERS_1
-        if output == 2: reg = self.SI5351_REGISTER_MULTISYNTH2_PARAMETERS_1
+            raise ValueError("bad multisynth divisor：div (int): Integer divider [4-2047].")
+        if output == 0:
+            reg = self.SI5351_REGISTER_MULTISYNTH0_PARAMETERS_1
+        if output == 1:
+            reg = self.SI5351_REGISTER_MULTISYNTH1_PARAMETERS_1
+        if output == 2:
+            reg = self.SI5351_REGISTER_MULTISYNTH2_PARAMETERS_1
         self.write_config(reg, whole=div, num=num, denom=denom, rdiv=rdiv)
         if self.div[output] != div:
             pll = self.pll[output]
             self.set_phase(output, div if self.quadrature[output] else 0)
             # only after MS setup, syncs all clocks of pll
             self.reset_pll(pll)
-            integer_mode = (num == 0)
+            integer_mode = num == 0
             self.init_multisynth(output, integer_mode=integer_mode)
             self.div[output] = div
 
@@ -804,10 +805,11 @@ class SI5351_I2C:
 
         # determine rdiv
         for rdiv in range(self.SI5351_MULTISYNTH_RX_MAX + 1):
-            if freq * self.SI5351_MULTISYNTH_DIV_MAX > vco: break
+            if freq * self.SI5351_MULTISYNTH_DIV_MAX > vco:
+                break
             freq *= 2
         else:
-            raise ValueError('maximum Rx divisor exceeded')
+            raise ValueError("maximum Rx divisor exceeded")
 
         # determine divisor: div + num / denom
         vco = int(10 * vco)
@@ -815,9 +817,8 @@ class SI5351_I2C:
         num = vco % denom
         # div = 4,6,[8+0/1048575 to 2047]
         div = vco // denom
-        if (div < self.SI5351_MULTISYNTH_DIV_MIN or
-                div >= self.SI5351_MULTISYNTH_DIV_MAX):
-            raise ValueError('multisynth divisor out of range')
+        if div < self.SI5351_MULTISYNTH_DIV_MIN or div >= self.SI5351_MULTISYNTH_DIV_MAX:
+            raise ValueError("multisynth divisor out of range")
         max_denom = self.SI5351_MULTISYNTH_C_MAX
         num, denom = self.approximate_fraction(num, denom, max_denom=max_denom)
         self.setup_multisynth(output, div=div, num=num, denom=denom, rdiv=rdiv)
@@ -863,7 +864,7 @@ class SI5351_I2C:
             raise ValueError("freq must be positive")
         pll = self.pll[output]
         crystal = self.crystal
-        vco = freq * div * 2 ** rdiv
+        vco = freq * div * 2**rdiv
 
         # determine multiplicand: mul + num / denom
         vco = int(10 * vco)
@@ -871,9 +872,8 @@ class SI5351_I2C:
         num = vco % denom
         # mul = 15+0/1048575 to 90
         mul = vco // denom
-        if (mul < self.SI5351_MULTISYNTH_MUL_MIN or
-                mul >= self.SI5351_MULTISYNTH_MUL_MAX):
-            raise ValueError('pll multiplier out of range')
+        if mul < self.SI5351_MULTISYNTH_MUL_MIN or mul >= self.SI5351_MULTISYNTH_MUL_MAX:
+            raise ValueError("pll multiplier out of range")
         max_denom = self.SI5351_MULTISYNTH_C_MAX
         num, denom = self.approximate_fraction(num, denom, max_denom=max_denom)
         self.setup_pll(pll, mul=mul, num=num, denom=denom)
@@ -932,7 +932,7 @@ class SI5351_I2C:
         Raises:
             TypeError: 参数类型错误。
             ValueError: mask 不在 0..0xFF 范围。
-            
+
         ==========================================
         Disable OEB pin support for given outputs.
 
@@ -953,6 +953,7 @@ class SI5351_I2C:
             raise ValueError("mask must be in range 0..0xFF")
 
         self._write(self.SI5351_REGISTER_OEB_ENABLE_CONTROL, mask & 0xFF)
+
 
 # ======================================== 初始化配置 ==========================================
 

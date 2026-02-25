@@ -23,6 +23,7 @@ from machine import I2C, Pin
 
 # ======================================== 功能函数 ============================================
 
+
 def init_float_array(size: int) -> array.array:
     """
     初始化一个指定大小的浮点型数组。
@@ -57,7 +58,8 @@ def init_float_array(size: int) -> array.array:
     """
     if not isinstance(size, int) or size <= 0:
         raise ValueError("Size must be a positive integer.")
-    return array.array('f', (0 for _ in range(size)))
+    return array.array("f", (0 for _ in range(size)))
+
 
 def init_int_array(size: int) -> array.array:
     """
@@ -93,9 +95,11 @@ def init_int_array(size: int) -> array.array:
     """
     if not isinstance(size, int) or size <= 0:
         raise ValueError("Size must be a positive integer.")
-    return array.array('i', (0 for _ in range(size)))
+    return array.array("i", (0 for _ in range(size)))
+
 
 # ======================================== 自定义类 ============================================
+
 
 class RefreshRate:
     """
@@ -131,6 +135,7 @@ class RefreshRate:
     Notes:
         These values correspond to the refresh rate bit field in MLX90640's control register.
     """
+
     # 0.5Hz
     REFRESH_0_5_HZ = 0b000
     # 1Hz
@@ -257,7 +262,7 @@ class I2CDevice:
         Raises:
             TypeError: 当 buf 不是 bytearray 时。
             ValueError: 当 start/end 超出范围时。
-            
+
         Notes:
             - buf长度必须等于需要读取的字节数。
             - 非ISR-safe。
@@ -274,7 +279,7 @@ class I2CDevice:
         Raises:
             TypeError: If buf is not a bytearray.
             ValueError: If start/end are out of range.
-            
+
         Notes:
             - Buffer length must match expected read size.
             - Not ISR-safe.
@@ -306,7 +311,7 @@ class I2CDevice:
 
         Args:
             buf (bytes): Data buffer to write.
-            
+
         Notes:
             - buf must be of type bytes or bytearray.
             - Uses machine.I2C.writeto internally.
@@ -314,8 +319,9 @@ class I2CDevice:
         """
         self.i2c.writeto(self.device_address, buf)
 
-    def write_then_read_into(self, out_buffer: bytes, in_buffer: bytearray, *, out_start: int = 0, out_end: int = None,
-                             in_start: int = 0, in_end: int = None) -> None:
+    def write_then_read_into(
+        self, out_buffer: bytes, in_buffer: bytearray, *, out_start: int = 0, out_end: int = None, in_start: int = 0, in_end: int = None
+    ) -> None:
         """
         先向设备写入数据（通常是寄存器地址），再读取响应数据到缓冲区。
 
@@ -329,7 +335,7 @@ class I2CDevice:
 
         Raises:
             ValueError: out_start/out_end 或 in_start/in_end 超出缓冲区长度范围。
-            
+
         Notes:
             - 常用于寄存器访问：先写寄存器地址再读寄存器内容。
             - 内部使用memoryview避免额外内存分配。
@@ -367,14 +373,14 @@ class I2CDevice:
             raise ValueError(f"Invalid out_buffer range: start={out_start}, end={out_end}, len={len(out_buffer)}")
         if not (0 <= in_start <= in_end <= len(in_buffer)):
             raise ValueError(f"Invalid in_buffer range: start={in_start}, end={in_end}, len={len(in_buffer)}")
-            
+
         self.i2c.writeto(self.device_address, memoryview(out_buffer)[out_start:out_end], False)
         self.i2c.readfrom_into(self.device_address, memoryview(in_buffer)[in_start:in_end])
 
     def _probe_for_device(self) -> None:
         """
         探测I2C设备是否存在。
-        
+
         Raises:
             ValueError: 如果设备不存在或无法响应。
 
@@ -390,7 +396,7 @@ class I2CDevice:
 
         Raises:
             ValueError: Raised if the device is absent or does not respond.
-            
+
         Notes:
             - First attempts empty write to probe device.
             - If write fails, tries reading 1 byte.
@@ -398,13 +404,13 @@ class I2CDevice:
             - Not ISR-safe.
         """
         try:
-            self.i2c.writeto(self.device_address, b'')
+            self.i2c.writeto(self.device_address, b"")
         except OSError:
             try:
                 result = bytearray(1)
                 self.i2c.readfrom_into(self.device_address, result)
             except OSError:
-                raise ValueError(f'No I2C device at address: 0x{self.device_address:x}')
+                raise ValueError(f"No I2C device at address: 0x{self.device_address:x}")
 
 
 class MLX90640:
@@ -559,6 +565,7 @@ class MLX90640:
         - Initialization reads calibration data from EEPROM and extracts parameters, which takes time.
         - Maximum support for 768 pixels (32x24) temperature data reading and calculation.
     """
+
     # 类常量定义
     i2c_read_len = 128
     scale_alpha = 1e-6
@@ -607,7 +614,7 @@ class MLX90640:
         # 这里按手册默认范围，可根据实际修改
         if not (0x31 <= address <= 0x35):
             raise ValueError(f"Invalid MLX90640 I2C address: 0x{address:x}")
-            
+
         # 初始化EEPROM数据缓冲区
         self.ee_data = init_int_array(1024)
         # 双缓存
@@ -739,7 +746,7 @@ class MLX90640:
             RefreshRate.REFRESH_8_HZ,
             RefreshRate.REFRESH_16_HZ,
             RefreshRate.REFRESH_32_HZ,
-            RefreshRate.REFRESH_64_HZ
+            RefreshRate.REFRESH_64_HZ,
         }
         if rate not in valid_rates:
             raise ValueError("Invalid refresh rate value")
@@ -792,7 +799,7 @@ class MLX90640:
         status = self._get_frame_data()
 
         if status < 0:
-            raise RuntimeError('Frame data error')
+            raise RuntimeError("Frame data error")
 
         tr = self._get_ta() - self.openair_ta_shift
 
@@ -844,7 +851,7 @@ class MLX90640:
             cnt += 1
 
         if cnt > 4:
-            raise RuntimeError('Too many retries')
+            raise RuntimeError("Too many retries")
 
         self._i2c_read_words(0x800D, control_register)
         self.mlx90640_frame[832] = control_register[0]
@@ -993,8 +1000,7 @@ class MLX90640:
         if mode == self.calibration_mode_ee:
             ir_data_cp[1] -= self.cp_offset[1] * (1 + self.cp_kta * (ta - 25)) * (1 + self.cp_kv * (vdd - 3.3))
         else:
-            ir_data_cp[1] -= (self.cp_offset[1] + self.il_chess_c[0]) * (1 + self.cp_kta * (ta - 25)) * (
-                    1 + self.cp_kv * (vdd - 3.3))
+            ir_data_cp[1] -= (self.cp_offset[1] + self.il_chess_c[0]) * (1 + self.cp_kta * (ta - 25)) * (1 + self.cp_kv * (vdd - 3.3))
         # 遍历 768 个像素，计算每个像素的温度
         for pixel_number in range(768):
             if self._is_pixel_bad(pixel_number):
@@ -1002,8 +1008,9 @@ class MLX90640:
                 continue
             # 行列模式相关的采样补偿计算
             il_pattern = pixel_number // 32 - (pixel_number // 64) * 2
-            conversion_pattern = ((pixel_number + 2) // 4 - (pixel_number + 3) // 4 + (
-                    pixel_number + 1) // 4 - pixel_number // 4) * (1 - 2 * il_pattern)
+            conversion_pattern = ((pixel_number + 2) // 4 - (pixel_number + 3) // 4 + (pixel_number + 1) // 4 - pixel_number // 4) * (
+                1 - 2 * il_pattern
+            )
 
             if mode == 0:
                 pattern = il_pattern
@@ -1029,20 +1036,10 @@ class MLX90640:
                 ir_data = ir_data - self.tgc * ir_data_cp[sub_page]
                 ir_data /= emissivity
 
-                alpha_compensated = (
-                        (self.scale_alpha * alpha_scale / self.alpha[pixel_number])
-                        * (1 + self.ks_ta * (ta - 25))
-                )
+                alpha_compensated = (self.scale_alpha * alpha_scale / self.alpha[pixel_number]) * (1 + self.ks_ta * (ta - 25))
                 # 计算温度（Stefan-Boltzmann 辐射公式的修正）
-                sx = math.sqrt(math.sqrt(
-                    alpha_compensated
-                    * alpha_compensated
-                    * alpha_compensated
-                    * (ir_data + alpha_compensated * ta_tr)
-                ))
-                to = math.sqrt(math.sqrt(
-                    (ir_data / (alpha_compensated * (1 - self.ks_to[1] * 273.15) + sx) + ta_tr)
-                )) - 273.15
+                sx = math.sqrt(math.sqrt(alpha_compensated * alpha_compensated * alpha_compensated * (ir_data + alpha_compensated * ta_tr)))
+                to = math.sqrt(math.sqrt((ir_data / (alpha_compensated * (1 - self.ks_to[1] * 273.15) + sx) + ta_tr))) - 273.15
 
                 if to < self.ct[1]:
                     torange = 0
@@ -1053,13 +1050,12 @@ class MLX90640:
                 else:
                     torange = 3
                 # 再次修正，得到最终温度值
-                to = math.sqrt(math.sqrt(
-                    ir_data / (
-                            alpha_compensated
-                            * alpha_corr_r[torange]
-                            * (1 + self.ks_to[torange] * (to - self.ct[torange]))
-                    ) + ta_tr
-                )) - 273.15
+                to = (
+                    math.sqrt(
+                        math.sqrt(ir_data / (alpha_compensated * alpha_corr_r[torange] * (1 + self.ks_to[torange] * (to - self.ct[torange]))) + ta_tr)
+                    )
+                    - 273.15
+                )
 
                 result[pixel_number] = to
 
@@ -1355,11 +1351,7 @@ class MLX90640:
                 if alpha_temp[p] > 31:
                     alpha_temp[p] -= 64
                 alpha_temp[p] *= 1 << acc_rem_scale
-                alpha_temp[p] += (
-                        alpha_ref
-                        + (acc_row[i] << acc_row_scale)
-                        + (acc_column[j] << acc_column_scale)
-                )
+                alpha_temp[p] += alpha_ref + (acc_row[i] << acc_row_scale) + (acc_column[j] << acc_column_scale)
                 alpha_temp[p] /= math.pow(2, alpha_scale)
                 alpha_temp[p] -= self.tgc * (self.cp_alpha[0] + self.cp_alpha[1]) / 2
                 alpha_temp[p] = self.scale_alpha / alpha_temp[p]
@@ -1433,11 +1425,7 @@ class MLX90640:
                 if self.offset[p] > 31:
                     self.offset[p] -= 64
                 self.offset[p] *= 1 << occ_rem_scale
-                self.offset[p] += (
-                        offset_ref
-                        + (occ_row[i] << occ_row_scale)
-                        + (occ_column[j] << occ_column_scale)
-                )
+                self.offset[p] += offset_ref + (occ_row[i] << occ_row_scale) + (occ_column[j] << occ_column_scale)
 
     def _extract_kta_pixel_parameters(self) -> None:
         """
@@ -1626,11 +1614,7 @@ class MLX90640:
             Outlier pixel information is used to mark invalid data during temperature calculation.
         """
         pix_cnt = 0
-        while (
-                (pix_cnt < 768)
-                and (len(self.broken_pixels) < 5)
-                and (len(self.outlier_pixels) < 5)
-        ):
+        while (pix_cnt < 768) and (len(self.broken_pixels) < 5) and (len(self.outlier_pixels) < 5):
             if self.ee_data[pix_cnt + 64] == 0:
                 self.broken_pixels.add(pix_cnt)
             elif (self.ee_data[pix_cnt + 64] & 0x0001) != 0:
@@ -1638,24 +1622,24 @@ class MLX90640:
             pix_cnt += 1
 
         if len(self.broken_pixels) > 4:
-            raise RuntimeError('More than 4 broken pixels')
+            raise RuntimeError("More than 4 broken pixels")
         if len(self.outlier_pixels) > 4:
-            raise RuntimeError('More than 4 outlier pixels')
+            raise RuntimeError("More than 4 outlier pixels")
         if (len(self.broken_pixels) + len(self.outlier_pixels)) > 4:
-            raise RuntimeError('More than 4 faulty pixels')
+            raise RuntimeError("More than 4 faulty pixels")
 
         for broken_pixel1, broken_pixel2 in self._unique_list_pairs(self.broken_pixels):
             if self._are_pixels_adjacent(broken_pixel1, broken_pixel2):
-                raise RuntimeError('Adjacent broken pixels')
+                raise RuntimeError("Adjacent broken pixels")
 
         for outlier_pixel1, outlier_pixel2 in self._unique_list_pairs(self.outlier_pixels):
             if self._are_pixels_adjacent(outlier_pixel1, outlier_pixel2):
-                raise RuntimeError('Adjacent outlier pixels')
+                raise RuntimeError("Adjacent outlier pixels")
 
         for broken_pixel in self.broken_pixels:
             for outlier_pixel in self.outlier_pixels:
                 if self._are_pixels_adjacent(broken_pixel, outlier_pixel):
-                    raise RuntimeError('Adjacent broken and outlier pixels')
+                    raise RuntimeError("Adjacent broken and outlier pixels")
 
     def _unique_list_pairs(self, input_list: set):
         """
@@ -1786,11 +1770,11 @@ class MLX90640:
         self._i2c_read_words(write_address, data_check)
 
     def _i2c_read_words(
-            self,
-            addr: int,
-            buffer: array.array,
-            *,
-            end: int = None,
+        self,
+        addr: int,
+        buffer: array.array,
+        *,
+        end: int = None,
     ) -> None:
         """
         从传感器的指定地址读取多个16位字数据，并存储到缓冲区。
@@ -1843,8 +1827,8 @@ class MLX90640:
             )
 
             outwords = struct.unpack(
-                '>' + 'H' * read_words,
-                self.inbuf[:read_words * 2],
+                ">" + "H" * read_words,
+                self.inbuf[: read_words * 2],
             )
             for i, w in enumerate(outwords):
                 buffer[offset + i] = w
@@ -1852,6 +1836,8 @@ class MLX90640:
             offset += read_words
             remaining_words -= read_words
             addr += read_words
+
+
 # ======================================== 初始化配置 ===========================================
 
 # ========================================  主程序  ============================================

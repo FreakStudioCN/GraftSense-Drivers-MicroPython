@@ -16,6 +16,7 @@ import micropython
 
 # ======================================== 功能函数 ============================================
 
+
 def format_time():
     """
     格式化当前时间为 [YYYY-MM-DD HH:MM:SS.sss] 格式。
@@ -86,19 +87,20 @@ def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
         - Calculates time difference before and after function execution, converts to milliseconds.
         - Function name extracted via string splitting, may not work in all cases.
     """
-    myname = str(f).split(' ')[1]
+    myname = str(f).split(" ")[1]
 
     def new_func(*args: tuple, **kwargs: dict) -> any:
         t: int = time.ticks_us()
         result = f(*args, **kwargs)
         delta: int = time.ticks_diff(time.ticks_us(), t)
-        print('Function {} Time = {:6.3f}ms'.format(myname, delta / 1000))
+        print("Function {} Time = {:6.3f}ms".format(myname, delta / 1000))
         return result
 
     return new_func
 
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义异常类
 class DeviceInitializationError(Exception):
@@ -113,6 +115,7 @@ class DeviceInitializationError(Exception):
 
     Raised when critical errors occur during R60AMP1 device initialization.
     """
+
     pass
 
 
@@ -288,85 +291,37 @@ class R60AMP1:
     # 轨迹信息查询
     TYPE_QUERY_TRAJECTORY_INFO = 19
 
-
     # 指令映射表 - 将查询、开关、设置类型指令的命令字和控制字的具体值映射到帧参数
     COMMAND_MAP = {
         # 基础指令信息查询和设置类型
-        TYPE_QUERY_HEARTBEAT: {
-            'control_byte': 0x01,  # 系统指令
-            'command_byte': 0x01,  # 心跳包查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_MODULE_RESET: {
-            'control_byte': 0x01,  # 系统指令
-            'command_byte': 0x02,  # 模组复位
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_PRODUCT_MODEL: {
-            'control_byte': 0x02,  # 产品信息
-            'command_byte': 0xA1,  # 产品型号查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_PRODUCT_ID: {
-            'control_byte': 0x02,  # 产品信息
-            'command_byte': 0xA2,  # 产品ID查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_HARDWARE_MODEL: {
-            'control_byte': 0x02,  # 产品信息
-            'command_byte': 0xA3,  # 硬件型号查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_FIRMWARE_VERSION: {
-            'control_byte': 0x02,  # 产品信息
-            'command_byte': 0xA4,  # 固件版本查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_INIT_COMPLETE: {
-            'control_byte': 0x05,  # 工作状态
-            'command_byte': 0x81,  # 初始化完成查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-
+        TYPE_QUERY_HEARTBEAT: {"control_byte": 0x01, "command_byte": 0x01, "data": bytes([0x0F])},  # 系统指令  # 心跳包查询  # 固定数据
+        TYPE_MODULE_RESET: {"control_byte": 0x01, "command_byte": 0x02, "data": bytes([0x0F])},  # 系统指令  # 模组复位  # 固定数据
+        TYPE_QUERY_PRODUCT_MODEL: {"control_byte": 0x02, "command_byte": 0xA1, "data": bytes([0x0F])},  # 产品信息  # 产品型号查询  # 固定数据
+        TYPE_QUERY_PRODUCT_ID: {"control_byte": 0x02, "command_byte": 0xA2, "data": bytes([0x0F])},  # 产品信息  # 产品ID查询  # 固定数据
+        TYPE_QUERY_HARDWARE_MODEL: {"control_byte": 0x02, "command_byte": 0xA3, "data": bytes([0x0F])},  # 产品信息  # 硬件型号查询  # 固定数据
+        TYPE_QUERY_FIRMWARE_VERSION: {"control_byte": 0x02, "command_byte": 0xA4, "data": bytes([0x0F])},  # 产品信息  # 固件版本查询  # 固定数据
+        TYPE_QUERY_INIT_COMPLETE: {"control_byte": 0x05, "command_byte": 0x81, "data": bytes([0x0F])},  # 工作状态  # 初始化完成查询  # 固定数据
         # 人体存在指令信息查询和设置类型
         TYPE_CONTROL_HUMAN_PRESENCE_ON: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x00,  # 开关人体存在功能
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x80,  # 人体存在检测
+            "command_byte": 0x00,  # 开关人体存在功能
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_HUMAN_PRESENCE_OFF: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x00,  # 开关人体存在功能
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x80,  # 人体存在检测
+            "command_byte": 0x00,  # 开关人体存在功能
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_HUMAN_PRESENCE_SWITCH: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x80,  # 查询人体存在开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x80,  # 人体存在检测
+            "command_byte": 0x80,  # 查询人体存在开关
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_QUERY_PRESENCE_STATUS: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x81,  # 存在信息查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_MOTION_INFO: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x82,  # 运动信息查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_BODY_MOTION_PARAM: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x83,  # 体动参数查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-
+        TYPE_QUERY_PRESENCE_STATUS: {"control_byte": 0x80, "command_byte": 0x81, "data": bytes([0x0F])},  # 人体存在检测  # 存在信息查询  # 固定数据
+        TYPE_QUERY_MOTION_INFO: {"control_byte": 0x80, "command_byte": 0x82, "data": bytes([0x0F])},  # 人体存在检测  # 运动信息查询  # 固定数据
+        TYPE_QUERY_BODY_MOTION_PARAM: {"control_byte": 0x80, "command_byte": 0x83, "data": bytes([0x0F])},  # 人体存在检测  # 体动参数查询  # 固定数据
         # 轨迹信息指令类型
-        TYPE_QUERY_TRAJECTORY_INFO: {
-            'control_byte': 0x82,  # 轨迹信息
-            'command_byte': 0x82,  # 轨迹信息查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-
+        TYPE_QUERY_TRAJECTORY_INFO: {"control_byte": 0x82, "command_byte": 0x82, "data": bytes([0x0F])},  # 轨迹信息  # 轨迹信息查询  # 固定数据
     }
 
     # 查询类型到名称的映射（用于调试输出）
@@ -381,7 +336,6 @@ class R60AMP1:
         TYPE_QUERY_INIT_COMPLETE: "Init Complete",
         TYPE_RADAR_FAULT_UPLOAD: "Radar Fault Upload",
         TYPE_INIT_COMPLETE_UPLOAD: "Init Complete Upload",
-
         # 人体存在指令信息查询和设置
         TYPE_CONTROL_HUMAN_PRESENCE_ON: "Human Presence ON",
         TYPE_CONTROL_HUMAN_PRESENCE_OFF: "Human Presence OFF",
@@ -392,15 +346,12 @@ class R60AMP1:
         TYPE_PRESENCE_STATUS_UPLOAD: "Presence Status Upload",
         TYPE_MOTION_INFO_UPLOAD: "Motion Info Upload",
         TYPE_BODY_MOTION_PARAM_UPLOAD: "Body Motion Parameter Upload",
-
         # 轨迹信息指令
         TYPE_TRAJECTORY_INFO_UPLOAD: "Trajectory Info Upload",
-        TYPE_QUERY_TRAJECTORY_INFO: "Trajectory Info Query"
+        TYPE_QUERY_TRAJECTORY_INFO: "Trajectory Info Query",
     }
 
-    def __init__(self, data_processor, parse_interval=200,
-                 presence_enabled=True,
-                 max_retries=3, retry_delay=100, init_timeout=5000):
+    def __init__(self, data_processor, parse_interval=200, presence_enabled=True, max_retries=3, retry_delay=100, init_timeout=5000):
         """
         初始化R60AMP1实例。
 
@@ -444,9 +395,7 @@ class R60AMP1:
             - After successful initialization, device enters running state and timer starts periodic data parsing.
         """
         # 参数验证
-        self._validate_init_parameters(
-            parse_interval, max_retries, retry_delay, init_timeout
-        )
+        self._validate_init_parameters(parse_interval, max_retries, retry_delay, init_timeout)
 
         if parse_interval > 500:
             raise ValueError("parse_interval must be less than 500ms")
@@ -554,12 +503,11 @@ class R60AMP1:
         except Exception as e:
             # 初始化失败，停止定时器
             self._is_running = False
-            if hasattr(self, '_timer'):
+            if hasattr(self, "_timer"):
                 self._timer.deinit()
             raise DeviceInitializationError(f"Device initialization failed: {str(e)}")
 
-    def _validate_init_parameters(self, parse_interval: int,
-                                  max_retries: int, retry_delay: int, init_timeout: int) -> None:
+    def _validate_init_parameters(self, parse_interval: int, max_retries: int, retry_delay: int, init_timeout: int) -> None:
         """
         验证初始化参数。
 
@@ -686,7 +634,7 @@ class R60AMP1:
             ("Product Model", self.query_product_model),
             ("Product ID", self.query_product_id),
             ("Hardware Model", self.query_hardware_model),
-            ("Firmware Version", self.query_firmware_version)
+            ("Firmware Version", self.query_firmware_version),
         ]
 
         all_success = True
@@ -774,11 +722,7 @@ class R60AMP1:
             - Returns True if both reset and initialization are successful.
         """
         # 发送复位指令
-        reset_success = self._execute_with_retry(
-            self.reset_module,
-            "Reset Device",
-            timeout=1000
-        )
+        reset_success = self._execute_with_retry(self.reset_module, "Reset Device", timeout=1000)
 
         if not reset_success:
             return False
@@ -935,17 +879,17 @@ class R60AMP1:
             - Configuration errors list is a copy of the original list to prevent external modification.
         """
         return {
-            'initialization_complete': self._initialization_complete,
-            'configuration_errors': self._configuration_errors.copy(),
-            'device_info': {
-                'product_model': self.product_model,
-                'product_id': self.product_id,
-                'hardware_model': self.hardware_model,
-                'firmware_version': self.firmware_version
+            "initialization_complete": self._initialization_complete,
+            "configuration_errors": self._configuration_errors.copy(),
+            "device_info": {
+                "product_model": self.product_model,
+                "product_id": self.product_id,
+                "hardware_model": self.hardware_model,
+                "firmware_version": self.firmware_version,
             },
-            'current_settings': {
-                'presence_enabled': self.presence_enabled,
-            }
+            "current_settings": {
+                "presence_enabled": self.presence_enabled,
+            },
         }
 
     def _start_timer(self) -> None:
@@ -1048,16 +992,16 @@ class R60AMP1:
             if i + target_size > data_len:
                 break
 
-            target_data = data_bytes[i:i + target_size]
+            target_data = data_bytes[i : i + target_size]
 
             target = {
-                'index': target_data[0],  # 1B索引
-                'size': target_data[1],  # 1B目标大小: 0-100
-                'feature': target_data[2],  # 1B目标特征: 0x00静止, 0x01运动
-                'x': self._parse_signed_16bit_special(target_data[3:5]),  # 2B X轴位置
-                'y': self._parse_signed_16bit_special(target_data[5:7]),  # 2B Y轴位置
-                'height': (target_data[7] << 8) | target_data[8],  # 2B高度
-                'speed': self._parse_signed_16bit_special(target_data[9:11])  # 2B速度
+                "index": target_data[0],  # 1B索引
+                "size": target_data[1],  # 1B目标大小: 0-100
+                "feature": target_data[2],  # 1B目标特征: 0x00静止, 0x01运动
+                "x": self._parse_signed_16bit_special(target_data[3:5]),  # 2B X轴位置
+                "y": self._parse_signed_16bit_special(target_data[5:7]),  # 2B Y轴位置
+                "height": (target_data[7] << 8) | target_data[8],  # 2B高度
+                "speed": self._parse_signed_16bit_special(target_data[9:11]),  # 2B速度
             }
 
             targets.append(target)
@@ -1145,9 +1089,9 @@ class R60AMP1:
                 print(f"[Parse] Raw product data: {data_bytes}, hex: {data_bytes.hex()}")
 
             # 找到第一个空字节的位置，截取有效部分
-            if b'\x00' in data_bytes:
+            if b"\x00" in data_bytes:
                 # 找到第一个空字节，截取之前的部分
-                null_index = data_bytes.index(b'\x00')
+                null_index = data_bytes.index(b"\x00")
                 valid_data = data_bytes[:null_index]
                 if R60AMP1.DEBUG_ENABLED:
                     print(f"[Parse] After null removal: {valid_data}, hex: {valid_data.hex()}")
@@ -1155,7 +1099,7 @@ class R60AMP1:
                 valid_data = data_bytes
 
             # 解码为字符串
-            product_info = valid_data.decode('utf-8').strip()
+            product_info = valid_data.decode("utf-8").strip()
             if R60AMP1.DEBUG_ENABLED:
                 print(f"[Parse] Decoded product info: '{product_info}'")
 
@@ -1167,7 +1111,7 @@ class R60AMP1:
 
             # 尝试使用 ascii 解码作为备选方案
             try:
-                product_info = valid_data.decode('ascii').strip()
+                product_info = valid_data.decode("ascii").strip()
                 if R60AMP1.DEBUG_ENABLED:
                     print(f"[Parse] ASCII decoded product info: '{product_info}'")
                 return (product_info,)
@@ -1209,9 +1153,9 @@ class R60AMP1:
                 print(f"[Parse] Raw firmware data: {data_bytes}, hex: {data_bytes.hex()}")
 
             # 找到第一个空字节的位置，截取有效部分
-            if b'\x00' in data_bytes:
+            if b"\x00" in data_bytes:
                 # 找到第一个空字节，截取之前的部分
-                null_index = data_bytes.index(b'\x00')
+                null_index = data_bytes.index(b"\x00")
                 valid_data = data_bytes[:null_index]
                 if R60AMP1.DEBUG_ENABLED:
                     print(f"[Parse] After null removal: {valid_data}, hex: {valid_data.hex()}")
@@ -1219,7 +1163,7 @@ class R60AMP1:
                 valid_data = data_bytes
 
             # 解码为字符串
-            version = valid_data.decode('utf-8').strip()
+            version = valid_data.decode("utf-8").strip()
             if R60AMP1.DEBUG_ENABLED:
                 print(f"[Parse] Decoded firmware version: '{version}'")
 
@@ -1231,7 +1175,7 @@ class R60AMP1:
 
             # 尝试使用 ascii 解码作为备选方案
             try:
-                version = valid_data.decode('ascii').strip()
+                version = valid_data.decode("ascii").strip()
                 if R60AMP1.DEBUG_ENABLED:
                     print(f"[Parse] ASCII decoded firmware version: '{version}'")
                 return (version,)
@@ -1304,13 +1248,11 @@ class R60AMP1:
             cmd_params = self.COMMAND_MAP[operation_type]
 
             # 使用传入的数据或默认数据
-            data_to_send = data if data is not None else cmd_params['data']
+            data_to_send = data if data is not None else cmd_params["data"]
 
             # 构建并发送帧
             operation_frame = self.data_processor.build_and_send_frame(
-                control_byte=cmd_params['control_byte'],
-                command_byte=cmd_params['command_byte'],
-                data=data_to_send
+                control_byte=cmd_params["control_byte"], command_byte=cmd_params["command_byte"], data=data_to_send
             )
 
             if not operation_frame:
@@ -1320,7 +1262,7 @@ class R60AMP1:
             if R60AMP1.DEBUG_ENABLED:
                 operation_name = self.QUERY_NAME_MAP.get(operation_type, f"Unknown({operation_type})")
                 print(f"[Operation] {operation_name} operation sent")
-                frame_hex = ' '.join(['{:02X}'.format(b) for b in operation_frame])
+                frame_hex = " ".join(["{:02X}".format(b) for b in operation_frame])
                 print(f"[Operation] Sent frame: {frame_hex}")
 
             # 等待设备响应
@@ -1497,10 +1439,7 @@ class R60AMP1:
             tuple: (指令发送成功状态, 存在状态)
                     - 存在状态: 必须是 R60AMP1.PRESENCE_NO_PERSON, R60AMP1.PRESENCE_PERSON 中的一个
         """
-        success, presence_status = self._execute_operation(
-            R60AMP1.TYPE_QUERY_PRESENCE_STATUS,
-            timeout=timeout
-        )
+        success, presence_status = self._execute_operation(R60AMP1.TYPE_QUERY_PRESENCE_STATUS, timeout=timeout)
         # 验证返回的存在状态是否有效
         if success and presence_status not in (R60AMP1.PRESENCE_NO_PERSON, R60AMP1.PRESENCE_PERSON):
             raise ValueError(f"Invalid presence status: {presence_status}")
@@ -1518,10 +1457,7 @@ class R60AMP1:
             tuple: (指令发送成功状态, 运动状态)
                     - 运动状态: 必须是 R60AMP1.MOTION_NONE, R60AMP1.MOTION_STATIC, R60AMP1.MOTION_ACTIVE 中的一个
         """
-        success, motion_status = self._execute_operation(
-            R60AMP1.TYPE_QUERY_MOTION_INFO,
-            timeout=timeout
-        )
+        success, motion_status = self._execute_operation(R60AMP1.TYPE_QUERY_MOTION_INFO, timeout=timeout)
         # 验证返回的运动状态是否有效
         if success and motion_status not in (R60AMP1.MOTION_NONE, R60AMP1.MOTION_STATIC, R60AMP1.MOTION_ACTIVE):
             raise ValueError(f"Invalid motion status: {motion_status}")
@@ -1564,9 +1500,7 @@ class R60AMP1:
             response_name: 响应名称（用于调试）
         """
         # 情况1：正确时间正确读取
-        if (self._query_in_progress and
-                self._current_query_type == expected_type and
-                not self._query_response_received):
+        if self._query_in_progress and self._current_query_type == expected_type and not self._query_response_received:
 
             self._query_result = response_data
             self._query_response_received = True
@@ -1578,8 +1512,7 @@ class R60AMP1:
         # 情况2：当前正在进行其他类型的查询，但收到了本响应
         elif self._query_in_progress and self._current_query_type != expected_type:
             if R60AMP1.DEBUG_ENABLED:
-                current_query = self.QUERY_NAME_MAP.get(self._current_query_type,
-                                                        f"Unknown({self._current_query_type})")
+                current_query = self.QUERY_NAME_MAP.get(self._current_query_type, f"Unknown({self._current_query_type})")
                 print(f"[Query] Unexpected {response_name} response during {current_query} query: {response_data}")
 
         # 情况3：没有查询在进行，但收到了查询响应
@@ -1587,7 +1520,7 @@ class R60AMP1:
             if R60AMP1.DEBUG_ENABLED:
                 print(f"[Query] Unsolicited {response_name} response: {response_data}")
 
-    def _update_property_with_debug(self, property_name, new_value, debug_message)-> None:
+    def _update_property_with_debug(self, property_name, new_value, debug_message) -> None:
         """
         更新属性并输出调试信息。
 
@@ -1617,7 +1550,7 @@ class R60AMP1:
         if R60AMP1.DEBUG_ENABLED:
             print(debug_message)
 
-    def update_properties_from_frame(self, frame)-> None:
+    def update_properties_from_frame(self, frame) -> None:
         """
         根据解析的帧更新属性值。
 
@@ -1641,30 +1574,22 @@ class R60AMP1:
             - Update corresponding device property values.
             - Handle query responses and active reporting data.
         """
-        control = frame['control_byte']
-        command = frame['command_byte']
-        data = frame['data']
+        control = frame["control_byte"]
+        command = frame["command_byte"]
+        data = frame["data"]
 
         # 系统功能 (0x01)
         if control == 0x01:
             # 心跳包查询响应
             if command == 0x01:
                 self.heartbeat_last_received = time.ticks_ms()
-                self._handle_query_response(
-                    R60AMP1.TYPE_QUERY_HEARTBEAT,
-                    True,
-                    "Heartbeat"
-                )
+                self._handle_query_response(R60AMP1.TYPE_QUERY_HEARTBEAT, True, "Heartbeat")
 
             # 模组复位响应
             elif command == 0x02:
                 self.module_reset_flag = True
                 self.module_reset_timestamp = time.ticks_ms()
-                self._handle_query_response(
-                    R60AMP1.TYPE_MODULE_RESET,
-                    True,
-                    "Module Reset"
-                )
+                self._handle_query_response(R60AMP1.TYPE_MODULE_RESET, True, "Module Reset")
 
         # 产品信息 (0x02)
         elif control == 0x02:
@@ -1673,11 +1598,7 @@ class R60AMP1:
                 if data:
                     product_info = self._parse_product_info_data(data)[0]
                     self.product_model = product_info
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_PRODUCT_MODEL,
-                        product_info,
-                        "Product Model"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_PRODUCT_MODEL, product_info, "Product Model")
 
             # 产品ID查询响应
             elif command == 0xA2:
@@ -1686,11 +1607,7 @@ class R60AMP1:
                     product_id = self._parse_product_info_data(data)[0]
                     # 更新产品ID属性
                     self.product_id = product_id
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_PRODUCT_ID,
-                        product_id,
-                        "Product ID"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_PRODUCT_ID, product_id, "Product ID")
 
             # 硬件型号查询响应
             elif command == 0xA3:
@@ -1699,11 +1616,7 @@ class R60AMP1:
                     hardware_model = self._parse_product_info_data(data)[0]
                     # 更新硬件型号属性
                     self.hardware_model = hardware_model
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_HARDWARE_MODEL,
-                        hardware_model,
-                        "Hardware Model"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_HARDWARE_MODEL, hardware_model, "Hardware Model")
 
             # 固件版本查询响应
             elif command == 0xA4:
@@ -1712,18 +1625,14 @@ class R60AMP1:
                     firmware_version = self._parse_firmware_version_data(data)[0]
                     # 更新固件版本属性
                     self.firmware_version = firmware_version
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_FIRMWARE_VERSION,
-                        firmware_version,
-                        "Firmware Version"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_FIRMWARE_VERSION, firmware_version, "Firmware Version")
 
         # 工作状态 (0x05)
         elif control == 0x05:
             # 初始化完成信息上报
             if command == 0x01:
                 if data and len(data) > 0:
-                    self.system_initialized = (data[0] == 0x0F)
+                    self.system_initialized = data[0] == 0x0F
                     self.system_initialized_timestamp = time.ticks_ms()
                     if R60AMP1.DEBUG_ENABLED:
                         status = "completed" if self.system_initialized else "not completed"
@@ -1736,8 +1645,7 @@ class R60AMP1:
                     self.radar_fault_status = fault_code
                     self.radar_fault_timestamp = time.ticks_ms()
                     if R60AMP1.DEBUG_ENABLED:
-                        fault_text = ["None", "Radar chip error", "Encryption error"][
-                            fault_code] if fault_code < 3 else "Unknown"
+                        fault_text = ["None", "Radar chip error", "Encryption error"][fault_code] if fault_code < 3 else "Unknown"
                         print(f"[System] Radar fault: {fault_text}")
             # 在数据手册中有一个没有下发的回复
             # 对应数值：00:默认 01:客厅 02：卧室 03:洗手间
@@ -1746,41 +1654,28 @@ class R60AMP1:
                     env_mode = data[0]
                     self.environment_mode = env_mode
                     if R60AMP1.DEBUG_ENABLED:
-                        mode_text = ["Default", "Living Room", "Bedroom", "Bathroom"][
-                            env_mode] if env_mode < 4 else "Unknown"
+                        mode_text = ["Default", "Living Room", "Bedroom", "Bathroom"][env_mode] if env_mode < 4 else "Unknown"
                         print(f"[System] Environment mode: {mode_text}")
 
             # 初始化完成查询响应
             elif command == 0x81:
                 if data and len(data) > 0:
-                    init_status = (data[0] == 0x01)
+                    init_status = data[0] == 0x01
                     self.system_initialized = init_status
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_INIT_COMPLETE,
-                        init_status,
-                        "Init Complete"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_INIT_COMPLETE, init_status, "Init Complete")
 
         # 人体存在检测 (0x80)
         elif control == 0x80:
             # 人体存在开关控制响应
             if command == 0x00:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.presence_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60AMP1.TYPE_CONTROL_HUMAN_PRESENCE_ON,
-                            True,
-                            "Human Presence ON"
-                        )
+                        self._handle_query_response(R60AMP1.TYPE_CONTROL_HUMAN_PRESENCE_ON, True, "Human Presence ON")
                     else:
-                        self._handle_query_response(
-                            R60AMP1.TYPE_CONTROL_HUMAN_PRESENCE_OFF,
-                            True,
-                            "Human Presence OFF"
-                        )
+                        self._handle_query_response(R60AMP1.TYPE_CONTROL_HUMAN_PRESENCE_OFF, True, "Human Presence OFF")
 
             # 存在信息主动上报
             elif command == 0x01:
@@ -1795,8 +1690,7 @@ class R60AMP1:
                 if data and len(data) > 0:
                     self.motion_status = data[0]
                     if R60AMP1.DEBUG_ENABLED:
-                        status_text = ["No motion", "Static", "Active"][
-                            self.motion_status] if self.motion_status < 3 else "Unknown"
+                        status_text = ["No motion", "Static", "Active"][self.motion_status] if self.motion_status < 3 else "Unknown"
                         print(f"[Motion] {status_text}")
 
             # 体动参数主动上报
@@ -1809,46 +1703,30 @@ class R60AMP1:
             # 人体存在开关查询响应
             elif command == 0x80:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.presence_enabled = switch_status
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH,
-                        switch_status,
-                        "Human Presence Switch"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH, switch_status, "Human Presence Switch")
 
             # 存在信息查询响应
             elif command == 0x81:
                 if data and len(data) > 0:
                     presence_value = data[0]
                     self.presence_status = presence_value
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_PRESENCE_STATUS,
-                        presence_value,
-                        "Presence Status"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_PRESENCE_STATUS, presence_value, "Presence Status")
 
             # 运动信息查询响应
             elif command == 0x82:
                 if data and len(data) > 0:
                     motion_value = data[0]
                     self.motion_status = motion_value
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_MOTION_INFO,
-                        motion_value,
-                        "Motion Info"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_MOTION_INFO, motion_value, "Motion Info")
 
             # 体动参数查询响应
             elif command == 0x83:
                 if data and len(data) > 0:
                     motion_param = data[0]
                     self.body_motion_param = motion_param
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_BODY_MOTION_PARAM,
-                        motion_param,
-                        "Body Motion Parameter"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_BODY_MOTION_PARAM, motion_param, "Body Motion Parameter")
 
         # 轨迹信息 (0x82)
         elif control == 0x82:
@@ -1866,11 +1744,7 @@ class R60AMP1:
                 if data and len(data) > 0:
                     targets = self._parse_trajectory_data(data)
                     self.trajectory_targets = targets
-                    self._handle_query_response(
-                        R60AMP1.TYPE_QUERY_TRAJECTORY_INFO,
-                        targets,
-                        "Trajectory Info"
-                    )
+                    self._handle_query_response(R60AMP1.TYPE_QUERY_TRAJECTORY_INFO, targets, "Trajectory Info")
 
     def close(self) -> None:
         """
@@ -1926,11 +1800,11 @@ class R60AMP1:
             stats = self.data_processor.get_stats()
             if R60AMP1.DEBUG_ENABLED:
                 print("  [R60AMP1] Final statistics: %s" % format_time())
-                print("  Total bytes received: %d" % stats['total_bytes_received'])
-                print("  Total frames parsed: %d" % stats['total_frames_parsed'])
-                print("  CRC errors: %d" % stats['crc_errors'])
-                print("  Frame errors: %d" % stats['frame_errors'])
-                print("  Invalid frames: %d" % stats['invalid_frames'])
+                print("  Total bytes received: %d" % stats["total_bytes_received"])
+                print("  Total frames parsed: %d" % stats["total_frames_parsed"])
+                print("  CRC errors: %d" % stats["crc_errors"])
+                print("  Frame errors: %d" % stats["frame_errors"])
+                print("  Invalid frames: %d" % stats["invalid_frames"])
         except Exception as e:
             raise Exception(f"Failed to get statistics: {str(e)}")
 
@@ -1942,6 +1816,7 @@ class R60AMP1:
 
         if R60AMP1.DEBUG_ENABLED:
             print("%s [R60AMP1] Resources fully released" % format_time())
+
 
 # ======================================== 初始化配置 ==========================================
 

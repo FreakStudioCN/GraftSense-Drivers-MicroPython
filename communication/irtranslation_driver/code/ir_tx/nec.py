@@ -14,7 +14,7 @@ __platform__ = "MicroPython v1.23"
 # ======================================== 导入相关模块 =========================================
 
 from micropython import const
-from  . import IR
+from . import IR
 
 # ======================================== 全局变量 ============================================
 
@@ -24,6 +24,7 @@ _T_ONE = const(1687)
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class NEC(IR):
     """
@@ -65,10 +66,10 @@ class NEC(IR):
         Calling transmit() uses tx() to populate _arr.
     """
 
-    valid = (0xffff, 0xff, 0)  # Max addr, data, toggle
+    valid = (0xFFFF, 0xFF, 0)  # Max addr, data, toggle
     samsung = False
 
-    def __init__(self, pin, freq: int=38000, verbose: bool=False) -> None:
+    def __init__(self, pin, freq: int = 38000, verbose: bool = False) -> None:
         """
         初始化 NEC 对象。
 
@@ -151,11 +152,11 @@ class NEC(IR):
             if self.samsung:
                 addr |= addr << 8
             else:
-                addr |= ((addr ^ 0xff) << 8)
+                addr |= (addr ^ 0xFF) << 8
         for _ in range(16):
             self._bit(addr & 1)
             addr >>= 1
-        data |= ((data ^ 0xff) << 8)
+        data |= (data ^ 0xFF) << 8
         for _ in range(16):
             self._bit(data & 1)
             data >>= 1
@@ -176,6 +177,7 @@ class NEC(IR):
         self.aptr = 0
         self.append(9000, 2250, _TBURST)
         self.trigger()
+
 
 # ======================================== 初始化配置 ==========================================
 

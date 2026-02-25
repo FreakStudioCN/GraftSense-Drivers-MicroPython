@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.26.1
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/11/4 下午5:35   
+# -*- coding: utf-8 -*-
+# @Time    : 2025/11/4 下午5:35
 # @Author  : hogeiha
-# @File    : R60AFD1.py       
+# @File    : R60AFD1.py
 # @Description : R60AFD1雷达设备业务处理类相关代码
 # @License : MIT
 
@@ -20,6 +20,7 @@ import micropython
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 
 def format_time():
     """
@@ -54,6 +55,7 @@ def format_time():
     t = time.localtime()
     ms = time.ticks_ms() % 1000
     return f"[{t[0]}-{t[1]:02d}-{t[2]:02d} {t[3]:02d}:{t[4]:02d}:{t[5]:02d}.{ms:03d}]"
+
 
 # 计时装饰器，用于计算函数运行时间
 def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
@@ -90,18 +92,20 @@ def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
         - Calculates time difference before and after function execution, converts to milliseconds.
         - Function name extracted via string splitting, may not work in all cases.
     """
-    myname = str(f).split(' ')[1]
+    myname = str(f).split(" ")[1]
 
     def new_func(*args: tuple, **kwargs: dict) -> any:
         t: int = time.ticks_us()
         result = f(*args, **kwargs)
         delta: int = time.ticks_diff(time.ticks_us(), t)
-        print('Function {} Time = {:6.3f}ms'.format(myname, delta / 1000))
+        print("Function {} Time = {:6.3f}ms".format(myname, delta / 1000))
         return result
 
     return new_func
 
+
 # ======================================== 自定义类 ============================================
+
 
 # 自定义异常类
 class DeviceInitializationError(Exception):
@@ -116,7 +120,9 @@ class DeviceInitializationError(Exception):
 
     Raised when critical errors occur during R60AFD1 device initialization.
     """
+
     pass
+
 
 class R60AFD1:
 
@@ -128,7 +134,7 @@ class R60AFD1:
     MOTION_NONE, MOTION_STATIC, MOTION_ACTIVE = (0x00, 0x01, 0x02)
 
     # 雷达故障状态
-    FAULT_NONE,FAULT_HW_ERROR, FAULT_FW_ERROR = (0x00,0x01,0x02)
+    FAULT_NONE, FAULT_HW_ERROR, FAULT_FW_ERROR = (0x00, 0x01, 0x02)
 
     # 跌倒检测状态
     FALL_NONE, FALL_DETECTED = (0x00, 0x01)
@@ -140,8 +146,7 @@ class R60AFD1:
     HUMAN_ABSENT, HUMAN_PRESENT = (0x00, 0x01)
 
     # 跌倒灵敏度档位（0-3，0为最低，3为最高）
-    FALL_SENSITIVITY_LEVEL_0, FALL_SENSITIVITY_LEVEL_1, FALL_SENSITIVITY_LEVEL_2, FALL_SENSITIVITY_LEVEL_3 = (
-    0x00, 0x01, 0x02, 0x03)
+    FALL_SENSITIVITY_LEVEL_0, FALL_SENSITIVITY_LEVEL_1, FALL_SENSITIVITY_LEVEL_2, FALL_SENSITIVITY_LEVEL_3 = (0x00, 0x01, 0x02, 0x03)
 
     # 安装方式（暂未在协议中明确定义，根据控制字0x06推测）
     INSTALL_ANGLE_SET, INSTALL_HEIGHT_SET = (0x01, 0x02)
@@ -223,328 +228,134 @@ class R60AFD1:
     TYPE_QUERY_FALL_SENSITIVITY = 57  # 查询跌倒检测灵敏度
     TYPE_SET_TRACK_FREQUENCY = 58  # 设置跟踪频率
     TYPE_SET_TRACK_SWITCH = 59  # 设置跟踪开关
-    TYPE_SET_FALL_SENSITIVITY = 60 # 设置跌倒检测灵敏度
+    TYPE_SET_FALL_SENSITIVITY = 60  # 设置跌倒检测灵敏度
 
     # 指令映射表 - 将查询、开关、设置类型指令的命令字和控制字的具体值映射到帧参数
     COMMAND_MAP = {
         # 基础指令
-        TYPE_QUERY_HEARTBEAT: {
-            'control_byte': 0x01,
-            'command_byte': 0x01,
-            'data': bytes([0x0F])
-        },
-        TYPE_MODULE_RESET: {
-            'control_byte': 0x01,
-            'command_byte': 0x02,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_PRODUCT_MODEL: {
-            'control_byte': 0x02,
-            'command_byte': 0xA1,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_PRODUCT_ID: {
-            'control_byte': 0x02,
-            'command_byte': 0xA2,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_HARDWARE_MODEL: {
-            'control_byte': 0x02,
-            'command_byte': 0xA3,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_FIRMWARE_VERSION: {
-            'control_byte': 0x02,
-            'command_byte': 0xA4,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_INIT_COMPLETE: {
-            'control_byte': 0x05,
-            'command_byte': 0x81,
-            'data': bytes([0x0F])
-        },
-
-        TYPE_QUERY_SCENE_INFO: {
-            'control_byte': 0x05,
-            'command_byte': 0x07,
-            'data': bytes([0x0F])
-        },
-
+        TYPE_QUERY_HEARTBEAT: {"control_byte": 0x01, "command_byte": 0x01, "data": bytes([0x0F])},
+        TYPE_MODULE_RESET: {"control_byte": 0x01, "command_byte": 0x02, "data": bytes([0x0F])},
+        TYPE_QUERY_PRODUCT_MODEL: {"control_byte": 0x02, "command_byte": 0xA1, "data": bytes([0x0F])},
+        TYPE_QUERY_PRODUCT_ID: {"control_byte": 0x02, "command_byte": 0xA2, "data": bytes([0x0F])},
+        TYPE_QUERY_HARDWARE_MODEL: {"control_byte": 0x02, "command_byte": 0xA3, "data": bytes([0x0F])},
+        TYPE_QUERY_FIRMWARE_VERSION: {"control_byte": 0x02, "command_byte": 0xA4, "data": bytes([0x0F])},
+        TYPE_QUERY_INIT_COMPLETE: {"control_byte": 0x05, "command_byte": 0x81, "data": bytes([0x0F])},
+        TYPE_QUERY_SCENE_INFO: {"control_byte": 0x05, "command_byte": 0x07, "data": bytes([0x0F])},
         # 安装参数
-        TYPE_SET_INSTALL_ANGLE: {
-            'control_byte': 0x06,
-            'command_byte': 0x01,
-            'data': None  # 动态设置：6字节角度数据
-        },
-        TYPE_QUERY_INSTALL_ANGLE: {
-            'control_byte': 0x06,
-            'command_byte': 0x81,
-            'data': bytes([0x0F])
-        },
-        TYPE_SET_INSTALL_HEIGHT: {
-            'control_byte': 0x06,
-            'command_byte': 0x02,
-            'data': None  # 动态设置：2字节高度
-        },
-        TYPE_QUERY_INSTALL_HEIGHT: {
-            'control_byte': 0x06,
-            'command_byte': 0x82,
-            'data': bytes([0x0F])
-        },
-        TYPE_AUTO_HEIGHT_MEASURE: {
-            'control_byte': 0x83,
-            'command_byte': 0x90,
-            'data': bytes([0x0F])
-        },
-
+        TYPE_SET_INSTALL_ANGLE: {"control_byte": 0x06, "command_byte": 0x01, "data": None},  # 动态设置：6字节角度数据
+        TYPE_QUERY_INSTALL_ANGLE: {"control_byte": 0x06, "command_byte": 0x81, "data": bytes([0x0F])},
+        TYPE_SET_INSTALL_HEIGHT: {"control_byte": 0x06, "command_byte": 0x02, "data": None},  # 动态设置：2字节高度
+        TYPE_QUERY_INSTALL_HEIGHT: {"control_byte": 0x06, "command_byte": 0x82, "data": bytes([0x0F])},
+        TYPE_AUTO_HEIGHT_MEASURE: {"control_byte": 0x83, "command_byte": 0x90, "data": bytes([0x0F])},
         # 人体存在
-        TYPE_CONTROL_HUMAN_PRESENCE_ON: {
-            'control_byte': 0x80,
-            'command_byte': 0x00,
-            'data': bytes([0x01])
-        },
-        TYPE_CONTROL_HUMAN_PRESENCE_OFF: {
-            'control_byte': 0x80,
-            'command_byte': 0x00,
-            'data': bytes([0x00])
-        },
-        TYPE_QUERY_HUMAN_PRESENCE_SWITCH: {
-            'control_byte': 0x80,
-            'command_byte': 0x80,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_HUMAN_EXISTENCE_INFO: {
-            'control_byte': 0x80,
-            'command_byte': 0x81,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_HUMAN_MOTION_INFO: {
-            'control_byte': 0x80,
-            'command_byte': 0x82,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_BODY_MOTION_PARAM: {
-            'control_byte': 0x80,
-            'command_byte': 0x83,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_HEIGHT_RATIO: {
-            'control_byte': 0x83,
-            'command_byte': 0x8E,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_TRACK_POINT: {
-            'control_byte': 0x83,
-            'command_byte': 0x92,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_TRACK_FREQUENCY: {
-            'control_byte': 0x83,
-            'command_byte': 0x93,
-            'data': bytes([0x0F])
-        },
+        TYPE_CONTROL_HUMAN_PRESENCE_ON: {"control_byte": 0x80, "command_byte": 0x00, "data": bytes([0x01])},
+        TYPE_CONTROL_HUMAN_PRESENCE_OFF: {"control_byte": 0x80, "command_byte": 0x00, "data": bytes([0x00])},
+        TYPE_QUERY_HUMAN_PRESENCE_SWITCH: {"control_byte": 0x80, "command_byte": 0x80, "data": bytes([0x0F])},
+        TYPE_QUERY_HUMAN_EXISTENCE_INFO: {"control_byte": 0x80, "command_byte": 0x81, "data": bytes([0x0F])},
+        TYPE_QUERY_HUMAN_MOTION_INFO: {"control_byte": 0x80, "command_byte": 0x82, "data": bytes([0x0F])},
+        TYPE_QUERY_BODY_MOTION_PARAM: {"control_byte": 0x80, "command_byte": 0x83, "data": bytes([0x0F])},
+        TYPE_QUERY_HEIGHT_RATIO: {"control_byte": 0x83, "command_byte": 0x8E, "data": bytes([0x0F])},
+        TYPE_QUERY_TRACK_POINT: {"control_byte": 0x83, "command_byte": 0x92, "data": bytes([0x0F])},
+        TYPE_QUERY_TRACK_FREQUENCY: {"control_byte": 0x83, "command_byte": 0x93, "data": bytes([0x0F])},
         TYPE_CONTROL_TRACK_SWITCH: {
             # 动态设置：开关值
-            'control_byte': 0x83,
-            'command_byte': 0x94,
-            'data': None
+            "control_byte": 0x83,
+            "command_byte": 0x94,
+            "data": None,
         },
-        TYPE_QUERY_TRACK_SWITCH: {
-            'control_byte': 0x83,
-            'command_byte': 0x94,
-            'data': bytes([0x0F])
-        },
-
+        TYPE_QUERY_TRACK_SWITCH: {"control_byte": 0x83, "command_byte": 0x94, "data": bytes([0x0F])},
         # 参数设置
         TYPE_SET_STATIC_DISTANCE: {
             # 动态设置：2字节距离
-            'control_byte': 0x80,
-            'command_byte': 0x0D,
-            'data': None
+            "control_byte": 0x80,
+            "command_byte": 0x0D,
+            "data": None,
         },
-        TYPE_QUERY_STATIC_DISTANCE: {
-            'control_byte': 0x80,
-            'command_byte': 0x8D,
-            'data': bytes([0x0F])
-        },
+        TYPE_QUERY_STATIC_DISTANCE: {"control_byte": 0x80, "command_byte": 0x8D, "data": bytes([0x0F])},
         TYPE_SET_MOTION_DISTANCE: {
             # 动态设置：2字节距离
-            'control_byte': 0x80,
-            'command_byte': 0x0E,
-            'data': None
+            "control_byte": 0x80,
+            "command_byte": 0x0E,
+            "data": None,
         },
-        TYPE_QUERY_MOTION_DISTANCE: {
-            'control_byte': 0x80,
-            'command_byte': 0x8E,
-            'data': bytes([0x0F])
-        },
+        TYPE_QUERY_MOTION_DISTANCE: {"control_byte": 0x80, "command_byte": 0x8E, "data": bytes([0x0F])},
         TYPE_SET_NO_PERSON_TIME: {
             # 动态设置：4字节时间
-            'control_byte': 0x80,
-            'command_byte': 0x12,
-            'data': None
+            "control_byte": 0x80,
+            "command_byte": 0x12,
+            "data": None,
         },
-        TYPE_QUERY_NO_PERSON_TIME: {
-            'control_byte': 0x80,
-            'command_byte': 0x92,
-            'data': bytes([0x0F])
-        },
+        TYPE_QUERY_NO_PERSON_TIME: {"control_byte": 0x80, "command_byte": 0x92, "data": bytes([0x0F])},
         TYPE_SET_PRESENCE_THRESHOLD: {
             # 动态设置：4字节阈值
-            'control_byte': 0x80,
-            'command_byte': 0x11,
-            'data': None
+            "control_byte": 0x80,
+            "command_byte": 0x11,
+            "data": None,
         },
-        TYPE_QUERY_PRESENCE_THRESHOLD: {
-            'control_byte': 0x80,
-            'command_byte': 0x91,
-            'data': bytes([0x0F])
-        },
-        TYPE_CONTROL_ENERGY_REPORT_ON: {
-            'control_byte': 0x80,
-            'command_byte': 0x13,
-            'data': bytes([0x01])
-        },
-        TYPE_CONTROL_ENERGY_REPORT_OFF: {
-            'control_byte': 0x80,
-            'command_byte': 0x13,
-            'data': bytes([0x00])
-        },
-        TYPE_QUERY_ENERGY_REPORT_SWITCH: {
-            'control_byte': 0x80,
-            'command_byte': 0x93,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_MAX_ENERGY: {
-            'control_byte': 0x80,
-            'command_byte': 0x90,
-            'data': bytes([0x0F])
-        },
-
+        TYPE_QUERY_PRESENCE_THRESHOLD: {"control_byte": 0x80, "command_byte": 0x91, "data": bytes([0x0F])},
+        TYPE_CONTROL_ENERGY_REPORT_ON: {"control_byte": 0x80, "command_byte": 0x13, "data": bytes([0x01])},
+        TYPE_CONTROL_ENERGY_REPORT_OFF: {"control_byte": 0x80, "command_byte": 0x13, "data": bytes([0x00])},
+        TYPE_QUERY_ENERGY_REPORT_SWITCH: {"control_byte": 0x80, "command_byte": 0x93, "data": bytes([0x0F])},
+        TYPE_QUERY_MAX_ENERGY: {"control_byte": 0x80, "command_byte": 0x90, "data": bytes([0x0F])},
         # 跌倒检测
-        TYPE_CONTROL_FALL_DETECTION_ON: {
-            'control_byte': 0x83,
-            'command_byte': 0x00,
-            'data': bytes([0x01])
-        },
-        TYPE_CONTROL_FALL_DETECTION_OFF: {
-            'control_byte': 0x83,
-            'command_byte': 0x00,
-            'data': bytes([0x00])
-        },
-        TYPE_QUERY_FALL_DETECTION_SWITCH: {
-            'control_byte': 0x83,
-            'command_byte': 0x80,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_FALL_STATUS: {
-            'control_byte': 0x83,
-            'command_byte': 0x81,
-            'data': bytes([0x0F])
-        },
+        TYPE_CONTROL_FALL_DETECTION_ON: {"control_byte": 0x83, "command_byte": 0x00, "data": bytes([0x01])},
+        TYPE_CONTROL_FALL_DETECTION_OFF: {"control_byte": 0x83, "command_byte": 0x00, "data": bytes([0x00])},
+        TYPE_QUERY_FALL_DETECTION_SWITCH: {"control_byte": 0x83, "command_byte": 0x80, "data": bytes([0x0F])},
+        TYPE_QUERY_FALL_STATUS: {"control_byte": 0x83, "command_byte": 0x81, "data": bytes([0x0F])},
         TYPE_SET_FALL_DURATION: {
             # 动态设置：4字节时长
-            'control_byte': 0x83,
-            'command_byte': 0x0C,
-            'data': None
+            "control_byte": 0x83,
+            "command_byte": 0x0C,
+            "data": None,
         },
-        TYPE_QUERY_FALL_DURATION: {
-            'control_byte': 0x83,
-            'command_byte': 0x8C,
-            'data': bytes([0x0F])
-        },
+        TYPE_QUERY_FALL_DURATION: {"control_byte": 0x83, "command_byte": 0x8C, "data": bytes([0x0F])},
         TYPE_SET_STATIC_STAY_DURATION: {
             # 动态设置：4字节时长
-            'control_byte': 0x83,
-            'command_byte': 0x0A,
-            'data': None
+            "control_byte": 0x83,
+            "command_byte": 0x0A,
+            "data": None,
         },
-        TYPE_QUERY_STATIC_STAY_DURATION: {
-            'control_byte': 0x83,
-            'command_byte': 0x8A,
-            'data': bytes([0x0F])
-        },
-        TYPE_CONTROL_STATIC_STAY_ON: {
-            'control_byte': 0x83,
-            'command_byte': 0x0B,
-            'data': bytes([0x01])
-        },
-        TYPE_CONTROL_STATIC_STAY_OFF: {
-            'control_byte': 0x83,
-            'command_byte': 0x0B,
-            'data': bytes([0x00])
-        },
-        TYPE_QUERY_STATIC_STAY_SWITCH: {
-            'control_byte': 0x83,
-            'command_byte': 0x8B,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_STATIC_STAY_STATUS: {
-            'control_byte': 0x83,
-            'command_byte': 0x85,
-            'data': bytes([0x0F])
-        },
+        TYPE_QUERY_STATIC_STAY_DURATION: {"control_byte": 0x83, "command_byte": 0x8A, "data": bytes([0x0F])},
+        TYPE_CONTROL_STATIC_STAY_ON: {"control_byte": 0x83, "command_byte": 0x0B, "data": bytes([0x01])},
+        TYPE_CONTROL_STATIC_STAY_OFF: {"control_byte": 0x83, "command_byte": 0x0B, "data": bytes([0x00])},
+        TYPE_QUERY_STATIC_STAY_SWITCH: {"control_byte": 0x83, "command_byte": 0x8B, "data": bytes([0x0F])},
+        TYPE_QUERY_STATIC_STAY_STATUS: {"control_byte": 0x83, "command_byte": 0x85, "data": bytes([0x0F])},
         TYPE_SET_HEIGHT_ACCUMULATION_TIME: {
             # 动态设置：4字节时间
-            'control_byte': 0x83,
-            'command_byte': 0x0F,
-            'data': None
+            "control_byte": 0x83,
+            "command_byte": 0x0F,
+            "data": None,
         },
-        TYPE_QUERY_HEIGHT_ACCUMULATION_TIME: {
-            'control_byte': 0x83,
-            'command_byte': 0x8F,
-            'data': bytes([0x0F])
-        },
+        TYPE_QUERY_HEIGHT_ACCUMULATION_TIME: {"control_byte": 0x83, "command_byte": 0x8F, "data": bytes([0x0F])},
         TYPE_SET_FALL_BREAK_HEIGHT: {
             # 动态设置：2字节高度
-            'control_byte': 0x83,
-            'command_byte': 0x11,
-            'data': None
+            "control_byte": 0x83,
+            "command_byte": 0x11,
+            "data": None,
         },
-        TYPE_QUERY_FALL_BREAK_HEIGHT: {
-            'control_byte': 0x83,
-            'command_byte': 0x91,
-            'data': bytes([0x0F])
-        },
-        TYPE_CONTROL_HEIGHT_RATIO_ON: {
-            'control_byte': 0x83,
-            'command_byte': 0x15,
-            'data': bytes([0x01])
-        },
-        TYPE_CONTROL_HEIGHT_RATIO_OFF: {
-            'control_byte': 0x83,
-            'command_byte': 0x15,
-            'data': bytes([0x00])
-        },
-        TYPE_QUERY_HEIGHT_RATIO_SWITCH: {
-            'control_byte': 0x83,
-            'command_byte': 0x95,
-            'data': bytes([0x0F])
-        },
-        TYPE_QUERY_FALL_SENSITIVITY: {
-            'control_byte': 0x83,
-            'command_byte': 0x8D,
-            'data': bytes([0x0F])
-        },
+        TYPE_QUERY_FALL_BREAK_HEIGHT: {"control_byte": 0x83, "command_byte": 0x91, "data": bytes([0x0F])},
+        TYPE_CONTROL_HEIGHT_RATIO_ON: {"control_byte": 0x83, "command_byte": 0x15, "data": bytes([0x01])},
+        TYPE_CONTROL_HEIGHT_RATIO_OFF: {"control_byte": 0x83, "command_byte": 0x15, "data": bytes([0x00])},
+        TYPE_QUERY_HEIGHT_RATIO_SWITCH: {"control_byte": 0x83, "command_byte": 0x95, "data": bytes([0x0F])},
+        TYPE_QUERY_FALL_SENSITIVITY: {"control_byte": 0x83, "command_byte": 0x8D, "data": bytes([0x0F])},
         TYPE_SET_TRACK_FREQUENCY: {
             # 动态设置：4字节时间
-            'control_byte': 0x83,
-            'command_byte': 0x13,
-            'data': None
+            "control_byte": 0x83,
+            "command_byte": 0x13,
+            "data": None,
         },
         TYPE_SET_TRACK_SWITCH: {
             # 动态设置：开关值
-            'control_byte': 0x83,
-            'command_byte': 0x14,
-            'data': None
-        }
-        ,
+            "control_byte": 0x83,
+            "command_byte": 0x14,
+            "data": None,
+        },
         TYPE_SET_FALL_SENSITIVITY: {
             # 动态设置:灵敏度
-            'control_byte': 0x83,
-            'command_byte': 0x0D,
-            'data': None
-        }
+            "control_byte": 0x83,
+            "command_byte": 0x0D,
+            "data": None,
+        },
     }
 
     # 查询类型到名称的映射（用于调试输出）
@@ -557,13 +368,11 @@ class R60AFD1:
         TYPE_QUERY_FIRMWARE_VERSION: "Firmware Version",
         TYPE_QUERY_INIT_COMPLETE: "Init Complete",
         TYPE_QUERY_SCENE_INFO: "Scene Info",
-
         TYPE_SET_INSTALL_ANGLE: "Set Install Angle",
         TYPE_QUERY_INSTALL_ANGLE: "Query Install Angle",
         TYPE_SET_INSTALL_HEIGHT: "Set Install Height",
         TYPE_QUERY_INSTALL_HEIGHT: "Query Install Height",
         TYPE_AUTO_HEIGHT_MEASURE: "Auto Height Measure",
-
         TYPE_CONTROL_HUMAN_PRESENCE_ON: "Human Presence ON",
         TYPE_CONTROL_HUMAN_PRESENCE_OFF: "Human Presence OFF",
         TYPE_QUERY_HUMAN_PRESENCE_SWITCH: "Human Presence Switch",
@@ -575,7 +384,6 @@ class R60AFD1:
         TYPE_QUERY_TRACK_FREQUENCY: "Track Frequency",
         TYPE_CONTROL_TRACK_SWITCH: "Control Track Switch",
         TYPE_QUERY_TRACK_SWITCH: "Query Track Switch",
-
         TYPE_SET_STATIC_DISTANCE: "Set Static Distance",
         TYPE_QUERY_STATIC_DISTANCE: "Query Static Distance",
         TYPE_SET_MOTION_DISTANCE: "Set Motion Distance",
@@ -588,7 +396,6 @@ class R60AFD1:
         TYPE_CONTROL_ENERGY_REPORT_OFF: "Energy Report OFF",
         TYPE_QUERY_ENERGY_REPORT_SWITCH: "Energy Report Switch",
         TYPE_QUERY_MAX_ENERGY: "Query Max Energy",
-
         TYPE_CONTROL_FALL_DETECTION_ON: "Fall Detection ON",
         TYPE_CONTROL_FALL_DETECTION_OFF: "Fall Detection OFF",
         TYPE_QUERY_FALL_DETECTION_SWITCH: "Fall Detection Switch",
@@ -611,66 +418,76 @@ class R60AFD1:
         TYPE_QUERY_FALL_SENSITIVITY: "Query Fall Sensitivity",
         TYPE_SET_TRACK_FREQUENCY: "Set Track Frequency",
         TYPE_SET_TRACK_SWITCH: "Set Track Switch",
-        TYPE_SET_FALL_SENSITIVITY: "Set Fall Sensitivity"
+        TYPE_SET_FALL_SENSITIVITY: "Set Fall Sensitivity",
     }
 
-    def __init__(self, data_processor, presence_enabled=True, track_report_enabled=True,
-                 energy_report_enabled=True, height_ratio_enabled=True, fall_detection_enabled=True
-                , static_stay_enabled=True,static_distance=30, motion_distance=30
-                 , parse_interval=200,max_retries=3, retry_delay=100, init_timeout=5000):
+    def __init__(
+        self,
+        data_processor,
+        presence_enabled=True,
+        track_report_enabled=True,
+        energy_report_enabled=True,
+        height_ratio_enabled=True,
+        fall_detection_enabled=True,
+        static_stay_enabled=True,
+        static_distance=30,
+        motion_distance=30,
+        parse_interval=200,
+        max_retries=3,
+        retry_delay=100,
+        init_timeout=5000,
+    ):
         """
-                初始化R60AFD1雷达设备类实例。
+        初始化R60AFD1雷达设备类实例。
 
-                Args:
-                    data_processor: 数据处理器对象，用于处理接收到的数据帧
-                    presence_enabled (bool): 人体存在检测功能开关
-                    track_report_enabled (bool): 轨迹点上报功能开关
-                    energy_report_enabled (bool): 能量值上报功能开关
-                    height_ratio_enabled (bool): 高度占比上报功能开关
-                    fall_detection_enabled (bool): 跌倒检测功能开关
-                    static_stay_enabled (bool): 静止驻留检测功能开关
-                    parse_interval (int): 数据解析间隔时间（毫秒），默认200ms
-                    max_retries (int): 最大重试次数，默认3次
-                    retry_delay (int): 重试延迟时间（毫秒），默认100ms
-                    init_timeout (int): 初始化超时时间（毫秒），默认5000ms
+        Args:
+            data_processor: 数据处理器对象，用于处理接收到的数据帧
+            presence_enabled (bool): 人体存在检测功能开关
+            track_report_enabled (bool): 轨迹点上报功能开关
+            energy_report_enabled (bool): 能量值上报功能开关
+            height_ratio_enabled (bool): 高度占比上报功能开关
+            fall_detection_enabled (bool): 跌倒检测功能开关
+            static_stay_enabled (bool): 静止驻留检测功能开关
+            parse_interval (int): 数据解析间隔时间（毫秒），默认200ms
+            max_retries (int): 最大重试次数，默认3次
+            retry_delay (int): 重试延迟时间（毫秒），默认100ms
+            init_timeout (int): 初始化超时时间（毫秒），默认5000ms
 
-                Raises:
-                    ValueError: 当参数验证失败时抛出异常
+        Raises:
+            ValueError: 当参数验证失败时抛出异常
 
-                Note:
-                    - 初始化时会验证参数的有效性范围
-                    - 设置设备的默认状态和参数
-                    - 创建内部定时器用于周期性操作
+        Note:
+            - 初始化时会验证参数的有效性范围
+            - 设置设备的默认状态和参数
+            - 创建内部定时器用于周期性操作
 
-                ==========================================
+        ==========================================
 
-                Initialize R60AFD1 radar device class instance.
+        Initialize R60AFD1 radar device class instance.
 
-                Args:
-                    data_processor: Data processor object for handling received data frames
-                    presence_enabled (bool): Human presence detection function switch
-                    track_report_enabled (bool): Track point reporting function switch
-                    energy_report_enabled (bool): Energy value reporting function switch
-                    height_ratio_enabled (bool): Height ratio reporting function switch
-                    fall_detection_enabled (bool): Fall detection function switch
-                    static_stay_enabled (bool): Static stay detection function switch
-                    parse_interval (int): Data parsing interval time (milliseconds), default 200ms
-                    max_retries (int): Maximum retry attempts, default 3 times
-                    retry_delay (int): Retry delay time (milliseconds), default 100ms
-                    init_timeout (int): Initialization timeout time (milliseconds), default 5000ms
+        Args:
+            data_processor: Data processor object for handling received data frames
+            presence_enabled (bool): Human presence detection function switch
+            track_report_enabled (bool): Track point reporting function switch
+            energy_report_enabled (bool): Energy value reporting function switch
+            height_ratio_enabled (bool): Height ratio reporting function switch
+            fall_detection_enabled (bool): Fall detection function switch
+            static_stay_enabled (bool): Static stay detection function switch
+            parse_interval (int): Data parsing interval time (milliseconds), default 200ms
+            max_retries (int): Maximum retry attempts, default 3 times
+            retry_delay (int): Retry delay time (milliseconds), default 100ms
+            init_timeout (int): Initialization timeout time (milliseconds), default 5000ms
 
-                Raises:
-                    ValueError: Throws exception when parameter validation fails
+        Raises:
+            ValueError: Throws exception when parameter validation fails
 
-                Note:
-                    - Validates parameter validity ranges during initialization
-                    - Sets device default states and parameters
-                    - Creates internal timer for periodic operations
-                """
+        Note:
+            - Validates parameter validity ranges during initialization
+            - Sets device default states and parameters
+            - Creates internal timer for periodic operations
+        """
         # 参数验证
-        self._validate_init_parameters(
-            parse_interval,max_retries, retry_delay, init_timeout
-        )
+        self._validate_init_parameters(parse_interval, max_retries, retry_delay, init_timeout)
 
         if parse_interval > 500:
             raise ValueError("parse_interval must be less than 500ms")
@@ -810,7 +627,6 @@ class R60AFD1:
         # 0:未跌倒, 1:跌倒
         self.fall_status = 0
 
-
         # 静止驻留检测
         # 静止驻留开关
         self.static_stay_enabled = static_stay_enabled
@@ -859,7 +675,7 @@ class R60AFD1:
         except Exception as e:
             # 初始化失败，停止定时器
             self._is_running = False
-            if hasattr(self, '_timer'):
+            if hasattr(self, "_timer"):
                 self._timer.deinit()
             raise DeviceInitializationError(f"Device initialization failed: {str(e)}")
 
@@ -886,76 +702,74 @@ class R60AFD1:
             - Configuration errors list is a copy of the original list to prevent外部 modification.
         """
         return {
-            'initialization_complete': self._initialization_complete,
-            'configuration_errors': self._configuration_errors.copy(),
-            'device_info': {
-                'product_model': self.product_model,
-                'product_id': self.product_id,
-                'hardware_model': self.hardware_model,
-                'firmware_version': self.firmware_version,
-                'system_initialized': self.system_initialized,
-                'working_duration': self.working_duration,
-                'radar_fault_status': self.radar_fault_status,
-                'scene_info': self.scene_info
+            "initialization_complete": self._initialization_complete,
+            "configuration_errors": self._configuration_errors.copy(),
+            "device_info": {
+                "product_model": self.product_model,
+                "product_id": self.product_id,
+                "hardware_model": self.hardware_model,
+                "firmware_version": self.firmware_version,
+                "system_initialized": self.system_initialized,
+                "working_duration": self.working_duration,
+                "radar_fault_status": self.radar_fault_status,
+                "scene_info": self.scene_info,
             },
-            'installation_settings': {
-                'install_angle_x': self.install_angle_x,
-                'install_angle_y': self.install_angle_y,
-                'install_angle_z': self.install_angle_z,
-                'install_height': self.install_height,
-                'auto_height': self.auto_height
+            "installation_settings": {
+                "install_angle_x": self.install_angle_x,
+                "install_angle_y": self.install_angle_y,
+                "install_angle_z": self.install_angle_z,
+                "install_height": self.install_height,
+                "auto_height": self.auto_height,
             },
-            'function_switches': {
-                'presence_enabled': self.presence_enabled,
-                'energy_report_enabled': self.energy_report_enabled,
-                'height_ratio_enabled': self.height_ratio_enabled,
-                'track_report_enabled': self.track_report_enabled,
-                'fall_detection_enabled': self.fall_detection_enabled,
-                'static_stay_enabled': self.static_stay_enabled
+            "function_switches": {
+                "presence_enabled": self.presence_enabled,
+                "energy_report_enabled": self.energy_report_enabled,
+                "height_ratio_enabled": self.height_ratio_enabled,
+                "track_report_enabled": self.track_report_enabled,
+                "fall_detection_enabled": self.fall_detection_enabled,
+                "static_stay_enabled": self.static_stay_enabled,
             },
-            'detection_parameters': {
-                'presence_status': self.presence_status,
-                'motion_status': self.motion_status,
-                'movement_parameter': self.movement_parameter,
-                'max_energy_value': self.max_energy_value,
-                'height_total_count': self.height_total_count,
-                'height_ratio_0_05': self.height_ratio_0_05,
-                'height_ratio_05_1': self.height_ratio_05_1,
-                'height_ratio_1_15': self.height_ratio_1_15,
-                'height_ratio_15_2': self.height_ratio_15_2,
-                'track_position_x': self.track_position_x,
-                'track_position_y': self.track_position_y,
-                'static_distance': self.static_distance,
-                'motion_distance': self.motion_distance,
-                'presence_threshold': self.presence_threshold,
-                'no_person_timeout': self.no_person_timeout,
-                'fall_sensitivity': self.fall_sensitivity,
-                'fall_status': self.fall_status,
-                'fall_duration_threshold': self.fall_duration_threshold,
-                'static_stay_status': self.static_stay_status,
-                'static_stay_duration': self.static_stay_duration,
-                'height_accumulation_time': self.height_accumulation_time,
-                'fall_break_height': self.fall_break_height
+            "detection_parameters": {
+                "presence_status": self.presence_status,
+                "motion_status": self.motion_status,
+                "movement_parameter": self.movement_parameter,
+                "max_energy_value": self.max_energy_value,
+                "height_total_count": self.height_total_count,
+                "height_ratio_0_05": self.height_ratio_0_05,
+                "height_ratio_05_1": self.height_ratio_05_1,
+                "height_ratio_1_15": self.height_ratio_1_15,
+                "height_ratio_15_2": self.height_ratio_15_2,
+                "track_position_x": self.track_position_x,
+                "track_position_y": self.track_position_y,
+                "static_distance": self.static_distance,
+                "motion_distance": self.motion_distance,
+                "presence_threshold": self.presence_threshold,
+                "no_person_timeout": self.no_person_timeout,
+                "fall_sensitivity": self.fall_sensitivity,
+                "fall_status": self.fall_status,
+                "fall_duration_threshold": self.fall_duration_threshold,
+                "static_stay_status": self.static_stay_status,
+                "static_stay_duration": self.static_stay_duration,
+                "height_accumulation_time": self.height_accumulation_time,
+                "fall_break_height": self.fall_break_height,
             },
-            'system_timestamps': {
-                'heartbeat_last_received': self.heartbeat_last_received,
-                'heartbeat_timeout_count': self.heartbeat_timeout_count,
-                'heartbeat_interval': self.heartbeat_interval,
-                'system_initialized_timestamp': self.system_initialized_timestamp,
-                'module_reset_timestamp': self.module_reset_timestamp
+            "system_timestamps": {
+                "heartbeat_last_received": self.heartbeat_last_received,
+                "heartbeat_timeout_count": self.heartbeat_timeout_count,
+                "heartbeat_interval": self.heartbeat_interval,
+                "system_initialized_timestamp": self.system_initialized_timestamp,
+                "module_reset_timestamp": self.module_reset_timestamp,
             },
-            'timing_settings': {
-                'track_report_frequency': self.track_report_frequency
+            "timing_settings": {"track_report_frequency": self.track_report_frequency},
+            "operational_status": {
+                "is_running": self._is_running,
+                "query_in_progress": self._query_in_progress,
+                "query_response_received": self._query_response_received,
+                "parse_interval": self.parse_interval,
+                "max_retries": self.max_retries,
+                "retry_delay": self.retry_delay,
+                "init_timeout": self.init_timeout,
             },
-            'operational_status': {
-                'is_running': self._is_running,
-                'query_in_progress': self._query_in_progress,
-                'query_response_received': self._query_response_received,
-                'parse_interval': self.parse_interval,
-                'max_retries': self.max_retries,
-                'retry_delay': self.retry_delay,
-                'init_timeout': self.init_timeout
-            }
         }
 
     def _validate_init_parameters(self, parse_interval: int, max_retries: int, retry_delay: int, init_timeout: int) -> None:
@@ -1073,13 +887,11 @@ class R60AFD1:
             cmd_params = self.COMMAND_MAP[operation_type]
 
             # 使用传入的数据或默认数据
-            data_to_send = data if data is not None else cmd_params['data']
+            data_to_send = data if data is not None else cmd_params["data"]
 
             # 构建并发送帧
             operation_frame = self.data_processor.build_and_send_frame(
-                control_byte=cmd_params['control_byte'],
-                command_byte=cmd_params['command_byte'],
-                data=data_to_send
+                control_byte=cmd_params["control_byte"], command_byte=cmd_params["command_byte"], data=data_to_send
             )
 
             if not operation_frame:
@@ -1089,7 +901,7 @@ class R60AFD1:
             if R60AFD1.DEBUG_ENABLED:
                 operation_name = self.QUERY_NAME_MAP.get(operation_type, f"Unknown({operation_type})")
                 print(f"[Operation] {operation_name} operation sent")
-                frame_hex = ' '.join(['{:02X}'.format(b) for b in operation_frame])
+                frame_hex = " ".join(["{:02X}".format(b) for b in operation_frame])
                 print(f"[Operation] Sent frame: {frame_hex}")
 
             # 等待设备响应
@@ -1188,6 +1000,7 @@ class R60AFD1:
         for frame in frames:
             # 使用micropython.schedule安全地调用属性更新方法
             micropython.schedule(self.update_properties_from_frame, frame)
+
     def _load_device_information(self) -> bool:
         """
         加载设备基本信息。
@@ -1216,7 +1029,7 @@ class R60AFD1:
             ("Product Model", self.query_product_model),
             ("Product ID", self.query_product_id),
             ("Hardware Model", self.query_hardware_model),
-            ("Firmware Version", self.query_firmware_version)
+            ("Firmware Version", self.query_firmware_version),
         ]
 
         all_success = True
@@ -1281,6 +1094,7 @@ class R60AFD1:
                         print(f"[Init] {operation_name} failed after {self.max_retries + 1} attempts: {e}")
 
         return False
+
     def _wait_for_device_initialization(self, timeout: int = None) -> bool:
         """
         等待设备初始化完成。
@@ -1329,6 +1143,7 @@ class R60AFD1:
         if R60AFD1.DEBUG_ENABLED:
             print("[Init] Device initialization timeout")
         return False
+
     def _reset_and_wait_for_initialization(self) -> bool:
         """
         重置设备并等待初始化完成。
@@ -1354,11 +1169,7 @@ class R60AFD1:
             - Returns True if both reset and initialization are successful.
         """
         # 发送复位指令
-        reset_success = self._execute_with_retry(
-            self.reset_module,
-            "Reset Device",
-            timeout=1000
-        )
+        reset_success = self._execute_with_retry(self.reset_module, "Reset Device", timeout=1000)
 
         if not reset_success:
             return False
@@ -1370,6 +1181,7 @@ class R60AFD1:
 
         # 重新等待初始化完成
         return self._wait_for_device_initialization(timeout=10000)  # 10秒超时
+
     def _auto_configure_device(self) -> None:
         """
         自动配置设备功能。
@@ -1392,165 +1204,132 @@ class R60AFD1:
         # ============================ 安装参数配置 ============================
 
         # 设置安装角度（如果有提供）
-        if hasattr(self, 'install_angle_x') and hasattr(self, 'install_angle_y') and hasattr(self, 'install_angle_z'):
+        if hasattr(self, "install_angle_x") and hasattr(self, "install_angle_y") and hasattr(self, "install_angle_z"):
             if self.install_angle_x != 0 or self.install_angle_y != 0 or self.install_angle_z != 0:
-                configuration_steps.append((
-                    f"Set install angle (X:{self.install_angle_x}, Y:{self.install_angle_y}, Z:{self.install_angle_z})",
-                    lambda: self.set_install_angle(self.install_angle_x, self.install_angle_y, self.install_angle_z)
-                ))
+                configuration_steps.append(
+                    (
+                        f"Set install angle (X:{self.install_angle_x}, Y:{self.install_angle_y}, Z:{self.install_angle_z})",
+                        lambda: self.set_install_angle(self.install_angle_x, self.install_angle_y, self.install_angle_z),
+                    )
+                )
 
         # 设置安装高度（如果有提供）
-        if hasattr(self, 'install_height') and self.install_height > 0:
-            configuration_steps.append((
-                f"Set install height to {self.install_height}cm",
-                lambda: self.set_install_height(self.install_height)
-            ))
+        if hasattr(self, "install_height") and self.install_height > 0:
+            configuration_steps.append((f"Set install height to {self.install_height}cm", lambda: self.set_install_height(self.install_height)))
 
         # 人体存在检测配置
         # 设置人体存在开关
         if self.presence_enabled:
-            configuration_steps.append((
-                "Enable Human Presence Detection",
-                lambda: self.set_presence_switch(True)
-            ))
+            configuration_steps.append(("Enable Human Presence Detection", lambda: self.set_presence_switch(True)))
 
             # 设置静坐水平距离
-            if hasattr(self, 'static_distance') and self.static_distance > 0:
-                configuration_steps.append((
-                    f"Set static distance to {self.static_distance}cm",
-                    lambda: self.set_static_distance(self.static_distance)
-                ))
+            if hasattr(self, "static_distance") and self.static_distance > 0:
+                configuration_steps.append(
+                    (f"Set static distance to {self.static_distance}cm", lambda: self.set_static_distance(self.static_distance))
+                )
 
             # 设置运动水平距离
-            if hasattr(self, 'motion_distance') and self.motion_distance > 0:
-                configuration_steps.append((
-                    f"Set motion distance to {self.motion_distance}cm",
-                    lambda: self.set_motion_distance(self.motion_distance)
-                ))
+            if hasattr(self, "motion_distance") and self.motion_distance > 0:
+                configuration_steps.append(
+                    (f"Set motion distance to {self.motion_distance}cm", lambda: self.set_motion_distance(self.motion_distance))
+                )
 
             # 设置无人时间
-            if hasattr(self, 'no_person_timeout') and self.no_person_timeout > 0:
-                configuration_steps.append((
-                    f"Set no-person timeout to {self.no_person_timeout} seconds",
-                    lambda: self.set_no_person_time(self.no_person_timeout)
-                ))
+            if hasattr(self, "no_person_timeout") and self.no_person_timeout > 0:
+                configuration_steps.append(
+                    (f"Set no-person timeout to {self.no_person_timeout} seconds", lambda: self.set_no_person_time(self.no_person_timeout))
+                )
 
             # 设置人体存在判断阈值
-            if hasattr(self, 'presence_threshold') and self.presence_threshold > 0:
-                configuration_steps.append((
-                    f"Set presence threshold to {self.presence_threshold}",
-                    lambda: self.set_presence_threshold(self.presence_threshold)
-                ))
+            if hasattr(self, "presence_threshold") and self.presence_threshold > 0:
+                configuration_steps.append(
+                    (f"Set presence threshold to {self.presence_threshold}", lambda: self.set_presence_threshold(self.presence_threshold))
+                )
 
             # 设置能量值上报开关
             if self.energy_report_enabled:
-                configuration_steps.append((
-                    "Enable energy report",
-                    lambda: self.set_energy_report_switch(True)
-                ))
+                configuration_steps.append(("Enable energy report", lambda: self.set_energy_report_switch(True)))
             else:
-                configuration_steps.append((
-                    "Disable energy report",
-                    lambda: self.set_energy_report_switch(False)
-                ))
+                configuration_steps.append(("Disable energy report", lambda: self.set_energy_report_switch(False)))
 
             # 设置高度占比开关
             if self.height_ratio_enabled:
-                configuration_steps.append((
-                    "Enable height ratio reporting",
-                    lambda: self.set_height_ratio_switch(True)
-                ))
+                configuration_steps.append(("Enable height ratio reporting", lambda: self.set_height_ratio_switch(True)))
             else:
-                configuration_steps.append((
-                    "Disable height ratio reporting",
-                    lambda: self.set_height_ratio_switch(False)
-                ))
+                configuration_steps.append(("Disable height ratio reporting", lambda: self.set_height_ratio_switch(False)))
 
             # 设置轨迹点上报开关
             if self.track_report_enabled:
-                configuration_steps.append((
-                    f"Enable track reporting (frequency: {self.track_report_frequency}s)",
-                    lambda: self.set_track_switch(True)
-                ))
+                configuration_steps.append(
+                    (f"Enable track reporting (frequency: {self.track_report_frequency}s)", lambda: self.set_track_switch(True))
+                )
 
                 # 设置轨迹点上报频率
-                if hasattr(self, 'track_report_frequency') and self.track_report_frequency > 0:
-                    configuration_steps.append((
-                        f"Set track report frequency to {self.track_report_frequency} seconds",
-                        lambda: self.set_track_frequency(self.track_report_frequency)
-                    ))
+                if hasattr(self, "track_report_frequency") and self.track_report_frequency > 0:
+                    configuration_steps.append(
+                        (
+                            f"Set track report frequency to {self.track_report_frequency} seconds",
+                            lambda: self.set_track_frequency(self.track_report_frequency),
+                        )
+                    )
             else:
-                configuration_steps.append((
-                    "Disable track reporting",
-                    lambda: self.set_track_switch(False)
-                ))
+                configuration_steps.append(("Disable track reporting", lambda: self.set_track_switch(False)))
 
         else:
-            configuration_steps.append((
-                "Disable Human Presence Detection",
-                lambda: self.set_presence_switch(False)
-            ))
+            configuration_steps.append(("Disable Human Presence Detection", lambda: self.set_presence_switch(False)))
         # ============================ 跌倒检测配置 ============================
 
         # 设置跌倒检测开关
         if self.fall_detection_enabled:
-            configuration_steps.append((
-                "Enable Fall Detection",
-                lambda: self.set_fall_detection_switch(True)
-            ))
+            configuration_steps.append(("Enable Fall Detection", lambda: self.set_fall_detection_switch(True)))
 
             # 设置跌倒时长
-            if hasattr(self, 'fall_duration_threshold') and self.fall_duration_threshold > 0:
-                configuration_steps.append((
-                    f"Set fall duration threshold to {self.fall_duration_threshold} seconds",
-                    lambda: self.set_fall_duration(self.fall_duration_threshold)
-                ))
+            if hasattr(self, "fall_duration_threshold") and self.fall_duration_threshold > 0:
+                configuration_steps.append(
+                    (
+                        f"Set fall duration threshold to {self.fall_duration_threshold} seconds",
+                        lambda: self.set_fall_duration(self.fall_duration_threshold),
+                    )
+                )
 
             # 设置跌倒灵敏度
-            if hasattr(self, 'fall_sensitivity') and self.fall_sensitivity > 0:
-                configuration_steps.append((
-                    f"Set fall sensitivity to {self.fall_sensitivity}",
-                    lambda: self.set_fall_sensitivity(self.fall_sensitivity)
-                ))
+            if hasattr(self, "fall_sensitivity") and self.fall_sensitivity > 0:
+                configuration_steps.append(
+                    (f"Set fall sensitivity to {self.fall_sensitivity}", lambda: self.set_fall_sensitivity(self.fall_sensitivity))
+                )
 
             # 设置跌倒打破高度
-            if hasattr(self, 'fall_break_height') and self.fall_break_height >= 0:
-                configuration_steps.append((
-                    f"Set fall break height to {self.fall_break_height}cm",
-                    lambda: self.set_fall_break_height(self.fall_break_height)
-                ))
+            if hasattr(self, "fall_break_height") and self.fall_break_height >= 0:
+                configuration_steps.append(
+                    (f"Set fall break height to {self.fall_break_height}cm", lambda: self.set_fall_break_height(self.fall_break_height))
+                )
 
             # 设置高度累积时间
-            if hasattr(self, 'height_accumulation_time') and self.height_accumulation_time >= 0:
-                configuration_steps.append((
-                    f"Set height accumulation time to {self.height_accumulation_time} seconds",
-                    lambda: self.set_height_accumulation_time(self.height_accumulation_time)
-                ))
+            if hasattr(self, "height_accumulation_time") and self.height_accumulation_time >= 0:
+                configuration_steps.append(
+                    (
+                        f"Set height accumulation time to {self.height_accumulation_time} seconds",
+                        lambda: self.set_height_accumulation_time(self.height_accumulation_time),
+                    )
+                )
 
             # 设置静止驻留开关
             if self.static_stay_enabled:
-                configuration_steps.append((
-                    "Enable Static Stay Detection",
-                    lambda: self.set_static_stay_switch(True)
-                ))
+                configuration_steps.append(("Enable Static Stay Detection", lambda: self.set_static_stay_switch(True)))
 
                 # 设置静止驻留时长
-                if hasattr(self, 'static_stay_duration') and self.static_stay_duration > 0:
-                    configuration_steps.append((
-                        f"Set static stay duration to {self.static_stay_duration} seconds",
-                        lambda: self.set_static_stay_duration(self.static_stay_duration)
-                    ))
+                if hasattr(self, "static_stay_duration") and self.static_stay_duration > 0:
+                    configuration_steps.append(
+                        (
+                            f"Set static stay duration to {self.static_stay_duration} seconds",
+                            lambda: self.set_static_stay_duration(self.static_stay_duration),
+                        )
+                    )
             else:
-                configuration_steps.append((
-                    "Disable Static Stay Detection",
-                    lambda: self.set_static_stay_switch(False)
-                ))
+                configuration_steps.append(("Disable Static Stay Detection", lambda: self.set_static_stay_switch(False)))
 
         else:
-            configuration_steps.append((
-                "Disable Fall Detection",
-                lambda: self.set_fall_detection_switch(False)
-            ))
+            configuration_steps.append(("Disable Fall Detection", lambda: self.set_fall_detection_switch(False)))
         # 执行配置步骤
         for step_name, step_function in configuration_steps:
             success = self._execute_with_retry(step_function, step_name)
@@ -1561,22 +1340,22 @@ class R60AFD1:
 
     def _verify_critical_configuration(self) -> None:
         """
-           验证关键配置是否成功。
+        验证关键配置是否成功。
 
-           Note:
-               - 验证设备初始化状态和基本功能状态。
-               - 根据启用的功能验证相应模块的开关状态。
-               - 验证失败会记录到配置错误列表中。
+        Note:
+            - 验证设备初始化状态和基本功能状态。
+            - 根据启用的功能验证相应模块的开关状态。
+            - 验证失败会记录到配置错误列表中。
 
-           ==========================================
+        ==========================================
 
-           Verify critical configuration success.
+        Verify critical configuration success.
 
-           Note:
-               - Verify device initialization status and basic function status.
-               - Verify switch status of corresponding modules based on enabled functions.
-               - Verification failures are recorded in configuration errors list.
-           """
+        Note:
+            - Verify device initialization status and basic function status.
+            - Verify switch status of corresponding modules based on enabled functions.
+            - Verification failures are recorded in configuration errors list.
+        """
 
         critical_verifications = []
 
@@ -1609,6 +1388,7 @@ class R60AFD1:
                 self._configuration_errors.append(f"Verification failed: {verify_name}")
                 if R60AFD1.DEBUG_ENABLED:
                     print(f"[Init] Warning: {verify_name} verification failed")
+
     def _complete_initialization(self) -> None:
         """
         完整的初始化流程。
@@ -1662,6 +1442,7 @@ class R60AFD1:
         elapsed_time = time.ticks_diff(time.ticks_ms(), start_time)
         if R60AFD1.DEBUG_ENABLED:
             print(f"[Init] Initialization completed in {elapsed_time}ms")
+
     def _handle_query_response(self, expected_type: int, response_data, response_name: str = "") -> None:
         """
         统一处理查询响应
@@ -1672,9 +1453,7 @@ class R60AFD1:
             response_name: 响应名称（用于调试）
         """
         # 情况1：正确时间正确读取
-        if (self._query_in_progress and
-                self._current_query_type == expected_type and
-                not self._query_response_received):
+        if self._query_in_progress and self._current_query_type == expected_type and not self._query_response_received:
 
             self._query_result = response_data
             self._query_response_received = True
@@ -1686,8 +1465,7 @@ class R60AFD1:
         # 情况2：当前正在进行其他类型的查询，但收到了本响应
         elif self._query_in_progress and self._current_query_type != expected_type:
             if R60AFD1.DEBUG_ENABLED:
-                current_query = self.QUERY_NAME_MAP.get(self._current_query_type,
-                                                        f"Unknown({self._current_query_type})")
+                current_query = self.QUERY_NAME_MAP.get(self._current_query_type, f"Unknown({self._current_query_type})")
                 print(f"[Query] Unexpected {response_name} response during {current_query} query: {response_data}")
 
         # 情况3：没有查询在进行，但收到了查询响应
@@ -1810,13 +1588,14 @@ class R60AFD1:
 
         # 提取符号位和数值
         sign_bit = (unsigned_value >> 15) & 0x1  # 最高位为符号位
-        magnitude = unsigned_value & 0x7FFF      # 低15位为数值
+        magnitude = unsigned_value & 0x7FFF  # 低15位为数值
 
         # 根据符号位确定正负
         if sign_bit == 1:  # 负数
             return -magnitude
         else:  # 正数
             return magnitude
+
     def _parse_product_info_data(self, data_bytes: bytes) -> tuple:
         """
         解析产品信息数据 (可变长度字符串)。
@@ -1852,9 +1631,9 @@ class R60AFD1:
                 print(f"[Parse] Raw product data: {data_bytes}, hex: {data_bytes.hex()}")
 
             # 找到第一个空字节的位置，截取有效部分
-            if b'\x00' in data_bytes:
+            if b"\x00" in data_bytes:
                 # 找到第一个空字节，截取之前的部分
-                null_index = data_bytes.index(b'\x00')
+                null_index = data_bytes.index(b"\x00")
                 valid_data = data_bytes[:null_index]
                 if R60AFD1.DEBUG_ENABLED:
                     print(f"[Parse] After null removal: {valid_data}, hex: {valid_data.hex()}")
@@ -1863,7 +1642,7 @@ class R60AFD1:
 
             # 解码为字符串 - 移除关键字参数
             # MicroPython 的 decode 方法不支持 errors='ignore' 关键字参数
-            product_info = valid_data.decode('utf-8').strip()
+            product_info = valid_data.decode("utf-8").strip()
             if R60AFD1.DEBUG_ENABLED:
                 print(f"[Parse] Decoded product info: '{product_info}'")
 
@@ -1875,17 +1654,18 @@ class R60AFD1:
 
             # 尝试使用 ascii 解码作为备选方案
             try:
-                product_info = valid_data.decode('ascii').strip()
+                product_info = valid_data.decode("ascii").strip()
                 if R60AFD1.DEBUG_ENABLED:
                     print(f"[Parse] ASCII decoded product info: '{product_info}'")
                 return (product_info,)
             except:
                 return ("",)
+
     def update_properties_from_frame(self, frame: dict) -> None:
 
-        control = frame['control_byte']
-        command = frame['command_byte']
-        data = frame['data']
+        control = frame["control_byte"]
+        command = frame["command_byte"]
+        data = frame["data"]
 
         # 心跳包 (0x01)
         if control == 0x01:
@@ -1898,11 +1678,7 @@ class R60AFD1:
             elif command == 0x02:
                 self.module_reset_flag = True
                 self.module_reset_timestamp = time.ticks_ms()
-                self._handle_query_response(
-                    R60AFD1.TYPE_MODULE_RESET,
-                    True,
-                    "Module Reset"
-                )
+                self._handle_query_response(R60AFD1.TYPE_MODULE_RESET, True, "Module Reset")
 
         # 产品信息查询
         elif control == 0x02:
@@ -1913,11 +1689,7 @@ class R60AFD1:
                     product_model = self._parse_product_info_data(data)[0]
                     # 更新产品型号属性
                     self.product_model = product_model
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_PRODUCT_MODEL,
-                        product_model,
-                        "PRODUCT MODEL"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_PRODUCT_MODEL, product_model, "PRODUCT MODEL")
             # 产品ID查询
             elif command == 0xA2:
                 if data:
@@ -1925,11 +1697,7 @@ class R60AFD1:
                     product_id = self._parse_product_info_data(data)[0]
                     # 更新产品ID属性
                     self.product_id = product_id
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_PRODUCT_ID,
-                        product_id,
-                        "PRODUCT ID"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_PRODUCT_ID, product_id, "PRODUCT ID")
             # 硬件型号查询
             elif command == 0xA3:
                 if data:
@@ -1937,11 +1705,7 @@ class R60AFD1:
                     hardware_model = self._parse_product_info_data(data)[0]
                     # 更新硬件型号属性
                     self.hardware_model = hardware_model
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_HARDWARE_MODEL,
-                        hardware_model,
-                        "HARDWARE MODEL"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_HARDWARE_MODEL, hardware_model, "HARDWARE MODEL")
             # 固件版本查询
             elif command == 0xA4:
                 if data:
@@ -1949,17 +1713,13 @@ class R60AFD1:
                     firmware_version = self._parse_product_info_data(data)[0]
                     # 更新固件版本属性
                     self.firmware_version = firmware_version
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_FIRMWARE_VERSION,
-                        firmware_version,
-                        "FIRMWARE VERSION"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_FIRMWARE_VERSION, firmware_version, "FIRMWARE VERSION")
         # 工作状态查询
         elif control == 0x05:
             # 初始化完成上报
             if command == 0x01:
                 if data and len(data) > 0:
-                    self.system_initialized = (data[0] == 0x01)
+                    self.system_initialized = data[0] == 0x01
                     self.system_initialized_timestamp = time.ticks_ms()
                     if R60AFD1.DEBUG_ENABLED:
                         status = "completed" if self.system_initialized else "not completed"
@@ -1982,23 +1742,15 @@ class R60AFD1:
             elif command == 0x81:
                 if data and len(data) >= 1:
                     # 01：已完成 00：未完成
-                    system_initialized  = data[0] == 0x01
+                    system_initialized = data[0] == 0x01
                     self.system_initialized = system_initialized
                     self.system_initialized_timestamp = time.ticks_ms()
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_INIT_COMPLETE,
-                        system_initialized,
-                        "INIT COMPLETE"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_INIT_COMPLETE, system_initialized, "INIT COMPLETE")
             elif command == 0x07:
                 if data and len(data) >= 1:
                     scene_info = data[0]
                     self.scene_info = scene_info
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_SCENE_INFO,
-                        scene_info,
-                        "SCENE INFO"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_SCENE_INFO, scene_info, "SCENE INFO")
 
         # 雷达安装信息
         elif control == 0x06:
@@ -2009,21 +1761,13 @@ class R60AFD1:
                     self.install_angle_x = x
                     self.install_angle_y = y
                     self.install_angle_z = z
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_INSTALL_ANGLE,
-                        [x, y, z],
-                        "SET INSTALL ANGLE"
-                )
+                    self._handle_query_response(R60AFD1.TYPE_SET_INSTALL_ANGLE, [x, y, z], "SET INSTALL ANGLE")
             # 安装高度设置(2B)
             if command == 0x02:
                 if data and len(data) >= 2:
                     install_height = self._parse_signed_16bit_special(data[0:2])
                     self.install_height = install_height
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_INSTALL_HEIGHT,
-                        install_height,
-                        "SET INSTALL HEIGHT"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_INSTALL_HEIGHT, install_height, "SET INSTALL HEIGHT")
             # 安装角度查询
             if command == 0x81:
                 if data and len(data) >= 6:
@@ -2031,42 +1775,26 @@ class R60AFD1:
                     self.install_angle_x = x
                     self.install_angle_y = y
                     self.install_angle_z = z
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_INSTALL_ANGLE,
-                        [x, y, z],
-                        "INSTALL ANGLE"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_INSTALL_ANGLE, [x, y, z], "INSTALL ANGLE")
             # 安装高度查询
             elif command == 0x82:
                 if data and len(data) >= 1:
                     if data and len(data) >= 2:
                         install_height = self._parse_signed_16bit_special(data[0:2])
                         self.install_height = install_height
-                        self._handle_query_response(
-                            R60AFD1.TYPE_QUERY_INSTALL_HEIGHT,
-                            install_height,
-                            "INSTALL HEIGHT"
-                        )
+                        self._handle_query_response(R60AFD1.TYPE_QUERY_INSTALL_HEIGHT, install_height, "INSTALL HEIGHT")
         # 人体存在功能查询
         elif control == 0x80:
             # 开关人体存在功能
             if command == 0x00:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.presence_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_HUMAN_PRESENCE_ON,
-                            switch_status,
-                            "Human Presence ON"
-                        )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_HUMAN_PRESENCE_ON, switch_status, "Human Presence ON")
                     else:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_HUMAN_PRESENCE_OFF,
-                            switch_status,
-                            "Human Presence OFF"
-                        )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_HUMAN_PRESENCE_OFF, switch_status, "Human Presence OFF")
             # 存在信息主动上报
             if command == 0x01:
                 if data and len(data) > 0:
@@ -2100,167 +1828,102 @@ class R60AFD1:
                 if data and len(data) >= 2:
                     static_distance = self._parse_signed_16bit_special(data[0:2])
                     self.static_distance = static_distance
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_STATIC_DISTANCE,
-                        static_distance,
-                        "SET STATIC DISTANCE"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_STATIC_DISTANCE, static_distance, "SET STATIC DISTANCE")
             # 运动水平距离设置(2B)
             elif command == 0x0E:
                 if data and len(data) >= 2:
                     motion_distance = self._parse_signed_16bit_special(data[0:2])
                     self.motion_distance = motion_distance
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_MOTION_DISTANCE,
-                        motion_distance,
-                        "SET MOTION DISTANCE"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_MOTION_DISTANCE, motion_distance, "SET MOTION DISTANCE")
             # 最大能量值上报(4B)
             elif command == 0x10:
                 if data and len(data) >= 4:
                     max_energy = self._parse_4byte_timestamp(data)
                     self.max_energy_value = max_energy
                     if R60AFD1.DEBUG_ENABLED:
-                        print(f"[Energy] Max energy value: {max_energy}"
-                    )
+                        print(f"[Energy] Max energy value: {max_energy}")
             # 人体存在判断阈值设置
             elif command == 0x11:
                 if data and len(data) >= 4:
                     presence_threshold = self._parse_4byte_timestamp(data)
                     self.presence_threshold = presence_threshold
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_PRESENCE_THRESHOLD,
-                        presence_threshold,
-                        "SET_PRESENCE_THRESHOLD"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_PRESENCE_THRESHOLD, presence_threshold, "SET_PRESENCE_THRESHOLD")
             # 查询体动参数
             elif command == 0x83:
                 if data and len(data) > 0:
                     body_motion_param = data[0]
                     self.movement_parameter = body_motion_param
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_BODY_MOTION_PARAM,
-                        body_motion_param,
-                        "BODY MOTION PARAMETER"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_BODY_MOTION_PARAM, body_motion_param, "BODY MOTION PARAMETER")
 
             # 无人时间设置(4B)
             elif command == 0x12:
                 if data and len(data) >= 4:
                     no_person_time = self._parse_4byte_timestamp(data)
                     self.no_person_timeout = no_person_time
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_NO_PERSON_TIME,
-                        no_person_time,
-                        "SET NO PERSON TIME"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_NO_PERSON_TIME, no_person_time, "SET NO PERSON TIME")
             # 最大能量值上报开关
             elif command == 0x13:
                 if data and len(data) >= 1:
-                    energy_report_switch = (data[0] == 0x01)
+                    energy_report_switch = data[0] == 0x01
                     self.energy_report_enabled = energy_report_switch
                     if energy_report_switch:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_ENERGY_REPORT_ON,
-                            energy_report_switch,
-                            " ENERGY REPORT ON"
-                        )
-                    else :
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_ENERGY_REPORT_OFF,
-                            energy_report_switch,
-                            " ENERGY REPORT OFF"
-                        )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_ENERGY_REPORT_ON, energy_report_switch, " ENERGY REPORT ON")
+                    else:
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_ENERGY_REPORT_OFF, energy_report_switch, " ENERGY REPORT OFF")
 
             # 人体存在开关查询
-            elif command ==0x80:
-                if data and len(data) >=1:
-                    presence_switch = (data[0]==0x01)
+            elif command == 0x80:
+                if data and len(data) >= 1:
+                    presence_switch = data[0] == 0x01
                     self.presence_enabled = presence_switch
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH,
-                        presence_switch,
-                        "HUMAN PRESENCE SWITCH"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH, presence_switch, "HUMAN PRESENCE SWITCH")
             # 存在信息查询
             elif command == 0x81:
-                if data and len(data) >=1:
+                if data and len(data) >= 1:
                     presence_info = data[0]
                     self.presence_status = presence_info
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_HUMAN_EXISTENCE_INFO,
-                        presence_info,
-                        "HUMAN EXISTENCE INFO"
-                    )
-            #运动信息查询
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_HUMAN_EXISTENCE_INFO, presence_info, "HUMAN EXISTENCE INFO")
+            # 运动信息查询
             elif command == 0x82:
-                if data and len(data) >=1:
+                if data and len(data) >= 1:
                     motion_info = data[0]
                     self.motion_status = motion_info
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_HUMAN_MOTION_INFO,
-                        motion_info,
-                        "HUMAN MOTION INFO"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_HUMAN_MOTION_INFO, motion_info, "HUMAN MOTION INFO")
             # 静坐水平距离查询(2B
             elif command == 0x8D:
                 if data and len(data) >= 2:
                     static_distance = self._parse_signed_16bit_special(data[0:2])
                     self.static_distance = static_distance
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_STATIC_DISTANCE,
-                        static_distance,
-                        "STATIC DISTANCE"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_STATIC_DISTANCE, static_distance, "STATIC DISTANCE")
             # 运动水平距离查询(2B)
             elif command == 0x8E:
                 if data and len(data) >= 2:
                     motion_distance = self._parse_signed_16bit_special(data[0:2])
                     self.motion_distance = motion_distance
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_MOTION_DISTANCE,
-                        motion_distance,
-                        "MOTION DISTANCE"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_MOTION_DISTANCE, motion_distance, "MOTION DISTANCE")
             # 最大能量值查询(4B)
             elif command == 0x90:
                 if data and len(data) >= 4:
                     max_energy = self._parse_4byte_timestamp(data)
                     self.max_energy_value = max_energy
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_MAX_ENERGY,
-                        max_energy,
-                        "MAX ENERGY"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_MAX_ENERGY, max_energy, "MAX ENERGY")
             # 人体存在判断阈值查询
             elif command == 0x91:
                 if data and len(data) >= 4:
                     presence_threshold = self._parse_4byte_timestamp(data)
                     self.presence_threshold = presence_threshold
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_PRESENCE_THRESHOLD,
-                        presence_threshold,
-                        "PRESENCE THRESHOLD"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_PRESENCE_THRESHOLD, presence_threshold, "PRESENCE THRESHOLD")
             # 无人时间查询(4B)
             elif command == 0x92:
                 if data and len(data) >= 4:
                     no_person_time = self._parse_4byte_timestamp(data)
                     self.no_person_timeout = no_person_time
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_NO_PERSON_TIME,
-                        no_person_time,
-                        "NO PERSON TIME"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_NO_PERSON_TIME, no_person_time, "NO PERSON TIME")
             elif command == 0x93:
                 if data and len(data) >= 1:
-                    energy_report_switch = (data[0] == 0x01)
+                    energy_report_switch = data[0] == 0x01
                     self.energy_report_enabled = energy_report_switch
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_ENERGY_REPORT_SWITCH,
-                        energy_report_switch,
-                        "ENERGY REPORT SWITCH"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_ENERGY_REPORT_SWITCH, energy_report_switch, "ENERGY REPORT SWITCH")
 
         elif control == 0x83:
             # 自动测高
@@ -2268,11 +1931,7 @@ class R60AFD1:
                 if data and len(data) >= 2:
                     auto_height = self._parse_signed_16bit_special(data[0:2])
                     self.auto_height = auto_height
-                    self._handle_query_response(
-                        R60AFD1.TYPE_AUTO_HEIGHT_MEASURE,
-                        auto_height,
-                        "AUTO MEASURED HEIGHT"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_AUTO_HEIGHT_MEASURE, auto_height, "AUTO MEASURED HEIGHT")
             # 高度占比上报
             elif command == 0x0E:
                 if data and len(data) >= 6:
@@ -2283,7 +1942,9 @@ class R60AFD1:
                     self.height_ratio_1_15 = ratio_1_15
                     self.height_ratio_15_2 = ratio_15_2
                     if R60AFD1.DEBUG_ENABLED:
-                        print(f"[Height] Total: {height_total}, 0-0.5m: {ratio_0_05}%, 0.5-1m: {ratio_05_1}%, 1-1.5m: {ratio_1_15}%, 1.5-2m: {ratio_15_2}%")
+                        print(
+                            f"[Height] Total: {height_total}, 0-0.5m: {ratio_0_05}%, 0.5-1m: {ratio_05_1}%, 1-1.5m: {ratio_1_15}%, 1.5-2m: {ratio_15_2}%"
+                        )
             # 轨迹点
             elif command == 0x12:
                 if data and len(data) >= 3:
@@ -2298,11 +1959,7 @@ class R60AFD1:
                 if data and len(data) >= 1:
                     fall_sensitivity = data[0]
                     self.fall_sensitivity = fall_sensitivity
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_FALL_SENSITIVITY,
-                        fall_sensitivity,
-                        "SET FALL SENSITIVITY"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_FALL_SENSITIVITY, fall_sensitivity, "SET FALL SENSITIVITY")
             # 轨迹点信息查询X(2B)Y(2B)
             elif command == 0x92:
                 if data and len(data) >= 3:
@@ -2310,49 +1967,29 @@ class R60AFD1:
                     track_y = self._parse_signed_16bit_special(data[2:4])
                     self.track_position_x = track_x
                     self.track_position_y = track_y
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_TRACK_POINT,
-                        (track_x, track_y),
-                        "TRACK POINT"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_TRACK_POINT, (track_x, track_y), "TRACK POINT")
             # 轨迹点上报频率查询(4B)
             elif command == 0x93:
                 if data and len(data) >= 4:
                     track_frequency = self._parse_4byte_timestamp(data)
                     self.track_report_frequency = track_frequency
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_TRACK_FREQUENCY,
-                        track_frequency,
-                        "TRACK FREQUENCY"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_TRACK_FREQUENCY, track_frequency, "TRACK FREQUENCY")
             # 轨迹点上报开关查询(1B)
             elif command == 0x94:
                 if data and len(data) >= 1:
-                    track_switch = (data[0] == 0x01)
+                    track_switch = data[0] == 0x01
                     self.track_report_enabled = track_switch
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_TRACK_SWITCH,
-                        track_switch,
-                        "TRACK SWITCH"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_TRACK_SWITCH, track_switch, "TRACK SWITCH")
             # 跌倒开关监测功能
             elif command == 0x00:
                 if data and len(data) > 0:
-                    fall_detection_switch = (data[0] == 0x01)
+                    fall_detection_switch = data[0] == 0x01
                     self.fall_detection_enabled = fall_detection_switch
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_FALL_DETECTION_ON,
-                            True,
-                            "Fall Detection ON"
-                        )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_FALL_DETECTION_ON, True, "Fall Detection ON")
                     else:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_FALL_DETECTION_OFF,
-                            True,
-                            "Fall Detection OFF"
-                        )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_FALL_DETECTION_OFF, True, "Fall Detection OFF")
             # 跌倒状态
             elif command == 0x01:
                 if data and len(data) > 0:
@@ -2366,201 +2003,121 @@ class R60AFD1:
                 if data and len(data) >= 4:
                     fall_duration = self._parse_4byte_timestamp(data)
                     self.fall_duration_threshold = fall_duration
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_FALL_DURATION,
-                        fall_duration,
-                        "FALL DETECTION DURATION"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_FALL_DURATION, fall_duration, "FALL DETECTION DURATION")
             # 静止驻留状态
             elif command == 0x05:
-                if data and len(data) >0:
+                if data and len(data) > 0:
                     stationary_status = data[0]
                     self.static_stay_status = stationary_status
                     if R60AFD1.DEBUG_ENABLED:
-                        status_text = "Not stationary" if self.static_stay_status ==0 else "Stationary detected"
+                        status_text = "Not stationary" if self.static_stay_status == 0 else "Stationary detected"
                         print(f"[Stationary Detection] {status_text}")
             # 静止驻留时长设置(4B)
             elif command == 0x0A:
-                if data and len(data) >=4:
+                if data and len(data) >= 4:
                     stationary_duration = self._parse_4byte_timestamp(data)
                     self.static_stay_duration = stationary_duration
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_STATIC_STAY_DURATION,
-                        stationary_duration,
-                        "STATIONARY DURATION"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_STATIC_STAY_DURATION, stationary_duration, "STATIONARY DURATION")
             elif command == 0x0B:
                 if data and len(data) >= 1:
-                    stationary_switch = (data[0] == 0x01)
+                    stationary_switch = data[0] == 0x01
                     self.static_stay_enabled = stationary_switch
                     if stationary_switch:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_STATIC_STAY_ON,
-                            stationary_switch,
-                            "STATIC STAY ON"
-                    )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_STATIC_STAY_ON, stationary_switch, "STATIC STAY ON")
                     else:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_STATIC_STAY_OFF,
-                            stationary_switch,
-                            "STATIC STAY OFF"
-                    )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_STATIC_STAY_OFF, stationary_switch, "STATIC STAY OFF")
             # 跌倒灵敏度设置
             elif command == 0x0D:
                 if data and len(data) >= 2:
                     static_distance = data[0]
                     self.static_distance = static_distance
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_FALL_SENSITIVITY,
-                        static_distance,
-                        "STATIC DISTANCE"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_FALL_SENSITIVITY, static_distance, "STATIC DISTANCE")
             # 高度累积时间设置
             elif command == 0x0F:
                 if data and len(data) >= 4:
                     height_accumulation_time = self._parse_4byte_timestamp(data)
                     self.height_accumulation_time = height_accumulation_time
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_HEIGHT_ACCUMULATION_TIME,
-                        height_accumulation_time,
-                        "HEIGHT ACCUMULATION TIME"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_HEIGHT_ACCUMULATION_TIME, height_accumulation_time, "HEIGHT ACCUMULATION TIME")
             # 跌倒打破高度设置
             elif command == 0x11:
                 if data and len(data) >= 2:
                     fall_break_height = self._parse_signed_16bit_special(data[0:2])
                     self.fall_break_height = fall_break_height
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_FALL_BREAK_HEIGHT,
-                        fall_break_height,
-                        "FALL BREAK HEIGHT"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_FALL_BREAK_HEIGHT, fall_break_height, "FALL BREAK HEIGHT")
             # 高度占比开关设置
             elif command == 0x15:
                 if data and len(data) >= 1:
-                    height_ratio_switch = (data[0] == 0x01)
+                    height_ratio_switch = data[0] == 0x01
                     self.height_ratio_enabled = height_ratio_switch
                     if height_ratio_switch:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_HEIGHT_RATIO_ON,
-                            height_ratio_switch,
-                         "HEIGHT RATIO ON"
-                        )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_HEIGHT_RATIO_ON, height_ratio_switch, "HEIGHT RATIO ON")
                     else:
-                        self._handle_query_response(
-                            R60AFD1.TYPE_CONTROL_HEIGHT_RATIO_OFF,
-                            height_ratio_switch,
-                            "HEIGHT RATIO OFF"
-                        )
+                        self._handle_query_response(R60AFD1.TYPE_CONTROL_HEIGHT_RATIO_OFF, height_ratio_switch, "HEIGHT RATIO OFF")
             # 轨迹点信息上报频率设置(4B)
             elif command == 0x13:
                 if data and len(data) >= 4:
                     track_frequency = self._parse_4byte_timestamp(data)
                     self.track_report_frequency = track_frequency
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_TRACK_FREQUENCY,
-                        track_frequency,
-                        "TRACK FREQUENCY"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_TRACK_FREQUENCY, track_frequency, "TRACK FREQUENCY")
             # 轨迹点上报开关设置(1B)
             elif command == 0x14:
                 if data and len(data) >= 1:
-                    track_switch = (data[0] == 0x01)
+                    track_switch = data[0] == 0x01
                     self.track_report_enabled = track_switch
-                    self._handle_query_response(
-                        R60AFD1.TYPE_SET_TRACK_SWITCH,
-                        track_switch,
-                        "TRACK SWITCH"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_SET_TRACK_SWITCH, track_switch, "TRACK SWITCH")
             # 查询跌倒监测开关
             elif command == 0x80:
                 if data and len(data) >= 1:
-                    track_switch = (data[0] == 0x01)
+                    track_switch = data[0] == 0x01
                     self.track_report_enabled = track_switch
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_FALL_DETECTION_SWITCH,
-                        track_switch,
-                        "FALL DETECTION SWITCH"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_FALL_DETECTION_SWITCH, track_switch, "FALL DETECTION SWITCH")
             # 跌倒状态查询
             elif command == 0x81:
                 if data and len(data) > 0:
                     fall_status = data[0]
                     self.fall_status = fall_status
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_FALL_STATUS,
-                        fall_status,
-                        "QUERY_FALL_STATUS"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_FALL_STATUS, fall_status, "QUERY_FALL_STATUS")
             elif command == 0x8C:
                 if data and len(data) >= 4:
                     fall_duration = self._parse_signed_16bit_special(data[0:4])
                     self.fall_duration_threshold = fall_duration
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_FALL_DURATION,
-                        fall_duration,
-                        "QUERY FALL DURATION"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_FALL_DURATION, fall_duration, "QUERY FALL DURATION")
             # 跌倒打破高度查询
             elif command == 0x91:
                 if data and len(data) >= 2:
                     fall_break_height = self._parse_signed_16bit_special(data[0:2])
                     self.fall_break_height = fall_break_height
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_FALL_BREAK_HEIGHT,
-                        fall_break_height,
-                        "QUERY FALL BREAK HEIGHT"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_FALL_BREAK_HEIGHT, fall_break_height, "QUERY FALL BREAK HEIGHT")
             # 高度占比开关查询
             elif command == 0x95:
                 if data and len(data) >= 1:
-                    height_ratio_switch = (data[0] == 0x01)
+                    height_ratio_switch = data[0] == 0x01
                     self.height_ratio_enabled = height_ratio_switch
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_HEIGHT_RATIO_SWITCH,
-                        height_ratio_switch,
-                        "HEIGHT RATIO SWITCH"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_HEIGHT_RATIO_SWITCH, height_ratio_switch, "HEIGHT RATIO SWITCH")
             # 静止驻留状态查询
             elif command == 0x85:
                 if data and len(data) >= 1:
                     static_stay_status = data[0]
                     self.height_accumulation_time = static_stay_status
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_STATIC_STAY_STATUS,
-                        static_stay_status,
-                        "QUERY STATIC STAY STATUS"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_STATIC_STAY_STATUS, static_stay_status, "QUERY STATIC STAY STATUS")
             # 静止驻留时长查询(4B)
             elif command == 0x8A:
                 if data and len(data) >= 4:
                     stationary_duration = self._parse_4byte_timestamp(data)
                     self.static_stay_duration = stationary_duration
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_STATIC_STAY_DURATION,
-                        stationary_duration,
-                        "STATIC STAY DURATION"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_STATIC_STAY_DURATION, stationary_duration, "STATIC STAY DURATION")
             # 静止驻留开关查询(1B)
             elif command == 0x8B:
                 if data and len(data) >= 1:
-                    stationary_switch = (data[0] == 0x01)
+                    stationary_switch = data[0] == 0x01
                     self.static_stay_enabled = stationary_switch
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_STATIC_STAY_SWITCH,
-                        stationary_switch,
-                        "STATIONARY SWITCH"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_STATIC_STAY_SWITCH, stationary_switch, "STATIONARY SWITCH")
             # 跌倒灵敏度查询(1B)
             elif command == 0x8D:
                 if data and len(data) >= 1:
                     static_distance = data[0]
                     self.static_distance = static_distance
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_FALL_SENSITIVITY,
-                        static_distance,
-                        "QUERY FALL SENSITIVITY"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_FALL_SENSITIVITY, static_distance, "QUERY FALL SENSITIVITY")
             # 一段时间高度占比上报(6B)
             elif command == 0x0E:
                 if data and len(data) >= 6:
@@ -2571,7 +2128,9 @@ class R60AFD1:
                     self.height_ratio_1_15 = ratio_1_15
                     self.height_ratio_15_2 = ratio_15_2
                     if R60AFD1.DEBUG_ENABLED:
-                        print(f"[Height] Total: {height_total}, 0-0.5m: {ratio_0_05}%, 0.5-1m: {ratio_05_1}%, 1-1.5m: {ratio_1_15}%, 1.5-2m: {ratio_15_2}%")
+                        print(
+                            f"[Height] Total: {height_total}, 0-0.5m: {ratio_0_05}%, 0.5-1m: {ratio_05_1}%, 1-1.5m: {ratio_1_15}%, 1.5-2m: {ratio_15_2}%"
+                        )
             # 一段时间高度占比查询(6B)
             elif command == 0x8E:
                 if data and len(data) >= 6:
@@ -2582,46 +2141,35 @@ class R60AFD1:
                     self.height_ratio_1_15 = ratio_1_15
                     self.height_ratio_15_2 = ratio_15_2
                     self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_HEIGHT_RATIO,
-                        (height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2),
-                        "HEIGHT RATIO"
+                        R60AFD1.TYPE_QUERY_HEIGHT_RATIO, (height_total, ratio_0_05, ratio_05_1, ratio_1_15, ratio_15_2), "HEIGHT RATIO"
                     )
             # 高度累计时间查询(4B)
             elif command == 0x8F:
                 if data and len(data) >= 4:
                     height_accumulation_time = self._parse_4byte_timestamp(data)
                     self.height_accumulation_time = height_accumulation_time
-                    self._handle_query_response(
-                        R60AFD1.TYPE_QUERY_HEIGHT_ACCUMULATION_TIME,
-                        height_accumulation_time,
-                        "HEIGHT ACCUMULATION TIME"
-                    )
+                    self._handle_query_response(R60AFD1.TYPE_QUERY_HEIGHT_ACCUMULATION_TIME, height_accumulation_time, "HEIGHT ACCUMULATION TIME")
 
-# ============================ 系统基础查询指令 ============================
+    # ============================ 系统基础查询指令 ============================
     def reset_module(self, timeout: int = 200) -> tuple:
         """模组复位"""
         return self._execute_operation(R60AFD1.TYPE_MODULE_RESET, timeout=timeout)
-
 
     def query_product_model(self, timeout: int = 200) -> tuple:
         """查询产品型号"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_PRODUCT_MODEL, timeout=timeout)
 
-
     def query_product_id(self, timeout: int = 200) -> tuple:
         """查询产品ID"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_PRODUCT_ID, timeout=timeout)
-
 
     def query_hardware_model(self, timeout: int = 200) -> tuple:
         """查询硬件型号"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HARDWARE_MODEL, timeout=timeout)
 
-
     def query_firmware_version(self, timeout: int = 200) -> tuple:
         """查询固件版本"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FIRMWARE_VERSION, timeout=timeout)
-
 
     def query_init_complete(self, timeout: int = 200) -> tuple:
         """查询初始化是否完成"""
@@ -2631,24 +2179,19 @@ class R60AFD1:
         """查询场景信息"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_SCENE_INFO, timeout=timeout)
 
-
     # ============================ 安装参数查询指令 ============================
 
     def query_install_angle(self, timeout: int = 200) -> tuple:
         """查询安装角度"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_INSTALL_ANGLE, timeout=timeout)
 
-
-
     def query_install_height(self, timeout: int = 200) -> tuple:
         """查询安装高度"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_INSTALL_HEIGHT, timeout=timeout)
 
-
     def auto_measure_height(self, timeout=500):
         """自动测高（注意：容易受干扰导致测不准）实测一直为00 00"""
         return self._execute_operation(R60AFD1.TYPE_AUTO_HEIGHT_MEASURE, timeout=timeout)
-
 
     # ============================ 人体存在功能查询指令 ============================
 
@@ -2656,71 +2199,57 @@ class R60AFD1:
         """查询人体存在开关状态"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH, timeout=timeout)
 
-
     def query_presence_status(self, timeout: int = 200) -> tuple:
         """查询存在信息（有人/无人）"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HUMAN_EXISTENCE_INFO, timeout=timeout)
-
 
     def query_motion_status(self, timeout: int = 200) -> tuple:
         """查询运动信息（静止/活跃）"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HUMAN_MOTION_INFO, timeout=timeout)
 
-
     def query_body_motion_param(self, timeout: int = 200) -> tuple:
         """查询体动参数（0-100）"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_BODY_MOTION_PARAM, timeout=timeout)
-
 
     def query_height_ratio(self, timeout: int = 200) -> tuple:
         """查询高度占比"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HEIGHT_RATIO, timeout=timeout)
 
-
     def query_track_point(self, timeout: int = 200) -> tuple:
         """查询轨迹点信息"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_TRACK_POINT, timeout=timeout)
-
 
     def query_track_frequency(self, timeout: int = 200) -> tuple:
         """查询轨迹点上报频率"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_TRACK_FREQUENCY, timeout=timeout)
 
-
     def query_track_switch(self, timeout: int = 200) -> tuple:
         """查询轨迹点上报开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_TRACK_SWITCH, timeout=timeout)
-
 
     def query_static_distance(self, timeout: int = 200) -> tuple:
         """查询静坐水平距离"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_STATIC_DISTANCE, timeout=timeout)
 
-
     def query_motion_distance(self, timeout: int = 200) -> tuple:
         """查询运动水平距离"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_MOTION_DISTANCE, timeout=timeout)
-
 
     def query_no_person_time(self, timeout: int = 200) -> tuple:
         """查询无人时间设置"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_NO_PERSON_TIME, timeout=timeout)
 
-
     def query_presence_threshold(self, timeout: int = 200) -> tuple:
         """查询人体存在判断阈值"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_PRESENCE_THRESHOLD, timeout=timeout)
-
 
     def query_energy_report_switch(self, timeout: int = 200) -> tuple:
         """查询最大能量值上报开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_ENERGY_REPORT_SWITCH, timeout=timeout)
 
-
     def query_max_energy(self, timeout: int = 200) -> tuple:
         """查询最大能量值"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_MAX_ENERGY, timeout=timeout)
-
 
     # ============================ 跌倒检测功能查询指令 ============================
 
@@ -2728,51 +2257,41 @@ class R60AFD1:
         """查询跌倒监测开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_DETECTION_SWITCH, timeout=timeout)
 
-
     def query_fall_status(self, timeout: int = 200) -> tuple:
         """查询跌倒状态"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_STATUS, timeout=timeout)
-
 
     def query_fall_duration(self, timeout: int = 200) -> tuple:
         """查询跌倒时长设置"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_DURATION, timeout=timeout)
 
-
     def query_static_stay_duration(self, timeout: int = 200) -> tuple:
         """查询驻留时长设置"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_STATIC_STAY_DURATION, timeout=timeout)
-
 
     def query_static_stay_switch(self, timeout: int = 200) -> tuple:
         """查询静止驻留开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_STATIC_STAY_SWITCH, timeout=timeout)
 
-
     def query_static_stay_status(self, timeout: int = 200) -> tuple:
         """查询静止驻留状态"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_STATIC_STAY_STATUS, timeout=timeout)
-
 
     def query_height_accumulation_time(self, timeout: int = 200) -> tuple:
         """查询高度累积时间"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HEIGHT_ACCUMULATION_TIME, timeout=timeout)
 
-
     def query_fall_break_height(self, timeout: int = 200) -> tuple:
         """查询跌倒打破高度"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_BREAK_HEIGHT, timeout=timeout)
-
 
     def query_height_ratio_switch(self, timeout: int = 200) -> tuple:
         """查询高度占比开关"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_HEIGHT_RATIO_SWITCH, timeout=timeout)
 
-
     def query_fall_sensitivity(self, timeout: int = 200) -> tuple:
         """查询跌倒灵敏度"""
         return self._execute_operation(R60AFD1.TYPE_QUERY_FALL_SENSITIVITY, timeout=timeout)
-
 
     # ============================ 控制指令方法 ============================
 
@@ -2781,36 +2300,30 @@ class R60AFD1:
         command_type = R60AFD1.TYPE_CONTROL_HUMAN_PRESENCE_ON if enabled else R60AFD1.TYPE_CONTROL_HUMAN_PRESENCE_OFF
         return self._execute_operation(command_type, timeout=timeout)
 
-
     def set_fall_detection_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置跌倒监测开关"""
         command_type = R60AFD1.TYPE_CONTROL_FALL_DETECTION_ON if enabled else R60AFD1.TYPE_CONTROL_FALL_DETECTION_OFF
         return self._execute_operation(command_type, timeout=timeout)
-
 
     def set_static_stay_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置静止驻留开关"""
         command_type = R60AFD1.TYPE_CONTROL_STATIC_STAY_ON if enabled else R60AFD1.TYPE_CONTROL_STATIC_STAY_OFF
         return self._execute_operation(command_type, timeout=timeout)
 
-
     def set_energy_report_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置能量值上报开关"""
         command_type = R60AFD1.TYPE_CONTROL_ENERGY_REPORT_ON if enabled else R60AFD1.TYPE_CONTROL_ENERGY_REPORT_OFF
         return self._execute_operation(command_type, timeout=timeout)
-
 
     def set_height_ratio_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置高度占比开关"""
         command_type = R60AFD1.TYPE_CONTROL_HEIGHT_RATIO_ON if enabled else R60AFD1.TYPE_CONTROL_HEIGHT_RATIO_OFF
         return self._execute_operation(command_type, timeout=timeout)
 
-
     def set_track_switch(self, enabled=True, timeout: int = 200) -> tuple:
         """设置轨迹点上报开关（需要传入动态数据）"""
         data = bytes([0x01 if enabled else 0x00])
         return self._execute_operation(R60AFD1.TYPE_SET_TRACK_SWITCH, timeout=timeout, data=data)
-
 
     # ============================ 参数设置指令方法 ============================
 
@@ -2835,7 +2348,6 @@ class R60AFD1:
         data[1] = height_cm & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_INSTALL_HEIGHT, timeout=timeout, data=data)
 
-
     def set_static_distance(self, distance_cm, timeout: int = 200) -> tuple:
         """设置静坐水平距离（单位：cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
@@ -2845,7 +2357,6 @@ class R60AFD1:
         data[1] = distance_cm & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_STATIC_DISTANCE, timeout=timeout, data=data)
 
-
     def set_motion_distance(self, distance_cm, timeout: int = 200) -> tuple:
         """设置运动水平距离（单位：cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
@@ -2854,7 +2365,6 @@ class R60AFD1:
         data[0] = (distance_cm >> 8) & 0xFF
         data[1] = distance_cm & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_MOTION_DISTANCE, timeout=timeout, data=data)
-
 
     def set_no_person_time(self, seconds, timeout: int = 200) -> tuple:
         """设置无人时间（单位：秒，范围5-1800）"""
@@ -2867,10 +2377,9 @@ class R60AFD1:
         data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_NO_PERSON_TIME, timeout=timeout, data=data)
 
-
     def set_presence_threshold(self, threshold, timeout: int = 200) -> tuple:
         """设置人体存在判断阈值（范围0-0xffffffff）"""
-        if threshold < 0 or threshold > 0xffffffff:
+        if threshold < 0 or threshold > 0xFFFFFFFF:
             raise ValueError("The threshold must be within the range of 0-0xffffffff")
         data = bytearray(4)
         data[0] = (threshold >> 24) & 0xFF
@@ -2878,7 +2387,6 @@ class R60AFD1:
         data[2] = (threshold >> 8) & 0xFF
         data[3] = threshold & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_PRESENCE_THRESHOLD, timeout=timeout, data=data)
-
 
     def set_fall_duration(self, seconds, timeout: int = 200) -> tuple:
         """设置跌倒时长（单位：秒，范围5-180）"""
@@ -2891,7 +2399,6 @@ class R60AFD1:
         data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_DURATION, timeout=timeout, data=data)
 
-
     def set_static_stay_duration(self, seconds, timeout: int = 200) -> tuple:
         """设置静止驻留时长（单位：秒，范围60-3600）"""
         if seconds <= 60 or seconds >= 3600:
@@ -2903,7 +2410,6 @@ class R60AFD1:
         data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_STATIC_STAY_DURATION, timeout=timeout, data=data)
 
-
     def set_height_accumulation_time(self, seconds, timeout: int = 200) -> tuple:
         """设置高度累积时间（单位：秒，范围0-300）"""
         if seconds < 0 or seconds > 300:
@@ -2914,7 +2420,6 @@ class R60AFD1:
         data[2] = (seconds >> 8) & 0xFF
         data[3] = seconds & 0xFF
         return self._execute_operation(R60AFD1.TYPE_SET_HEIGHT_ACCUMULATION_TIME, timeout=timeout, data=data)
-
 
     def set_fall_break_height(self, height_cm, timeout: int = 200) -> tuple:
         """设置跌倒打破高度（单位：cm，范围0-150）"""
@@ -2928,7 +2433,7 @@ class R60AFD1:
     # 该功能查询和设置均与手册不符，查询方法和设置方法待核实后修改
     def set_track_frequency(self, seconds, timeout: int = 200) -> tuple:
         """设置轨迹点上报频率（单位：秒，范围0-0xffffffff）"""
-        if seconds < 0 or seconds > 0xffffffff:
+        if seconds < 0 or seconds > 0xFFFFFFFF:
             raise ValueError("The reporting frequency of trajectory points is out of range")
         data = bytearray(4)
         data[0] = (seconds >> 24) & 0xFF
@@ -2993,7 +2498,7 @@ class R60AFD1:
 
         # 获取并输出统计信息
         try:
-            if hasattr(self.data_processor, 'get_stats'):
+            if hasattr(self.data_processor, "get_stats"):
                 stats = self.data_processor.get_stats()
                 if R60AFD1.DEBUG_ENABLED:
                     print(f"{format_time()} [R60AFD1] Final statistics:")
@@ -3007,13 +2512,15 @@ class R60AFD1:
 
         # 清空缓冲区
         try:
-            if hasattr(self.data_processor, 'clear_buffer'):
+            if hasattr(self.data_processor, "clear_buffer"):
                 self.data_processor.clear_buffer()
         except Exception as e:
             raise Exception(f"Failed to clear buffer: {str(e)}")
 
         if R60AFD1.DEBUG_ENABLED:
             print(f"{format_time()} [R60AFD1] Resources fully released")
+
+
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================

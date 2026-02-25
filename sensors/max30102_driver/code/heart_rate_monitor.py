@@ -13,13 +13,14 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
 
-from time import ticks_diff , ticks_ms
+from time import ticks_diff, ticks_ms
 
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class HeartRateMonitor:
     """
@@ -63,28 +64,29 @@ class HeartRateMonitor:
         - The threshold is 50% between min and max of the recent window.
         - At least two peaks are required to compute BPM.
     """
+
     def __init__(self, sample_rate=100, window_size=10, smoothing_window=5):
         """
-            初始化。
+        初始化。
 
-            Args:
-                sample_rate (int): 采样率（Hz）。
-                window_size (int): 峰值检测窗口大小。
-                smoothing_window (int): 平滑窗口大小。
+        Args:
+            sample_rate (int): 采样率（Hz）。
+            window_size (int): 峰值检测窗口大小。
+            smoothing_window (int): 平滑窗口大小。
 
-            Raises:
-                ValueError: 当任一参数 <= 0。
+        Raises:
+            ValueError: 当任一参数 <= 0。
 
-            =========================================
-            Initialize the monitor.
+        =========================================
+        Initialize the monitor.
 
-            Args:
-                sample_rate (int): Sampling rate in Hz.
-                window_size (int): Peak-detection window length.
-                smoothing_window (int): Moving average window length.
+        Args:
+            sample_rate (int): Sampling rate in Hz.
+            window_size (int): Peak-detection window length.
+            smoothing_window (int): Moving average window length.
 
-            Raises:
-                ValueError: If any parameter <= 0.
+        Raises:
+            ValueError: If any parameter <= 0.
         """
         self.sample_rate = sample_rate
         self.window_size = window_size
@@ -95,19 +97,19 @@ class HeartRateMonitor:
 
     def add_sample(self, sample):
         """
-            添加一个新样本并更新平滑结果。
+        添加一个新样本并更新平滑结果。
 
-            Args:
-                sample (float|int): 原始样本值。
-            Raises:
-                TypeError: 如果 sample 不是 int 或 float。
-            =========================================
-            Add a new sample and update the smoothed value.
+        Args:
+            sample (float|int): 原始样本值。
+        Raises:
+            TypeError: 如果 sample 不是 int 或 float。
+        =========================================
+        Add a new sample and update the smoothed value.
 
-            Args:
-                sample (float|int): Raw sample value.
-            Raises:
-                TypeError: If sample is not int or float.
+        Args:
+            sample (float|int): Raw sample value.
+        Raises:
+            TypeError: If sample is not int or float.
         """
         timestamp = ticks_ms()
         self.samples.append(sample)
@@ -115,9 +117,7 @@ class HeartRateMonitor:
 
         # Apply smoothing
         if len(self.samples) >= self.smoothing_window:
-            smoothed_sample = (
-                sum(self.samples[-self.smoothing_window :]) / self.smoothing_window
-            )
+            smoothed_sample = sum(self.samples[-self.smoothing_window :]) / self.smoothing_window
             self.filtered_samples.append(smoothed_sample)
         else:
             self.filtered_samples.append(sample)
@@ -130,17 +130,17 @@ class HeartRateMonitor:
 
     def find_peaks(self):
         """
-            在平滑序列中查找峰值（基于动态阈值的三点法）。
+        在平滑序列中查找峰值（基于动态阈值的三点法）。
 
-            Returns:
-                list[tuple[int, float]]: 峰值列表，每项为 (时间戳ms, 峰值幅度)。
+        Returns:
+            list[tuple[int, float]]: 峰值列表，每项为 (时间戳ms, 峰值幅度)。
 
-            =========================================
-            Find peaks on the smoothed samples using a simple three-point test with
-            a dynamic threshold.
+        =========================================
+        Find peaks on the smoothed samples using a simple three-point test with
+        a dynamic threshold.
 
-            Returns:
-                list[tuple[int, float]]: Peaks as (timestamp_ms, amplitude).
+        Returns:
+            list[tuple[int, float]]: Peaks as (timestamp_ms, amplitude).
         """
         peaks = []
 
@@ -149,19 +149,17 @@ class HeartRateMonitor:
             return peaks
 
         # 基于最近窗口的滤波样本的最小值和最大值计算动态阈值
-        recent_samples = self.filtered_samples[-self.window_size:]
+        recent_samples = self.filtered_samples[-self.window_size :]
         min_val = min(recent_samples)
         max_val = max(recent_samples)
         # 以最小值和最大值的50%作为阈值
-        threshold = (
-                min_val + (max_val - min_val) * 0.5
-        )
+        threshold = min_val + (max_val - min_val) * 0.5
 
         for i in range(1, len(self.filtered_samples) - 1):
             if (
-                    self.filtered_samples[i] > threshold
-                    and self.filtered_samples[i - 1] < self.filtered_samples[i]
-                    and self.filtered_samples[i] > self.filtered_samples[i + 1]
+                self.filtered_samples[i] > threshold
+                and self.filtered_samples[i - 1] < self.filtered_samples[i]
+                and self.filtered_samples[i] > self.filtered_samples[i + 1]
             ):
                 peak_time = self.timestamps[i]
                 peaks.append((peak_time, self.filtered_samples[i]))
@@ -170,16 +168,16 @@ class HeartRateMonitor:
 
     def calculate_heart_rate(self):
         """
-            计算心率（BPM）。
+        计算心率（BPM）。
 
-            Returns:
-                float|None: 若峰值不足则返回 None，否则返回 BPM。
+        Returns:
+            float|None: 若峰值不足则返回 None，否则返回 BPM。
 
-            =========================================
-            Compute heart rate in BPM.
+        =========================================
+        Compute heart rate in BPM.
 
-            Returns:
-                float|None: BPM or None if not enough peaks are found.
+        Returns:
+            float|None: BPM or None if not enough peaks are found.
         """
         peaks = self.find_peaks()
 
@@ -197,9 +195,7 @@ class HeartRateMonitor:
 
         # 将间隔转换为每分钟心跳数（BPM）
         # 60秒每分钟 * 1000毫秒每秒
-        heart_rate = (
-                60000 / average_interval
-        )
+        heart_rate = 60000 / average_interval
 
         return heart_rate
 

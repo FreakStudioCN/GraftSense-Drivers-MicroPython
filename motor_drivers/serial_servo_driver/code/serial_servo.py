@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/1/18 下午1:59   
-# @Author  : 李清水            
-# @File    : serial_servo.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/1/18 下午1:59
+# @Author  : 李清水
+# @File    : serial_servo.py
 # @Description : TTL串口舵机驱动类
 
 __version__ = "0.1.0"
@@ -14,6 +14,7 @@ __platform__ = "MicroPython v1.23"
 
 # 硬件相关的模块
 from machine import UART
+
 # 时间相关的模块
 import time
 
@@ -22,6 +23,7 @@ import time
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 串口舵机自定义类
 class SerialServo:
@@ -268,31 +270,31 @@ class SerialServo:
     MODE_MOTOR = 1
 
     # 类变量：LED报警故障类型
-    ERROR_NO_ALARM = 0              # 无报警
-    ERROR_OVER_TEMP = 1             # 过温报警
-    ERROR_OVER_VOLT = 2             # 过压报警
-    ERROR_OVER_TEMP_AND_VOLT = 3    # 过温和过压报警
-    ERROR_STALL = 4                 # 堵转报警
-    ERROR_OVER_TEMP_AND_STALL = 5   # 过温和堵转报警
-    ERROR_OVER_VOLT_AND_STALL = 6   # 过压和堵转报警
-    ERROR_ALL = 7                   # 过温、过压和堵转报警
+    ERROR_NO_ALARM = 0  # 无报警
+    ERROR_OVER_TEMP = 1  # 过温报警
+    ERROR_OVER_VOLT = 2  # 过压报警
+    ERROR_OVER_TEMP_AND_VOLT = 3  # 过温和过压报警
+    ERROR_STALL = 4  # 堵转报警
+    ERROR_OVER_TEMP_AND_STALL = 5  # 过温和堵转报警
+    ERROR_OVER_VOLT_AND_STALL = 6  # 过压和堵转报警
+    ERROR_ALL = 7  # 过温、过压和堵转报警
 
     # 读取命令集合：根据指令的元组长度来确定哪些是读取命令（命令编号，参数长度，返回数据长度）
     READ_COMMANDS = {
         2,  # SERVO_MOVE_TIME_READ
         8,  # SERVO_MOVE_TIME_WAIT_READ
-        14, # SERVO_ID_READ
-        19, # SERVO_ANGLE_OFFSET_READ
-        21, # SERVO_ANGLE_LIMIT_READ
-        23, # SERVO_VIN_LIMIT_READ
-        25, # SERVO_TEMP_MAX_LIMIT_READ
-        26, # SERVO_TEMP_READ
-        27, # SERVO_VIN_READ
-        28, # SERVO_POS_READ
-        30, # SERVO_OR_MOTOR_MODE_READ
-        32, # SERVO_LOAD_OR_UNLOAD_READ
-        34, # SERVO_LED_CTRL_READ
-        36  # SERVO_LED_ERROR_READ
+        14,  # SERVO_ID_READ
+        19,  # SERVO_ANGLE_OFFSET_READ
+        21,  # SERVO_ANGLE_LIMIT_READ
+        23,  # SERVO_VIN_LIMIT_READ
+        25,  # SERVO_TEMP_MAX_LIMIT_READ
+        26,  # SERVO_TEMP_READ
+        27,  # SERVO_VIN_READ
+        28,  # SERVO_POS_READ
+        30,  # SERVO_OR_MOTOR_MODE_READ
+        32,  # SERVO_LOAD_OR_UNLOAD_READ
+        34,  # SERVO_LED_CTRL_READ
+        36,  # SERVO_LED_ERROR_READ
     }
 
     def __init__(self, uart: UART) -> None:
@@ -1161,7 +1163,7 @@ class SerialServo:
         max_vin_high = (max_vin_mV >> 8) & 0xFF
 
         # 生成指令包并发送
-        self.send_command(servo_id, SerialServo.SERVO_VIN_LIMIT_WRITE[0], [min_vin_low, min_vin_high,  max_vin_low, max_vin_high])
+        self.send_command(servo_id, SerialServo.SERVO_VIN_LIMIT_WRITE[0], [min_vin_low, min_vin_high, max_vin_low, max_vin_high])
 
     def get_servo_vin_range(self, servo_id: int) -> tuple:
         """
@@ -1546,8 +1548,8 @@ class SerialServo:
                 speed = (speed + 65536) % 65536
 
             # 取低八位数据和高八位数据
-            low_byte = (speed & 0xFF)
-            high_byte = ((speed >> 8) & 0xFF)
+            low_byte = speed & 0xFF
+            high_byte = (speed >> 8) & 0xFF
         else:
             # 在位置控制模式下，转动速度无效，设置为0
             low_byte = 0
@@ -1816,14 +1818,16 @@ class SerialServo:
         """
 
         # 检查报警代码是否在合法范围内
-        if alarm_code not in [SerialServo.ERROR_NO_ALARM,
-                              SerialServo.ERROR_OVER_TEMP,
-                              SerialServo.ERROR_OVER_VOLT,
-                              SerialServo.ERROR_OVER_TEMP_AND_VOLT,
-                              SerialServo.ERROR_STALL,
-                              SerialServo.ERROR_OVER_TEMP_AND_STALL,
-                              SerialServo.ERROR_OVER_VOLT_AND_STALL,
-                              SerialServo.ERROR_ALL]:
+        if alarm_code not in [
+            SerialServo.ERROR_NO_ALARM,
+            SerialServo.ERROR_OVER_TEMP,
+            SerialServo.ERROR_OVER_VOLT,
+            SerialServo.ERROR_OVER_TEMP_AND_VOLT,
+            SerialServo.ERROR_STALL,
+            SerialServo.ERROR_OVER_TEMP_AND_STALL,
+            SerialServo.ERROR_OVER_VOLT_AND_STALL,
+            SerialServo.ERROR_ALL,
+        ]:
 
             raise ValueError("Invalid alarm code. Must be between 0 and 7.")
 
@@ -1883,19 +1887,22 @@ class SerialServo:
         error_alarm_value = params[0]
 
         # 判断值是否在合法范围内
-        if error_alarm_value not in [SerialServo.ERROR_NO_ALARM,
-                                     SerialServo.ERROR_OVER_TEMP,
-                                     SerialServo.ERROR_OVER_VOLT,
-                                     SerialServo.ERROR_OVER_TEMP_AND_VOLT,
-                                     SerialServo.ERROR_STALL,
-                                     SerialServo.ERROR_OVER_TEMP_AND_STALL,
-                                     SerialServo.ERROR_OVER_VOLT_AND_STALL,
-                                     SerialServo.ERROR_ALL]:
+        if error_alarm_value not in [
+            SerialServo.ERROR_NO_ALARM,
+            SerialServo.ERROR_OVER_TEMP,
+            SerialServo.ERROR_OVER_VOLT,
+            SerialServo.ERROR_OVER_TEMP_AND_VOLT,
+            SerialServo.ERROR_STALL,
+            SerialServo.ERROR_OVER_TEMP_AND_STALL,
+            SerialServo.ERROR_OVER_VOLT_AND_STALL,
+            SerialServo.ERROR_ALL,
+        ]:
 
             raise ValueError("Error alarm value is out of range.")
 
         # 返回LED故障报警值
         return error_alarm_value
+
 
 # ======================================== 初始化配置 ==========================================
 

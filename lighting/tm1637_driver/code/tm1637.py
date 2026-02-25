@@ -15,89 +15,94 @@ __platform__ = "MicroPython v1.23.0"
 
 # 导入MicroPython内置模块
 from micropython import const
+
 # 导入Pin类以控制GPIO引脚
 from machine import Pin
+
 # 导入时间相关函数
 from time import sleep_us, sleep_ms
 
 # ======================================== 全局变量 ============================================
 
 TM1637_CMD1 = const(64)  # 0x40 数据命令
-TM1637_CMD2 = const(192) # 0xC0 地址命令
-TM1637_CMD3 = const(128) # 0x80 显示控制命令
-TM1637_DSP_ON = const(8) # 0x08 开启显示
-TM1637_DELAY = const(10) # 10us 时钟延迟
+TM1637_CMD2 = const(192)  # 0xC0 地址命令
+TM1637_CMD3 = const(128)  # 0x80 显示控制命令
+TM1637_DSP_ON = const(8)  # 0x08 开启显示
+TM1637_DELAY = const(10)  # 10us 时钟延迟
 TM1637_MSB = const(128)  # MSB（最高有效位）表示小数点或冒号
 
 # 0-9, a-z, blank, dash, star
 # 这是七段显示的编码表，包含了数字、字母、空格、破折号、星号等字符
-_SEGMENTS = bytearray(b'\x3F\x06\x5B\x4F\x66\x6D\x7D\x07\x7F\x6F\x77\x7C\x39\x5E\x79\x71\x3D\x76\x06\x1E\x76\x38\x55\x54\x3F\x73\x67\x50\x6D\x78\x3E\x1C\x2A\x76\x6E\x5B\x00\x40\x63')
+_SEGMENTS = bytearray(
+    b"\x3F\x06\x5B\x4F\x66\x6D\x7D\x07\x7F\x6F\x77\x7C\x39\x5E\x79\x71\x3D\x76\x06\x1E\x76\x38\x55\x54\x3F\x73\x67\x50\x6D\x78\x3E\x1C\x2A\x76\x6E\x5B\x00\x40\x63"
+)
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
 
+
 class TM1637(object):
     """
-       基于 TM1637 的四位七段数码管显示驱动类（MicroPython）。
-       提供位/段写入、亮度调节、数字/字符串/十六进制/温度显示与滚动显示等高层 API；
-       底层严格按 TM1637 时序实现（START/STOP、自动地址递增、显示控制）。
+    基于 TM1637 的四位七段数码管显示驱动类（MicroPython）。
+    提供位/段写入、亮度调节、数字/字符串/十六进制/温度显示与滚动显示等高层 API；
+    底层严格按 TM1637 时序实现（START/STOP、自动地址递增、显示控制）。
 
-       Attributes:
-           clk (Pin): 时钟引脚（输出模式）
-           dio (Pin): 数据引脚（输出模式）
-           _brightness (int): 当前亮度（0–7）
+    Attributes:
+        clk (Pin): 时钟引脚（输出模式）
+        dio (Pin): 数据引脚（输出模式）
+        _brightness (int): 当前亮度（0–7）
 
-       Methods:
-           __init__(clk, dio, brightness=7): 初始化引脚与默认亮度；写入数据与显示控制命令以启用显示。
-           brightness(val): 设置并应用亮度（0–7）；越大越亮；非法值抛 `ValueError`。
-           write(segments, pos=0): 从给定起始位写入原始段码（自动地址递增）；pos 超界抛 `ValueError`。
-           encode_digit(digit): 将 0–9 编码为七段段码；返回单字节。
-           encode_string(string): 将字符串（≤4 字符）批量编码为段码数组。
-           encode_char(char): 编码单字符（0–9、a–z/A–Z、空格、破折号、星号）；不支持则抛 `ValueError`。
-           hex(val): 以 4 位十六进制显示（小写）。
-           number(num): 显示整数（-999..9999），自动裁剪到范围。
-           numbers(num1, num2, colon=True): 显示两个 2 位整数（-9..99），可选显示冒号。
-           temperature(num): 显示温度（-9..99），越界显示 “lo/hi”，并追加 ℃ 符号。
-           show(string, colon=False): 直接显示字符串（≤4），可选点亮冒号位。
-           scroll(string, delay=250): 左移滚动显示字符串；`delay` 为步进毫秒。
+    Methods:
+        __init__(clk, dio, brightness=7): 初始化引脚与默认亮度；写入数据与显示控制命令以启用显示。
+        brightness(val): 设置并应用亮度（0–7）；越大越亮；非法值抛 `ValueError`。
+        write(segments, pos=0): 从给定起始位写入原始段码（自动地址递增）；pos 超界抛 `ValueError`。
+        encode_digit(digit): 将 0–9 编码为七段段码；返回单字节。
+        encode_string(string): 将字符串（≤4 字符）批量编码为段码数组。
+        encode_char(char): 编码单字符（0–9、a–z/A–Z、空格、破折号、星号）；不支持则抛 `ValueError`。
+        hex(val): 以 4 位十六进制显示（小写）。
+        number(num): 显示整数（-999..9999），自动裁剪到范围。
+        numbers(num1, num2, colon=True): 显示两个 2 位整数（-9..99），可选显示冒号。
+        temperature(num): 显示温度（-9..99），越界显示 “lo/hi”，并追加 ℃ 符号。
+        show(string, colon=False): 直接显示字符串（≤4），可选点亮冒号位。
+        scroll(string, delay=250): 左移滚动显示字符串；`delay` 为步进毫秒。
 
-       Notes:
-           - 使用 TM1637 的时序控制，避免在 ISR 或中断上下文中直接操作。
-           - 显示亮度范围为 0–7，设置过高可能导致功耗增加。
-           - 本类设计用于支持常见的 4 位显示模块，并支持可选冒号。
+    Notes:
+        - 使用 TM1637 的时序控制，避免在 ISR 或中断上下文中直接操作。
+        - 显示亮度范围为 0–7，设置过高可能导致功耗增加。
+        - 本类设计用于支持常见的 4 位显示模块，并支持可选冒号。
 
-       ==========================================
+    ==========================================
 
-       TM1637-based driver for 4-digit 7-segment displays (MicroPython).
-       Provides high-level APIs for segment writes, brightness control, numeric/string/hex/temperature
-       rendering, and text scrolling, while implementing low-level TM1637 timing
-       (START/STOP, auto address increment, display control).
+    TM1637-based driver for 4-digit 7-segment displays (MicroPython).
+    Provides high-level APIs for segment writes, brightness control, numeric/string/hex/temperature
+    rendering, and text scrolling, while implementing low-level TM1637 timing
+    (START/STOP, auto address increment, display control).
 
-       Attributes:
-           clk (Pin): Clock pin (output).
-           dio (Pin): Data pin (output).
-           _brightness (int): Current brightness level (0–7).
+    Attributes:
+        clk (Pin): Clock pin (output).
+        dio (Pin): Data pin (output).
+        _brightness (int): Current brightness level (0–7).
 
-       Methods:
-           __init__(clk, dio, brightness=7): Initialize pins/brightness and send init commands.
-           brightness(val): Set and apply display brightness in [0..7]; out-of-range values raise `ValueError`.
-           write(segments, pos=0): Write raw segment bytes starting at position; validates `pos`.
-           encode_digit(digit): Encode a decimal digit (0–9) to a segment byte.
-           encode_string(string): Encode a short string (≤4 chars) into segment bytes.
-           encode_char(char): Encode a single char; unsupported chars raise `ValueError`.
-           hex(val): Display a 16-bit value as 4-digit hex (lowercase).
-           number(num): Display an integer within [-999, 9999] (clamped).
-           numbers(num1, num2, colon=True): Display two 2-digit integers with optional colon.
-           temperature(num): Show temperature value with ℃ indicator and out-of-range handling.
-           show(string, colon=False): Show a short string with optional colon.
-           scroll(string, delay=250): Scroll text left with step delay (ms).
+    Methods:
+        __init__(clk, dio, brightness=7): Initialize pins/brightness and send init commands.
+        brightness(val): Set and apply display brightness in [0..7]; out-of-range values raise `ValueError`.
+        write(segments, pos=0): Write raw segment bytes starting at position; validates `pos`.
+        encode_digit(digit): Encode a decimal digit (0–9) to a segment byte.
+        encode_string(string): Encode a short string (≤4 chars) into segment bytes.
+        encode_char(char): Encode a single char; unsupported chars raise `ValueError`.
+        hex(val): Display a 16-bit value as 4-digit hex (lowercase).
+        number(num): Display an integer within [-999, 9999] (clamped).
+        numbers(num1, num2, colon=True): Display two 2-digit integers with optional colon.
+        temperature(num): Show temperature value with ℃ indicator and out-of-range handling.
+        show(string, colon=False): Show a short string with optional colon.
+        scroll(string, delay=250): Scroll text left with step delay (ms).
 
-       Notes:
-           - Operates with TM1637 timing control; avoid direct calls from ISR or interrupt contexts.
-           - Brightness range is 0–7; excessive settings may increase power consumption.
-           - Designed for common 4-digit displays with optional colon support.
-   """
+    Notes:
+        - Operates with TM1637 timing control; avoid direct calls from ISR or interrupt contexts.
+        - Brightness range is 0–7; excessive settings may increase power consumption.
+        - Designed for common 4-digit displays with optional colon support.
+    """
 
     def __init__(self, clk, dio, brightness=7):
         """
@@ -299,7 +304,7 @@ class TM1637(object):
         Returns:
             byte: Corresponding 7-segment display encoding
         """
-        return _SEGMENTS[digit & 0x0f]
+        return _SEGMENTS[digit & 0x0F]
 
     def encode_string(self, string):
         """
@@ -357,20 +362,20 @@ class TM1637(object):
         if o == 32:
             return _SEGMENTS[36]
         if o == 42:
-        # 星号
+            # 星号
             return _SEGMENTS[38]
         if o == 45:
-        # 破折号
+            # 破折号
             return _SEGMENTS[37]
         # 大写字母 A-Z
         if o >= 65 and o <= 90:
-            return _SEGMENTS[o-55]
+            return _SEGMENTS[o - 55]
         # 小写字母 a-z
         if o >= 97 and o <= 122:
-            return _SEGMENTS[o-87]
+            return _SEGMENTS[o - 87]
         # 数字 0-9
         if o >= 48 and o <= 57:
-            return _SEGMENTS[o-48]
+            return _SEGMENTS[o - 48]
         raise ValueError("Character out of range: {:d} '{:s}'".format(o, chr(o)))
 
     def hex(self, val):
@@ -387,7 +392,7 @@ class TM1637(object):
         Args:
             val (int): Hexadecimal value
         """
-        string = '{:04x}'.format(val & 0xffff)
+        string = "{:04x}".format(val & 0xFFFF)
         self.write(self.encode_string(string))
 
     def number(self, num):
@@ -405,7 +410,7 @@ class TM1637(object):
             num (int): Numeric value
         """
         num = max(-999, min(num, 9999))
-        string = '{0: >4d}'.format(num)
+        string = "{0: >4d}".format(num)
         self.write(self.encode_string(string))
 
     def numbers(self, num1, num2, colon=True):
@@ -428,9 +433,9 @@ class TM1637(object):
         """
         num1 = max(-9, min(num1, 99))
         num2 = max(-9, min(num2, 99))
-        segments = self.encode_string('{0:0>2d}{1:0>2d}'.format(num1, num2))
+        segments = self.encode_string("{0:0>2d}{1:0>2d}".format(num1, num2))
         if colon:
-            segments[1] |= 0x80 # 显示冒号
+            segments[1] |= 0x80  # 显示冒号
         self.write(segments)
 
     def temperature(self, num):
@@ -448,13 +453,13 @@ class TM1637(object):
             num (int): Temperature value
         """
         if num < -9:
-            self.show('lo') # 显示 "低温"
+            self.show("lo")  # 显示 "低温"
         elif num > 99:
-            self.show('hi') # 显示 "高温"
+            self.show("hi")  # 显示 "高温"
         else:
-            string = '{0: >2d}'.format(num)
+            string = "{0: >2d}".format(num)
             self.write(self.encode_string(string))
-        self.write([_SEGMENTS[38], _SEGMENTS[12]], 2) # 显示摄氏度符号
+        self.write([_SEGMENTS[38], _SEGMENTS[12]], 2)  # 显示摄氏度符号
 
     def show(self, string, colon=False):
         """
@@ -497,8 +502,9 @@ class TM1637(object):
         data = [0] * 8
         data[4:0] = list(segments)
         for i in range(len(segments) + 5):
-            self.write(data[0+i:4+i])
+            self.write(data[0 + i : 4 + i])
             sleep_ms(delay)
+
 
 # ======================================== 初始化配置 ==========================================
 

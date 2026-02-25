@@ -18,6 +18,7 @@ mode = 0
 
 # ======================================== 功能函数 ============================================
 
+
 def test_mode0():
     """
     测试CH9328的Mode0工作模式。
@@ -61,6 +62,7 @@ def test_mode0():
     key.crlf()
     key.send_string("Mode0")
 
+
 def test_mode1():
     """
     测试CH9328的Mode1工作模式。
@@ -100,6 +102,7 @@ def test_mode1():
     key.set_keyboard_mode(1)
     key.send_string("Hello")
     key.send_string("Mode1")
+
 
 def test_mode2():
     """
@@ -143,6 +146,7 @@ def test_mode2():
     key.send_string("Hello")
     key.crlf()
     key.send_string("Mode2")
+
 
 def test_mode3():
     """
@@ -206,7 +210,7 @@ def test_mode3():
         CH9328.MODIFIER_RIGHT_CTRL,
         CH9328.MODIFIER_RIGHT_SHIFT,
         CH9328.MODIFIER_RIGHT_ALT,
-        CH9328.MODIFIER_RIGHT_GUI
+        CH9328.MODIFIER_RIGHT_GUI,
     ]
     time.sleep(3)
     # 轮流点击所有普通按键
@@ -215,8 +219,9 @@ def test_mode3():
         time.sleep_ms(50)
     # 轮流点击修饰键
     for i in range(8):
-        key.tap_key(key_code=CH9328.KEY_NONE,modifier=modifier[i])
+        key.tap_key(key_code=CH9328.KEY_NONE, modifier=modifier[i])
         time.sleep_ms(50)
+
 
 # ======================================== 自定义类 ============================================
 
@@ -245,4 +250,3 @@ elif mode == 2:
 elif mode == 3:
     print("Testing Mode 3...")
     test_mode3()
-

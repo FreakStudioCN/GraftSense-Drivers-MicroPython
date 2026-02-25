@@ -11,6 +11,7 @@
 
 # 导入硬件相关模块
 import machine
+
 # 导入数字信号处理相关模块
 from math import pi, radians
 
@@ -19,6 +20,7 @@ from math import pi, radians
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # DDS信号芯片AD9833自定义类
 class AD9833:
@@ -89,7 +91,7 @@ class AD9833:
             raise ValueError("spi_id must be 0 or 1")
 
         # 设置时钟频率（默认为25 MHz）
-        self.fmclk = fmclk * 10 ** 6
+        self.fmclk = fmclk * 10**6
 
         # 设置SPI引脚的相关参数
         self.sdo = machine.Pin(sdo)
@@ -149,8 +151,19 @@ class AD9833:
 
         return
 
-    def set_control_reg(self, B28: int = 1, HLB: int = 0, FS: int = 0, PS: int = 0,
-                        RESET: int = 0, SLP1: int = 0, SLP12: int = 0, OP: int = 0, DIV2: int = 0, MODE: int = 0) -> None:
+    def set_control_reg(
+        self,
+        B28: int = 1,
+        HLB: int = 0,
+        FS: int = 0,
+        PS: int = 0,
+        RESET: int = 0,
+        SLP1: int = 0,
+        SLP12: int = 0,
+        OP: int = 0,
+        DIV2: int = 0,
+        MODE: int = 0,
+    ) -> None:
         """
         设置控制寄存器的各个位值，用于配置AD9833的工作状态。
 
@@ -210,8 +223,9 @@ class AD9833:
         self.MODE = MODE
 
         # 将所有位拼接成控制寄存器的值
-        controlReg = (B28 << 13) + (HLB << 12) + (FS << 11) + (PS << 10) + (RESET << 8) + (SLP1 << 7) + (SLP12 << 6) + (
-                    OP << 5) + (DIV2 << 3) + (MODE << 1)
+        controlReg = (
+            (B28 << 13) + (HLB << 12) + (FS << 11) + (PS << 10) + (RESET << 8) + (SLP1 << 7) + (SLP12 << 6) + (OP << 5) + (DIV2 << 3) + (MODE << 1)
+        )
 
         # 将控制寄存器值拆分为两个字节，通过两次SPI写入进行发送
         controlRegList = [(controlReg & 0xFF00) >> 8, controlReg & 0x00FF]
@@ -274,10 +288,10 @@ class AD9833:
         fBoth = fLSBList + fMSBList
 
         # 仅写入高14位
-        if self.writeMode == 'MSB':
+        if self.writeMode == "MSB":
             self.write_data(fMSBList)
         # 仅写入低14位
-        elif self.writeMode == 'LSB':
+        elif self.writeMode == "LSB":
             self.write_data(fLSBList)
         # 写入全部14位
         else:
@@ -308,7 +322,7 @@ class AD9833:
             raise ValueError("phaseSelect must be 0 or 1")
 
         # 计算相位寄存器的值
-        if rads == False:
+        if rads is False:
             # 将角度转换为弧度
             pout = radians(pout)
 
@@ -326,7 +340,7 @@ class AD9833:
 
         return
 
-    def set_mode(self, mode: str = 'SIN') -> None:
+    def set_mode(self, mode: str = "SIN") -> None:
         """
         设置AD9833输出波形的类型，根据输入的模式选择不同的波形。
 
@@ -351,36 +365,34 @@ class AD9833:
         """
 
         # 判断输入波形模式是否为SIN、TRIANGLE、SQUARE、SQUARE/2、RESET或OFF
-        if mode != 'SIN' and mode != 'TRIANGLE' and mode != 'SQUARE' and mode != 'SQUARE/2' and mode != 'RESET' and mode != 'OFF':
+        if mode != "SIN" and mode != "TRIANGLE" and mode != "SQUARE" and mode != "SQUARE/2" and mode != "RESET" and mode != "OFF":
             raise ValueError("mode must be 'SIN', 'TRIANGLE', 'SQUARE', 'SQUARE/2', 'RESET' or 'OFF'")
 
         # 存储当前的模式
         self.mode = mode
 
         # 正弦波模式
-        if mode == 'SIN':
+        if mode == "SIN":
             self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=self.FS, PS=self.PS, RESET=0, MODE=0)
         # 三角波模式
-        elif mode == 'TRIANGLE':
+        elif mode == "TRIANGLE":
             self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=self.FS, PS=self.PS, RESET=0, MODE=1)
         # 方波模式
-        elif mode == 'SQUARE':
-            self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=self.FS, PS=self.PS, RESET=0, SLP12=1,
-                                 OP=1, DIV2=1, MODE=0)
+        elif mode == "SQUARE":
+            self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=self.FS, PS=self.PS, RESET=0, SLP12=1, OP=1, DIV2=1, MODE=0)
         # 二分之一频率的方波模式
-        elif mode == 'SQUARE/2':
-            self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=self.FS, PS=self.PS, RESET=0, SLP12=1,
-                                 OP=1, DIV2=0, MODE=0)
+        elif mode == "SQUARE/2":
+            self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=self.FS, PS=self.PS, RESET=0, SLP12=1, OP=1, DIV2=0, MODE=0)
         # 复位模式
-        elif mode == 'RESET':
+        elif mode == "RESET":
             self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=self.FS, PS=self.PS, RESET=1)
         # 关闭模式
-        elif mode == 'OFF':
+        elif mode == "OFF":
             self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=self.FS, PS=self.PS, RESET=1, SLP1=1, SLP12=1)
 
         return
 
-    def set_write_mode(self, writeMode: str = 'BOTH') -> None:
+    def set_write_mode(self, writeMode: str = "BOTH") -> None:
         """
         设置频率寄存器的写入模式。
 
@@ -404,7 +416,7 @@ class AD9833:
         """
 
         # 判断写入模式是否为BOTH、MSB或LSB，若不是则抛出异常
-        if writeMode != 'BOTH' and writeMode != 'MSB' and writeMode != 'LSB':
+        if writeMode != "BOTH" and writeMode != "MSB" and writeMode != "LSB":
             raise ValueError("writeMode must be 'BOTH', 'MSB' or 'LSB'")
 
         # 初始化 B28 位为 1，表示同时写入频率寄存器的 MSB 和 LSB
@@ -412,24 +424,25 @@ class AD9833:
         # 初始化 HLB 位为 0，表示选择写入的部分，默认为全写
         HLB = 0
         # 默认写入模式为 'BOTH'，即同时写入 MSB 和 LSB
-        self.writeMode = 'BOTH'
+        self.writeMode = "BOTH"
 
         #  如果写入模式为 'MSB'，则只写入频率寄存器的高 14 位
-        if writeMode == 'MSB':
+        if writeMode == "MSB":
             # 设置B28位为0，HLB为1
             B28 = 0
             HLB = 1
-            self.writeMode = 'MSB'
+            self.writeMode = "MSB"
         # 如果写入模式为 'LSB'，则只写入频率寄存器的低 14 位
-        elif writeMode == 'LSB':
+        elif writeMode == "LSB":
             # 设置B28位为0，HLB为0
             B28 = 0
             HLB = 0
-            self.writeMode = 'LSB'
+            self.writeMode = "LSB"
 
         # 根据选择的 B28 和 HLB 位更新控制寄存器
-        self.set_control_reg(B28=B28, HLB=HLB, FS=self.FS, PS=self.PS, RESET=self.RESET, SLP1=self.SLP1,
-                             SLP12=self.SLP12, OP=self.OP, DIV2=self.DIV2, MODE=self.MODE)
+        self.set_control_reg(
+            B28=B28, HLB=HLB, FS=self.FS, PS=self.PS, RESET=self.RESET, SLP1=self.SLP1, SLP12=self.SLP12, OP=self.OP, DIV2=self.DIV2, MODE=self.MODE
+        )
 
         return
 
@@ -459,10 +472,12 @@ class AD9833:
             raise ValueError("PS must be 0 or 1")
 
         # 根据指定的频率选择 (FS) 和相位选择 (PS) 更新控制寄存器
-        self.set_control_reg(B28=self.B28, HLB=self.HLB, FS=FS, PS=PS, RESET=self.RESET, SLP1=self.SLP1,
-                             SLP12=self.SLP12, OP=self.OP, DIV2=self.DIV2, MODE=self.MODE)
+        self.set_control_reg(
+            B28=self.B28, HLB=self.HLB, FS=FS, PS=PS, RESET=self.RESET, SLP1=self.SLP1, SLP12=self.SLP12, OP=self.OP, DIV2=self.DIV2, MODE=self.MODE
+        )
 
         return
+
 
 # ======================================== 初始化配置 ==========================================
 

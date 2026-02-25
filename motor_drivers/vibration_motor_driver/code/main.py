@@ -14,6 +14,7 @@ from vibration_motor import VibrationMotor
 
 # ======================================== 功能函数 ============================================
 
+
 def demo_full() -> None:
     """
     震动马达全速运行演示 2 秒。
@@ -33,6 +34,7 @@ def demo_full() -> None:
     time.sleep(2)
     motor.off()
     print(">>> Motor stopped")
+
 
 def demo_half() -> None:
     """
@@ -56,6 +58,7 @@ def demo_half() -> None:
     motor.off()
     print(">>> Motor stopped")
 
+
 def demo_low() -> None:
     """
     震动马达低速运行演示 2 秒。
@@ -77,6 +80,7 @@ def demo_low() -> None:
     time.sleep(2)
     motor.off()
     print(">>> Motor stopped")
+
 
 def show_methods() -> None:
     """
@@ -104,6 +108,7 @@ def show_methods() -> None:
     print("demo_half()")
     print("demo_low()")
     print("show_methods()")
+
 
 # ======================================== 自定义类 ============================================
 

@@ -9,8 +9,10 @@
 
 # 导入MicroPython标准库模块
 from machine import Pin, I2C
+
 # 导入时间模块
 import time
+
 # 导入pca9546模块
 from pca9546adr import PCA9546ADR
 

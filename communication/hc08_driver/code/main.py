@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from machine import UART,Pin
+from machine import UART, Pin
 from hc08 import HC08
 
 # ======================================== 全局变量 ============================================
@@ -31,11 +31,11 @@ hc0 = HC08(uart0)
 # ========================================  主程序  ===========================================
 
 ok, resp = hc0.get_name()
-print(f'hc0 Name   :{resp}')
+print(f"hc0 Name   :{resp}")
 ok, resp = hc0.get_version()
-print(f'hc0 Version:{resp}')
+print(f"hc0 Version:{resp}")
 ok, resp = hc0.get_role()
-print(f'hc0 Role   :{resp}')
+print(f"hc0 Role   :{resp}")
 
 while True:
     # 阻塞接收透传数据

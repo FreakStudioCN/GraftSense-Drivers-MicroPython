@@ -37,14 +37,14 @@ try:
         print(f"\nSent: {test_msg}")
 
         # 发送消息
-        uart.write(test_msg.encode('utf-8'))
+        uart.write(test_msg.encode("utf-8"))
 
         # 等待短时间以接收数据
         time.sleep(0.1)
 
         # 读取并打印接收到的数据
         if uart.any():
-            received = uart.read(uart.any()).decode('utf-8')
+            received = uart.read(uart.any()).decode("utf-8")
             print(f"Received: {received}")
         else:
             print("Received: No data (check connections)")

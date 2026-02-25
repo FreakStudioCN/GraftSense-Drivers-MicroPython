@@ -19,6 +19,7 @@ import micropython
 
 # ======================================== 自定义类 ============================================
 
+
 class PIRSensor:
     """
     该类用于控制 PIR 红外运动传感器，支持中断回调、状态读取和阻塞等待。
@@ -232,8 +233,7 @@ class PIRSensor:
             Calling twice has no effect.
         """
         if not self._irq_handler:
-            self._irq_handler = self._pin.irq(trigger=Pin.IRQ_RISING,
-                                             handler=self._internal_irq_handler)
+            self._irq_handler = self._pin.irq(trigger=Pin.IRQ_RISING, handler=self._internal_irq_handler)
 
     def disable(self) -> None:
         """
@@ -308,6 +308,7 @@ class PIRSensor:
         """
         pin_val = self._pin.value()
         print(f"[DEBUG] PIR Pin: {self._pin}, Value: {pin_val}, Motion Detected: {self.is_motion_detesct()}")
+
 
 # ======================================== 初始化配置 ===========================================
 

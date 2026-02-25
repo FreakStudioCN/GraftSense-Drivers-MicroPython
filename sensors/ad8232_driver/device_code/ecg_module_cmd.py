@@ -25,6 +25,7 @@ import micropython
 
 # ======================================== 自定义类 ============================================
 
+
 def voltage_to_16bit(voltage, V_min=-1, V_max=2):
     """
     将电压值映射到0-65535（16位无符号整数范围）。
@@ -74,73 +75,74 @@ def voltage_to_16bit(voltage, V_min=-1, V_max=2):
     normalized = (voltage_clipped - V_min) / (V_max - V_min)
     return round(normalized * 65535)
 
+
 class ECGModuleCMD:
     """
-           AD8232心电传感器与数据流处理器的集成类。
+    AD8232心电传感器与数据流处理器的集成类。
 
-           该类整合AD8232传感器、ECG信号处理器和数据流处理器，实现心电数据的
-           采集、处理、通信协议转换和上报功能。支持主动上报和查询响应两种模式。
+    该类整合AD8232传感器、ECG信号处理器和数据流处理器，实现心电数据的
+    采集、处理、通信协议转换和上报功能。支持主动上报和查询响应两种模式。
 
-           Attributes:
-               DEBUG_ENABLED (bool): 调试模式开关。
-               ECGSignalProcessor: ECG信号处理器实例。
-               DataFlowProcessor: 数据流处理器实例。
-               AD8232: AD8232传感器实例。
-               parse_interval (int): 解析数据帧的时间间隔（毫秒）。
-               _timer (Timer): 数据解析定时器。
-               _report_timer (Timer): 数据上报定时器。
-               _is_running (bool): 运行状态标志。
-               ecg_value (int): 原始心电数据（16位映射值）。
-               filtered_ecg_value (int): 滤波后心电数据（16位映射值）。
-               heart_rate (int): 心率值（次/分钟）。
-               active_reporting (bool): 主动上报模式开关。
-               reporting_frequency (int): 上报频率（Hz）。
-               lead_status (int): 导联连接状态（0正常，1脱落）。
-               operating_status (int): 工作状态（0停止，1运行）。
+    Attributes:
+        DEBUG_ENABLED (bool): 调试模式开关。
+        ECGSignalProcessor: ECG信号处理器实例。
+        DataFlowProcessor: 数据流处理器实例。
+        AD8232: AD8232传感器实例。
+        parse_interval (int): 解析数据帧的时间间隔（毫秒）。
+        _timer (Timer): 数据解析定时器。
+        _report_timer (Timer): 数据上报定时器。
+        _is_running (bool): 运行状态标志。
+        ecg_value (int): 原始心电数据（16位映射值）。
+        filtered_ecg_value (int): 滤波后心电数据（16位映射值）。
+        heart_rate (int): 心率值（次/分钟）。
+        active_reporting (bool): 主动上报模式开关。
+        reporting_frequency (int): 上报频率（Hz）。
+        lead_status (int): 导联连接状态（0正常，1脱落）。
+        operating_status (int): 工作状态（0停止，1运行）。
 
-           Methods:
-               __init__(): 初始化ECGModuleCMD实例。
-               _start_timer(): 启动定时器。
-               _report_timer_callback(): 上报定时器回调函数。
-               _timer_callback(): 解析定时器回调函数。
-               update_properties_from_frame(): 根据接收帧更新属性并响应。
+    Methods:
+        __init__(): 初始化ECGModuleCMD实例。
+        _start_timer(): 启动定时器。
+        _report_timer_callback(): 上报定时器回调函数。
+        _timer_callback(): 解析定时器回调函数。
+        update_properties_from_frame(): 根据接收帧更新属性并响应。
 
-           ==========================================
+    ==========================================
 
-           AD8232 ECG sensor and data flow processor integration class.
+    AD8232 ECG sensor and data flow processor integration class.
 
-           This class integrates AD8232 sensor, ECG signal processor, and data flow processor,
-           implementing ECG data acquisition, processing, communication protocol conversion,
-           and reporting functions. Supports both active reporting and query response modes.
+    This class integrates AD8232 sensor, ECG signal processor, and data flow processor,
+    implementing ECG data acquisition, processing, communication protocol conversion,
+    and reporting functions. Supports both active reporting and query response modes.
 
-           Attributes:
-               DEBUG_ENABLED (bool): Debug mode switch.
-               ECGSignalProcessor: ECG signal processor instance.
-               DataFlowProcessor: Data flow processor instance.
-               AD8232: AD8232 sensor instance.
-               parse_interval (int): Data frame parsing interval (milliseconds).
-               _timer (Timer): Data parsing timer.
-               _report_timer (Timer): Data reporting timer.
-               _is_running (bool): Running status flag.
-               ecg_value (int): Raw ECG data (16-bit mapped value).
-               filtered_ecg_value (int): Filtered ECG data (16-bit mapped value).
-               heart_rate (int): Heart rate value (beats per minute).
-               active_reporting (bool): Active reporting mode switch.
-               reporting_frequency (int): Reporting frequency (Hz).
-               lead_status (int): Lead connection status (0 normal, 1 detached).
-               operating_status (int): Operating status (0 stopped, 1 running).
+    Attributes:
+        DEBUG_ENABLED (bool): Debug mode switch.
+        ECGSignalProcessor: ECG signal processor instance.
+        DataFlowProcessor: Data flow processor instance.
+        AD8232: AD8232 sensor instance.
+        parse_interval (int): Data frame parsing interval (milliseconds).
+        _timer (Timer): Data parsing timer.
+        _report_timer (Timer): Data reporting timer.
+        _is_running (bool): Running status flag.
+        ecg_value (int): Raw ECG data (16-bit mapped value).
+        filtered_ecg_value (int): Filtered ECG data (16-bit mapped value).
+        heart_rate (int): Heart rate value (beats per minute).
+        active_reporting (bool): Active reporting mode switch.
+        reporting_frequency (int): Reporting frequency (Hz).
+        lead_status (int): Lead connection status (0 normal, 1 detached).
+        operating_status (int): Operating status (0 stopped, 1 running).
 
-           Methods:
-               __init__(): Initialize ECGModuleCMD instance.
-               _start_timer(): Start timers.
-               _report_timer_callback(): Reporting timer callback function.
-               _timer_callback(): Parsing timer callback function.
-               update_properties_from_frame(): Update properties and respond based on received frames.
-           """
+    Methods:
+        __init__(): Initialize ECGModuleCMD instance.
+        _start_timer(): Start timers.
+        _report_timer_callback(): Reporting timer callback function.
+        _timer_callback(): Parsing timer callback function.
+        update_properties_from_frame(): Update properties and respond based on received frames.
+    """
 
     DEBUG_ENABLED = True  # 调试模式开关
 
-    def __init__(self, data_flowprocessor,ad8232,ecg_signal_processor, parse_interval=10):
+    def __init__(self, data_flowprocessor, ad8232, ecg_signal_processor, parse_interval=10):
         """
         初始化ECGModuleCMD实例。
 
@@ -181,7 +183,7 @@ class ECGModuleCMD:
         # 原始心电数据
         self.ecg_value = 0
         # 滤波后心电数据
-        self.filtered_ecg_value= 0
+        self.filtered_ecg_value = 0
         # 心率
         self.heart_rate = 0
         # 主动上报模式
@@ -215,7 +217,7 @@ class ECGModuleCMD:
         """
         self._is_running = True
         self._timer.init(period=self.parse_interval, mode=Timer.PERIODIC, callback=self._timer_callback)
-        self._report_timer.init(period=int(1000/self.reporting_frequency),mode=Timer.PERIODIC,callback=self._report_timer_callback)
+        self._report_timer.init(period=int(1000 / self.reporting_frequency), mode=Timer.PERIODIC, callback=self._report_timer_callback)
 
     def _report_timer_callback(self, timer):
         """
@@ -326,7 +328,7 @@ class ECGModuleCMD:
             # 使用micropython.schedule安全地调用属性更新方法
             micropython.schedule(self.update_properties_from_frame, frame)
 
-    def update_properties_from_frame(self,frame):
+    def update_properties_from_frame(self, frame):
         """
         根据接收到的协议帧更新属性并发送响应。
 
@@ -382,8 +384,8 @@ class ECGModuleCMD:
             - All response frames use same frame type codes for easy host identification.
             - Invalid commands or data print error messages but don't crash.
         """
-        command = frame['frame_type']
-        data = frame['data']
+        command = frame["frame_type"]
+        data = frame["data"]
         if len(data) == 0:
             return
         # 在这里根据命令和数据更新属性
@@ -419,7 +421,7 @@ class ECGModuleCMD:
             # 上报频率 100HZ
             if data[0] in [100]:
                 self.reporting_frequency = data[0]
-                self._report_timer.init(period=int(1000 / self.reporting_frequency), mode=Timer.PERIODIC,callback=self._report_timer_callback)
+                self._report_timer.init(period=int(1000 / self.reporting_frequency), mode=Timer.PERIODIC, callback=self._report_timer_callback)
                 self.DataFlowProcessor.build_and_send_frame(0x04, bytes(data[0]))
                 if ECGModuleCMD.DEBUG_ENABLED:
                     print("Reporting Frequency set to:", self.reporting_frequency)
@@ -466,6 +468,7 @@ class ECGModuleCMD:
             self.DataFlowProcessor.build_and_send_frame(0x08, data)
             if ECGModuleCMD.DEBUG_ENABLED:
                 print("Heart Rate:", heart_rate)
+
 
 # ======================================== 初始化配置 ==========================================
 

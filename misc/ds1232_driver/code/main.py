@@ -1,14 +1,15 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/8/25 下午6:46   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/8/25 下午6:46
+# @Author  : 李清水
+# @File    : main.py
 # @Description : 外部DS1232看门狗模块测试程序
 
 # ======================================== 导入相关模块 =========================================
 
 # 导入硬件相关模块
 from machine import Pin, Timer
+
 # 导入时间相关模块
 import time
 
@@ -34,6 +35,7 @@ system_reset_flag = False
 
 # ======================================== 功能函数 ============================================
 
+
 def rst_callback(pin: Pin) -> None:
     """
     DS1232 RST 引脚触发回调函数。
@@ -50,6 +52,7 @@ def rst_callback(pin: Pin) -> None:
     # 设置标志，主循环检测后跳出
     system_reset_flag = True
     print("DS1232 RST pin triggered.")
+
 
 def stop_feed_callback(t: Timer) -> None:
     """
@@ -69,6 +72,7 @@ def stop_feed_callback(t: Timer) -> None:
     wdg.stop()
     # 停掉本定时器，只执行一次
     stop_feed_timer.deinit()
+
 
 # ======================================== 自定义类 ============================================
 

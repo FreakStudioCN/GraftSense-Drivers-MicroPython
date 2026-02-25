@@ -10,6 +10,7 @@
 # 导入硬件相关模块
 import time
 from machine import UART, Pin
+
 # 导入第三方驱动模块
 from cc253x_ttl import CC253xTTL
 
@@ -45,9 +46,9 @@ while env.read_status() is None:
 pamid, ch = cor.read_panid_channel()
 print(f"cor:pamid:{pamid},channel:{ch}")
 
-while env.set_panid(int(pamid,16)) is False:
+while env.set_panid(int(pamid, 16)) is False:
     pass
-while env.set_channel(int(ch,16)) is False:
+while env.set_channel(int(ch, 16)) is False:
     pass
 
 # 输出路由器PAMID与通道
@@ -61,7 +62,7 @@ while True:
     # 路由器发送
     cor.send_transparent("Here is transparent")
     time.sleep(0.5)
-    
+
     # 协调器接收并且输出
     mode, data, addr1, addr2 = env.recv_frame()
     print(f"   Coordinator Received Data:")
@@ -70,4 +71,3 @@ while True:
     print(f"   Address 1: {addr1}")
     print(f"   Address 2: {addr2}")
     time.sleep(1)
-

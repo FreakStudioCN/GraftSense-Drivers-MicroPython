@@ -27,14 +27,14 @@ print("FreakStudio:Testing BMP280 pressure, temperature, and humidity sensor")
 # 注意：引脚号根据实际硬件修改
 i2c = I2C(1, scl=3, sda=2, freq=100000)
 # 开始扫描I2C总线上的设备，返回从机地址的列表
-devices_list:list[int] = i2c.scan()
-print('START I2C SCANNER')
+devices_list: list[int] = i2c.scan()
+print("START I2C SCANNER")
 # 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     # 若非空，则打印从机设备地址
     print("No i2c device !")
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
 for device in devices_list:
     if 0x60 <= device <= 0x7A:
         print("I2c hexadecimal address:", hex(device))
@@ -54,9 +54,7 @@ try:
         sea_level_hpa = 1013.25
         altitude = 44330.0 * (1.0 - (press_hpa / sea_level_hpa) ** 0.1903)
         # 打印浮点信息
-        print("Temperature: {:.2f} °C | Humidity: {:.2f}% | Pressure: {:.2f} hPa".format(
-            temp, hum, press_hpa
-        ))
+        print("Temperature: {:.2f} °C | Humidity: {:.2f}% | Pressure: {:.2f} hPa".format(temp, hum, press_hpa))
         print(altitude)
         time.sleep(2)
 except KeyboardInterrupt:

@@ -1,5 +1,5 @@
 # MicroPython v1.23.0
-# -*- coding: utf-8 -*-   
+# -*- coding: utf-8 -*-
 # @Time    : 2025/9/4 下午3:32
 # @Author  : 缪贵成
 # @File    : pn532_uart.py
@@ -21,6 +21,7 @@ from pn532 import PN532
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class PN532_UART(PN532):
     """
@@ -140,9 +141,7 @@ class PN532_UART(PN532):
             self._reset_pin.value(1)
             time.sleep(0.01)
         self.low_power = False
-        self._uart.write(
-            b"\x55\x55\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-        )
+        self._uart.write(b"\x55\x55\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
         # 使用普通模式，配置内部安全访问模式
         self.SAM_configuration()
 
@@ -224,6 +223,7 @@ class PN532_UART(PN532):
         while self._uart.any():
             self._uart.read()
         self._uart.write(framebytes)
+
 
 # ======================================== 初始化配置 ==========================================
 

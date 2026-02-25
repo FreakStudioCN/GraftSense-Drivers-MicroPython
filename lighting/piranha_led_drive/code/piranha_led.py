@@ -15,6 +15,7 @@ __platform__ = "MicroPython v1.23+"
 
 # 导入硬件相关模块
 from machine import Pin
+
 # 导入MicroPython相关模块
 from micropython import const
 
@@ -24,9 +25,10 @@ from micropython import const
 # 共阴极：高电平亮
 POLARITY_CATHODE = const(0)
 # 共阳极：低电平亮
-POLARITY_ANODE   = const(1)
+POLARITY_ANODE = const(1)
 
 # ======================================== 功能函数 ============================================
+
 
 def _calculate_output(desired_on: bool, polarity: int) -> int:
     """
@@ -62,7 +64,9 @@ def _calculate_output(desired_on: bool, polarity: int) -> int:
     else:
         raise ValueError(f"Invalid polarity: {polarity}")
 
+
 # ======================================== 自定义类 ============================================
+
 
 class PiranhaLED:
     """
@@ -191,6 +195,7 @@ class PiranhaLED:
         """
         current_level = self._pin.value()
         return current_level == _calculate_output(True, self._polarity)
+
 
 # ======================================== 初始化配置 ==========================================
 

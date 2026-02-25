@@ -10,8 +10,10 @@
 
 # micropython内部模块
 from machine import UART, Pin
+
 # 导入 time 提供延时与时间控制
 import time
+
 # 导入串口舵机控制版模块
 from serial_servo import SerialServo
 

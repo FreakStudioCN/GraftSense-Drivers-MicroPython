@@ -30,9 +30,7 @@ notch_b2 = 1.0
 notch_a0 = 1.080
 notch_a1 = -1.0
 notch_a2 = 0.920
-sos_notch = np.array(
-    [[notch_b0 / notch_a0, notch_b1 / notch_a0, notch_b2 / notch_a0, 1.0, notch_a1 / notch_a0, notch_a2 / notch_a0]],
-    dtype=np.float)
+sos_notch = np.array([[notch_b0 / notch_a0, notch_b1 / notch_a0, notch_b2 / notch_a0, 1.0, notch_a1 / notch_a0, notch_a2 / notch_a0]], dtype=np.float)
 
 # 2. 0.5Hz高通滤波器：去除基线漂移（SEMG核心需求）
 hp_b0 = 0.9605960596059606
@@ -62,6 +60,7 @@ dc_idx = 0
 
 # ======================================== 功能函数 ============================================
 
+
 def realtime_process(timer):
     global DC_REMOVE_BASE, dc_buffer, dc_idx, zi_notch, zi_hp, zi_lp
 
@@ -87,11 +86,12 @@ def realtime_process(timer):
 
     # 4. 串口输出（原始值+滤波后值）
     uart_str = f"{raw_val_dc:.6f},{filtered_val:.6f}\r\n"
-    uart.write(uart_str.encode('utf-8'))
+    uart.write(uart_str.encode("utf-8"))
 
     # 5. 调试打印
     print_str = f"Original value:{raw_val_dc:.6f}, Filtered value:{filtered_val:.6f}"
     print(print_str)
+
 
 # ======================================== 自定义类 ============================================
 
@@ -111,8 +111,8 @@ print("===== Surface Electromyography System (100Hz Version) =====")
 print(f"Sampling Frequency: {FS}Hz | 50Hz Notch Filter | Baseline Drift Removal")
 print("Press Ctrl+C/Thonny Stop Button to terminate the programn")
 
-uart.write("===== Surface Electromyography System (100Hz Version) =====rn".encode('utf-8'))
-uart.write(f"Sampling Frequency: {FS}Hz | Output: Raw Value, Filtered Valuern".encode('utf-8'))
+uart.write("===== Surface Electromyography System (100Hz Version) =====rn".encode("utf-8"))
+uart.write(f"Sampling Frequency: {FS}Hz | Output: Raw Value, Filtered Valuern".encode("utf-8"))
 
 # 启动定时器采样
 timer = Timer(-1)
@@ -128,4 +128,4 @@ except KeyboardInterrupt:
     running = False
     timer.deinit()
     print("nThe program has stopped!")
-    uart.write("nThe program has stopped!rn".encode('utf-8'))
+    uart.write("nThe program has stopped!rn".encode("utf-8"))

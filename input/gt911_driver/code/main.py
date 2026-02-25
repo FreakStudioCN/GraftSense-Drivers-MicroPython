@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/29 下午2:21   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/29 下午2:21
+# @Author  : 李清水
+# @File    : main.py
 # @Description : SPI类实验，LCD屏幕配合GT911触摸芯片完成键盘输入实验
 
 # ======================================== 导入相关模块 ========================================
@@ -10,16 +10,21 @@
 # 硬件相关的模块
 from machine import Pin, SPI, I2C, Timer
 from micropython import const
+
 # 时间相关的模块
 import time
+
 # LCD屏幕相关的模块
 from st7789 import ST7789
+
 # 字库相关的模块
 import vga1_16x32 as bigfont
 import vga1_16x16 as mediumfont
-import vga1_8x8   as smallfont
+import vga1_8x8 as smallfont
+
 # 垃圾回收的模块
 import gc
+
 # 导入GT911触摸芯片相关模块
 from gt911 import GT911
 
@@ -36,6 +41,7 @@ button1 = None
 button2 = None
 
 # ======================================== 功能函数 ============================================
+
 
 def detect_touch(t: Timer) -> None:
     """
@@ -88,6 +94,7 @@ def detect_touch(t: Timer) -> None:
         # 启动定时器，延迟100ms重置状态标志
         touch_timer.init(period=100, mode=Timer.ONE_SHOT, callback=reset_touch)
 
+
 def reset_touch(t: Timer) -> None:
     """
     重置触摸状态函数。
@@ -109,7 +116,9 @@ def reset_touch(t: Timer) -> None:
     button1.release()
     button2.release()
 
+
 # ======================================== 自定义类 ============================================
+
 
 # 自定义LCD类
 class LCD(ST7789):
@@ -154,23 +163,34 @@ class LCD(ST7789):
     Nested Classes:
         Button: 按钮控件
     """
+
     # 自定义颜色值
-    BLACK   = const(0xFFFF)     # 黑色
-    WHITE   = const(0x0000)     # 白色
-    MAGENTA = const(0x07E0)     # 品红色/浅紫色
-    RED     = const(0x07FF)     # 红色
-    GREEN   = const(0xF81F)     # 绿色
-    BLUE    = const(0xFFE0)     # 蓝色
-    CYAN    = const(0xF800)     # 青色
-    YELLOW  = const(0x001F)     # 黄色
-    YEGR    = const(0xFAEBD7)   # 黄绿色
-    GATES   = const(0x87CEEB)   # 品蓝色
-    ANWHITE = const(0x191970)   # 古董白
+    BLACK = const(0xFFFF)  # 黑色
+    WHITE = const(0x0000)  # 白色
+    MAGENTA = const(0x07E0)  # 品红色/浅紫色
+    RED = const(0x07FF)  # 红色
+    GREEN = const(0xF81F)  # 绿色
+    BLUE = const(0xFFE0)  # 蓝色
+    CYAN = const(0xF800)  # 青色
+    YELLOW = const(0x001F)  # 黄色
+    YEGR = const(0xFAEBD7)  # 黄绿色
+    GATES = const(0x87CEEB)  # 品蓝色
+    ANWHITE = const(0x191970)  # 古董白
 
     # 字体大小
     bigsize, mediumsize, smallsize = 32, 16, 8
 
-    def __init__(self, spi: object, width: int, height: int, reset: object = None, dc: object = None, cs: object = None, backlight: object = None, rotation: int = 0) -> None:
+    def __init__(
+        self,
+        spi: object,
+        width: int,
+        height: int,
+        reset: object = None,
+        dc: object = None,
+        cs: object = None,
+        backlight: object = None,
+        rotation: int = 0,
+    ) -> None:
         """
         初始化LCD屏幕。
 
@@ -188,7 +208,7 @@ class LCD(ST7789):
             None
         """
         # 初始化ST7789，像素数据的顺序、选择角度使用默认值，使用内置的旋转命令
-        super().__init__(spi, width, height, reset, dc, cs, backlight, rotation = rotation)
+        super().__init__(spi, width, height, reset, dc, cs, backlight, rotation=rotation)
 
     def line_center_text(self, text: str, line: int, color: int = BLACK, size: int = bigsize) -> int:
         """
@@ -209,22 +229,22 @@ class LCD(ST7789):
 
         # 根据选用字体大小，获取字体宽度、高度
         if size == self.bigsize:
-            font        = bigfont
-            fontheight  = bigfont.HEIGHT
-            fontwitdh   = bigfont.WIDTH
+            font = bigfont
+            fontheight = bigfont.HEIGHT
+            fontwitdh = bigfont.WIDTH
         elif size == self.mediumsize:
-            font        = mediumfont
-            fontheight  = mediumfont.HEIGHT
-            fontwitdh   = mediumfont.WIDTH
+            font = mediumfont
+            fontheight = mediumfont.HEIGHT
+            fontwitdh = mediumfont.WIDTH
         elif size == self.smallsize:
-            font        = smallfont
-            fontheight  = smallfont.HEIGHT
-            fontwitdh   = smallfont.WIDTH
+            font = smallfont
+            fontheight = smallfont.HEIGHT
+            fontwitdh = smallfont.WIDTH
         else:
             raise ValueError("WRONG FONT SIZE")
 
         # 计算文字的x坐标
-        x = int(self.width/2) - int(len(text)/2 * fontwitdh)
+        x = int(self.width / 2) - int(len(text) / 2 * fontwitdh)
         self.text(font, text, x, line, color)
 
         return fontheight
@@ -248,14 +268,14 @@ class LCD(ST7789):
 
         # 根据选用字体大小，获取字体宽度
         if size == self.bigsize:
-            font        = bigfont
-            fontheight  = bigfont.HEIGHT
+            font = bigfont
+            fontheight = bigfont.HEIGHT
         elif size == self.mediumsize:
-            font        = mediumfont
-            fontheight  = mediumfont.HEIGHT
+            font = mediumfont
+            fontheight = mediumfont.HEIGHT
         elif size == self.smallsize:
-            font        = smallfont
-            fontheight  = smallfont.HEIGHT
+            font = smallfont
+            fontheight = smallfont.HEIGHT
         else:
             raise ValueError("WRONG FONT SIZE")
 
@@ -282,21 +302,21 @@ class LCD(ST7789):
 
         # 根据选用字体大小，获取字体宽度
         if size == self.bigsize:
-            font        = bigfont
-            fontheight  = bigfont.HEIGHT
-            fontwitdh   = bigfont.WIDTH
+            font = bigfont
+            fontheight = bigfont.HEIGHT
+            fontwitdh = bigfont.WIDTH
         elif size == self.mediumsize:
-            font        = mediumfont
-            fontheight  = mediumfont.HEIGHT
-            fontwitdh   = mediumfont.WIDTH
+            font = mediumfont
+            fontheight = mediumfont.HEIGHT
+            fontwitdh = mediumfont.WIDTH
         elif size == self.smallsize:
-            font        = smallfont
-            fontheight  = smallfont.HEIGHT
-            fontwitdh   = smallfont.WIDTH
+            font = smallfont
+            fontheight = smallfont.HEIGHT
+            fontwitdh = smallfont.WIDTH
         else:
             raise ValueError("WRONG FONT SIZE")
 
-        self.text(font, text, self.width-len(text)*fontwitdh, line, color)
+        self.text(font, text, self.width - len(text) * fontwitdh, line, color)
 
         return fontheight
 
@@ -343,12 +363,12 @@ class LCD(ST7789):
                 pixel_list.append((x + radius - j, y - i))
                 pixel_list.append((x - radius + j, y - i))
 
-            if 4 * (i + 1) ** 2 + (2 * radius - 2 * j + 1) ** 2 > 4 * radius ** 2:
+            if 4 * (i + 1) ** 2 + (2 * radius - 2 * j + 1) ** 2 > 4 * radius**2:
                 j += 1
             i += 1
 
         if fill:
-            self.polygon(pixel_list, x, y, color = color)
+            self.polygon(pixel_list, x, y, color=color)
 
     # 嵌套类，按钮控件
     class Button:
@@ -384,8 +404,8 @@ class LCD(ST7789):
             release(self):
                 设置按钮为未按下状态，并重新绘制按钮。
         """
-        def __init__(self, lcd_obj: 'LCD', x: int, y: int, width: int, height: int, text: str, color: int,
-                     pressed_color: int) -> None:
+
+        def __init__(self, lcd_obj: "LCD", x: int, y: int, width: int, height: int, text: str, color: int, pressed_color: int) -> None:
             """
             初始化Button类实例，设置按钮的显示属性和位置。
 
@@ -488,37 +508,38 @@ class LCD(ST7789):
                 self.is_pressed = False
                 self.draw()
 
+
 # ======================================== 初始化配置 ==========================================
 
 # 延时等待设备初始化
 time.sleep(3)
 # 打印调试信息
-print('FreakStudio : Using LCD with GT911 touch chip to complete keyboard input')
+print("FreakStudio : Using LCD with GT911 touch chip to complete keyboard input")
 
 # 初始化SPI类，设置波特率、极性、相位、时钟引脚、数据引脚
 spi = SPI(0, baudrate=10000000, polarity=0, phase=0, sck=Pin(6), mosi=Pin(7))
 # 初始化LCD屏幕,并设置屏幕上下和左右都翻转
-lcd = LCD(spi, 240, 320, reset=Pin(8), dc=Pin(9), cs=Pin(10), backlight=Pin(11),rotation = 2)
+lcd = LCD(spi, 240, 320, reset=Pin(8), dc=Pin(9), cs=Pin(10), backlight=Pin(11), rotation=2)
 
 # 生成文本，offset为偏移量，用于下一行显示中y坐标的偏移量的确定
-offset  = 0
-offset  = lcd.line_center_text("Freak Studio", 0, lcd.RED, lcd.bigsize)
-offset  = lcd.line_center_text("TORCHBEARERS OF CREATION", offset, lcd.MAGENTA, lcd.smallsize) + offset
-offset  = lcd.line_center_text("Touch Keyboard Experiment", offset, lcd.BLACK, lcd.smallsize) + offset
+offset = 0
+offset = lcd.line_center_text("Freak Studio", 0, lcd.RED, lcd.bigsize)
+offset = lcd.line_center_text("TORCHBEARERS OF CREATION", offset, lcd.MAGENTA, lcd.smallsize) + offset
+offset = lcd.line_center_text("Touch Keyboard Experiment", offset, lcd.BLACK, lcd.smallsize) + offset
 # 绘制矩形填充
-lcd.fill_rect(5,offset,230,265,LCD.YEGR)
+lcd.fill_rect(5, offset, 230, 265, LCD.YEGR)
 # 绘制矩形边框
-lcd.rect(5,offset,230,265,LCD.BLACK)
+lcd.rect(5, offset, 230, 265, LCD.BLACK)
 
 # 创建按键控件实例button1，位置为(10, offset + 20)，宽80，高20，显示文本"LED ON"，默认颜色为品蓝色，按下颜色为古董白
-button1 = LCD.Button(lcd, 10, offset + 20, 80, 20, "LED ON",  LCD.GATES, LCD.ANWHITE)
+button1 = LCD.Button(lcd, 10, offset + 20, 80, 20, "LED ON", LCD.GATES, LCD.ANWHITE)
 # 创建按键控件实例button2，位置为(10, offset + 50)，宽80，高20，显示文本"LED OFF"，默认颜色为绿色，按下颜色为红色
 button2 = LCD.Button(lcd, 10, offset + 50, 80, 20, "LED OFF", LCD.GREEN, LCD.RED)
 
 # 创建硬件I2C的实例，使用I2C0外设，时钟频率为400KHz，SDA引脚为12，SCL引脚为13
 i2c_gt911 = I2C(id=0, sda=Pin(12), scl=Pin(13), freq=400000)
 # 创建GT911类实例，使用I2C1外设，地址为0x5D，同时最大支持触摸点数为2
-gt911_dev = GT911(i2c_gt911, 15, 14, 0x14, touch_points = 5, reverse_x = True, reverse_y = True, user_callback = detect_touch)
+gt911_dev = GT911(i2c_gt911, 15, 14, 0x14, touch_points=5, reverse_x=True, reverse_y=True, user_callback=detect_touch)
 
 # 设置GPIO 25为LED输出引脚，下拉电阻使能
 LED = Pin(25, Pin.OUT, Pin.PULL_DOWN)

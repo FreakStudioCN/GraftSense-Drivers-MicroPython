@@ -60,48 +60,50 @@ print("Tone set to 9.")
 
 # 播放铃声
 for i in range(5):
-    while not tts.play_ringtone(i+1):
+    while not tts.play_ringtone(i + 1):
         time.sleep(1)
         continue
     print(f"Playing ringtone {i+1}/5...")
-print('Ringtone playback finished.')
+print("Ringtone playback finished.")
 
 # 播放提示音
 for i in range(5):
-    while not tts.play_message_tone(i+1):
+    while not tts.play_message_tone(i + 1):
         time.sleep(1)
         continue
     print(f"Playing message tone {i+1}/5...")
-print('Message tone playback finished.')
+print("Message tone playback finished.")
 
 # 播放警报音
 for i in range(5):
-    while not tts.play_alert_tone(i+1):
+    while not tts.play_alert_tone(i + 1):
         time.sleep(1)
         continue
     print(f"Playing prompt tone {i+1}/5...")
-print('Alert tone playback finished.')
+print("Alert tone playback finished.")
 
 # 合成文本
-while not tts.synthesize_text("欢迎使用我司的TTS语音合[w0]成测试模块。请注意以下发音细节：这个要[=yao1]求很重[=zhong4]要[=yao4]。（避免“要[yao]求”和“重[chong]要”的错误发音）本次会议共有[n1]25人参加。"):
+while not tts.synthesize_text(
+    "欢迎使用我司的TTS语音合[w0]成测试模块。请注意以下发音细节：这个要[=yao1]求很重[=zhong4]要[=yao4]。（避免“要[yao]求”和“重[chong]要”的错误发音）本次会议共有[n1]25人参加。"
+):
     time.sleep(1)
     continue
 print("Text synthesis started.")
 
 # 终端输入任意键暂停播放
-input ("Press any key to pause")
+input("Press any key to pause")
 # 暂停合成
 tts.pause_synthesis()
 print("Synthesis paused.")
 
 # 终端输入任意键继续合成播放
-input ("Press any key to play")
+input("Press any key to play")
 # 继续合成
 tts.resume_synthesis()
 print("Synthesis resumed.")
 
-#终端输入任意键停止取消合成播放
-input ("Press any key to stop")
+# 终端输入任意键停止取消合成播放
+input("Press any key to stop")
 # 停止合成
 tts.stop_synthesis()
 print("Synthesis stopped.")

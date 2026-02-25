@@ -21,6 +21,7 @@ from pcf8574 import PCF8574
 
 # ======================================== 自定义类 ============================================
 
+
 class PCF8574IO8:
     """
     该类封装 PCF8574 8 位 IO 扩展器，提供端口级（2bit）和单引脚的输入/输出控制。
@@ -505,7 +506,7 @@ class PCF8574IO8:
             - Does not perform I2C write.
         """
         if value:
-            self._cache |= (1 << pin)
+            self._cache |= 1 << pin
         else:
             self._cache &= ~(1 << pin)
 
@@ -537,6 +538,7 @@ class PCF8574IO8:
             - No I2C communication, only cache read.
         """
         return (self._cache >> pin) & 1
+
 
 # ======================================== 初始化配置 ===========================================
 

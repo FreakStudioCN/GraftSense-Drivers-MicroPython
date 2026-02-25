@@ -23,11 +23,12 @@ import time
 
 # ======================================== 自定义类 ============================================
 
+
 class HC14_Lora:
     """
-    HC14_Lora 类，用于通过 UART 串口操作 HC14 LoRa 模块，实现参数配置和透明传输通信。  
-    封装了 AT 命令交互，提供波特率、信道、发射功率、无线速率等设置接口，  
-    并支持透传模式下的数据收发。  
+    HC14_Lora 类，用于通过 UART 串口操作 HC14 LoRa 模块，实现参数配置和透明传输通信。
+    封装了 AT 命令交互，提供波特率、信道、发射功率、无线速率等设置接口，
+    并支持透传模式下的数据收发。
 
     Attributes:
         _uart (UART): MicroPython UART 实例，用于与 HC14 模块通信。
@@ -67,10 +68,10 @@ class HC14_Lora:
 
     ==========================================
 
-    HC14_Lora driver class for controlling HC14 LoRa module via UART.  
-    Provides AT command communication methods for configuring parameters  
-    such as baud rate, channel, RF rate, transmit power, and supports  
-    transparent data transmission and reception.  
+    HC14_Lora driver class for controlling HC14 LoRa module via UART.
+    Provides AT command communication methods for configuring parameters
+    such as baud rate, channel, RF rate, transmit power, and supports
+    transparent data transmission and reception.
 
     Attributes:
         _uart (UART): MicroPython UART instance for communication.
@@ -110,24 +111,30 @@ class HC14_Lora:
     """
 
     # 波特率常量
-    BAUD_1200  = const(1200)
-    BAUD_2400  = const(2400)
-    BAUD_4800  = const(4800)
-    BAUD_9600  = const(9600)
+    BAUD_1200 = const(1200)
+    BAUD_2400 = const(2400)
+    BAUD_4800 = const(4800)
+    BAUD_9600 = const(9600)
     BAUD_19200 = const(19200)
     BAUD_38400 = const(38400)
     BAUD_57600 = const(57600)
-    BAUD_115200= const(115200)
+    BAUD_115200 = const(115200)
     BAUD_DEFAULT = BAUD_9600
 
     # 无线速率 S 值常量（1..8）
-    S1 = const(1); S2 = const(2); S3 = const(3); S4 = const(4)
-    S5 = const(5); S6 = const(6); S7 = const(7); S8 = const(8)
+    S1 = const(1)
+    S2 = const(2)
+    S3 = const(3)
+    S4 = const(4)
+    S5 = const(5)
+    S6 = const(6)
+    S7 = const(7)
+    S8 = const(8)
     S_DEFAULT = S3
 
     # 发射功率范围与默认
-    POWER_MIN = const(6)    # dBm
-    POWER_MAX = const(20)   # dBm
+    POWER_MIN = const(6)  # dBm
+    POWER_MAX = const(20)  # dBm
     POWER_DEFAULT = const(20)
 
     # 信道范围与默认（编号为整数 1..50）
@@ -151,7 +158,7 @@ class HC14_Lora:
     # 私有：接收超时时间（秒），固定 3s（接口要求）
     _RECV_TIMEOUT_S = const(3)
 
-    def __init__(self, uart : UART, baud: int = BAUD_DEFAULT):
+    def __init__(self, uart: UART, baud: int = BAUD_DEFAULT):
         """
         初始化 HC14_Lora 驱动类，绑定 UART 并设置默认参数。
 
@@ -182,9 +189,9 @@ class HC14_Lora:
         self.rate = HC14_Lora.S_DEFAULT
         self.power = HC14_Lora.POWER_DEFAULT
         self.channel = HC14_Lora.CH_DEFAULT
-        self.firmware_version = ''
+        self.firmware_version = ""
 
-    def _send(self, cmd: bytes) -> (bool, None|str):
+    def _send(self, cmd: bytes) -> (bool, None | str):
         """
         向模块发送 AT 命令
 
@@ -219,7 +226,7 @@ class HC14_Lora:
         except Exception as e:
             return (False, "send error")
 
-    def _recv(self) -> (bool, None|str):
+    def _recv(self) -> (bool, None | str):
         """
         从模块接收数据
 
@@ -241,18 +248,18 @@ class HC14_Lora:
         """
         try:
             resp = self._uart.read()
-            if resp == None:
-                return False,'RECV NONE'
-            if resp.decode('utf-8').strip() == 'ORDER ERROR':
-                return False,'ORDER ERROR'
+            if resp is None:
+                return False, "RECV NONE"
+            if resp.decode("utf-8").strip() == "ORDER ERROR":
+                return False, "ORDER ERROR"
             try:
-                return True,resp.decode('utf-8').strip().split(':')[1]
+                return True, resp.decode("utf-8").strip().split(":")[1]
             except:
-                return True,resp.decode('utf-8').strip()
+                return True, resp.decode("utf-8").strip()
         except Exception as e:
             return (False, "recv error")
 
-    def test_comm(self) -> (bool, None|str):
+    def test_comm(self) -> (bool, None | str):
         """
         发送 `AT` 测试模块是否进入 AT 模式。
 
@@ -273,14 +280,16 @@ class HC14_Lora:
             Uses _send + _recv to perform test. Sets self.in_at_mode = True if successful.
         """
 
-        ok, err = self._send(f'AT'.encode())
-        if not ok: return (False, err)
+        ok, err = self._send(f"AT".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
         if not ok:
             return (False, resp)
-        if resp == 'OK':return (True, None)
-        
-    def reset_defaults(self) -> (bool, None|str):
+        if resp == "OK":
+            return (True, None)
+
+    def reset_defaults(self) -> (bool, None | str):
         """
         发送 `AT+DEFAULT` 恢复模块出厂设置。
 
@@ -301,14 +310,16 @@ class HC14_Lora:
             Caller should refresh internal cache after success, or get_params can be called internally.
         """
 
-        ok, err = self._send(f'AT+DEFAULT'.encode())
-        if not ok: return (False, err)
+        ok, err = self._send(f"AT+DEFAULT".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
         if not ok:
             return (False, resp)
-        if resp == 'OK+DEFAULT':return (True, None)
+        if resp == "OK+DEFAULT":
+            return (True, None)
 
-    def get_baud(self) -> (bool, int|str):
+    def get_baud(self) -> (bool, int | str):
         """
         查询模块当前 UART 波特率，发送 `AT+B?` 并解析返回 `OK+B:xxxx`。
 
@@ -329,13 +340,15 @@ class HC14_Lora:
             Does not change local UART, only returns module setting; use set_baud to switch.
         """
 
-        ok, err = self._send(f'AT+B?'.encode())
-        if not ok: return (False, err)
+        ok, err = self._send(f"AT+B?".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
-        return True,resp
-    
-    def set_baud(self, baud: int) -> (bool, int|str):
+        if not ok:
+            return (False, resp)
+        return True, resp
+
+    def set_baud(self, baud: int) -> (bool, int | str):
         """
         设置模块 UART 波特率，发送 `AT+B{baud}`。
 
@@ -360,18 +373,27 @@ class HC14_Lora:
             Caller or this method must sync UART instance baud rate after success.
         """
 
-        if baud not in [HC14_Lora.BAUD_1200,HC14_Lora.BAUD_2400,HC14_Lora.BAUD_4800,
-                        HC14_Lora.BAUD_9600,HC14_Lora.BAUD_19200,HC14_Lora.BAUD_38400,
-                        HC14_Lora.BAUD_57600,HC14_Lora.BAUD_115200]:
+        if baud not in [
+            HC14_Lora.BAUD_1200,
+            HC14_Lora.BAUD_2400,
+            HC14_Lora.BAUD_4800,
+            HC14_Lora.BAUD_9600,
+            HC14_Lora.BAUD_19200,
+            HC14_Lora.BAUD_38400,
+            HC14_Lora.BAUD_57600,
+            HC14_Lora.BAUD_115200,
+        ]:
             return (False, "invalid param")
-        ok, err = self._send(f'AT+B{baud}'.encode())
-        if not ok:return (False, err)
+        ok, err = self._send(f"AT+B{baud}".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
+        if not ok:
+            return (False, resp)
         self.baud = baud
-        return True,resp
+        return True, resp
 
-    def get_channel(self) -> (bool, int|str):
+    def get_channel(self) -> (bool, int | str):
         """
         查询模块信道，发送 `AT+C?` 并解析返回 `OK+C:xxx`。
 
@@ -390,13 +412,15 @@ class HC14_Lora:
             Returns integer channel number (1–50).
         """
 
-        ok, err = self._send(f'AT+C?'.encode())
-        if not ok: return (False, err)
+        ok, err = self._send(f"AT+C?".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
-        return True,resp
+        if not ok:
+            return (False, resp)
+        return True, resp
 
-    def set_channel(self, ch: int) -> (bool, int|str):
+    def set_channel(self, ch: int) -> (bool, int | str):
         """
         设置模块信道，发送 `AT+C{ch:03d}`。
 
@@ -423,14 +447,16 @@ class HC14_Lora:
 
         if not (self.CH_MIN <= ch <= self.CH_MAX):
             return (False, "invalid param")
-        ok, err = self._send(f'AT+C{ch:03d}'.encode())
-        if not ok:return (False, err)
+        ok, err = self._send(f"AT+C{ch:03d}".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
+        if not ok:
+            return (False, resp)
         self.channel = ch
-        return True,resp
+        return True, resp
 
-    def get_rate(self) -> (bool, int|str):
+    def get_rate(self) -> (bool, int | str):
         """
         查询无线速率 S 值，发送 `AT+S?` 并解析返回 `OK+S:x`。
 
@@ -449,13 +475,15 @@ class HC14_Lora:
             Returns value in range 1–8.
         """
 
-        ok, err = self._send(f'AT+S?'.encode())
-        if not ok: return (False, err)
+        ok, err = self._send(f"AT+S?".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
-        return True,resp
+        if not ok:
+            return (False, resp)
+        return True, resp
 
-    def set_rate(self, s: int) -> (bool, int|str):
+    def set_rate(self, s: int) -> (bool, int | str):
         """
         设置无线速率 S 值，发送 `AT+S{s}`。
 
@@ -482,14 +510,16 @@ class HC14_Lora:
 
         if not (1 <= s <= 8):
             return (False, "invalid param")
-        ok, err = self._send(f'AT+S{s}'.encode())
-        if not ok:return (False, err)
+        ok, err = self._send(f"AT+S{s}".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
+        if not ok:
+            return (False, resp)
         self.rate = s
-        return True,resp
+        return True, resp
 
-    def get_power(self) -> (bool, int|str):
+    def get_power(self) -> (bool, int | str):
         """
         查询发射功率，发送 `AT+P?` 并解析 `OK+P:+XdBm`。
 
@@ -508,13 +538,15 @@ class HC14_Lora:
             Returns integer in dBm.
         """
 
-        ok, err = self._send(f'AT+P?'.encode())
-        if not ok: return (False, err)
+        ok, err = self._send(f"AT+P?".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
-        return True,resp
+        if not ok:
+            return (False, resp)
+        return True, resp
 
-    def set_power(self, p_dbm: int) -> (bool, int|str):
+    def set_power(self, p_dbm: int) -> (bool, int | str):
         """
         设置发射功率，发送 `AT+P{p_dbm}`。
 
@@ -541,12 +573,14 @@ class HC14_Lora:
 
         if not (self.POWER_MIN <= p_dbm <= self.POWER_MAX):
             return (False, "invalid param")
-        ok, err = self._send(f'AT+P{p_dbm}'.encode())
-        if not ok:return (False, err)
+        ok, err = self._send(f"AT+P{p_dbm}".encode())
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
+        if not ok:
+            return (False, resp)
         self.power = p_dbm
-        return True,resp
+        return True, resp
 
     def get_version(self) -> (bool, str):
         """
@@ -567,13 +601,15 @@ class HC14_Lora:
             Updates self.firmware_version on success.
         """
 
-        ok, err = self._send(b'AT+V?')
-        if not ok: return (False, err)
+        ok, err = self._send(b"AT+V?")
+        if not ok:
+            return (False, err)
         ok, resp = self._recv()
-        if not ok:return (False, resp)
-        return True,resp
+        if not ok:
+            return (False, resp)
+        return True, resp
 
-    def get_params(self) -> (bool, dict|str):
+    def get_params(self) -> (bool, dict | str):
         """
         查询模块所有参数，发送 `AT+RX` 并解析多行响应：
         OK+B:..., OK+C:..., OK+S:..., OK+P:...
@@ -595,17 +631,18 @@ class HC14_Lora:
         Notes:
             Updates internal cache self.baud/self.channel/self.rate/self.power on success.
         """
-        ok, err = self._send(f'AT+RX'.encode())
-        if not ok: return (False, err)
-        
-        try:
-            lines = self._uart.read().decode('utf-8').strip().split('\r\n')
-            values = [item.split(':')[1] for item in lines if ':' in item]
-            return True,{'baud': values[0],'channel': values[1],'rate': values[2],'power': values[3]}
-        except:
-            return False,'get params error'
+        ok, err = self._send(f"AT+RX".encode())
+        if not ok:
+            return (False, err)
 
-    def transparent_send(self, data: bytes, wait_between_packets_s: float = 0.01) -> (bool, dict|str):
+        try:
+            lines = self._uart.read().decode("utf-8").strip().split("\r\n")
+            values = [item.split(":")[1] for item in lines if ":" in item]
+            return True, {"baud": values[0], "channel": values[1], "rate": values[2], "power": values[3]}
+        except:
+            return False, "get params error"
+
+    def transparent_send(self, data: bytes, wait_between_packets_s: float = 0.01) -> (bool, dict | str):
         """
         透明传输发送，将任意 bytes 分包并发送。
 
@@ -639,12 +676,12 @@ class HC14_Lora:
         try:
             n = 0
             for i in range(0, len(data), M):
-                packet = data[i:i+M]
+                packet = data[i : i + M]
                 if self._uart.write(packet) != len(packet):
                     return (False, f"send error, wrote {ok}/{len(packet)} bytes")
                 n += 1
                 time.sleep(wait_between_packets_s)
-            return (True, {"packets":n, "bytes_sent":len(data)})
+            return (True, {"packets": n, "bytes_sent": len(data)})
         except Exception as e:
             return (False, str(e))
 
@@ -681,8 +718,7 @@ class HC14_Lora:
                         return (False, "timeout")
             time.sleep_ms(5)  # 小延时，避免 busy-loop
 
-
-    def close(self) -> (bool, None|str):
+    def close(self) -> (bool, None | str):
         """
         关闭并释放串口资源（如果实例负责打开串口）。
 
@@ -699,6 +735,7 @@ class HC14_Lora:
             return (True, None)
         except Exception as e:
             return (False, str(e))
+
 
 # ======================================== 初始化配置 ==========================================
 

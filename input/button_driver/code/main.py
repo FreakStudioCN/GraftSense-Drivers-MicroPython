@@ -9,6 +9,7 @@
 
 # 导入时间相关模块
 import time
+
 # 导入按钮驱动模块
 from touchkey import TouchKey
 
@@ -16,11 +17,14 @@ from touchkey import TouchKey
 
 # ======================================== 功能函数 ============================================
 
+
 def on_press():
     print("Button pressed")
 
+
 def on_release():
     print("Button released")
+
 
 # ======================================== 自定义类 ============================================
 

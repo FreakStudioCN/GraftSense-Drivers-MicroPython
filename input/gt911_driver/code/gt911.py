@@ -9,12 +9,15 @@
 # ======================================== 导入相关模块 ========================================
 
 # 导入引脚相关模块
-from machine import Pin,I2C
+from machine import Pin, I2C
+
 # 时间相关的模块
 import time
+
 # 导入micropython相关模块
 import micropython
 from micropython import const
+
 # 导入数组相关模块
 from array import array
 
@@ -23,6 +26,7 @@ from array import array
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义GT911触摸芯片类
 class GT911:
@@ -115,6 +119,7 @@ class GT911:
         - 错误处理：对 I2C/硬件可能出现的异常（总线错误、引脚配置错误等）不在内部吞掉，调用者应根据平台需要捕获并处理异常。
         - MicroPython 版本：此实现以 MicroPython v1.23.0 行为测试，某些底层 API（如 I2C readfrom_mem_into 的 addrsize 参数）在不同移植中可能存在差异，部署前请在目标板上验证。
     """
+
     # 寄存器和相应位段对应地址
     # 命令寄存器基地址
     COMMAND = const(0x8040)
@@ -143,9 +148,22 @@ class GT911:
     # 第一个触摸点位段地址
     POINT_1 = const(0x8150)
 
-    def __init__(self, i2c: I2C, int_pin: int, rst_pin: int, addr: int = 0x5D, width: int = 240, height: int = 320,
-                 touch_points: int = 2, reverse_x: bool = False, reverse_y: bool = False, reverse_axis: bool = False,
-                 sito: bool = False, refresh_rate: int = 240, user_callback: callable = None) -> None:
+    def __init__(
+        self,
+        i2c: I2C,
+        int_pin: int,
+        rst_pin: int,
+        addr: int = 0x5D,
+        width: int = 240,
+        height: int = 320,
+        touch_points: int = 2,
+        reverse_x: bool = False,
+        reverse_y: bool = False,
+        reverse_axis: bool = False,
+        sito: bool = False,
+        refresh_rate: int = 240,
+        user_callback: callable = None,
+    ) -> None:
         """
         初始化 GT911 触摸控制器。
 
@@ -169,11 +187,11 @@ class GT911:
         """
         # 判断输入地址是否为0x5D或0x14
         if addr not in (0x5D, 0x14):
-            raise ValueError('GT911 I2C address must be 0x5D or 0x14')
+            raise ValueError("GT911 I2C address must be 0x5D or 0x14")
 
         # 判断同时触摸点数是否大于5
         if touch_points > 5:
-            raise ValueError('GT911 touch points must be less than 5')
+            raise ValueError("GT911 touch points must be less than 5")
 
         # 传入的 I2C 对象
         self.i2c = i2c
@@ -402,7 +420,8 @@ class GT911:
         """
         # 若用户传入了回调函数，则安排其尽快执行
         if self.user_callback is not None:
-            micropython.schedule(self.user_callback,0)
+            micropython.schedule(self.user_callback, 0)
+
 
 # ======================================== 初始化配置 ==========================================
 

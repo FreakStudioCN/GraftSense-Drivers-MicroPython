@@ -27,11 +27,7 @@ def main():
             try:
                 # 调用mpy-cross编译
                 subprocess.run(
-                    ["python", "-m", "mpy_cross", py_file, "-o", mpy_file],
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
+                    ["python", "-m", "mpy_cross", py_file, "-o", mpy_file], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
                 )
                 print(f"✅ 编译成功: {py_file} → {mpy_file}")
                 compiled_mpy.append(mpy_file)
@@ -43,13 +39,7 @@ def main():
     # 先传编译后的mpy文件
     for mpy_file in compiled_mpy:
         try:
-            subprocess.run(
-                ["mpremote", "fs", "cp", mpy_file, ":/"],
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
+            subprocess.run(["mpremote", "fs", "cp", mpy_file, ":/"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             print(f"✅ 上传成功: {mpy_file}")
         except subprocess.CalledProcessError as e:
             print(f"❌ 上传失败 {mpy_file}: {e.stderr}")
@@ -57,22 +47,16 @@ def main():
     # 单独上传main.py（直接传原文件）
     if main_file:
         try:
-            subprocess.run(
-                ["mpremote", "fs", "cp", main_file, ":/"],
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
+            subprocess.run(["mpremote", "fs", "cp", main_file, ":/"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             print(f"✅ 上传成功（直接传py）: {main_file}")
         except subprocess.CalledProcessError as e:
             print(f"❌ 上传失败 {main_file}: {e.stderr}")
 
+
 if __name__ == "__main__":
     # 检查依赖工具是否安装
     try:
-        subprocess.run(["python", "-m", "mpy_cross", "--version"], check=True, stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE)
+        subprocess.run(["python", "-m", "mpy_cross", "--version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         subprocess.run(["mpremote", "--version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("请先安装依赖工具：")

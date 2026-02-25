@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/26 下午5:17   
-# @Author  : 李清水            
-# @File    : menu.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/26 下午5:17
+# @Author  : 李清水
+# @File    : menu.py
 # @Description : OLED显示简易菜单库
 
 # ======================================== 导入相关模块 =========================================
@@ -15,6 +15,7 @@ import time
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class MenuNode:
     """
@@ -34,12 +35,14 @@ class MenuNode:
         __init__(self, name:str, enter_callback : callable=None, exit_callback : callable=None):
             初始化MenuNode类实例，设置菜单名称和回调函数。
     """
-    def __init__(self, name:str, enter_callback : callable=None, exit_callback : callable=None):
+
+    def __init__(self, name: str, enter_callback: callable = None, exit_callback: callable = None):
         self.name = name
         self.next = None
         self.sub_menu = []
         self.enter_callback = enter_callback
         self.exit_callback = exit_callback
+
 
 class SimpleOLEDMenu:
     """
@@ -94,6 +97,7 @@ class SimpleOLEDMenu:
         get_current_menu_name(self) -> Union[str, None]:
             获取当前选中菜单项的名称。
     """
+
     def __init__(self, oled, name: str, pos_x: int, pos_y: int, width: int, height: int) -> None:
         """
         初始化SimpleOLEDMenu实例。
@@ -174,7 +178,7 @@ class SimpleOLEDMenu:
                 # 抛出错误
                 raise ValueError("Parent menu not found, please check the name")
 
-    def _find_node(self, current, name: str) -> 'MenuNode':
+    def _find_node(self, current, name: str) -> "MenuNode":
         """
         递归查找菜单节点。
 
@@ -412,7 +416,7 @@ class SimpleOLEDMenu:
         oled_height = self.oled.height
 
         # 矩形参数
-        rect_width  = 120
+        rect_width = 120
         rect_height = 32
         x = (oled_width - rect_width) // 2
         y = (oled_height - rect_height) // 2
@@ -454,11 +458,11 @@ class SimpleOLEDMenu:
             str: 当前菜单名称，如果没有选中菜单返回None。
         """
         # 获取当前选中的菜单
-        current_menu = self.head.sub_menu[self.selected_index] \
-            if self.selected_index < len(self.head.sub_menu) else None
+        current_menu = self.head.sub_menu[self.selected_index] if self.selected_index < len(self.head.sub_menu) else None
 
         # 如果当前菜单存在，返回菜单名称
         return current_menu.name if current_menu else None
+
 
 # ======================================== 初始化配置 ==========================================
 

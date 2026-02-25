@@ -1,20 +1,24 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/3/21 下午3:04   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/3/21 下午3:04
+# @Author  : 李清水
+# @File    : main.py
 # @Description : 使用DS3502数字电位器输出任意波形
 
 # ======================================== 导入相关模块 ========================================
 
 # 导入硬件模块
 from machine import ADC, Timer, Pin, I2C, UART
+
 # 导入时间相关模块
 import time
+
 # 导入访问和控制 MicroPython 内部结构的模块
 import micropython
+
 # 导入ds3502模块用于控制数字电位器芯片
 from ds3502 import DS3502
+
 # 导入波形生成模块
 from dac_waveformgenerator import WaveformGenerator
 
@@ -26,6 +30,7 @@ DAC_ADDRESS = 0x00
 adc_conversion_factor = 3.3 / (65535)
 
 # ======================================== 功能函数 ============================================
+
 
 def timer_callback(timer: Timer) -> None:
     """
@@ -49,6 +54,7 @@ def timer_callback(timer: Timer) -> None:
     # 调用用户自定义的回调函数
     micropython.schedule(user_callback, (value))
 
+
 def user_callback(value: float) -> None:
     """
     用户自定义的回调函数，用于处理ADC采集到的电压值并通过串口发送。
@@ -68,7 +74,8 @@ def user_callback(value: float) -> None:
     # 获取浮点数并将其四舍五入到两位小数
     formatted_value = "{:.2f}".format(value)
     # 串口发送采集到的电压数据
-    uart.write(str(formatted_value) + '\r\n')
+    uart.write(str(formatted_value) + "\r\n")
+
 
 # ======================================== 自定义类 ============================================
 
@@ -84,14 +91,14 @@ i2c = I2C(id=1, sda=Pin(2), scl=Pin(3), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 遍历从机设备地址列表
     for device in devices_list:
         # 如果设备地址在0x28-0x2B之间，则为DS3502芯片
@@ -108,13 +115,7 @@ dac.set_mode(1)
 uart = UART(0, 115200)
 # 初始化uart对象，波特率为115200，数据位为8，无校验位，停止位为1
 # 设置串口超时时间为100ms
-uart.init(baudrate=115200,
-          bits=8,
-          parity=None,
-          stop=1,
-          tx=0,
-          rx=1,
-          timeout=100)
+uart.init(baudrate=115200, bits=8, parity=None, stop=1, tx=0, rx=1, timeout=100)
 
 # 创建ADC实例：ADC2-GP28
 adc = ADC(2)
@@ -128,7 +129,7 @@ timer.init(period=10, mode=Timer.PERIODIC, callback=timer_callback)
 # 生成正弦波
 print("FreakStudio : Generate Sine Waveform : 10Hz, 1.5V, 1.5V")
 # 初始化波形生成器
-wave = WaveformGenerator(dac, frequency=5, amplitude=1.5, offset=1.5, waveform='sine')
+wave = WaveformGenerator(dac, frequency=5, amplitude=1.5, offset=1.5, waveform="sine")
 # 启动波形生成
 wave.start()
 # 运行一段时间后停止生成
@@ -138,7 +139,7 @@ wave.stop()
 # 生成方波
 print("FreakStudio : Generate Square Waveform : 10Hz, 1.5V, 1.5V")
 # 初始化波形生成器
-wave = WaveformGenerator(dac, frequency=5, amplitude=1.5, offset=1.5, waveform='square')
+wave = WaveformGenerator(dac, frequency=5, amplitude=1.5, offset=1.5, waveform="square")
 # 启动波形生成
 wave.start()
 # 运行一段时间后停止生成
@@ -148,7 +149,7 @@ wave.stop()
 # 生成三角波
 print("FreakStudio : Generate Triangle Waveform : 10Hz, 1.5V, 1.5V, 0.8")
 # 初始化波形生成器
-wave = WaveformGenerator(dac, frequency=5, amplitude=1.5, offset=1.5, waveform='triangle', rise_ratio=0.8)
+wave = WaveformGenerator(dac, frequency=5, amplitude=1.5, offset=1.5, waveform="triangle", rise_ratio=0.8)
 # 启动波形生成
 wave.start()
 # 运行一段时间后停止生成

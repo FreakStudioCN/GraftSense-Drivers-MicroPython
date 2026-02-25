@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/1 下午2:10   
-# @Author  : 李清水            
-# @File    : mcp4725.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/1 下午2:10
+# @Author  : 李清水
+# @File    : mcp4725.py
 # @Description : 12位DAC芯片mcp4725驱动模块，参考代码：https://github.com/wayoda/micropython-mcp4725/blob/master/mcp4725.py
 # @License : MIT
 
@@ -21,6 +21,7 @@ from machine import I2C
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # DAC芯片MCP4725自定义类
 class MCP4725:
@@ -57,7 +58,7 @@ class MCP4725:
     # 定义MCP4725的I2C地址，一般可以选择0x60或0x61
     BUS_ADDRESS = [0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67]
     # 定义MCP4725的电源关断模式，键值为模式名称，对应的值为模式编码
-    POWER_DOWN_MODE = {'Off': 0, '1k': 1, '100k': 2, '500k': 3}
+    POWER_DOWN_MODE = {"Off": 0, "1k": 1, "100k": 2, "500k": 3}
 
     def __init__(self, i2c: I2C, address: int = 0x60) -> None:
         """
@@ -115,7 +116,7 @@ class MCP4725:
         return self.i2c.writeto(self.address, self._writeBuffer) == 2
 
     def read(self) -> tuple:
-        '''
+        """
         读取MCP4725芯片中电源关断数据位和DAC数据位。
 
         该方法从MCP4725芯片读取5个字节的数据，并解析出电源关断状态、DAC输出值和EEPROM中的数据。
@@ -139,7 +140,7 @@ class MCP4725:
 
         Raises:
             None: 该方法不抛出异常。
-        '''
+        """
         # 创建用于接收数据的缓冲区
         buf = bytearray(5)
         # 从MCP4725读取5个字节的数据并存入缓冲区
@@ -155,12 +156,12 @@ class MCP4725:
             # 读取EEPROM中的电源关断模式
             eeprom_power_down = self._powerDownKey((buf[3] >> 5) & 0x03)
             # 读取EEPROM中的输出值
-            eeprom_value = ((buf[3] & 0x0f) << 8) | buf[4]
+            eeprom_value = ((buf[3] & 0x0F) << 8) | buf[4]
             # 返回包含所有读取数据的元组
             return (eeprom_write_busy, power_down, value, eeprom_power_down, eeprom_value)
         return None
 
-    def config(self, power_down: str = 'Off', value: int = 0, eeprom: bool = False) -> bool:
+    def config(self, power_down: str = "Off", value: int = 0, eeprom: bool = False) -> bool:
         """
         配置MCP4725芯片的电源关断模式和输出值。
 
@@ -229,6 +230,7 @@ class MCP4725:
             if item == value:
                 return key
         raise KeyError("No matching power down mode for value: {}".format(value))
+
 
 # ======================================== 初始化配置 ==========================================
 

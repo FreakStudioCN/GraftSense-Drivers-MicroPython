@@ -22,8 +22,8 @@ import time
 
 # ======================================== 自定义类 ============================================
 
-class SNR9816_TTS:
 
+class SNR9816_TTS:
     """
     SNR9816_TTS类，用于通过UART接口控制SNR9816 TTS语音合成芯片。
 
@@ -133,9 +133,9 @@ class SNR9816_TTS:
     CMD_STOP = 0x02
     # 固定指令帧
     query_status_cmd = bytes([0xFD, 0x00, 0x01, 0x21])
-    pause_synthesis_cmd = bytes([0XFD, 0X00, 0X01, 0X03])
-    resume_synthesis_cmd = bytes([0XFD, 0X00, 0X01, 0X04])
-    stop_synthesis_cmd = bytes([0XFD, 0X00, 0X01, 0X02])
+    pause_synthesis_cmd = bytes([0xFD, 0x00, 0x01, 0x03])
+    resume_synthesis_cmd = bytes([0xFD, 0x00, 0x01, 0x04])
+    stop_synthesis_cmd = bytes([0xFD, 0x00, 0x01, 0x02])
 
     def __init__(self, uart):
         """
@@ -159,7 +159,7 @@ class SNR9816_TTS:
         self.encoding_gb2312 = 0x01
         self.encoding_utf8 = 0x04
 
-    def _send_frame(self, cmd, encoding, data_bytes)-> bool:
+    def _send_frame(self, cmd, encoding, data_bytes) -> bool:
         """
         内部方法：发送协议帧到SNR9816模块。
 
@@ -189,15 +189,15 @@ class SNR9816_TTS:
         try:
             # 命令字 + 编码参数 + 数据
             length = len(data_bytes) + 2
-            length_bytes = struct.pack('>H', length)  # 大端，2字节
-            frame = struct.pack('B', SNR9816_TTS.FRAME_HEADER) + length_bytes
-            frame += struct.pack('B', cmd) + struct.pack('B', encoding) + data_bytes
+            length_bytes = struct.pack(">H", length)  # 大端，2字节
+            frame = struct.pack("B", SNR9816_TTS.FRAME_HEADER) + length_bytes
+            frame += struct.pack("B", cmd) + struct.pack("B", encoding) + data_bytes
             self._uart.write(frame)
             return True
         except:
             return False
 
-    def _check_response(self, expected_response=None, timeout_ms=100)-> int|bool|None:
+    def _check_response(self, expected_response=None, timeout_ms=100) -> int | bool | None:
         """
         内部方法：检查模块响应。
 
@@ -273,7 +273,7 @@ class SNR9816_TTS:
             print(f"Chip is busy (status: {status}), cannot synthesize now.")
             return False
 
-        data_bytes = text.encode('utf-8')
+        data_bytes = text.encode("utf-8")
         return self._send_frame(SNR9816_TTS.CMD_SYNTHESIS, self.encoding_utf8, data_bytes)
 
     def query_status(self) -> str:
@@ -544,7 +544,6 @@ class SNR9816_TTS:
             raise ValueError("num must be between 1 and 5")
         text = f"message_{num}"
         return self.synthesize_text(text)
-
 
     def play_alert_tone(self, num: int) -> bool:
         """
