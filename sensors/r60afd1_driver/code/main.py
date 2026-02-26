@@ -24,6 +24,7 @@ print_interval = 2000
 
 # ======================================== 功能函数 ============================================
 
+
 def print_report_sensor_data():
     """
     打印传感器上报数据到Thonny控制台。
@@ -52,15 +53,13 @@ def print_report_sensor_data():
     print("Scene Info: %d" % device.scene_info)
 
     # 安装配置
-    print("Install Angle: X=%d, Y=%d, Z=%d" % (
-        device.install_angle_x, device.install_angle_y, device.install_angle_z))
+    print("Install Angle: X=%d, Y=%d, Z=%d" % (device.install_angle_x, device.install_angle_y, device.install_angle_z))
     print("Install Height: %d cm" % device.install_height)
     print("Auto Measured Height: %d cm" % device.auto_height)
 
     # 人体存在检测
     print("Presence Status: %s" % ("Someone" if device.presence_status == 1 else "No one"))
-    print("Motion Status: %s" % ["No motion", "Static", "Active"][
-        device.motion_status] if device.motion_status < 3 else "Unknown")
+    print("Motion Status: %s" % ["No motion", "Static", "Active"][device.motion_status] if device.motion_status < 3 else "Unknown")
     print("Movement Parameter: %d" % device.movement_parameter)
     print("Max Energy Value: %d" % device.max_energy_value)
 
@@ -478,34 +477,34 @@ device = R60AFD1(
     parse_interval=200,  # 数据解析间隔200ms
     max_retries=3,  # 最大重试次数3次
     retry_delay=100,  # 重试延迟100ms
-    init_timeout=5000  # 初始化超时5秒
+    init_timeout=5000,  # 初始化超时5秒
 )
 
 # 打印配置状态
 print("\nDevice Configuration Status:")
 config_status = device.get_configuration_status()
-print("Initialization Complete: %s" % config_status['initialization_complete'])
-print("Configuration Errors: %d" % len(config_status['configuration_errors']))
+print("Initialization Complete: %s" % config_status["initialization_complete"])
+print("Configuration Errors: %d" % len(config_status["configuration_errors"]))
 
-if len(config_status['configuration_errors']) > 0:
+if len(config_status["configuration_errors"]) > 0:
     print("Configuration Error Details:")
-    for error in config_status['configuration_errors']:
+    for error in config_status["configuration_errors"]:
         print("  - %s" % error)
 
 # 打印设备信息
-device_info = config_status['device_info']
+device_info = config_status["device_info"]
 print("\nDevice Information:")
-print("  Product Model: %s" % device_info['product_model'])
-print("  Product ID: %s" % device_info['product_id'])
-print("  Hardware Model: %s" % device_info['hardware_model'])
-print("  Firmware Version: %s" % device_info['firmware_version'])
-print("  System Initialized: %s" % device_info['system_initialized'])
-print("  Working Duration: %d seconds" % device_info['working_duration'])
-print("  Radar Fault Status: %d" % device_info['radar_fault_status'])
-print("  Scene Info: %d" % device_info['scene_info'])
+print("  Product Model: %s" % device_info["product_model"])
+print("  Product ID: %s" % device_info["product_id"])
+print("  Hardware Model: %s" % device_info["hardware_model"])
+print("  Firmware Version: %s" % device_info["firmware_version"])
+print("  System Initialized: %s" % device_info["system_initialized"])
+print("  Working Duration: %d seconds" % device_info["working_duration"])
+print("  Radar Fault Status: %d" % device_info["radar_fault_status"])
+print("  Scene Info: %d" % device_info["scene_info"])
 
 # 打印功能开关状态
-func_switches = config_status['function_switches']
+func_switches = config_status["function_switches"]
 print("\nFunction Switches:")
 
 time.sleep(1)
@@ -527,7 +526,6 @@ try:
 
     # 驻留检测设置
     device.set_static_stay_duration(seconds=90)
-
 
     while True:
         current_time = time.ticks_ms()

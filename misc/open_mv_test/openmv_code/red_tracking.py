@@ -44,13 +44,7 @@ while True:
     img = sensor.snapshot()
 
     # 寻找红色色块
-    blobs = img.find_blobs(
-        [red_threshold],
-        pixels_threshold=100,
-        area_threshold=100,
-        merge=True,
-        margin=10
-    )
+    blobs = img.find_blobs([red_threshold], pixels_threshold=100, area_threshold=100, merge=True, margin=10)
 
     if blobs:
         # 找到所有红色色块
@@ -60,13 +54,11 @@ while True:
             img.draw_cross(blob.cx(), blob.cy())
 
             # 打印坐标信息
-            uart.write("Red Blob - X:%d, Y:%d, W:%d, H:%d\n" % (
-                blob.cx(), blob.cy(), blob.w(), blob.h()))
-            print("Red block - X:%d, Y:%d, Width:%d, Height:%d" % (
-                blob.cx(), blob.cy(), blob.w(), blob.h()))
+            uart.write("Red Blob - X:%d, Y:%d, W:%d, H:%d\n" % (blob.cx(), blob.cy(), blob.w(), blob.h()))
+            print("Red block - X:%d, Y:%d, Width:%d, Height:%d" % (blob.cx(), blob.cy(), blob.w(), blob.h()))
     else:
         # 没有找到红色色块
-       # uart.write("No red blob found\n")
+        # uart.write("No red blob found\n")
         print("No red blob found\n")
 
     # 打印帧率

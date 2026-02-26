@@ -1,14 +1,15 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/10/3 下午2:41   
-# @Author  : 李清水            
-# @File    : ds1302.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/10/3 下午2:41
+# @Author  : 李清水
+# @File    : ds1302.py
 # @Description : 自定义DS1302类控制芯片
 
 # ======================================== 导入相关模块 ========================================
 
 # 导入硬件相关模块
 from machine import Pin
+
 # 导入MicroPython相关模块
 from micropython import const
 
@@ -17,6 +18,7 @@ from micropython import const
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义DS1302芯片控制类
 class DS1302:
@@ -110,17 +112,18 @@ class DS1302:
         ram(self, reg: int, dat: int | None = None) -> int | None:
             读取或写入RAM寄存器的值。
     """
+
     # 类变量：定义DS1302芯片寄存器地址
     DS1302_REG_SECOND = const(0x80)  # 秒寄存器
     DS1302_REG_MINUTE = const(0x82)  # 分寄存器
-    DS1302_REG_HOUR = const(0x84)    # 时寄存器
-    DS1302_REG_DAY = const(0x86)     # 日寄存器
-    DS1302_REG_MONTH = const(0x88)   # 月寄存器
-    DS1302_REG_WEEKDAY = const(0x8A) # 星期寄存器
-    DS1302_REG_YEAR = const(0x8C)    # 年寄存器
-    DS1302_REG_WP = const(0x8E)      # 写保护寄存器
-    DS1302_REG_CTRL = const(0x90)    # 控制寄存器
-    DS1302_REG_RAM = const(0xC0)     # RAM寄存器
+    DS1302_REG_HOUR = const(0x84)  # 时寄存器
+    DS1302_REG_DAY = const(0x86)  # 日寄存器
+    DS1302_REG_MONTH = const(0x88)  # 月寄存器
+    DS1302_REG_WEEKDAY = const(0x8A)  # 星期寄存器
+    DS1302_REG_YEAR = const(0x8C)  # 年寄存器
+    DS1302_REG_WP = const(0x8E)  # 写保护寄存器
+    DS1302_REG_CTRL = const(0x90)  # 控制寄存器
+    DS1302_REG_RAM = const(0xC0)  # RAM寄存器
 
     def __init__(self, clk: Pin, dio: Pin, cs: Pin) -> None:
         """
@@ -281,7 +284,7 @@ class DS1302:
         # 读取秒寄存器
         t = self._get_reg(DS1302.DS1302_REG_SECOND + 1)
         # 取消停止位
-        self._wr(DS1302.DS1302_REG_SECOND, t & 0x7f)
+        self._wr(DS1302.DS1302_REG_SECOND, t & 0x7F)
 
     def stop(self) -> None:
         """
@@ -508,6 +511,7 @@ class DS1302:
             return self._get_reg(DS1302.DS1302_REG_RAM + 1 + (reg % 31) * 2)
         else:
             self._wr(DS1302.DS1302_REG_RAM + (reg % 31) * 2, dat)
+
 
 # ======================================== 初始化配置 ==========================================
 

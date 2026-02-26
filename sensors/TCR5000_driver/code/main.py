@@ -1,5 +1,5 @@
 # MicroPython v1.23.0
-# -*- coding: utf-8 -*-   
+# -*- coding: utf-8 -*-
 # @Time    : 2025/9/4 上午9:44
 # @Author  : 缪贵成
 # @File    : main.py
@@ -13,6 +13,7 @@ from tcr5000 import TCR5000
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 
 def on_change(value: int) -> None:
     """
@@ -37,6 +38,7 @@ def on_change(value: int) -> None:
         User can handle sensor state changes here, e.g., print or motor control.
     """
     print("Callback triggered, value =", value)
+
 
 # ======================================== 自定义类 ============================================
 

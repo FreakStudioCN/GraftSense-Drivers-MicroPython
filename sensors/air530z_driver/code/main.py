@@ -49,10 +49,10 @@ while True:
             # 海拔
             print(f"altitude: {gps_data['altitude']}")
             # 时间
-            if gps_data['timestamp'] is None:
+            if gps_data["timestamp"] is None:
                 print("time:None")
             else:
-                ts = gps_data['timestamp']
+                ts = gps_data["timestamp"]
                 print(f"time: {ts['hour']:02d}:{ts['minute']:02d}:{ts['second']:02d}")
 
             # 卫星

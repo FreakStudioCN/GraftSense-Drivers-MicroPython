@@ -1,5 +1,5 @@
 # MicroPython v1.23.0
-# -*- coding: utf-8 -*-   
+# -*- coding: utf-8 -*-
 # @Time    : 2025/9/4 上午11:20
 # @Author  : 缪贵成
 # @File    : pn532.py
@@ -131,6 +131,7 @@ _FRAME_START = b"\x00\x00\xFF"
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # PN532 基类
 class PN532:
@@ -505,9 +506,7 @@ class PN532:
         # Check frame checksum value matches bytes.
         checksum = sum(response[offset + 2 : offset + 2 + frame_len + 1]) & 0xFF
         if checksum != 0:
-            raise RuntimeError(
-                "Response checksum did not match expected value: ", checksum
-            )
+            raise RuntimeError("Response checksum did not match expected value: ", checksum)
         # Return frame data.
         return response[offset + 2 : offset + 2 + frame_len]
 
@@ -572,9 +571,7 @@ class PN532:
         """
         if not self.send_command(command, params=params, timeout=timeout):
             return None
-        return self.process_response(
-            command, response_length=response_length, timeout=timeout
-        )
+        return self.process_response(command, response_length=response_length, timeout=timeout)
 
     def send_command(self, command, params=[], timeout=1000) -> bool:
         """
@@ -911,8 +908,8 @@ class PN532:
         params[0] = 0x01
         params[1] = key_number & 0xFF
         params[2] = block_number & 0xFF
-        params[3:3+keylen] = key
-        params[3+keylen:] = uid
+        params[3 : 3 + keylen] = key
+        params[3 + keylen :] = uid
         response = self.call_function(_COMMAND_INDATAEXCHANGE, params=params, response_length=1)
         return response[0] == 0x00
 
@@ -1062,6 +1059,8 @@ class PN532:
         if ntag_block is not None:
             return ntag_block[0:4]
         return None
+
+
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================

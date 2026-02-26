@@ -14,7 +14,6 @@ __platform__ = "MicroPython v1.23"
 # ======================================== 导入相关模块 =========================================
 
 import time
-import binascii
 from micropython import const
 
 # ======================================== 全局变量 ============================================
@@ -23,53 +22,64 @@ from micropython import const
 
 # ======================================== 自定义类 ============================================
 
+
 class CC253xError(Exception):
     """
-    CC253x 模块相关的基础异常类，所有自定义异常均继承自此类。  
+    CC253x 模块相关的基础异常类，所有自定义异常均继承自此类。
 
-    Base exception class for CC253x module.  
+    Base exception class for CC253x module.
     All custom exceptions are derived from this class.
     """
+
     pass
+
 
 class PacketTooLargeError(CC253xError):
     """
-    当发送的数据包超过 CC253x 模块支持的最大负载时抛出。  
+    当发送的数据包超过 CC253x 模块支持的最大负载时抛出。
 
     Raised when the packet size exceeds the maximum supported payload of CC253x.
     """
+
     pass
+
 
 class CommandFailedError(CC253xError):
     """
-    当 CC253x 模块返回 ERR 或命令执行失败时抛出。  
+    当 CC253x 模块返回 ERR 或命令执行失败时抛出。
 
     Raised when CC253x module returns ERR or a command execution fails.
     """
+
     pass
+
 
 class NotJoinedError(CC253xError):
     """
-    当尝试在未入网状态下执行需要网络的操作时抛出。  
+    当尝试在未入网状态下执行需要网络的操作时抛出。
 
     Raised when an operation requiring network join is attempted but the module is not joined.
     """
+
     pass
+
 
 class InvalidParameterError(CC253xError):
     """
-    当提供给 CC253x 模块的参数不合法或超出范围时抛出。  
+    当提供给 CC253x 模块的参数不合法或超出范围时抛出。
 
     Raised when an invalid or out-of-range parameter is provided to CC253x module.
     """
+
     pass
+
 
 class CC253xTTL:
     """
-    CC253x TTL 模块驱动类，支持 ZigBee 通信控制与透明传输，基于 UART 接口进行通信。  
-    提供 PANID、信道、波特率、短地址、查询间隔、休眠等参数配置接口，  
-    支持协调器与节点之间点对点数据收发，  
-    并提供透明数据传输模式与接收帧解析机制。  
+    CC253x TTL 模块驱动类，支持 ZigBee 通信控制与透明传输，基于 UART 接口进行通信。
+    提供 PANID、信道、波特率、短地址、查询间隔、休眠等参数配置接口，
+    支持协调器与节点之间点对点数据收发，
+    并提供透明数据传输模式与接收帧解析机制。
 
     Attributes:
         _uart (UART): MicroPython UART 实例，用于与 CC253x 模块通信。
@@ -124,12 +134,12 @@ class CC253xTTL:
 
     ==========================================
 
-    CC253x TTL driver class supporting ZigBee control and transparent transmission,  
-    operating via UART interface.  
-    Provides configuration of PANID, channel, baud rate, short address,  
-    query interval, sleep mode, and more.  
-    Supports point-to-point communication between coordinator and nodes,  
-    as well as transparent transmission mode with frame parsing support.  
+    CC253x TTL driver class supporting ZigBee control and transparent transmission,
+    operating via UART interface.
+    Provides configuration of PANID, channel, baud rate, short address,
+    query interval, sleep mode, and more.
+    Supports point-to-point communication between coordinator and nodes,
+    as well as transparent transmission mode with frame parsing support.
 
     Attributes:
     _uart (UART): MicroPython UART instance, used for communicating with the CC253x module.
@@ -200,8 +210,16 @@ class CC253xTTL:
     SHORTADDR_COORDINATOR = const(0x0000)  # 协调器短地址始终 0x0000
     SHORTADDR_NOT_JOINED = const(0xFFFE)  # 表示未加入网络（驱动层约定）
 
-    def __init__(self, uart, wake=None, baud=DEFAULT_BAUD, channel=DEFAULT_CHANNEL, panid=DEFAULT_PANID,
-                 seek_time=DEFAULT_SEEK_TIME, query_interval_ms=DEFAULT_QUERY_MS):
+    def __init__(
+        self,
+        uart,
+        wake=None,
+        baud=DEFAULT_BAUD,
+        channel=DEFAULT_CHANNEL,
+        panid=DEFAULT_PANID,
+        seek_time=DEFAULT_SEEK_TIME,
+        query_interval_ms=DEFAULT_QUERY_MS,
+    ):
         """
         uart: 已初始化的 UART 实例（driver 只使用其 read/write）
         wake: 只有enddevice需要
@@ -220,10 +238,10 @@ class CC253xTTL:
     # 私有辅助方法
     def _send(self, cmd):
         """
-        私有方法：发送 AT 命令并等待响应，直到收到 OK 或 ERROR。  
+        私有方法：发送 AT 命令并等待响应，直到收到 OK 或 ERROR。
 
         Args:
-            cmd (str): 完整的 AT 命令字符串。  
+            cmd (str): 完整的 AT 命令字符串。
 
         Returns:
             Tuple[bool, str]: (状态, 响应内容)，True 表示成功，False 表示失败。
@@ -232,10 +250,10 @@ class CC253xTTL:
             CommandFailedError:设备未响应
 
         ==========================================
-        Private method: Send an AT command and wait for response until OK or ERROR.  
+        Private method: Send an AT command and wait for response until OK or ERROR.
 
         Args:
-            cmd (str): Full AT command string.  
+            cmd (str): Full AT command string.
 
         Returns:
             Tuple[bool, str]: (status, response), True if success, False otherwise.
@@ -252,7 +270,7 @@ class CC253xTTL:
             tag = resp[4]
             resp = resp[5:]
             resp_hex = resp.hex()
-            if tag in [1, 5, 12, 11, 14, 15,10]:
+            if tag in [1, 5, 12, 11, 14, 15, 10]:
                 return True, resp_hex
             else:
                 if resp_hex == "4f4b":
@@ -261,7 +279,7 @@ class CC253xTTL:
                     return False, "failure"
                 raise CommandFailedError(f"Device not responding tag:{tag}")
         else:
-            return False, 'No response from UART'
+            return False, "No response from UART"
 
     def read_status(self) -> str:
         """
@@ -288,13 +306,13 @@ class CC253xTTL:
             CommandFailedError: If response times out or returns ERR.
         """
         status_map = {
-            '02': 'Device has not joined the network',
-            '06': 'EndDevice has joined the network',
-            '07': 'Router has joined the network',
-            '08': 'Coordinator is starting',
-            '09': 'Coordinator has started'
+            "02": "Device has not joined the network",
+            "06": "EndDevice has joined the network",
+            "07": "Router has joined the network",
+            "08": "Coordinator is starting",
+            "09": "Coordinator has started",
         }
-        status_code = self._send('01')[1]
+        status_code = self._send("01")[1]
         try:
             # 判断并返回状态
             if status_code in status_map:
@@ -334,7 +352,7 @@ class CC253xTTL:
         """
         if not (0 <= ms <= 0xFFFF):
             raise InvalidParameterError("query interval out of range 0..65535")
-        return self._send('02' + f'{ms:04X}')[0]
+        return self._send("02" + f"{ms:04X}")[0]
 
     def reset_factory(self) -> bool:
         """
@@ -355,7 +373,7 @@ class CC253xTTL:
         Raises:
             CommandFailedError: If module returns ERR or times out.
         """
-        return self._send('03')[0]
+        return self._send("03")[0]
 
     def set_panid(self, panid: int) -> bool:
         """
@@ -386,7 +404,7 @@ class CC253xTTL:
         """
         if not (0 <= panid <= 0xFFFF):
             raise InvalidParameterError("panid must be 0..0xFFFF")
-        return self._send('02' + f'{panid:04X}')[0]
+        return self._send("02" + f"{panid:04X}")[0]
 
     def read_panid_channel(self) -> tuple[str, str]:
         """
@@ -405,7 +423,7 @@ class CC253xTTL:
         # 读取前清空 UART 缓冲区
         resp = self._uart.read()
         # 发送读取 PANID/CHANNEL 命令，期望 payload = panid_hi panid_lo channel
-        resp = self._send('05')[1]
+        resp = self._send("05")[1]
         return resp[:4], resp[4:]
 
     def set_baud(self, baud_idx: int) -> bool:
@@ -441,10 +459,9 @@ class CC253xTTL:
             CommandFailedError: If module returns ERR or times out.
         """
         if baud_idx in range(5):
-            return self._send('06' + f'{baud_idx:02d}')[0]
+            return self._send("06" + f"{baud_idx:02d}")[0]
         else:
             raise InvalidParameterError("baud index must be 0..4")
-
 
     def enter_lowpower(self) -> bool:
         """
@@ -460,7 +477,7 @@ class CC253xTTL:
             bool: True if success.
 
         """
-        return self._send('07')[0]
+        return self._send("07")[0]
 
     def set_seek_time(self, seconds: int) -> bool:
         """
@@ -491,7 +508,7 @@ class CC253xTTL:
         """
         if not (1 <= seconds <= 65):
             raise InvalidParameterError("seek time must be 1..65 seconds")
-        return self._send('08' + f'{seconds:02X}')[0]
+        return self._send("08" + f"{seconds:02X}")[0]
 
     def set_channel(self, channel: int) -> bool:
         """
@@ -517,9 +534,9 @@ class CC253xTTL:
         Raises:panid
             InvalidParameterError: If parameter is out of range.
         """
-        if not channel in range(0x0b, 0x1a, 1):
+        if channel not in range(0x0B, 0x1A, 1):
             raise InvalidParameterError(f"channel must be [0x0b,0x1a,1]，channel={channel}！")
-        return self._send('09' + f'{channel:02X}')[0]
+        return self._send("09" + f"{channel:02X}")[0]
 
     def send_node_to_coord(self, data: str) -> None:
         """
@@ -535,7 +552,7 @@ class CC253xTTL:
             data (bytes): Data, length ≤ MAX_USER_PAYLOAD.
 
         """
-        self._send('0A' + data.encode('utf-8').hex())
+        self._send("0A" + data.encode("utf-8").hex())
 
     def send_coord_to_node(self, short_addr: int, data: str) -> None:
         """
@@ -560,7 +577,7 @@ class CC253xTTL:
         """
         if not (0 <= short_addr <= 0xFFFF):
             raise InvalidParameterError("short_addr out of range 0..65535")
-        return self._send('0B' + f'{short_addr:04X}' + data.encode("utf-8").hex())[0]
+        return self._send("0B" + f"{short_addr:04X}" + data.encode("utf-8").hex())[0]
 
     def read_mac(self) -> str:
         """
@@ -576,7 +593,7 @@ class CC253xTTL:
             bytes: 8-byte MAC address.
         """
 
-        return self._send('0C')[1]
+        return self._send("0C")[1]
 
     def set_custom_short_addr(self, short_addr: int) -> bool:
         """
@@ -606,7 +623,7 @@ class CC253xTTL:
         """
         if not (0 <= short_addr <= 0xFFFF):
             raise InvalidParameterError("short_addr out of range 0..65535")
-        return self._send('0D' + f'{short_addr:04X}')
+        return self._send("0D" + f"{short_addr:04X}")
 
     # 短地址与入网判断
     def read_short_addr(self) -> int:
@@ -623,9 +640,9 @@ class CC253xTTL:
             int: 16-bit short address, or SHORTADDR_NOT_JOINED.
 
         """
-        return self._send('0E')[1]
+        return self._send("0E")[1]
 
-    def send_node_to_node(self, source_addr: int, target_addr:int, data: str) -> None:
+    def send_node_to_node(self, source_addr: int, target_addr: int, data: str) -> None:
         """
         节点发送数据到节点。
 
@@ -653,7 +670,7 @@ class CC253xTTL:
             raise InvalidParameterError("source_addr out of range 0..65535")
         if not (0 <= target_addr <= 0xFFFF):
             raise InvalidParameterError("target_addr out of range 0..65535")
-        self._send('0F' + f'{source_addr:04X}' + f'{target_addr:04X}' + data.encode("utf-8").hex())
+        self._send("0F" + f"{source_addr:04X}" + f"{target_addr:04X}" + data.encode("utf-8").hex())
 
     # 点对点 / 透明数据发送（长度限制与延时）
     def send_transparent(self, data: bytes) -> None:
@@ -669,7 +686,6 @@ class CC253xTTL:
         """
 
         self._uart.write(data)
-
 
     def recv_frame(self):
         """
@@ -696,8 +712,8 @@ class CC253xTTL:
 
         """
         # 前导码
-        header = '02a879c3'
-        mode =None
+        header = "02a879c3"
+        mode = None
         data = None
         addr1 = None
         addr2 = None
@@ -707,41 +723,39 @@ class CC253xTTL:
             data = self._uart.read()
             # 检查前导，无前导则透明传输
             if data[0:4].hex() != header:
-                mode = 'transparent'
+                mode = "transparent"
                 return mode, data, addr1, addr2
             else:
                 # 读取控制码
                 cmd = data[4:5].hex()
                 # 点对点解析
-                if cmd == '0f':
-                    mode = 'node_to_node'
+                if cmd == "0f":
+                    mode = "node_to_node"
                     # 目的地址
                     addr1 = data[5:7].hex()
                     # 源地址
                     addr2 = data[7:9].hex()
                     # 数据
-                    data = data[9:len(data)]
+                    data = data[9 : len(data)]
                     return mode, data, addr1, addr2
                 # 节点到协调器解析
-                if cmd == '0a':
-                    mode = 'node_to_coord'
+                if cmd == "0a":
+                    mode = "node_to_coord"
                     # 协调器地址
                     addr1 = data[5:7].hex()
                     # 数据
-                    data = data[7:len(data)]
+                    data = data[7 : len(data)]
                     return mode, data, addr1, addr2
                 # 协调器到节点解析
-                if cmd == '0b':
-                    mode = 'coord_to_node'
-                    data = data[5:len(data)]
+                if cmd == "0b":
+                    mode = "coord_to_node"
+                    data = data[5 : len(data)]
                     return mode, data, addr1, addr2
-                raise CommandFailedError(f'Command {cmd} not supported for parsing')
+                raise CommandFailedError(f"Command {cmd} not supported for parsing")
         else:
             return mode, data, addr1, addr2
+
 
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================
-
-
-

@@ -1,18 +1,21 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/10/3 下午2:41   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/10/3 下午2:41
+# @Author  : 李清水
+# @File    : main.py
 # @Description : 外置RTC类实验，使用DS1302实现闹钟
 
 # ======================================== 导入相关模块 ========================================
 
 # 导入硬件相关模块
 from machine import Pin, I2C, Timer, PWM, RTC
+
 # 导入时间相关模块
 import time
+
 # 导入外部RTC实时时钟模块
 from ds1302 import DS1302
+
 # 从SSD1306模块中导入SSD1306_I2C类
 from SSD1306 import SSD1306_I2C
 
@@ -22,6 +25,7 @@ from SSD1306 import SSD1306_I2C
 OLED_ADDRESS = 0
 
 # ======================================== 功能函数 ============================================
+
 
 def display_time(timer: Timer) -> None:
     """
@@ -83,7 +87,9 @@ def display_time(timer: Timer) -> None:
         # 刷新屏幕
         oled.show()
 
+
 # ======================================== 自定义类 ============================================
+
 
 # 自定义闹钟类
 class AlarmClock:
@@ -117,6 +123,7 @@ class AlarmClock:
         stop_alarm(self) -> None:
             停止闹钟，关闭蜂鸣器。
     """
+
     def __init__(self, oled: SSD1306_I2C, buzzer_pin: Pin) -> None:
         """
         初始化闹钟类。
@@ -219,6 +226,7 @@ class AlarmClock:
         # 关闭蜂鸣器
         self.buzzer.duty_u16(0)
 
+
 # ======================================== 初始化配置 ==========================================
 
 # 上电延时3s
@@ -244,23 +252,23 @@ i2c = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 便利从机设备地址列表
     for device in devices_list:
         # 判断从机设备地址是否为0x3c或0x3d（即OLED SSD1306的地址）
-        if device == 0x3c or device == 0x3d:
+        if device == 0x3C or device == 0x3D:
             print("I2C hexadecimal address: ", hex(device))
             OLED_ADDRESS = device
 
 # 创建SSD1306 OLED屏幕的实例，宽度为128像素，高度为64像素，不使用外部电源
-oled = SSD1306_I2C(i2c, OLED_ADDRESS, 128, 64,False)
+oled = SSD1306_I2C(i2c, OLED_ADDRESS, 128, 64, False)
 
 # 创建闹钟实例
 alarm_clock = AlarmClock(oled, buzzer_pin=Pin(9))
@@ -281,4 +289,4 @@ while True:
     # 延时1s
     time.sleep(1)
     # 打印当前时间
-    print("Current Time: {:02}:{:02}:{:02}".format( current_time[4], current_time[5], current_time[6]))
+    print("Current Time: {:02}:{:02}:{:02}".format(current_time[4], current_time[5], current_time[6]))

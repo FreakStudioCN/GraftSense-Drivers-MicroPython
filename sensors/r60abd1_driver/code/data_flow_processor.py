@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.26.1
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/11/4 下午6:38   
-# @Author  : 李清水            
+# -*- coding: utf-8 -*-
+# @Time    : 2025/11/4 下午6:38
+# @Author  : 李清水
 # @File    : data_flow_processor.py
 # @Description : 用于处理R60ABD1雷达设备串口通信协议的数据流处理器类相关代码
 # @License : MIT
@@ -13,6 +13,7 @@
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class DataFlowProcessor:
     """
@@ -72,6 +73,7 @@ class DataFlowProcessor:
         build_and_send_frame(control_byte, command_byte, data=b''): Build and send data frame.
         _calculate_crc(data_bytes): Calculate CRC checksum.
     """
+
     def __init__(self, uart):
         """
         初始化数据流处理器。
@@ -104,13 +106,7 @@ class DataFlowProcessor:
         """
         self.uart = uart
         self.buffer = bytearray()
-        self.stats = {
-            'total_bytes_received': 0,
-            'total_frames_parsed': 0,
-            'crc_errors': 0,
-            'frame_errors': 0,
-            'invalid_frames': 0
-        }
+        self.stats = {"total_bytes_received": 0, "total_frames_parsed": 0, "crc_errors": 0, "frame_errors": 0, "invalid_frames": 0}
 
         self.max_buffer_size = 128
 
@@ -171,7 +167,7 @@ class DataFlowProcessor:
             return []
 
         # 更新统计信息
-        self.stats['total_bytes_received'] += len(data)
+        self.stats["total_bytes_received"] += len(data)
 
         # 检查缓冲区大小
         if len(self.buffer) > self.max_buffer_size:
@@ -214,14 +210,14 @@ class DataFlowProcessor:
 
             # 验证帧尾
             if not self._validate_trailer(frame_data):
-                self.stats['frame_errors'] += 1
+                self.stats["frame_errors"] += 1
                 # 帧尾错误，跳过这个帧头，继续查找下一个
                 processed_bytes = current_pos + 1
                 continue
 
             # 验证CRC
             if not self._validate_crc(frame_data):
-                self.stats['crc_errors'] += 1
+                self.stats["crc_errors"] += 1
                 # CRC错误，跳过这个帧，继续查找下一个
                 processed_bytes = current_pos + total_frame_len
                 continue
@@ -230,9 +226,9 @@ class DataFlowProcessor:
             parsed_frame = self._parse_single_frame(frame_data)
             if parsed_frame:
                 frames.append(parsed_frame)
-                self.stats['total_frames_parsed'] += 1
+                self.stats["total_frames_parsed"] += 1
             else:
-                self.stats['invalid_frames'] += 1
+                self.stats["invalid_frames"] += 1
 
             # 移动到下一帧
             processed_bytes = current_pos + total_frame_len
@@ -345,8 +341,7 @@ class DataFlowProcessor:
         """
         if len(frame_data) < 2:
             return False
-        return (frame_data[-2] == self.TRAILER[0] and
-                frame_data[-1] == self.TRAILER[1])
+        return frame_data[-2] == self.TRAILER[0] and frame_data[-1] == self.TRAILER[1]
 
     def _validate_crc(self, frame_data: bytes) -> bool:
         """
@@ -428,7 +423,7 @@ class DataFlowProcessor:
             pos = 0
 
             # 解析帧头 (2字节)
-            header = bytes(frame_data[pos:pos + 2])
+            header = bytes(frame_data[pos : pos + 2])
             pos += 2
 
             # 控制字 (1字节)
@@ -455,18 +450,18 @@ class DataFlowProcessor:
             pos += 1
 
             # 帧尾 (2字节)
-            trailer = bytes(frame_data[pos:pos + 2])
+            trailer = bytes(frame_data[pos : pos + 2])
 
             # 构建解析结果
             parsed_frame = {
-                'header': header,
-                'control_byte': control_byte,
-                'command_byte': command_byte,
-                'data_length': data_length,
-                'data': data,
-                'crc': crc,
-                'trailer': trailer,
-                'raw_data': bytes(frame_data)
+                "header": header,
+                "control_byte": control_byte,
+                "command_byte": command_byte,
+                "data_length": data_length,
+                "data": data,
+                "crc": crc,
+                "trailer": trailer,
+                "raw_data": bytes(frame_data),
             }
 
             return parsed_frame
@@ -535,7 +530,7 @@ class DataFlowProcessor:
         """
         self.buffer = bytearray()
 
-    def build_and_send_frame(self, control_byte: int, command_byte: int, data: bytes = b'') -> bytes:
+    def build_and_send_frame(self, control_byte: int, command_byte: int, data: bytes = b"") -> bytes:
         """
         构建并发送数据帧。
 
@@ -639,6 +634,7 @@ class DataFlowProcessor:
             - CRC check range typically from header to data portion.
         """
         return sum(data_bytes) & 0xFF
+
 
 # ======================================== 初始化配置 ==========================================
 

@@ -1,14 +1,15 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/8/27 下午10:02   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/8/27 下午10:02
+# @Author  : 李清水
+# @File    : main.py
 # @Description : ADC类实验，读取摇杆两端电压
 
 # ======================================== 导入相关模块 ========================================
 
 # 导入时间相关模块
 import time
+
 # 导入摇杆驱动模块
 from joystick import Joystick
 

@@ -1,5 +1,5 @@
 # MicroPython v1.23.0
-# -*- coding: utf-8 -*-   
+# -*- coding: utf-8 -*-
 # @Time    : 2025/8/23 下午4:08
 # @Author  : 缪贵成
 # @File    : main.py
@@ -12,6 +12,7 @@ from machine import Pin
 from vibration_sensor import VibrationSensor
 
 # ======================================== 全局变量 =============================================
+
 
 # ======================================== 功能函数 ==============================================
 def vibration_callback() -> None:
@@ -29,6 +30,7 @@ def vibration_callback() -> None:
         This function is called from interrupt, scheduled via micropython.schedule.
     """
     print("Vibration detected callback triggered!")
+
 
 # ======================================== 自定义类 =============================================
 

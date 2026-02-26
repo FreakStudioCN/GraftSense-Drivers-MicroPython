@@ -1,0 +1,32 @@
+#!/usr/bin/env cmd.exe
+@echo off
+chcp 65001 > nul 2>&1
+
+:: Clear temp vars
+set "PY_CMD=" & set "PIP_CMD="
+
+echo [INFO] Checking and installing code style tools (black/flake8/pre-commit)...
+echo.
+
+:: Check Python (python/python3)
+python --version > nul 2>&1 && set "PY_CMD=python" || (python3 --version > nul 2>&1 && set "PY_CMD=python3" || (echo [ERROR] Python not found! Install Python and add to PATH. & pause > nul & exit /b 1))
+
+:: Check Pip (pip/pip3/python -m pip)
+%PY_CMD% -m pip --version > nul 2>&1 && set "PIP_CMD=%PY_CMD% -m pip" || (pip --version > nul 2>&1 && set "PIP_CMD=pip" || (pip3 --version > nul 2>&1 && set "PIP_CMD=pip3" || (echo [ERROR] Pip not found! Run: %PY_CMD% -m ensurepip & pause > nul & exit /b 1)))
+
+:: Install/upgrade dependencies
+echo [INFO] Installing/upgrading dependencies...
+%PIP_CMD% install --upgrade --quiet black flake8 pre-commit || (echo [ERROR] Dependencies install failed! Run: %PIP_CMD% install black flake8 pre-commit & pause > nul & exit /b 1)
+
+echo [SUCCESS] Dependencies installed/updated
+echo [INFO] Running pre-commit full check...
+echo.
+
+:: Run pre-commit check
+pre-commit run --all-files
+if errorlevel 1 (
+    echo. & echo [ERROR] Code style check failed! Fix issues before git commit. & pause > nul & exit /b 1
+) else (
+    echo. & echo [SUCCESS] Code style check passed, git commit allowed
+    exit /b 0
+)

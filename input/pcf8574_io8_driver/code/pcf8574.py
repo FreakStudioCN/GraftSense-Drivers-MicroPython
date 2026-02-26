@@ -15,6 +15,7 @@ __platform__ = "MicroPython v1.23"
 
 # 硬件相关的模块
 from machine import Pin, I2C
+
 # 导入micropython相关的模块
 import micropython
 
@@ -23,6 +24,7 @@ import micropython
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义PCF8574类
 class PCF8574:
@@ -70,10 +72,8 @@ class PCF8574:
         - Not ISR-safe, use micropython.schedule when calling from ISR.
         - Supports MicroPython v1.23.0.
     """
-    def __init__(self, i2c: I2C, address: int = 0x20,
-                 int_pin: int = None,
-                 callback: callable = None,
-                 trigger: int = Pin.IRQ_FALLING) -> None:
+
+    def __init__(self, i2c: I2C, address: int = 0x20, int_pin: int = None, callback: callable = None, trigger: int = Pin.IRQ_FALLING) -> None:
         """
         初始化 PCF8574 实例。
 
@@ -398,6 +398,7 @@ class PCF8574:
             - Performs I2C write, not ISR-safe.
         """
         self._i2c.writeto(self._address, self._port)
+
 
 # ======================================== 初始化配置 ===========================================
 

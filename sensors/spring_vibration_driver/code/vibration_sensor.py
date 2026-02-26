@@ -23,6 +23,7 @@ from machine import Pin
 
 # ======================================== 自定义类 =============================================
 
+
 class VibrationSensor:
     """
     滚珠震动传感器驱动类，支持震动检测、回调绑定和状态查询。
@@ -136,8 +137,7 @@ class VibrationSensor:
         """
         self._pin.init(Pin.IN)
         if self._callback:
-            self._irq = self._pin.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING,
-                                      handler=self._irq_handler)
+            self._irq = self._pin.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=self._irq_handler)
 
     def deinit(self) -> None:
         """
@@ -261,11 +261,8 @@ class VibrationSensor:
             debounce_ms is the configure
             callback_set indicates if a callback function is bound.
         """
-        return {
-            "last_state": self._last_state,
-            "debounce_ms": self._debounce_ms,
-            "callback_set": self._callback is not None
-        }
+        return {"last_state": self._last_state, "debounce_ms": self._debounce_ms, "callback_set": self._callback is not None}
+
 
 # ======================================== 初始化配置 ===========================================
 

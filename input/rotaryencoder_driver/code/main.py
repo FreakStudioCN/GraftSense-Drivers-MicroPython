@@ -1,14 +1,15 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/19 下午7:46   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/19 下午7:46
+# @Author  : 李清水
+# @File    : main.py
 # @Description : Timer类实验，读取旋转编码器的值，使用定时器做软件消抖
 
 # ======================================== 导入相关模块 =========================================
 
 # 导入时间相关模块
 import time
+
 # 导入自定义驱动模块
 from processbar import ProgressBar
 from ec11encoder import EC11Encoder

@@ -1,16 +1,18 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/25 上午8:31   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/25 上午8:31
+# @Author  : 李清水
+# @File    : main.py
 # @Description : I2C类实验，使用PCF8575芯片控制流水灯
 
 # ======================================== 导入相关模块 =========================================
 
 # 硬件相关的模块
 from machine import I2C, Pin
+
 # 时间相关的模块
 import time
+
 # 导入自定义的PCF8575类
 from pcf8575 import PCF8575
 
@@ -37,14 +39,14 @@ i2c: I2C = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 
 # 若devices_list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     print("No i2c device !")
 # 若非空，则打印从机设备地址
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
     # 遍历从机设备地址列表
     for device in devices_list:
         # 判断设备地址是否为PCF8575的地址

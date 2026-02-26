@@ -25,6 +25,7 @@ import time
 
 # ======================================== 自定义类 ============================================
 
+
 class DYSV19T:
     """
     DY-SV19T 音频模块控制类（UART）。支持：播放/暂停/停止、上下曲、音量、EQ、循环模式、
@@ -108,12 +109,16 @@ class DYSV19T:
     VOLUME_MAX = const(30)
     DEFAULT_BAUD = const(9600)
 
-    def __init__(self, uart, *,
-                 default_volume: int = VOLUME_MAX,
-                 default_disk: int = DISK_USB,
-                 default_play_mode: int = MODE_SINGLE_STOP,
-                 default_dac_channel: int = CH_MP3,
-                 timeout_ms: int = 500):
+    def __init__(
+        self,
+        uart,
+        *,
+        default_volume: int = VOLUME_MAX,
+        default_disk: int = DISK_USB,
+        default_play_mode: int = MODE_SINGLE_STOP,
+        default_dac_channel: int = CH_MP3,
+        timeout_ms: int = 500
+    ):
         """
         初始化驱动实例；仅保存状态与参数校验，不主动向模块发命令。
 
@@ -143,16 +148,21 @@ class DYSV19T:
             ValueError: If any argument is out of range or wrong type
         """
         # 参数校验
-        if uart is None or not hasattr(uart, 'read') or not hasattr(uart, 'write'):
+        if uart is None or not hasattr(uart, "read") or not hasattr(uart, "write"):
             raise ValueError("Invalid UART instance, must have read()/write() / Invalid UART instance")
         if not (DYSV19T.VOLUME_MIN <= int(default_volume) <= DYSV19T.VOLUME_MAX):
             raise ValueError("default_volume must be within 0..30")
         if default_disk not in (DYSV19T.DISK_USB, DYSV19T.DISK_SD, DYSV19T.DISK_FLASH, DYSV19T.DISK_NONE):
             raise ValueError("default_disk must be a DISK_* constant")
         if default_play_mode not in (
-            DYSV19T.MODE_FULL_LOOP, DYSV19T.MODE_SINGLE_LOOP, DYSV19T.MODE_SINGLE_STOP,
-            DYSV19T.MODE_FULL_RANDOM, DYSV19T.MODE_DIR_LOOP, DYSV19T.MODE_DIR_RANDOM,
-            DYSV19T.MODE_DIR_SEQUENCE, DYSV19T.MODE_SEQUENCE,
+            DYSV19T.MODE_FULL_LOOP,
+            DYSV19T.MODE_SINGLE_LOOP,
+            DYSV19T.MODE_SINGLE_STOP,
+            DYSV19T.MODE_FULL_RANDOM,
+            DYSV19T.MODE_DIR_LOOP,
+            DYSV19T.MODE_DIR_RANDOM,
+            DYSV19T.MODE_DIR_SEQUENCE,
+            DYSV19T.MODE_SEQUENCE,
         ):
             raise ValueError("default_play_mode must be a MODE_* constant")
         if default_dac_channel not in (DYSV19T.CH_MP3, DYSV19T.CH_AUX, DYSV19T.CH_MP3_AUX):
@@ -214,7 +224,7 @@ class DYSV19T:
         Raises:
             ValueError: If disk is invalid
         """
-        
+
         if disk not in (DYSV19T.DISK_USB, DYSV19T.DISK_SD, DYSV19T.DISK_FLASH):
             raise ValueError("The disk must be DISK_USB/SD/FLASH and must be online.")
         return int(disk)
@@ -239,9 +249,14 @@ class DYSV19T:
             ValueError: If mode invalid
         """
         if mode not in (
-            DYSV19T.MODE_FULL_LOOP, DYSV19T.MODE_SINGLE_LOOP, DYSV19T.MODE_SINGLE_STOP,
-            DYSV19T.MODE_FULL_RANDOM, DYSV19T.MODE_DIR_LOOP, DYSV19T.MODE_DIR_RANDOM,
-            DYSV19T.MODE_DIR_SEQUENCE, DYSV19T.MODE_SEQUENCE,
+            DYSV19T.MODE_FULL_LOOP,
+            DYSV19T.MODE_SINGLE_LOOP,
+            DYSV19T.MODE_SINGLE_STOP,
+            DYSV19T.MODE_FULL_RANDOM,
+            DYSV19T.MODE_DIR_LOOP,
+            DYSV19T.MODE_DIR_RANDOM,
+            DYSV19T.MODE_DIR_SEQUENCE,
+            DYSV19T.MODE_SEQUENCE,
         ):
             raise ValueError("mode must be a MODE_* constant")
         return int(mode)
@@ -312,14 +327,14 @@ class DYSV19T:
         """
         if not isinstance(path, str) or not path:
             raise ValueError("The path must start with '/'")
-        if path[0] != '/':
+        if path[0] != "/":
             raise ValueError("The path must start with '/'")
         # 允许的字符集：A-Z, 0-9, '_', '/', '*', '.'
         for ch in path:
             o = ord(ch)
-            if ch in ('/', '*', '.'):
+            if ch in ("/", "*", "."):
                 continue
-            if ch == '_':
+            if ch == "_":
                 continue
             if 48 <= o <= 57:  # 0-9
                 continue
@@ -329,16 +344,16 @@ class DYSV19T:
         # 校验每段（按 '/' 分割的文件夹名）长度 1..8；'*' 属于格式符不过不作为段内容校验
         seg = ""
         for ch in path[1:]:  # 跳过开头 '/'
-            if ch == '/':
+            if ch == "/":
                 if not (1 <= len(seg) <= 8):
                     raise ValueError("The length of the folder name must be 1..8 bytes")
                 seg = ""
-            elif ch in ('*', '.'):
+            elif ch in ("*", "."):
                 # 到达文件名或扩展名格式区，结束文件夹段校验
                 break
             else:
                 seg += ch
-        return path.encode('ascii')
+        return path.encode("ascii")
 
     def _build_frame(self, cmd: int, data: bytes) -> bytes:
         """
@@ -354,7 +369,7 @@ class DYSV19T:
 
         Build a complete frame: AA CMD LEN DATA... SM
 
-        
+
             cmd (int): Command code
             data (bytes): Payload data
 
@@ -369,7 +384,7 @@ class DYSV19T:
         frame[1] = cmd
         frame[2] = len(data)
         if data:
-            frame[3:3+len(data)] = data
+            frame[3 : 3 + len(data)] = data
         sm = 0
         for b in frame[:-1]:
             sm = (sm + b) & 0xFF
@@ -397,7 +412,7 @@ class DYSV19T:
         if resp[0] != 0xAA:
             raise ValueError("Initial code error")
         cmd = resp[1]
-        n   = resp[2]
+        n = resp[2]
         if len(resp) != 4 + n - 0:  # AA CMD LEN DATA(n) SM
             raise ValueError("Length mismatch")
         sm = 0
@@ -405,8 +420,8 @@ class DYSV19T:
             sm = (sm + b) & 0xFF
         if sm != resp[-1]:
             raise ValueError("The volume must be between 0..30")
-        data = resp[3:3+n] if n else b""
-        return {'cmd': cmd, 'data': data}
+        data = resp[3 : 3 + n] if n else b""
+        return {"cmd": cmd, "data": data}
 
     def _recv_response(self, expected_cmd: int = None, timeout_ms: int = None):
         """
@@ -459,7 +474,7 @@ class DYSV19T:
                         state = 0
                         buf = bytearray()
                         continue
-                    if (expected_cmd is None) or (parsed['cmd'] == expected_cmd):
+                    if (expected_cmd is None) or (parsed["cmd"] == expected_cmd):
                         return bytes(buf)
                     # 不匹配继续寻找下一帧
                     state = 0
@@ -552,19 +567,19 @@ class DYSV19T:
 
     def select_track(self, track_no: int, play: bool = True):
         """
-        指定曲目号 1..65535；play=True 直接播放（AA 07 02 H L SM），否则仅选曲（AA 1F 02 H L SM）。
+            指定曲目号 1..65535；play=True 直接播放（AA 07 02 H L SM），否则仅选曲（AA 1F 02 H L SM）。
 
-        Args:
-            track_no (int): 曲目号，范围 1..65535
-            play (bool): True 立即播放；False 仅预选
-            
-    ==========================================
+            Args:
+                track_no (int): 曲目号，范围 1..65535
+                play (bool): True 立即播放；False 仅预选
 
-        Select track 1..65535; play immediately if True, else select only.
-        
-        Args:
-            track_no (int): Track number 1..65535
-            play (bool): True to play now, False to preselect only
+        ==========================================
+
+            Select track 1..65535; play immediately if True, else select only.
+
+            Args:
+                track_no (int): Track number 1..65535
+                play (bool): True to play now, False to preselect only
         """
         # 验证track_no 输出H,L
         H, L = self._u16(track_no)
@@ -589,7 +604,7 @@ class DYSV19T:
             disk (int): One of DISK_*
             path (str): Path like '/DIR/NAME.MP3'
         """
-        path = path.replace('.', '*')
+        path = path.replace(".", "*")
         # 校验盘符
         d = self._validate_disk(disk)
         # 校验路径
@@ -638,7 +653,7 @@ class DYSV19T:
             disk (int): One of DISK_*
             path (str): Path (must start with '/')
         """
-        path = path.replace('.', '*')
+        path = path.replace(".", "*")
         # 验证文件
         d = self._validate_disk(disk)
         # 验证路径
@@ -784,7 +799,7 @@ class DYSV19T:
         # 验证count 并且输出H,L
         H, L = self._u16(count)
         self._uart.write(self._build_frame(0x19, bytes([H, L])))
-        if self.play_mode in ( 0x02, 0x03, 0x05, 0x06, 0x07):
+        if self.play_mode in (0x02, 0x03, 0x05, 0x06, 0x07):
             # 单曲停止、全盘随机、目录随机、目录顺序、全盘
             raise ValueError("The playback mode is incorrect, it supports \n(MODE_FULL_LOOP, MODE_SINGLE_LOOP, MODE_DIR_LOOP, MODE_SEQUENCE)")
 
@@ -884,8 +899,8 @@ class DYSV19T:
         if not resp:
             return None
         parsed = self._parse_response(resp)
-        if len(parsed['data']) == 1:
-            st = parsed['data'][0]
+        if len(parsed["data"]) == 1:
+            st = parsed["data"][0]
             self.play_state = st
             return st
         return None
@@ -903,7 +918,7 @@ class DYSV19T:
         resp = self._recv_response(expected_cmd=0x09)
         if not resp:
             return None
-        d = self._parse_response(resp)['data']
+        d = self._parse_response(resp)["data"]
         return d[0] if len(d) == 1 else None
 
     def query_current_disk(self):
@@ -919,7 +934,7 @@ class DYSV19T:
         resp = self._recv_response(expected_cmd=0x0A)
         if not resp:
             return None
-        d = self._parse_response(resp)['data']
+        d = self._parse_response(resp)["data"]
         if len(d) == 1:
             self.current_disk = d[0]
             return d[0]
@@ -937,7 +952,7 @@ class DYSV19T:
         resp = self._recv_response(expected_cmd=0x0C)
         if not resp:
             return None
-        d = self._parse_response(resp)['data']
+        d = self._parse_response(resp)["data"]
         if len(d) == 2:
             return (d[0] << 8) | d[1]
         return None
@@ -955,7 +970,7 @@ class DYSV19T:
         resp = self._recv_response(expected_cmd=0x0D)
         if not resp:
             return None
-        d = self._parse_response(resp)['data']
+        d = self._parse_response(resp)["data"]
         if len(d) == 2:
             return (d[0] << 8) | d[1]
         return None
@@ -973,7 +988,7 @@ class DYSV19T:
         resp = self._recv_response(expected_cmd=0x11)
         if not resp:
             return None
-        d = self._parse_response(resp)['data']
+        d = self._parse_response(resp)["data"]
         if len(d) == 2:
             return (d[0] << 8) | d[1]
         return None
@@ -992,7 +1007,7 @@ class DYSV19T:
         resp = self._recv_response(expected_cmd=0x12)
         if not resp:
             return None
-        d = self._parse_response(resp)['data']
+        d = self._parse_response(resp)["data"]
         if len(d) == 2:
             return (d[0] << 8) | d[1]
         return None
@@ -1010,9 +1025,9 @@ class DYSV19T:
         resp = self._recv_response(expected_cmd=0x1E)
         if not resp:
             return None
-        d = self._parse_response(resp)['data']
+        d = self._parse_response(resp)["data"]
         try:
-            return d.decode('ascii') if d else ""
+            return d.decode("ascii") if d else ""
         except Exception:
             return None
 
@@ -1028,7 +1043,7 @@ class DYSV19T:
         resp = self._recv_response(expected_cmd=0x24)
         if not resp:
             return None
-        d = self._parse_response(resp)['data']
+        d = self._parse_response(resp)["data"]
         if len(d) == 3:
             return (d[0], d[1], d[2])
         return None
@@ -1064,7 +1079,7 @@ class DYSV19T:
                 o = ord(ch)
                 if not (48 <= o <= 57 or 65 <= o <= 90):
                     raise ValueError(" names are only allowed to contain A-Z or 0-9")
-            bb.extend(s.encode('ascii'))
+            bb.extend(s.encode("ascii"))
         self._uart.write(self._build_frame(0x1B, bytes(bb)))
 
     def end_combination_playlist(self):
@@ -1115,10 +1130,11 @@ class DYSV19T:
         if resp:
             # 解析帧得到数据段
             parsed = self._parse_response(resp)
-            d = parsed['data']
+            d = parsed["data"]
             # 数据长度为 3 字节时按 (h, m, s) 打印
             if len(d) == 3:
                 return d[0], d[1], d[2]
+
 
 # ======================================== 初始化配置 ==========================================
 

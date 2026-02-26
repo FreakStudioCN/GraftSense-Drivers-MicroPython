@@ -16,6 +16,7 @@ from mqx import MQX
 
 # ======================================== 功能函数 ============================================
 
+
 # 用户回调函数
 def mq_callback(voltage: float) -> None:
     """
@@ -45,6 +46,7 @@ def mq_callback(voltage: float) -> None:
         None: This function does not raise exceptions.
     """
     print("[IRQ] Voltage: {:.3f} V".format(voltage))
+
 
 # ======================================== 自定义类 ============================================
 

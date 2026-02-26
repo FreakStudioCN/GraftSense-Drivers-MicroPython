@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/1/16 上午11:35   
-# @Author  : 李清水            
-# @File    : bus_step_motor.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/1/16 上午11:35
+# @Author  : 李清水
+# @File    : bus_step_motor.py
 # @Description : 总线步进电机驱动模块，使用PCA9685芯片控制电机驱动芯片
 # @License : MIT
 
@@ -15,8 +15,10 @@ __platform__ = "MicroPython v1.23"
 
 # 导入PCA9685模块
 from pca9685 import PCA9685
+
 # 导入硬件相关模块
 from machine import Timer
+
 # 导入MicroPython相关模块
 import micropython
 
@@ -25,6 +27,7 @@ import micropython
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义总线步进电机驱动类
 class BusStepMotor:
@@ -92,9 +95,9 @@ class BusStepMotor:
     """
 
     # 步进电机驱动模式：单相、双相、半步驱动
-    DRIVER_MODE_SINGLE, DRIVER_MODE_DOUBLE, DRIVER_MODE_HALF_STEP = (0,1,2)
+    DRIVER_MODE_SINGLE, DRIVER_MODE_DOUBLE, DRIVER_MODE_HALF_STEP = (0, 1, 2)
     # 步进电机方向：正转、反转
-    FORWARD, BACKWARD = (0,1)
+    FORWARD, BACKWARD = (0, 1)
 
     # 不同驱动模式的相位序列
     PHASES = {
@@ -119,11 +122,11 @@ class BusStepMotor:
             [0, 0, 1, 1],  # 步进6：B- 和 A-
             [0, 0, 0, 1],  # 步进7：A-
             [1, 0, 0, 1],  # 步进8：A+ 和 A-
-        ]
+        ],
     }
 
     # 步进电机运动模式：定步运动、连续运动
-    CONTINUOUS_MOTION, STEP_MOTION = (0,1)
+    CONTINUOUS_MOTION, STEP_MOTION = (0, 1)
 
     def __init__(self, pca9685: PCA9685, motor_count: int = 2):
         """
@@ -179,7 +182,7 @@ class BusStepMotor:
         self.pca9685.freq(5000)
         # 根据电机数量设置PCA9685芯片不同PWM通道占空比为0：一个步进电机对应四个PWM通道
         # 同时步进电机编号从0开始，对应PWM通道从0开始，以4个PWM通道递增
-        for i in range(motor_count*4):
+        for i in range(motor_count * 4):
             self.pca9685.duty(i, 0)
 
     @micropython.native
@@ -329,8 +332,14 @@ class BusStepMotor:
             raise ValueError("Invalid direction: %d. Direction must be FORWARD or BACKWARD." % direction)
 
         # 判断驱动模式是否有效
-        if driver_mode != BusStepMotor.DRIVER_MODE_SINGLE and driver_mode != BusStepMotor.DRIVER_MODE_DOUBLE and driver_mode != BusStepMotor.DRIVER_MODE_HALF_STEP:
-            raise ValueError("Invalid driver_mode: %d. Driver mode must be DRIVER_MODE_SINGLE, DRIVER_MODE_DOUBLE or DRIVER_MODE_HALF_STEP." % driver_mode)
+        if (
+            driver_mode != BusStepMotor.DRIVER_MODE_SINGLE
+            and driver_mode != BusStepMotor.DRIVER_MODE_DOUBLE
+            and driver_mode != BusStepMotor.DRIVER_MODE_HALF_STEP
+        ):
+            raise ValueError(
+                "Invalid driver_mode: %d. Driver mode must be DRIVER_MODE_SINGLE, DRIVER_MODE_DOUBLE or DRIVER_MODE_HALF_STEP." % driver_mode
+            )
 
         # 调整 motor_id 从 1 开始
         motor_id -= 1
@@ -379,7 +388,7 @@ class BusStepMotor:
 
         # 计算电机对应的PWM通道
         # 对于motor_id为1, 控制0到3通道；motor_id为2, 控制4到7通道
-        pwm_start_index = (motor_id) * 4     # 计算对应的PWM通道起始索引
+        pwm_start_index = (motor_id) * 4  # 计算对应的PWM通道起始索引
         pwm_end_index = pwm_start_index + 3  # 计算对应的PWM通道结束索引
 
         # 将控制通道的PWM占空比设置为0
@@ -439,9 +448,14 @@ class BusStepMotor:
             raise ValueError("Invalid direction: %d. Direction must be FORWARD or BACKWARD." % direction)
 
         # 判断驱动模式是否有效
-        if driver_mode != BusStepMotor.DRIVER_MODE_SINGLE and driver_mode != BusStepMotor.DRIVER_MODE_DOUBLE and driver_mode != BusStepMotor.DRIVER_MODE_HALF_STEP:
+        if (
+            driver_mode != BusStepMotor.DRIVER_MODE_SINGLE
+            and driver_mode != BusStepMotor.DRIVER_MODE_DOUBLE
+            and driver_mode != BusStepMotor.DRIVER_MODE_HALF_STEP
+        ):
             raise ValueError(
-                "Invalid driver_mode: %d. Driver mode must be DRIVER_MODE_SINGLE, DRIVER_MODE_DOUBLE or DRIVER_MODE_HALF_STEP." % driver_mode)
+                "Invalid driver_mode: %d. Driver mode must be DRIVER_MODE_SINGLE, DRIVER_MODE_DOUBLE or DRIVER_MODE_HALF_STEP." % driver_mode
+            )
 
         # 调整 motor_id 从 1 开始
         motor_id -= 1
@@ -498,7 +512,7 @@ class BusStepMotor:
         # 停止步进电机的PWM信号输出
         # 计算电机对应的PWM通道
         # 对于motor_id为1, 控制0到3通道；motor_id为2, 控制4到7通道
-        pwm_start_index = (motor_id) * 4     # 计算对应的PWM通道起始索引
+        pwm_start_index = (motor_id) * 4  # 计算对应的PWM通道起始索引
         pwm_end_index = pwm_start_index + 3  # 计算对应的PWM通道结束索引
 
         # 将控制通道的PWM占空比设置为0
@@ -509,6 +523,7 @@ class BusStepMotor:
         self.motor_modes[motor_id] = BusStepMotor.CONTINUOUS_MOTION
 
         print("stop_step_motion")
+
 
 # ======================================== 初始化配置 ==========================================
 

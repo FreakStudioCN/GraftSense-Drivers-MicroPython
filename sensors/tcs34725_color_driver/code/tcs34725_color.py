@@ -31,9 +31,9 @@ _REGISTER_AIHT = const(0x06)
 
 _REGISTER_ID = const(0x12)
 
-_REGISTER_APERS = const(0x0c)
+_REGISTER_APERS = const(0x0C)
 
-_REGISTER_CONTROL = const(0x0f)
+_REGISTER_CONTROL = const(0x0F)
 
 _REGISTER_SENSORID = const(0x12)
 
@@ -41,7 +41,7 @@ _REGISTER_STATUS = const(0x13)
 _REGISTER_CDATA = const(0x14)
 _REGISTER_RDATA = const(0x16)
 _REGISTER_GDATA = const(0x18)
-_REGISTER_BDATA = const(0x1a)
+_REGISTER_BDATA = const(0x1A)
 
 _ENABLE_AIEN = const(0x10)
 _ENABLE_WEN = const(0x08)
@@ -54,6 +54,7 @@ _CYCLES = (0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60)
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class TCS34725:
     """
@@ -192,7 +193,7 @@ class TCS34725:
         register |= _COMMAND_BIT
         if value is None:
             return self.i2c.readfrom_mem(self.address, register, 1)[0]
-        data = ustruct.pack('<B', value)
+        data = ustruct.pack("<B", value)
         self.i2c.writeto_mem(self.address, register, data)
 
     def _register16(self, register, value=None) -> int | None:
@@ -228,8 +229,8 @@ class TCS34725:
         register |= _COMMAND_BIT
         if value is None:
             data = self.i2c.readfrom_mem(self.address, register, 2)
-            return ustruct.unpack('<H', data)[0]
-        data = ustruct.pack('<H', value)
+            return ustruct.unpack("<H", data)[0]
+        data = ustruct.pack("<H", value)
         self.i2c.writeto_mem(self.address, register, data)
 
     def active(self, value=None, led_pin: Pin = None) -> bool:
@@ -271,7 +272,7 @@ class TCS34725:
             else:
                 raise ValueError("led_pin must be GPIO number (int) or Pin object")
         # 若未初始化过 led_pin，创建空属性避免后续报错
-        if not hasattr(self, 'led_pin'):
+        if not hasattr(self, "led_pin"):
             self.led_pin = None
 
         if value is None:
@@ -294,7 +295,6 @@ class TCS34725:
             self._register8(_REGISTER_ENABLE, enable & ~(_ENABLE_PON | _ENABLE_AEN))
             if self.led_pin is not None:  # 仅在 led_pin 有效时操作
                 self.led_pin.value(0)
-
 
     def sensor_id(self) -> int:
         """
@@ -435,12 +435,15 @@ class TCS34725:
         self.active(True)
         while not self._valid():
             time.sleep_ms(int(self._integration_time + 0.9))
-        data = tuple(self._register16(register) for register in (
-            _REGISTER_RDATA,
-            _REGISTER_GDATA,
-            _REGISTER_BDATA,
-            _REGISTER_CDATA,
-        ))
+        data = tuple(
+            self._register16(register)
+            for register in (
+                _REGISTER_RDATA,
+                _REGISTER_GDATA,
+                _REGISTER_BDATA,
+                _REGISTER_CDATA,
+            )
+        )
         self.active(was_active)
         if raw:
             return data
@@ -484,7 +487,7 @@ class TCS34725:
         z = -0.68202 * r + 0.77073 * g + 0.56332 * b
         d = x + y + z
         n = (x / d - 0.3320) / (0.1858 - y / d)
-        cct = 449.0 * n ** 3 + 3525.0 * n ** 2 + 6823.3 * n + 5520.33
+        cct = 449.0 * n**3 + 3525.0 * n**2 + 6823.3 * n + 5520.33
         return cct, y
 
     def threshold(self, cycles=None, min_value=None, max_value=None) -> tuple | None:
@@ -534,7 +537,7 @@ class TCS34725:
             min_value = self._register16(_REGISTER_AILT)
             max_value = self._register16(_REGISTER_AILT)
             if self._register8(_REGISTER_ENABLE) & _ENABLE_AIEN:
-                cycles = _CYCLES[self._register8(_REGISTER_APERS) & 0x0f]
+                cycles = _CYCLES[self._register8(_REGISTER_APERS) & 0x0F]
             else:
                 cycles = -1
             return cycles, min_value, max_value
@@ -595,7 +598,7 @@ class TCS34725:
             return bool(self._register8(_REGISTER_STATUS) & _ENABLE_AIEN)
         if value:
             raise ValueError("interrupt can only be cleared")
-        self.i2c.writeto(self.address, b'\xe6')
+        self.i2c.writeto(self.address, b"\xe6")
 
 
 def html_rgb(data) -> tuple:
@@ -654,9 +657,7 @@ def html_hex(data) -> str:
         str: 6-digit hex color string, e.g. 'ff00cc'.
     """
     r, g, b = html_rgb(data)
-    return "{0:02x}{1:02x}{2:02x}".format(int(r),
-                                          int(g),
-                                          int(b))
+    return "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
 
 
 # ======================================== 功能函数 ============================================

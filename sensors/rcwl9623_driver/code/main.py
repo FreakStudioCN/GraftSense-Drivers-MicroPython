@@ -9,8 +9,10 @@
 
 # 导入硬件模块
 from machine import Pin, UART, I2C
+
 # 导入时间相关模块
 import time
+
 # 导入超声波相关模块
 from rcwl9623 import RCWL9623
 

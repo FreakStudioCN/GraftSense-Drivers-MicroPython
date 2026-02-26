@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/10/7 下午2:24   
-# @Author  : 李清水            
-# @File    : ads1115.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/10/7 下午2:24
+# @Author  : 李清水
+# @File    : ads1115.py
 # @Description : 外置ADC芯片ADS1115驱动类，参考代码：https://github.com/robert-hh/ads1x15
 # @License : MIT
 
@@ -14,9 +14,11 @@ __platform__ = "MicroPython v1.23"
 
 # 导入时间相关模块
 import time
+
 # 导入MicroPython相关模块
 from micropython import const
 import micropython
+
 # 导入硬件相关模块
 from machine import Pin
 
@@ -25,6 +27,7 @@ from machine import Pin
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义ADS1115类
 class ADS1115:
@@ -248,7 +251,7 @@ class ADS1115:
         # 8x
         PGA_0_512V,
         # 16x
-        PGA_0_256V
+        PGA_0_256V,
     )
 
     # 增益对应的电压范围
@@ -264,7 +267,7 @@ class ADS1115:
         # 8x
         0.512,
         # 16x
-        0.256
+        0.256,
     )
 
     # 通道对应的多路复用配置
@@ -296,7 +299,7 @@ class ADS1115:
         # 475 采样每秒
         DR_475SPS,
         # 860 采样每秒
-        DR_860SPS
+        DR_860SPS,
     )
 
     def __init__(self, i2c, address=0x48, gain=2, alert_pin=None, callback=None):
@@ -342,7 +345,7 @@ class ADS1115:
             raise ValueError("Invalid I2C address: 0x{:02X}".format(address))
 
         # 判断增益是否为2/3、1、2、4、8或16
-        if gain not in (2/3, 1, 2, 4, 8, 16):
+        if gain not in (2 / 3, 1, 2, 4, 8, 16):
             raise ValueError("Invalid gain: {}".format(gain))
 
         # 存储 I2C 对象
@@ -389,14 +392,7 @@ class ADS1115:
         Returns:
             int: Register configuration value.
         """
-        gain_map = {
-            2/3: ADS1115.GAINS[0],
-            1:   ADS1115.GAINS[1],
-            2:   ADS1115.GAINS[2],
-            4:   ADS1115.GAINS[3],
-            8:   ADS1115.GAINS[4],
-            16:  ADS1115.GAINS[5]
-        }
+        gain_map = {2 / 3: ADS1115.GAINS[0], 1: ADS1115.GAINS[1], 2: ADS1115.GAINS[2], 4: ADS1115.GAINS[3], 8: ADS1115.GAINS[4], 16: ADS1115.GAINS[5]}
         return gain_map[gain]
 
     def _irq_handler(self, pin):
@@ -413,7 +409,7 @@ class ADS1115:
         Args:
             pin (machine.Pin): Pin object that triggered interrupt.
         """
-        if hasattr(self, 'callback') and self.callback:
+        if hasattr(self, "callback") and self.callback:
             micropython.schedule(self.callback, pin)
 
     def _write_register(self, register, value):
@@ -529,11 +525,17 @@ class ADS1115:
             raise ValueError("Invalid channel: {}".format(channel1))
 
         # 配置寄存器值
-        self.mode = (ADS1115.CQUE_NONE      | ADS1115.CLAT_NONLAT |
-                     ADS1115.CPOL_ACTVLOW   | ADS1115.CMODE_TRAD |
-                     ADS1115.RATES[rate]    | ADS1115.MODE_SINGLE |
-                     ADS1115.OS_SINGLE      | ADS1115.GAINS[self.gain_index] |
-                     ADS1115.CHANNELS.get((channel1, channel2), ADS1115.MUX_SINGLE_0))
+        self.mode = (
+            ADS1115.CQUE_NONE
+            | ADS1115.CLAT_NONLAT
+            | ADS1115.CPOL_ACTVLOW
+            | ADS1115.CMODE_TRAD
+            | ADS1115.RATES[rate]
+            | ADS1115.MODE_SINGLE
+            | ADS1115.OS_SINGLE
+            | ADS1115.GAINS[self.gain_index]
+            | ADS1115.CHANNELS.get((channel1, channel2), ADS1115.MUX_SINGLE_0)
+        )
 
     def read(self, rate=4, channel1=0, channel2=None):
         """
@@ -582,11 +584,17 @@ class ADS1115:
         # 写入配置寄存器，启动转换
         self._write_register(
             ADS1115.REGISTER_CONFIG,
-            (ADS1115.CQUE_NONE      | ADS1115.CLAT_NONLAT |
-             ADS1115.CPOL_ACTVLOW   | ADS1115.CMODE_TRAD |
-             ADS1115.RATES[rate]    | ADS1115.MODE_SINGLE |
-             ADS1115.OS_SINGLE      | ADS1115.GAINS[self.gain_index] |
-             ADS1115.CHANNELS.get((channel1, channel2), ADS1115.MUX_SINGLE_0))
+            (
+                ADS1115.CQUE_NONE
+                | ADS1115.CLAT_NONLAT
+                | ADS1115.CPOL_ACTVLOW
+                | ADS1115.CMODE_TRAD
+                | ADS1115.RATES[rate]
+                | ADS1115.MODE_SINGLE
+                | ADS1115.OS_SINGLE
+                | ADS1115.GAINS[self.gain_index]
+                | ADS1115.CHANNELS.get((channel1, channel2), ADS1115.MUX_SINGLE_0)
+            ),
         )
         # 等待转换完成
         while not (self._read_register(ADS1115.REGISTER_CONFIG) & ADS1115.OS_NOTBUSY):
@@ -624,8 +632,7 @@ class ADS1115:
         # 返回有符号结果
         return res if res < 32768 else res - 65536
 
-    def alert_start(self, rate=4, channel1=0, channel2=None,
-                    threshold_high=0x4000, threshold_low=0, latched=False):
+    def alert_start(self, rate=4, channel1=0, channel2=None, threshold_high=0x4000, threshold_low=0, latched=False):
         """
         启动持续测量，并设置 ALERT 引脚的阈值。
 
@@ -677,12 +684,16 @@ class ADS1115:
         # 配置 ALERT 引脚和比较器
         self._write_register(
             ADS1115.REGISTER_CONFIG,
-            (ADS1115.CQUE_1CONV |
-             (ADS1115.CLAT_LATCH if latched else ADS1115.CLAT_NONLAT) |
-             ADS1115.CPOL_ACTVLOW | ADS1115.CMODE_TRAD |
-             ADS1115.RATES[rate] | ADS1115.MODE_CONTIN |
-             ADS1115.GAINS[self.gain_index] |
-             ADS1115.CHANNELS.get((channel1, channel2), ADS1115.MUX_SINGLE_0))
+            (
+                ADS1115.CQUE_1CONV
+                | (ADS1115.CLAT_LATCH if latched else ADS1115.CLAT_NONLAT)
+                | ADS1115.CPOL_ACTVLOW
+                | ADS1115.CMODE_TRAD
+                | ADS1115.RATES[rate]
+                | ADS1115.MODE_CONTIN
+                | ADS1115.GAINS[self.gain_index]
+                | ADS1115.CHANNELS.get((channel1, channel2), ADS1115.MUX_SINGLE_0)
+            ),
         )
 
     def conversion_start(self, rate=4, channel1=0, channel2=None):
@@ -725,11 +736,16 @@ class ADS1115:
         # 配置 ALERT 引脚和比较器，启动转换
         self._write_register(
             ADS1115.REGISTER_CONFIG,
-            (ADS1115.CQUE_1CONV | ADS1115.CLAT_NONLAT |
-             ADS1115.CPOL_ACTVLOW | ADS1115.CMODE_TRAD |
-             ADS1115.RATES[rate] | ADS1115.MODE_CONTIN |
-             ADS1115.GAINS[self.gain_index] |
-             ADS1115.CHANNELS.get((channel1, channel2), ADS1115.MUX_SINGLE_0))
+            (
+                ADS1115.CQUE_1CONV
+                | ADS1115.CLAT_NONLAT
+                | ADS1115.CPOL_ACTVLOW
+                | ADS1115.CMODE_TRAD
+                | ADS1115.RATES[rate]
+                | ADS1115.MODE_CONTIN
+                | ADS1115.GAINS[self.gain_index]
+                | ADS1115.CHANNELS.get((channel1, channel2), ADS1115.MUX_SINGLE_0)
+            ),
         )
 
     def alert_read(self):
@@ -750,6 +766,7 @@ class ADS1115:
         res = self._read_register(ADS1115.REGISTER_CONVERT)
         # 返回有符号结果
         return res if res < 32768 else res - 65536
+
 
 # ======================================== 初始化配置 ==========================================
 

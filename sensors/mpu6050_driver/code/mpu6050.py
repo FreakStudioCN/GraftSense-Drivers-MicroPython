@@ -13,7 +13,7 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
-from math import sqrt, atan2, radians ,degrees
+from math import sqrt, atan2, radians, degrees
 from machine import Pin, SoftI2C
 from time import sleep_ms, ticks_ms, ticks_diff
 
@@ -23,6 +23,7 @@ error_msg = "\nError \n"
 i2c_err_str = "not communicate with module at address 0x{:02X}, check wiring"
 
 # ======================================== 功能函数 ============================================
+
 
 def signedIntFromBytes(x, endian="big") -> int:
     """
@@ -48,12 +49,14 @@ def signedIntFromBytes(x, endian="big") -> int:
         - 正数直接返回原值。
     """
     y = int.from_bytes(x, endian)
-    if (y >= 0x8000):
+    if y >= 0x8000:
         return -((65535 - y) + 1)
     else:
         return y
 
+
 # ======================================== 自定义类 ============================================
+
 
 class ComplementaryKalmanFilter:
     """
@@ -112,36 +115,37 @@ class ComplementaryKalmanFilter:
         get_angles_degrees(): Get angles in degrees.
         get_angles_radians(): Get angles in radians.
     """
+
     def __init__(self, dt=0.01, gyro_weight=0.98, Q_angle=0.001, Q_bias=0.003, R_measure=0.003):
         """
-            初始化互补卡尔曼滤波器。
+        初始化互补卡尔曼滤波器。
 
-            Args:
-                dt: 采样时间间隔（秒）。
-                gyro_weight: 陀螺仪权重（0-1），值越大越相信陀螺仪数据。
-                Q_angle: 过程噪声协方差。
-                Q_bias: 陀螺仪偏置噪声协方差。
-                R_measure: 测量噪声协方差。
+        Args:
+            dt: 采样时间间隔（秒）。
+            gyro_weight: 陀螺仪权重（0-1），值越大越相信陀螺仪数据。
+            Q_angle: 过程噪声协方差。
+            Q_bias: 陀螺仪偏置噪声协方差。
+            R_measure: 测量噪声协方差。
 
-            Note:
-                - 默认参数适用于大多数应用场景。
-                - 可根据实际需求调整滤波参数。
+        Note:
+            - 默认参数适用于大多数应用场景。
+            - 可根据实际需求调整滤波参数。
 
-            ==========================================
+        ==========================================
 
-            Initialize complementary Kalman filter.
+        Initialize complementary Kalman filter.
 
-            Args:
-                dt: Sampling time interval (seconds).
-                gyro_weight: Gyroscope weight (0-1), higher values trust gyroscope more.
-                Q_angle: Process noise covariance.
-                Q_bias: Gyroscope bias noise covariance.
-                R_measure: Measurement noise covariance.
+        Args:
+            dt: Sampling time interval (seconds).
+            gyro_weight: Gyroscope weight (0-1), higher values trust gyroscope more.
+            Q_angle: Process noise covariance.
+            Q_bias: Gyroscope bias noise covariance.
+            R_measure: Measurement noise covariance.
 
-            Note:
-                - Default parameters are suitable for most applications.
-                - Filter parameters can be adjusted according to actual requirements.
-            """
+        Note:
+            - Default parameters are suitable for most applications.
+            - Filter parameters can be adjusted according to actual requirements.
+        """
         self.dt = dt
         self.alpha = gyro_weight  # 互补滤波系数
 
@@ -164,25 +168,25 @@ class ComplementaryKalmanFilter:
 
     def update_complementary(self, accel_angle, gyro_rate):
         """
-           使用互补滤波更新角度估计。
+        使用互补滤波更新角度估计。
 
-           Args:
-               accel_angle: 从加速度计计算的角度（弧度）。
-               gyro_rate: 陀螺仪角速度（弧度/秒）。
+        Args:
+            accel_angle: 从加速度计计算的角度（弧度）。
+            gyro_rate: 陀螺仪角速度（弧度/秒）。
 
-           Returns:
-               滤波后的角度（弧度）。
+        Returns:
+            滤波后的角度（弧度）。
 
-           ==========================================
+        ==========================================
 
-           Update angle estimation using complementary filtering.
+        Update angle estimation using complementary filtering.
 
-           Args:
-               accel_angle: Angle calculated from accelerometer (radians).
-               gyro_rate: Gyroscope angular velocity (radians/second).
+        Args:
+            accel_angle: Angle calculated from accelerometer (radians).
+            gyro_rate: Gyroscope angular velocity (radians/second).
 
-           Returns:
-               Filtered angle (radians).
+        Returns:
+            Filtered angle (radians).
         """
         # 计算时间间隔
         current_time = ticks_ms()
@@ -294,13 +298,13 @@ class ComplementaryKalmanFilter:
         """
         # 将角速度从度/秒转换为弧度/秒
         # 公式9: ω_rad = ω_deg * π / 180
-        gyro_roll_rate = radians(gyro_data['y'])
-        gyro_pitch_rate = radians(gyro_data['x'])
+        gyro_roll_rate = radians(gyro_data["y"])
+        gyro_pitch_rate = radians(gyro_data["x"])
 
         # 从加速度计计算角度
-        acc_x = accel_data['x']
-        acc_y = accel_data['y']
-        acc_z = accel_data['z']
+        acc_x = accel_data["x"]
+        acc_y = accel_data["y"]
+        acc_z = accel_data["z"]
 
         # 公式10: 加速度计横滚角（绕X轴）
         # φ_accel = atan2(a_y, sqrt(a_x² + a_z²))
@@ -375,6 +379,7 @@ class ComplementaryKalmanFilter:
         """
         return self.roll, self.pitch
 
+
 class MPU6050(object):
     """
     MPU6050六轴运动传感器驱动类。
@@ -442,6 +447,7 @@ class MPU6050(object):
         read_gyro_data(): Read gyroscope data.
         read_angle(): Calculate angles (based on accelerometer).
     """
+
     _GRAVITIY_MS2 = 9.80665
 
     _ACC_SCLR_2G = 16384.0
@@ -480,8 +486,7 @@ class MPU6050(object):
     # Address
     _MPU6050_ADDRESS = 0x68
 
-
-    def __init__(self, i2c,addr=_MPU6050_ADDRESS):
+    def __init__(self, i2c, addr=_MPU6050_ADDRESS):
         """
         初始化MPU6050传感器实例。
 
@@ -560,6 +565,7 @@ class MPU6050(object):
                 - Maximum retry count defined by _maxFails.
                 - Returns NaN values if reading fails beyond maximum attempts.
             """
+
         failCount = 0
         while failCount < MPU6050._maxFails:
             try:
@@ -594,7 +600,7 @@ class MPU6050(object):
         """
         try:
             rawData = self.i2c.readfrom_mem(self.addr, MPU6050._TEMP_OUT0, 2)
-            raw_temp = (signedIntFromBytes(rawData, "big"))
+            raw_temp = signedIntFromBytes(rawData, "big")
         except:
             print(i2c_err_str.format(self.addr))
             return float("NaN")

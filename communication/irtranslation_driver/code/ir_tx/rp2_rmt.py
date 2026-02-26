@@ -20,6 +20,7 @@ import rp2
 
 # ======================================== 功能函数 ============================================
 
+
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW, autopull=True, pull_thresh=32)
 def pulsetrain():
     """
@@ -52,6 +53,7 @@ def pulsetrain():
     jmp(y_dec, "loop_lo")
     wrap()
 
+
 @rp2.asm_pio(autopull=True, pull_thresh=32)
 def irqtrain():
     """
@@ -76,7 +78,9 @@ def irqtrain():
     jmp(x_dec, "loop")
     wrap()
 
+
 # ======================================== 自定义类 ============================================
+
 
 class DummyPWM:
     """
@@ -100,6 +104,7 @@ class DummyPWM:
         Placeholder, does not affect hardware.
         Used by RP2_RMT when no carrier is configured.
     """
+
     def duty_u16(self, _):
         """
         设置 PWM 占空比（无实际作用）。
@@ -121,54 +126,56 @@ class DummyPWM:
         """
         pass
 
+
 class RP2_RMT:
     """
-       RP2 平台红外遥控仿真类，使用 PIO 状态机和可选 PWM 载波。
+    RP2 平台红外遥控仿真类，使用 PIO 状态机和可选 PWM 载波。
 
-       Attributes:
-           pwm (PWM/DummyPWM): PWM 实例，如果未提供载波则为 DummyPWM。
-           duty (tuple of int): PWM 高低占空比。
-           sm (StateMachine): RP2 状态机实例。
-           apt (int): 当前数组索引，用于跟踪发送数据。
-           arr (list/array): 当前发送的脉冲数组。
-           ict (int or None): 当前 IRQ 计数。
-           icm (int): STOP 指示索引，用于判断结束。
-           reps (int): 重复次数，0 表示无限重复。
+    Attributes:
+        pwm (PWM/DummyPWM): PWM 实例，如果未提供载波则为 DummyPWM。
+        duty (tuple of int): PWM 高低占空比。
+        sm (StateMachine): RP2 状态机实例。
+        apt (int): 当前数组索引，用于跟踪发送数据。
+        arr (list/array): 当前发送的脉冲数组。
+        ict (int or None): 当前 IRQ 计数。
+        icm (int): STOP 指示索引，用于判断结束。
+        reps (int): 重复次数，0 表示无限重复。
 
-       Methods:
-           send(ar, reps=1, check=True) -> None: 发送 IR 脉冲序列。
-           busy() -> bool: 查询状态机是否忙。
-           cancel() -> None: 取消正在发送的脉冲。
+    Methods:
+        send(ar, reps=1, check=True) -> None: 发送 IR 脉冲序列。
+        busy() -> bool: 查询状态机是否忙。
+        cancel() -> None: 取消正在发送的脉冲。
 
-       Notes:
-           该类仅适用于 RP2 (Raspberry Pi Pico) 平台。
-           send 方法会启动状态机，非 ISR-safe，发送过程依赖 IRQ 回调。
-           请确保发送数组以 STOP (0) 结尾。
+    Notes:
+        该类仅适用于 RP2 (Raspberry Pi Pico) 平台。
+        send 方法会启动状态机，非 ISR-safe，发送过程依赖 IRQ 回调。
+        请确保发送数组以 STOP (0) 结尾。
 
-       ==========================================
+    ==========================================
 
-       RP2 IR remote emulation class using PIO state machine and optional PWM carrier.
+    RP2 IR remote emulation class using PIO state machine and optional PWM carrier.
 
-       Attributes:
-           pwm (PWM/DummyPWM): PWM instance, DummyPWM if no carrier is provided.
-           duty (tuple of int): PWM high/low duty cycle.
-           sm (StateMachine): RP2 state machine instance.
-           apt (int): Current array pointer.
-           arr (list/array): Current pulse array being sent.
-           ict (int or None): Current IRQ count.
-           icm (int): Index of STOP marker to indicate end.
-           reps (int): Repeat count, 0 means infinite repetition.
+    Attributes:
+        pwm (PWM/DummyPWM): PWM instance, DummyPWM if no carrier is provided.
+        duty (tuple of int): PWM high/low duty cycle.
+        sm (StateMachine): RP2 state machine instance.
+        apt (int): Current array pointer.
+        arr (list/array): Current pulse array being sent.
+        ict (int or None): Current IRQ count.
+        icm (int): Index of STOP marker to indicate end.
+        reps (int): Repeat count, 0 means infinite repetition.
 
-       Methods:
-           send(ar, reps=1, check=True) -> None: Send IR pulse sequence.
-           busy() -> bool: Check if state machine is busy.
-           cancel() -> None: Cancel ongoing pulse sending.
+    Methods:
+        send(ar, reps=1, check=True) -> None: Send IR pulse sequence.
+        busy() -> bool: Check if state machine is busy.
+        cancel() -> None: Cancel ongoing pulse sending.
 
-       Notes:
-           This class is RP2 (Raspberry Pi Pico) specific.
-           send() initiates the state machine, non ISR-safe, relies on IRQ callback.
-           Ensure pulse arrays end with STOP (0) to terminate properly.
-       """
+    Notes:
+        This class is RP2 (Raspberry Pi Pico) specific.
+        send() initiates the state machine, non ISR-safe, relies on IRQ callback.
+        Ensure pulse arrays end with STOP (0) to terminate properly.
+    """
+
     def __init__(self, pin_pulse=None, carrier=None, sm_no=0, sm_freq: int = 1_000_000) -> None:
         """
         初始化 RP2_RMT 对象。
@@ -332,7 +339,7 @@ class RP2_RMT:
         """
         self.reps = 1
 
+
 # ======================================== 初始化配置 ==========================================
 
 # ========================================  主程序  ===========================================
-

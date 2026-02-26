@@ -15,6 +15,7 @@ __platform__ = "MicroPython v1.19+"
 
 # 导入时间模块
 import time
+
 # 导入常量模块
 from micropython import const
 
@@ -23,6 +24,7 @@ from micropython import const
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class BusPWMServoController:
     """
@@ -283,8 +285,8 @@ class BusPWMServoController:
         # 检查 min_us 和 max_us
         if not (isinstance(min_us, int) and isinstance(max_us, int) and min_us > 0 and max_us > 0 and min_us < max_us):
             raise ValueError(
-                "min_us and max_us must be positive integers and min_us must be less than max_us. Got min_us={}, max_us={}".format(
-                    min_us, max_us))
+                "min_us and max_us must be positive integers and min_us must be less than max_us. Got min_us={}, max_us={}".format(min_us, max_us)
+            )
 
         # 检查 neutral_us
         if neutral_us is not None:
@@ -292,8 +294,8 @@ class BusPWMServoController:
                 raise ValueError("neutral_us must be an integer if specified. Got neutral_us={}".format(neutral_us))
             if not (min_us <= neutral_us <= max_us):
                 raise ValueError(
-                    "neutral_us must be in the range [min_us, max_us]. Got neutral_us={}, min_us={}, max_us={}".format(
-                        neutral_us, min_us, max_us))
+                    "neutral_us must be in the range [min_us, max_us]. Got neutral_us={}, min_us={}, max_us={}".format(neutral_us, min_us, max_us)
+                )
 
         # 配置舵机
         self._cfg[channel] = {
@@ -540,6 +542,7 @@ class BusPWMServoController:
                 self._write_pulse(channel, int(neutral))
         except Exception as e:
             raise RuntimeError("PCA9685 I/O failed while stopping output on channel {}".format(channel)) from e
+
 
 # ======================================== 初始化配置 ==========================================
 

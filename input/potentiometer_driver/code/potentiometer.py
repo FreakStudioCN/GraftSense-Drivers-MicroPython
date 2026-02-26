@@ -21,6 +21,7 @@ from machine import ADC
 
 # ======================================== 自定义类 ============================================
 
+
 class Potentiometer:
     """
     滑动变阻器（Potentiometer）驱动类，提供原始值、电压值和归一化比例读取功能。
@@ -197,7 +198,7 @@ class Potentiometer:
         raw = self.read_raw()
         voltage = self.read_voltage()
         ratio = self.read_ratio()
-        return {'raw': raw, 'voltage': voltage, 'ratio': ratio}
+        return {"raw": raw, "voltage": voltage, "ratio": ratio}
 
     @property
     def adc(self) -> ADC:
@@ -229,6 +230,7 @@ class Potentiometer:
             float: reference voltage in volts.
         """
         return self._vref
+
 
 # ======================================== 初始化配置 ==========================================
 

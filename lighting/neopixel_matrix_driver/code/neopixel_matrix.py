@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/4/13 下午2:21   
-# @Author  : 李清水            
-# @File    : neopixel_matrix.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/4/13 下午2:21
+# @Author  : 李清水
+# @File    : neopixel_matrix.py
 # @Description : WS2812矩阵驱动库
 
 __version__ = "0.1.0"
@@ -14,13 +14,17 @@ __platform__ = "MicroPython v1.23"
 
 # 导入硬件相关模块
 from machine import Pin
+
 # 导入framebuf模块
 import framebuf
+
 # 导入WS2812驱动模块
 import neopixel
+
 # 导入MicroPython相关模块
 import micropython
 from micropython import const
+
 # 导入json模块
 import json
 
@@ -38,29 +42,30 @@ GAMMA_BLUE = 1.0
 
 # ======================================== 自定义类 ============================================
 
+
 # WS2812 矩阵驱动类
 class NeopixelMatrix(framebuf.FrameBuffer):
     # 常用颜色（RGB565）
-    COLOR_BLACK   = const(0x0000)
-    COLOR_WHITE   = const(0xFFFF)
-    COLOR_RED     = const(0xF800)
-    COLOR_GREEN   = const(0x07E0)
-    COLOR_BLUE    = const(0x001F)
-    COLOR_YELLOW  = const(0xFFE0)
-    COLOR_CYAN    = const(0x07FF)
+    COLOR_BLACK = const(0x0000)
+    COLOR_WHITE = const(0xFFFF)
+    COLOR_RED = const(0xF800)
+    COLOR_GREEN = const(0x07E0)
+    COLOR_BLUE = const(0x001F)
+    COLOR_YELLOW = const(0xFFE0)
+    COLOR_CYAN = const(0x07FF)
     COLOR_MAGENTA = const(0xF81F)
 
     # RGB顺序常量（WS2812不同模块可能顺序不同）
-    ORDER_RGB = 'RGB'
-    ORDER_GRB = 'GRB'
-    ORDER_BGR = 'BGR'
-    ORDER_BRG = 'BRG'
-    ORDER_RBG = 'RBG'
-    ORDER_GBR = 'GBR'
+    ORDER_RGB = "RGB"
+    ORDER_GRB = "GRB"
+    ORDER_BGR = "BGR"
+    ORDER_BRG = "BRG"
+    ORDER_RBG = "RBG"
+    ORDER_GBR = "GBR"
 
     # 布局类型常量
-    LAYOUT_ROW = 'row'
-    LAYOUT_SNAKE = 'snake'
+    LAYOUT_ROW = "row"
+    LAYOUT_SNAKE = "snake"
 
     # Gamma色准校正计算公式
 
@@ -83,29 +88,36 @@ class NeopixelMatrix(framebuf.FrameBuffer):
     #     "version": 1.0
     # }
 
-    def __init__(self, width, height, pin, layout=LAYOUT_ROW, brightness=1, order=ORDER_RGB,
-                 flip_h=False, flip_v=False, rotate=0):
+    def __init__(self, width, height, pin, layout=LAYOUT_ROW, brightness=1, order=ORDER_RGB, flip_h=False, flip_v=False, rotate=0):
         # 检查参数是否合法
         if width < 1 or height < 1:
-            raise ValueError('width and height must be greater than 0')
+            raise ValueError("width and height must be greater than 0")
 
         # 检查布局类型是否合法
         if layout not in [NeopixelMatrix.LAYOUT_ROW, NeopixelMatrix.LAYOUT_SNAKE]:
             raise ValueError('layout must be one of "NeopixelMatrix.LAYOUT_ROW" or "NeopixelMatrix.LAYOUT_SNAKE"')
 
         # 检查颜色转换顺序是否合法
-        if order not in [NeopixelMatrix.ORDER_RGB, NeopixelMatrix.ORDER_GRB, NeopixelMatrix.ORDER_BGR,
-                         NeopixelMatrix.ORDER_BRG, NeopixelMatrix.ORDER_RBG, NeopixelMatrix.ORDER_GBR]:
-            raise ValueError('order must be one of "NeopixelMatrix.ORDER_RGB", "NeopixelMatrix.ORDER_GRB", "NeopixelMatrix.ORDER_BGR", '
-                             '"NeopixelMatrix.ORDER_BRG", "NeopixelMatrix.ORDER_RBG" or "NeopixelMatrix.ORDER_GBR"')
+        if order not in [
+            NeopixelMatrix.ORDER_RGB,
+            NeopixelMatrix.ORDER_GRB,
+            NeopixelMatrix.ORDER_BGR,
+            NeopixelMatrix.ORDER_BRG,
+            NeopixelMatrix.ORDER_RBG,
+            NeopixelMatrix.ORDER_GBR,
+        ]:
+            raise ValueError(
+                'order must be one of "NeopixelMatrix.ORDER_RGB", "NeopixelMatrix.ORDER_GRB", "NeopixelMatrix.ORDER_BGR", '
+                '"NeopixelMatrix.ORDER_BRG", "NeopixelMatrix.ORDER_RBG" or "NeopixelMatrix.ORDER_GBR"'
+            )
 
         # 检查翻转参数是否合法
         if not isinstance(flip_h, bool) or not isinstance(flip_v, bool):
-            raise ValueError('flip_h and flip_v must be bool')
+            raise ValueError("flip_h and flip_v must be bool")
 
         # 检查旋转角度是否合法：只能为0、90、180、270
         if not (rotate == 0 or rotate == 90 or rotate == 180 or rotate == 270):
-            raise ValueError('rotate must be 90, 180 or 270')
+            raise ValueError("rotate must be 90, 180 or 270")
 
         # 创建 NeoPixel 对象，共 width*height 个像素
         self.np = neopixel.NeoPixel(pin, width * height)
@@ -234,7 +246,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         elif order == NeopixelMatrix.ORDER_GBR:
             rgb = (g8, b8, r8)
         else:
-            raise ValueError('Invalid order: {}'.format(order))
+            raise ValueError("Invalid order: {}".format(order))
 
         return rgb
 
@@ -252,13 +264,13 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         # 检查区域参数是否合法
         # 检查起始坐标是否合法
         if not (0 <= x1 < self.width and 0 <= y1 < self.height):
-            raise ValueError(f'Start coordinate ({x1},{y1}) out of range ')
+            raise ValueError(f"Start coordinate ({x1},{y1}) out of range ")
         # 检查结束坐标是否合法
         if not (0 <= x2 < self.width and 0 <= y2 < self.height):
-            raise ValueError(f'End coordinate ({x2},{y2}) out of range ')
+            raise ValueError(f"End coordinate ({x2},{y2}) out of range ")
         # 检查区域是否合法
         if x2 < x1 or y2 < y1:
-            raise ValueError('Invalid area: ({x1},{y1})-({x2},{y2})'.format(x1=x1, y1=y1, x2=x2, y2=y2))
+            raise ValueError("Invalid area: ({x1},{y1})-({x2},{y2})".format(x1=x1, y1=y1, x2=x2, y2=y2))
 
         # 遍历每一行
         for y in range(y1, y2 + 1):
@@ -275,6 +287,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
 
         # 写入所有像素数据到 WS2812 灯带，点亮屏幕
         self.np.write()
+
     @micropython.native
     def send_pixels_via_uart(self, uart, start_x=0, start_y=0, end_x=None, end_y=None):
         """
@@ -287,8 +300,8 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         :return: int - 实际发送的字节数（每个像素3字节，总字节数=像素数×3）
         :raise ValueError: 当UART无效、坐标参数不合法时抛出异常
         """
-        data =[]
-      # 如果没指定 end_x，默认整行
+        data = []
+        # 如果没指定 end_x，默认整行
         end_x = end_x if end_x is not None else self.width - 1
         # 如果没指定 end_y，默认整列
         end_y = end_y if end_y is not None else self.height - 1
@@ -296,13 +309,13 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         # 检查区域参数是否合法
         # 检查起始坐标是否合法
         if not (0 <= start_x < self.width and 0 <= start_y < self.height):
-            raise ValueError(f'Start coordinate ({start_x},{start_y}) out of range ')
+            raise ValueError(f"Start coordinate ({start_x},{start_y}) out of range ")
         # 检查结束坐标是否合法
         if not (0 <= end_x < self.width and 0 <= end_y < self.height):
-            raise ValueError(f'End coordinate ({end_x},{end_y}) out of range ')
+            raise ValueError(f"End coordinate ({end_x},{end_y}) out of range ")
         # 检查区域是否合法
         if end_x < start_x or end_y < start_y:
-            raise ValueError('Invalid area: ({x1},{y1})-({x2},{y2})'.format(x1=start_x, y1=end_x, x2=start_y, y2=end_y))
+            raise ValueError("Invalid area: ({x1},{y1})-({x2},{y2})".format(x1=start_x, y1=end_x, x2=start_y, y2=end_y))
 
         # 遍历每一行
         for y in range(start_y, end_y + 1):
@@ -316,9 +329,10 @@ class NeopixelMatrix(framebuf.FrameBuffer):
                 val = (self.buffer[addr + 1] << 8) | self.buffer[addr]
                 # 转换为 RGB888 后赋值给 WS2812
                 self.np[idx] = self.rgb565_to_rgb888(val, self.brightness, self.order)
-                data=data+list(self.np[idx])
+                data = data + list(self.np[idx])
         uart.write(bytes(data))
         return data
+
     @micropython.native
     def scroll(self, xstep, ystep, clear_color=None, wrap=False):
         """
@@ -337,19 +351,19 @@ class NeopixelMatrix(framebuf.FrameBuffer):
 
         # 检查滚动参数是否合法
         if not isinstance(xstep, int) or not isinstance(ystep, int):
-            raise ValueError('xstep and ystep must be int')
+            raise ValueError("xstep and ystep must be int")
 
         # 检查颜色参数是否合法
         if not isinstance(clear_color, int):
-            raise ValueError('clear_color must be int')
+            raise ValueError("clear_color must be int")
 
         # 检查循环滚动设置参数是否合法
         if not isinstance(wrap, bool):
-            raise ValueError('wrap must be bool')
+            raise ValueError("wrap must be bool")
 
         # 只能选择水平或垂直一个方向滚动
         if xstep != 0 and ystep != 0:
-            raise ValueError('Cannot set xstep and ystep at the same time (only one direction allowed)')
+            raise ValueError("Cannot set xstep and ystep at the same time (only one direction allowed)")
 
         if wrap:
             # 循环滚动模式 - 保存原始缓冲区
@@ -436,12 +450,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             self._validate_rgb565_image(image_data)
 
             # 渲染图片
-            self._draw_rgb565_data(
-                image_data['pixels'],
-                image_data.get('width', self.width),
-                offset_x,
-                offset_y
-            )
+            self._draw_rgb565_data(image_data["pixels"], image_data.get("width", self.width), offset_x, offset_y)
         except Exception as e:
             print("Error: {}".format(e))
 
@@ -450,19 +459,19 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         """
         验证RGB565图像数据结构
         """
-        required = ['pixels']
+        required = ["pixels"]
         if not all(key in data for key in required):
-            raise ValueError('lack required keys: {}'.format(required))
+            raise ValueError("lack required keys: {}".format(required))
 
-        if not isinstance(data['pixels'], list):
-            raise ValueError('pixels must be list')
+        if not isinstance(data["pixels"], list):
+            raise ValueError("pixels must be list")
 
-        if 'width' in data and data['width'] <= 0:
-            raise ValueError('width must be positive integer')
+        if "width" in data and data["width"] <= 0:
+            raise ValueError("width must be positive integer")
 
-        for color in data['pixels']:
+        for color in data["pixels"]:
             if not 0 <= color <= 0xFFFF:
-                raise ValueError('color must be 0-65535')
+                raise ValueError("color must be 0-65535")
 
     @micropython.native
     def _draw_rgb565_data(self, pixels, img_width, offset_x, offset_y):
@@ -491,10 +500,11 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             offset_y: Y轴偏移
         """
         try:
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 self.show_rgb565_image(f.read(), offset_x, offset_y)
         except OSError as e:
             print("Error: {}".format(e))
+
 
 # ======================================== 初始化配置 ==========================================
 

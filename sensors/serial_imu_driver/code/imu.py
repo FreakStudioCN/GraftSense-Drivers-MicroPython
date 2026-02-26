@@ -1,8 +1,8 @@
-# Python env   : MicroPython v1.23.0              
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/6/24 上午10:32   
-# @Author  : 李清水            
-# @File    : imu.py       
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2024/6/24 上午10:32
+# @Author  : 李清水
+# @File    : imu.py
 # @Description : 串口IMU驱动代码
 # @License : MIT
 
@@ -15,14 +15,17 @@ __platform__ = "MicroPython v1.23"
 
 # 硬件相关的模块
 from machine import UART
+
 # 时间相关的模块
 import time
+
 # 二进制/ASCII 转换的模块
 import binascii
 
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 
 def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
     """
@@ -38,7 +41,7 @@ def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
 
     ==========================================
 
-    Timing decorator to calculate and print the execution time 
+    Timing decorator to calculate and print the execution time
     of a function or method.
 
     Args:
@@ -49,18 +52,20 @@ def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
     Returns:
         callable: A function with execution time measurement.
     """
-    myname = str(f).split(' ')[1]
+    myname = str(f).split(" ")[1]
 
     def new_func(*args: tuple, **kwargs: dict) -> any:
         t: int = time.ticks_us()
         result = f(*args, **kwargs)
         delta: int = time.ticks_diff(time.ticks_us(), t)
-        print('Function {} Time = {:6.3f}ms'.format(myname, delta / 1000))
+        print("Function {} Time = {:6.3f}ms".format(myname, delta / 1000))
         return result
 
     return new_func
 
+
 # ======================================== 自定义类 ============================================
+
 
 class IMU:
     """
@@ -104,7 +109,7 @@ class IMU:
             接收并解析 IMU 的加速度、角速度和角度数据。
 
     ==========================================
-    6-axis gyroscope class for serial communication with IMU sensors.  
+    6-axis gyroscope class for serial communication with IMU sensors.
     Provides command transmission, data reception, and parsing.
 
     Features:
@@ -156,23 +161,23 @@ class IMU:
 
     # 以下变量为各个指令的数据内容
     # z轴清零指令
-    ZAXISCLEARCMD = [0XFF, 0XAA, 0X52]
+    ZAXISCLEARCMD = [0xFF, 0xAA, 0x52]
     # 加速度校准指令
-    ACCCALBCMD    = [0XFF, 0XAA, 0X67]
+    ACCCALBCMD = [0xFF, 0xAA, 0x67]
     # 切换睡眠模式和工作模式的指令
-    CONVSLEEPCMD  = [0XFF, 0XAA, 0X60]
+    CONVSLEEPCMD = [0xFF, 0xAA, 0x60]
     # 串口传输模式指令
-    UARTMODECMD   = [0XFF, 0XAA, 0X61]
+    UARTMODECMD = [0xFF, 0xAA, 0x61]
     # IIC传输模式指令
-    IICMODECMD    = [0XFF, 0XAA, 0X62]
+    IICMODECMD = [0xFF, 0xAA, 0x62]
     # 水平安装模式指令
-    HORIZINSTCMD  = [0XFF, 0XAA, 0x65]
+    HORIZINSTCMD = [0xFF, 0xAA, 0x65]
     # 垂直安装模式指令
-    VERTINSTCMD   = [0XFF, 0XAA, 0x66]
+    VERTINSTCMD = [0xFF, 0xAA, 0x66]
     # 串口波特率设置为 115200 指令
-    BAUD115200CMD = [0XFF, 0XAA, 0X63]
+    BAUD115200CMD = [0xFF, 0xAA, 0x63]
     # 串口波特率设置为 9600 指令
-    BAUD9600CMD   = [0XFF, 0XAA, 0X64]
+    BAUD9600CMD = [0xFF, 0xAA, 0x64]
     # 带宽设置指令不常用，留给用户自行实现即可
     # ============ 带宽协议 ============
     # | HEARDER1 | HEARDER2 |  CMD  |
@@ -214,7 +219,7 @@ class IMU:
             None
 
         ==========================================
-        Initialize IMU, set UART object, and perform 
+        Initialize IMU, set UART object, and perform
         accelerometer calibration and Z-axis reset.
 
         Args:
@@ -299,7 +304,7 @@ class IMU:
             tempchecksum = tempchecksum + self.datalist[i]
 
         # 取出计算校验和的低8位
-        tempchecksum = tempchecksum & 0xff
+        tempchecksum = tempchecksum & 0xFF
 
         # 判断接收是否正确
         if tempchecksum != self.checksum:
@@ -329,7 +334,8 @@ class IMU:
         """
 
         # 若指令未在IMU类变量中定义，则返回False
-        if (cmd != IMU.ZAXISCLEARCMD
+        if (
+            cmd != IMU.ZAXISCLEARCMD
             and cmd != IMU.ACCCALBCMD
             and cmd != IMU.CONVSLEEPCMD
             and cmd != IMU.UARTMODECMD
@@ -337,7 +343,8 @@ class IMU:
             and cmd != IMU.HORIZINSTCMD
             and cmd != IMU.VERTINSTCMD
             and cmd != IMU.BAUD115200CMD
-            and cmd != IMU.BAUD9600CMD):
+            and cmd != IMU.BAUD9600CMD
+        ):
 
             return False
 
@@ -377,12 +384,12 @@ class IMU:
         # 若发送串口波特率设置为 115200 指令
         if cmd == IMU.BAUD115200CMD:
             # 串口波特率设置为 115200
-            self.UART_Obj.init(baudrate = 115200)
+            self.UART_Obj.init(baudrate=115200)
 
         # 若发送串口波特率设置为 9600 指令
         if cmd == IMU.BAUD9600CMD:
             # 串口波特率设置为 9600
-            self.UART_Obj.init(baudrate = 9600)
+            self.UART_Obj.init(baudrate=9600)
 
         # 如果指令是Z轴清零指令或加速度校准指令
         if cmd == IMU.ZAXISCLEARCMD or cmd == IMU.ACCCALBCMD:
@@ -403,7 +410,7 @@ class IMU:
             tuple: (acc_x, acc_y, acc_z, temp, gyro_x, gyro_y, gyro_z, angle_x, angle_y, angle_z)
 
         ==========================================
-        Receive and parse IMU data, including acceleration, 
+        Receive and parse IMU data, including acceleration,
         angular velocity, and angle.
 
         Returns:
@@ -483,7 +490,18 @@ class IMU:
                                 self.recv_angle_flag = 0
 
                                 # 返回一个时间段内接收到的陀螺仪数据
-                                return self.acc_x, self.acc_y, self.acc_z, self.temp, self.gyro_x, self.gyro_y, self.gyro_z, self.angle_x, self.angle_y, self.angle_z
+                                return (
+                                    self.acc_x,
+                                    self.acc_y,
+                                    self.acc_z,
+                                    self.temp,
+                                    self.gyro_x,
+                                    self.gyro_y,
+                                    self.gyro_z,
+                                    self.angle_x,
+                                    self.angle_y,
+                                    self.angle_z,
+                                )
 
                         # 接受完一帧数据后，对串口接收数据次数的变量进行清零
                         self.rcvcount = 0

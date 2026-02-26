@@ -13,7 +13,7 @@ from mlx90640 import MLX90640, RefreshRate
 
 # ======================================== 全局变量 ============================================
 
-mlxaddr=None
+mlxaddr = None
 
 # Prepare temperature data buffer
 temperature_frame = [0.0] * 768
@@ -31,13 +31,13 @@ i2c = I2C(0, scl=5, sda=4, freq=100000)
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表
 devices_list: list[int] = i2c.scan()
-print('START I2C SCANNER')
+print("START I2C SCANNER")
 # 若devices list为空，则没有设备连接到I2C总线上
 if len(devices_list) == 0:
     # 若非空，则打印从机设备地址
     print("No i2c device !")
 else:
-    print('i2c devices found:', len(devices_list))
+    print("i2c devices found:", len(devices_list))
 for device in devices_list:
     if 0x31 <= device <= 0x35:
         print("I2c hexadecimal address:", hex(device))

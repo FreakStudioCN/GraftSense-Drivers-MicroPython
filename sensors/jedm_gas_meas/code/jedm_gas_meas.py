@@ -15,6 +15,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # 导入时间相关模块
 import time
+
 # 导入硬件相关模块
 from machine import SoftI2C, Pin
 
@@ -23,6 +24,7 @@ from machine import SoftI2C, Pin
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class JEDMGasMeas:
     """
@@ -213,10 +215,7 @@ class JEDMGasMeas:
         try:
             # 发送写操作，写入校零命令+校准值高低字节，stop=True发送停止位
             # 发送的字节序列：[校零命令, 高位字节, 低位字节]
-            ack_count = self.i2c.writeto(
-                self._addr_7bit,
-                bytes([JEDMGasMeas.CALIBRATE_CMD, high_byte, low_byte])
-            )
+            ack_count = self.i2c.writeto(self._addr_7bit, bytes([JEDMGasMeas.CALIBRATE_CMD, high_byte, low_byte]))
             # 检查ACK数量
             if ack_count != 1:
                 raise OSError("No ACK for calibrate command or data")
@@ -232,6 +231,7 @@ class JEDMGasMeas:
         except OSError as e:
             print(f"Failed to calibrate zero: {str(e)}")
             return False
+
 
 # ======================================== 初始化配置 ==========================================
 

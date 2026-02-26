@@ -3,7 +3,7 @@
 # @Time    : 2026/2/12 下午6:36
 # @Author  : 李清水
 # @File    : list_package_info.py
-# @Description : 扫描并列出项目中所有package.json文件及urls配置信息
+# @Description : 可视化扫描所有package.json，支持任意深度目录结构（递归遍历）
 
 import os
 import json
@@ -11,29 +11,22 @@ import sys
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 
-def scan_package_json(project_root):
-    """扫描项目目录，收集所有package.json的信息（包含字段核验）"""
+
+def scan_package_json_recursive(root_dir, parent_subdir=""):
+    """递归扫描目录，收集所有package.json信息"""
     package_info = []
-    # 定义必须包含的核心字段
     required_fields = ["name", "version", "description", "author"]
 
-    # 遍历项目根目录下的所有子目录
-    for entry in os.scandir(project_root):
-        if entry.is_dir() and not entry.name.startswith('.'):  # 跳过隐藏文件夹
-            subdir_name = entry.name
-            subdir_path = entry.path
-
-            # 遍历子目录下的驱动文件夹（以 _driver 结尾）
-            for driver_folder in os.listdir(subdir_path):
-                driver_path = os.path.join(subdir_path, driver_folder)
-                if not os.path.isdir(driver_path) or not driver_folder.endswith("_driver"):
-                    continue
-
-                # 检查package.json是否存在
-                package_json_path = os.path.join(driver_path, "package.json")
+    # 遍历当前目录下的所有条目
+    for entry in os.scandir(root_dir):
+        if entry.is_dir() and not entry.name.startswith("."):
+            # 检查当前目录是否有package.json
+            package_json_path = os.path.join(root_dir, entry.name, "package.json")
+            if os.path.exists(package_json_path):
+                # 有package.json，记录信息
                 driver_info = {
-                    "subdir": subdir_name,
-                    "driver_folder": driver_folder,
+                    "subdir": parent_subdir if parent_subdir else os.path.basename(root_dir),
+                    "driver_folder": entry.name,
                     "package_path": package_json_path,
                     "name": "未知名称",
                     "version": "未知版本",
@@ -41,15 +34,9 @@ def scan_package_json(project_root):
                     "author": "未知作者",
                     "urls": [],
                     "error": "",
-                    "missing_fields": []  # 新增：记录缺失的必要字段
+                    "missing_fields": [],
                 }
 
-                if not os.path.exists(package_json_path):
-                    driver_info["error"] = "无package.json文件"
-                    package_info.append(driver_info)
-                    continue
-
-                # 读取并解析package.json
                 try:
                     with open(package_json_path, "r", encoding="utf-8") as f:
                         package_data = json.load(f)
@@ -59,10 +46,9 @@ def scan_package_json(project_root):
                     for field in required_fields:
                         if field not in package_data or package_data[field] is None or package_data[field] == "":
                             missing_fields.append(field)
-
                     driver_info["missing_fields"] = missing_fields
 
-                    # 填充字段值（无则用默认值）
+                    # 填充字段值
                     driver_info["name"] = package_data.get("name", "未知名称")
                     driver_info["version"] = package_data.get("version", "未知版本")
                     driver_info["description"] = package_data.get("description", "无描述")
@@ -76,7 +62,19 @@ def scan_package_json(project_root):
 
                 package_info.append(driver_info)
 
+            # 递归扫描子目录
+            subdir_path = os.path.join(root_dir, entry.name)
+            subdir_info = scan_package_json_recursive(
+                subdir_path, parent_subdir=os.path.join(parent_subdir, entry.name) if parent_subdir else entry.name
+            )
+            package_info.extend(subdir_info)
+
     return package_info
+
+
+def scan_package_json(project_root):
+    """对外接口：扫描整个项目"""
+    return scan_package_json_recursive(project_root)
 
 
 def on_double_click(tree, log_text):
@@ -98,7 +96,7 @@ def on_double_click(tree, log_text):
             else:
                 package_path = value_str.strip()
 
-        # 场景2：双击的是package.json的子节点（name/version/urls等），向上找父节点
+        # 场景2：双击的是package.json的子节点，向上找父节点
         else:
             parent_item = selected_item
             # 向上遍历直到找到package.json节点
@@ -118,12 +116,13 @@ def on_double_click(tree, log_text):
         # 验证路径并打开文件
         if package_path:
             if os.path.exists(package_path):
-                # 跨平台打开文件（优先适配Windows）
+                # 跨平台打开文件
                 if sys.platform == "win32":
-                    os.startfile(package_path)  # Windows直接打开
+                    os.startfile(package_path)  # Windows
                 else:
                     # Mac/Linux兼容
                     import subprocess
+
                     subprocess.run(["open" if sys.platform == "darwin" else "xdg-open", package_path])
 
                 # 日志记录成功
@@ -143,7 +142,7 @@ def on_double_click(tree, log_text):
         log_text.insert(tk.END, "\n⚠️  请先选中一个节点再双击\n", "warning")
         log_text.see(tk.END)
     except Exception as e:
-        # 其他异常（如权限不足）
+        # 其他异常
         log_text.insert(tk.END, f"\n❌ 打开文件失败: {str(e)}\n", "warning")
         log_text.see(tk.END)
 
@@ -152,8 +151,8 @@ def create_gui(project_root):
     """创建可视化UI界面（带红字警告+双击打开文件）"""
     # 主窗口配置
     root = tk.Tk()
-    root.title("传感器驱动 package.json 信息查看器（带字段核验+双击打开）")
-    root.geometry("1200x800")  # 窗口大小
+    root.title("package.json 信息查看器（支持任意深度目录）")
+    root.geometry("1200x800")
     root.minsize(1000, 700)
 
     # 创建顶部说明标签
@@ -164,7 +163,7 @@ def create_gui(project_root):
         justify=tk.LEFT,
         padx=10,
         pady=5,
-        fg="red"
+        fg="red",
     )
     info_label.pack(fill=tk.X)
 
@@ -203,7 +202,7 @@ def create_gui(project_root):
 
     log_text = scrolledtext.ScrolledText(log_frame, font=("Consolas", 9))
     log_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-    # 配置红字标签（用于警告输出）
+    # 配置标签样式
     log_text.tag_configure("warning", foreground="red", font=("Consolas", 9, "bold"))
     log_text.tag_configure("normal", foreground="black", font=("Consolas", 9))
 
@@ -235,61 +234,30 @@ def create_gui(project_root):
                 log_text.see(tk.END)
                 root.update()
 
-                # 添加驱动文件夹节点
-                driver_node = tree.insert(
-                    subdir_node, tk.END,
-                    text=driver_name,
-                    values=("驱动文件夹", driver_name)
-                )
+                # 添加文件夹节点
+                driver_node = tree.insert(subdir_node, tk.END, text=driver_name, values=("功能文件夹", driver_name))
 
                 # 添加package.json节点
                 if driver_info["error"]:
                     package_node = tree.insert(
-                        driver_node, tk.END,
-                        text="package.json",
-                        values=("配置文件", f"{driver_info['package_path']} (错误: {driver_info['error']})")
+                        driver_node, tk.END, text="package.json", values=("配置文件", f"{driver_info['package_path']} (错误: {driver_info['error']})")
                     )
                     log_text.insert(tk.END, f"⚠️  {driver_name}: {driver_info['error']}\n", "warning")
                 else:
-                    package_node = tree.insert(
-                        driver_node, tk.END,
-                        text="package.json",
-                        values=("配置文件", driver_info["package_path"])
-                    )
+                    package_node = tree.insert(driver_node, tk.END, text="package.json", values=("配置文件", driver_info["package_path"]))
 
-                    # 检查是否缺失必要字段
+                    # 检查缺失字段
                     if driver_info["missing_fields"]:
                         missing_str = ", ".join(driver_info["missing_fields"])
-                        # 红字输出缺失字段警告
                         log_text.insert(tk.END, f"❌ {driver_name}: 缺失必要字段 → {missing_str}\n", "warning")
-                        # 在树形节点标注缺失字段
-                        tree.insert(
-                            package_node, tk.END,
-                            text="⚠️  字段警告",
-                            values=("警告", f"缺失必要字段：{missing_str}")
-                        )
+                        # 标注缺失字段
+                        tree.insert(package_node, tk.END, text="⚠️  字段警告", values=("警告", f"缺失必要字段：{missing_str}"))
 
                     # 添加核心字段节点
-                    tree.insert(
-                        package_node, tk.END,
-                        text="name",
-                        values=("核心字段", driver_info["name"])
-                    )
-                    tree.insert(
-                        package_node, tk.END,
-                        text="version",
-                        values=("核心字段", driver_info["version"])
-                    )
-                    tree.insert(
-                        package_node, tk.END,
-                        text="description",
-                        values=("核心字段", driver_info["description"])
-                    )
-                    tree.insert(
-                        package_node, tk.END,
-                        text="author",
-                        values=("核心字段", driver_info["author"])
-                    )
+                    tree.insert(package_node, tk.END, text="name", values=("核心字段", driver_info["name"]))
+                    tree.insert(package_node, tk.END, text="version", values=("核心字段", driver_info["version"]))
+                    tree.insert(package_node, tk.END, text="description", values=("核心字段", driver_info["description"]))
+                    tree.insert(package_node, tk.END, text="author", values=("核心字段", driver_info["author"]))
 
                     # 添加urls节点
                     urls_node = tree.insert(package_node, tk.END, text="urls", values=("核心字段", "文件映射列表"))
@@ -323,6 +291,6 @@ def create_gui(project_root):
 
 
 if __name__ == "__main__":
-    # 获取脚本所在目录作为项目根目录（无需手动修改）
+    # 获取脚本所在目录作为项目根目录
     project_root = os.path.dirname(os.path.abspath(__file__))
     create_gui(project_root)

@@ -1,14 +1,15 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/7/22 下午2:57   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/7/22 下午2:57
+# @Author  : 李清水
+# @File    : main.py
 # @Description : DHT11温湿度传感器类实验，使用单总线通信完成数据交互
 
 # ======================================== 导入相关模块 ========================================
 
 # 导入硬件相关的模块
 from machine import Pin
+
 # 导入时间相关的模块
 import time
 from dht11 import DHT11
@@ -29,7 +30,7 @@ temperature = 0.0
 # 延时等待设备初始化
 time.sleep(3)
 # 打印调试信息
-print('FreakStudio : Using OneWire to read DHT11 sensor')
+print("FreakStudio : Using OneWire to read DHT11 sensor")
 
 # 延时1s，等待DHT11传感器上电完成
 time.sleep(1)

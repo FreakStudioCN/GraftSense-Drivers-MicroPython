@@ -18,15 +18,16 @@ from . import IR_RX
 # ======================================== 全局变量 ============================================
 
 _errors = {
-    IR_RX.BADSTART : 'Invalid start pulse',
-    IR_RX.BADBLOCK : 'Error: bad block',
-    IR_RX.BADREP : 'Error: repeat',
-    IR_RX.OVERRUN : 'Error: overrun',
-    IR_RX.BADDATA : 'Error: invalid data',
-    IR_RX.BADADDR : 'Error: invalid address'
+    IR_RX.BADSTART: "Invalid start pulse",
+    IR_RX.BADBLOCK: "Error: bad block",
+    IR_RX.BADREP: "Error: repeat",
+    IR_RX.OVERRUN: "Error: overrun",
+    IR_RX.BADDATA: "Error: invalid data",
+    IR_RX.BADADDR: "Error: invalid address",
 }
 
 # ======================================== 功能函数 ============================================
+
 
 def print_error(data: int) -> None:
     """
@@ -57,7 +58,8 @@ def print_error(data: int) -> None:
     if data in _errors:
         print(_errors[data])
     else:
-        print('Unknown error code:', data)
+        print("Unknown error code:", data)
+
 
 # ======================================== 自定义类 ============================================
 

@@ -9,13 +9,17 @@
 
 # 导入所需模块
 from machine import SoftI2C, Pin
+
 # 导入时间模块
 import time
 from time import ticks_diff, ticks_us, ticks_ms
-#导入MAX30102驱动模块
+
+# 导入MAX30102驱动模块
 from max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
+
 # 导入心率监测器
 from heart_rate_monitor import HeartRateMonitor
+
 # 导入环形缓冲区模块
 from circular_buffer import CircularBuffer
 

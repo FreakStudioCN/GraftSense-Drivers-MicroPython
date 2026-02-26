@@ -1,5 +1,5 @@
 # MicroPython v1.23.0
-# -*- coding: utf-8 -*-   
+# -*- coding: utf-8 -*-
 # @Time    : 2025/8/23 下午5:55
 # @Author  : 缪贵成
 # @File    : main.py
@@ -14,6 +14,7 @@ from flame_sensor import FlameSensor
 # ======================================== 全局变量 =============================================
 
 # ======================================== 功能函数 =============================================
+
 
 def flame_detected_callback() -> None:
     """
@@ -31,6 +32,7 @@ def flame_detected_callback() -> None:
         Safe to perform printing or LED control in main thread.
     """
     print("Flame detected!")
+
 
 # ======================================== 自定义类 =============================================
 

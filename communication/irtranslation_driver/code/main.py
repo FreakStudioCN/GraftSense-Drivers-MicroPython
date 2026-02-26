@@ -10,14 +10,17 @@
 # 导入硬件相关模块
 import time
 from machine import Pin
+
 # 导入第三方驱动模块
 from ir_tx.nec import NEC
+
 # nec_16三个参数在回调函数中
 from ir_rx.nec import NEC_16
 
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 
 # 如果使用nec_8需要传入不定长参数，，此处是nec_16
 def ir_callback(addr: int, cmd: int, repeat: bool) -> None:
@@ -46,6 +49,7 @@ def ir_callback(addr: int, cmd: int, repeat: bool) -> None:
         Prints received data to REPL.
     """
     print(f"[RX] Address=0x{addr:04X}, Cmd=0x{cmd:02X}, Repeat={repeat}")
+
 
 # ======================================== 自定义类 =============================================
 

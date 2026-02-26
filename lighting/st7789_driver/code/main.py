@@ -11,18 +11,24 @@
 
 # 硬件相关的模块
 from machine import Pin, SPI, UART
+
 # MicroPython相关模块
 from micropython import const
+
 # 时间相关的模块
 import time
+
 # LCD屏幕相关的模块
 from st7789 import ST7789
+
 # 字库相关的模块
 import vga1_16x32 as bigfont
 import vga1_16x16 as mediumfont
-import vga1_8x8   as smallfont
+import vga1_8x8 as smallfont
+
 # 陀螺仪相关的模块
 from IMU import IMU
+
 # 垃圾回收的模块
 import gc
 
@@ -34,6 +40,7 @@ IMU_RECV_COUNT = 0
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义LCD类
 class LCD(ST7789):
@@ -80,23 +87,34 @@ class LCD(ST7789):
         waveformShow: 波形显示控件
         InfoShow: 调试信息显示控件
     """
+
     # 自定义颜色值
-    BLACK   = const(0xFFFF)     # 黑色
-    WHITE   = const(0x0000)     # 白色
-    MAGENTA = const(0x07E0)     # 品红色/浅紫色
-    RED     = const(0x07FF)     # 红色
-    GREEN   = const(0xF81F)     # 绿色
-    BLUE    = const(0xFFE0)     # 蓝色
-    CYAN    = const(0xF800)     # 青色
-    YELLOW  = const(0x001F)     # 黄色
-    YEGR    = const(0xFAEBD7)   # 黄绿色
-    GATES   = const(0x87CEEB)   # 品蓝色
-    ANWHITE = const(0x191970)   # 古董白
+    BLACK = const(0xFFFF)  # 黑色
+    WHITE = const(0x0000)  # 白色
+    MAGENTA = const(0x07E0)  # 品红色/浅紫色
+    RED = const(0x07FF)  # 红色
+    GREEN = const(0xF81F)  # 绿色
+    BLUE = const(0xFFE0)  # 蓝色
+    CYAN = const(0xF800)  # 青色
+    YELLOW = const(0x001F)  # 黄色
+    YEGR = const(0xFAEBD7)  # 黄绿色
+    GATES = const(0x87CEEB)  # 品蓝色
+    ANWHITE = const(0x191970)  # 古董白
 
     # 字体大小
     bigsize, mediumsize, smallsize = 32, 16, 8
 
-    def __init__(self, spi: object, width: int, height: int, reset: object = None, dc: object = None, cs: object = None, backlight: object = None, rotation: int = 0) -> None:
+    def __init__(
+        self,
+        spi: object,
+        width: int,
+        height: int,
+        reset: object = None,
+        dc: object = None,
+        cs: object = None,
+        backlight: object = None,
+        rotation: int = 0,
+    ) -> None:
         """
         初始化LCD屏幕。
 
@@ -114,7 +132,7 @@ class LCD(ST7789):
             None
         """
         # 初始化ST7789，像素数据的顺序、选择角度使用默认值，使用内置的旋转命令
-        super().__init__(spi, width, height, reset, dc, cs, backlight, rotation = rotation)
+        super().__init__(spi, width, height, reset, dc, cs, backlight, rotation=rotation)
 
     def line_center_text(self, text: str, line: int, color: int = BLACK, size: int = bigsize) -> int:
         """
@@ -135,22 +153,22 @@ class LCD(ST7789):
 
         # 根据选用字体大小，获取字体宽度、高度
         if size == self.bigsize:
-            font        = bigfont
-            fontheight  = bigfont.HEIGHT
-            fontwitdh   = bigfont.WIDTH
+            font = bigfont
+            fontheight = bigfont.HEIGHT
+            fontwitdh = bigfont.WIDTH
         elif size == self.mediumsize:
-            font        = mediumfont
-            fontheight  = mediumfont.HEIGHT
-            fontwitdh   = mediumfont.WIDTH
+            font = mediumfont
+            fontheight = mediumfont.HEIGHT
+            fontwitdh = mediumfont.WIDTH
         elif size == self.smallsize:
-            font        = smallfont
-            fontheight  = smallfont.HEIGHT
-            fontwitdh   = smallfont.WIDTH
+            font = smallfont
+            fontheight = smallfont.HEIGHT
+            fontwitdh = smallfont.WIDTH
         else:
             raise ValueError("WRONG FONT SIZE")
 
         # 计算文字的x坐标
-        x = int(self.width/2) - int(len(text)/2 * fontwitdh)
+        x = int(self.width / 2) - int(len(text) / 2 * fontwitdh)
         self.text(font, text, x, line, color)
 
         return fontheight
@@ -174,14 +192,14 @@ class LCD(ST7789):
 
         # 根据选用字体大小，获取字体宽度
         if size == self.bigsize:
-            font        = bigfont
-            fontheight  = bigfont.HEIGHT
+            font = bigfont
+            fontheight = bigfont.HEIGHT
         elif size == self.mediumsize:
-            font        = mediumfont
-            fontheight  = mediumfont.HEIGHT
+            font = mediumfont
+            fontheight = mediumfont.HEIGHT
         elif size == self.smallsize:
-            font        = smallfont
-            fontheight  = smallfont.HEIGHT
+            font = smallfont
+            fontheight = smallfont.HEIGHT
         else:
             raise ValueError("WRONG FONT SIZE")
 
@@ -208,21 +226,21 @@ class LCD(ST7789):
 
         # 根据选用字体大小，获取字体宽度
         if size == self.bigsize:
-            font        = bigfont
-            fontheight  = bigfont.HEIGHT
-            fontwitdh   = bigfont.WIDTH
+            font = bigfont
+            fontheight = bigfont.HEIGHT
+            fontwitdh = bigfont.WIDTH
         elif size == self.mediumsize:
-            font        = mediumfont
-            fontheight  = mediumfont.HEIGHT
-            fontwitdh   = mediumfont.WIDTH
+            font = mediumfont
+            fontheight = mediumfont.HEIGHT
+            fontwitdh = mediumfont.WIDTH
         elif size == self.smallsize:
-            font        = smallfont
-            fontheight  = smallfont.HEIGHT
-            fontwitdh   = smallfont.WIDTH
+            font = smallfont
+            fontheight = smallfont.HEIGHT
+            fontwitdh = smallfont.WIDTH
         else:
             raise ValueError("WRONG FONT SIZE")
 
-        self.text(font, text, self.width-len(text)*fontwitdh, line, color)
+        self.text(font, text, self.width - len(text) * fontwitdh, line, color)
 
         return fontheight
 
@@ -269,12 +287,12 @@ class LCD(ST7789):
                 pixel_list.append((x + radius - j, y - i))
                 pixel_list.append((x - radius + j, y - i))
 
-            if 4 * (i + 1) ** 2 + (2 * radius - 2 * j + 1) ** 2 > 4 * radius ** 2:
+            if 4 * (i + 1) ** 2 + (2 * radius - 2 * j + 1) ** 2 > 4 * radius**2:
                 j += 1
             i += 1
 
         if fill:
-            self.polygon(pixel_list, x, y, color = color)
+            self.polygon(pixel_list, x, y, color=color)
 
     # 嵌套类，变量显示控件
     class VarShow:
@@ -301,7 +319,8 @@ class LCD(ST7789):
             delete(self):
                 清除变量显示控件的内容，恢复为背景色。
         """
-        def __init__(self, name: str, value: int, x: int, y: int, lcd_obj: 'LCD') -> None:
+
+        def __init__(self, name: str, value: int, x: int, y: int, lcd_obj: "LCD") -> None:
             """
             变量显示控件，用于显示变量名和值。
 
@@ -316,10 +335,10 @@ class LCD(ST7789):
                 ValueError: 如果变量名或变量值的长度超出限制，抛出此异常。
             """
 
-            if len(name)*smallfont.WIDTH > 70:
+            if len(name) * smallfont.WIDTH > 70:
                 raise ValueError("NAME LENGTH MUST LESS THAN 8")
 
-            if len(str(value))*smallfont.WIDTH > 30:
+            if len(str(value)) * smallfont.WIDTH > 30:
                 raise ValueError("VALUE LENGTH MUST LESS THAN 7")
 
             self.name = name
@@ -333,9 +352,9 @@ class LCD(ST7789):
             # 绘制变量显示控件的矩形边框
             self.LCD_obj.rect(self.x, self.y, 100, 14, LCD.BLACK)
             # 绘制变量名，字体颜色为黑色，背景颜色为青色
-            self.LCD_obj.text(smallfont, self.name+':', self.x+2, self.y+2, LCD.BLACK,LCD.CYAN)
+            self.LCD_obj.text(smallfont, self.name + ":", self.x + 2, self.y + 2, LCD.BLACK, LCD.CYAN)
             # 绘制变量值，字体颜色为黑色，背景颜色为白色
-            self.LCD_obj.text(smallfont, str(self.value), self.x+int(len(self.name)*smallfont.WIDTH)+2, self.y+2, LCD.BLACK)
+            self.LCD_obj.text(smallfont, str(self.value), self.x + int(len(self.name) * smallfont.WIDTH) + 2, self.y + 2, LCD.BLACK)
 
         def update(self, value: int) -> None:
             """
@@ -349,12 +368,13 @@ class LCD(ST7789):
             """
 
             # 清除原先变量值
-            self.LCD_obj.fill_rect(self.x+int(len(self.name)*smallfont.WIDTH)+2, # 变量值起始点x坐标
-                                   self.y+2,                                     # 变量值起始点y坐标
-                                   95-int(len(str(self.name))*smallfont.WIDTH),  # 变量值宽度
-                                   smallfont.HEIGHT,                             # 变量值高度
-                                   LCD.WHITE                                     # 填充白色
-                                   )
+            self.LCD_obj.fill_rect(
+                self.x + int(len(self.name) * smallfont.WIDTH) + 2,  # 变量值起始点x坐标
+                self.y + 2,  # 变量值起始点y坐标
+                95 - int(len(str(self.name)) * smallfont.WIDTH),  # 变量值宽度
+                smallfont.HEIGHT,  # 变量值高度
+                LCD.WHITE,  # 填充白色
+            )
             # 绘制变量值，字体颜色为黑色，背景颜色为白色
             self.LCD_obj.text(smallfont, str(value), self.x + int(len(self.name) * smallfont.WIDTH) + 10, self.y + 2, LCD.BLACK)
 
@@ -406,7 +426,7 @@ class LCD(ST7789):
                 清除波形显示控件，重绘白色矩形覆盖整个区域。
         """
 
-        def __init__(self, x: int, y: int, width: int, height: int, title: str, lcd_obj: 'LCD') -> None:
+        def __init__(self, x: int, y: int, width: int, height: int, title: str, lcd_obj: "LCD") -> None:
             """
             初始化WaveformShow类实例，设置控件位置、尺寸、标题及LCD对象。
 
@@ -434,24 +454,24 @@ class LCD(ST7789):
             self.LCD_obj = lcd_obj
 
             # 波形坐标图的长宽和横纵坐标
-            self.formwidth  = width - 10
+            self.formwidth = width - 10
             self.formheight = height - 25
-            self.formx      = self.x+5
-            self.formy      = self.y+10
+            self.formx = self.x + 5
+            self.formy = self.y + 10
 
             # 存储上一个数据的y轴坐标点位置
             self.lastdata_y = self.formy + self.formheight
             # 存储当前数据的y轴坐标点位置
-            self.nowdata_y  = 0
+            self.nowdata_y = 0
             # 记录当前数据点数
-            self.count      = 0
+            self.count = 0
 
             # 绘制波形显示控件矩形填充
             self.LCD_obj.fill_rect(self.x, self.y, self.width, self.height, LCD.CYAN)
             # 绘制波形显示控件矩形边框
             self.LCD_obj.rect(self.x, self.y, self.width, self.height, LCD.BLACK)
             # 绘制标题，字体颜色为黑色，背景颜色为红色，标题位置在中间
-            self.LCD_obj.text(smallfont, self.title, int(self.width/2)-int(len(self.title)/2 * smallfont.WIDTH), self.y+2, LCD.BLACK,LCD.RED)
+            self.LCD_obj.text(smallfont, self.title, int(self.width / 2) - int(len(self.title) / 2 * smallfont.WIDTH), self.y + 2, LCD.BLACK, LCD.RED)
             # 绘制坐标轴
             self.setaxis()
 
@@ -467,24 +487,24 @@ class LCD(ST7789):
             """
 
             # 垂直于x轴的线段个数
-            x_line_number = int(self.formwidth/5)
+            x_line_number = int(self.formwidth / 5)
             # 垂直于y轴的线段个数
-            y_line_number = int(self.formheight/5)
+            y_line_number = int(self.formheight / 5)
 
             # 绘制垂直于x轴的线段
-            for i in range(x_line_number+1):
+            for i in range(x_line_number + 1):
                 # 绘制垂直于x轴的线段
-                self.LCD_obj.vline(self.formx+i*5, self.formy, self.formheight, LCD.BLACK)
+                self.LCD_obj.vline(self.formx + i * 5, self.formy, self.formheight, LCD.BLACK)
 
             # 绘制垂直于y轴的线段
-            for i in range(y_line_number+1):
+            for i in range(y_line_number + 1):
                 # 绘制垂直于y轴的线段
-                self.LCD_obj.hline(self.formx, self.formy+i*5, self.formwidth, LCD.BLACK)
+                self.LCD_obj.hline(self.formx, self.formy + i * 5, self.formwidth, LCD.BLACK)
 
             # 绘制原点字符串
-            self.LCD_obj.text(smallfont, "(0,0)", self.formx, self.formy+self.formheight+2, LCD.RED,LCD.CYAN)
+            self.LCD_obj.text(smallfont, "(0,0)", self.formx, self.formy + self.formheight + 2, LCD.RED, LCD.CYAN)
             # 在原点绘制一个红色填充圆
-            self.LCD_obj.circle(self.formx, self.formy+self.formheight, 4, LCD.RED, True)
+            self.LCD_obj.circle(self.formx, self.formy + self.formheight, 4, LCD.RED, True)
 
         def update(self, value: int, max_value: int, color: int) -> None:
             """
@@ -507,7 +527,7 @@ class LCD(ST7789):
                 raise ValueError("VALUE MUST BE LESS THAN MAX_VALUE")
 
             # 若数据点数超过控件宽度，则清空曲线，重新绘图
-            if self.count == int(self.formwidth/5):
+            if self.count == int(self.formwidth / 5):
                 self.LCD_obj.fill_rect(self.formx, self.formy, self.formwidth, self.formheight, LCD.WHITE)
                 # 重新设置坐标轴
                 self.setaxis()
@@ -515,15 +535,15 @@ class LCD(ST7789):
                 self.count = 0
 
             # 需要画的点距离waveformShow控件中formy的偏移量
-            pixel_y_offset = int(value/max_value * self.formheight)
+            pixel_y_offset = int(value / max_value * self.formheight)
 
             # 绘制点
-            if pixel_y_offset >= int(self.formheight/2):
+            if pixel_y_offset >= int(self.formheight / 2):
                 self.nowdata_y = self.formy + (self.formheight - pixel_y_offset)
             else:
                 self.nowdata_y = self.formy + self.formheight - pixel_y_offset
 
-            self.LCD_obj.line(self.formx+self.count*5, self.lastdata_y, self.formx+(self.count+1)*5, self.nowdata_y, color)
+            self.LCD_obj.line(self.formx + self.count * 5, self.lastdata_y, self.formx + (self.count + 1) * 5, self.nowdata_y, color)
             self.lastdata_y = self.nowdata_y
             self.count += 1
 
@@ -571,7 +591,8 @@ class LCD(ST7789):
             delete(self):
                 清除调试信息输出控件的显示内容，重绘控件背景。
         """
-        def __init__(self, x: int, y: int, width: int, height: int, title: str, lcd_obj: 'LCD') -> None:
+
+        def __init__(self, x: int, y: int, width: int, height: int, title: str, lcd_obj: "LCD") -> None:
             """
             调试信息输出控件初始化。
 
@@ -594,10 +615,10 @@ class LCD(ST7789):
             self.LCD_obj = lcd_obj
 
             # 调试信息输出窗口的长宽和横纵坐标
-            self.Infowidth  = self.width - 10
+            self.Infowidth = self.width - 10
             self.Infoheight = self.height - 15
-            self.Infox      = self.x+5
-            self.Infoy      = self.y+10
+            self.Infox = self.x + 5
+            self.Infoy = self.y + 10
 
             # 调试信息计数
             self.count = 0
@@ -607,7 +628,9 @@ class LCD(ST7789):
             # 绘制调试信息输出控件矩形边框
             self.LCD_obj.rect(self.x, self.y, self.width, self.height, LCD.BLACK)
             # 绘制标题，字体颜色为黑色，背景颜色为红色，标题位置在中间
-            self.LCD_obj.text(smallfont, self.title, int(self.width/2)-int(len(self.title)/2 * smallfont.WIDTH), self.y+2, LCD.BLACK,LCD.BLUE)
+            self.LCD_obj.text(
+                smallfont, self.title, int(self.width / 2) - int(len(self.title) / 2 * smallfont.WIDTH), self.y + 2, LCD.BLACK, LCD.BLUE
+            )
             # 绘制调试信息输出窗口
             self.LCD_obj.fill_rect(self.Infox, self.Infoy, self.Infowidth, self.Infoheight, LCD.BLACK)
 
@@ -627,13 +650,13 @@ class LCD(ST7789):
             """
 
             # 若是调试信息数量超过最大值，则清空文本，重新绘图
-            if self.count == int(self.Infoheight/10) :
+            if self.count == int(self.Infoheight / 10):
                 self.LCD_obj.fill_rect(self.Infox, self.Infoy, self.Infowidth, self.Infoheight, LCD.BLACK)
                 # 计数值清零
                 self.count = 0
 
             # 绘制文本
-            self.LCD_obj.text(smallfont, str(text_index)+': ' + text, self.Infox, self.Infoy + self.count*10, LCD.WHITE,LCD.BLACK)
+            self.LCD_obj.text(smallfont, str(text_index) + ": " + text, self.Infox, self.Infoy + self.count * 10, LCD.WHITE, LCD.BLACK)
 
             # 计数值加1
             self.count += 1
@@ -655,6 +678,7 @@ class LCD(ST7789):
             # 无需对创建的实例进行del销毁，使用gc模块的自动垃圾清除即可
             self.LCD_obj.fill_rect(self.x, self.y, self.width, self.height, LCD.WHITE)
 
+
 # ======================================== 初始化配置 ==========================================
 
 # 延时等待设备初始化
@@ -665,29 +689,29 @@ print("FreakStudio : Using LCD to show IMU data")
 # 初始化SPI类，设置波特率、极性、相位、时钟引脚、数据引脚
 spi = SPI(0, baudrate=10000000, polarity=0, phase=0, sck=Pin(6), mosi=Pin(7))
 # 初始化LCD屏幕,并设置屏幕上下和左右都翻转
-lcd = LCD(spi, 240, 320, reset=Pin(8), dc=Pin(9), cs=Pin(10), backlight=Pin(11), rotation = 2)
+lcd = LCD(spi, 240, 320, reset=Pin(8), dc=Pin(9), cs=Pin(10), backlight=Pin(11), rotation=2)
 
 # 生成文本，offset为偏移量，用于下一行显示中y坐标的偏移量的确定
-offset  = 0
-offset  = lcd.line_center_text("Freak Studio", 0, lcd.RED, lcd.bigsize)
-offset  = lcd.line_center_text("TORCHBEARERS OF CREATION", offset, lcd.MAGENTA, lcd.smallsize) + offset
-offset  = lcd.line_left_text("ST7789 LCD experiment", offset, lcd.BLACK, lcd.smallsize) + offset
+offset = 0
+offset = lcd.line_center_text("Freak Studio", 0, lcd.RED, lcd.bigsize)
+offset = lcd.line_center_text("TORCHBEARERS OF CREATION", offset, lcd.MAGENTA, lcd.smallsize) + offset
+offset = lcd.line_left_text("ST7789 LCD experiment", offset, lcd.BLACK, lcd.smallsize) + offset
 # 绘制矩形填充
-lcd.fill_rect(5,offset,230,265,LCD.ANWHITE)
+lcd.fill_rect(5, offset, 230, 265, LCD.ANWHITE)
 # 绘制矩形边框
-lcd.rect(5,offset,230,265,LCD.BLACK)
+lcd.rect(5, offset, 230, 265, LCD.BLACK)
 # 绘制填充矩形
-lcd.fill_rect(10,offset+10,220,10,LCD.CYAN)
-lcd.fill_rect(10,offset+20,220,10,LCD.YELLOW)
-lcd.fill_rect(10,offset+30,220,10,LCD.GREEN)
+lcd.fill_rect(10, offset + 10, 220, 10, LCD.CYAN)
+lcd.fill_rect(10, offset + 20, 220, 10, LCD.YELLOW)
+lcd.fill_rect(10, offset + 30, 220, 10, LCD.GREEN)
 # 生成陀螺仪x轴角度的变量显示控件实例
-var1 = LCD.VarShow("X_angle", 0, 10, offset+40, lcd)
+var1 = LCD.VarShow("X_angle", 0, 10, offset + 40, lcd)
 # 生成陀螺仪y轴角度的变量显示控件实例
-var2 = LCD.VarShow("Y_angle", 0, 120, offset+40, lcd)
+var2 = LCD.VarShow("Y_angle", 0, 120, offset + 40, lcd)
 # 生成波形显示控件
-waveformShow = LCD.waveformShow(10, offset+60, 220, 100, "WAVEFORM", lcd)
+waveformShow = LCD.waveformShow(10, offset + 60, 220, 100, "WAVEFORM", lcd)
 # 生成调试信息输出控件
-infoShow = LCD.InfoShow(10, offset+165, 220, 90, "DEBUG INFO", lcd)
+infoShow = LCD.InfoShow(10, offset + 165, 220, 90, "DEBUG INFO", lcd)
 # 调试信息输出控件输出调试信息，初始化LCD屏幕成功
 infoShow.update("LCD SCREEN INIT", 0)
 
@@ -695,12 +719,7 @@ infoShow.update("LCD SCREEN INIT", 0)
 uart = UART(1, 115200)
 # 初始化uart对象，数据位为8，无校验位，停止位为1
 # 设置串口超时时间为5ms
-uart.init(bits=8,
-          parity=None,
-          stop=1,
-          tx=4,
-          rx=5,
-          timeout=5)
+uart.init(bits=8, parity=None, stop=1, tx=4, rx=5, timeout=5)
 # 初始化一个IMU对象
 imu = IMU(uart)
 # 调试信息输出控件输出调试信息，初始化串口陀螺仪成功
@@ -742,5 +761,5 @@ while True:
 
     # 陀螺仪数据接收计数加1
     IMU_RECV_COUNT = IMU_RECV_COUNT + 1
-    if  IMU_RECV_COUNT == 1000:
+    if IMU_RECV_COUNT == 1000:
         IMU_RECV_COUNT = 0

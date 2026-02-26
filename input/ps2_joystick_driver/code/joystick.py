@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/7/3 下午9:34   
-# @Author  : 李清水            
-# @File    : joystick.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/7/3 下午9:34
+# @Author  : 李清水
+# @File    : joystick.py
 # @Description : joystick 驱动模块
 
 __version__ = "0.1.0"
@@ -14,6 +14,7 @@ __platform__ = "MicroPython v1.23"
 
 # 导入硬件模块
 from machine import ADC, Timer, Pin
+
 # 导入访问和控制 MicroPython 内部结构的模块
 import micropython
 
@@ -22,6 +23,7 @@ import micropython
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class Joystick:
     """
@@ -156,9 +158,9 @@ class Joystick:
         Notes:
             The timer periodically samples X-axis, Y-axis and button state at the given frequency.
         """
-        self.timer.init(period=int(1000/self.freq), mode=Timer.PERIODIC, callback=self._timer_callback)
+        self.timer.init(period=int(1000 / self.freq), mode=Timer.PERIODIC, callback=self._timer_callback)
 
-    def _timer_callback(self,timer: Timer) -> None:
+    def _timer_callback(self, timer: Timer) -> None:
         """
         定时器回调函数，采集并处理摇杆数据。
 
@@ -190,7 +192,7 @@ class Joystick:
         self.x_value = self.filtered_x
         self.y_value = self.filtered_y
         # 读取按键状态，按下为0，未按下为1
-        if hasattr(self, 'sw'):
+        if hasattr(self, "sw"):
             self.sw_value = self.sw.value()
 
         # 调用用户自定义回调函数，传递采集到的X轴、Y轴电压值和按键状态
@@ -224,6 +226,7 @@ class Joystick:
                    Y-axis voltage and button state.
         """
         return self.x_value, self.y_value, self.sw_value
+
 
 # ======================================== 初始化配置 ==========================================
 

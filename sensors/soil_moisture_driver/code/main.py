@@ -51,11 +51,7 @@ try:
         moisture_percent = sensor.read_moisture()
         level = sensor.get_level()
 
-        print(
-            "Raw ADC: {:>5} | Moisture: {:>5.1f}% | Level: {}".format(
-                raw, moisture_percent, level
-            )
-        )
+        print("Raw ADC: {:>5} | Moisture: {:>5.1f}% | Level: {}".format(raw, moisture_percent, level))
         time.sleep(2)
 
 except KeyboardInterrupt:

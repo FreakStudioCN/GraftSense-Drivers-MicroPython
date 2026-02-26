@@ -10,6 +10,7 @@
 
 # 导入标准库
 import time
+
 # 导入自定义食人鱼LED灯驱动模块
 from piranha_led import PiranhaLED, POLARITY_CATHODE, POLARITY_ANODE
 
@@ -34,10 +35,7 @@ time.sleep(3)
 print("FreakStudio: Using Running Led Code")
 
 # 初始化LED对象
-led = PiranhaLED(
-    pin_number=LED_PIN,
-    polarity=POLARITY_ANODE if IS_ANODE else POLARITY_CATHODE
-)
+led = PiranhaLED(pin_number=LED_PIN, polarity=POLARITY_ANODE if IS_ANODE else POLARITY_CATHODE)
 
 # ======================================== 主程序 ==============================================
 

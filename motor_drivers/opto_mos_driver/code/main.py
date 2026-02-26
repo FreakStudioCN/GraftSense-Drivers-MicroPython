@@ -19,7 +19,7 @@ from opto_mos_simple import OptoMosSimple
 
 # ======================================== 初始化配置 ===========================================
 
-#上电延时
+# 上电延时
 time.sleep(3)
 print("FreakStudio:  OptoMosSimple Test Start ")
 # 创建 PWM 对象，GPIO6 输出

@@ -16,6 +16,7 @@ __platform__ = "MicroPython v1.23"
 # 导入硬件相关的模块
 from machine import Pin
 from micropython import const
+
 # 导入单总线通信相关的模块
 from onewire import OneWire
 
@@ -24,6 +25,7 @@ from onewire import OneWire
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class DS18X20:
     """
@@ -73,15 +75,15 @@ class DS18X20:
     """
 
     # DS18X20 功能命令
-    CMD_CONVERT     = const(0x44)   # 转换温度命令
-    CMD_RDSCRATCH   = const(0xbe)   # 读暂存器命令
-    CMD_WRSCRATCH   = const(0x4e)   # 写暂存器命令
-    CMD_RDPOWER     = const(0xb4)   # 读电源命令
-    CMD_COPYSCRATCH = const(0x48)   # 拷贝暂存器命令
+    CMD_CONVERT = const(0x44)  # 转换温度命令
+    CMD_RDSCRATCH = const(0xBE)  # 读暂存器命令
+    CMD_WRSCRATCH = const(0x4E)  # 写暂存器命令
+    CMD_RDPOWER = const(0xB4)  # 读电源命令
+    CMD_COPYSCRATCH = const(0x48)  # 拷贝暂存器命令
 
     # 上拉电阻控制
-    PULLUP_ON       = const(1)
-    PULLUP_OFF      = const(0)
+    PULLUP_ON = const(1)
+    PULLUP_OFF = const(0)
 
     def __init__(self, onewire: OneWire) -> None:
         """
@@ -207,7 +209,7 @@ class DS18X20:
 
         Args:
             rom (bytearray): ROM address of target sensor. If None, broadcast to all.
-        """        """
+        """ """
         读取暂存器数据。
 
         Args:
@@ -243,7 +245,7 @@ class DS18X20:
         # 读取暂存器数据，保存到buf中
         self.ow.readinto(self.buf)
         # 进行CRC校验
-        assert self.ow.crc8(self.buf) == 0, 'CRC error'
+        assert self.ow.crc8(self.buf) == 0, "CRC error"
         return self.buf
 
     def write_scratch(self, rom: bytearray, buf: bytearray) -> None:
@@ -301,7 +303,7 @@ class DS18X20:
                 # 如果温度为负值
                 if buf[1]:
                     t = buf[0] >> 1 | 0x80
-                    t = -((~t + 1) & 0xff)
+                    t = -((~t + 1) & 0xFF)
                 # 如果温度为正数
                 else:
                     t = buf[0] >> 1
@@ -314,7 +316,7 @@ class DS18X20:
                 # 检查这个整数是否大于0x7fff，如果是，那么就将其转换为负数
                 if t & 0x8000:
                     # 先将后面的11位二进制补码变为原码(符号位不变，数值位取反后加1)，再计算十进制值
-                    t = -((t ^ 0xffff) + 1)
+                    t = -((t ^ 0xFFFF) + 1)
                 # 除以16，即乘以系数0.0625
                 return t / 16
             else:
@@ -348,7 +350,7 @@ class DS18X20:
         if bits is not None and 9 <= bits <= 12:
             # 将分辨率信息设置为bits变量的值
             # self.config的第3位用于设置分辨率
-            self.config[2] = ((bits - 9) << 5) | 0x1f
+            self.config[2] = ((bits - 9) << 5) | 0x1F
             self.write_scratch(rom, self.config)
             return bits
         else:
@@ -398,6 +400,7 @@ class DS18X20:
             float: Kelvin value, or None if input is None.
         """
         return celsius + 273.15 if celsius is not None else None
+
 
 # ======================================== 初始化配置 ==========================================
 

@@ -1,1 +1,1 @@
-signal_acquisition/ads1115_driver/code/ads1115.py
+signal_acquisition / ads1115_driver / code / ads1115.py

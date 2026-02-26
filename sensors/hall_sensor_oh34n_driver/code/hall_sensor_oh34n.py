@@ -22,6 +22,7 @@ from machine import Pin
 
 # ======================================== 自定义类 =============================================
 
+
 class HallSensorOH34N:
     """
     基于 OH34N 芯片的霍尔传感器驱动类。
@@ -88,6 +89,7 @@ class HallSensorOH34N:
         Must call enable() to activate interrupt detection.
         Avoid heavy operations in ISR; callback executes safely in main thread.
     """
+
     def __init__(self, pin: int, callback: callable = None) -> None:
         """
         初始化霍尔传感器，指定数字引脚并可选绑定回调函数。
@@ -206,8 +208,7 @@ class HallSensorOH34N:
             Triggers on both rising and falling edges.
         """
         if self._irq is None:
-            self._irq = self._pin.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING,
-                                      handler=self._irq_handler)
+            self._irq = self._pin.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=self._irq_handler)
 
     def disable(self) -> None:
         """
@@ -239,6 +240,7 @@ class HallSensorOH34N:
             Pin: Bound GPIO pin object.
         """
         return self._pin
+
 
 # ======================================== 初始化配置 ============================================
 

@@ -22,6 +22,7 @@ import time
 
 # ======================================== 自定义类 ============================================
 
+
 class LMSpeaker:
     """
     该类控制基于 LM386 功率放大器的扬声器模块，提供音调播放、音符序列播放和音量调节功能。
@@ -63,6 +64,7 @@ class LMSpeaker:
         - Only generates square waves, no audio decoding.
         - Not ISR-safe. Use micropython.schedule for deferred calls.
     """
+
     def __init__(self, pin: int, freq: int = 1000):
         """
         初始化扬声器模块。
@@ -216,6 +218,7 @@ class LMSpeaker:
             Mute achieved by setting duty=0.
         """
         self._pwm.duty_u16(0)
+
 
 # ======================================== 初始化配置 ===========================================
 

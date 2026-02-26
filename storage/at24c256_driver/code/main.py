@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/27 上午10:44   
-# @Author  : 李清水            
-# @File    : main.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/27 上午10:44
+# @Author  : 李清水
+# @File    : main.py
 # @Description : I2C类实验。读写外部EEPROM芯片AT24C256
 
 # ======================================== 导入相关模块 =========================================
@@ -10,6 +10,7 @@
 # 硬件相关的模块
 from machine import I2C, Pin
 from at24c256 import AT24CXX
+
 # 时间相关的模块
 import time
 
@@ -26,6 +27,7 @@ data_to_write = bytes(range(DATA_SIZE))
 
 # ======================================== 功能函数 ============================================
 
+
 def erase_data(at24cxx, start_address, length):
     """
     将指定区域的数据擦除为0xFF
@@ -39,6 +41,7 @@ def erase_data(at24cxx, start_address, length):
     data_to_erase = bytes([0xFF] * length)
     # 将其连续写入指定区域
     at24cxx.write_page(start_address, data_to_erase)
+
 
 # ======================================== 初始化配置 ==========================================
 

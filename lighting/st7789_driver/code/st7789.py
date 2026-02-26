@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/7/7 上午12:02   
-# @Author  : 李清水            
-# @File    : st7789.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/7/7 上午12:02
+# @Author  : 李清水
+# @File    : st7789.py
 # @Description : LCD屏幕驱动芯片st7789的类实现
 # 参考russhughes st7789py_mpy：https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
 
@@ -12,10 +12,13 @@
 from micropython import const
 import machine
 import micropython
+
 # 时间相关的模块
 import time
+
 # 数学计算相关的模块
 from math import sin, cos
+
 # 打包和解包相关的模块
 import struct
 
@@ -26,72 +29,72 @@ import struct
 # 软复位命令，用于初始化液晶屏
 _ST7789_SWRESET = b"\x01"
 # 进入睡眠模式命令
-_ST7789_SLPIN   = b"\x10"
+_ST7789_SLPIN = b"\x10"
 # 退出睡眠模式命令
-_ST7789_SLPOUT  = b"\x11"
+_ST7789_SLPOUT = b"\x11"
 # 正常模式命令
-_ST7789_NORON   = b"\x13"
+_ST7789_NORON = b"\x13"
 # 关闭屏幕反转命令
-_ST7789_INVOFF  = b"\x20"
+_ST7789_INVOFF = b"\x20"
 # 打开屏幕反转命令
-_ST7789_INVON   = b"\x21"
+_ST7789_INVON = b"\x21"
 # 关闭屏幕显示命令
 _ST7789_DISPOFF = b"\x28"
 # 打开屏幕显示命令
-_ST7789_DISPON  = b"\x29"
+_ST7789_DISPON = b"\x29"
 # 设置列地址范围命令
-_ST7789_CASET   = b"\x2a"
+_ST7789_CASET = b"\x2a"
 # 设置行地址范围命令
-_ST7789_RASET   = b"\x2b"
+_ST7789_RASET = b"\x2b"
 # 写入内存命令
-_ST7789_RAMWR   = b"\x2c"
+_ST7789_RAMWR = b"\x2c"
 # 设置垂直扫描方向命令
 _ST7789_VSCRDEF = b"\x33"
 # 设置颜色模式命令
-_ST7789_COLMOD  = b"\x3a"
+_ST7789_COLMOD = b"\x3a"
 # 设置内存访问控制命令
-_ST7789_MADCTL  = b"\x36"
+_ST7789_MADCTL = b"\x36"
 # 设置垂直偏移命令
-_ST7789_VSCSAD  = b"\x37"
+_ST7789_VSCSAD = b"\x37"
 # 设置内存控制命令
-_ST7789_RAMCTL  = b"\xb0"
+_ST7789_RAMCTL = b"\xb0"
 
 # MADCTL 位定义
-_ST7789_MADCTL_MY   = const(0x80)  # 指定像素数据从下往上读取
-_ST7789_MADCTL_MX   = const(0x40)  # 指定像素数据从右往左读取
-_ST7789_MADCTL_MV   = const(0x20)  # 指定像素数据从上往下滚动
-_ST7789_MADCTL_ML   = const(0x10)  # 指定像素数据从左往右滚动
-_ST7789_MADCTL_BGR  = const(0x08)  # 指定像素数据顺序为 BGR
-_ST7789_MADCTL_MH   = const(0x04)  # 保留位，未使用
-_ST7789_MADCTL_RGB  = const(0x00)  # 指定像素数据顺序为 RGB
+_ST7789_MADCTL_MY = const(0x80)  # 指定像素数据从下往上读取
+_ST7789_MADCTL_MX = const(0x40)  # 指定像素数据从右往左读取
+_ST7789_MADCTL_MV = const(0x20)  # 指定像素数据从上往下滚动
+_ST7789_MADCTL_ML = const(0x10)  # 指定像素数据从左往右滚动
+_ST7789_MADCTL_BGR = const(0x08)  # 指定像素数据顺序为 BGR
+_ST7789_MADCTL_MH = const(0x04)  # 保留位，未使用
+_ST7789_MADCTL_RGB = const(0x00)  # 指定像素数据顺序为 RGB
 
 # 常量定义
 RGB = const(0x00)  # 指定像素数据顺序为 RGB
 BGR = const(0x08)  # 指定像素数据顺序为 BGR
 
 # 颜色模式定义
-_COLOR_MODE_65K     = const(0x50)  # 65K 色模式
-_COLOR_MODE_262K    = const(0x60)  # 262K 色模式
-_COLOR_MODE_12BIT   = const(0x03)  # 12 位色模式
-_COLOR_MODE_16BIT   = const(0x05)  # 16 位色模式
-_COLOR_MODE_18BIT   = const(0x06)  # 18 位色模式
-_COLOR_MODE_16M     = const(0x07)  # 1600 万色模式
+_COLOR_MODE_65K = const(0x50)  # 65K 色模式
+_COLOR_MODE_262K = const(0x60)  # 262K 色模式
+_COLOR_MODE_12BIT = const(0x03)  # 12 位色模式
+_COLOR_MODE_16BIT = const(0x05)  # 16 位色模式
+_COLOR_MODE_18BIT = const(0x06)  # 18 位色模式
+_COLOR_MODE_16M = const(0x07)  # 1600 万色模式
 
 # 颜色定义
-BLACK   = const(0x0000)  # 黑色
-BLUE    = const(0x001F)  # 蓝色
-RED     = const(0xF800)  # 红色
-GREEN   = const(0x07E0)  # 绿色
-CYAN    = const(0x07FF)  # 青色
+BLACK = const(0x0000)  # 黑色
+BLUE = const(0x001F)  # 蓝色
+RED = const(0xF800)  # 红色
+GREEN = const(0x07E0)  # 绿色
+CYAN = const(0x07FF)  # 青色
 MAGENTA = const(0xF81F)  # 品红色
-YELLOW  = const(0xFFE0)  # 黄色
-WHITE   = const(0xFFFF)  # 白色
+YELLOW = const(0xFFE0)  # 黄色
+WHITE = const(0xFFFF)  # 白色
 
 # 编码像素格式定义
-_ENCODE_PIXEL = const(">H")             # 大端字节序，两个字节表示一个像素值
-_ENCODE_PIXEL_SWAPPED = const("<H")     # 小端字节序，两个字节表示一个像素值
-_ENCODE_POS = const(">HH")              # 大端字节序，两个字节分别表示横纵坐标
-_ENCODE_POS_16 = const("<HH")           # 小端字节序，两个字节分别表示横纵坐标
+_ENCODE_PIXEL = const(">H")  # 大端字节序，两个字节表示一个像素值
+_ENCODE_PIXEL_SWAPPED = const("<H")  # 小端字节序，两个字节表示一个像素值
+_ENCODE_POS = const(">HH")  # 大端字节序，两个字节分别表示横纵坐标
+_ENCODE_POS_16 = const("<HH")  # 小端字节序，两个字节分别表示横纵坐标
 
 # 用于设置缓冲区大小和位数的常量
 
@@ -110,29 +113,18 @@ _BIT1 = const(0x02)  # 第 1 位
 _BIT0 = const(0x01)  # 第 0 位
 
 # 存储每个屏幕尺寸对应的旋转信息的字典
-_DISPLAY_240x320 = (
-    (0x00, 240, 320, 0, 0, False),
-    (0x60, 320, 240, 0, 0, False),
-    (0xc0, 240, 320, 0, 0, False),
-    (0xa0, 320, 240, 0, 0, False))
+_DISPLAY_240x320 = ((0x00, 240, 320, 0, 0, False), (0x60, 320, 240, 0, 0, False), (0xC0, 240, 320, 0, 0, False), (0xA0, 320, 240, 0, 0, False))
 
-_DISPLAY_240x240 = (
-    (0x00, 240, 240,  0,  0, False),
-    (0x60, 240, 240,  0,  0, False),
-    (0xc0, 240, 240,  0, 80, False),
-    (0xa0, 240, 240, 80,  0, False))
+_DISPLAY_240x240 = ((0x00, 240, 240, 0, 0, False), (0x60, 240, 240, 0, 0, False), (0xC0, 240, 240, 0, 80, False), (0xA0, 240, 240, 80, 0, False))
 
 _DISPLAY_135x240 = (
     (0x00, 135, 240, 52, 40, False),
     (0x60, 240, 135, 40, 53, False),
-    (0xc0, 135, 240, 53, 40, False),
-    (0xa0, 240, 135, 40, 52, False))
+    (0xC0, 135, 240, 53, 40, False),
+    (0xA0, 240, 135, 40, 52, False),
+)
 
-_DISPLAY_128x128 = (
-    (0x00, 128, 128, 2, 1, False),
-    (0x60, 128, 128, 1, 2, False),
-    (0xc0, 128, 128, 2, 1, False),
-    (0xa0, 128, 128, 1, 2, False))
+_DISPLAY_128x128 = ((0x00, 128, 128, 2, 1, False), (0x60, 128, 128, 1, 2, False), (0xC0, 128, 128, 2, 1, False), (0xA0, 128, 128, 1, 2, False))
 
 # 到旋转表的索引值
 _WIDTH = const(0)
@@ -142,41 +134,38 @@ _YSTART = const(3)
 _NEEDS_SWAP = const(4)
 
 # 支持的显示器 (物理宽度, 物理高度, 旋转表)
-_SUPPORTED_DISPLAYS = (
-    (240, 320, _DISPLAY_240x320),
-    (240, 240, _DISPLAY_240x240),
-    (135, 240, _DISPLAY_135x240),
-    (128, 128, _DISPLAY_128x128))
+_SUPPORTED_DISPLAYS = ((240, 320, _DISPLAY_240x320), (240, 240, _DISPLAY_240x240), (135, 240, _DISPLAY_135x240), (128, 128, _DISPLAY_128x128))
 
 # 初始化时需要发送的命令元组，格式为命令, 数据, 延迟毫秒
 _ST7789_INIT_CMDS = (
-    ( b'\x11', b'\x00', 120),               # 退出休眠模式
-    ( b'\x13', b'\x00', 0),                 # 打开显示屏
+    (b"\x11", b"\x00", 120),  # 退出休眠模式
+    (b"\x13", b"\x00", 0),  # 打开显示屏
     # 参数 0a 表示行扫描方向从下往上，82 表示列扫描方向从右往左
-    ( b'\xb6', b'\x0a\x82', 0),             # 设置显示功能控制
+    (b"\xb6", b"\x0a\x82", 0),  # 设置显示功能控制
     # 参数 55 表示红绿蓝的权重分别为 5、6、5
-    ( b'\x3a', b'\x55', 10),                # 设置像素格式为 16 位每像素 (RGB565)
+    (b"\x3a", b"\x55", 10),  # 设置像素格式为 16 位每像素 (RGB565)
     # 参数 0c 表示起始行，0c 表示结束行，00 表示起始列，33 表示结束列
-    ( b'\xb2', b'\x0c\x0c\x00\x33\x33', 0), # 设置门控控制
+    (b"\xb2", b"\x0c\x0c\x00\x33\x33", 0),  # 设置门控控制
     # 参数 35 表示 VGS 电压
-    ( b'\xb7', b'\x35', 0),                 # 设置栅极控制
+    (b"\xb7", b"\x35", 0),  # 设置栅极控制
     # 参数 28 表示 VCOM 电压
-    ( b'\xbb', b'\x28', 0),                 # 设置 VCOMS 设置
-    ( b'\xc0', b'\x0c', 0),                 # 设置电源控制 1
-    ( b'\xc2', b'\x01\xff', 0),             # 设置电源控制 2
-    ( b'\xc3', b'\x10', 0),                 # 设置电源控制 3
-    ( b'\xc4', b'\x20', 0),                 # 设置电源控制 4
-    ( b'\xc6', b'\x0f', 0),                 # 设置 VCOM 控制 1
-    ( b'\xd0', b'\xa4\xa1', 0),             # 设置电源控制 A
+    (b"\xbb", b"\x28", 0),  # 设置 VCOMS 设置
+    (b"\xc0", b"\x0c", 0),  # 设置电源控制 1
+    (b"\xc2", b"\x01\xff", 0),  # 设置电源控制 2
+    (b"\xc3", b"\x10", 0),  # 设置电源控制 3
+    (b"\xc4", b"\x20", 0),  # 设置电源控制 4
+    (b"\xc6", b"\x0f", 0),  # 设置 VCOM 控制 1
+    (b"\xd0", b"\xa4\xa1", 0),  # 设置电源控制 A
     # 设置伽马曲线正极性，用于调整红绿蓝三色的亮度
-    ( b'\xe0', b'\xd0\x00\x02\x07\x0a\x28\x32\x44\x42\x06\x0e\x12\x14\x17', 0),
+    (b"\xe0", b"\xd0\x00\x02\x07\x0a\x28\x32\x44\x42\x06\x0e\x12\x14\x17", 0),
     # 设置伽马曲线负极性，用于调整红绿蓝三色的亮度
-    ( b'\xe1', b'\xd0\x00\x02\x07\x0a\x28\x31\x54\x47\x0e\x1c\x17\x1b\x1e', 0),
-    ( b'\x21', b'\x00', 0),                 # 启用显示反转
-    ( b'\x29', b'\x00', 120)                # 打开显示屏，等待 120 毫秒
+    (b"\xe1", b"\xd0\x00\x02\x07\x0a\x28\x31\x54\x47\x0e\x1c\x17\x1b\x1e", 0),
+    (b"\x21", b"\x00", 0),  # 启用显示反转
+    (b"\x29", b"\x00", 120),  # 打开显示屏，等待 120 毫秒
 )
 
 # ======================================== 功能函数 ============================================
+
 
 def color565(red: int, green: int = 0, blue: int = 0) -> int:
     """
@@ -207,7 +196,9 @@ def color565(red: int, green: int = 0, blue: int = 0) -> int:
     # 将新的BGR值组合成16位565编码
     return (b & 0x1F) << 11 | (g & 0x3F) << 5 | (r & 0x1F)
 
+
 # ======================================== 自定义类 ============================================
+
 
 # ST7789 LCD屏幕控制芯片类
 class ST7789:
@@ -323,10 +314,20 @@ class ST7789:
         - 若遇到 Viper 编译错误（例如 ViperTypeError），检查被装饰函数的注解并去掉不被支持的类型注解。
     """
 
-    def __init__(self, spi: 'machine.SPI', width: int, height: int, reset: 'machine.Pin' = None,
-                 dc: 'machine.Pin' = None, cs: 'machine.Pin' = None, backlight: 'machine.Pin' = None,
-                 rotation: int = 0, color_order: int = BGR,
-                 custom_init: tuple = None, custom_rotations: tuple = None) -> None:
+    def __init__(
+        self,
+        spi: "machine.SPI",
+        width: int,
+        height: int,
+        reset: "machine.Pin" = None,
+        dc: "machine.Pin" = None,
+        cs: "machine.Pin" = None,
+        backlight: "machine.Pin" = None,
+        rotation: int = 0,
+        color_order: int = BGR,
+        custom_init: tuple = None,
+        custom_rotations: tuple = None,
+    ) -> None:
         """
         ST7789 的初始化方法。
 
@@ -354,12 +355,8 @@ class ST7789:
         # 根据屏幕尺寸和旋转角度找到支持的旋转信息
         self.rotations = custom_rotations or self._find_rotations(width, height)
         if not self.rotations:
-            supported_displays = ", ".join(
-                [f"{display[0]}x{display[1]}" for display in _SUPPORTED_DISPLAYS]
-            )
-            raise ValueError(
-                f"Unsupported {width}x{height} display. Supported displays: {supported_displays}"
-            )
+            supported_displays = ", ".join([f"{display[0]}x{display[1]}" for display in _SUPPORTED_DISPLAYS])
+            raise ValueError(f"Unsupported {width}x{height} display. Supported displays: {supported_displays}")
 
         # 检查是否提供了 DC 引脚，若没有提供，则抛出一个 ValueError 异常
         if dc is None:
@@ -402,7 +399,7 @@ class ST7789:
         self.fill(0x0)
 
     @staticmethod
-    def _find_rotations(width: int, height: int) -> 'tuple | None':
+    def _find_rotations(width: int, height: int) -> "tuple | None":
         """
         根据屏幕的物理尺寸和逻辑尺寸，找到支持的旋转信息。
 
@@ -687,12 +684,10 @@ class ST7789:
         self._write(
             None,
             # 将颜色值 color 打包成一个大端字节序或小端字节序的字节串，具体取决于 self.needs_swap 的值
-            struct.pack(
-                _ENCODE_PIXEL_SWAPPED if self.needs_swap else _ENCODE_PIXEL, color
-            ),
+            struct.pack(_ENCODE_PIXEL_SWAPPED if self.needs_swap else _ENCODE_PIXEL, color),
         )
 
-    def blit_buffer(self, buffer: 'bytes | bytearray | memoryview', x: int, y: int, width: int, height: int) -> None:
+    def blit_buffer(self, buffer: "bytes | bytearray | memoryview", x: int, y: int, width: int, height: int) -> None:
         """
         在指定位置绘制一个缓冲区中的图像。
 
@@ -761,9 +756,7 @@ class ST7789:
         # 将颜色值 color 打包成一个像素值
         # 如果 self.needs_swap 为真，则使用 _ENCODE_PIXEL_SWAPPED 格式打包
         # 否则，使用 _ENCODE_PIXEL 格式打包
-        pixel = struct.pack(
-            _ENCODE_PIXEL_SWAPPED if self.needs_swap else _ENCODE_PIXEL, color
-        )
+        pixel = struct.pack(_ENCODE_PIXEL_SWAPPED if self.needs_swap else _ENCODE_PIXEL, color)
         # DC拉高，表示发送数据
         self.dc.on()
         # 如果存在完整块，则执行以下操作
@@ -896,12 +889,12 @@ class ST7789:
             - 本函数使用 viper 优化并假设可用 ptr8/ptr16 类型转换函数以提高速度。
         """
         # 创建一个大小为 128 字节的字节数组 buffer
-        buffer  = bytearray(128)
+        buffer = bytearray(128)
         # 需要忽略PyCharm对ptr16和ptr8的警告
         # 将 buffer 转换为指向 16 位整数的指针 bitmap
-        bitmap  = ptr16(buffer)
+        bitmap = ptr16(buffer)
         # 将 glyphs 转换为指向 8 位整数的指针 glyph
-        glyph   = ptr8(glyphs)
+        glyph = ptr8(glyphs)
 
         # # 遍历 64 个连续的 8 位像素点
         for i in range(0, 64, 8):
@@ -999,11 +992,7 @@ class ST7789:
             # 将字符转换为ASCII码
             ch = ord(char)
             # 检查字符是否在字体支持的范围内，并且当前位置没有超出屏幕范围
-            if (
-                font.FIRST <= ch < font.LAST
-                and x0 + font.WIDTH <= self.width
-                and y0 + font.HEIGHT <= self.height
-            ):
+            if font.FIRST <= ch < font.LAST and x0 + font.WIDTH <= self.width and y0 + font.HEIGHT <= self.height:
                 # 根据字体的高度选择绘制方式
                 if font.HEIGHT == 8:
                     # 绘制8x8像素的字符
@@ -1046,11 +1035,7 @@ class ST7789:
             # 将字符转换为ASCII码
             ch = ord(char)
             # 检查字符是否在字体支持的范围内，并且当前位置没有超出屏幕范围
-            if (
-                font.FIRST <= ch < font.LAST
-                and x0 + font.WIDTH <= self.width
-                and y0 + font.HEIGHT <= self.height
-            ):
+            if font.FIRST <= ch < font.LAST and x0 + font.WIDTH <= self.width and y0 + font.HEIGHT <= self.height:
                 # 根据字体的高度决定绘制几行
                 each = 16
                 if font.HEIGHT == 16:
@@ -1091,11 +1076,7 @@ class ST7789:
         """
         # 根据当前是否需要字节序交换，调整前景色和背景色的字节序
         fg_color = color if self.needs_swap else ((color << 8) & 0xFF00) | (color >> 8)
-        bg_color = (
-            background
-            if self.needs_swap
-            else ((background << 8) & 0xFF00) | (background >> 8)
-        )
+        bg_color = background if self.needs_swap else ((background << 8) & 0xFF00) | (background >> 8)
         # 如果字体宽度为 8 位，则调用 _text8 方法绘制文本
         if font.WIDTH == 8:
             self._text8(font, text, x0, y0, fg_color, bg_color)
@@ -1150,9 +1131,7 @@ class ST7789:
         for i in range(0, buffer_len, 2):
             color_index = 0
             for _ in range(bpp):
-                color_index = (color_index << 1) | (
-                    (bitmap.BITMAP[bs_bit >> 3] >> (7 - (bs_bit & 7))) & 1
-                )
+                color_index = (color_index << 1) | ((bitmap.BITMAP[bs_bit >> 3] >> (7 - (bs_bit & 7))) & 1)
                 bs_bit += 1
 
             # 获取当前像素对应的颜色值
@@ -1205,9 +1184,7 @@ class ST7789:
                 # 从 MSB 到 LSB 依次提取像素颜色
                 for _ in range(bpp):
                     color_index <<= 1
-                    color_index |= (
-                        bitmap.BITMAP[bs_bit // 8] & 1 << (7 - (bs_bit % 8))
-                    ) > 0
+                    color_index |= (bitmap.BITMAP[bs_bit // 8] & 1 << (7 - (bs_bit % 8))) > 0
                     bs_bit += 1
                 color = palette[color_index]
                 # 根据当前设备的字节序交换颜色值的高低位
@@ -1322,8 +1299,7 @@ class ST7789:
         return width
 
     @micropython.native
-    def polygon(self, points, x: int, y: int, color: int, angle: float = 0.0, center_x: int = 0,
-                center_y: int = 0) -> None:
+    def polygon(self, points, x: int, y: int, color: int, angle: float = 0.0, center_x: int = 0, center_y: int = 0) -> None:
         """
         绘制闭合多边形。
 
@@ -1351,16 +1327,8 @@ class ST7789:
             sin_a = sin(angle)
             rotated = [
                 (
-                    x
-                    + center_x
-                    + int(
-                        (point[0] - center_x) * cos_a - (point[1] - center_y) * sin_a
-                    ),
-                    y
-                    + center_y
-                    + int(
-                        (point[0] - center_x) * sin_a + (point[1] - center_y) * cos_a
-                    ),
+                    x + center_x + int((point[0] - center_x) * cos_a - (point[1] - center_y) * sin_a),
+                    y + center_y + int((point[0] - center_x) * sin_a + (point[1] - center_y) * cos_a),
                 )
                 for point in points
             ]

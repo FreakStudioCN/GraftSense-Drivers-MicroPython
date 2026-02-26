@@ -1,5 +1,5 @@
 # MicroPython v1.23.0
-# -*- coding: utf-8 -*-   
+# -*- coding: utf-8 -*-
 # @Time    : 2025/9/22 下午4:08
 # @Author  : 缪贵成
 # @File    : main.py
@@ -19,6 +19,7 @@ last_irq_time = 0
 THROTTLE_MS = 50
 
 # ======================================== 功能函数 ==============================================
+
 
 def vibration_callback() -> None:
     """
@@ -42,6 +43,7 @@ def vibration_callback() -> None:
         last_irq_time = now
         print("Vibration detected callback triggered!")
         # 否则忽略此次中断触发
+
 
 # ======================================== 自定义类 =============================================
 

@@ -15,8 +15,10 @@ __platform__ = "MicroPython v1.23"
 
 # 导入时间相关的模块
 import time
+
 # 导入数值数据数组模块
 import array
+
 # 导入MicroPython标准库模块
 import micropython
 from micropython import const
@@ -27,6 +29,7 @@ from machine import Pin
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class InvalidChecksum(Exception):
     """
@@ -47,7 +50,9 @@ class InvalidChecksum(Exception):
     Attributes:
         message (str): Error message describing the reason for checksum failure.
     """
+
     pass
+
 
 class InvalidPulseCount(Exception):
     """
@@ -68,7 +73,9 @@ class InvalidPulseCount(Exception):
     Attributes:
         message (str): Error message describing the reason for invalid pulse count.
     """
+
     pass
+
 
 class DHT11:
     """
@@ -167,9 +174,7 @@ class DHT11:
         current_ticks = time.ticks_us()
 
         # 检查是否已经等待了足够的时间进行下一次测量,若是没有，则直接返回
-        if time.ticks_diff(current_ticks, self._last_measure) < DHT11.MIN_INTERVAL_US and (
-                self._temperature > -1 or self._humidity > -1
-        ):
+        if time.ticks_diff(current_ticks, self._last_measure) < DHT11.MIN_INTERVAL_US and (self._temperature > -1 or self._humidity > -1):
             return
 
         # 发送初始化信号，呼叫从机
@@ -313,9 +318,7 @@ class DHT11:
                 # 当idx大于DHT11.EXPECTED_PULSES时，说明捕获脉冲数目错误
                 # 抛出InvalidPulseCount异常
                 if idx >= DHT11.EXPECTED_PULSES:
-                    raise InvalidPulseCount(
-                        "Got more than {} pulses".format(DHT11.EXPECTED_PULSES)
-                    )
+                    raise InvalidPulseCount("Got more than {} pulses".format(DHT11.EXPECTED_PULSES))
                 now = time.ticks_us()
                 # transitions二进制序列记录了脉冲序列的持续时间
                 transitions[idx] = now - timestamp
@@ -333,9 +336,7 @@ class DHT11:
         # 判断接收的脉冲数目是否为期望的脉冲数目
         if idx != DHT11.EXPECTED_PULSES:
             # 若不是，则抛出InvalidPulseCount异常
-            raise InvalidPulseCount(
-                "Expected {} but got {} pulses".format(DHT11.EXPECTED_PULSES, idx)
-            )
+            raise InvalidPulseCount("Expected {} but got {} pulses".format(DHT11.EXPECTED_PULSES, idx))
         # 返回捕获到脉冲的持续时间序列的后80个字节
         # 忽略前4个字节，即从机应答产生的4个脉冲
         return transitions[4:]
@@ -422,6 +423,7 @@ class DHT11:
         if checksum & 0xFF != buffer[4]:
             # 若不相等，则抛出InvalidChecksum异常
             raise InvalidChecksum()
+
 
 # ======================================== 初始化配置 ==========================================
 

@@ -10,14 +10,17 @@
 
 # 导入 UART 和 Pin 用于硬件串口与引脚配置
 from machine import UART, Pin, Timer
+
 # 导入 time 提供延时与时间控制
 import time
+
 # 导入驱动与常量（DYSV19T、VOLUME_MAX、DISK_*、MODE_*、CH_* 等）
 from dy_sv19t import *
 
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 
 def tick(timer):
     """
@@ -41,6 +44,7 @@ def tick(timer):
     if hms:
         h, m, s = hms
         print("[auto time] h:m:s =", h, m, s)
+
 
 def play_track_demo():
     """
@@ -66,8 +70,8 @@ def play_track_demo():
         pass
     print("play_track_demo ends")
 
-def select_and_play_demo():
 
+def select_and_play_demo():
     """
     选择曲目但不立即播放，并展示暂停、恢复、切换曲目的用法。
 
@@ -133,6 +137,7 @@ def repeat_area_demo():
     player.stop()
     print("repeat_area_demo ends")
 
+
 def loop_mode_demo():
     """
     设置循环播放模式，并指定循环次数。
@@ -150,7 +155,6 @@ def loop_mode_demo():
     time.sleep(10)
     # 设置播放模式为单曲停止
     player.set_play_mode(DYSV19T.MODE_SINGLE_STOP)
-
 
 
 def insert_track_demo():
@@ -185,12 +189,13 @@ def combination_playlist_demo():
 
     """
     print("combination_playlist_demo")
-    player.start_combination_playlist(['Z1', 'Z2'])
+    player.start_combination_playlist(["Z1", "Z2"])
     # 留出 2 秒以便组合播放启动
     time.sleep(10)
     # 结束组合播放
     player.end_combination_playlist()
     print("combination_playlist_demo ends")
+
 
 # ======================================== 自定义类 ============================================
 

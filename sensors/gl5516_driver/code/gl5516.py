@@ -11,9 +11,11 @@ __author__ = "hogeiha"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
+
 # ======================================== 导入相关模块 =========================================
 
 from machine import ADC, Pin
+
 
 class GL5516:
     """
@@ -67,6 +69,7 @@ class GL5516:
         Percentage output is linear mapping; actual light intensity may differ due to sensor non-linearity.
         For best accuracy, calibrate within the intended operational lighting range.
     """
+
     def __init__(self, analog_pin: int):
         """
         光敏传感器 GL5516 驱动类。
@@ -155,4 +158,3 @@ class GL5516:
     # ======================================== 初始化配置 ============================================
 
     # ======================================== 主程序 ===============================================
-

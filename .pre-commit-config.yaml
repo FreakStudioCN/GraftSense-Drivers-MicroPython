@@ -1,0 +1,12 @@
+repos:
+  - repo: git@github.com:psf/black.git
+    rev: 24.3.0
+    hooks:
+      - id: black
+        args: [--line-length=150]
+
+  - repo: git@github.com:pycqa/flake8.git
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ["--ignore=E203,E501,W503", "--max-line-length=150"]

@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/9/30 下午12:11   
-# @Author  : 李清水            
-# @File    : sdcard.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/30 下午12:11
+# @Author  : 李清水
+# @File    : sdcard.py
 # @Description : 自定义用于SD卡读写的SDCard类
 # 参考代码：https://github.com/micropython/micropython-lib/blob/master/micropython/drivers/storage/sdcard/sdcard.py#L291
 # @License : MIT
@@ -16,8 +16,10 @@ __platform__ = "MicroPython v1.23"
 
 # 导入MicroPython相关模块
 from micropython import const
+
 # 导入时间相关的模块
 import time
+
 # 导入硬件相关模块
 from machine import SPI, Pin
 
@@ -40,6 +42,7 @@ TOKEN_DATA = const(0xFE)
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # 自定义SD卡操作类
 class SDCard:
@@ -126,7 +129,7 @@ class SDCard:
         SD card operations follow SPI protocol specification, support standard capacity (SDSC) and high capacity (SDHC/SDXC) cards.
         Initialization process includes card identification, CSD register reading and block size setting.
         Read/write operations use 512 bytes as block unit, support single block and multiple block transfer modes.
-"""
+    """
 
     def __init__(self, spi: SPI, cs: Pin, baudrate: int = 1320000) -> None:
         """
@@ -740,6 +743,7 @@ class SDCard:
         self.cs(1)
         # 发送空字节
         self.spi.write(b"\xff")
+
 
 # ======================================== 初始化配置 ==========================================
 

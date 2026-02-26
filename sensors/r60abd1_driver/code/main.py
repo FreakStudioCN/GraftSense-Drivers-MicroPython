@@ -22,6 +22,7 @@ print_interval = 2000
 
 # ======================================== 功能函数 ============================================
 
+
 def print_report_sensor_data():
     """
     打印传感器上报数据到Thonny控制台。
@@ -55,18 +56,17 @@ def print_report_sensor_data():
     # 人体存在数据
     print("Report Movement Parameter: %d" % device.movement_parameter)
     print("Report Presence Status: %s" % ("Someone" if device.presence_status == 1 else "No one"))
-    print("Report Motion Status: %s" % ["No motion", "Static", "Active"][
-        device.motion_status] if device.motion_status < 3 else "Unknown")
+    print("Report Motion Status: %s" % ["No motion", "Static", "Active"][device.motion_status] if device.motion_status < 3 else "Unknown")
 
     # 距离和位置
     print("Report Human Distance: %d cm" % device.human_distance)
-    print("Report Human Position: X=%d, Y=%d, Z=%d" % (
-    device.human_position_x, device.human_position_y, device.human_position_z))
+    print("Report Human Position: X=%d, Y=%d, Z=%d" % (device.human_position_x, device.human_position_y, device.human_position_z))
 
     # 雷达状态
     print("Report Radar in Range: %s" % ("Yes" if device.radar_in_range else "No"))
 
     print("=" * 50)
+
 
 def print_active_query_data(timeout=200):
     """
@@ -206,8 +206,7 @@ def print_active_query_data(timeout=200):
     # 查询无人计时状态
     success, no_person_timing_status = device.query_no_person_timing_status(timeout)
     if success:
-        status_text = ["None", "Normal", "Abnormal"][
-            no_person_timing_status] if no_person_timing_status < 3 else "Unknown"
+        status_text = ["None", "Normal", "Abnormal"][no_person_timing_status] if no_person_timing_status < 3 else "Unknown"
         print("Query No Person Timing Status: %d - %s" % (no_person_timing_status, status_text))
     else:
         print("Query No Person Timing Status: Failed")
@@ -267,7 +266,11 @@ def print_active_query_data(timeout=200):
         # 可以进一步解析和显示详细数据
         if len(sleep_comprehensive_status) >= 8:
             print("  - Presence: %s" % ("Someone" if sleep_comprehensive_status[0] == 1 else "No one"))
-            print("  - Sleep Status: %s" % ["Deep sleep", "Light sleep", "Awake", "None"][sleep_comprehensive_status[1]] if sleep_comprehensive_status[1] < 4 else "Unknown")
+            print(
+                "  - Sleep Status: %s" % ["Deep sleep", "Light sleep", "Awake", "None"][sleep_comprehensive_status[1]]
+                if sleep_comprehensive_status[1] < 4
+                else "Unknown"
+            )
             print("  - Avg Breath: %d bpm" % sleep_comprehensive_status[2])
             print("  - Avg Heart Rate: %d bpm" % sleep_comprehensive_status[3])
             print("  - Turnover Count: %d" % sleep_comprehensive_status[4])
@@ -320,6 +323,7 @@ def print_active_query_data(timeout=200):
         print("Query Sleep Quality Level: Failed")
 
     print("=" * 50)
+
 
 # ======================================== 自定义类 ============================================
 

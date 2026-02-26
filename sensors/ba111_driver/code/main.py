@@ -44,5 +44,3 @@ if sensor.calibrate():
             time.sleep(1)
 else:
     print("Calibration failed")
-
-

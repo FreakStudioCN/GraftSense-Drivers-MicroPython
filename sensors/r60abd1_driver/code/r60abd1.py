@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.26.1
-# -*- coding: utf-8 -*-        
-# @Time    : 2025/11/4 下午5:35   
-# @Author  : 李清水            
-# @File    : r60abd1.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2025/11/4 下午5:35
+# @Author  : 李清水
+# @File    : r60abd1.py
 # @Description : R60ABD1雷达设备业务处理类相关代码
 # @License : MIT
 
@@ -20,6 +20,7 @@ import micropython
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 
 def format_time():
     """
@@ -54,6 +55,7 @@ def format_time():
     t = time.localtime()
     ms = time.ticks_ms() % 1000
     return f"[{t[0]}-{t[1]:02d}-{t[2]:02d} {t[3]:02d}:{t[4]:02d}:{t[5]:02d}.{ms:03d}]"
+
 
 # 计时装饰器，用于计算函数运行时间
 def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
@@ -90,18 +92,20 @@ def timed_function(f: callable, *args: tuple, **kwargs: dict) -> callable:
         - Calculates time difference before and after function execution, converts to milliseconds.
         - Function name extracted via string splitting, may not work in all cases.
     """
-    myname = str(f).split(' ')[1]
+    myname = str(f).split(" ")[1]
 
     def new_func(*args: tuple, **kwargs: dict) -> any:
         t: int = time.ticks_us()
         result = f(*args, **kwargs)
         delta: int = time.ticks_diff(time.ticks_us(), t)
-        print('Function {} Time = {:6.3f}ms'.format(myname, delta / 1000))
+        print("Function {} Time = {:6.3f}ms".format(myname, delta / 1000))
         return result
 
     return new_func
 
+
 # ======================================== 自定义类 ============================================
+
 
 # 自定义异常类
 class DeviceInitializationError(Exception):
@@ -116,7 +120,9 @@ class DeviceInitializationError(Exception):
 
     Raised when critical errors occur during R60ABD1 device initialization.
     """
+
     pass
+
 
 class R60ABD1:
     """
@@ -495,325 +501,229 @@ class R60ABD1:
     # 指令映射表 - 将查询、开关、设置类型指令的命令字和控制字的具体值映射到帧参数
     COMMAND_MAP = {
         # 基础指令信息查询和设置类型
-        TYPE_QUERY_HEARTBEAT: {
-            'control_byte': 0x01,  # 系统指令
-            'command_byte': 0x80,  # 心跳包查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_MODULE_RESET: {
-            'control_byte': 0x01,  # 系统指令
-            'command_byte': 0x02,  # 模组复位
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_PRODUCT_MODEL: {
-            'control_byte': 0x02,  # 产品信息
-            'command_byte': 0xA1,  # 产品型号查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_PRODUCT_ID: {
-            'control_byte': 0x02,  # 产品信息
-            'command_byte': 0xA2,  # 产品ID查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_HARDWARE_MODEL: {
-            'control_byte': 0x02,  # 产品信息
-            'command_byte': 0xA3,  # 硬件型号查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_FIRMWARE_VERSION: {
-            'control_byte': 0x02,  # 产品信息
-            'command_byte': 0xA4,  # 固件版本查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_INIT_COMPLETE: {
-            'control_byte': 0x05,  # 系统初始化状态
-            'command_byte': 0x81,  # 初始化完成查询
-            'data': bytes([0x0F])  # 固定数据
-        },
+        TYPE_QUERY_HEARTBEAT: {"control_byte": 0x01, "command_byte": 0x80, "data": bytes([0x0F])},  # 系统指令  # 心跳包查询  # 固定数据
+        TYPE_MODULE_RESET: {"control_byte": 0x01, "command_byte": 0x02, "data": bytes([0x0F])},  # 系统指令  # 模组复位  # 固定数据
+        TYPE_QUERY_PRODUCT_MODEL: {"control_byte": 0x02, "command_byte": 0xA1, "data": bytes([0x0F])},  # 产品信息  # 产品型号查询  # 固定数据
+        TYPE_QUERY_PRODUCT_ID: {"control_byte": 0x02, "command_byte": 0xA2, "data": bytes([0x0F])},  # 产品信息  # 产品ID查询  # 固定数据
+        TYPE_QUERY_HARDWARE_MODEL: {"control_byte": 0x02, "command_byte": 0xA3, "data": bytes([0x0F])},  # 产品信息  # 硬件型号查询  # 固定数据
+        TYPE_QUERY_FIRMWARE_VERSION: {"control_byte": 0x02, "command_byte": 0xA4, "data": bytes([0x0F])},  # 产品信息  # 固件版本查询  # 固定数据
+        TYPE_QUERY_INIT_COMPLETE: {"control_byte": 0x05, "command_byte": 0x81, "data": bytes([0x0F])},  # 系统初始化状态  # 初始化完成查询  # 固定数据
         TYPE_QUERY_RADAR_RANGE_BOUNDARY: {
-            'control_byte': 0x07,  # 雷达探测范围
-            'command_byte': 0x87,  # 范围越界状态查询
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x07,  # 雷达探测范围
+            "command_byte": 0x87,  # 范围越界状态查询
+            "data": bytes([0x0F]),  # 固定数据
         },
-
         # 人体存在指令信息查询和设置类型
         TYPE_CONTROL_HUMAN_PRESENCE_ON: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x00,  # 打开人体存在功能
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x80,  # 人体存在检测
+            "command_byte": 0x00,  # 打开人体存在功能
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_HUMAN_PRESENCE_OFF: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x00,  # 关闭人体存在功能
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x80,  # 人体存在检测
+            "command_byte": 0x00,  # 关闭人体存在功能
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_HUMAN_PRESENCE_SWITCH: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x80,  # 查询人体存在开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x80,  # 人体存在检测
+            "command_byte": 0x80,  # 查询人体存在开关
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_QUERY_HUMAN_EXISTENCE_INFO: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x81,  # 存在信息查询
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x80,  # 人体存在检测
+            "command_byte": 0x81,  # 存在信息查询
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_QUERY_HUMAN_MOTION_INFO: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x82,  # 运动信息查询
-            'data': bytes([0x0F])  # 固定数据
-        },
+        TYPE_QUERY_HUMAN_MOTION_INFO: {"control_byte": 0x80, "command_byte": 0x82, "data": bytes([0x0F])},  # 人体存在检测  # 运动信息查询  # 固定数据
         TYPE_QUERY_HUMAN_BODY_MOTION_PARAM: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x83,  # 体动参数查询
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x80,  # 人体存在检测
+            "command_byte": 0x83,  # 体动参数查询
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_QUERY_HUMAN_DISTANCE: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x84,  # 人体距离查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_HUMAN_DIRECTION: {
-            'control_byte': 0x80,  # 人体存在检测
-            'command_byte': 0x85,  # 人体方位查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-
+        TYPE_QUERY_HUMAN_DISTANCE: {"control_byte": 0x80, "command_byte": 0x84, "data": bytes([0x0F])},  # 人体存在检测  # 人体距离查询  # 固定数据
+        TYPE_QUERY_HUMAN_DIRECTION: {"control_byte": 0x80, "command_byte": 0x85, "data": bytes([0x0F])},  # 人体存在检测  # 人体方位查询  # 固定数据
         # 心率监测指令信息查询和设置类型
         TYPE_CONTROL_HEART_RATE_MONITOR_ON: {
-            'control_byte': 0x85,  # 心率监测
-            'command_byte': 0x00,  # 打开心率监测功能
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x85,  # 心率监测
+            "command_byte": 0x00,  # 打开心率监测功能
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_HEART_RATE_MONITOR_OFF: {
-            'control_byte': 0x85,  # 心率监测
-            'command_byte': 0x00,  # 关闭心率监测功能
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x85,  # 心率监测
+            "command_byte": 0x00,  # 关闭心率监测功能
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_HEART_RATE_MONITOR_SWITCH: {
-            'control_byte': 0x85,  # 心率监测
-            'command_byte': 0x80,  # 查询心率监测开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x85,  # 心率监测
+            "command_byte": 0x80,  # 查询心率监测开关
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_CONTROL_HEART_RATE_WAVEFORM_REPORT_ON: {
-            'control_byte': 0x85,  # 心率监测
-            'command_byte': 0x0A,  # 打开心率波形上报开关
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x85,  # 心率监测
+            "command_byte": 0x0A,  # 打开心率波形上报开关
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_HEART_RATE_WAVEFORM_REPORT_OFF: {
-            'control_byte': 0x85,  # 心率监测
-            'command_byte': 0x0A,  # 关闭心率波形上报开关
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x85,  # 心率监测
+            "command_byte": 0x0A,  # 关闭心率波形上报开关
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_HEART_RATE_WAVEFORM_REPORT_SWITCH: {
-            'control_byte': 0x85,  # 心率监测
-            'command_byte': 0x8A,  # 查询心率波形上报开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x85,  # 心率监测
+            "command_byte": 0x8A,  # 查询心率波形上报开关
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_QUERY_HEART_RATE_VALUE: {
-            'control_byte': 0x85,  # 心率监测
-            'command_byte': 0x82,  # 心率数值查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_HEART_RATE_WAVEFORM: {
-            'control_byte': 0x85,  # 心率监测
-            'command_byte': 0x85,  # 心率波形查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-
+        TYPE_QUERY_HEART_RATE_VALUE: {"control_byte": 0x85, "command_byte": 0x82, "data": bytes([0x0F])},  # 心率监测  # 心率数值查询  # 固定数据
+        TYPE_QUERY_HEART_RATE_WAVEFORM: {"control_byte": 0x85, "command_byte": 0x85, "data": bytes([0x0F])},  # 心率监测  # 心率波形查询  # 固定数据
         # 呼吸监测指令信息查询和设置类型
         TYPE_CONTROL_BREATH_MONITOR_ON: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x00,  # 打开呼吸监测功能
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x81,  # 呼吸监测
+            "command_byte": 0x00,  # 打开呼吸监测功能
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_BREATH_MONITOR_OFF: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x00,  # 关闭呼吸监测功能
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x81,  # 呼吸监测
+            "command_byte": 0x00,  # 关闭呼吸监测功能
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_BREATH_MONITOR_SWITCH: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x80,  # 查询呼吸监测开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x81,  # 呼吸监测
+            "command_byte": 0x80,  # 查询呼吸监测开关
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_SET_LOW_BREATH_THRESHOLD: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x0B,  # 设置低缓呼吸判读阈值
-            'data': None  # 数据需要动态设置
+            "control_byte": 0x81,  # 呼吸监测
+            "command_byte": 0x0B,  # 设置低缓呼吸判读阈值
+            "data": None,  # 数据需要动态设置
         },
         TYPE_QUERY_LOW_BREATH_THRESHOLD: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x8B,  # 查询低缓呼吸判读阈值
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x81,  # 呼吸监测
+            "command_byte": 0x8B,  # 查询低缓呼吸判读阈值
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_QUERY_BREATH_INFO: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x81,  # 呼吸信息查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_BREATH_VALUE: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x82,  # 呼吸数值查询
-            'data': bytes([0x0F])  # 固定数据
-        },
+        TYPE_QUERY_BREATH_INFO: {"control_byte": 0x81, "command_byte": 0x81, "data": bytes([0x0F])},  # 呼吸监测  # 呼吸信息查询  # 固定数据
+        TYPE_QUERY_BREATH_VALUE: {"control_byte": 0x81, "command_byte": 0x82, "data": bytes([0x0F])},  # 呼吸监测  # 呼吸数值查询  # 固定数据
         TYPE_CONTROL_BREATH_WAVEFORM_REPORT_ON: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x0C,  # 打开呼吸波形上报开关
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x81,  # 呼吸监测
+            "command_byte": 0x0C,  # 打开呼吸波形上报开关
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_BREATH_WAVEFORM_REPORT_OFF: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x0C,  # 关闭呼吸波形上报开关
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x81,  # 呼吸监测
+            "command_byte": 0x0C,  # 关闭呼吸波形上报开关
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_BREATH_WAVEFORM_REPORT_SWITCH: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x8C,  # 查询呼吸波形上报开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x81,  # 呼吸监测
+            "command_byte": 0x8C,  # 查询呼吸波形上报开关
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_QUERY_BREATH_WAVEFORM: {
-            'control_byte': 0x81,  # 呼吸监测
-            'command_byte': 0x85,  # 呼吸波形查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-
+        TYPE_QUERY_BREATH_WAVEFORM: {"control_byte": 0x81, "command_byte": 0x85, "data": bytes([0x0F])},  # 呼吸监测  # 呼吸波形查询  # 固定数据
         # 睡眠监测指令信息查询和设置类型
         TYPE_CONTROL_SLEEP_MONITOR_ON: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x00,  # 打开睡眠监测功能
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x00,  # 打开睡眠监测功能
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_SLEEP_MONITOR_OFF: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x00,  # 关闭睡眠监测功能
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x00,  # 关闭睡眠监测功能
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_SLEEP_MONITOR_SWITCH: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x80,  # 查询睡眠监测开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x80,  # 查询睡眠监测开关
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_CONTROL_ABNORMAL_STRUGGLE_ON: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x13,  # 打开异常挣扎状态监测
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x13,  # 打开异常挣扎状态监测
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_ABNORMAL_STRUGGLE_OFF: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x13,  # 关闭异常挣扎状态监测
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x13,  # 关闭异常挣扎状态监测
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_ABNORMAL_STRUGGLE_SWITCH: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x93,  # 查询异常挣扎状态开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x93,  # 查询异常挣扎状态开关
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_QUERY_ABNORMAL_STRUGGLE_STATUS: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x91,  # 查询异常挣扎状态
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x91,  # 查询异常挣扎状态
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_SET_STRUGGLE_SENSITIVITY: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x1A,  # 设置挣扎状态判读灵敏度
-            'data': None  # 数据需要动态设置
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x1A,  # 设置挣扎状态判读灵敏度
+            "data": None,  # 数据需要动态设置
         },
         TYPE_QUERY_STRUGGLE_SENSITIVITY: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x9A,  # 查询挣扎状态判读灵敏度
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x9A,  # 查询挣扎状态判读灵敏度
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_CONTROL_NO_PERSON_TIMING_ON: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x14,  # 打开无人计时功能
-            'data': bytes([0x01])  # 打开指令数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x14,  # 打开无人计时功能
+            "data": bytes([0x01]),  # 打开指令数据
         },
         TYPE_CONTROL_NO_PERSON_TIMING_OFF: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x14,  # 关闭无人计时功能
-            'data': bytes([0x00])  # 关闭指令数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x14,  # 关闭无人计时功能
+            "data": bytes([0x00]),  # 关闭指令数据
         },
         TYPE_QUERY_NO_PERSON_TIMING_SWITCH: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x94,  # 查询无人计时功能开关
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x94,  # 查询无人计时功能开关
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_SET_NO_PERSON_TIMING_DURATION: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x15,  # 设置无人计时时长
-            'data': None  # 数据需要动态设置
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x15,  # 设置无人计时时长
+            "data": None,  # 数据需要动态设置
         },
         TYPE_QUERY_NO_PERSON_TIMING_DURATION: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x95,  # 查询无人计时时长
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x95,  # 查询无人计时时长
+            "data": bytes([0x0F]),  # 固定数据
         },
         # 无人计时状态查询
         TYPE_QUERY_NO_PERSON_TIMING_STATUS: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x92,  # 无人计时状态查询
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x92,  # 无人计时状态查询
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_SET_SLEEP_END_DURATION: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x16,  # 设置睡眠截止时长
-            'data': None  # 数据需要动态设置
-        },
+        TYPE_SET_SLEEP_END_DURATION: {"control_byte": 0x84, "command_byte": 0x16, "data": None},  # 睡眠监测  # 设置睡眠截止时长  # 数据需要动态设置
         TYPE_QUERY_SLEEP_END_DURATION: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x96,  # 查询睡眠截止时长
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x96,  # 查询睡眠截止时长
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_QUERY_BED_STATUS: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x81,  # 入床/离床状态查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_SLEEP_STATUS: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x82,  # 睡眠状态查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_AWAKE_DURATION: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x83,  # 清醒时长查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_LIGHT_SLEEP_DURATION: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x84,  # 浅睡时长查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_DEEP_SLEEP_DURATION: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x85,  # 深睡时长查询
-            'data': bytes([0x0F])  # 固定数据
-        },
+        TYPE_QUERY_BED_STATUS: {"control_byte": 0x84, "command_byte": 0x81, "data": bytes([0x0F])},  # 睡眠监测  # 入床/离床状态查询  # 固定数据
+        TYPE_QUERY_SLEEP_STATUS: {"control_byte": 0x84, "command_byte": 0x82, "data": bytes([0x0F])},  # 睡眠监测  # 睡眠状态查询  # 固定数据
+        TYPE_QUERY_AWAKE_DURATION: {"control_byte": 0x84, "command_byte": 0x83, "data": bytes([0x0F])},  # 睡眠监测  # 清醒时长查询  # 固定数据
+        TYPE_QUERY_LIGHT_SLEEP_DURATION: {"control_byte": 0x84, "command_byte": 0x84, "data": bytes([0x0F])},  # 睡眠监测  # 浅睡时长查询  # 固定数据
+        TYPE_QUERY_DEEP_SLEEP_DURATION: {"control_byte": 0x84, "command_byte": 0x85, "data": bytes([0x0F])},  # 睡眠监测  # 深睡时长查询  # 固定数据
         TYPE_QUERY_SLEEP_QUALITY_SCORE: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x86,  # 睡眠质量评分查询
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x86,  # 睡眠质量评分查询
+            "data": bytes([0x0F]),  # 固定数据
         },
         TYPE_QUERY_SLEEP_COMPREHENSIVE_STATUS: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x8D,  # 睡眠综合状态查询
-            'data': bytes([0x0F])  # 固定数据
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x8D,  # 睡眠综合状态查询
+            "data": bytes([0x0F]),  # 固定数据
         },
-        TYPE_QUERY_SLEEP_ANOMALY: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x8E,  # 睡眠异常查询
-            'data': bytes([0x0F])  # 固定数据
-        },
-        TYPE_QUERY_SLEEP_STATISTICS: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x8F,  # 睡眠统计查询
-            'data': bytes([0x0F])  # 固定数据
-        },
+        TYPE_QUERY_SLEEP_ANOMALY: {"control_byte": 0x84, "command_byte": 0x8E, "data": bytes([0x0F])},  # 睡眠监测  # 睡眠异常查询  # 固定数据
+        TYPE_QUERY_SLEEP_STATISTICS: {"control_byte": 0x84, "command_byte": 0x8F, "data": bytes([0x0F])},  # 睡眠监测  # 睡眠统计查询  # 固定数据
         TYPE_QUERY_SLEEP_QUALITY_LEVEL: {
-            'control_byte': 0x84,  # 睡眠监测
-            'command_byte': 0x90,  # 睡眠质量评级查询
-            'data': bytes([0x0F])  # 固定数据
-        }
+            "control_byte": 0x84,  # 睡眠监测
+            "command_byte": 0x90,  # 睡眠质量评级查询
+            "data": bytes([0x0F]),  # 固定数据
+        },
     }
 
     # 查询类型到名称的映射（用于调试输出）
@@ -827,7 +737,6 @@ class R60ABD1:
         TYPE_QUERY_FIRMWARE_VERSION: "Firmware Version",
         TYPE_QUERY_INIT_COMPLETE: "Init Complete",
         TYPE_QUERY_RADAR_RANGE_BOUNDARY: "Radar Range Boundary",
-
         # 人体存在指令信息查询和设置
         TYPE_CONTROL_HUMAN_PRESENCE_ON: "Human Presence ON",
         TYPE_CONTROL_HUMAN_PRESENCE_OFF: "Human Presence OFF",
@@ -837,7 +746,6 @@ class R60ABD1:
         TYPE_QUERY_HUMAN_BODY_MOTION_PARAM: "Body Motion Parameter",
         TYPE_QUERY_HUMAN_DISTANCE: "Human Distance",
         TYPE_QUERY_HUMAN_DIRECTION: "Human Direction",
-
         # 心率监测指令信息查询和设置
         TYPE_CONTROL_HEART_RATE_MONITOR_ON: "Heart Rate Monitor ON",
         TYPE_CONTROL_HEART_RATE_MONITOR_OFF: "Heart Rate Monitor OFF",
@@ -847,7 +755,6 @@ class R60ABD1:
         TYPE_QUERY_HEART_RATE_WAVEFORM_REPORT_SWITCH: "Heart Rate Waveform Report Switch",
         TYPE_QUERY_HEART_RATE_VALUE: "Heart Rate Value",
         TYPE_QUERY_HEART_RATE_WAVEFORM: "Heart Rate Waveform",
-
         # 呼吸监测指令
         TYPE_CONTROL_BREATH_MONITOR_ON: "Breath Monitor ON",
         TYPE_CONTROL_BREATH_MONITOR_OFF: "Breath Monitor OFF",
@@ -860,7 +767,6 @@ class R60ABD1:
         TYPE_CONTROL_BREATH_WAVEFORM_REPORT_OFF: "Breath Waveform Report OFF",
         TYPE_QUERY_BREATH_WAVEFORM_REPORT_SWITCH: "Breath Waveform Report Switch",
         TYPE_QUERY_BREATH_WAVEFORM: "Breath Waveform",
-
         # 睡眠监测指令
         TYPE_CONTROL_SLEEP_MONITOR_ON: "Sleep Monitor ON",
         TYPE_CONTROL_SLEEP_MONITOR_OFF: "Sleep Monitor OFF",
@@ -889,18 +795,28 @@ class R60ABD1:
         TYPE_QUERY_SLEEP_COMPREHENSIVE_STATUS: "Sleep Comprehensive Status",
         TYPE_QUERY_SLEEP_ANOMALY: "Sleep Anomaly",
         TYPE_QUERY_SLEEP_STATISTICS: "Sleep Statistics",
-        TYPE_QUERY_SLEEP_QUALITY_LEVEL: "Sleep Quality Level"
+        TYPE_QUERY_SLEEP_QUALITY_LEVEL: "Sleep Quality Level",
     }
 
-    def __init__(self, data_processor, parse_interval=200,
-                 presence_enabled=True,
-                 heart_rate_enabled=True, heart_rate_waveform_enabled=False,
-                 breath_monitoring_enabled=True, breath_waveform_enabled=False,
-                 sleep_monitoring_enabled=True,
-                 abnormal_struggle_enabled=False, struggle_sensitivity=1,
-                 no_person_timing_enabled=False, no_person_timing_duration=30,
-                 sleep_cutoff_duration=120,
-                 max_retries=3, retry_delay=100, init_timeout=5000):
+    def __init__(
+        self,
+        data_processor,
+        parse_interval=200,
+        presence_enabled=True,
+        heart_rate_enabled=True,
+        heart_rate_waveform_enabled=False,
+        breath_monitoring_enabled=True,
+        breath_waveform_enabled=False,
+        sleep_monitoring_enabled=True,
+        abnormal_struggle_enabled=False,
+        struggle_sensitivity=1,
+        no_person_timing_enabled=False,
+        no_person_timing_duration=30,
+        sleep_cutoff_duration=120,
+        max_retries=3,
+        retry_delay=100,
+        init_timeout=5000,
+    ):
         """
         初始化R60ABD1实例。
 
@@ -965,8 +881,7 @@ class R60ABD1:
         """
         # 参数验证
         self._validate_init_parameters(
-            parse_interval, struggle_sensitivity, no_person_timing_duration,
-            sleep_cutoff_duration, max_retries, retry_delay, init_timeout
+            parse_interval, struggle_sensitivity, no_person_timing_duration, sleep_cutoff_duration, max_retries, retry_delay, init_timeout
         )
 
         if parse_interval > 500:
@@ -1157,13 +1072,13 @@ class R60ABD1:
         except Exception as e:
             # 初始化失败，停止定时器
             self._is_running = False
-            if hasattr(self, '_timer'):
+            if hasattr(self, "_timer"):
                 self._timer.deinit()
             raise DeviceInitializationError(f"Device initialization failed: {str(e)}")
 
-    def _validate_init_parameters(self, parse_interval, struggle_sensitivity,
-                                  no_person_timing_duration, sleep_cutoff_duration,
-                                  max_retries, retry_delay, init_timeout)-> None:
+    def _validate_init_parameters(
+        self, parse_interval, struggle_sensitivity, no_person_timing_duration, sleep_cutoff_duration, max_retries, retry_delay, init_timeout
+    ) -> None:
         """
         验证初始化参数。
 
@@ -1226,7 +1141,7 @@ class R60ABD1:
         if init_timeout < 1000 or init_timeout > 30000:
             raise ValueError("init_timeout must be between 1000ms and 30000ms")
 
-    def _complete_initialization(self)-> None:
+    def _complete_initialization(self) -> None:
         """
         完整的初始化流程。
 
@@ -1281,7 +1196,7 @@ class R60ABD1:
         if R60ABD1.DEBUG_ENABLED:
             print(f"[Init] Initialization completed in {elapsed_time}ms")
 
-    def _load_device_information(self)-> bool:
+    def _load_device_information(self) -> bool:
         """
         加载设备基本信息。
 
@@ -1309,7 +1224,7 @@ class R60ABD1:
             ("Product Model", self.query_product_model),
             ("Product ID", self.query_product_id),
             ("Hardware Model", self.query_hardware_model),
-            ("Firmware Version", self.query_firmware_version)
+            ("Firmware Version", self.query_firmware_version),
         ]
 
         all_success = True
@@ -1323,7 +1238,7 @@ class R60ABD1:
 
         return all_success
 
-    def _wait_for_device_initialization(self, timeout=None)-> bool:
+    def _wait_for_device_initialization(self, timeout=None) -> bool:
         """
         等待设备初始化完成。
 
@@ -1372,7 +1287,7 @@ class R60ABD1:
             print("[Init] Device initialization timeout")
         return False
 
-    def _reset_and_wait_for_initialization(self)-> bool:
+    def _reset_and_wait_for_initialization(self) -> bool:
         """
         重置设备并等待初始化完成。
 
@@ -1397,11 +1312,7 @@ class R60ABD1:
             - Returns True if both reset and initialization are successful.
         """
         # 发送复位指令
-        reset_success = self._execute_with_retry(
-            self.reset_module,
-            "Reset Device",
-            timeout=1000
-        )
+        reset_success = self._execute_with_retry(self.reset_module, "Reset Device", timeout=1000)
 
         if not reset_success:
             return False
@@ -1414,7 +1325,7 @@ class R60ABD1:
         # 重新等待初始化完成
         return self._wait_for_device_initialization(timeout=10000)  # 10秒超时
 
-    def _auto_configure_device(self)-> None:
+    def _auto_configure_device(self) -> None:
         """
         自动配置设备功能。
 
@@ -1444,11 +1355,9 @@ class R60ABD1:
         if self.heart_rate_enabled:
             configuration_steps.append(("Enable Heart Rate Monitor", self.enable_heart_rate_monitor))
             if self.heart_rate_waveform_enabled:
-                configuration_steps.append(
-                    ("Enable Heart Rate Waveform Report", self.enable_heart_rate_waveform_report))
+                configuration_steps.append(("Enable Heart Rate Waveform Report", self.enable_heart_rate_waveform_report))
             else:
-                configuration_steps.append(
-                    ("Disable Heart Rate Waveform Report", self.disable_heart_rate_waveform_report))
+                configuration_steps.append(("Disable Heart Rate Waveform Report", self.disable_heart_rate_waveform_report))
         else:
             configuration_steps.append(("Disable Heart Rate Monitor", self.disable_heart_rate_monitor))
 
@@ -1470,24 +1379,22 @@ class R60ABD1:
             if self.abnormal_struggle_enabled:
                 configuration_steps.append(("Enable Abnormal Struggle Monitor", self.enable_abnormal_struggle_monitor))
                 # 设置挣扎灵敏度
-                configuration_steps.append(("Set Struggle Sensitivity",
-                                            lambda: self.set_struggle_sensitivity(self.struggle_sensitivity)))
+                configuration_steps.append(("Set Struggle Sensitivity", lambda: self.set_struggle_sensitivity(self.struggle_sensitivity)))
             else:
-                configuration_steps.append(
-                    ("Disable Abnormal Struggle Monitor", self.disable_abnormal_struggle_monitor))
+                configuration_steps.append(("Disable Abnormal Struggle Monitor", self.disable_abnormal_struggle_monitor))
 
             # 无人计时配置
             if self.no_person_timing_enabled:
                 configuration_steps.append(("Enable No Person Timing", self.enable_no_person_timing))
                 # 设置无人计时时长
-                configuration_steps.append(("Set No Person Timing Duration",
-                                            lambda: self.set_no_person_timing_duration(self.no_person_timing_duration)))
+                configuration_steps.append(
+                    ("Set No Person Timing Duration", lambda: self.set_no_person_timing_duration(self.no_person_timing_duration))
+                )
             else:
                 configuration_steps.append(("Disable No Person Timing", self.disable_no_person_timing))
 
             # 设置睡眠截止时长
-            configuration_steps.append(("Set Sleep End Duration",
-                                        lambda: self.set_sleep_end_duration(self.sleep_cutoff_duration)))
+            configuration_steps.append(("Set Sleep End Duration", lambda: self.set_sleep_end_duration(self.sleep_cutoff_duration)))
         else:
             configuration_steps.append(("Disable Sleep Monitor", self.disable_sleep_monitor))
 
@@ -1621,27 +1528,27 @@ class R60ABD1:
             - Configuration errors list is a copy of the original list to prevent external modification.
         """
         return {
-            'initialization_complete': self._initialization_complete,
-            'configuration_errors': self._configuration_errors.copy(),
-            'device_info': {
-                'product_model': self.product_model,
-                'product_id': self.product_id,
-                'hardware_model': self.hardware_model,
-                'firmware_version': self.firmware_version
+            "initialization_complete": self._initialization_complete,
+            "configuration_errors": self._configuration_errors.copy(),
+            "device_info": {
+                "product_model": self.product_model,
+                "product_id": self.product_id,
+                "hardware_model": self.hardware_model,
+                "firmware_version": self.firmware_version,
             },
-            'current_settings': {
-                'presence_enabled': self.presence_enabled,
-                'heart_rate_enabled': self.heart_rate_enabled,
-                'heart_rate_waveform_enabled': self.heart_rate_waveform_enabled,
-                'breath_monitoring_enabled': self.breath_monitoring_enabled,
-                'breath_waveform_enabled': self.breath_waveform_enabled,
-                'sleep_monitoring_enabled': self.sleep_monitoring_enabled,
-                'abnormal_struggle_enabled': self.abnormal_struggle_enabled,
-                'struggle_sensitivity': self.struggle_sensitivity,
-                'no_person_timing_enabled': self.no_person_timing_enabled,
-                'no_person_timing_duration': self.no_person_timing_duration,
-                'sleep_cutoff_duration': self.sleep_cutoff_duration
-            }
+            "current_settings": {
+                "presence_enabled": self.presence_enabled,
+                "heart_rate_enabled": self.heart_rate_enabled,
+                "heart_rate_waveform_enabled": self.heart_rate_waveform_enabled,
+                "breath_monitoring_enabled": self.breath_monitoring_enabled,
+                "breath_waveform_enabled": self.breath_waveform_enabled,
+                "sleep_monitoring_enabled": self.sleep_monitoring_enabled,
+                "abnormal_struggle_enabled": self.abnormal_struggle_enabled,
+                "struggle_sensitivity": self.struggle_sensitivity,
+                "no_person_timing_enabled": self.no_person_timing_enabled,
+                "no_person_timing_duration": self.no_person_timing_duration,
+                "sleep_cutoff_duration": self.sleep_cutoff_duration,
+            },
         }
 
     def _start_timer(self) -> None:
@@ -1775,7 +1682,7 @@ class R60ABD1:
 
         # 提取符号位和数值
         sign_bit = (unsigned_value >> 15) & 0x1  # 最高位为符号位
-        magnitude = unsigned_value & 0x7FFF      # 低15位为数值
+        magnitude = unsigned_value & 0x7FFF  # 低15位为数值
 
         # 根据符号位确定正负
         if sign_bit == 1:  # 负数
@@ -1816,13 +1723,7 @@ class R60ABD1:
         if len(data_bytes) != 5:
             return (128, 128, 128, 128, 128)
 
-        return (
-            data_bytes[0],
-            data_bytes[1],
-            data_bytes[2],
-            data_bytes[3],
-            data_bytes[4]
-        )
+        return (data_bytes[0], data_bytes[1], data_bytes[2], data_bytes[3], data_bytes[4])
 
     def _parse_sleep_comprehensive_data(self, data_bytes) -> tuple:
         """
@@ -1875,7 +1776,7 @@ class R60ABD1:
             data_bytes[4],  # 翻身次数: 处于浅睡或深睡的翻身次数
             data_bytes[5],  # 大幅度体动占比: 0~100
             data_bytes[6],  # 小幅度体动占比: 0~100
-            data_bytes[7]  # 呼吸暂停次数: 10分钟呼吸暂停次数
+            data_bytes[7],  # 呼吸暂停次数: 10分钟呼吸暂停次数
         )
 
     def _parse_sleep_statistics_data(self, data_bytes) -> tuple:
@@ -1943,7 +1844,7 @@ class R60ABD1:
             data_bytes[8],  # 翻身次数: 0~255
             data_bytes[9],  # 平均呼吸: 0~25
             data_bytes[10],  # 平均心跳: 0~100
-            data_bytes[11]  # 呼吸暂停次数: 0~10
+            data_bytes[11],  # 呼吸暂停次数: 0~10
         )
 
     def _parse_breath_waveform_data(self, data_bytes) -> tuple:
@@ -1979,13 +1880,7 @@ class R60ABD1:
         if len(data_bytes) != 5:
             return (128, 128, 128, 128, 128)
 
-        return (
-            data_bytes[0],
-            data_bytes[1],
-            data_bytes[2],
-            data_bytes[3],
-            data_bytes[4]
-        )
+        return (data_bytes[0], data_bytes[1], data_bytes[2], data_bytes[3], data_bytes[4])
 
     def _parse_product_info_data(self, data_bytes) -> tuple:
         """
@@ -2022,9 +1917,9 @@ class R60ABD1:
                 print(f"[Parse] Raw product data: {data_bytes}, hex: {data_bytes.hex()}")
 
             # 找到第一个空字节的位置，截取有效部分
-            if b'\x00' in data_bytes:
+            if b"\x00" in data_bytes:
                 # 找到第一个空字节，截取之前的部分
-                null_index = data_bytes.index(b'\x00')
+                null_index = data_bytes.index(b"\x00")
                 valid_data = data_bytes[:null_index]
                 if R60ABD1.DEBUG_ENABLED:
                     print(f"[Parse] After null removal: {valid_data}, hex: {valid_data.hex()}")
@@ -2033,7 +1928,7 @@ class R60ABD1:
 
             # 解码为字符串 - 移除关键字参数
             # MicroPython 的 decode 方法不支持 errors='ignore' 关键字参数
-            product_info = valid_data.decode('utf-8').strip()
+            product_info = valid_data.decode("utf-8").strip()
             if R60ABD1.DEBUG_ENABLED:
                 print(f"[Parse] Decoded product info: '{product_info}'")
 
@@ -2045,7 +1940,7 @@ class R60ABD1:
 
             # 尝试使用 ascii 解码作为备选方案
             try:
-                product_info = valid_data.decode('ascii').strip()
+                product_info = valid_data.decode("ascii").strip()
                 if R60ABD1.DEBUG_ENABLED:
                     print(f"[Parse] ASCII decoded product info: '{product_info}'")
                 return (product_info,)
@@ -2087,9 +1982,9 @@ class R60ABD1:
                 print(f"[Parse] Raw firmware data: {data_bytes}, hex: {data_bytes.hex()}")
 
             # 找到第一个空字节的位置，截取有效部分
-            if b'\x00' in data_bytes:
+            if b"\x00" in data_bytes:
                 # 找到第一个空字节，截取之前的部分
-                null_index = data_bytes.index(b'\x00')
+                null_index = data_bytes.index(b"\x00")
                 valid_data = data_bytes[:null_index]
                 if R60ABD1.DEBUG_ENABLED:
                     print(f"[Parse] After null removal: {valid_data}, hex: {valid_data.hex()}")
@@ -2097,7 +1992,7 @@ class R60ABD1:
                 valid_data = data_bytes
 
             # 解码为字符串 - 移除关键字参数
-            version = valid_data.decode('utf-8').strip()
+            version = valid_data.decode("utf-8").strip()
             if R60ABD1.DEBUG_ENABLED:
                 print(f"[Parse] Decoded firmware version: '{version}'")
 
@@ -2109,7 +2004,7 @@ class R60ABD1:
 
             # 尝试使用 ascii 解码作为备选方案
             try:
-                version = valid_data.decode('ascii').strip()
+                version = valid_data.decode("ascii").strip()
                 if R60ABD1.DEBUG_ENABLED:
                     print(f"[Parse] ASCII decoded firmware version: '{version}'")
                 return (version,)
@@ -2182,13 +2077,11 @@ class R60ABD1:
             cmd_params = self.COMMAND_MAP[operation_type]
 
             # 使用传入的数据或默认数据
-            data_to_send = data if data is not None else cmd_params['data']
+            data_to_send = data if data is not None else cmd_params["data"]
 
             # 构建并发送帧
             operation_frame = self.data_processor.build_and_send_frame(
-                control_byte=cmd_params['control_byte'],
-                command_byte=cmd_params['command_byte'],
-                data=data_to_send
+                control_byte=cmd_params["control_byte"], command_byte=cmd_params["command_byte"], data=data_to_send
             )
 
             if not operation_frame:
@@ -2198,7 +2091,7 @@ class R60ABD1:
             if R60ABD1.DEBUG_ENABLED:
                 operation_name = self.QUERY_NAME_MAP.get(operation_type, f"Unknown({operation_type})")
                 print(f"[Operation] {operation_name} operation sent")
-                frame_hex = ' '.join(['{:02X}'.format(b) for b in operation_frame])
+                frame_hex = " ".join(["{:02X}".format(b) for b in operation_frame])
                 print(f"[Operation] Sent frame: {frame_hex}")
 
             # 等待设备响应
@@ -2329,10 +2222,7 @@ class R60ABD1:
         Raises:
             ValueError: 如果返回的运动状态不是预定义的有效值
         """
-        success, motion_status = self._execute_operation(
-            R60ABD1.TYPE_QUERY_HUMAN_MOTION_INFO,
-            timeout=timeout
-        )
+        success, motion_status = self._execute_operation(R60ABD1.TYPE_QUERY_HUMAN_MOTION_INFO, timeout=timeout)
         # 验证返回的运动状态是否有效
         if success and motion_status not in (R60ABD1.MOTION_NONE, R60ABD1.MOTION_STATIC, R60ABD1.MOTION_ACTIVE):
             raise ValueError(f"Invalid motion status: {motion_status}")
@@ -2560,13 +2450,9 @@ class R60ABD1:
         Raises:
             ValueError: 如果返回的呼吸状态不是预定义的有效值
         """
-        success, breath_status = self._execute_operation(
-            R60ABD1.TYPE_QUERY_BREATH_INFO,
-            timeout=timeout
-        )
+        success, breath_status = self._execute_operation(R60ABD1.TYPE_QUERY_BREATH_INFO, timeout=timeout)
         # 验证返回的呼吸状态是否有效
-        if success and breath_status not in (R60ABD1.BREATH_NORMAL, R60ABD1.BREATH_HIGH,
-                                             R60ABD1.BREATH_LOW, R60ABD1.BREATH_NONE):
+        if success and breath_status not in (R60ABD1.BREATH_NORMAL, R60ABD1.BREATH_HIGH, R60ABD1.BREATH_LOW, R60ABD1.BREATH_NONE):
             raise ValueError(f"Invalid breath status: {breath_status}")
 
         return success, breath_status
@@ -2723,13 +2609,9 @@ class R60ABD1:
         Raises:
             ValueError: 如果返回的挣扎状态不是预定义的有效值
         """
-        success, struggle_status = self._execute_operation(
-            R60ABD1.TYPE_QUERY_ABNORMAL_STRUGGLE_STATUS,
-            timeout=timeout
-        )
+        success, struggle_status = self._execute_operation(R60ABD1.TYPE_QUERY_ABNORMAL_STRUGGLE_STATUS, timeout=timeout)
         # 验证返回的挣扎状态是否有效
-        if success and struggle_status not in (R60ABD1.STRUGGLE_NONE, R60ABD1.STRUGGLE_NORMAL,
-                                               R60ABD1.STRUGGLE_ABNORMAL):
+        if success and struggle_status not in (R60ABD1.STRUGGLE_NONE, R60ABD1.STRUGGLE_NORMAL, R60ABD1.STRUGGLE_ABNORMAL):
             raise ValueError(f"Invalid struggle status: {struggle_status}")
 
         return success, struggle_status
@@ -2876,14 +2758,10 @@ class R60ABD1:
         Raises:
             ValueError: 如果返回的无人计时状态不是预定义的有效值
         """
-        success, timing_status = self._execute_operation(
-            R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_STATUS,
-            timeout=timeout
-        )
+        success, timing_status = self._execute_operation(R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_STATUS, timeout=timeout)
 
         # 验证返回的无人计时状态是否有效
-        if success and timing_status not in (R60ABD1.NO_PERSON_TIMING_NONE, R60ABD1.NO_PERSON_TIMING_NORMAL,
-                                             R60ABD1.NO_PERSON_TIMING_ABNORMAL):
+        if success and timing_status not in (R60ABD1.NO_PERSON_TIMING_NONE, R60ABD1.NO_PERSON_TIMING_NORMAL, R60ABD1.NO_PERSON_TIMING_ABNORMAL):
             raise ValueError(f"Invalid no person timing status: {timing_status}")
 
         return success, timing_status
@@ -2902,10 +2780,7 @@ class R60ABD1:
         Raises:
             ValueError: 如果返回的床状态不是预定义的有效值
         """
-        success, bed_status = self._execute_operation(
-            R60ABD1.TYPE_QUERY_BED_STATUS,
-            timeout=timeout
-        )
+        success, bed_status = self._execute_operation(R60ABD1.TYPE_QUERY_BED_STATUS, timeout=timeout)
         # 验证返回的床状态是否有效
         if success and bed_status not in (R60ABD1.BED_LEAVE, R60ABD1.BED_ENTER, R60ABD1.BED_NONE):
             raise ValueError(f"Invalid bed status: {bed_status}")
@@ -2927,13 +2802,9 @@ class R60ABD1:
         Raises:
             ValueError: 如果返回的睡眠状态不是预定义的有效值
         """
-        success, sleep_status = self._execute_operation(
-            R60ABD1.TYPE_QUERY_SLEEP_STATUS,
-            timeout=timeout
-        )
+        success, sleep_status = self._execute_operation(R60ABD1.TYPE_QUERY_SLEEP_STATUS, timeout=timeout)
         # 验证返回的睡眠状态是否有效
-        if success and sleep_status not in (R60ABD1.SLEEP_DEEP, R60ABD1.SLEEP_LIGHT,
-                                            R60ABD1.SLEEP_AWAKE, R60ABD1.SLEEP_NONE):
+        if success and sleep_status not in (R60ABD1.SLEEP_DEEP, R60ABD1.SLEEP_LIGHT, R60ABD1.SLEEP_AWAKE, R60ABD1.SLEEP_NONE):
             raise ValueError(f"Invalid sleep status: {sleep_status}")
 
         return success, sleep_status
@@ -3018,13 +2889,14 @@ class R60ABD1:
         Raises:
             ValueError: 如果返回的异常状态不是预定义的有效值
         """
-        success, anomaly_status = self._execute_operation(
-            R60ABD1.TYPE_QUERY_SLEEP_ANOMALY,
-            timeout=timeout
-        )
+        success, anomaly_status = self._execute_operation(R60ABD1.TYPE_QUERY_SLEEP_ANOMALY, timeout=timeout)
         # 验证返回的异常状态是否有效
-        if success and anomaly_status not in (R60ABD1.SLEEP_ANOMALY_SHORT, R60ABD1.SLEEP_ANOMALY_LONG,
-                                              R60ABD1.SLEEP_ANOMALY_NO_PERSON, R60ABD1.SLEEP_ANOMALY_NONE):
+        if success and anomaly_status not in (
+            R60ABD1.SLEEP_ANOMALY_SHORT,
+            R60ABD1.SLEEP_ANOMALY_LONG,
+            R60ABD1.SLEEP_ANOMALY_NO_PERSON,
+            R60ABD1.SLEEP_ANOMALY_NONE,
+        ):
             raise ValueError(f"Invalid sleep anomaly status: {anomaly_status}")
 
         return success, anomaly_status
@@ -3057,13 +2929,14 @@ class R60ABD1:
         Raises:
             ValueError: 如果返回的质量评级不是预定义的有效值
         """
-        success, quality_level = self._execute_operation(
-            R60ABD1.TYPE_QUERY_SLEEP_QUALITY_LEVEL,
-            timeout=timeout
-        )
+        success, quality_level = self._execute_operation(R60ABD1.TYPE_QUERY_SLEEP_QUALITY_LEVEL, timeout=timeout)
         # 验证返回的质量评级是否有效
-        if success and quality_level not in (R60ABD1.SLEEP_QUALITY_NONE, R60ABD1.SLEEP_QUALITY_GOOD,
-                                             R60ABD1.SLEEP_QUALITY_NORMAL, R60ABD1.SLEEP_QUALITY_POOR):
+        if success and quality_level not in (
+            R60ABD1.SLEEP_QUALITY_NONE,
+            R60ABD1.SLEEP_QUALITY_GOOD,
+            R60ABD1.SLEEP_QUALITY_NORMAL,
+            R60ABD1.SLEEP_QUALITY_POOR,
+        ):
             raise ValueError(f"Invalid sleep quality level: {quality_level}")
 
         return success, quality_level
@@ -3078,9 +2951,7 @@ class R60ABD1:
             response_name: 响应名称（用于调试）
         """
         # 情况1：正确时间正确读取
-        if (self._query_in_progress and
-                self._current_query_type == expected_type and
-                not self._query_response_received):
+        if self._query_in_progress and self._current_query_type == expected_type and not self._query_response_received:
 
             self._query_result = response_data
             self._query_response_received = True
@@ -3092,8 +2963,7 @@ class R60ABD1:
         # 情况2：当前正在进行其他类型的查询，但收到了本响应
         elif self._query_in_progress and self._current_query_type != expected_type:
             if R60ABD1.DEBUG_ENABLED:
-                current_query = self.QUERY_NAME_MAP.get(self._current_query_type,
-                                                        f"Unknown({self._current_query_type})")
+                current_query = self.QUERY_NAME_MAP.get(self._current_query_type, f"Unknown({self._current_query_type})")
                 print(f"[Query] Unexpected {response_name} response during {current_query} query: {response_data}")
 
         # 情况3：没有查询在进行，但收到了查询响应
@@ -3155,9 +3025,9 @@ class R60ABD1:
             - Update corresponding device property values.
             - Handle query responses and active reporting data.
         """
-        control = frame['control_byte']
-        command = frame['command_byte']
-        data = frame['data']
+        control = frame["control_byte"]
+        command = frame["command_byte"]
+        data = frame["data"]
 
         # 心跳包 (0x01)
         if control == 0x01:
@@ -3169,21 +3039,13 @@ class R60ABD1:
             # 心跳包查询响应
             elif command == 0x80:
                 self.heartbeat_last_received = time.ticks_ms()
-                self._handle_query_response(
-                    R60ABD1.TYPE_QUERY_HEARTBEAT,
-                    True,
-                    "Heartbeat"
-                )
+                self._handle_query_response(R60ABD1.TYPE_QUERY_HEARTBEAT, True, "Heartbeat")
 
             # 模组复位响应
             elif command == 0x02:
                 self.module_reset_flag = True
                 self.module_reset_timestamp = time.ticks_ms()
-                self._handle_query_response(
-                    R60ABD1.TYPE_MODULE_RESET,
-                    True,
-                    "Module Reset"
-                )
+                self._handle_query_response(R60ABD1.TYPE_MODULE_RESET, True, "Module Reset")
 
         # 产品信息指令 (0x02)
         elif control == 0x02:
@@ -3192,11 +3054,7 @@ class R60ABD1:
                 if data:
                     product_info = self._parse_product_info_data(data)[0]
                     self.product_model = product_info
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_PRODUCT_MODEL,
-                        product_info,
-                        "Product Model"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_PRODUCT_MODEL, product_info, "Product Model")
 
             # 产品ID查询响应
             elif command == 0xA2:
@@ -3205,11 +3063,7 @@ class R60ABD1:
                     product_id = self._parse_product_info_data(data)[0]
                     # 更新产品ID属性
                     self.product_id = product_id
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_PRODUCT_ID,
-                        product_id,
-                        "Product ID"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_PRODUCT_ID, product_id, "Product ID")
 
             # 硬件型号查询响应
             elif command == 0xA3:
@@ -3218,11 +3072,7 @@ class R60ABD1:
                     hardware_model = self._parse_product_info_data(data)[0]
                     # 更新硬件型号属性
                     self.hardware_model = hardware_model
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HARDWARE_MODEL,
-                        hardware_model,
-                        "Hardware Model"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HARDWARE_MODEL, hardware_model, "Hardware Model")
 
             # 固件版本查询响应
             elif command == 0xA4:
@@ -3231,18 +3081,14 @@ class R60ABD1:
                     firmware_version = self._parse_firmware_version_data(data)[0]
                     # 更新固件版本属性
                     self.firmware_version = firmware_version
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_FIRMWARE_VERSION,
-                        firmware_version,
-                        "Firmware Version"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_FIRMWARE_VERSION, firmware_version, "Firmware Version")
 
         # 系统初始化状态 (0x05)
         elif control == 0x05:
             # 初始化完成信息
             if command == 0x01:
                 if data and len(data) > 0:
-                    self.system_initialized = (data[0] == 0x01)
+                    self.system_initialized = data[0] == 0x01
                     self.system_initialized_timestamp = time.ticks_ms()
                     if R60ABD1.DEBUG_ENABLED:
                         status = "completed" if self.system_initialized else "not completed"
@@ -3251,20 +3097,16 @@ class R60ABD1:
             # 初始化完成查询响应
             elif command == 0x81:
                 if data and len(data) > 0:
-                    init_status = (data[0] == 0x01)
+                    init_status = data[0] == 0x01
                     self.system_initialized = init_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_INIT_COMPLETE,
-                        init_status,
-                        "Init Complete"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_INIT_COMPLETE, init_status, "Init Complete")
 
         # 雷达探测范围 (0x07)
         elif control == 0x07:
             # 位置越界状态上报
             if command == 0x07:
                 if data and len(data) > 0:
-                    self.radar_in_range = (data[0] == 0x01)
+                    self.radar_in_range = data[0] == 0x01
                     if R60ABD1.DEBUG_ENABLED:
                         status = "in range" if self.radar_in_range else "out of range"
                         print(f"[Radar] {status}")
@@ -3272,34 +3114,22 @@ class R60ABD1:
             # 位置越界状态查询响应
             elif command == 0x87:
                 if data and len(data) > 0:
-                    boundary_status = (data[0] == 0x01)
+                    boundary_status = data[0] == 0x01
                     self.radar_in_range = not boundary_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_RADAR_RANGE_BOUNDARY,
-                        boundary_status,
-                        "Radar Range Boundary"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_RADAR_RANGE_BOUNDARY, boundary_status, "Radar Range Boundary")
 
         # 人体存在检测 (0x80)
         elif control == 0x80:
             # 人体存在开关控制响应
             if command == 0x00:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.presence_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_HUMAN_PRESENCE_ON,
-                            True,
-                            "Human Presence ON"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_HUMAN_PRESENCE_ON, True, "Human Presence ON")
                     else:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_HUMAN_PRESENCE_OFF,
-                            True,
-                            "Human Presence OFF"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_HUMAN_PRESENCE_OFF, True, "Human Presence OFF")
 
             # 存在信息
             if command == 0x01:
@@ -3312,57 +3142,37 @@ class R60ABD1:
             # 人体存在开关查询响应
             elif command == 0x80:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.presence_enabled = switch_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH,
-                        switch_status,
-                        "Human Presence Switch"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HUMAN_PRESENCE_SWITCH, switch_status, "Human Presence Switch")
 
             # 存在信息（查询响应）
             elif command == 0x81:
                 if data and len(data) > 0:
                     presence_value = data[0]
                     self.presence_status = presence_value
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HUMAN_EXISTENCE_INFO,
-                        presence_value,
-                        "Presence Status"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HUMAN_EXISTENCE_INFO, presence_value, "Presence Status")
 
             # 运动信息查询响应
             elif command == 0x82:
                 if data and len(data) > 0:
                     motion_value = data[0]
                     self.motion_status = motion_value
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HUMAN_MOTION_INFO,
-                        motion_value,
-                        "Human Motion Info"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HUMAN_MOTION_INFO, motion_value, "Human Motion Info")
 
             # 体动参数查询响应
             elif command == 0x83:
                 if data and len(data) > 0:
                     motion_param = data[0]
                     self.movement_parameter = motion_param
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HUMAN_BODY_MOTION_PARAM,
-                        motion_param,
-                        "Body Motion Parameter"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HUMAN_BODY_MOTION_PARAM, motion_param, "Body Motion Parameter")
 
             # 人体距离查询响应
             elif command == 0x84:
                 if data and len(data) >= 2:
                     distance = (data[0] << 8) | data[1]
                     self.human_distance = distance
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HUMAN_DISTANCE,
-                        distance,
-                        "Human Distance"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HUMAN_DISTANCE, distance, "Human Distance")
 
             # 人体方位查询响应
             elif command == 0x85:
@@ -3372,18 +3182,13 @@ class R60ABD1:
                     self.human_position_y = y
                     self.human_position_z = z
                     position_data = (x, y, z)
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HUMAN_DIRECTION,
-                        position_data,
-                        "Human Direction"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HUMAN_DIRECTION, position_data, "Human Direction")
 
             elif command == 0x02:  # 运动信息
                 if data and len(data) > 0:
                     self.motion_status = data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        status_text = ["No motion", "Static", "Active"][
-                            self.motion_status] if self.motion_status < 3 else "Unknown"
+                        status_text = ["No motion", "Static", "Active"][self.motion_status] if self.motion_status < 3 else "Unknown"
                         print(f"[Motion] {status_text}")
 
             elif command == 0x03:  # 体动参数
@@ -3414,8 +3219,7 @@ class R60ABD1:
                 if data and len(data) > 0:
                     self.breath_status = data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        status_text = ["Normal", "High", "Low", "None"][
-                            self.breath_status - 1] if 1 <= self.breath_status <= 4 else "Unknown"
+                        status_text = ["Normal", "High", "Low", "None"][self.breath_status - 1] if 1 <= self.breath_status <= 4 else "Unknown"
                         print(f"[Breath] Status: {status_text}")
 
             # 呼吸数值
@@ -3436,117 +3240,73 @@ class R60ABD1:
             # 呼吸监测开关控制响应
             elif command == 0x00:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.breath_monitoring_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_BREATH_MONITOR_ON,
-                            True,
-                            "Breath Monitor ON"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_BREATH_MONITOR_ON, True, "Breath Monitor ON")
                     else:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_BREATH_MONITOR_OFF,
-                            True,
-                            "Breath Monitor OFF"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_BREATH_MONITOR_OFF, True, "Breath Monitor OFF")
 
             # 呼吸波形上报开关控制响应
             elif command == 0x0C:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.breath_waveform_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_BREATH_WAVEFORM_REPORT_ON,
-                            True,
-                            "Breath Waveform Report ON"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_BREATH_WAVEFORM_REPORT_ON, True, "Breath Waveform Report ON")
                     else:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_BREATH_WAVEFORM_REPORT_OFF,
-                            True,
-                            "Breath Waveform Report OFF"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_BREATH_WAVEFORM_REPORT_OFF, True, "Breath Waveform Report OFF")
 
             # 低缓呼吸阈值设置响应
             elif command == 0x0B:
                 if data and len(data) > 0:
                     threshold = data[0]
                     self.low_breath_threshold = threshold
-                    self._handle_query_response(
-                        R60ABD1.TYPE_SET_LOW_BREATH_THRESHOLD,
-                        threshold,
-                        "Set Low Breath Threshold"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_SET_LOW_BREATH_THRESHOLD, threshold, "Set Low Breath Threshold")
 
             # 呼吸监测开关查询响应
             elif command == 0x80:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.breath_monitoring_enabled = switch_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_BREATH_MONITOR_SWITCH,
-                        switch_status,
-                        "Breath Monitor Switch"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_BREATH_MONITOR_SWITCH, switch_status, "Breath Monitor Switch")
 
             # 低缓呼吸阈值查询响应
             elif command == 0x8B:
                 if data and len(data) > 0:
                     threshold = data[0]
                     self.low_breath_threshold = threshold
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_LOW_BREATH_THRESHOLD,
-                        threshold,
-                        "Query Low Breath Threshold"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_LOW_BREATH_THRESHOLD, threshold, "Query Low Breath Threshold")
 
             # 呼吸信息查询响应
             elif command == 0x81:
                 if data and len(data) > 0:
                     breath_status = data[0]
                     self.breath_status = breath_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_BREATH_INFO,
-                        breath_status,
-                        "Breath Info"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_BREATH_INFO, breath_status, "Breath Info")
 
             # 呼吸数值查询响应
             elif command == 0x82:
                 if data and len(data) > 0:
                     breath_value = data[0]
                     self.breath_value = breath_value
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_BREATH_VALUE,
-                        breath_value,
-                        "Breath Value"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_BREATH_VALUE, breath_value, "Breath Value")
 
             # 呼吸波形上报开关查询响应
             elif command == 0x8C:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.breath_waveform_enabled = switch_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_BREATH_WAVEFORM_REPORT_SWITCH,
-                        switch_status,
-                        "Breath Waveform Report Switch"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_BREATH_WAVEFORM_REPORT_SWITCH, switch_status, "Breath Waveform Report Switch")
 
             # 呼吸波形查询响应
             elif command == 0x85:
                 if data and len(data) == 5:
                     waveform = self._parse_breath_waveform_data(data)
                     self.breath_waveform = list(waveform)
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_BREATH_WAVEFORM,
-                        list(waveform),
-                        "Breath Waveform"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_BREATH_WAVEFORM, list(waveform), "Breath Waveform")
 
         # 心率监测 (0x85)
         elif control == 0x85:
@@ -3566,95 +3326,63 @@ class R60ABD1:
             # 心率监测开关控制响应
             elif command == 0x00:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.heart_rate_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_HEART_RATE_MONITOR_ON,
-                            True,
-                            "Heart Rate Monitor ON"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_HEART_RATE_MONITOR_ON, True, "Heart Rate Monitor ON")
                     else:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_HEART_RATE_MONITOR_OFF,
-                            True,
-                            "Heart Rate Monitor OFF"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_HEART_RATE_MONITOR_OFF, True, "Heart Rate Monitor OFF")
             # 心率波形上报开关控制响应
             elif command == 0x0A:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.heart_rate_waveform_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_HEART_RATE_WAVEFORM_REPORT_ON,
-                            True,
-                            "Heart Rate Waveform Report ON"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_HEART_RATE_WAVEFORM_REPORT_ON, True, "Heart Rate Waveform Report ON")
                     else:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_HEART_RATE_WAVEFORM_REPORT_OFF,
-                            True,
-                            "Heart Rate Waveform Report OFF"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_HEART_RATE_WAVEFORM_REPORT_OFF, True, "Heart Rate Waveform Report OFF")
             # 心率监测开关查询响应
             elif command == 0x80:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.heart_rate_enabled = switch_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HEART_RATE_MONITOR_SWITCH,
-                        switch_status,
-                        "Heart Rate Monitor Switch"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HEART_RATE_MONITOR_SWITCH, switch_status, "Heart Rate Monitor Switch")
             # 心率波形上报开关查询响应
             elif command == 0x8A:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.heart_rate_waveform_enabled = switch_status
                     self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HEART_RATE_WAVEFORM_REPORT_SWITCH,
-                        switch_status,
-                        "Heart Rate Waveform Report Switch"
+                        R60ABD1.TYPE_QUERY_HEART_RATE_WAVEFORM_REPORT_SWITCH, switch_status, "Heart Rate Waveform Report Switch"
                     )
             # 心率数值查询响应
             elif command == 0x82:
                 if data and len(data) > 0:
                     heart_rate = data[0]
                     self.heart_rate_value = heart_rate
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HEART_RATE_VALUE,
-                        heart_rate,
-                        "Heart Rate Value"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HEART_RATE_VALUE, heart_rate, "Heart Rate Value")
             # 心率波形查询响应
             elif command == 0x85:
                 if data and len(data) == 5:
                     waveform = self._parse_heart_rate_waveform_data(data)
                     self.heart_rate_waveform = list(waveform)
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_HEART_RATE_WAVEFORM,
-                        list(waveform),
-                        "Heart Rate Waveform"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_HEART_RATE_WAVEFORM, list(waveform), "Heart Rate Waveform")
         # 睡眠监测 (0x84)
         elif control == 0x84:
             if command == 0x01:  # 入床/离床状态
                 if data and len(data) > 0:
                     self.bed_status = data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        status_text = ["Leave bed", "Enter bed", "None"][
-                            self.bed_status] if self.bed_status < 3 else "Unknown"
+                        status_text = ["Leave bed", "Enter bed", "None"][self.bed_status] if self.bed_status < 3 else "Unknown"
                         print(f"[Bed] Status: {status_text}")
 
             elif command == 0x02:  # 睡眠状态
                 if data and len(data) > 0:
                     self.sleep_status = data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        status_text = ["Deep sleep", "Light sleep", "Awake", "None"][
-                            self.sleep_status] if self.sleep_status < 4 else "Unknown"
+                        status_text = ["Deep sleep", "Light sleep", "Awake", "None"][self.sleep_status] if self.sleep_status < 4 else "Unknown"
                         print(f"[Sleep] Status: {status_text}")
 
             elif command == 0x03:  # 清醒时长
@@ -3686,14 +3414,14 @@ class R60ABD1:
                     comprehensive_data = self._parse_sleep_comprehensive_data(data)
                     # 更新到字典属性
                     self.sleep_comprehensive_status = {
-                        'presence': comprehensive_data[0],
-                        'sleep_status': comprehensive_data[1],
-                        'avg_breath': comprehensive_data[2],
-                        'avg_heart_rate': comprehensive_data[3],
-                        'turnover_count': comprehensive_data[4],
-                        'large_movement_ratio': comprehensive_data[5],
-                        'small_movement_ratio': comprehensive_data[6],
-                        'apnea_count': comprehensive_data[7]
+                        "presence": comprehensive_data[0],
+                        "sleep_status": comprehensive_data[1],
+                        "avg_breath": comprehensive_data[2],
+                        "avg_heart_rate": comprehensive_data[3],
+                        "turnover_count": comprehensive_data[4],
+                        "large_movement_ratio": comprehensive_data[5],
+                        "small_movement_ratio": comprehensive_data[6],
+                        "apnea_count": comprehensive_data[7],
                     }
                     if R60ABD1.DEBUG_ENABLED:
                         print(f"[Sleep] Comprehensive status updated")
@@ -3711,331 +3439,225 @@ class R60ABD1:
                 if data and len(data) > 0:
                     self.sleep_anomaly = data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        status_text = ["Short sleep (<4h)", "Long sleep (>12h)", "No person anomaly", "Normal"][
-                            self.sleep_anomaly] if self.sleep_anomaly < 4 else "Unknown"
+                        status_text = (
+                            ["Short sleep (<4h)", "Long sleep (>12h)", "No person anomaly", "Normal"][self.sleep_anomaly]
+                            if self.sleep_anomaly < 4
+                            else "Unknown"
+                        )
                         print(f"[Sleep] Anomaly: {status_text}")
 
             elif command == 0x10:  # 睡眠质量评级
                 if data and len(data) > 0:
                     self.sleep_quality_rating = data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        status_text = ["None", "Good", "Normal", "Poor"][
-                            self.sleep_quality_rating] if self.sleep_quality_rating < 4 else "Unknown"
+                        status_text = ["None", "Good", "Normal", "Poor"][self.sleep_quality_rating] if self.sleep_quality_rating < 4 else "Unknown"
                         print(f"[Sleep] Quality rating: {status_text}")
 
             elif command == 0x11:  # 异常挣扎状态
                 if data and len(data) > 0:
                     self.abnormal_struggle_status = data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        status_text = ["None", "Normal", "Abnormal"][
-                            self.abnormal_struggle_status] if self.abnormal_struggle_status < 3 else "Unknown"
+                        status_text = (
+                            ["None", "Normal", "Abnormal"][self.abnormal_struggle_status] if self.abnormal_struggle_status < 3 else "Unknown"
+                        )
                         print(f"[Sleep] Struggle status: {status_text}")
 
             elif command == 0x12:  # 无人计时状态
                 if data and len(data) > 0:
                     self.no_person_timing_status = data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        status_text = ["None", "Normal", "Abnormal"][
-                            self.no_person_timing_status] if self.no_person_timing_status < 3 else "Unknown"
+                        status_text = ["None", "Normal", "Abnormal"][self.no_person_timing_status] if self.no_person_timing_status < 3 else "Unknown"
                         print(f"[Sleep] No person timing: {status_text}")
 
             # 睡眠监测开关控制响应
             elif command == 0x00:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.sleep_monitoring_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_SLEEP_MONITOR_ON,
-                            True,
-                            "Sleep Monitor ON"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_SLEEP_MONITOR_ON, True, "Sleep Monitor ON")
                     else:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_SLEEP_MONITOR_OFF,
-                            True,
-                            "Sleep Monitor OFF"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_SLEEP_MONITOR_OFF, True, "Sleep Monitor OFF")
 
             # 异常挣扎状态开关控制响应
             elif command == 0x13:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.abnormal_struggle_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_ABNORMAL_STRUGGLE_ON,
-                            True,
-                            "Abnormal Struggle Monitor ON"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_ABNORMAL_STRUGGLE_ON, True, "Abnormal Struggle Monitor ON")
                     else:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_ABNORMAL_STRUGGLE_OFF,
-                            True,
-                            "Abnormal Struggle Monitor OFF"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_ABNORMAL_STRUGGLE_OFF, True, "Abnormal Struggle Monitor OFF")
 
             # 挣扎灵敏度设置响应
             elif command == 0x1A:
                 if data and len(data) > 0:
                     sensitivity = data[0]
                     self.struggle_sensitivity = sensitivity
-                    self._handle_query_response(
-                        R60ABD1.TYPE_SET_STRUGGLE_SENSITIVITY,
-                        sensitivity,
-                        "Set Struggle Sensitivity"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_SET_STRUGGLE_SENSITIVITY, sensitivity, "Set Struggle Sensitivity")
 
             # 无人计时功能开关控制响应
             elif command == 0x14:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.no_person_timing_enabled = switch_status
                     # 根据数据内容判断是打开还是关闭操作
                     if data[0] == 0x01:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_NO_PERSON_TIMING_ON,
-                            True,
-                            "No Person Timing ON"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_NO_PERSON_TIMING_ON, True, "No Person Timing ON")
                     else:
-                        self._handle_query_response(
-                            R60ABD1.TYPE_CONTROL_NO_PERSON_TIMING_OFF,
-                            True,
-                            "No Person Timing OFF"
-                        )
+                        self._handle_query_response(R60ABD1.TYPE_CONTROL_NO_PERSON_TIMING_OFF, True, "No Person Timing OFF")
 
             # 无人计时时长设置响应
             elif command == 0x15:
                 if data and len(data) > 0:
                     duration = data[0]
                     self.no_person_timing_duration = duration
-                    self._handle_query_response(
-                        R60ABD1.TYPE_SET_NO_PERSON_TIMING_DURATION,
-                        duration,
-                        "Set No Person Timing Duration"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_SET_NO_PERSON_TIMING_DURATION, duration, "Set No Person Timing Duration")
 
             # 睡眠截止时长设置响应
             elif command == 0x16:
                 if data and len(data) > 0:
                     duration = data[0]
                     self.sleep_cutoff_duration = duration
-                    self._handle_query_response(
-                        R60ABD1.TYPE_SET_SLEEP_END_DURATION,
-                        duration,
-                        "Set Sleep End Duration"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_SET_SLEEP_END_DURATION, duration, "Set Sleep End Duration")
 
             # 睡眠监测开关查询响应
             elif command == 0x80:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.sleep_monitoring_enabled = switch_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_SLEEP_MONITOR_SWITCH,
-                        switch_status,
-                        "Sleep Monitor Switch"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_SLEEP_MONITOR_SWITCH, switch_status, "Sleep Monitor Switch")
 
             # 异常挣扎状态开关查询响应
             elif command == 0x93:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.abnormal_struggle_enabled = switch_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_ABNORMAL_STRUGGLE_SWITCH,
-                        switch_status,
-                        "Abnormal Struggle Monitor Switch"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_ABNORMAL_STRUGGLE_SWITCH, switch_status, "Abnormal Struggle Monitor Switch")
 
             # 异常挣扎状态查询响应
             elif command == 0x91:
                 if data and len(data) > 0:
                     struggle_status = data[0]
                     self.abnormal_struggle_status = struggle_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_ABNORMAL_STRUGGLE_STATUS,
-                        struggle_status,
-                        "Abnormal Struggle Status"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_ABNORMAL_STRUGGLE_STATUS, struggle_status, "Abnormal Struggle Status")
 
             # 挣扎灵敏度查询响应
             elif command == 0x9A:
                 if data and len(data) > 0:
                     sensitivity = data[0]
                     self.struggle_sensitivity = sensitivity
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_STRUGGLE_SENSITIVITY,
-                        sensitivity,
-                        "Query Struggle Sensitivity"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_STRUGGLE_SENSITIVITY, sensitivity, "Query Struggle Sensitivity")
 
             # 无人计时功能开关查询响应
             elif command == 0x94:
                 if data and len(data) > 0:
-                    switch_status = (data[0] == 0x01)
+                    switch_status = data[0] == 0x01
                     self.no_person_timing_enabled = switch_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_SWITCH,
-                        switch_status,
-                        "No Person Timing Switch"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_SWITCH, switch_status, "No Person Timing Switch")
 
             # 无人计时时长查询响应
             elif command == 0x95:
                 if data and len(data) > 0:
                     duration = data[0]
                     self.no_person_timing_duration = duration
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_DURATION,
-                        duration,
-                        "Query No Person Timing Duration"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_DURATION, duration, "Query No Person Timing Duration")
 
             # 无人计时状态查询响应
             elif command == 0x92:
                 if data and len(data) > 0:
                     timing_status = data[0]
                     self.no_person_timing_status = timing_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_STATUS,
-                        timing_status,
-                        "No Person Timing Status"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_NO_PERSON_TIMING_STATUS, timing_status, "No Person Timing Status")
 
             # 睡眠截止时长查询响应
             elif command == 0x96:
                 if data and len(data) > 0:
                     duration = data[0]
                     self.sleep_cutoff_duration = duration
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_SLEEP_END_DURATION,
-                        duration,
-                        "Query Sleep End Duration"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_SLEEP_END_DURATION, duration, "Query Sleep End Duration")
 
             # 入床/离床状态查询响应
             elif command == 0x81:
                 if data and len(data) > 0:
                     bed_status = data[0]
                     self.bed_status = bed_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_BED_STATUS,
-                        bed_status,
-                        "Bed Status"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_BED_STATUS, bed_status, "Bed Status")
 
             # 睡眠状态查询响应
             elif command == 0x82:
                 if data and len(data) > 0:
                     sleep_status = data[0]
                     self.sleep_status = sleep_status
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_SLEEP_STATUS,
-                        sleep_status,
-                        "Sleep Status"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_SLEEP_STATUS, sleep_status, "Sleep Status")
 
             # 清醒时长查询响应
             elif command == 0x83:
                 if data and len(data) >= 2:
                     awake_duration = (data[0] << 8) | data[1]
                     self.awake_duration = awake_duration
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_AWAKE_DURATION,
-                        awake_duration,
-                        "Awake Duration"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_AWAKE_DURATION, awake_duration, "Awake Duration")
 
             # 浅睡时长查询响应
             elif command == 0x84:
                 if data and len(data) >= 2:
                     light_sleep_duration = (data[0] << 8) | data[1]
                     self.light_sleep_duration = light_sleep_duration
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_LIGHT_SLEEP_DURATION,
-                        light_sleep_duration,
-                        "Light Sleep Duration"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_LIGHT_SLEEP_DURATION, light_sleep_duration, "Light Sleep Duration")
 
             # 深睡时长查询响应
             elif command == 0x85:
                 if data and len(data) >= 2:
                     deep_sleep_duration = (data[0] << 8) | data[1]
                     self.deep_sleep_duration = deep_sleep_duration
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_DEEP_SLEEP_DURATION,
-                        deep_sleep_duration,
-                        "Deep Sleep Duration"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_DEEP_SLEEP_DURATION, deep_sleep_duration, "Deep Sleep Duration")
 
             # 睡眠质量评分查询响应
             elif command == 0x86:
                 if data and len(data) > 0:
                     quality_score = data[0]
                     self.sleep_quality_score = quality_score
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_SLEEP_QUALITY_SCORE,
-                        quality_score,
-                        "Sleep Quality Score"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_SLEEP_QUALITY_SCORE, quality_score, "Sleep Quality Score")
 
             # 睡眠综合状态查询响应
             elif command == 0x8D:
                 if data and len(data) == 8:
                     comprehensive_data = self._parse_sleep_comprehensive_data(data)
                     self.sleep_comprehensive_status = {
-                        'presence': comprehensive_data[0],
-                        'sleep_status': comprehensive_data[1],
-                        'avg_breath': comprehensive_data[2],
-                        'avg_heart_rate': comprehensive_data[3],
-                        'turnover_count': comprehensive_data[4],
-                        'large_movement_ratio': comprehensive_data[5],
-                        'small_movement_ratio': comprehensive_data[6],
-                        'apnea_count': comprehensive_data[7]
+                        "presence": comprehensive_data[0],
+                        "sleep_status": comprehensive_data[1],
+                        "avg_breath": comprehensive_data[2],
+                        "avg_heart_rate": comprehensive_data[3],
+                        "turnover_count": comprehensive_data[4],
+                        "large_movement_ratio": comprehensive_data[5],
+                        "small_movement_ratio": comprehensive_data[6],
+                        "apnea_count": comprehensive_data[7],
                     }
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_SLEEP_COMPREHENSIVE_STATUS,
-                        comprehensive_data,
-                        "Sleep Comprehensive Status"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_SLEEP_COMPREHENSIVE_STATUS, comprehensive_data, "Sleep Comprehensive Status")
 
             # 睡眠异常查询响应
             elif command == 0x8E:
                 if data and len(data) > 0:
                     sleep_anomaly = data[0]
                     self.sleep_anomaly = sleep_anomaly
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_SLEEP_ANOMALY,
-                        sleep_anomaly,
-                        "Sleep Anomaly"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_SLEEP_ANOMALY, sleep_anomaly, "Sleep Anomaly")
 
             # 睡眠统计查询响应
             elif command == 0x8F:
                 if data and len(data) == 12:
                     stats_data = self._parse_sleep_statistics_data(data)
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_SLEEP_STATISTICS,
-                        stats_data,
-                        "Sleep Statistics"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_SLEEP_STATISTICS, stats_data, "Sleep Statistics")
 
             # 睡眠质量评级查询响应
             elif command == 0x90:
                 if data and len(data) > 0:
                     quality_level = data[0]
                     self.sleep_quality_rating = quality_level
-                    self._handle_query_response(
-                        R60ABD1.TYPE_QUERY_SLEEP_QUALITY_LEVEL,
-                        quality_level,
-                        "Sleep Quality Level"
-                    )
+                    self._handle_query_response(R60ABD1.TYPE_QUERY_SLEEP_QUALITY_LEVEL, quality_level, "Sleep Quality Level")
 
-    def close(self)-> None:
+    def close(self) -> None:
         """
         停止定时器，解析剩余数据帧，输出统计信息。
 
@@ -4089,11 +3711,11 @@ class R60ABD1:
             stats = self.data_processor.get_stats()
             if R60ABD1.DEBUG_ENABLED:
                 print("  [R60ABD1] Final statistics: %s" % format_time())
-                print("  Total bytes received: %d" % stats['total_bytes_received'])
-                print("  Total frames parsed: %d" % stats['total_frames_parsed'])
-                print("  CRC errors: %d" % stats['crc_errors'])
-                print("  Frame errors: %d" % stats['frame_errors'])
-                print("  Invalid frames: %d" % stats['invalid_frames'])
+                print("  Total bytes received: %d" % stats["total_bytes_received"])
+                print("  Total frames parsed: %d" % stats["total_frames_parsed"])
+                print("  CRC errors: %d" % stats["crc_errors"])
+                print("  Frame errors: %d" % stats["frame_errors"])
+                print("  Invalid frames: %d" % stats["invalid_frames"])
         except Exception as e:
             raise Exception(f"Failed to get statistics: {str(e)}")
 
@@ -4105,6 +3727,7 @@ class R60ABD1:
 
         if R60ABD1.DEBUG_ENABLED:
             print("%s [R60ABD1] Resources fully released" % format_time())
+
 
 # ======================================== 初始化配置 ==========================================
 

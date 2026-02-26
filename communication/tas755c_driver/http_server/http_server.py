@@ -16,18 +16,21 @@ import os
 
 
 HOST = "0.0.0.0"  # 0.0.0.0 允许所有网络设备访问（本地用 localhost 或 127.0.0.1）
-PORT = 8080        # 监听端口（建议选 8000/8080/9090 等非占用端口）
+PORT = 8080  # 监听端口（建议选 8000/8080/9090 等非占用端口）
 
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 =============================================
 
+
 # 完全禁用标准错误输出
 class DevNull:
     def write(self, msg):
         pass
+
     def flush(self):
         pass
+
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     """自定义请求处理器，重写 GET 请求逻辑"""
@@ -46,7 +49,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         print(f"\n[新请求]")
         print(f"  客户端: {client_ip}:{client_port}")
         print(f"  方法: {self.command}")  # 请求方法（GET/POST 等）
-        print(f"  路径: {self.path}")    # 请求路径（如 / 或 /test）
+        print(f"  路径: {self.path}")  # 请求路径（如 / 或 /test）
         print(f"  协议: {self.request_version}")
 
         # 2. 构造响应内容（支持 HTML 格式，可自定义）
@@ -82,8 +85,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         print(f"  协议: {self.request_version}")
 
         # 2. 读取 POST 数据
-        content_length = int(self.headers['Content-Length']) if self.headers.get('Content-Length') else 0
-        post_data = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else ''
+        content_length = int(self.headers["Content-Length"]) if self.headers.get("Content-Length") else 0
+        post_data = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else ""
         print(f"  POST 数据: {post_data}")
 
         # 3. 构造响应内容
@@ -133,6 +136,7 @@ def run_simple_http_server():
         print(f"\n🔌 正在关闭服务器...")
         httpd.server_close()  # 关闭服务器连接
         print(f"✅ 服务器已关闭")
+
 
 # ======================================== 初始化配置 ==========================================
 

@@ -27,6 +27,7 @@ print_interval = 2000
 
 # ======================================== 功能函数 ============================================
 
+
 def print_report_sensor_data():
     """
     打印传感器上报数据到Thonny控制台。
@@ -50,10 +51,16 @@ def print_report_sensor_data():
 
     # 系统级信息
     print("System Initialized: %s" % ("Yes" if device.system_initialized else "No"))
-    print("Radar Fault Status: %s" % ["Normal", "Radar chip error", "Encryption error"][
-        device.radar_fault_status] if device.radar_fault_status < 3 else "Unknown")
-    print("Environment Mode: %s" % ["Default", "Living Room", "Bedroom", "Bathroom"][
-        device.environment_mode] if device.environment_mode < 4 else "Unknown")
+    print(
+        "Radar Fault Status: %s" % ["Normal", "Radar chip error", "Encryption error"][device.radar_fault_status]
+        if device.radar_fault_status < 3
+        else "Unknown"
+    )
+    print(
+        "Environment Mode: %s" % ["Default", "Living Room", "Bedroom", "Bathroom"][device.environment_mode]
+        if device.environment_mode < 4
+        else "Unknown"
+    )
 
     # 产品信息
     print("Product Model: %s" % device.product_model)
@@ -63,8 +70,7 @@ def print_report_sensor_data():
 
     # 人体存在检测
     print("Presence Status: %s" % ("Someone" if device.presence_status == R60AMP1.PRESENCE_PERSON else "No one"))
-    print("Motion Status: %s" % ["No motion", "Static", "Active"][
-        device.motion_status] if device.motion_status < 3 else "Unknown")
+    print("Motion Status: %s" % ["No motion", "Static", "Active"][device.motion_status] if device.motion_status < 3 else "Unknown")
     print("Body Motion Parameter: %d" % device.body_motion_param)
     print("Presence Function Enabled: %s" % ("ON" if device.presence_enabled else "OFF"))
 
@@ -73,16 +79,17 @@ def print_report_sensor_data():
         print("\nTrajectory Targets (%d):" % len(device.trajectory_targets))
         for i, target in enumerate(device.trajectory_targets):
             print("  Target %d:" % (i + 1))
-            print("    Index: %d" % target['index'])
-            print("    Size: %d" % target['size'])
-            print("    Feature: %s" % ("Static" if target['feature'] == R60AMP1.TARGET_FEATURE_STATIC else "Moving"))
-            print("    Position: X=%d cm, Y=%d cm" % (target['x'], target['y']))
-            print("    Height: %d cm" % target['height'])
-            print("    Speed: %d cm/s" % target['speed'])
+            print("    Index: %d" % target["index"])
+            print("    Size: %d" % target["size"])
+            print("    Feature: %s" % ("Static" if target["feature"] == R60AMP1.TARGET_FEATURE_STATIC else "Moving"))
+            print("    Position: X=%d cm, Y=%d cm" % (target["x"], target["y"]))
+            print("    Height: %d cm" % target["height"])
+            print("    Speed: %d cm/s" % target["speed"])
     else:
         print("\nNo trajectory targets detected")
 
     print("=" * 50)
+
 
 def print_active_query_data(timeout=200):
     """
@@ -213,16 +220,26 @@ def print_active_query_data(timeout=200):
         if trajectory_targets:
             print("  Number of targets: %d" % len(trajectory_targets))
             for i, target in enumerate(trajectory_targets):
-                print("  Target %d: Index=%d, Size=%d, Feature=%s, Position=(%d, %d), Height=%d, Speed=%d" %
-                      (i + 1, target['index'], target['size'],
-                       "Static" if target['feature'] == R60AMP1.TARGET_FEATURE_STATIC else "Moving",
-                       target['x'], target['y'], target['height'], target['speed']))
+                print(
+                    "  Target %d: Index=%d, Size=%d, Feature=%s, Position=(%d, %d), Height=%d, Speed=%d"
+                    % (
+                        i + 1,
+                        target["index"],
+                        target["size"],
+                        "Static" if target["feature"] == R60AMP1.TARGET_FEATURE_STATIC else "Moving",
+                        target["x"],
+                        target["y"],
+                        target["height"],
+                        target["speed"],
+                    )
+                )
         else:
             print("  No targets detected")
     else:
         print("Query Trajectory Info: Failed")
 
     print("=" * 50)
+
 
 # ======================================== 自定义类 ============================================
 
@@ -250,32 +267,32 @@ device = R60AMP1(
     presence_enabled=True,  # 启用人体存在检测
     max_retries=3,  # 最大重试次数3次
     retry_delay=100,  # 重试延迟100ms
-    init_timeout=5000  # 初始化超时5秒
+    init_timeout=5000,  # 初始化超时5秒
 )
 
 # 打印配置状态
 print("\nDevice Configuration Status:")
 config_status = device.get_configuration_status()
-print("Initialization Complete: %s" % config_status['initialization_complete'])
-print("Configuration Errors: %d" % len(config_status['configuration_errors']))
+print("Initialization Complete: %s" % config_status["initialization_complete"])
+print("Configuration Errors: %d" % len(config_status["configuration_errors"]))
 
-if len(config_status['configuration_errors']) > 0:
+if len(config_status["configuration_errors"]) > 0:
     print("Configuration Error Details:")
-    for error in config_status['configuration_errors']:
+    for error in config_status["configuration_errors"]:
         print("  - %s" % error)
 
 # 打印设备信息
-device_info = config_status['device_info']
+device_info = config_status["device_info"]
 print("\nDevice Information:")
-print("  Product Model: %s" % device_info['product_model'])
-print("  Product ID: %s" % device_info['product_id'])
-print("  Hardware Model: %s" % device_info['hardware_model'])
-print("  Firmware Version: %s" % device_info['firmware_version'])
+print("  Product Model: %s" % device_info["product_model"])
+print("  Product ID: %s" % device_info["product_id"])
+print("  Hardware Model: %s" % device_info["hardware_model"])
+print("  Firmware Version: %s" % device_info["firmware_version"])
 
 # 打印当前设置
-current_settings = config_status['current_settings']
+current_settings = config_status["current_settings"]
 print("\nCurrent Settings:")
-print("  Presence Detection: %s" % ("ENABLED" if current_settings['presence_enabled'] else "DISABLED"))
+print("  Presence Detection: %s" % ("ENABLED" if current_settings["presence_enabled"] else "DISABLED"))
 
 time.sleep(1)
 
@@ -307,8 +324,7 @@ try:
             # 查询并打印存在状态
             success, presence_status = device.query_presence_status()
             if success:
-                print("Active Query Presence Status: %s" % (
-                    "Someone" if presence_status == R60AMP1.PRESENCE_PERSON else "No one"))
+                print("Active Query Presence Status: %s" % ("Someone" if presence_status == R60AMP1.PRESENCE_PERSON else "No one"))
             else:
                 print("Active Query Presence Status: Failed")
 

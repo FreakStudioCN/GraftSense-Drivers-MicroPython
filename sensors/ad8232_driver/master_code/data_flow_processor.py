@@ -19,6 +19,7 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 自定义类 ============================================
 
+
 class DataFlowProcessor:
     """
     新协议数据处理器类。
@@ -111,8 +112,6 @@ class DataFlowProcessor:
         reset_stats(): Reset statistics.
     """
 
-
-
     def __init__(self, uart):
         """
         初始化数据处理器。
@@ -140,14 +139,14 @@ class DataFlowProcessor:
         self.uart = uart
         self.buffer = bytearray()
         self.stats = {
-            'total_bytes_received': 0,
-            'total_frames_parsed': 0,
-            'crc_errors': 0,
-            'frame_errors': 0,
-            'invalid_frames': 0,
-            'command_frames': 0,  # 指令帧计数
-            'data_frames': 0,  # 数据帧计数
-            'timeout_frames': 0  # 超时帧计数（如果协议支持）
+            "total_bytes_received": 0,
+            "total_frames_parsed": 0,
+            "crc_errors": 0,
+            "frame_errors": 0,
+            "invalid_frames": 0,
+            "command_frames": 0,  # 指令帧计数
+            "data_frames": 0,  # 数据帧计数
+            "timeout_frames": 0,  # 超时帧计数（如果协议支持）
         }
 
         self.max_buffer_size = 256
@@ -202,7 +201,7 @@ class DataFlowProcessor:
             return []
 
         # 更新统计信息
-        self.stats['total_bytes_received'] += len(data)
+        self.stats["total_bytes_received"] += len(data)
 
         # 检查缓冲区大小
         if len(self.buffer) > self.max_buffer_size:
@@ -233,8 +232,7 @@ class DataFlowProcessor:
             data_len = self.buffer[length_pos]
 
             # 计算完整帧长度
-            total_frame_len = (self.HEADER_LEN + self.TYPE_LEN + self.LENGTH_LEN +
-                               data_len + self.CRC_LEN + self.TRAILER_LEN)
+            total_frame_len = self.HEADER_LEN + self.TYPE_LEN + self.LENGTH_LEN + data_len + self.CRC_LEN + self.TRAILER_LEN
 
             # 检查是否有完整的帧
             if current_pos + total_frame_len > len(self.buffer):
@@ -246,14 +244,14 @@ class DataFlowProcessor:
 
             # 验证帧尾
             if not self._validate_trailer(frame_data):
-                self.stats['frame_errors'] += 1
+                self.stats["frame_errors"] += 1
                 # 帧尾错误，跳过这个帧头，继续查找下一个
                 processed_bytes = current_pos + 1
                 continue
 
             # 验证校验和
             if frame_data[-3] != self._calculate_crc(frame_data[0:-3]):
-                self.stats['crc_errors'] += 1
+                self.stats["crc_errors"] += 1
                 # 校验错误，跳过这个帧，继续查找下一个
                 processed_bytes = current_pos + total_frame_len
                 continue
@@ -262,16 +260,16 @@ class DataFlowProcessor:
             parsed_frame = self._parse_single_frame(frame_data)
             if parsed_frame:
                 frames.append(parsed_frame)
-                self.stats['total_frames_parsed'] += 1
+                self.stats["total_frames_parsed"] += 1
 
                 # 根据帧类型更新统计
-                frame_type = parsed_frame.get('frame_type')
+                frame_type = parsed_frame.get("frame_type")
                 if frame_type == self.FRAME_TYPE_COMMAND:
-                    self.stats['command_frames'] += 1
+                    self.stats["command_frames"] += 1
                 elif frame_type == self.FRAME_TYPE_DATA:
-                    self.stats['data_frames'] += 1
+                    self.stats["data_frames"] += 1
             else:
-                self.stats['invalid_frames'] += 1
+                self.stats["invalid_frames"] += 1
 
             # 移动到下一帧
             processed_bytes = current_pos + total_frame_len
@@ -345,8 +343,7 @@ class DataFlowProcessor:
         """
         if len(frame_data) < 2:
             return False
-        return (frame_data[-2] == self.TRAILER[0] and
-                frame_data[-1] == self.TRAILER[1])
+        return frame_data[-2] == self.TRAILER[0] and frame_data[-1] == self.TRAILER[1]
 
     def _calculate_crc(self, data_bytes):
         """
@@ -420,7 +417,7 @@ class DataFlowProcessor:
             pos = 0
 
             # 解析帧头 (2字节)
-            header = bytes(frame_data[pos:pos + 2])
+            header = bytes(frame_data[pos : pos + 2])
             pos += 2
 
             # 帧类型 (1字节)
@@ -443,18 +440,18 @@ class DataFlowProcessor:
             pos += 1
 
             # 帧尾 (2字节)
-            trailer = bytes(frame_data[pos:pos + 2])
+            trailer = bytes(frame_data[pos : pos + 2])
 
             # 构建解析结果
             parsed_frame = {
-                'header': header,
-                'frame_type': frame_type,
-                'data_length': data_length,
-                'data': data,
-                'crc_check': crc_check,
-                'trailer': trailer,
-                'raw_data': bytes(frame_data),
-                'frame_type_str': self._get_frame_type_string(frame_type)
+                "header": header,
+                "frame_type": frame_type,
+                "data_length": data_length,
+                "data": data,
+                "crc_check": crc_check,
+                "trailer": trailer,
+                "raw_data": bytes(frame_data),
+                "frame_type_str": self._get_frame_type_string(frame_type),
             }
 
             return parsed_frame
@@ -560,7 +557,7 @@ class DataFlowProcessor:
         """
         self.buffer = bytearray()
 
-    def build_and_send_frame(self, frame_type, data=b''):
+    def build_and_send_frame(self, frame_type, data=b""):
         """
         构建并发送数据帧。
 
@@ -638,7 +635,6 @@ class DataFlowProcessor:
         except Exception as e:
             print(f"Frame building and sending error: {e}")
             return None
-
 
     def build_and_send_command(self, command_data):
         """
@@ -726,6 +722,7 @@ class DataFlowProcessor:
         """
         for key in self.stats:
             self.stats[key] = 0
+
 
 # ======================================== 初始化配置 ==========================================
 

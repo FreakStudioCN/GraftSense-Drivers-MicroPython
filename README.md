@@ -17,19 +17,24 @@
 
 ```plantuml
 GraftSense-Drivers-MicroPython/
-├── input/                # 输入类模块（如按钮、摇杆、编码器等）
-├── storage/              # 存储类模块（如SD卡、Flash等）
-├── misc/                 # 杂项功能模块
-├── lighting/             # 发光/显示类模块（如LED、NeoPixel等）
-├── signal_generation/    # 信号发生类模块（如PWM、波形生成等）
-├── motor_drivers/        # 电机驱动类模块（如直流电机、步进电机、舵机等）
-├── signal_acquisition/   # 信号采集类模块（如ADC、传感器数据采集等）
-├── sensors/              # 传感器类模块（如温湿度、气压、红外、超声波等）
-├── communication/        # 通信类模块（如UART、I2C、SPI、蓝牙等）
-├── docs/                 # 详细文档、应用说明和项目截图
-├── list_package_info.py  # 可视化扫描工具，查看所有package.json配置
-├── modify_package_json.py # 批量修改工具，标准化urls路径和字段
-└── rename_readme.py      # 批量重命名工具，统一README.md文件名
+├── input/                  # 输入类模块（如按钮、摇杆、编码器等）
+├── storage/                # 存储类模块（如SD卡、Flash等）
+├── misc/                   # 杂项功能模块
+├── lighting/               # 发光/显示类模块（如LED、NeoPixel等）
+├── signal_generation/      # 信号发生类模块（如PWM、波形生成等）
+├── motor_drivers/          # 电机驱动类模块（如直流电机、步进电机、舵机等）
+├── signal_acquisition/     # 信号采集类模块（如ADC、传感器数据采集等）
+├── sensors/                # 传感器类模块（如温湿度、气压、红外、超声波等）
+├── communication/          # 通信类模块（如UART、I2C、SPI、蓝牙等）
+├── docs/                   # 详细文档、应用说明和项目截图
+├── git-hooks/              # Git 钩子脚本目录
+│   ├── pre-commit          # 提交前自动检查钩子（依赖安装+代码规范检查）
+│   └── post-push           # 推送后自动恢复钩子配置（Windows 兼容版）
+├── init-hooks.bat          # Windows 一键初始化 Git 钩子脚本
+├── list_package_info.py    # 可视化扫描工具，查看所有package.json配置
+├── modify_package_json.py  # 批量修改工具，标准化urls路径和字段
+├── rename_readme.py        # 批量重命名工具，统一README.md文件名
+└── .pre-commit-config.yaml # pre-commit 钩子配置文件
 ```
 
 # 📦 包管理与安装（支持 mip /mpremote/upypi）
@@ -114,13 +119,72 @@ python rename_readme.py
 ![图片描述](docs/5.png)
 ![图片描述](docs/6.png)
 
+# 🧹 代码规范与提交检查
+
+`.pre-commit-config.yaml` 是仓库的 `pre-commit` 钩子配置文件，用于定义代码提交前需要执行的检查规则，核心作用：
+* 指定要使用的代码检查工具（如 `black`、`flake8`）及对应版本；
+* 配置工具的运行参数（如 `black` 的行长度、`flake8` 忽略的错误码）；
+* 实现「提交代码前自动执行规范检查」，避免不合规代码推送到远程仓库。
+
+仓库已内置 Windows 兼容版 Git 钩子脚本，开发工程师只需执行以下步骤完成初始化：
+
+通过下面命令进行安装：
+开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具：
+```bash
+pre-commit install
+```
+
+开发过程中需遵循代码规范，确保提交的代码符合质量要求，以下是核心操作说明：
+
+## 依赖安装
+开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具：
+```bash
+# 安装black（代码格式化工具）和flake8（代码语法/规范检查工具）
+pip install black flake8 pre-commit
+```
+
+接着在仓库根目录，双击运行 `init-hooks.bat`，该脚本会自动：
+* 检查仓库根目录和钩子模板文件；
+* 将 git-hooks/ 目录下的 pre-commit、post-push 钩子复制到 .git/hooks/；
+* 初始化 pre-commit 配置。
+
+初始化完成后，后续提交代码时，pre-commit 钩子会自动执行：
+* 检查并自动安装 black/flake8/pre-commit 依赖；
+* 执行代码格式化（black）和规范检查（flake8）；
+* 若检查不通过，会阻止提交，提示修复问题。
+
+## 推送前手动检查
+我们也可以使用下面命令手动执行全量检查，提前发现规范问题：
+```bash
+# 执行所有pre-commit钩子检查（包含black格式化、flake8语法检查）
+pre-commit run --all-files
+```
+
+## 特殊情况说明
+部分检查报错是由于 MicroPython（mpy）与标准 Python（py）语法 / 内置对象差异导致的误报，并非代码实际功能问题。
+
+## 临时跳过钩子推送（谨慎使用）
+若需临时跳过检查推送代码，可执行以下命令临时禁用 Git 钩子：
+```bash
+# 临时禁用本地Git钩子（Windows系统）
+git config --local core.hooksPath NUL
+```
+⚠️ 重要提醒：推送完成后，务必执行以下命令恢复钩子配置，避免后续提交永久跳过检查：
+```bash
+# 恢复本地Git钩子配置
+git config --local --unset core.hooksPath
+```
+
+
 # 📜 许可协议
 
 本仓库所有驱动程序（除 MicroPython 官方模块和参考的相关模块外）均采用MIT许可协议。
 
 # 📞 联系方式
 
+如有问题或建议，欢迎提交 Issue 或 Pull Request 参与贡献！
+
 - 邮箱：10696531183@qq.com
 - GitHub 仓库：[https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython](https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython)
 
-如有问题或建议，欢迎提交 Issue 或 Pull Request 参与贡献！
+![图片描述](docs/freakstudio.jpg)

@@ -38,8 +38,8 @@ try:
         # 读取并打印接收到的数据
         if uart.any():
             time.sleep(0.2)
-            received = uart.read(uart.any()).decode('utf-8')
+            received = uart.read(uart.any()).decode("utf-8")
             print(f"Received: {received}")
-            
+
 except KeyboardInterrupt:
     print("\nTest stopped by user")

@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/10/1 上午11:13   
-# @Author  : 李清水            
-# @File    : sd_block_dev.py       
+# -*- coding: utf-8 -*-
+# @Time    : 2024/10/1 上午11:13
+# @Author  : 李清水
+# @File    : sd_block_dev.py
 # @Description : 自定义SD卡块设备类
 # 参考代码：https://github.com/micropython/micropython-lib/blob/master/micropython/drivers/storage/sdcard/sdcard.py#L291
 # @License : MIT
@@ -16,8 +16,10 @@ __platform__ = "MicroPython v1.23"
 
 # 导入虚拟文件块设备的抽象基类
 from AbstractBlockDevInterface import AbstractBlockDev
+
 # 导入自定义SD卡读写类中定义的一些常量
-from sdcard import TOKEN_CMD25,TOKEN_STOP_TRAN,TOKEN_DATA
+from sdcard import TOKEN_CMD25, TOKEN_STOP_TRAN, TOKEN_DATA
+
 # 导入自定义SD卡读写类
 from sdcard import SDCard
 
@@ -42,6 +44,7 @@ ENOSPC = 28
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class SDCARDBlockDevice(AbstractBlockDev):
     """
@@ -262,42 +265,42 @@ class SDCARDBlockDevice(AbstractBlockDev):
 
     def ioctl(self, op: int, arg: int) -> int:
         """
-           控制块设备并查询其参数。
+        控制块设备并查询其参数。
 
-           Args:
-               op (int): 操作码，参考 AbstractBlockDev 定义。
-               arg (int): 附加参数。
+        Args:
+            op (int): 操作码，参考 AbstractBlockDev 定义。
+            arg (int): 附加参数。
 
-           Returns:
-               int: 操作结果，成功返回 0，或相应的块数/字节数。
+        Returns:
+            int: 操作结果，成功返回 0，或相应的块数/字节数。
 
-           Raises:
-               OSError: 如果操作码无效或者擦除块号无效。
+        Raises:
+            OSError: 如果操作码无效或者擦除块号无效。
 
-           Notes:
-               支持的操作包括：设备初始化（IOCTL_INIT）、设备关闭（IOCTL_SHUTDOWN）、
-               数据同步（IOCTL_SYNC）、获取块数量（IOCTL_BLK_COUNT）、获取块大小（IOCTL_BLK_SIZE）、
-               擦除块（IOCTL_BLK_ERASE）。
+        Notes:
+            支持的操作包括：设备初始化（IOCTL_INIT）、设备关闭（IOCTL_SHUTDOWN）、
+            数据同步（IOCTL_SYNC）、获取块数量（IOCTL_BLK_COUNT）、获取块大小（IOCTL_BLK_SIZE）、
+            擦除块（IOCTL_BLK_ERASE）。
 
-           ==========================================
+        ==========================================
 
-           Control block device and query its parameters.
+        Control block device and query its parameters.
 
-           Args:
-               op (int): Operation code, refer to AbstractBlockDev definition.
-               arg (int): Additional parameter.
+        Args:
+            op (int): Operation code, refer to AbstractBlockDev definition.
+            arg (int): Additional parameter.
 
-           Returns:
-               int: Operation result, returns 0 for success, or corresponding block count/byte count.
+        Returns:
+            int: Operation result, returns 0 for success, or corresponding block count/byte count.
 
-           Raises:
-               OSError: If operation code is invalid or erase block number is invalid.
+        Raises:
+            OSError: If operation code is invalid or erase block number is invalid.
 
-           Notes:
-               Supported operations include: device initialization (IOCTL_INIT), device shutdown (IOCTL_SHUTDOWN),
-               data synchronization (IOCTL_SYNC), get block count (IOCTL_BLK_COUNT), get block size (IOCTL_BLK_SIZE),
-               erase block (IOCTL_BLK_ERASE).
-           """
+        Notes:
+            Supported operations include: device initialization (IOCTL_INIT), device shutdown (IOCTL_SHUTDOWN),
+            data synchronization (IOCTL_SYNC), get block count (IOCTL_BLK_COUNT), get block size (IOCTL_BLK_SIZE),
+            erase block (IOCTL_BLK_ERASE).
+        """
         # 初始化设备
         if op == AbstractBlockDev.IOCTL_INIT:
             # 执行初始化操作
@@ -329,6 +332,7 @@ class SDCARDBlockDevice(AbstractBlockDev):
         else:
             # 无效的操作码，抛出异常
             raise OSError(EINVAL, "Invalid ioctl operation")
+
 
 # ======================================== 初始化配置 ==========================================
 

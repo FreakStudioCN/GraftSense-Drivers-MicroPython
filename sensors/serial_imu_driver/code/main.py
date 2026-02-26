@@ -1,18 +1,21 @@
-# Python env   : MicroPython v1.23.0              
-# -*- coding: utf-8 -*-        
-# @Time    : 2024/6/24 上午10:32   
-# @Author  : 李清水            
-# @File    : main.py       
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2024/6/24 上午10:32
+# @Author  : 李清水
+# @File    : main.py
 # @Description : 串口IMU类实验,主要通过串口获取IMU:JY61数据，然后通过Print函数打印数据
 
 # ======================================== 导入相关模块 ========================================
 
 # 硬件相关的模块
 from machine import UART, Pin
+
 # 时间相关的模块
 import time
+
 # 垃圾回收的模块
 import gc
+
 # IMU类模块
 from imu import IMU
 
@@ -40,22 +43,12 @@ print("FreakStudio : Using UART to communicate with IMU")
 uart = UART(1, 115200)
 # 初始化uart对象，数据位为8，无校验位，停止位为1
 # 设置串口超时时间为5ms
-uart.init(bits=8,
-          parity=None,
-          stop=1,
-          tx=8,
-          rx=9,
-          timeout=5)
+uart.init(bits=8, parity=None, stop=1, tx=8, rx=9, timeout=5)
 
 # 创建串口对象，设置波特率为115200，用于将三轴角度数据发送到上位机
 uart_pc = UART(0, 115200)
 # 初始化uart对象，数据位为8，无校验位，停止位为1，设置串口超时时间为5ms
-uart_pc.init(bits=8,
-             parity=None,
-             stop=1,
-             tx=0,
-             rx=1,
-             timeout=5)
+uart_pc.init(bits=8, parity=None, stop=1, tx=0, rx=1, timeout=5)
 
 # 设置GPIO 25为LED输出引脚，下拉电阻使能
 LED = Pin(25, Pin.OUT, Pin.PULL_DOWN)
