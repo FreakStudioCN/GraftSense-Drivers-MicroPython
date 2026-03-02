@@ -12,12 +12,8 @@
   },
   "urls": [
     [
-      "mems_air_quality.py",
-      "code/mems_air_quality.py"
-    ],
-    [
-      "ads1115.py",
-      "code/ads1115.py"
+      "mems_air_module.py",
+      "code/mems_air_module.py"
     ]
   ]
 }
