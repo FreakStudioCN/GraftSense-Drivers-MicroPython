@@ -13,6 +13,11 @@ from mems_air_module import MEMSGasSensor, PCA9546ADR, AirQualityMonitor
 
 # ======================================== 初始化配置 ==========================================
 
+# 延时等待设备初始化
+time.sleep(3)
+# 打印调试信息
+print("FreakStudio : Using IIC to read MEMS sensor")
+
 i2c = SoftI2C(sda=Pin(4), scl=Pin(5), freq=100000)
 
 
