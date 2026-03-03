@@ -10,7 +10,7 @@
 # ======================================== 导入相关模块 =========================================
 
 from machine import UART, Pin
-from ewm550_driver import EWM550
+from ewm550_uwb import EWM550_UWB
 import time
 
 # ======================================== 全局变量 ============================================
@@ -20,7 +20,7 @@ import time
 # ======================================== 自定义类 ============================================
 
 uart1 = UART(1, baudrate=921600, tx=Pin(8), rx=Pin(9), bits=8, parity=None, stop=1)
-ewm550_base = EWM550(uart1, rx_timeout_ms=600)
+ewm550_base = EWM550_UWB(uart1, rx_timeout_ms=600)
 
 # ======================================== 初始化配置 ==========================================
 
@@ -50,7 +50,7 @@ ok, resp = ewm550_base.reset_module()
 print(ok, resp, "Reset and exit AT mode")
 
 uart = UART(0, baudrate=921600, tx=Pin(16), rx=Pin(17), bits=8, parity=None, stop=1)
-ewm550_tag = EWM550(uart, rx_timeout_ms=600)
+ewm550_tag = EWM550_UWB(uart, rx_timeout_ms=600)
 
 print("\n===== Start configuring as tag mode =====")
 # 1. 进入AT模式
