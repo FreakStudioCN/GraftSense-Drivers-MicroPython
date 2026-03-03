@@ -1,44 +1,160 @@
 # EWM550-7G9T10SP UWB模组MicroPython驱动
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/2
-# @Author  : Derived
+# @Author  : hogeiha
 # @File    : ewm550.py
 # @Description : EWM550-7G9T10SP 超宽带UWB测距定位模组驱动，支持AT指令配置、测距、透传模式
 # @License : MIT
 # @Platform : MicroPython v1.23.0
 
 __version__ = "0.1.0"
-__author__ = "Derived"
+__author__ = "hogeiha"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
+# ======================================== 导入相关模块 =========================================
+
 import time
+
+# ======================================== 全局变量 ============================================
+
+# ======================================== 功能函数 ============================================
+
+# ======================================== 自定义类 ============================================
 
 class EWM550:
     """
-    EWM550-7G9T10SP UWB测距定位模组驱动类，基于UART接口实现AT指令配置、测距模式、透传模式
-    支持基站/标签/透传三种角色切换，信道/波特率/功率/测距参数配置，以及数据透传、测距数据解析
+    EWM550-7G9T10SP UWB模组驱动类，基于UART接口实现AT指令配置、测距模式、透传模式控制。
+    提供基站/标签/透传角色切换、信道/波特率/功率/地址/测距参数等配置接口，
+    同时支持休眠模式控制与测距数据解析功能。
 
     Attributes:
-        _uart (UART): MicroPython UART实例，与模组通信的串口
-        rx_timeout_ms (int): 串口接收超时时间，单位ms
-        role (int): 模块当前角色，对应Role常量
-        ch (int): 工作信道，5/9
-        baud (int): 串口波特率，对应Baud常量
-        power (int): 发射功率档位，0-3
-        responder_num (int): 从机（标签）数量，1-5
-        src_addr (str): 源地址，4位十六进制字符串(0000-FFFF)
-        dst_addr (str): 目标地址，20位十六进制字符串
-        intv (int): 测距数据打印间隙，30-2000ms
-        version (str): 模组固件版本号
-        sleep_mode (int): 休眠模式，0=掉电模式，1=周期休眠模式
+        _uart (UART): MicroPython UART 实例，用于与 EWM550 模组通信。
+        rx_timeout_ms (int): 串口接收超时时间（ms）。
+        role (int): 当前模块角色（基站/标签/透传，使用 Role 常量）。
+        ch (int): 当前工作信道（5/9，使用 CHANNEL 常量）。
+        baud (int): 当前串口实际波特率。
+        power (int): 发射功率档位（0-3，使用 POWER 常量）。
+        responder_num (int): 从机（标签）数量（1-5）。
+        src_addr (str): 源地址（4位十六进制字符串）。
+        dst_addr (str): 目标地址（20位十六进制字符串）。
+        intv (int): 测距数据打印间隙（ms，30-2000）。
+        version (str): 模组固件版本号。
+        sleep_mode (int): 休眠模式（掉电/周期休眠，使用 SLEEP 常量）。
 
-    Constants:
-        Role: 角色常量 (TAG=0, BASE=1, TRANSMODE=2)
-        Baud: 波特率常量，对应AT指令的数字映射
-        CHANNEL: 信道常量 (CH5=5, CH9=9)
-        POWER: 功率档位常量 (P0-P3，P3为最大功率)
-        SLEEP: 休眠模式常量 (POWER_DOWN=0, CYCLE_SLEEP=1)
+        Role: 定义模块角色常量（TAG=0，BASE=1，TRANSMODE=2）。
+        Baud: 定义波特率参数与实际值映射常量（0=9600~9=2000000）。
+        CHANNEL: 定义工作信道常量（CH5=5，CH9=9）。
+        POWER: 定义发射功率档位常量（P0=0~P3=3）。
+        SLEEP: 定义休眠模式常量（POWER_DOWN=0，CYCLE_SLEEP=1）。
+
+    Methods:
+        __init__(uart, rx_timeout_ms=600):
+            初始化驱动类，绑定UART并初始化参数。
+        enter_at_mode():
+            发送+++进入AT配置模式。
+        exit_at_mode():
+            发送AT+EXIT退出AT配置模式。
+        check():
+            发送AT检测模块通信是否正常。
+        restore_factory_settings():
+            发送AT+RESTORE恢复出厂设置。
+        reset_module():
+            发送AT+RESET复位模块使配置生效。
+        get_version():
+            发送AT+VERSION查询固件版本。
+        set_role(role) / get_role():
+            设置/查询模块角色。
+        set_channel(ch) / get_channel():
+            设置/查询工作信道。
+        set_baud(baud_param) / get_baud():
+            设置/查询串口波特率。
+        set_power(power) / get_power():
+            设置/查询发射功率档位。
+        set_responder_num(num) / get_responder_num():
+            设置/查询从机（标签）数量。
+        set_src_addr(addr) / get_src_addr():
+            设置/查询源地址。
+        set_dst_addr(addr) / get_dst_addr():
+            设置/查询目标地址。
+        set_print_interval(intv) / get_print_interval():
+            设置/查询测距数据打印间隙。
+        enter_sleep_mode(sleep_mode):
+            设置休眠模式。
+        parse_ranging_data(data):
+            解析串口接收的测距数据字节流。
+        _send_cmd(cmd):
+            底层串口发送AT指令（内部方法）。
+        _recv_resp():
+            底层串口接收模块响应（内部方法）。
+
+    ==========================================
+
+    EWM550-7G9T10SP UWB driver class supporting AT command configuration, ranging mode,
+    and transparent transmission mode via UART interface.
+    Provides interfaces for role switching (base/tag/transparent), parameter configuration
+    (channel, baud rate, power, address, ranging params, etc.),
+    sleep mode control, and ranging data parsing.
+
+    Attributes:
+        _uart (UART): MicroPython UART instance for communication with EWM550 module.
+        rx_timeout_ms (int): UART receive timeout in milliseconds.
+        role (int): Current module role (BASE/TAG/TRANSMODE, use Role constants).
+        ch (int): Current working channel (5/9, use CHANNEL constants).
+        baud (int): Current actual UART baud rate.
+        power (int): Transmit power level (0-3, use POWER constants).
+        responder_num (int): Responder (tag) number (1-5).
+        src_addr (str): Source address (4-character hex string).
+        dst_addr (str): Destination address (20-character hex string).
+        intv (int): Ranging data print interval (ms, 30-2000).
+        version (str): Module firmware version string.
+        sleep_mode (int): Sleep mode (power down/cycle sleep, use SLEEP constants).
+
+        Role: Module role constants (TAG=0, BASE=1, TRANSMODE=2).
+        Baud: Baud rate parameter to actual value mapping constants (0=9600~9=2000000).
+        CHANNEL: Working channel constants (CH5=5, CH9=9).
+        POWER: Transmit power level constants (P0=0~P3=3).
+        SLEEP: Sleep mode constants (POWER_DOWN=0, CYCLE_SLEEP=1).
+
+    Methods:
+        __init__(uart, rx_timeout_ms=600):
+            Initialize driver with UART and default parameters.
+        enter_at_mode():
+            Send +++ to enter AT configuration mode.
+        exit_at_mode():
+            Send AT+EXIT to exit AT configuration mode.
+        check():
+            Send AT to check module communication.
+        restore_factory_settings():
+            Send AT+RESTORE to restore factory settings.
+        reset_module():
+            Send AT+RESET to reset module and apply configurations.
+        get_version():
+            Send AT+VERSION to query firmware version.
+        set_role(role) / get_role():
+            Set/get module role.
+        set_channel(ch) / get_channel():
+            Set/get working channel.
+        set_baud(baud_param) / get_baud():
+            Set/get UART baud rate.
+        set_power(power) / get_power():
+            Set/get transmit power level.
+        set_responder_num(num) / get_responder_num():
+            Set/get responder (tag) number.
+        set_src_addr(addr) / get_src_addr():
+            Set/get source address.
+        set_dst_addr(addr) / get_dst_addr():
+            Set/get destination address.
+        set_print_interval(intv) / get_print_interval():
+            Set/get ranging data print interval.
+        enter_sleep_mode(sleep_mode):
+            Set sleep mode.
+        parse_ranging_data(data):
+            Parse ranging data bytes received from UART.
+        _send_cmd(cmd):
+            Low-level UART AT command transmission (internal method).
+        _recv_resp():
+            Low-level UART response reception (internal method).
     """
     # 模块角色常量
     Role = {"TAG": 0, "BASE": 1, "TRANSMODE": 2}
@@ -578,3 +694,7 @@ class EWM550:
             return None
         except Exception:
             return None
+
+# ======================================== 初始化配置 ==========================================
+
+# ========================================  主程序  ===========================================
