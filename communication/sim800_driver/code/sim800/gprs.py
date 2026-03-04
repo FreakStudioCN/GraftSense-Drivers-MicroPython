@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/8 下午8:00
-# @Author  : hogeiha
+# @Author  : basanovase
 # @File    : gprs.py
 # @Description : SIM800模块GPRS扩展类 实现GPRS附着/分离、APN配置、TCP通信、GSM定位等功能
 # @License : MIT

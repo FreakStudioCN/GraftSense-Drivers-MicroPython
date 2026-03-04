@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/8 下午7:00
-# @Author  : hogeiha
+# @Author  : basanovase
 # @File    : tcpip.py
 # @Description : SIM800模块TCP/IP扩展类 实现TCP/UDP通信、HTTP请求、FTP文件传输等网络功能
 # @License : MIT

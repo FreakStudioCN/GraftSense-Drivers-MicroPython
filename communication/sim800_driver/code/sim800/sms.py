@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/8 下午7:30
-# @Author  : hogeiha
+# @Author  : basanovase
 # @File    : sms.py
 # @Description : SIM800模块SMS扩展类 实现短信格式设置、发送、读取、删除等短信相关功能
 # @License : MIT
