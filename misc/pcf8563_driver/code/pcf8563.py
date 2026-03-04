@@ -14,7 +14,7 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
 # 导入时间模块，用于系统时间交互
-import utime
+import time
 # 导入I2C通信模块，用于与PCF8563进行数据交互
 from machine import I2C
 # 导入常量定义工具，用于定义硬件寄存器地址
@@ -442,8 +442,8 @@ class PCF8563:
                    (year, month, date, weekday, hour, minute, second)
 
         Notes:
-            返回与utime.localtime()格式兼容的时间元组（不含微秒和夏令时）
-            Return time tuple compatible with utime.localtime() format (without microseconds and DST)
+            返回与time.localtime()格式兼容的时间元组（不含微秒和夏令时）
+            Return time tuple compatible with time.localtime() format (without microseconds and DST)
         """
         # 组合完整的日期时间元组并返回
         return (self.year(), self.month(), self.date(),
@@ -576,7 +576,7 @@ class PCF8563:
             Get system local time and write to RTC module to realize time synchronization
         """
         # 获取系统本地时间并设置到RTC
-        self.set_datetime(utime.localtime())
+        self.set_datetime(time.localtime())
 
     def set_clk_out_frequency(self, frequency=CLOCK_CLK_OUT_FREQ_1_HZ):
         """
