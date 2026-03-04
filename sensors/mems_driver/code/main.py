@@ -1,81 +1,70 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2024/10/7 下午2:21
-# @Author  : 李清水
+# @Time    : 2025/12/22 下午2:21
+# @Author  : hogeiha
 # @File    : main.py
-# @Description : MEMS空气质量传感器驱动示例程序 for MicroPython
+# @Description : MEMS气体传感器多通道读取示例代码，实现VOC/CO/H2S/NO2四种气体的校准和实时浓度读取
 
-# ======================================== 导入相关模块 ========================================
+# ======================================== 导入相关模块 =========================================
 
-# 导入硬件相关模块
-from machine import Pin, I2C, Timer, UART
-
-# 导入时间相关模块
+from machine import Pin, SoftI2C
 import time
-
-# 导入外部ADC相关模块
-from ads1115 import ADS1115
-
-# 导入二进制数据和原生数据类型打包解包模块
-from mems_air_quality import MEMSAirQuality
-
-# ======================================== 全局变量 ============================================
-
-# 外置ADC地址
-ADC_ADDRESS = 0
-
-# ======================================== 功能函数 ============================================
-
-
-# ======================================== 自定义类 ============================================
+from mems_air_module import MEMSGasSensor, PCA9546ADR, AirQualityMonitor
 
 # ======================================== 初始化配置 ==========================================
 
-# 上电延时3s
+# 延时等待设备初始化
 time.sleep(3)
+# 打印调试信息
+print("FreakStudio : Using IIC to read MEMS sensor")
 
-# 打印调试消息
-print("FreakStudio: MEMS Air Quality Sensor Test Program")
-# 创建硬件I2C的实例，使用I2C0外设，时钟频率为400KHz，SDA引脚为4，SCL引脚为5
-i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
+i2c = SoftI2C(sda=Pin(4), scl=Pin(5), freq=100000)
 
-# 开始扫描I2C总线上的设备，返回从机地址的列表
-devices_list = i2c.scan()
-print("START I2C SCANNER")
 
-# 若devices_list为空，则没有设备连接到I2C总线上
-if len(devices_list) == 0:
-    print("No i2c device !")
+monitor = AirQualityMonitor(i2c)
 
-# 若非空，则打印从机设备地址
-else:
-    print("i2c devices found:", len(devices_list))
-    # 便利从机设备地址列表
-    for device in devices_list:
-        print("ADC I2C hexadecimal address: ", hex(device))
-        ADC_ADDRESS = device
 
-# 创建ADC相关实例，增益系数设置为1
-adc = ADS1115(i2c, ADC_ADDRESS, 1)
-# 创建空气质量传感器的实例
-mems = MEMSAirQuality(adc, 7)
+# 通道0：VOC传感器注册与校准
+print("Registering and calibrating VOC sensor on channel 0...")
+monitor.register_sensor(0, MEMSGasSensor.TYPE_VOC)
+monitor.calibrate_sensor(MEMSGasSensor.TYPE_VOC)
 
-# 查看VOC参数的默认多项式
-mems.get_polynomial(MEMSAirQuality.VOC)
-# 设置VOC参数的自定义多项式系数
-mems.set_custom_polynomial(MEMSAirQuality.VOC, [20, 100, 20])
-# 查看VOC更改后参数的多项式
-mems.get_polynomial(MEMSAirQuality.VOC)
-# 选择VOC内置默认参数
-mems.select_builtin(MEMSAirQuality.VOC)
+# 通道1：CO传感器注册与校准
+print("Registering and calibrating CO sensor on channel 1...")
+monitor.register_sensor(1, MEMSGasSensor.TYPE_CO)
+monitor.calibrate_sensor(MEMSGasSensor.TYPE_CO)
 
-# ========================================  主程序  ============================================
+# 通道2：H2S传感器注册与校准
+print("Registering and calibrating H2S sensor on channel 2...")
+monitor.register_sensor(2, MEMSGasSensor.TYPE_H2S)
+monitor.calibrate_sensor(MEMSGasSensor.TYPE_H2S)
+
+# 通道3：NO2传感器注册与校准
+print("Registering and calibrating NO2 sensor on channel 3...")
+monitor.register_sensor(3, MEMSGasSensor.TYPE_NO2)
+monitor.calibrate_sensor(MEMSGasSensor.TYPE_NO2)
+
+# ======================================== 主程序 =============================
+
+print("\nStart reading gas concentration (press Ctrl+C to stop)...")
+print("-" * 50)
 
 while True:
-    # 读取VOC电压
-    voltage = mems.read_voltage(MEMSAirQuality.VOC)
-    # 读取VOC浓度
-    ppm = mems.read_ppm(MEMSAirQuality.VOC)
-    # 打印
-    print(f"VOC Voltage: {voltage}V,  VOC Concentration: {ppm} ppm")
+    try:
+        # 读取所有已注册传感器的浓度值，返回{传感器类型: 浓度值}字典
+        results = monitor.read_all()
+
+        # 格式化打印各气体浓度值
+        print(f"VOC concentration: {results[MEMSGasSensor.TYPE_VOC]}")
+        print(f"CO concentration: {results[MEMSGasSensor.TYPE_CO]}")
+        print(f"H2S concentration: {results[MEMSGasSensor.TYPE_H2S]}")
+        print(f"NO2 concentration: {results[MEMSGasSensor.TYPE_NO2]}")
+        print("-" * 50)
+
+    except Exception as e:
+        # 捕获并打印所有异常，避免程序崩溃
+        print(f"Error reading concentration: {str(e)}")
+        print("-" * 50)
+
+    # 每隔1秒读取一次数据
     time.sleep(1)

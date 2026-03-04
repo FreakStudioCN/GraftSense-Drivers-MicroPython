@@ -1,7 +1,7 @@
 {
-  "name": "mems_driver",
+  "name": "ewm550_driver",
   "version": "1.0.0",
-  "description": "A MicroPython library to control MEMS sensors",
+  "description": "A MicroPython library to control ewm550 driver",
   "author": "leeqingshui",
   "license": "MIT",
   "chips": "all",
@@ -12,8 +12,8 @@
   },
   "urls": [
     [
-      "mems_air_module.py",
-      "code/mems_air_module.py"
+      "ewm550_uwb.py",
+      "code/ewm550_uwb.py"
     ]
   ]
 }
