@@ -19,11 +19,11 @@ import time
 
 # ======================================== 自定义类 ============================================
 
-
 # ======================================== 初始化配置 ==========================================
 
 uart1 = UART(1, baudrate=921600, tx=Pin(8), rx=Pin(9), bits=8, parity=None, stop=1)
 ewm550_base = EWM550_UWB(uart1, rx_timeout_ms=600)
+
 print("\n===== Start configuring as base station mode =====")
 # 1. 进入AT模式
 ok, resp = ewm550_base.enter_at_mode()
