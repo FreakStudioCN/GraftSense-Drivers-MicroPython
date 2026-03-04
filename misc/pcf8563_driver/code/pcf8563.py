@@ -1,14 +1,14 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/9 下午4:00
-# @Author  : alankrantas
+# @Author  : lewisxhe
 # @File    : pcf8563.py
 # @Description : PCF8563 RTC实时时钟模块驱动 实现时间读写、闹钟设置、时钟输出配置等功能
 # @License : MIT
-# @Platform: Raspberry Pi Pico / MicroPython
+# @Platform: MicroPython v1.23.0
 
 __version__ = "1.0.0"
-__author__ = "alankrantas"
+__author__ = "lewisxhe"
 __license__ = "MIT"
 __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 
