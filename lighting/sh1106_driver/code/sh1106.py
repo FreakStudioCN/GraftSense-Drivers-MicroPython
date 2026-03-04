@@ -1,90 +1,18 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from micropython import const
 import time
 import framebuf
 
 
-
-_SET_CONTRAST        = const(0x81)
-_SET_NORM_INV        = const(0xa6)
-_SET_DISP            = const(0xae)
-_SET_SCAN_DIR        = const(0xc0)
-_SET_SEG_REMAP       = const(0xa0)
-_LOW_COLUMN_ADDRESS  = const(0x00)
+_SET_CONTRAST = const(0x81)
+_SET_NORM_INV = const(0xa6)
+_SET_DISP = const(0xae)
+_SET_SCAN_DIR = const(0xc0)
+_SET_SEG_REMAP = const(0xa0)
+_LOW_COLUMN_ADDRESS = const(0x00)
 _HIGH_COLUMN_ADDRESS = const(0x10)
-_SET_PAGE_ADDRESS    = const(0xB0)
+_SET_PAGE_ADDRESS = const(0xB0)
 
 
 class SH1106(framebuf.FrameBuffer):
@@ -103,9 +31,7 @@ class SH1106(framebuf.FrameBuffer):
 
         if self.rotate90:
             self.displaybuf = bytearray(self.bufsize)
-            
-            
-            
+
             super().__init__(self.renderbuf, self.height, self.width,
                              framebuf.MONO_HMSB)
         else:
@@ -113,15 +39,12 @@ class SH1106(framebuf.FrameBuffer):
             super().__init__(self.renderbuf, self.width, self.height,
                              framebuf.MONO_VLSB)
 
-        
         self.rotate = self.flip
         self.init_display()
 
-    
-    def write_cmd(self, *args, **kwargs): 
+    def write_cmd(self, *args, **kwargs):
         raise NotImplementedError
 
-    
     def write_data(self,  *args, **kwargs):
         raise NotImplementedError
 
@@ -130,7 +53,7 @@ class SH1106(framebuf.FrameBuffer):
         self.fill(0)
         self.show()
         self.poweron()
-        
+
         self.flip(self.flip_en)
 
     def poweroff(self):
@@ -150,7 +73,7 @@ class SH1106(framebuf.FrameBuffer):
         self.write_cmd(_SET_SCAN_DIR | (0x08 if mir_h else 0x00))
         self.flip_en = flag
         if update:
-            self.show(True) 
+            self.show(True)
 
     def sleep(self, value):
         self.write_cmd(_SET_DISP | (not value))
@@ -162,8 +85,8 @@ class SH1106(framebuf.FrameBuffer):
     def invert(self, invert):
         self.write_cmd(_SET_NORM_INV | (invert & 1))
 
-    def show(self, full_update = False):
-        
+    def show(self, full_update=False):
+
         (w, p, db, rb) = (self.width, self.pages,
                           self.displaybuf, self.renderbuf)
         if self.rotate90:
@@ -173,7 +96,7 @@ class SH1106(framebuf.FrameBuffer):
             pages_to_update = (1 << self.pages) - 1
         else:
             pages_to_update = self.pages_to_update
-        
+
         for page in range(self.pages):
             if (pages_to_update & (1 << page)):
                 self.write_cmd(_SET_PAGE_ADDRESS | page)
@@ -186,7 +109,7 @@ class SH1106(framebuf.FrameBuffer):
         if color is None:
             return super().pixel(x, y)
         else:
-            super().pixel(x, y , color)
+            super().pixel(x, y, color)
             page = y // 8
             self.pages_to_update |= 1 << page
 
@@ -215,9 +138,9 @@ class SH1106(framebuf.FrameBuffer):
         self.register_updates(y, y+self.height)
 
     def scroll(self, x, y):
-        
+
         super().scroll(x, y)
-        self.pages_to_update =  (1 << self.pages) - 1
+        self.pages_to_update = (1 << self.pages) - 1
 
     def fill_rect(self, x, y, w, h, color):
         super().fill_rect(x, y, w, h, color)
@@ -232,12 +155,10 @@ class SH1106(framebuf.FrameBuffer):
         self.register_updates(y-yr, y+yr-1)
 
     def register_updates(self, y0, y1=None):
-        
-        
-        
+
         start_page = max(0, y0 // 8)
         end_page = max(0, y1 // 8) if y1 is not None else start_page
-        
+
         if start_page > end_page:
             start_page, end_page = end_page, start_page
         for page in range(start_page, end_page+1):
@@ -266,14 +187,14 @@ class SH1106_I2C(SH1106):
         super().__init__(width, height, external_vcc, rotate)
 
     def write_cmd(self, cmd):
-        self.temp[0] = 0x80  
+        self.temp[0] = 0x80
         self.temp[1] = cmd
         self.i2c.writeto(self.addr, self.temp)
 
     def write_data(self, buf):
         self.i2c.writeto(self.addr, b'\x40'+buf)
 
-    def reset(self,res=None):
+    def reset(self, res=None):
         super().reset(self.res)
 
 
