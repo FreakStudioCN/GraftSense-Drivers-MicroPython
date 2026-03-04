@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/8 下午6:30
-# @Author  : basanovase
+# @Author  : alankrantas
 # @File    : utils.py
 # @Description : SIM800模块工具类 提供UART通信、指令发送、响应等待等通用工具函数
 # @License : MIT
@@ -15,7 +15,7 @@ import utime
 # ======================================== 全局变量 ============================================
 
 __version__ = "1.0.0"
-__author__ = "缪贵成"
+__author__ = "alankrantas"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 

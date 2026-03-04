@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/8 下午7:00
-# @Author  : basanovase
+# @Author  : alankrantas
 # @File    : tcpip.py
 # @Description : SIM800模块TCP/IP扩展类 实现TCP/UDP通信、HTTP请求、FTP文件传输等网络功能
 # @License : MIT
@@ -15,7 +15,7 @@ from .core import SIM800
 # ======================================== 全局变量 ============================================
 
 __version__ = "1.0.0"
-__author__ = "hogeiha"
+__author__ = "alankrantas"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 
