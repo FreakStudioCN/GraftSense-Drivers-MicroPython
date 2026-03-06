@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
 Pre-commit code checker for MicroPython driver files & main.py
 Check all specified rules:
@@ -12,12 +13,16 @@ Check all specified rules:
 7. 所有文件:__init__方法有参数类型注解+try-except
 8. 非main.py文件:类中所有有入口参数的方法必须包含参数合法性校验（isinstance/hasattr/取值判断+raise）
 """
+
+# ======================================== 导入相关模块 =========================================
+
 import argparse
 import re
 import ast
 from pathlib import Path
 
-# -------------------------- 配置常量（精准匹配） --------------------------
+# ======================================== 全局变量 ============================================
+
 REQUIRED_GLOBALS = ["__version__", "__author__", "__license__", "__platform__"]
 LICENSE_COMMENT = "# @License : MIT"
 FREAKSTUDIO_PATTERN = r'print\("FreakStudio: .*"\)'
@@ -32,10 +37,12 @@ MACHINE_INSTANCE_PATTERNS = [
     r"\w+ = \w+\.\w+\(",  # 匹配 uart = machine.UART(1) 这类
 ]
 
+# ======================================== 功能函数 ============================================
 
-# -------------------------- 核心工具函数 --------------------------
 def read_file_content(file_path: Path) -> str:
-    """读取文件内容（UTF-8编码）"""
+    """
+    读取文件内容（UTF-8编码）
+    """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
@@ -43,9 +50,10 @@ def read_file_content(file_path: Path) -> str:
         print(f"[FAIL] Error reading file {file_path}: {str(e)}")
         return ""
 
-
 def check_required_globals(content: str, file_path: Path) -> bool:
-    """检查4个必填全局变量是否存在（仅非main.py文件需要检查）"""
+    """
+    检查4个必填全局变量是否存在（仅非main.py文件需要检查）
+    """
     if file_path.name == "main.py":
         print(f"[PASS] {file_path}: main.py Skip global variables check (main.py)")
         return True
@@ -74,9 +82,10 @@ def check_required_globals(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: All 4 required global variables exist")
     return True
 
-
 def check_license_comment(content: str, file_path: Path) -> bool:
-    """精准匹配独立的 # @License : MIT 注释行（仅非main.py文件需要检查）"""
+    """
+    精准匹配独立的 # @License : MIT 注释行（仅非main.py文件需要检查）
+    """
     if file_path.name == "main.py":
         print(f"[PASS] {file_path}: Skip License comment check (main.py)")
         return True
@@ -88,9 +97,10 @@ def check_license_comment(content: str, file_path: Path) -> bool:
     print(f"[FAIL] {file_path}: Missing # @License : MIT comment")
     return False
 
-
 def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
-    """检查raise/print中的中文字符（所有文件都检查）"""
+    """
+    检查raise/print中的中文字符（所有文件都检查）
+    """
     lines = content.split("\n")
     error_lines = []
     for line_num, line in enumerate(lines, 1):
@@ -107,9 +117,10 @@ def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: No Chinese in raise/print messages")
     return True
 
-
 def extract_section_content(content: str, marker: str) -> str:
-    """精准提取指定分隔注释后的模块内容"""
+    """
+    精准提取指定分隔注释后的模块内容
+    """
     lines = content.split("\n")
     section_start = -1
     section_end = -1
@@ -130,9 +141,10 @@ def extract_section_content(content: str, marker: str) -> str:
         return "\n".join(lines[section_start:section_end])
     return ""
 
-
 def check_init_config_section(content: str, file_path: Path) -> bool:
-    """检查初始化配置区（仅main.py需要检查，非main.py跳过）"""
+    """
+    检查初始化配置区（仅main.py需要检查，非main.py跳过）
+    """
     if file_path.name != "main.py":
         print(f"[PASS] {file_path}: Skip init config section check (non-main.py file)")
         return True
@@ -153,9 +165,10 @@ def check_init_config_section(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: Init config section has required content")
     return True
 
-
 def check_main_py_instance_location(content: str, file_path: Path) -> bool:
-    """精准检查main.py实例化位置（仅main.py需要检查）"""
+    """
+    精准检查main.py实例化位置（仅main.py需要检查）
+    """
     if "main.py" not in str(file_path):
         print(f"[PASS] {file_path}: Skip instantiation location check (non-main.py file)")
         return True
@@ -189,9 +202,10 @@ def check_main_py_instance_location(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: main.py instance location is correct")
     return True
 
-
 def check_main_py_while_loop(content: str, file_path: Path) -> bool:
-    """精准检查while循环仅在主程序区（仅main.py需要检查）"""
+    """
+    精准检查while循环仅在主程序区（仅main.py需要检查）
+    """
     if "main.py" not in str(file_path):
         print(f"[PASS] {file_path}: Skip while loop location check (non-main.py file)")
         return True
@@ -218,9 +232,10 @@ def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: main.py while loop location is correct")
     return True
 
-
 def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
-    """检查__init__方法的参数类型注解（仅检查类型注解，移除try-except检查）"""
+    """
+    检查__init__方法的参数类型注解（仅检查类型注解，移除try-except检查）
+    """
     try:
         tree = ast.parse(content)
     except Exception as e:
@@ -250,9 +265,10 @@ def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: Type hints exist in __init__ parameters")
     return True
 
-
 def check_method_param_validation(content: str, file_path: Path) -> bool:
-    """检查非main.py文件中类的所有有参数方法是否包含参数合法性校验（isinstance/hasattr/取值判断+raise）"""
+    """
+    检查非main.py文件中类的所有有参数方法是否包含参数合法性校验（isinstance/hasattr/取值判断+raise）
+    """
     # main.py跳过该检查
     if file_path.name == "main.py":
         print(f"[PASS] {file_path}: Skip method parameter validation check (main.py)")
@@ -322,9 +338,10 @@ def check_method_param_validation(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: All methods with parameters have valid parameter validation")
     return True
 
-
 def check_file(file_path: Path) -> bool:
-    """全量检查单个文件"""
+    """
+    全量检查单个文件
+    """
     content = read_file_content(file_path)
     if not content:
         return False
@@ -347,6 +364,11 @@ def check_file(file_path: Path) -> bool:
 
     return all_passed
 
+# ======================================== 自定义类 ============================================
+
+# ======================================== 初始化配置 ===========================================
+
+# ========================================  主程序  ===========================================
 
 def main():
     """
