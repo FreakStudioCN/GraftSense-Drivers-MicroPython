@@ -150,14 +150,8 @@ class ICP10111:
             p_lut[0] * p_lut[1] * (raw_pa[0] - raw_pa[1])
             + p_lut[1] * p_lut[2] * (raw_pa[1] - raw_pa[2])
             + p_lut[2] * p_lut[0] * (raw_pa[2] - raw_pa[0])
-        ) / (
-            p_lut[2] * (raw_pa[0] - raw_pa[1])
-            + p_lut[0] * (raw_pa[1] - raw_pa[2])
-            + p_lut[1] * (raw_pa[2] - raw_pa[0])
-        )
-        a = (
-            raw_pa[0] * p_lut[0] - raw_pa[1] * p_lut[1] - (raw_pa[1] - raw_pa[0]) * c
-        ) / (p_lut[0] - p_lut[1])
+        ) / (p_lut[2] * (raw_pa[0] - raw_pa[1]) + p_lut[0] * (raw_pa[1] - raw_pa[2]) + p_lut[1] * (raw_pa[2] - raw_pa[0]))
+        a = (raw_pa[0] * p_lut[0] - raw_pa[1] * p_lut[1] - (raw_pa[1] - raw_pa[0]) * c) / (p_lut[0] - p_lut[1])
         b = (raw_pa[0] - a) * (p_lut[0] + c)
         return a, b, c
 
@@ -166,21 +160,12 @@ class ICP10111:
         Convert an output from a calibrated sensor to a pressure in Pa.
         """
         temperature_prov = raw_temperature - 32768.0
-        s1 = (
-            self._lut_lower
-            + float(self._sensor_constants[0] * temperature_prov * temperature_prov)
-            * self._quadr_factor
-        )
+        s1 = self._lut_lower + float(self._sensor_constants[0] * temperature_prov * temperature_prov) * self._quadr_factor
         s2 = (
             self._offset_factor * self._sensor_constants[3]
-            + float(self._sensor_constants[1] * temperature_prov * temperature_prov)
-            * self._quadr_factor
+            + float(self._sensor_constants[1] * temperature_prov * temperature_prov) * self._quadr_factor
         )
-        s3 = (
-            self._lut_upper
-            + float(self._sensor_constants[2] * temperature_prov * temperature_prov)
-            * self._quadr_factor
-        )
+        s3 = self._lut_upper + float(self._sensor_constants[2] * temperature_prov * temperature_prov) * self._quadr_factor
         a, b, c = self.calculate_conversion_constants(self._p_pa_calib, [s1, s2, s3])
         return a + b / (c + raw_pressure)
 

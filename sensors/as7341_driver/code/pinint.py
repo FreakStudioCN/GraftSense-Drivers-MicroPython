@@ -17,7 +17,9 @@ if not sensor.isconnected():
     print("Failed to contact AS7341, terminating")
     sys.exit(1)
 
-led = Pin(34, Pin.OUT)                       
+led = Pin(34, Pin.OUT)
+
+
 def pinint_toggle(x):
     # toggle Pin
     print("pinint", str(x), x.value())
@@ -26,6 +28,7 @@ def pinint_toggle(x):
     else:
         led.on()
 
+
 print("Toggle LED on pin 34, with every interrupt on pin 4")
 pinint = Pin(4, Pin.IN, Pin.PULL_UP)
 pinint.irq(handler=pinint_toggle, trigger=Pin.IRQ_FALLING)
@@ -33,9 +36,9 @@ pinint.irq(handler=pinint_toggle, trigger=Pin.IRQ_FALLING)
 
 sensor.set_spectral_interrupt(True)
 
-sensor.set_atime(29)                # 30 ASTEPS
-sensor.set_astep(599)               # 1.67 ms
-sensor.set_again(4)                 # factor 8 (with pretty much light)
+sensor.set_atime(29)  # 30 ASTEPS
+sensor.set_astep(599)  # 1.67 ms
+sensor.set_again(4)  # factor 8 (with pretty much light)
 
 try:
     while True:
@@ -43,7 +46,7 @@ try:
         print("After clear_interrupt")
         print("pinint is", "high" if pinint.value() else "low")
         sensor.start_measure("F1F4CN")
-        _,_,_,_,clear,_ = sensor.get_spectral_data()
+        _, _, _, _, clear, _ = sensor.get_spectral_data()
         print("After reading measurements")
         print("Clear {:d}".format(clear))
         if sensor.check_interrupt():

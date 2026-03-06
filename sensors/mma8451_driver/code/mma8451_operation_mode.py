@@ -16,9 +16,7 @@ while True:
         print("Current Operation mode setting: ", mma.operation_mode)
         for _ in range(10):
             accx, accy, accz = mma.acceleration
-            print(
-                f"Acceleration: X={accx:0.1f}m/s^2 y={accy:0.1f}m/s^2 z={accz:0.1f}m/s^2"
-            )
+            print(f"Acceleration: X={accx:0.1f}m/s^2 y={accy:0.1f}m/s^2 z={accz:0.1f}m/s^2")
             print()
             time.sleep(0.5)
         mma.operation_mode = operation_mode

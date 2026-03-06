@@ -16,9 +16,7 @@ while True:
         print("Current Data rate setting: ", mma.data_rate)
         for _ in range(10):
             accx, accy, accz = mma.acceleration
-            print(
-                f"Acceleration: X={accx:0.1f}m/s^2 y={accy:0.1f}m/s^2 z={accz:0.1f}m/s^2"
-            )
+            print(f"Acceleration: X={accx:0.1f}m/s^2 y={accy:0.1f}m/s^2 z={accz:0.1f}m/s^2")
             print()
             time.sleep(0.5)
         mma.data_rate = data_rate

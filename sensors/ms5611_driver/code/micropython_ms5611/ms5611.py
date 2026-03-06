@@ -204,9 +204,7 @@ class MS5611:
     @temperature_oversample_rate.setter
     def temperature_oversample_rate(self, value: int) -> None:
         if value not in temperature_oversample_rate_values:
-            raise ValueError(
-                "Value must be a valid temperature_oversample_rate setting"
-            )
+            raise ValueError("Value must be a valid temperature_oversample_rate setting")
         self._temperature_oversample_rate = value
         self._temp_command = temp_command_values[value]
 

@@ -39,7 +39,7 @@ CCS811_SW_RESET = const(0xFF)
 
 
 class CCS811(object):
-    """ CCS811 gas sensor driver. """
+    """CCS811 gas sensor driver."""
 
     def __init__(self, i2c=None):
         self.i2c = i2c
@@ -48,23 +48,23 @@ class CCS811(object):
         self.CO2 = 0
 
     def print_error(self):
-        """Error code. """
+        """Error code."""
 
         error = self.i2c.readfrom_mem(self.addr, CCS811_ERROR_ID, 1)
-        message = 'Error: '
+        message = "Error: "
 
         if (error[0] >> 5) & 1:
-            message += 'HeaterSupply '
+            message += "HeaterSupply "
         elif (error[0] >> 4) & 1:
-            message += 'HeaterFault '
+            message += "HeaterFault "
         elif (error[0] >> 3) & 1:
-            message += 'MaxResistance '
+            message += "MaxResistance "
         elif (error[0] >> 2) & 1:
-            message += 'MeasModeInvalid '
+            message += "MeasModeInvalid "
         elif (error[0] >> 1) & 1:
-            message += 'ReadRegInvalid '
+            message += "ReadRegInvalid "
         elif (error[0] >> 0) & 1:
-            message += 'MsgInvalid '
+            message += "MsgInvalid "
 
         print(message)
 
@@ -73,42 +73,42 @@ class CCS811(object):
         hardware_id = self.i2c.readfrom_mem(self.addr, CCS811_HW_ID, 1)
         # print(hardware_id)
 
-        if (hardware_id[0] != 0x81):
+        if hardware_id[0] != 0x81:
             # print ("error!")
-            raise ValueError('CCS811 not found. Please check wiring.')
+            raise ValueError("CCS811 not found. Please check wiring.")
 
         if self.check_for_error():
             self.print_error()
-            raise ValueError('Error at Startup.')
+            raise ValueError("Error at Startup.")
 
         if not self.app_valid():
-            raise ValueError('Error: App not valid')
+            raise ValueError("Error: App not valid")
 
         self.i2c.writeto(self.addr, CCS811_APP_START)
 
         if self.check_for_error():
             self.print_error()
-            raise ValueError('Error at AppStart.')
+            raise ValueError("Error at AppStart.")
 
         self.set_drive_mode(1)
 
         if self.check_for_error():
             self.print_error()
-            raise ValueError('Error at setDriveMode.')
+            raise ValueError("Error at setDriveMode.")
 
     def setup(self):
 
-        print('Starting CCS811 Read')
+        print("Starting CCS811 Read")
         self.configure_ccs811()
 
         result = self.get_base_line()
 
         # print("baseline for this sensor: ")
         if result < 0x100:
-            print('0')
+            print("0")
         if result < 0x10:
-            print('0')
-        print('baseline for this sensor =   ', result)
+            print("0")
+        print("baseline for this sensor =   ", result)
 
     def get_base_line(self):
 
@@ -123,18 +123,18 @@ class CCS811(object):
         # print('Value_error', value)
         # print(value[0] )
 
-        v = ((value[0] >> 0) & 1)
+        v = (value[0] >> 0) & 1
         # print('V error = ', v)
-        return ((value[0] >> 0) & 1)
+        return (value[0] >> 0) & 1
 
     def app_valid(self):
         value = self.i2c.readfrom_mem(self.addr, CCS811_STATUS, 1)
         # print('Value', value)
         # print(value[0])
 
-        v = ((value[0] >> 4) & 1)
+        v = (value[0] >> 4) & 1
         # print('V valid = ', v)
-        return ((value[0] >> 4) & 1)
+        return (value[0] >> 4) & 1
 
     def set_drive_mode(self, mode):
         if mode > 4:
@@ -160,7 +160,7 @@ class CCS811(object):
         return value[0] << 3
 
     def readeCO2(self):
-        """ Equivalent Carbone Dioxide in parts per millions. Clipped to 400 to 8192ppm."""
+        """Equivalent Carbone Dioxide in parts per millions. Clipped to 400 to 8192ppm."""
 
         self.setup()
 
@@ -171,13 +171,13 @@ class CCS811(object):
             co2MSB = d[0]
             co2LSB = d[1]
 
-            return ((co2MSB << 8) | co2LSB)
+            return (co2MSB << 8) | co2LSB
 
         elif self.check_for_error():
-                self.print_error()
+            self.print_error()
 
     def readtVOC(self):
-        """ Total Volatile Organic Compound in parts per billion. """
+        """Total Volatile Organic Compound in parts per billion."""
 
         self.setup()
 
@@ -188,13 +188,13 @@ class CCS811(object):
             tvocMSB = d[2]
             tvocLSB = d[3]
 
-            return ((tvocMSB << 8) | tvocLSB)
+            return (tvocMSB << 8) | tvocLSB
 
         elif self.check_for_error():
-                self.print_error()
+            self.print_error()
 
     def reset(self):
-        """ Initiate a software reset. """
+        """Initiate a software reset."""
 
         seq = bytearray([0x11, 0xE5, 0x72, 0x8A])
         self.i2c.writeto_mem(self.addr, CCS811_SW_RESET, seq)

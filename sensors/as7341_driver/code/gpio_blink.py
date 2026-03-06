@@ -11,9 +11,10 @@ addrlist = " ".join(["0x{:02X}".format(x) for x in i2c.scan()])
 print("Detected devices at I2C-addresses:", addrlist)
 
 from as7341 import *
+
 sensor = AS7341(i2c)
 
-sensor.set_gpio_output(True)       # enable output mode, inverted
+sensor.set_gpio_output(True)  # enable output mode, inverted
 print("Starting with LED OFF for 3 seconds")
 sleep_ms(3000)
 
@@ -25,12 +26,12 @@ try:
         sensor.set_gpio_inverted()
         print("LED off 0.5 seconds")
         sleep_ms(500)
-        
+
 
 except KeyboardInterrupt:
     print("Interrupted from keyboard")
 
-sensor.set_gpio_input()       # disable output: LED off
+sensor.set_gpio_input()  # disable output: LED off
 sensor.disable()
 
 #

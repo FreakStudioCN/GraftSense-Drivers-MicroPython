@@ -5,7 +5,7 @@ import mcp3421mod
 import time
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     i2c = I2C(id=1, scl=Pin(7), sda=Pin(6), freq=400_000)  # on Raspberry Pi Pico
     adapter = I2cAdapter(i2c)
 
@@ -14,8 +14,7 @@ if __name__ == '__main__':
     print("---Одиночный режим измерения---")
     my_gain = 0
     my_data_rate = 2
-    adc.start_measurement(single_shot=True, data_rate_raw=my_data_rate, gain_raw=my_gain,
-                          channel=0, differential_channel=True)
+    adc.start_measurement(single_shot=True, data_rate_raw=my_data_rate, gain_raw=my_gain, channel=0, differential_channel=True)
     print("---Основные 'сырые' настройки датчика---")
     gp = adc.get_general_raw_props()
     print(gp)
@@ -33,14 +32,12 @@ if __name__ == '__main__':
         # print(f"value: {val};\tLSB [Вольт]: {lsb}")
         # val = adc.get_raw_value_ex()
         print(f"Напряжение: {val} Вольт")
-        adc.start_measurement(single_shot=True, data_rate_raw=my_data_rate, gain_raw=my_gain,
-                              channel=0, differential_channel=True)
+        adc.start_measurement(single_shot=True, data_rate_raw=my_data_rate, gain_raw=my_gain, channel=0, differential_channel=True)
 
     print(16 * "--")
     print("Автоматический режим измерений АЦП")
     print(16 * "--")
-    adc.start_measurement(single_shot=False, data_rate_raw=my_data_rate, gain_raw=my_gain,
-                          channel=0, differential_channel=True)
+    adc.start_measurement(single_shot=False, data_rate_raw=my_data_rate, gain_raw=my_gain, channel=0, differential_channel=True)
     td = adc.get_conversion_cycle_time()
     time.sleep_us(td)
     print(f"Время преобразования [мкс]: {td}")

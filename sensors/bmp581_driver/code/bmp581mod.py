@@ -2,6 +2,7 @@
 # mail: goctaprog@gmail.com
 # MIT license
 import micropython
+
 # import array
 
 from sensor_pack import bus_service
@@ -10,8 +11,8 @@ from sensor_pack.base_sensor import BaseSensor, Iterator, check_value
 # ВНИМАНИЕ: не подключайте питание датчика к 5В, иначе датчик выйдет из строя! Только 3.3В!!!
 # WARNING: do not connect "+" to 5V or the sensor will be damaged!
 
-_kT = 2 ** -16  # для вычисления температуры
-_kP = 2 ** -6  # для вычисления давления
+_kT = 2**-16  # для вычисления температуры
+_kP = 2**-6  # для вычисления давления
 
 _osr_t_times = 1.0, 1.1, 1.5, 2.1, 3.3, 5.8, 10.8, 20.8
 _osr_p_times = 1.0, 1.7, 2.9, 5.4, 10.4, 20.4, 40.4, 80.4
@@ -109,12 +110,12 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x7E, command_code)
 
     def _int_conf(
-            self,
-            pad_int_drv: [int, None] = None,  # bit 4..7,
-            int_en: [bool, None] = None,  # bit 3,
-            int_od: [bool, None] = None,  # bit 2,
-            int_pol: [bool, None] = None,  # bit 1,
-            int_mode: [bool, None] = None,  # bit 0,
+        self,
+        pad_int_drv: [int, None] = None,  # bit 4..7,
+        int_en: [bool, None] = None,  # bit 3,
+        int_od: [bool, None] = None,  # bit 2,
+        int_pol: [bool, None] = None,  # bit 1,
+        int_mode: [bool, None] = None,  # bit 0,
     ) -> int:
         """Interrupt configuration register. Если все параметры в None, возвращает содержимое ICR"""
         val = self._read_reg(0x14)[0]
@@ -140,11 +141,11 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x14, val, 1)
 
     def _int_source_sel(
-            self,
-            oor_p_en: [int, None] = None,  # bit 3, Pressure data out-of-range (OOR_P)
-            fifo_ths_en: [bool, None] = None,  # bit 2, FIFO Threshold/Watermark (FIFO_THS)
-            fifo_full_en: [bool, None] = None,  # bit 1, FIFO Full (FIFO_FULL)
-            drdy_data_reg_en: [bool, None] = None,  # bit 0, Data Ready
+        self,
+        oor_p_en: [int, None] = None,  # bit 3, Pressure data out-of-range (OOR_P)
+        fifo_ths_en: [bool, None] = None,  # bit 2, FIFO Threshold/Watermark (FIFO_THS)
+        fifo_full_en: [bool, None] = None,  # bit 1, FIFO Full (FIFO_FULL)
+        drdy_data_reg_en: [bool, None] = None,  # bit 0, Data Ready
     ) -> int:
         """Interrupt source selection register. Если все параметры в None, возвращает содержимое ISSR"""
         val = self._read_reg(0x15)[0]
@@ -166,9 +167,9 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x15, val, 1)
 
     def _fifo_config(
-            self,
-            fifo_mode: [bool, None] = None,
-            fifo_threshold: [int, None] = None,
+        self,
+        fifo_mode: [bool, None] = None,
+        fifo_threshold: [int, None] = None,
     ) -> int:
         """FIFO config. Если все параметры метода None, то возвращает значение регистра!"""
         val = self._read_reg(0x16)[0]
@@ -184,10 +185,19 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x16, val, 1)
 
     def _odr_config(
-            self,
-            deep_dis: [bool, None] = None,      # bit 7. Если Истина, то запрещает глубокий режим ожидания/deep sleep mode (Примечание: это поле нельзя изменить во время текущего преобразования давления/температуры).
-            output_data_rate: [int, None] = None,   # bit 6..2. настроенный ODR может быть недействительным в сочетании с конфигурацией OSR. Это можно увидеть с помощью флага odr_is_valid.
-            power_mode: [int, None] = None,     # bit 1..0. Настройка режима питания. Пользователь может запросить выделенный режим питания, записав это поле. Чтение возвращает фактический режим, в котором находится устройство.
+        self,
+        deep_dis: [
+            bool,
+            None,
+        ] = None,  # bit 7. Если Истина, то запрещает глубокий режим ожидания/deep sleep mode (Примечание: это поле нельзя изменить во время текущего преобразования давления/температуры).
+        output_data_rate: [
+            int,
+            None,
+        ] = None,  # bit 6..2. настроенный ODR может быть недействительным в сочетании с конфигурацией OSR. Это можно увидеть с помощью флага odr_is_valid.
+        power_mode: [
+            int,
+            None,
+        ] = None,  # bit 1..0. Настройка режима питания. Пользователь может запросить выделенный режим питания, записав это поле. Чтение возвращает фактический режим, в котором находится устройство.
     ) -> int:
         """Control 0 Register. Если все параметры метода None, то возвращает значение регистра!
         Величина ODR может быть неверной для текущего значение OSR. Это можно определить с помощью флага
@@ -214,9 +224,9 @@ class Bmp581(BaseSensor, Iterator):
         return 0x3F & self._read_reg(0x17)[0]
 
     def _fifo_sel_config(
-            self,
-            fifo_dec_sel: [int, None] = None,
-            fifo_frame_sel: [int, None] = None,
+        self,
+        fifo_dec_sel: [int, None] = None,
+        fifo_frame_sel: [int, None] = None,
     ) -> int:
         """FIFO selection config. Если все параметры метода None, то возвращает значение регистра!"""
         val = self._read_reg(0x18)[0]
@@ -286,22 +296,43 @@ class Bmp581(BaseSensor, Iterator):
             #
             return tuple([0 != (mask & val) for mask in _masks])
 
-#    def _get_fifo_output_port(self) -> int:
-#        """Возвращает значение регистра FIFO output port"""
-#        return self._read_reg(0x29, 1)[0]
+    #    def _get_fifo_output_port(self) -> int:
+    #        """Возвращает значение регистра FIFO output port"""
+    #        return self._read_reg(0x29, 1)[0]
 
-    def _dsp_config(self,
-                    oor_sel_iir_p: [bool, None] = None,     # bit 7, Выбор OOR IIR (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                    fifo_sel_iir_p: [bool, None] = None,    # bit 6, FIFO IIR отбор данных давления. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                    shdw_sel_iir_p: [bool, None] = None,    # bit 5, Теневые регистры IIR отбора данных давления. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                    fifo_sel_iir_t: [bool, None] = None,    # bit 4, FIFO IIR отбор данных температуры. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                    shdw_sel_iir_t: [bool, None] = None,    # bit 3, Регистры данных температуры. IIR отбор данных температуры. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                    iir_flush_forced_en: [bool, None] = None,   # bit 2, если в Истина, то IIR фильтр flush выполняется принудительно. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                    comp_pt_en: [int, None] = None,     # bit 1..0, компенсация датчика. bit 0 - компенсация температуры; bit 1 - компенсация давления (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                    ) -> int:
+    def _dsp_config(
+        self,
+        oor_sel_iir_p: [
+            bool,
+            None,
+        ] = None,  # bit 7, Выбор OOR IIR (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+        fifo_sel_iir_p: [
+            bool,
+            None,
+        ] = None,  # bit 6, FIFO IIR отбор данных давления. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+        shdw_sel_iir_p: [
+            bool,
+            None,
+        ] = None,  # bit 5, Теневые регистры IIR отбора данных давления. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+        fifo_sel_iir_t: [
+            bool,
+            None,
+        ] = None,  # bit 4, FIFO IIR отбор данных температуры. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+        shdw_sel_iir_t: [
+            bool,
+            None,
+        ] = None,  # bit 3, Регистры данных температуры. IIR отбор данных температуры. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+        iir_flush_forced_en: [
+            bool,
+            None,
+        ] = None,  # bit 2, если в Истина, то IIR фильтр flush выполняется принудительно. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+        comp_pt_en: [
+            int,
+            None,
+        ] = None,  # bit 1..0, компенсация датчика. bit 0 - компенсация температуры; bit 1 - компенсация давления (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+    ) -> int:
         val = self._read_reg(0x30)[0]
-        if _all_none(oor_sel_iir_p, fifo_sel_iir_p, shdw_sel_iir_p, fifo_sel_iir_t, shdw_sel_iir_t, iir_flush_forced_en,
-                     comp_pt_en):
+        if _all_none(oor_sel_iir_p, fifo_sel_iir_p, shdw_sel_iir_p, fifo_sel_iir_t, shdw_sel_iir_t, iir_flush_forced_en, comp_pt_en):
             return val
         if oor_sel_iir_p is not None:
             val &= ~(1 << 7)  # mask
@@ -326,10 +357,17 @@ class Bmp581(BaseSensor, Iterator):
             val |= comp_pt_en
         self._write_reg(0x30, val, 1)
 
-    def _dsp_iir_config(self,
-                        set_iir_p: [int, None] = None,  # bit 5..3, Выбор IIR LPF фильтра давления. Коэффициент фильтра. 0 - фильтр отключен, 0x07 - коэфф. фильтра 127. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                        set_iir_t: [int, None] = None,  # bit 2..0, Выбор IIR LPF фильтра температуры. Коэффициент фильтра. 0 - фильтр отключен, 0x07 - коэфф. фильтра 127. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
-                        ) -> int:
+    def _dsp_iir_config(
+        self,
+        set_iir_p: [
+            int,
+            None,
+        ] = None,  # bit 5..3, Выбор IIR LPF фильтра давления. Коэффициент фильтра. 0 - фильтр отключен, 0x07 - коэфф. фильтра 127. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+        set_iir_t: [
+            int,
+            None,
+        ] = None,  # bit 2..0, Выбор IIR LPF фильтра температуры. Коэффициент фильтра. 0 - фильтр отключен, 0x07 - коэфф. фильтра 127. (Это поле невозможно записать во время текущего преобразования давления/температуры.)
+    ) -> int:
         val = self._read_reg(0x31)[0]
         if _all_none(set_iir_p, set_iir_t):
             return val
@@ -363,11 +401,15 @@ class Bmp581(BaseSensor, Iterator):
         tmp = self._dsp_iir_config()
         return (0b0011_1000 & tmp) >> 3, 0b0000_0111 & tmp
 
-    def _osr_config(self,
-                    press_en: [bool, None] = None,  # bit 6, Если Истина, то включается измерение давления датчиком. В противном случае выполняются только измерения температуры.
-                    osr_p: [int, None] = None,  # bit 5..3, частота передискретизации давления (oversampling rate)
-                    osr_t: [int, None] = None,  # bit 2..0, частота передискретизации температуры (oversampling rate)
-                    ) -> int:
+    def _osr_config(
+        self,
+        press_en: [
+            bool,
+            None,
+        ] = None,  # bit 6, Если Истина, то включается измерение давления датчиком. В противном случае выполняются только измерения температуры.
+        osr_p: [int, None] = None,  # bit 5..3, частота передискретизации давления (oversampling rate)
+        osr_t: [int, None] = None,  # bit 2..0, частота передискретизации температуры (oversampling rate)
+    ) -> int:
         """Oversampling rates"""
         val = self._read_reg(0x36)[0]
         if _all_none(press_en, osr_p, osr_t):
@@ -432,7 +474,7 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x7E, 0xB6, 1)
 
     def start_measurement(self, mode: int = 1, output_data_rate: int = 10) -> bool:
-        """ # mode:
+        """# mode:
         0 - Режим ожидания: измерения не производятся.
         1 - Нормальный режим: измерение с частотой output_data_rate.
         2 - Принудительный режим: принудительное однократное(!) измерение.

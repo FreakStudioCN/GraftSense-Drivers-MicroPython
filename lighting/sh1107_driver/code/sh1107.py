@@ -22,13 +22,13 @@ import framebuf
 # 设置对比度指令
 _SET_CONTRAST = const(0x81)
 # 设置显示正显/反显指令
-_SET_NORM_INV = const(0xa6)
+_SET_NORM_INV = const(0xA6)
 # 设置显示开关指令
-_SET_DISP = const(0xae)
+_SET_DISP = const(0xAE)
 # 设置扫描方向指令
-_SET_SCAN_DIR = const(0xc0)
+_SET_SCAN_DIR = const(0xC0)
 # 设置段重映射指令
-_SET_SEG_REMAP = const(0xa0)
+_SET_SEG_REMAP = const(0xA0)
 # 低列地址设置指令
 _LOW_COLUMN_ADDRESS = const(0x00)
 # 高列地址设置指令
@@ -38,6 +38,7 @@ _SET_PAGE_ADDRESS = const(0xB0)
 
 
 # ======================================== 功能函数 ============================================
+
 
 # ======================================== 自定义类 ============================================
 class SH1106(framebuf.FrameBuffer):
@@ -134,14 +135,12 @@ class SH1106(framebuf.FrameBuffer):
             # 创建独立的显示缓冲区
             self.displaybuf = bytearray(self.bufsize)
             # 初始化帧缓冲（高度和宽度交换，使用MONO_HMSB格式）
-            super().__init__(self.renderbuf, self.height, self.width,
-                             framebuf.MONO_HMSB)
+            super().__init__(self.renderbuf, self.height, self.width, framebuf.MONO_HMSB)
         else:
             # 显示缓冲区复用渲染缓冲区
             self.displaybuf = self.renderbuf
             # 初始化帧缓冲（使用MONO_VLSB格式）
-            super().__init__(self.renderbuf, self.width, self.height,
-                             framebuf.MONO_VLSB)
+            super().__init__(self.renderbuf, self.width, self.height, framebuf.MONO_VLSB)
 
         # 绑定翻转方法到rotate属性
         self.rotate = self.flip
@@ -345,8 +344,7 @@ class SH1106(framebuf.FrameBuffer):
             全量更新时刷新所有页，增量更新时仅刷新有变化的页，90/270度旋转时需要转换缓冲区数据
         """
         # 解包显示参数
-        (w, p, db, rb) = (self.width, self.pages,
-                          self.displaybuf, self.renderbuf)
+        (w, p, db, rb) = (self.width, self.pages, self.displaybuf, self.renderbuf)
         # 90/270度旋转数据转换
         if self.rotate90:
             for i in range(self.bufsize):
@@ -359,7 +357,7 @@ class SH1106(framebuf.FrameBuffer):
 
         # 逐页更新显示
         for page in range(self.pages):
-            if (pages_to_update & (1 << page)):
+            if pages_to_update & (1 << page):
                 # 设置页地址
                 self.write_cmd(_SET_PAGE_ADDRESS | page)
                 # 设置列地址（低字节）
@@ -367,7 +365,7 @@ class SH1106(framebuf.FrameBuffer):
                 # 设置列地址（高字节）
                 self.write_cmd(_HIGH_COLUMN_ADDRESS | 0)
                 # 发送页数据
-                self.write_data(db[(w * page):(w * page + w)])
+                self.write_data(db[(w * page) : (w * page + w)])
         # 重置更新页掩码
         self.pages_to_update = 0
 
@@ -681,8 +679,7 @@ class SH1106_I2C(SH1106):
         reset(res=None): 重置显示屏
     """
 
-    def __init__(self, width, height, i2c, res=None, addr=0x3c,
-                 rotate=0, external_vcc=False, delay=0):
+    def __init__(self, width, height, i2c, res=None, addr=0x3C, rotate=0, external_vcc=False, delay=0):
         """
         初始化I2C接口SH1106
         Initialize I2C interface SH1106
@@ -751,7 +748,7 @@ class SH1106_I2C(SH1106):
         Notes:
             I2C数据格式:0x40 + 数据字节流
         """
-        self.i2c.writeto(self.addr, b'\x40' + buf)
+        self.i2c.writeto(self.addr, b"\x40" + buf)
 
     def reset(self, res=None):
         """
@@ -791,8 +788,7 @@ class SH1106_SPI(SH1106):
         reset(res=None): 重置显示屏
     """
 
-    def __init__(self, width, height, spi, dc, res=None, cs=None,
-                 rotate=0, external_vcc=False, delay=0):
+    def __init__(self, width, height, spi, dc, res=None, cs=None, rotate=0, external_vcc=False, delay=0):
         """
         初始化SPI接口SH1106
         Initialize SPI interface SH1106
@@ -909,6 +905,7 @@ class SH1106_SPI(SH1106):
             调用父类reset方法，使用自身的res引脚
         """
         super().reset(self.res)
+
 
 # ======================================== 初始化配置 ===========================================
 

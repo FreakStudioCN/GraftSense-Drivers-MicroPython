@@ -12,4 +12,4 @@ ms = MS5803(i2c)
 print(ms.get_measurements())
 
 # Get converted measurements
-print(ms.get_measurements(temp_units='celcius', pressure_units='pascals'))
+print(ms.get_measurements(temp_units="celcius", pressure_units="pascals"))

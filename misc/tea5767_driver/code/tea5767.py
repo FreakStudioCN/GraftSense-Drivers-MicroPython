@@ -23,6 +23,7 @@ import time
 
 # ======================================== 自定义类 ============================================
 
+
 class Radio:
     """
     FM收音机模块控制类
@@ -132,8 +133,17 @@ class Radio:
         "signal_adc_level",
     ]
 
-    def __init__(self, i2c: I2C, addr: int = 0x60, freq: float = 0.0, band: str = 'US', stereo: bool = True,
-                 soft_mute: bool = True, noise_cancel: bool = True, high_cut: bool = True) -> None:
+    def __init__(
+        self,
+        i2c: I2C,
+        addr: int = 0x60,
+        freq: float = 0.0,
+        band: str = "US",
+        stereo: bool = True,
+        soft_mute: bool = True,
+        noise_cancel: bool = True,
+        high_cut: bool = True,
+    ) -> None:
         """
         初始化收音机控制器
         Initialize radio controller
@@ -331,7 +341,7 @@ class Radio:
         # 从I2C设备读取5字节状态数据
         buf: bytearray = self._i2c.readfrom(self._address, 5)
         # 解析频率数据（原始值转换为MHz）
-        freqB: int = int((buf[0] & 0x3f) << 8 | buf[1])
+        freqB: int = int((buf[0] & 0x3F) << 8 | buf[1])
         # 计算实际FM频率并保留1位小数
         self.frequency = round((freqB * 32768 / 4 - 225000) / 1000000, 1)
         # 解析模块就绪状态（第1字节第7位）

@@ -61,8 +61,8 @@ class Device:
     def _get_byteorder_as_str(self) -> tuple:
         """Return byteorder as string"""
         if self.is_big_byteorder():
-            return 'big', '>'
-        return 'little', '<'
+            return "big", ">"
+        return "little", "<"
 
     def pack(self, fmt_char: str, *values) -> bytes:
         if not fmt_char:

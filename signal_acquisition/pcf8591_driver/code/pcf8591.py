@@ -15,6 +15,7 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 # ======================================== 导入相关模块 =========================================
 # 导入微秒级时间模块，用于I2C通信延时
 import utime
+
 # 从machine模块导入I2C和Pin类，用于硬件接口控制
 from machine import I2C, Pin
 
@@ -30,6 +31,7 @@ AIN3 = CHANNEL3 = 0b00000011
 
 
 # ======================================== 功能函数 ============================================
+
 
 # ======================================== 自定义类 ============================================
 class PCF8591:
@@ -159,7 +161,7 @@ class PCF8591:
             self._i2c = I2C(i2c_id, scl=Pin(scl), sda=Pin(sda))
         else:
             # 未提供有效参数，抛出异常
-            raise ValueError('Either i2c or sda and scl must be provided')
+            raise ValueError("Either i2c or sda and scl must be provided")
 
         # 保存芯片I2C地址
         self._address = address
@@ -180,7 +182,7 @@ class PCF8591:
 
         Notes:
             通过I2C扫描功能检测指定地址的设备是否存在，是初始化后的必要检测步骤
-            Detect if device at specified address exists through I2C scan function, 
+            Detect if device at specified address exists through I2C scan function,
             which is a necessary detection step after initialization
         """
         # 扫描I2C总线，检查指定地址是否存在
@@ -215,9 +217,7 @@ class PCF8591:
             config byte format: D7(output enable)|D6-D5(input mode)|D4(auto-increment)|D3-D0(channel)
         """
         # 组合各配置位生成操作字节
-        return 0 | (self._output_status & self.OUTPUT_MASK) | read_type | \
-            (self.AUTOINCREMENT_READ if auto_increment else 0) | \
-            channel
+        return 0 | (self._output_status & self.OUTPUT_MASK) | read_type | (self.AUTOINCREMENT_READ if auto_increment else 0) | channel
 
     def _write_operation(self, operation):
         """
@@ -264,7 +264,7 @@ class PCF8591:
         Notes:
             启用自动增量模式，依次读取4个通道的采样值；启用DAC输出以支持多通道读取；
             每个通道值为8位无符号整数，对应0-Vref的电压范围
-            Enable auto-increment mode to read sampling values of 4 channels in sequence; 
+            Enable auto-increment mode to read sampling values of 4 channels in sequence;
             enable DAC output to support multi-channel reading;
             Each channel value is an 8-bit unsigned integer, corresponding to voltage range of 0-Vref
         """
@@ -278,14 +278,10 @@ class PCF8591:
         # 初始化数据列表
         data = []
         # 依次读取4个通道的数据
-        data.append(int.from_bytes(
-            self._i2c.readfrom(self._address, 1), 'big'))
-        data.append(int.from_bytes(
-            self._i2c.readfrom(self._address, 1), 'big'))
-        data.append(int.from_bytes(
-            self._i2c.readfrom(self._address, 1), 'big'))
-        data.append(int.from_bytes(
-            self._i2c.readfrom(self._address, 1), 'big'))
+        data.append(int.from_bytes(self._i2c.readfrom(self._address, 1), "big"))
+        data.append(int.from_bytes(self._i2c.readfrom(self._address, 1), "big"))
+        data.append(int.from_bytes(self._i2c.readfrom(self._address, 1), "big"))
+        data.append(int.from_bytes(self._i2c.readfrom(self._address, 1), "big"))
 
         # 返回4个通道的整数值元组
         return int(data[0]), int(data[1]), int(data[2]), int(data[3])
@@ -312,8 +308,7 @@ class PCF8591:
             Return first byte when output is enabled, return second byte when disabled (PCF8591 hardware feature)
         """
         # 生成单通道读取的操作配置字节
-        operation = self._get_operation(
-            auto_increment=False, channel=channel, read_type=read_type)
+        operation = self._get_operation(auto_increment=False, channel=channel, read_type=read_type)
         # 写入配置字节
         self._write_operation(operation)
 
@@ -400,15 +395,14 @@ class PCF8591:
         # 验证输入值范围
         if value > 255 or value < 0:
             # 超出范围抛出异常
-            Exception('Value must be between 0 and 255')
+            Exception("Value must be between 0 and 255")
 
         # 启用DAC输出
         self._output_status = self.ENABLE_OUTPUT
         # 重置上一次操作状态（强制重新写入配置）
         self._last_operation = None
         # 写入输出使能配置和模拟值
-        self._i2c.writeto(self._address, bytearray(
-            [self.ENABLE_OUTPUT, value]))
+        self._i2c.writeto(self._address, bytearray([self.ENABLE_OUTPUT, value]))
 
     def disable_output(self):
         """
@@ -429,6 +423,7 @@ class PCF8591:
         self._output_status = self.DISABLE_OUTPUT
         # 写入禁用输出的配置字节
         self._i2c.writeto(self._address, bytearray([self.DISABLE_OUTPUT]))
+
 
 # ======================================== 初始化配置 ===========================================
 

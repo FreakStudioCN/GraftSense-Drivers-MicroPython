@@ -39,6 +39,7 @@ MACHINE_INSTANCE_PATTERNS = [
 
 # ======================================== 功能函数 ============================================
 
+
 def read_file_content(file_path: Path) -> str:
     """
     读取文件内容（UTF-8编码）
@@ -49,6 +50,7 @@ def read_file_content(file_path: Path) -> str:
     except Exception as e:
         print(f"[FAIL] Error reading file {file_path}: {str(e)}")
         return ""
+
 
 def check_required_globals(content: str, file_path: Path) -> bool:
     """
@@ -82,6 +84,7 @@ def check_required_globals(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: All 4 required global variables exist")
     return True
 
+
 def check_license_comment(content: str, file_path: Path) -> bool:
     """
     精准匹配独立的 # @License : MIT 注释行（仅非main.py文件需要检查）
@@ -96,6 +99,7 @@ def check_license_comment(content: str, file_path: Path) -> bool:
         return True
     print(f"[FAIL] {file_path}: Missing # @License : MIT comment")
     return False
+
 
 def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
     """
@@ -116,6 +120,7 @@ def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
         return False
     print(f"[PASS] {file_path}: No Chinese in raise/print messages")
     return True
+
 
 def extract_section_content(content: str, marker: str) -> str:
     """
@@ -141,6 +146,7 @@ def extract_section_content(content: str, marker: str) -> str:
         return "\n".join(lines[section_start:section_end])
     return ""
 
+
 def check_init_config_section(content: str, file_path: Path) -> bool:
     """
     检查初始化配置区（仅main.py需要检查，非main.py跳过）
@@ -164,6 +170,7 @@ def check_init_config_section(content: str, file_path: Path) -> bool:
         return False
     print(f"[PASS] {file_path}: Init config section has required content")
     return True
+
 
 def check_main_py_instance_location(content: str, file_path: Path) -> bool:
     """
@@ -202,6 +209,7 @@ def check_main_py_instance_location(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: main.py instance location is correct")
     return True
 
+
 def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     """
     精准检查while循环仅在主程序区（仅main.py需要检查）
@@ -231,6 +239,7 @@ def check_main_py_while_loop(content: str, file_path: Path) -> bool:
 
     print(f"[PASS] {file_path}: main.py while loop location is correct")
     return True
+
 
 def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
     """
@@ -264,6 +273,7 @@ def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
         return False
     print(f"[PASS] {file_path}: Type hints exist in __init__ parameters")
     return True
+
 
 def check_method_param_validation(content: str, file_path: Path) -> bool:
     """
@@ -338,6 +348,7 @@ def check_method_param_validation(content: str, file_path: Path) -> bool:
     print(f"[PASS] {file_path}: All methods with parameters have valid parameter validation")
     return True
 
+
 def check_file(file_path: Path) -> bool:
     """
     全量检查单个文件
@@ -364,11 +375,13 @@ def check_file(file_path: Path) -> bool:
 
     return all_passed
 
+
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ===========================================
 
 # ========================================  主程序  ===========================================
+
 
 def main():
     """

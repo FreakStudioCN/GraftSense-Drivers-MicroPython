@@ -11,17 +11,19 @@ from sensor_pack_2.base_sensor import IBaseSensorEx, Iterator, IDentifier, Devic
 # ВНИМАНИЕ: не подключайте питание датчика к 5В, иначе датчик выйдет из строя! Только 3.3В!!!
 # WARNING: do not connect "+" to 5V or the sensor will be damaged!
 
+
 @micropython.native
 def _calibration_regs_addr() -> iter:
     """возвращает кортеж из адреса регистра, размера значения в байтах, типа значения (u-unsigned, s-signed)"""
     start_addr = 0x31
-    tpl = ('1b', '2h', '2H')
+    tpl = ("1b", "2h", "2H")
     # возвращает итератор с адресами внутренних регистров датчика, хранящих калибровочные коэффициенты
     val_type = "22011002200100"
     for item in val_type:
         v_size, v_type = tpl[int(item)]
         yield int(start_addr), int(v_size), v_type
         start_addr += int(v_size)
+
 
 serial_number_bmp390 = namedtuple("sn_bmp390", "chip_id rev_id")
 measured_values_bmp390 = namedtuple("meas_vals_bmp390", "T P")
@@ -33,8 +35,7 @@ event_bmp390 = namedtuple("event__bmp390", "itf_act_pt por_detected")
 class Bmp390(IBaseSensorEx, IDentifier, Iterator):
     """Class for work with Bosh BMP180 pressure sensor"""
 
-    def __init__(self, adapter: bus_service.BusAdapter, address=0x77,
-                 oversample_temp=0b11, oversample_press=0b11, iir_filter=0):
+    def __init__(self, adapter: bus_service.BusAdapter, address=0x77, oversample_temp=0b11, oversample_press=0b11, iir_filter=0):
         """i2c - объект класса I2C; baseline_pressure - давление на уровне моря в Pa в твоей(!) местности;;
         oversample_settings (0..5) - точность измерения 0-грубо но быстро, 5-медленно, но точно;
         address - адрес датчика;
@@ -48,13 +49,10 @@ class Bmp390(IBaseSensorEx, IDentifier, Iterator):
         self._buf_3 = bytearray(3)  # для _read_buf_from_mem
         self._t_lin = None  # for pressure calculation
         # for temperature only!
-        self._oss_t = check_value(oversample_temp, range(6),
-                                   f"Invalid temperature oversample value: {oversample_temp}")
-        self._oss_p = check_value(oversample_press, range(6),
-                                   f"Invalid pressure oversample value: {oversample_press}")
+        self._oss_t = check_value(oversample_temp, range(6), f"Invalid temperature oversample value: {oversample_temp}")
+        self._oss_p = check_value(oversample_press, range(6), f"Invalid pressure oversample value: {oversample_press}")
         self._adapter = adapter
-        self._IIR = check_value(iir_filter, range(8),
-                                 f"Invalid iir_filter value: {iir_filter}")
+        self._IIR = check_value(iir_filter, range(8), f"Invalid iir_filter value: {iir_filter}")
         self._mode = 0  # sleep mode
         self._enable_pressure = False
         self._enable_temperature = False
@@ -82,21 +80,21 @@ class Bmp390(IBaseSensorEx, IDentifier, Iterator):
         """предварительно вычисленные значения"""
         get_calibr_coeff = self.get_calibration_coefficient
         # для расчета температуры
-        self.par_t1 = get_calibr_coeff(0) * 2 ** 8  #
-        self.par_t2 = get_calibr_coeff(1) / 2 ** 30  #
-        self.par_t3 = get_calibr_coeff(2) / 2 ** 48  #
+        self.par_t1 = get_calibr_coeff(0) * 2**8  #
+        self.par_t2 = get_calibr_coeff(1) / 2**30  #
+        self.par_t3 = get_calibr_coeff(2) / 2**48  #
         # для расчета давления
-        self.par_p1 = (get_calibr_coeff(3) - 2 ** 14) / 2 ** 20
-        self.par_p2 = (get_calibr_coeff(4) - 2 ** 14) / 2 ** 29
-        self.par_p3 = get_calibr_coeff(5) / 2 ** 32
-        self.par_p4 = get_calibr_coeff(6) / 2 ** 37
+        self.par_p1 = (get_calibr_coeff(3) - 2**14) / 2**20
+        self.par_p2 = (get_calibr_coeff(4) - 2**14) / 2**29
+        self.par_p3 = get_calibr_coeff(5) / 2**32
+        self.par_p4 = get_calibr_coeff(6) / 2**37
         self.par_p5 = 8 * get_calibr_coeff(7)
-        self.par_p6 = get_calibr_coeff(8) / 2 ** 6
-        self.par_p7 = get_calibr_coeff(9) / 2 ** 8
-        self.par_p8 = get_calibr_coeff(10) / 2 ** 15
-        self.par_p9 = get_calibr_coeff(11) / 2 ** 48
-        self.par_p10 = get_calibr_coeff(12) / 2 ** 48
-        self.par_p11 = get_calibr_coeff(13) / 2 ** 65
+        self.par_p6 = get_calibr_coeff(8) / 2**6
+        self.par_p7 = get_calibr_coeff(9) / 2**8
+        self.par_p8 = get_calibr_coeff(10) / 2**15
+        self.par_p9 = get_calibr_coeff(11) / 2**48
+        self.par_p10 = get_calibr_coeff(12) / 2**48
+        self.par_p11 = get_calibr_coeff(13) / 2**65
 
     def _read_calibration_data(self) -> int:
         """Читает калибровочные значение из датчика.
@@ -222,9 +220,7 @@ class Bmp390(IBaseSensorEx, IDentifier, Iterator):
         Bit 1 full_int FIFO Full Interrupt
         Bit 3 drdy data ready interrupt"""
         int_stat = 0b1011 & self._connection.read_reg(reg_addr=0x11, bytes_count=1)[0]
-        return int_status_bmp390(data_ready=bool(0b1000 & int_stat),
-                                 fifo_is_full=bool(0b010 & int_stat),
-                                 fifo_watermark=bool(0b0001 & int_stat))
+        return int_status_bmp390(data_ready=bool(0b1000 & int_stat), fifo_is_full=bool(0b010 & int_stat), fifo_watermark=bool(0b0001 & int_stat))
 
     def get_fifo_length(self) -> int:
         """The FIFO byte counter indicates the current fill level of the FIFO buffer."""
@@ -233,7 +229,7 @@ class Bmp390(IBaseSensorEx, IDentifier, Iterator):
         return self._connection.unpack(fmt_char="H", source=buf)[0]
 
     def start_measurement(self, enable_press: bool = True, enable_temp: bool = True, mode: int = 2):
-        """ # mode: 0 - sleep, 1-forced, 2-normal (continuously)"""
+        """# mode: 0 - sleep, 1-forced, 2-normal (continuously)"""
         if not mode in range(3):
             raise ValueError(f"Invalid mode value: {mode}")
         tmp = 0
@@ -282,10 +278,8 @@ class Bmp390(IBaseSensorEx, IDentifier, Iterator):
 
     def set_oversampling(self, pressure_oversampling: int, temperature_oversampling: int):
         tmp = 0
-        po = check_value(pressure_oversampling, range(6),
-                          f"Invalid value pressure_oversampling: {pressure_oversampling}")
-        to = check_value(temperature_oversampling, range(6),
-                          f"Invalid value temperature_oversampling: {temperature_oversampling}")
+        po = check_value(pressure_oversampling, range(6), f"Invalid value pressure_oversampling: {pressure_oversampling}")
+        to = check_value(temperature_oversampling, range(6), f"Invalid value temperature_oversampling: {temperature_oversampling}")
         tmp |= po
         tmp |= to << 3
         self._connection.write_reg(reg_addr=0x1C, value=tmp, bytes_count=1)
@@ -293,15 +287,13 @@ class Bmp390(IBaseSensorEx, IDentifier, Iterator):
         self._oss_p = pressure_oversampling
 
     def set_sampling_period(self, period: int):
-        p = check_value(period, range(18),
-                         f"Invalid value output data rates: {period}")
+        p = check_value(period, range(18), f"Invalid value output data rates: {period}")
         self._connection.write_reg(reg_addr=0x1D, value=p, bytes_count=1)
         self._sampling_period = period
 
     def set_iir_filter(self, value):
         """Коэффициент IIR-фильтра"""
-        p = check_value(value, range(8),
-                         f"Invalid value iir_filter: {value}")
+        p = check_value(value, range(8), f"Invalid value iir_filter: {value}")
         self._connection.write_reg(reg_addr=0x1F, value=p, bytes_count=1)
         self._IIR = value
 
@@ -309,10 +301,10 @@ class Bmp390(IBaseSensorEx, IDentifier, Iterator):
     def get_conversion_cycle_time(self) -> int:
         """возвращает время преобразования в [мкс] датчиком температуры или давления в зависимости от его настроек"""
         k = 2020
-        temp_us = 163 + k * 2 ** self._oss_t
+        temp_us = 163 + k * 2**self._oss_t
         total = 234 + temp_us
         if self._enable_pressure:
-            press_us = 392 + k * 2 ** self._oss_p
+            press_us = 392 + k * 2**self._oss_p
             total += press_us
         return total
 

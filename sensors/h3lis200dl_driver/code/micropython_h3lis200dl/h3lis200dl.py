@@ -230,21 +230,9 @@ class H3LIS200DL:
         :return: Acceleration data
         """
 
-        x = (
-            self._twos_comp(self._acc_data_x, 8)
-            * full_scale[self._memory_full_scale_selection]
-            / 128
-        )
-        y = (
-            self._twos_comp(self._acc_data_y, 8)
-            * full_scale[self._memory_full_scale_selection]
-            / 128
-        )
-        z = (
-            self._twos_comp(self._acc_data_z, 8)
-            * full_scale[self._memory_full_scale_selection]
-            / 128
-        )
+        x = self._twos_comp(self._acc_data_x, 8) * full_scale[self._memory_full_scale_selection] / 128
+        y = self._twos_comp(self._acc_data_y, 8) * full_scale[self._memory_full_scale_selection] / 128
+        z = self._twos_comp(self._acc_data_z, 8) * full_scale[self._memory_full_scale_selection] / 128
         return x, y, z
 
     @property

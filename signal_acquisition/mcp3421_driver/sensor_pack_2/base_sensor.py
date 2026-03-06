@@ -61,8 +61,8 @@ class Device:
     def _get_byteorder_as_str(self) -> tuple:
         """Return byteorder as string"""
         if self.is_big_byteorder():
-            return 'big', '>'
-        return 'little', '<'
+            return "big", ">"
+        return "little", "<"
 
     def pack(self, fmt_char: str, *values) -> bytes:
         if not fmt_char:
@@ -188,6 +188,7 @@ class IPower:
         """
         raise NotImplemented
 
+
 #    def power_on(self, on: bool = True) -> int:
 #        """Полностью включает (on в Истина), либо полностью ВЫключает (on в Ложь)
 #        Возвращает текущий режим потребления устройства."""
@@ -210,9 +211,9 @@ class IBaseSensorEx:
         """Возвращает измеренное датчиком значение(значения)"""
         raise NotImplemented
 
-#    def is_data_ready(self) -> bool:
-#        """Возвращает Истина, если данные доступны для считывания"""
-#        raise NotImplemented
+    #    def is_data_ready(self) -> bool:
+    #        """Возвращает Истина, если данные доступны для считывания"""
+    #        raise NotImplemented
 
     def is_single_shot_mode(self) -> bool:
         """Возвращает Истина, когда датчик находится в режиме однократных измерений,

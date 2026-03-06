@@ -7,6 +7,7 @@
 
 import time
 from machine import I2C, Pin
+
 # 导入原有Radio类
 from tea5767 import Radio
 
@@ -49,18 +50,12 @@ if RADIO_ADDR not in i2c.scan():
 else:
     # 初始化Radio（关闭干扰检测的功能，保证信号读取准确）
     radio = Radio(
-        i2c=i2c,
-        addr=RADIO_ADDR,
-        freq=87.5 if SEARCH_BAND == "US" else 76.0,
-        band=SEARCH_BAND,
-        soft_mute=False,
-        noise_cancel=False,
-        high_cut=False
+        i2c=i2c, addr=RADIO_ADDR, freq=87.5 if SEARCH_BAND == "US" else 76.0, band=SEARCH_BAND, soft_mute=False, noise_cancel=False, high_cut=False
     )
     print(f"Starting {SEARCH_BAND} band scanning...")
 
     # 2. 定义频段范围
-    freq_min, freq_max = (Radio.FREQ_RANGE_US if SEARCH_BAND == "US" else Radio.FREQ_RANGE_JP)
+    freq_min, freq_max = Radio.FREQ_RANGE_US if SEARCH_BAND == "US" else Radio.FREQ_RANGE_JP
     current_freq = freq_min
     max_signal_freq = current_freq
     max_signal_level = 0
