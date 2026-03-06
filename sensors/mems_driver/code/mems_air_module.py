@@ -12,7 +12,6 @@ __license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
-
 import time
 from machine import SoftI2C, Pin, Timer
 from micropython import const
