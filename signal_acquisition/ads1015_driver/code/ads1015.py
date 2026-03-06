@@ -15,10 +15,9 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 # ======================================== 导入相关模块 =========================================
 # 导入结构化数据打包/解包模块，用于I2C数据格式转换
 import ustruct
+
 # 导入时间模块，用于转换等待延时
 import time
-
-
 
 # ======================================== 全局变量 ============================================
 # 寄存器地址掩码（用于地址验证）
@@ -132,14 +131,7 @@ _CQUE_4CONV = const(0x0002)  # Assert ALERT/RDY after four conversions
 _CQUE_NONE = const(0x0003)  # Disable the comparator and put ALERT/RDY in high state (default)
 
 # 增益配置列表（索引对应增益倍数：0=2/3x,1=1x,2=2x,3=4x,4=8x,5=16x）
-_GAINS = (
-    _PGA_6_144V,  # 2/3x
-    _PGA_4_096V,  # 1x
-    _PGA_2_048V,  # 2x
-    _PGA_1_024V,  # 4x
-    _PGA_0_512V,  # 8x
-    _PGA_0_256V  # 16x
-)
+_GAINS = (_PGA_6_144V, _PGA_4_096V, _PGA_2_048V, _PGA_1_024V, _PGA_0_512V, _PGA_0_256V)  # 2/3x  # 1x  # 2x  # 4x  # 8x  # 16x
 # 单端通道配置列表（索引0-3对应AIN0-AIN3）
 _CHANNELS = (_MUX_SINGLE_0, _MUX_SINGLE_1, _MUX_SINGLE_2, _MUX_SINGLE_3)
 # 差分通道映射表（通道对->配置值）
@@ -152,6 +144,7 @@ _DIFFS = {
 
 
 # ======================================== 功能函数 ============================================
+
 
 # ======================================== 自定义类 ============================================
 class ADS1115:
@@ -234,7 +227,7 @@ class ADS1115:
             Pack data using big-endian (>BH), B=register address (1 byte), H=16-bit value (2 bytes)
         """
         # 打包寄存器地址和值为大端序字节流
-        data = ustruct.pack('>BH', register, value)
+        data = ustruct.pack(">BH", register, value)
         # 通过I2C写入数据到指定地址
         self.i2c.writeto(self.address, data)
 
@@ -258,11 +251,11 @@ class ADS1115:
         # 启动I2C通信
         self.i2c.start()
         # 发送设备地址(写)和寄存器地址
-        self.i2c.write(ustruct.pack('>BB', self.address << 1, register))
+        self.i2c.write(ustruct.pack(">BB", self.address << 1, register))
         # 从设备读取2字节数据
         data = self.i2c.readfrom(self.address, 2)
         # 解包为16位有符号整数并返回
-        return ustruct.unpack('>h', data)[0]
+        return ustruct.unpack(">h", data)[0]
 
     def read(self, channel):
         """
@@ -283,9 +276,18 @@ class ADS1115:
             default configuration: 1600SPS, comparator disabled, traditional mode
         """
         # 写入配置寄存器：单次转换模式，指定通道和增益
-        self._write_register(_REGISTER_CONFIG, _CQUE_NONE | _CLAT_NONLAT |
-                             _CPOL_ACTVLOW | _CMODE_TRAD | _DR_1600SPS | _MODE_SINGLE |
-                             _OS_SINGLE | _GAINS[self.gain] | _CHANNELS[channel])
+        self._write_register(
+            _REGISTER_CONFIG,
+            _CQUE_NONE
+            | _CLAT_NONLAT
+            | _CPOL_ACTVLOW
+            | _CMODE_TRAD
+            | _DR_1600SPS
+            | _MODE_SINGLE
+            | _OS_SINGLE
+            | _GAINS[self.gain]
+            | _CHANNELS[channel],
+        )
         # 等待转换完成（轮询OS位状态）
         while not self._read_register(_REGISTER_CONFIG) & _OS_NOTBUSY:
             # 每次等待1ms
@@ -317,9 +319,18 @@ class ADS1115:
             Only support (0,1), (0,3), (1,3), (2,3) channel combinations, single conversion mode, conversion takes about 1ms
         """
         # 写入配置寄存器：单次转换模式，指定差分通道和增益
-        self._write_register(_REGISTER_CONFIG, _CQUE_NONE | _CLAT_NONLAT |
-                             _CPOL_ACTVLOW | _CMODE_TRAD | _DR_1600SPS | _MODE_SINGLE |
-                             _OS_SINGLE | _GAINS[self.gain] | _DIFFS[(channel1, channel2)])
+        self._write_register(
+            _REGISTER_CONFIG,
+            _CQUE_NONE
+            | _CLAT_NONLAT
+            | _CPOL_ACTVLOW
+            | _CMODE_TRAD
+            | _DR_1600SPS
+            | _MODE_SINGLE
+            | _OS_SINGLE
+            | _GAINS[self.gain]
+            | _DIFFS[(channel1, channel2)],
+        )
         # 等待转换完成（轮询OS位状态）
         while not self._read_register(_REGISTER_CONFIG) & _OS_NOTBUSY:
             # 每次等待1ms
@@ -349,9 +360,18 @@ class ADS1115:
         # 写入高阈值寄存器
         self._write_register(_REGISTER_HITHRESH, threshold)
         # 写入配置寄存器：连续转换模式，启用比较器
-        self._write_register(_REGISTER_CONFIG, _CQUE_1CONV | _CLAT_LATCH |
-                             _CPOL_ACTVLOW | _CMODE_TRAD | _DR_1600SPS | _MODE_CONTIN |
-                             _MODE_CONTIN | _GAINS[self.gain] | _CHANNELS[channel])
+        self._write_register(
+            _REGISTER_CONFIG,
+            _CQUE_1CONV
+            | _CLAT_LATCH
+            | _CPOL_ACTVLOW
+            | _CMODE_TRAD
+            | _DR_1600SPS
+            | _MODE_CONTIN
+            | _MODE_CONTIN
+            | _GAINS[self.gain]
+            | _CHANNELS[channel],
+        )
 
     def alert_read(self):
         """
@@ -502,6 +522,7 @@ class ADS1015(ADS1115):
         """
         # 调用父类方法并右移4位得到12位报警数据
         return super().alert_read() >> 4
+
 
 # ======================================== 初始化配置 ===========================================
 
