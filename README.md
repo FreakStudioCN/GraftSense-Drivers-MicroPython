@@ -30,7 +30,7 @@ GraftSense-Drivers-MicroPython/
 ├── git-hooks/              # Git 钩子脚本目录
 │   ├── pre-commit          # 提交前自动检查钩子（依赖安装+代码规范检查）
 │   └── post-push           # 推送后自动恢复钩子配置（Windows 兼容版）
-├── init-hooks.bat          # Windows 一键初始化 Git 钩子脚本
+├── code_checker.py         # 自定义代码规范检查脚本，用于检查 MicroPython 驱动文件的全局变量、参数校验等规则
 ├── list_package_info.py    # 可视化扫描工具，查看所有package.json配置
 ├── modify_package_json.py  # 批量修改工具，标准化urls路径和字段
 ├── rename_readme.py        # 批量重命名工具，统一README.md文件名
@@ -126,15 +126,7 @@ python rename_readme.py
 * 配置工具的运行参数（如 `black` 的行长度、`flake8` 忽略的错误码）；
 * 实现「提交代码前自动执行规范检查」，避免不合规代码推送到远程仓库。
 
-仓库已内置 Windows 兼容版 Git 钩子脚本，开发工程师只需执行以下步骤完成初始化:
-
-通过下面命令进行安装:
-开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具:
-```bash
-pre-commit install
-```
-
-开发过程中需遵循代码规范，确保提交的代码符合质量要求，以下是核心操作说明:
+开发过程中需遵循代码规范，确保提交的代码符合质量要求，以下是核心操作说明。
 
 ## 依赖安装
 开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具:
@@ -143,15 +135,39 @@ pre-commit install
 pip install black flake8 pre-commit
 ```
 
-接着在仓库根目录，双击运行 `init-hooks.bat`，该脚本会自动:
-* 检查仓库根目录和钩子模板文件；
-* 将 git-hooks/ 目录下的 pre-commit、post-push 钩子复制到 .git/hooks/；
-* 初始化 pre-commit 配置。
+接着在仓库根目录，执行以下命令初始化 `pre-commit` 钩子:
+```bash
+# 这个命令会在 .git/hooks/ 目录下生成 pre-commit 脚本，之后每次提交都会自动触发检查。
+pre-commit install
+```
 
 初始化完成后，后续提交代码时，pre-commit 钩子会自动执行:
-* 检查并自动安装 black/flake8/pre-commit 依赖；
-* 执行代码格式化（black）和规范检查（flake8）；
-* 若检查不通过，会阻止提交，提示修复问题。
+1. 代码格式化（`black`）
+2. 代码语法 / 规范检查（`flake8`）
+3. 自定义代码规范检查（`code_checker.py`）
+4. 若检查不通过，会阻止提交，提示修复问题。
+
+## 自定义代码检查脚本（code_checker.py）
+`code_checker.py` 是仓库新增的专项代码规范检查脚本，用于补充 `pre-commit` 钩子的检查规则，针对 `MicroPython` 驱动文件（如传感器、通信模块等）进行更细致的规范校验，核心检查规则包括：
+* 非 `main.py` 文件：必须包含 4 个顶层全局变量（`__version__`、`__author__`、`__license__`、`__platform__`）
+* 非 `main.py` 文件：必须包含独立的 # @License : MIT 注释行
+* 所有文件：`raise`/`print` 语句中不允许出现中文字符
+* `main.py` 文件：全局变量区禁止实例化，实例化必须放在初始化配置区；`while` 循环仅允许出现在主程序区
+* 所有文件：`__init__` 方法必须包含参数类型注解
+* 非 `main.py` 文件：类中所有有入口参数的方法必须包含参数合法性校验（`isinstance`/`hasattr`/ 取值判断 + `raise`）
+
+该脚本已集成到 `pre-commit` 钩子中，提交代码时会自动执行；也可通过命令行手动运行，对指定文件或目录进行检查：
+```bash
+# 检查单个文件
+python code_checker.py ./sensors/BH1750_driver/code/bh_1750.py
+
+# 检查同级所有文件夹（递归，包括子文件夹的子文件夹）
+python code_checker.py . -r
+```
+检查同级所有文件夹（递归，包括子文件夹的子文件夹）输出如下：
+![图片描述](docs/check_all.png)
+检查单个文件输出如下：
+![图片描述](docs/check_single.png)
 
 ## 推送前手动检查
 我们也可以使用下面命令手动执行全量检查，提前发现规范问题:
@@ -161,7 +177,7 @@ pre-commit run --all-files
 ```
 
 ## 特殊情况说明
-部分检查报错是由于 MicroPython（mpy）与标准 Python（py）语法 / 内置对象差异导致的误报，并非代码实际功能问题。
+部分检查报错是由于 `MicroPython`（`mpy`）与标准 `Python`（`py`）语法 / 内置对象差异导致的误报，并非代码实际功能问题（如 `const` 函数未定义），可通过在文件开头导入 `from micropython import const` 或在 `flake8` 配置中忽略对应错误码解决。
 
 ## 临时跳过钩子推送（谨慎使用）
 若需临时跳过检查推送代码，可执行以下命令临时禁用 Git 钩子:
@@ -174,7 +190,6 @@ git config --local core.hooksPath NUL
 # 恢复本地Git钩子配置
 git config --local --unset core.hooksPath
 ```
-
 
 # 📜 许可协议
 
