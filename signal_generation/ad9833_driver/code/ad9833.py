@@ -7,6 +7,11 @@
 # 代码参考:https://github.com/owainm713/AD9833-MicroPython-Module/blob/main/AD9833example.py#L54
 # 这部分代码由 owainm713 开发，采用 GNU General Public License v3.0 License.
 
+__version__ = "1.0.0"
+__author__ = "owainm713"
+__license__ = "GNU General Public License v3.0 License"
+__platform__ = "MicroPython v1.23.0"
+
 # ======================================== 导入相关模块 =========================================
 
 # 导入硬件相关模块
@@ -134,6 +139,9 @@ class AD9833:
         Raises:
             ValueError: 如果传入的data参数不是整数类型，则抛出该异常。
         """
+        # 校验参数类型和长度
+        if not isinstance(data, int):
+            raise TypeError(f"data must be a int, got {type(data)}")
 
         # 将数据转换为字节数组
         data = bytearray(data)
@@ -327,7 +335,6 @@ class AD9833:
             pout = radians(pout)
         # 根据弧度计算相位寄存器的值
         phaseR = int(pout * 4096 / (2 * pi))
-
         # 将相位值与地址合并
         phaseR = phaseR + (0b11 << 14) + (phaseSelect << 13)
 

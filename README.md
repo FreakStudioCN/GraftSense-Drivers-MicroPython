@@ -176,11 +176,84 @@ python code_checker.py . -r
 pre-commit run --all-files
 ```
 
+## 提交实例：自定义代码检查器（code_checker.py）检查失败（真实合规问题）
+
+![图片描述](docs/ad9833_1.png)
+
+![图片描述](docs/ad9833_2.png)
+
+![图片描述](docs/ad9833_3.png)
+
+提交 `signal_generation/ad9833_driver/code/ad9833.py` 时，`black` 和 `flake8` 钩子均通过，但 `code_checker.py` 检查失败，终端输出如下：
+```
+[main 6612fc9] ci(G:\GraftSense-Drivers-MicroPython): 修改文档，重新弄了pre-commit逻辑
+ 3 files changed, 34 insertions(+), 19 deletions(-)
+ create mode 100644 docs/check_all.png
+ create mode 100644 docs/check_single.png
+17:33:32.265: [GraftSense-Drivers-MicroPython#] git -c credential.helper= -c core.quotepath=false -c log.showSignature=false add --ignore-errors -A -f -- signal_generation/ad9833_driver/code/ad9833.py
+17:33:32.396: [GraftSense-Drivers-MicroPython#] git -c credential.helper= -c core.quotepath=false -c log.showSignature=false commit -F C:\Users\Administrator\AppData\Local\Temp\git-commit-msg-.txt --
+[main 80a75be] ci(G:\GraftSense-Drivers-MicroPython): 修改文档，重新弄了pre-commit逻辑
+ 1 file changed, 1 deletion(-)
+17:33:51.353: [GraftSense-Drivers-MicroPython#] git -c credential.helper= -c core.quotepath=false -c log.showSignature=false add --ignore-errors -A -f -- signal_generation/ad9833_driver/code/ad9833.py
+17:33:51.553: [GraftSense-Drivers-MicroPython#] git -c credential.helper= -c core.quotepath=false -c log.showSignature=false commit -F C:\Users\Administrator\AppData\Local\Temp\git-commit-msg-.txt --
+Microsoft Windows [�汾 10.0.19045.3803]
+(c) Microsoft Corporation����������Ȩ����
+(MicroPython_Learn) G:\GraftSense-Drivers-MicroPython#>black....................................................................Passed
+flake8...................................................................Passed
+Run Code Checker.........................................................Failed
+- hook id: run-code-checker
+- exit code: 1
+[INFO] Found 1 .py files, starting check...
+	[DOING] Checking file:signal_generation\ad9833_driver\code\ad9833.py
+[FAIL] signal_generation\ad9833_driver\code\ad9833.py: Missing required global variables: __version__, __author__, __license__, __platform__
+[FAIL] signal_generation\ad9833_driver\code\ad9833.py: Missing # @License : MIT comment
+[PASS] signal_generation\ad9833_driver\code\ad9833.py: No Chinese in raise/print messages
+[PASS] signal_generation\ad9833_driver\code\ad9833.py: Skip init config section check (non-main.py file)
+[PASS] signal_generation\ad9833_driver\code\ad9833.py: Skip instantiation location check (non-main.py file)
+[PASS] signal_generation\ad9833_driver\code\ad9833.py: Skip while loop location check (non-main.py file)
+[PASS] signal_generation\ad9833_driver\code\ad9833.py: Type hints exist in __init__ parameters
+[FAIL] signal_generation\ad9833_driver\code\ad9833.py: Methods missing parameter validation: AD9833.write_data
+--------------------------------------------------------------------------------
+[DONE] [SUMMARY] Check summary:
+Total files:1
+Passed:0
+Failed:1
+[FAIL] Files with failed checks:
+  - signal_generation\ad9833_driver\code\ad9833.py
+```
+
+这是因为 `ad9833.py` 作为非 `main.py` 的驱动文件，未满足 `code_checker.py` 定义的核心规范：
+* 缺失顶层全局变量：未定义 `__version__`、`__author__`、`__license__`、`__platform__` 四个必填全局变量；
+* 缺失 `License` 注释：未包含独立的 `# @License : MIT` 注释行；
+* 方法参数校验缺失：`AD9833.write_data` 方法有入口参数，但未添加合法性校验（如 `isinstance`/ 取值判断 + `raise`）。
+
+修改完成后，重新执行提交命令，`code_checker.py` 检查将全部通过，提交成功。
+
 ## 特殊情况说明
+
+### 情况 1：MicroPython 与标准 Python 语法差异导致的 flake8 误报
 部分检查报错是由于 `MicroPython`（`mpy`）与标准 `Python`（`py`）语法 / 内置对象差异导致的误报，并非代码实际功能问题（如 `const` 函数未定义），可通过在文件开头导入 `from micropython import const` 或在 `flake8` 配置中忽略对应错误码解决。
 
+### 情况 2：black 自动格式化导致的钩子 “失败”（正常机制）
+![图片描述](docs/except_black.png)
+从控制台输出可见，`black` 钩子标注为「Failed」，但这并非代码错误，而是 `pre-commit` 的标准保护机制：
+
+* 现象：`black` 输出提示 1 file reformatted，同时返回非零退出码，阻止代码提交；`flake8` 等其他钩子可能正常通过。
+* 原因：`black` 检测到代码不符合格式化规范，已自动完成代码格式化；为了提醒开发者文件已被修改，它会主动阻止提交，需开发者确认格式化后的内容。
+* 解决方法（需在 `Git Bash` 中执行）： 这是 `pre-commit` 的核心设计逻辑（先格式化→提醒修改→重新提交），只需两步即可完成合规提交：
+
+```bash
+# 步骤1：将 black 格式化后的文件重新加入暂存区（以 ad9833.py 为例）
+git add signal_generation/ad9833_driver/code/ad9833.py
+
+# 步骤2：再次执行提交命令，此时 pre-commit 所有钩子会全部通过
+git commit -m "你的提交信息"
+```
+
+![图片描述](docs/black_bash.png)
+
 ## 临时跳过钩子推送（谨慎使用）
-若需临时跳过检查推送代码，可执行以下命令临时禁用 Git 钩子:
+若需临时跳过检查推送代码，可执行以下命令临时禁用 `Git` 钩子:
 ```bash
 # 临时禁用本地Git钩子（Windows系统）
 git config --local core.hooksPath NUL
@@ -193,7 +266,7 @@ git config --local --unset core.hooksPath
 
 # 📜 许可协议
 
-本仓库所有驱动程序（除 MicroPython 官方模块和参考的相关模块外）均采用MIT许可协议。
+本仓库所有驱动程序（除 `MicroPython` 官方模块和参考的相关模块外）均采用`MIT`许可协议。
 
 # 📞 联系方式
 
