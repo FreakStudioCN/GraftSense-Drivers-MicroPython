@@ -254,7 +254,7 @@ class BusPWMServoController:
             reversed (bool): 是否反向控制。
 
         Raises:
-            ValueError: 如果参数无效，详细错误信息如下：
+            ValueError: 如果参数无效，详细错误信息如下:
                 - servo_type 不是 `SERVO_180` 或 `SERVO_360`。
                 - min_us 和 max_us 必须为正整数，并且 min_us 小于 max_us。
                 - neutral_us 必须是整数，且在 `min_us` 和 `max_us` 之间，或者为 `None`。

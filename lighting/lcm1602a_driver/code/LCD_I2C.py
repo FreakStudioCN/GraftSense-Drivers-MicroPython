@@ -170,7 +170,7 @@ class LCD:
         # 清屏
         self.clear()
 
-        # 设置输入模式：光标左移，显示不移位
+        # 设置输入模式:光标左移，显示不移位
         self._command(ENTRYMODESET | ENTRYLEFT | ENTRYSHIFTDECREMENT)
 
         # 将光标定位到初始位置(0,0)
@@ -191,7 +191,7 @@ class LCD:
             None
 
         Notes:
-            支持四种显示模式组合：仅显示、显示+闪烁、显示+光标、显示+光标+闪烁
+            支持四种显示模式组合:仅显示、显示+闪烁、显示+光标、显示+光标+闪烁
             Support four display mode combinations: display only, display+blink, display+cursor, display+cursor+blink
         """
         # 仅显示，关闭光标和闪烁
@@ -293,7 +293,7 @@ class LCD:
             None
 
         Notes:
-            自动处理换行：当列位置超过15时，自动切换到下一行开头，
+            自动处理换行:当列位置超过15时，自动切换到下一行开头，
             每个字符输出间隔10ms确保显示稳定
             Automatically handle line breaks: when column position exceeds 15, automatically switch to next row start,
             10ms interval between each character output to ensure stable display

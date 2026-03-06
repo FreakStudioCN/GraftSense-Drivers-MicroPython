@@ -3,7 +3,7 @@
 # @Time    : 2025/9/8 下午4:51
 # @Author  : 缪贵成
 # @File    : ds1307.py
-# @Description : 基于DS1307的RTC时钟，参考地址：https://github.com/peter-l5/DS1307
+# @Description : 基于DS1307的RTC时钟，参考地址:https://github.com/peter-l5/DS1307
 # @License : MIT
 
 __version__ = "0.1.0"

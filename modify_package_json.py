@@ -63,11 +63,11 @@ def delete_bak_files_recursive(root_dir):
                 print(f"❌ 删除失败: {bak_file_path} - {str(e)}")
 
     # 输出删除统计
-    print("\n备份文件清理完成！统计：")
-    print(f"成功删除：{delete_success} 个")
-    print(f"删除失败：{delete_fail} 个")
+    print("\n备份文件清理完成！统计:")
+    print(f"成功删除:{delete_success} 个")
+    print(f"删除失败:{delete_fail} 个")
     if fail_files:
-        print("\n删除失败的文件：")
+        print("\n删除失败的文件:")
         for f in fail_files:
             print(f"  - {f}")
     print("=" * 80)
@@ -149,13 +149,13 @@ def modify_single_package_json(package_json_path):
         # 生成修改日志
         modify_log = (
             f"【修改成功】{package_json_path}\n"
-            f"  - 保留字段：name={new_data['name']}, version={new_data['version']}\n"
-            f"  - 新增字段：license=MIT, chips=all, fw=all, _comments\n"
-            f"  - urls修改：{original_urls} → {new_urls}\n"
+            f"  - 保留字段:name={new_data['name']}, version={new_data['version']}\n"
+            f"  - 新增字段:license=MIT, chips=all, fw=all, _comments\n"
+            f"  - urls修改:{original_urls} → {new_urls}\n"
             f"  - {backup_msg}"
         )
         if errors:
-            modify_log += f"\n  - 警告：以下条目格式错误，已跳过：{', '.join(errors)}"
+            modify_log += f"\n  - 警告:以下条目格式错误，已跳过:{', '.join(errors)}"
         return True, modify_log
     except Exception as e:
         return False, f"【写入失败】{package_json_path} - {str(e)}"
@@ -165,7 +165,7 @@ def batch_modify_package_json_recursive(project_root):
     """递归批量修改所有目录下的package.json（无_driver限制）"""
     print("=" * 80)
     print("开始批量修改package.json文件（支持任意深度目录）")
-    print(f"项目根目录：{project_root}")
+    print(f"项目根目录:{project_root}")
     print("=" * 80)
 
     success_count = 0
@@ -184,7 +184,7 @@ def batch_modify_package_json_recursive(project_root):
             continue
 
         total_count += 1
-        print(f"\n[{total_count}] 处理：{package_json_path}")
+        print(f"\n[{total_count}] 处理:{package_json_path}")
 
         # 修改单个文件
         success, msg = modify_single_package_json(package_json_path)
@@ -198,13 +198,13 @@ def batch_modify_package_json_recursive(project_root):
 
     # 输出最终统计
     print("\n" + "=" * 80)
-    print("批量修改完成！统计结果：")
-    print(f"总处理文件数：{total_count}")
-    print(f"修改成功：{success_count}")
-    print(f"修改失败：{fail_count}")
+    print("批量修改完成！统计结果:")
+    print(f"总处理文件数:{total_count}")
+    print(f"修改成功:{success_count}")
+    print(f"修改失败:{fail_count}")
 
     if fail_list:
-        print("\n失败列表：")
+        print("\n失败列表:")
         for fail_msg in fail_list:
             print(f"  - {fail_msg}")
     print("=" * 80)

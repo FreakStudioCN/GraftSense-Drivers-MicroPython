@@ -286,9 +286,9 @@ class KT403A:
         Notes:
             Pin numbers are automatically converted to pin IDs in "P+number" format; module communication status is verified during initialization
         """
-        # 构造TX引脚ID字符串（格式：P+引脚编号）
+        # 构造TX引脚ID字符串（格式:P+引脚编号）
         txPinId = "P" + str(txPinNum)
-        # 构造RX引脚ID字符串（格式：P+引脚编号）
+        # 构造RX引脚ID字符串（格式:P+引脚编号）
         rxPinId = "P" + str(rxPinNum)
         # 初始化UART通信实例，配置9600波特率、8位数据位、无校验、1位停止位
         self._uart = UART(uartBus, baudrate=9600, bits=8, parity=None, stop=1, pins=(txPinId, rxPinId, None, None))
@@ -304,7 +304,7 @@ class KT403A:
 
     def _txCmd(self, cmd, dataL=0, dataH=0):
         """
-        私有方法：封装并发送符合KT403A通信协议的指令帧。
+        私有方法:封装并发送符合KT403A通信协议的指令帧。
 
         Args:
             cmd (int): 指令字（操作码）
@@ -312,7 +312,7 @@ class KT403A:
             dataH (int, 可选): 数据高字节，默认值0
 
         Notes:
-            指令帧格式：7E FF 06 [cmd] 00 [dataH] [dataL] EF；
+            指令帧格式:7E FF 06 [cmd] 00 [dataH] [dataL] EF；
             根据指令类型设置不同的延迟时间，确保模块处理完成
 
         ---
@@ -343,12 +343,12 @@ class KT403A:
         self._uart.write(bytes([dataL]))
         # 发送指令帧结束字节（0xEF）
         self._uart.write(b"\xEF")
-        # 根据指令类型设置延迟：0x09(切换设备)200ms，0x0C(复位)1000ms，其他30ms
+        # 根据指令类型设置延迟:0x09(切换设备)200ms，0x0C(复位)1000ms，其他30ms
         sleep_ms(200 if cmd == 0x09 else 1000 if cmd == 0x0C else 30)
 
     def _rxCmd(self):
         """
-        私有方法：读取并解析KT403A模块返回的响应指令帧。
+        私有方法:读取并解析KT403A模块返回的响应指令帧。
 
         Returns:
             tuple/None: 有效响应返回(cmd, data)元组，无效响应返回None
@@ -373,7 +373,7 @@ class KT403A:
         if self._uart.any():
             # 读取10字节响应数据
             buf = self._uart.read(10)
-            # 验证响应帧格式有效性：非空、长度10、帧头帧尾正确、版本和长度字段匹配
+            # 验证响应帧格式有效性:非空、长度10、帧头帧尾正确、版本和长度字段匹配
             if buf is not None and len(buf) == 10 and buf[0] == 0x7E and buf[1] == 0xFF and buf[2] == 0x06 and buf[9] == 0xEF:
                 # 提取响应指令字
                 cmd = buf[3]
@@ -386,7 +386,7 @@ class KT403A:
 
     def _readLastCmd(self):
         """
-        私有方法：循环读取UART响应，获取最后一条有效响应指令。
+        私有方法:循环读取UART响应，获取最后一条有效响应指令。
 
         Returns:
             tuple/None: 最后一条有效响应的(cmd, data)元组，无有效响应返回None

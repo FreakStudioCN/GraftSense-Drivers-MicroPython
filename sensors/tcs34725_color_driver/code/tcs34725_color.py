@@ -284,14 +284,14 @@ class TCS34725:
         enable = self._register8(_REGISTER_ENABLE)
 
         if value:
-            # 激活传感器：上电 → 启用 ADC → 点亮 LED（若有）
+            # 激活传感器:上电 → 启用 ADC → 点亮 LED（若有）
             self._register8(_REGISTER_ENABLE, enable | _ENABLE_PON)
             time.sleep_ms(3)
             self._register8(_REGISTER_ENABLE, enable | _ENABLE_PON | _ENABLE_AEN)
             if self.led_pin is not None:
                 self.led_pin.value(1)
         else:
-            # 关闭传感器：关闭 ADC 和电源 → 熄灭 LED（若有）
+            # 关闭传感器:关闭 ADC 和电源 → 熄灭 LED（若有）
             self._register8(_REGISTER_ENABLE, enable & ~(_ENABLE_PON | _ENABLE_AEN))
             if self.led_pin is not None:  # 仅在 led_pin 有效时操作
                 self.led_pin.value(0)

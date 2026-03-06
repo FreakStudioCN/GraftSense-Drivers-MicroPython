@@ -136,7 +136,7 @@ class SMS:
         Query SMS list by status
 
         Args:
-            status (str): 短信状态筛选条件，可选值："REC UNREAD"(未读)、"REC READ"(已读)、"STO UNSENT"(未发送)、"STO SENT"(已发送)、"ALL"(全部)
+            status (str): 短信状态筛选条件，可选值:"REC UNREAD"(未读)、"REC READ"(已读)、"STO UNSENT"(未发送)、"STO SENT"(已发送)、"ALL"(全部)
                           SMS status filter condition, optional values: "REC UNREAD" (unread), "REC READ" (read), "STO UNSENT" (unsent), "STO SENT" (sent), "ALL" (all)
 
         Returns:

@@ -66,7 +66,7 @@ class SNR9816_TTS:
         play_alert_tone(num: int) -> bool:
             播放警示音（1-5）。
 
-    注意事项：
+    注意事项:
         1. 合成文本不支持繁体字和生僻字。
         2. 所有控制指令均通过封装后的协议帧发送。
         3. 语音参数设置通过插入特定控制文本（如"[v5]"）实现。
@@ -161,7 +161,7 @@ class SNR9816_TTS:
 
     def _send_frame(self, cmd, encoding, data_bytes) -> bool:
         """
-        内部方法：发送协议帧到SNR9816模块。
+        内部方法:发送协议帧到SNR9816模块。
 
         Args:
             cmd (int): 命令字，如0x01为合成命令。
@@ -199,7 +199,7 @@ class SNR9816_TTS:
 
     def _check_response(self, expected_response=None, timeout_ms=100) -> int | bool | None:
         """
-        内部方法：检查模块响应。
+        内部方法:检查模块响应。
 
         Args:
             expected_response (int|None): 期望的响应字节值。如果为None，则返回实际接收的字节

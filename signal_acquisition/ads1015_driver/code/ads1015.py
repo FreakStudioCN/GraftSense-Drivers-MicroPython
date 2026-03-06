@@ -19,7 +19,6 @@ import ustruct
 # 导入时间模块，用于转换等待延时
 import time
 
-
 # ======================================== 全局变量 ============================================
 # 寄存器地址掩码（用于地址验证）
 _REGISTER_MASK = const(0x03)
@@ -34,30 +33,30 @@ _REGISTER_HITHRESH = const(0x03)
 
 # 操作状态位掩码（配置寄存器第15位）
 _OS_MASK = const(0x8000)
-# 单次转换触发（写操作：置1启动单次转换）
+# 单次转换触发（写操作:置1启动单次转换）
 _OS_SINGLE = const(0x8000)  # Write: Set to start a single-conversion
-# 转换中状态（读操作：0表示正在转换）
+# 转换中状态（读操作:0表示正在转换）
 _OS_BUSY = const(0x0000)  # Read: Bit=0 when conversion is in progress
-# 空闲状态（读操作：1表示转换完成/空闲）
+# 空闲状态（读操作:1表示转换完成/空闲）
 _OS_NOTBUSY = const(0x8000)  # Read: Bit=1 when device is not performing a conversion
 
 # 输入多路复用器掩码（配置寄存器第12-14位）
 _MUX_MASK = const(0x7000)
-# 差分输入：正输入端=AIN0，负输入端=AIN1（默认配置）
+# 差分输入:正输入端=AIN0，负输入端=AIN1（默认配置）
 _MUX_DIFF_0_1 = const(0x0000)  # Differential P  =  AIN0, N  =  AIN1 (default)
-# 差分输入：正输入端=AIN0，负输入端=AIN3
+# 差分输入:正输入端=AIN0，负输入端=AIN3
 _MUX_DIFF_0_3 = const(0x1000)  # Differential P  =  AIN0, N  =  AIN3
-# 差分输入：正输入端=AIN1，负输入端=AIN3
+# 差分输入:正输入端=AIN1，负输入端=AIN3
 _MUX_DIFF_1_3 = const(0x2000)  # Differential P  =  AIN1, N  =  AIN3
-# 差分输入：正输入端=AIN2，负输入端=AIN3
+# 差分输入:正输入端=AIN2，负输入端=AIN3
 _MUX_DIFF_2_3 = const(0x3000)  # Differential P  =  AIN2, N  =  AIN3
-# 单端输入：仅采集AIN0（参考地为GND）
+# 单端输入:仅采集AIN0（参考地为GND）
 _MUX_SINGLE_0 = const(0x4000)  # Single-ended AIN0
-# 单端输入：仅采集AIN1（参考地为GND）
+# 单端输入:仅采集AIN1（参考地为GND）
 _MUX_SINGLE_1 = const(0x5000)  # Single-ended AIN1
-# 单端输入：仅采集AIN2（参考地为GND）
+# 单端输入:仅采集AIN2（参考地为GND）
 _MUX_SINGLE_2 = const(0x6000)  # Single-ended AIN2
-# 单端输入：仅采集AIN3（参考地为GND）
+# 单端输入:仅采集AIN3（参考地为GND）
 _MUX_SINGLE_3 = const(0x7000)  # Single-ended AIN3
 
 # 可编程增益放大器掩码（配置寄存器第9-11位）
@@ -84,19 +83,19 @@ _MODE_SINGLE = const(0x0100)  # Power-down single-shot mode (default)
 
 # 数据速率掩码（配置寄存器第5-7位）
 _DR_MASK = const(0x00E0)
-# 数据速率：128样本/秒
+# 数据速率:128样本/秒
 _DR_128SPS = const(0x0000)  # 128 samples per second
-# 数据速率：250样本/秒
+# 数据速率:250样本/秒
 _DR_250SPS = const(0x0020)  # 250 samples per second
-# 数据速率：490样本/秒
+# 数据速率:490样本/秒
 _DR_490SPS = const(0x0040)  # 490 samples per second
-# 数据速率：920样本/秒
+# 数据速率:920样本/秒
 _DR_920SPS = const(0x0060)  # 920 samples per second
-# 数据速率：1600样本/秒（默认配置）
+# 数据速率:1600样本/秒（默认配置）
 _DR_1600SPS = const(0x0080)  # 1600 samples per second (default)
-# 数据速率：2400样本/秒
+# 数据速率:2400样本/秒
 _DR_2400SPS = const(0x00A0)  # 2400 samples per second
-# 数据速率：3300样本/秒
+# 数据速率:3300样本/秒
 _DR_3300SPS = const(0x00C0)  # 3300 samples per second
 
 # 比较器模式掩码（配置寄存器第4位）
@@ -131,7 +130,7 @@ _CQUE_4CONV = const(0x0002)  # Assert ALERT/RDY after four conversions
 # 禁用比较器，ALERT/RDY引脚置高（默认配置）
 _CQUE_NONE = const(0x0003)  # Disable the comparator and put ALERT/RDY in high state (default)
 
-# 增益配置列表（索引对应增益倍数：0=2/3x,1=1x,2=2x,3=4x,4=8x,5=16x）
+# 增益配置列表（索引对应增益倍数:0=2/3x,1=1x,2=2x,3=4x,4=8x,5=16x）
 _GAINS = (_PGA_6_144V, _PGA_4_096V, _PGA_2_048V, _PGA_1_024V, _PGA_0_512V, _PGA_0_256V)  # 2/3x  # 1x  # 2x  # 4x  # 8x  # 16x
 # 单端通道配置列表（索引0-3对应AIN0-AIN3）
 _CHANNELS = (_MUX_SINGLE_0, _MUX_SINGLE_1, _MUX_SINGLE_2, _MUX_SINGLE_3)
@@ -272,11 +271,11 @@ class ADS1115:
                  16-bit signed sampling value (-32768~32767)
 
         Notes:
-            采用单次转换模式，转换完成约需1ms，等待期间轮询转换状态，默认配置：1600SPS、禁用比较器、传统模式
+            采用单次转换模式，转换完成约需1ms，等待期间轮询转换状态，默认配置:1600SPS、禁用比较器、传统模式
             Use single conversion mode, conversion takes about 1ms, poll conversion status during waiting,
             default configuration: 1600SPS, comparator disabled, traditional mode
         """
-        # 写入配置寄存器：单次转换模式，指定通道和增益
+        # 写入配置寄存器:单次转换模式，指定通道和增益
         self._write_register(
             _REGISTER_CONFIG,
             _CQUE_NONE
@@ -319,7 +318,7 @@ class ADS1115:
             仅支持(0,1)、(0,3)、(1,3)、(2,3)通道组合，单次转换模式，转换完成约需1ms
             Only support (0,1), (0,3), (1,3), (2,3) channel combinations, single conversion mode, conversion takes about 1ms
         """
-        # 写入配置寄存器：单次转换模式，指定差分通道和增益
+        # 写入配置寄存器:单次转换模式，指定差分通道和增益
         self._write_register(
             _REGISTER_CONFIG,
             _CQUE_NONE
@@ -360,7 +359,7 @@ class ADS1115:
         """
         # 写入高阈值寄存器
         self._write_register(_REGISTER_HITHRESH, threshold)
-        # 写入配置寄存器：连续转换模式，启用比较器
+        # 写入配置寄存器:连续转换模式，启用比较器
         self._write_register(
             _REGISTER_CONFIG,
             _CQUE_1CONV

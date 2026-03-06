@@ -87,9 +87,9 @@ class JEDMGasMeas:
     READ_CMD: int = 0xA1
     # 校零校准的命令字
     CALIBRATE_CMD: int = 0x32
-    # 类常量：I2C最大允许通信速率（100KHz）
+    # 类常量:I2C最大允许通信速率（100KHz）
     MAX_I2C_FREQ: int = 100000
-    # 类常量：校准值的范围（16位无符号整数）
+    # 类常量:校准值的范围（16位无符号整数）
     CALIB_MIN: int = 0
     # 2^16 - 1
     CALIB_MAX: int = 65535
@@ -147,13 +147,13 @@ class JEDMGasMeas:
         """
 
         try:
-            # 第一步：发送写操作（7位地址），写入读取命令，stop=False表示不发送停止位（实现重复起始）
-            # writeto返回收到的ACK数量，需等于发送的字节数（这里是1个字节：READ_CMD）
+            # 第一步:发送写操作（7位地址），写入读取命令，stop=False表示不发送停止位（实现重复起始）
+            # writeto返回收到的ACK数量，需等于发送的字节数（这里是1个字节:READ_CMD）
             ack_count = self.i2c.writeto(self._addr_7bit, bytes([JEDMGasMeas.READ_CMD]), False)
             if ack_count != 1:
                 raise OSError("No ACK for read command")
 
-            # 第二步：发送读操作（7位地址），读取2个字节的浓度数据（高位+低位），stop=True发送停止位
+            # 第二步:发送读操作（7位地址），读取2个字节的浓度数据（高位+低位），stop=True发送停止位
             data = self.i2c.readfrom(self._addr_7bit, 2)
             if len(data) != 2:
                 raise OSError("Incomplete data received")
@@ -214,7 +214,7 @@ class JEDMGasMeas:
 
         try:
             # 发送写操作，写入校零命令+校准值高低字节，stop=True发送停止位
-            # 发送的字节序列：[校零命令, 高位字节, 低位字节]
+            # 发送的字节序列:[校零命令, 高位字节, 低位字节]
             ack_count = self.i2c.writeto(self._addr_7bit, bytes([JEDMGasMeas.CALIBRATE_CMD, high_byte, low_byte]))
             # 检查ACK数量
             if ack_count != 1:

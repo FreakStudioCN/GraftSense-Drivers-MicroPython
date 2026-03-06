@@ -52,5 +52,5 @@ while True:
     uart_str = f"{raw_val_dc},{filtered_val}\r\n"
     uart.write(uart_str.encode("utf-8"))  # 显式编码，避免截断
     # 终端打印心率 ，导联状态
-    print(f"lead_status：{lead_status},heart_rate：{heart_rate}\r\n")
+    print(f"lead_status:{lead_status},heart_rate:{heart_rate}\r\n")
     time.sleep_ms(10)

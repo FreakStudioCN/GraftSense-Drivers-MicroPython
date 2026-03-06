@@ -3,14 +3,14 @@
 """
 Pre-commit code checker for MicroPython driver files & main.py
 Check all specified rules:
-1. 非main.py文件：必须包含4个顶层全局变量(__version__, __author__, __license__, __platform__)
-2. 非main.py文件：必须包含独立的 # @License : MIT 注释行
-3. 所有文件：raise/print中无中文字符
-4. main.py：全局变量区无实例化，初始化配置区有实例化
-5. main.py：while循环仅在主程序区
-6. main.py：初始化配置区有time.sleep(3)和FreakStudio打印（非main.py跳过）
-7. 所有文件：__init__方法有参数类型注解+try-except
-8. 非main.py文件：类中所有有入口参数的方法必须包含参数合法性校验（isinstance/hasattr/取值判断+raise）
+1. 非main.py文件:必须包含4个顶层全局变量(__version__, __author__, __license__, __platform__)
+2. 非main.py文件:必须包含独立的 # @License : MIT 注释行
+3. 所有文件:raise/print中无中文字符
+4. main.py:全局变量区无实例化，初始化配置区有实例化
+5. main.py:while循环仅在主程序区
+6. main.py:初始化配置区有time.sleep(3)和FreakStudio打印（非main.py跳过）
+7. 所有文件:__init__方法有参数类型注解+try-except
+8. 非main.py文件:类中所有有入口参数的方法必须包含参数合法性校验（isinstance/hasattr/取值判断+raise）
 """
 import argparse
 import re
@@ -25,7 +25,7 @@ SLEEP3_PATTERN = r"time\.sleep\(3\)"
 MAIN_SECTION_MARKER = "# ========================================  主程序  ============================================"
 INIT_CONFIG_MARKER = "# ======================================== 初始化配置 ==========================================="
 CHINESE_CHAR_PATTERN = re.compile(r"[\u4e00-\u9fff]")  # 匹配中文字符
-# 精准匹配实例化：包含模块.类(如machine.UART)、变量=类(如sensor=TestSensor)
+# 精准匹配实例化:包含模块.类(如machine.UART)、变量=类(如sensor=TestSensor)
 MACHINE_INSTANCE_PATTERNS = [
     r"\w+\.\w+\(",  # 匹配 machine.UART(1) 这类
     r"\w+ = \w+\(",  # 匹配 sensor = TestSensor(5) 这类
@@ -47,7 +47,7 @@ def read_file_content(file_path: Path) -> str:
 def check_required_globals(content: str, file_path: Path) -> bool:
     """检查4个必填全局变量是否存在（仅非main.py文件需要检查）"""
     if file_path.name == "main.py":
-        print(f"[PASS] {file_path}: main.py 无需检查全局变量，跳过")
+        print(f"[PASS] {file_path}: main.py Skip global variables check (main.py)")
         return True
 
     try:
@@ -78,7 +78,7 @@ def check_required_globals(content: str, file_path: Path) -> bool:
 def check_license_comment(content: str, file_path: Path) -> bool:
     """精准匹配独立的 # @License : MIT 注释行（仅非main.py文件需要检查）"""
     if file_path.name == "main.py":
-        print(f"[PASS] {file_path}: main.py 无需检查License注释，跳过")
+        print(f"[PASS] {file_path}: Skip License comment check (main.py)")
         return True
 
     lines = [line.strip() for line in content.split("\n")]
@@ -134,7 +134,7 @@ def extract_section_content(content: str, marker: str) -> str:
 def check_init_config_section(content: str, file_path: Path) -> bool:
     """检查初始化配置区（仅main.py需要检查，非main.py跳过）"""
     if file_path.name != "main.py":
-        print(f"[PASS] {file_path}: 非main.py文件，无需检查初始化配置区，跳过")
+        print(f"[PASS] {file_path}: Skip init config section check (non-main.py file)")
         return True
 
     init_content = extract_section_content(content, INIT_CONFIG_MARKER)
@@ -157,7 +157,7 @@ def check_init_config_section(content: str, file_path: Path) -> bool:
 def check_main_py_instance_location(content: str, file_path: Path) -> bool:
     """精准检查main.py实例化位置（仅main.py需要检查）"""
     if "main.py" not in str(file_path):
-        print(f"[PASS] {file_path}: 非main.py文件，无需检查实例化位置，跳过")
+        print(f"[PASS] {file_path}: Skip instantiation location check (non-main.py file)")
         return True
 
     global_content = extract_section_content(
@@ -193,7 +193,7 @@ def check_main_py_instance_location(content: str, file_path: Path) -> bool:
 def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     """精准检查while循环仅在主程序区（仅main.py需要检查）"""
     if "main.py" not in str(file_path):
-        print(f"[PASS] {file_path}: 非main.py文件，无需检查while循环位置，跳过")
+        print(f"[PASS] {file_path}: Skip while loop location check (non-main.py file)")
         return True
 
     main_content = extract_section_content(content, MAIN_SECTION_MARKER)
@@ -240,7 +240,7 @@ def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
 
     # 无__init__方法则跳过检查
     if not has_init_method:
-        print(f"[PASS] {file_path}: 无__init__方法，跳过类型注解检查")
+        print(f"[PASS] {file_path}: Skip type hint check (no init method)")
         return True
 
     # 仅校验类型注解
@@ -255,7 +255,7 @@ def check_method_param_validation(content: str, file_path: Path) -> bool:
     """检查非main.py文件中类的所有有参数方法是否包含参数合法性校验（isinstance/hasattr/取值判断+raise）"""
     # main.py跳过该检查
     if file_path.name == "main.py":
-        print(f"[PASS] {file_path}: main.py 无需检查方法参数校验，跳过")
+        print(f"[PASS] {file_path}: Skip method parameter validation check (main.py)")
         return True
 
     try:
@@ -337,7 +337,7 @@ def check_file(file_path: Path) -> bool:
         check_main_py_instance_location,
         check_main_py_while_loop,
         check_type_hints_and_try_except,
-        check_method_param_validation,  # 新增：方法参数校验检查
+        check_method_param_validation,  # 新增:方法参数校验检查
     ]
 
     all_passed = True
@@ -350,16 +350,16 @@ def check_file(file_path: Path) -> bool:
 
 def main():
     """
-    命令行入口：支持两种模式
-    1. 传入文件路径：检查指定.py文件（原有功能）
-    2. 传入目录路径：检查目录下所有.py文件（新增功能）
-    可选参数：-r/--recursive 递归遍历子文件夹（默认不递归）
+    命令行入口:支持两种模式
+    1. 传入文件路径:检查指定.py文件（原有功能）
+    2. 传入目录路径:检查目录下所有.py文件（新增功能）
+    可选参数:-r/--recursive 递归遍历子文件夹（默认不递归）
     """
     parser = argparse.ArgumentParser(description="Check MicroPython code rules")
-    # 位置参数：支持传入文件/目录路径（可多个）
-    parser.add_argument("paths", nargs="+", help="文件路径或目录路径（支持多个）")
-    # 可选参数：是否递归遍历子文件夹
-    parser.add_argument("-r", "--recursive", action="store_true", help="递归遍历目录下的所有子文件夹（仅对目录路径生效）")
+    # 位置参数:支持传入文件/目录路径（可多个）
+    parser.add_argument("paths", nargs="+", help="File path or directory path (supports multiple)")
+    # 可选参数:是否递归遍历子文件夹
+    parser.add_argument("-r", "--recursive", action="store_true", help="Recursively traverse all subfolders (only for directory paths)")
 
     args = parser.parse_args()
 
@@ -370,16 +370,16 @@ def main():
         path = Path(path_str)
         # 处理路径不存在的情况
         if not path.exists():
-            print(f"路径不存在：{path_str}")
+            print(f"[ERROR] Path does not exist:{path_str}")
             exit(1)
 
-        # 情况1：传入的是文件，且是.py文件 → 加入列表
+        # 情况1:传入的是文件，且是.py文件 → 加入列表
         if path.is_file() and path.suffix == ".py":
             py_files.append(path)
-        # 情况2：传入的是文件，但不是.py文件 → 跳过并提示
+        # 情况2:传入的是文件，但不是.py文件 → 跳过并提示
         elif path.is_file() and path.suffix != ".py":
-            print(f"[WARNING] 跳过非.py文件：{path_str}")
-        # 情况3：传入的是目录 → 遍历目录下的.py文件
+            print(f"[WARNING] Skip non-.py file:{path_str}")
+        # 情况3:传入的是目录 → 遍历目录下的.py文件
         elif path.is_dir():
             if args.recursive:
                 # 递归遍历目录下所有.py文件
@@ -391,32 +391,32 @@ def main():
     # 去重（避免重复检查同一文件）
     py_files = list(set(py_files))
     if not py_files:
-        print("未找到任何待检查的.py文件")
+        print("[ERROR] No .py files found to check")
         exit(1)
 
     # 批量检查所有.py文件
     passed = True
     failed_files = []
-    print(f"共找到 {len(py_files)} 个.py文件，开始检查...\n")
+    print(f"[INFO] Found {len(py_files)} .py files, starting check...\n")
     for file_path in py_files:
-        print(f"[DOING] 检查文件：{file_path}")
+        print(f"	[DOING] Checking file:{file_path}")
         if not check_file(file_path):
             passed = False
             failed_files.append(str(file_path))
         print("-" * 80)  # 分隔线
 
     # 输出汇总结果
-    print("\n[DONE] 检查汇总：")
-    print(f"总文件数：{len(py_files)}")
-    print(f"通过数：{len(py_files) - len(failed_files)}")
-    print(f"失败数：{len(failed_files)}")
+    print("\n[DONE] [SUMMARY] Check summary:")
+    print(f"Total files:{len(py_files)}")
+    print(f"Passed:{len(py_files) - len(failed_files)}")
+    print(f"Failed:{len(failed_files)}")
     if failed_files:
-        print(f"\n[FAIL] 检查失败的文件：")
+        print(f"\n[FAIL] Files with failed checks:")
         for f in failed_files:
             print(f"  - {f}")
         exit(1)
     else:
-        print("\n[PASS] 所有文件检查通过！")
+        print("\n[PASS] All files passed checks!")
         exit(0)
 
 

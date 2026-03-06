@@ -109,7 +109,7 @@ dac = MCP4725(i2c, DAC_ADDRESS)
 # 读取DAC的配置信息
 eeprom_write_busy, power_down, value, eeprom_power_down, eeprom_value = dac.read()
 print(eeprom_write_busy, power_down, value, eeprom_power_down, eeprom_value)
-# 配置DAC：取消电源关断模式，输出电压为0V，写入EEPROM
+# 配置DAC:取消电源关断模式，输出电压为0V，写入EEPROM
 dac.config(power_down="Off", value=0, eeprom=True)
 # 延时50ms，配置完成后立即读取会发生错误
 time.sleep_ms(50)
@@ -117,7 +117,7 @@ time.sleep_ms(50)
 eeprom_write_busy, power_down, value, eeprom_power_down, eeprom_value = dac.read()
 print(eeprom_write_busy, power_down, value, eeprom_power_down, eeprom_value)
 
-# 创建ADC实例：ADC1-GP27
+# 创建ADC实例:ADC1-GP27
 adc = ADC(1)
 # 创建软件定时器对象
 timer = Timer(-1)

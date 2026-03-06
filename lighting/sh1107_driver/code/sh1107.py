@@ -646,7 +646,7 @@ class SH1106(framebuf.FrameBuffer):
             None
 
         Notes:
-            通过复位引脚执行硬件复位：高电平->低电平(20ms)->高电平(20ms)
+            通过复位引脚执行硬件复位:高电平->低电平(20ms)->高电平(20ms)
         """
         if res is not None:
             # 复位引脚置高
@@ -728,7 +728,7 @@ class SH1106_I2C(SH1106):
             None
 
         Notes:
-            I2C指令格式：0x80 + 指令字节
+            I2C指令格式:0x80 + 指令字节
         """
         # 设置指令标志位
         self.temp[0] = 0x80
@@ -749,7 +749,7 @@ class SH1106_I2C(SH1106):
             None
 
         Notes:
-            I2C数据格式：0x40 + 数据字节流
+            I2C数据格式:0x40 + 数据字节流
         """
         self.i2c.writeto(self.addr, b'\x40' + buf)
 
@@ -844,7 +844,7 @@ class SH1106_SPI(SH1106):
             None
 
         Notes:
-            SPI指令发送：DC引脚置低，可选CS引脚控制片选
+            SPI指令发送:DC引脚置低，可选CS引脚控制片选
         """
         if self.cs is not None:
             # 片选置高
@@ -875,7 +875,7 @@ class SH1106_SPI(SH1106):
             None
 
         Notes:
-            SPI数据发送：DC引脚置高，可选CS引脚控制片选
+            SPI数据发送:DC引脚置高，可选CS引脚控制片选
         """
         if self.cs is not None:
             # 片选置高

@@ -67,7 +67,7 @@ print("Sensor preheating for 30 seconds...")
 time.sleep(30)
 print("Preheating completed.")
 
-# 校零操作：置于通风空气中，执行校零并判断结果
+# 校零操作:置于通风空气中，执行校零并判断结果
 print("Starting zero calibration...")
 calib_success = mems_gas_sensor.calibrate_zero()
 if calib_success:

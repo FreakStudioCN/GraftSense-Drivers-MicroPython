@@ -1010,7 +1010,7 @@ class R60AMP1:
 
     def _parse_signed_16bit_special(self, two_bytes: bytes) -> int:
         """
-        解析有符号16位数据（特殊格式：首位符号位 + 后15位数值位）。
+        解析有符号16位数据（特殊格式:首位符号位 + 后15位数值位）。
 
         Args:
             two_bytes: 2字节的字节序列（大端序）。
@@ -1282,7 +1282,7 @@ class R60AMP1:
                 for frame in frames:
                     self.update_properties_from_frame(frame)
 
-            # 返回操作执行结果：(指令发送成功状态, 实际执行结果)
+            # 返回操作执行结果:(指令发送成功状态, 实际执行结果)
             return True, self._query_result
 
         except Exception as e:
@@ -1499,7 +1499,7 @@ class R60AMP1:
             response_data: 响应数据
             response_name: 响应名称（用于调试）
         """
-        # 情况1：正确时间正确读取
+        # 情况1:正确时间正确读取
         if self._query_in_progress and self._current_query_type == expected_type and not self._query_response_received:
 
             self._query_result = response_data
@@ -1509,13 +1509,13 @@ class R60AMP1:
                 query_name = self.QUERY_NAME_MAP.get(expected_type, f"Unknown({expected_type})")
                 print(f"[Query] {query_name} response received: {response_data}")
 
-        # 情况2：当前正在进行其他类型的查询，但收到了本响应
+        # 情况2:当前正在进行其他类型的查询，但收到了本响应
         elif self._query_in_progress and self._current_query_type != expected_type:
             if R60AMP1.DEBUG_ENABLED:
                 current_query = self.QUERY_NAME_MAP.get(self._current_query_type, f"Unknown({self._current_query_type})")
                 print(f"[Query] Unexpected {response_name} response during {current_query} query: {response_data}")
 
-        # 情况3：没有查询在进行，但收到了查询响应
+        # 情况3:没有查询在进行，但收到了查询响应
         elif not self._query_in_progress:
             if R60AMP1.DEBUG_ENABLED:
                 print(f"[Query] Unsolicited {response_name} response: {response_data}")
@@ -1648,7 +1648,7 @@ class R60AMP1:
                         fault_text = ["None", "Radar chip error", "Encryption error"][fault_code] if fault_code < 3 else "Unknown"
                         print(f"[System] Radar fault: {fault_text}")
             # 在数据手册中有一个没有下发的回复
-            # 对应数值：00:默认 01:客厅 02：卧室 03:洗手间
+            # 对应数值:00:默认 01:客厅 02:卧室 03:洗手间
             elif command == 0x07:
                 if data and len(data) > 0:
                     env_mode = data[0]

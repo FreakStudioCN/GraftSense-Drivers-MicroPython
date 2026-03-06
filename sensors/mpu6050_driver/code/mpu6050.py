@@ -3,7 +3,7 @@
 # @Time    : 2026/1/13 上午10:32
 # @Author  : hogeiha
 # @File    : mpu6050.py
-# @Description : mpu6050+卡尔曼滤波驱动代码,MPU6050类代码参考自：https://github.com/Lezgend/MPU6050-MicroPython
+# @Description : mpu6050+卡尔曼滤波驱动代码,MPU6050类代码参考自:https://github.com/Lezgend/MPU6050-MicroPython
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -34,7 +34,7 @@ def signedIntFromBytes(x, endian="big") -> int:
         endian: 字节序，可选"big"（大端序）或"little"（小端序），默认为"big"。
 
     Returns:
-        int: 转换后的有符号整数（范围：-32768 到 32767）。
+        int: 转换后的有符号整数（范围:-32768 到 32767）。
 
     Raises:
         无显式抛出异常，但依赖于int.from_bytes()函数的正常运作。
@@ -42,10 +42,10 @@ def signedIntFromBytes(x, endian="big") -> int:
     Note:
         - 专门用于处理MPU6050等传感器返回的16位有符号数据。
         - 使用补码（two's complement）表示法进行符号扩展。
-        - 公式解析：
+        - 公式解析:
           当原始值 >= 0x8000（即32768）时，表示负数。
-          负数转换公式：-((65535 - y) + 1) = -(65536 - y) = y - 65536
-          例如：0xFFFF（65535）→ -1，0x8000（32768）→ -32768
+          负数转换公式:-((65535 - y) + 1) = -(65536 - y) = y - 65536
+          例如:0xFFFF（65535）→ -1，0x8000（32768）→ -32768
         - 正数直接返回原值。
     """
     y = int.from_bytes(x, endian)
@@ -249,7 +249,7 @@ class ComplementaryKalmanFilter:
             # ========== 更新步骤（测量更新）==========
             # 公式5: 计算卡尔曼增益
             # K_k = P_k|k-1 * H_k^T * (H_k * P_k|k-1 * H_k^T + R_k)^{-1}
-            # 这里H = [1, 0]，所以简化为：
+            # 这里H = [1, 0]，所以简化为:
             S = self.P[0][0] + self.R_measure
             K = [self.P[0][0] / S, self.P[1][0] / S]
 
@@ -612,7 +612,7 @@ class MPU6050(object):
         设置加速度计的量程。
 
         Args:
-            accel_range: 要设置的量程值，使用预定义的常量：
+            accel_range: 要设置的量程值，使用预定义的常量:
                          _ACC_RNG_2G, _ACC_RNG_4G, _ACC_RNG_8G, _ACC_RNG_16G
 
         Note:
@@ -747,7 +747,7 @@ class MPU6050(object):
             float: 三轴加速度的合向量大小。
 
         Note:
-            - 计算公式：√(ax² + ay² + az²)
+            - 计算公式:√(ax² + ay² + az²)
             - 可用于检测总体加速度大小。
             - 单位由g参数决定。
 
@@ -774,7 +774,7 @@ class MPU6050(object):
         设置陀螺仪的量程。
 
         Args:
-            gyro_range: 要设置的量程值，使用预定义的常量：
+            gyro_range: 要设置的量程值，使用预定义的常量:
                         _GYR_RNG_250DEG, _GYR_RNG_500DEG,
                         _GYR_RNG_1000DEG, _GYR_RNG_2000DEG
 

@@ -73,7 +73,7 @@ def scan_package_json_recursive(root_dir, parent_subdir=""):
 
 
 def scan_package_json(project_root):
-    """对外接口：扫描整个项目"""
+    """对外接口:扫描整个项目"""
     return scan_package_json_recursive(project_root)
 
 
@@ -87,7 +87,7 @@ def on_double_click(tree, log_text):
 
         package_path = None
 
-        # 场景1：双击的是package.json节点
+        # 场景1:双击的是package.json节点
         if item_text == "package.json" and len(item_values) >= 2:
             value_str = item_values[1]
             # 提取纯路径（去掉错误信息）
@@ -96,7 +96,7 @@ def on_double_click(tree, log_text):
             else:
                 package_path = value_str.strip()
 
-        # 场景2：双击的是package.json的子节点，向上找父节点
+        # 场景2:双击的是package.json的子节点，向上找父节点
         else:
             parent_item = selected_item
             # 向上遍历直到找到package.json节点
@@ -130,7 +130,7 @@ def on_double_click(tree, log_text):
                 log_text.see(tk.END)
             else:
                 # 文件不存在
-                log_text.insert(tk.END, f"\n❌ 打开失败：文件不存在 → {package_path}\n", "warning")
+                log_text.insert(tk.END, f"\n❌ 打开失败:文件不存在 → {package_path}\n", "warning")
                 log_text.see(tk.END)
         else:
             # 未找到package.json路径
@@ -158,7 +158,7 @@ def create_gui(project_root):
     # 创建顶部说明标签
     info_label = tk.Label(
         root,
-        text=f"项目根目录: {project_root}\n⚠️  红字为缺失必要字段警告 | 必要字段：name、version、description、author\n💡 双击package.json节点/其子节点可直接打开文件",
+        text=f"项目根目录: {project_root}\n⚠️  红字为缺失必要字段警告 | 必要字段:name、version、description、author\n💡 双击package.json节点/其子节点可直接打开文件",
         font=("微软雅黑", 10),
         justify=tk.LEFT,
         padx=10,
@@ -251,7 +251,7 @@ def create_gui(project_root):
                         missing_str = ", ".join(driver_info["missing_fields"])
                         log_text.insert(tk.END, f"❌ {driver_name}: 缺失必要字段 → {missing_str}\n", "warning")
                         # 标注缺失字段
-                        tree.insert(package_node, tk.END, text="⚠️  字段警告", values=("警告", f"缺失必要字段：{missing_str}"))
+                        tree.insert(package_node, tk.END, text="⚠️  字段警告", values=("警告", f"缺失必要字段:{missing_str}"))
 
                     # 添加核心字段节点
                     tree.insert(package_node, tk.END, text="name", values=("核心字段", driver_info["name"]))

@@ -25,7 +25,7 @@ count = 1
 time.sleep(3)
 print("FreakStudio: UART loopback test started. Sending data every 2 seconds...")
 
-# 初始化 UART1：TX=Pin8，RX=Pin9，波特率9600
+# 初始化 UART1:TX=Pin8，RX=Pin9，波特率9600
 uart = UART(0, baudrate=9600, tx=Pin(8), rx=Pin(9))
 
 # ========================================  主程序  ===========================================

@@ -247,7 +247,7 @@ class MEMSGasSensor:
 
         Notes:
             校零后会读取浓度值验证结果，理想状态下读数应为0，微小偏差属正常现象。
-            校准命令需发送3字节数据：校零命令字 + 校准值高位 + 校准值低位。
+            校准命令需发送3字节数据:校零命令字 + 校准值高位 + 校准值低位。
 
         ==========================================
         Perform sensor zero calibration operation, optionally specify calibration reference value.
@@ -421,7 +421,7 @@ class PCA9546ADR:
 
         Notes:
             控制字节低4位分别对应4个通道，1表示启用对应通道，0表示禁用。
-            例如：0x01=启用通道0，0x02=启用通道1，0x00=禁用所有通道。
+            例如:0x01=启用通道0，0x02=启用通道1，0x00=禁用所有通道。
 
         ==========================================
         Write channel control byte to set multiplexer channel status.

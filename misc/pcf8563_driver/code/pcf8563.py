@@ -590,7 +590,7 @@ class PCF8563:
             None
 
         Notes:
-            支持的频率：32.768KHz/1.024KHz/32KHz/1Hz/高阻抗
+            支持的频率:32.768KHz/1.024KHz/32KHz/1Hz/高阻抗
             Supported frequencies: 32.768KHz/1.024KHz/32KHz/1Hz/high impedance
         """
         # 写入时钟输出频率配置

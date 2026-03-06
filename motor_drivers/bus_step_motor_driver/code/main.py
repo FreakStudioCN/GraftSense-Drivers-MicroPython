@@ -63,12 +63,12 @@ bus_step_motor = BusStepMotor(pca9685, 4)
 
 # ========================================  主程序  ===========================================
 
-# 开启步进电机连续运动模式：电机编号为1，方向为正转，驱动模式为单相驱动，速度为10
+# 开启步进电机连续运动模式:电机编号为1，方向为正转，驱动模式为单相驱动，速度为10
 bus_step_motor.start_continuous_motion(1, BusStepMotor.FORWARD, BusStepMotor.DRIVER_MODE_SINGLE, 10)
 # 延时10s
 time.sleep(10)
 # 停止步进电机连续运动模式
 bus_step_motor.stop_continuous_motion(1)
 
-# 开启步进电机步进运动模式：电机编号为1，方向为正转，驱动模式为单相驱动，速度为10，步数为10
+# 开启步进电机步进运动模式:电机编号为1，方向为正转，驱动模式为单相驱动，速度为10，步数为10
 bus_step_motor.start_step_motion(1, 1, 0, 100, 1000)

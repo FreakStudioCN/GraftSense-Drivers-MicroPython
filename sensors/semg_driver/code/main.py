@@ -23,7 +23,7 @@ DC_WINDOW = 20
 running = True
 
 # ===================== SEMG专用滤波器系数 =====================
-# 1. 50Hz陷波滤波器：抑制电源干扰（SEMG核心需求）
+# 1. 50Hz陷波滤波器:抑制电源干扰（SEMG核心需求）
 notch_b0 = 1.0
 notch_b1 = -1.0
 notch_b2 = 1.0
@@ -32,7 +32,7 @@ notch_a1 = -1.0
 notch_a2 = 0.920
 sos_notch = np.array([[notch_b0 / notch_a0, notch_b1 / notch_a0, notch_b2 / notch_a0, 1.0, notch_a1 / notch_a0, notch_a2 / notch_a0]], dtype=np.float)
 
-# 2. 0.5Hz高通滤波器：去除基线漂移（SEMG核心需求）
+# 2. 0.5Hz高通滤波器:去除基线漂移（SEMG核心需求）
 hp_b0 = 0.9605960596059606
 hp_b1 = -1.9211921192119212
 hp_b2 = 0.9605960596059606
@@ -41,7 +41,7 @@ hp_a1 = -1.918416309168257
 hp_a2 = 0.9206736526946108
 sos_hp = np.array([[hp_b0 / hp_a0, hp_b1 / hp_a0, hp_b2 / hp_a0, 1.0, hp_a1 / hp_a0, hp_a2 / hp_a0]], dtype=np.float)
 
-# 3. 35Hz低通滤波器：过滤高频噪声（可根据需求调整，SEMG典型带宽20-500Hz）
+# 3. 35Hz低通滤波器:过滤高频噪声（可根据需求调整，SEMG典型带宽20-500Hz）
 lp_b0 = 0.2266686574849259
 lp_b1 = 0.4533373149698518
 lp_b2 = 0.2266686574849259

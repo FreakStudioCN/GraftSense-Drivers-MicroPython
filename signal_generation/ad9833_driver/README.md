@@ -19,7 +19,7 @@
 
 ## 主要功能
 
-1. 控制AD9833生成多种波形：正弦波、方波、1/2频率方波、三角波；
+1. 控制AD9833生成多种波形:正弦波、方波、1/2频率方波、三角波；
 2. 支持AD9833双频率/相位寄存器配置，可灵活切换不同频率（0~MHz级）、相位（0~360°）参数；
 3. 通过MCP41010数字电位器精准调节DDS信号输出幅度（调节范围0~255）；
 4. MCP41010支持电源关断模式，可降低闲置状态下的功耗；
@@ -27,10 +27,10 @@
 
 ## 硬件要求
 
-1. 主控板：支持MicroPython的MCU板（如Raspberry Pi Pico、ESP32等）；
-2. 核心芯片：AD9833 DDS信号发生器芯片、MCP41010单通道数字电位器芯片；
-3. 外设配件：SPI总线连接所需的杜邦线、5V/3.3V稳压电源、面包板；
-4. 引脚要求：主控板需提供至少1路SPI外设（含SCK、MOSI、CS引脚）。
+1. 主控板:支持MicroPython的MCU板（如Raspberry Pi Pico、ESP32等）；
+2. 核心芯片:AD9833 DDS信号发生器芯片、MCP41010单通道数字电位器芯片；
+3. 外设配件:SPI总线连接所需的杜邦线、5V/3.3V稳压电源、面包板；
+4. 引脚要求:主控板需提供至少1路SPI外设（含SCK、MOSI、CS引脚）。
 
 ## 文件说明
 
@@ -42,10 +42,10 @@
 
 ## 软件设计核心思想
 
-1. **模块化封装**：将MCP41010硬件操作封装为独立类，提供`set_value`（设置电位值）、`set_shutdown`（关断模式）等简洁接口，便于复用和维护；
-2. **SPI通信标准化**：统一配置SPI总线参数（波特率1MHz、极性0、相位0），保证AD9833与MCP41010通信的稳定性和兼容性；
-3. **参数安全校验**：MCP41010的`set_value`方法对输入值做范围校验，超出0~max_value时抛出`ValueError`，避免硬件异常；
-4. **分层解耦**：驱动类专注硬件底层通信，主程序专注业务逻辑（信号配置），降低代码耦合度，便于功能扩展。
+1. **模块化封装**:将MCP41010硬件操作封装为独立类，提供`set_value`（设置电位值）、`set_shutdown`（关断模式）等简洁接口，便于复用和维护；
+2. **SPI通信标准化**:统一配置SPI总线参数（波特率1MHz、极性0、相位0），保证AD9833与MCP41010通信的稳定性和兼容性；
+3. **参数安全校验**:MCP41010的`set_value`方法对输入值做范围校验，超出0~max_value时抛出`ValueError`，避免硬件异常；
+4. **分层解耦**:驱动类专注硬件底层通信，主程序专注业务逻辑（信号配置），降低代码耦合度，便于功能扩展。
 
 ## 使用说明
 
@@ -60,7 +60,7 @@
 | MCP41010   | MOSI       | GP19               |
 | MCP41010   | CS         | GP21               |
 
-> 注：SPI总线支持多设备共享SCK/MOSI，通过独立CS引脚区分设备，需确保所有引脚电平匹配（3.3V）。
+> 注:SPI总线支持多设备共享SCK/MOSI，通过独立CS引脚区分设备，需确保所有引脚电平匹配（3.3V）。
 
 ### 2. 环境准备
 
@@ -75,7 +75,7 @@
 
 ## 示例程序
 
-以下为核心功能示例（摘自`main.py`），演示AD9833与MCP41010的基础使用：
+以下为核心功能示例（摘自`main.py`），演示AD9833与MCP41010的基础使用:
 
 ```python
 # Python env   : MicroPython v1.23.0
@@ -89,16 +89,16 @@ from mcp41010 import MCP41010
 time.sleep(3)
 print("初始化DDS信号发生器...")
 
-# 初始化AD9833（SPI0：MOSI-GP19、SCLK-GP18、CS-GP20，主时钟25MHz）
+# 初始化AD9833（SPI0:MOSI-GP19、SCLK-GP18、CS-GP20，主时钟25MHz）
 ad9833 = AD9833(sdo=19, clk=18, cs=20, fmclk=25, spi_id=0)
-# 初始化MCP41010（SPI0：MOSI-GP19、SCLK-GP18、CS-GP21，最大调节值255）
+# 初始化MCP41010（SPI0:MOSI-GP19、SCLK-GP18、CS-GP21，最大调节值255）
 mcp41010 = MCP41010(clk_pin=18, cs_pin=21, mosi_pin=19, spi_id=0, max_value=255)
 
 # 配置AD9833频率/相位
-ad9833.set_frequency(5000, 0)  # 频率寄存器0：5000Hz
-ad9833.set_phase(0, 0, rads=False)  # 相位寄存器0：0°
-ad9833.set_frequency(1300, 1) # 频率寄存器1：1300Hz
-ad9833.set_phase(180, 1, rads=False) # 相位寄存器1：180°
+ad9833.set_frequency(5000, 0)  # 频率寄存器0:5000Hz
+ad9833.set_phase(0, 0, rads=False)  # 相位寄存器0:0°
+ad9833.set_frequency(1300, 1) # 频率寄存器1:1300Hz
+ad9833.set_phase(180, 1, rads=False) # 相位寄存器1:180°
 
 # 选择频率/相位寄存器0，输出正弦波
 ad9833.select_freq_phase(0, 0)
@@ -107,27 +107,27 @@ ad9833.set_mode('SIN')
 # 调节MCP41010电位器值（幅度调节）
 mcp41010.set_value(125)
 
-# 可选：切换为方波输出
+# 可选:切换为方波输出
 # ad9833.set_mode('SQUARE')
-# 可选：切换为三角波输出
+# 可选:切换为三角波输出
 # ad9833.set_mode('TRIANGLE')
-# 可选：关断MCP41010降低功耗
+# 可选:关断MCP41010降低功耗
 # mcp41010.set_shutdown()
 ```
 
 ## 注意事项
 
-1. SPI参数修改：AD9833/MCP41010的SPI波特率默认1MHz，修改前需确认芯片手册，避免超出通信速率范围；
-2. 电位器值范围：MCP41010的`set_value`方法仅支持0~max_value（默认255），超出范围会抛出`ValueError`；
-3. 硬件保护：接线前需断电，避免引脚接反/短路导致芯片损坏；
-4. 时钟配置：AD9833的`fmclk`（主时钟）需与实际硬件匹配（默认25MHz），否则频率计算会偏差；
-5. 关断模式：MCP41010进入关断模式后，电位器调节功能失效，需重新调用`set_value`恢复。
+1. SPI参数修改:AD9833/MCP41010的SPI波特率默认1MHz，修改前需确认芯片手册，避免超出通信速率范围；
+2. 电位器值范围:MCP41010的`set_value`方法仅支持0~max_value（默认255），超出范围会抛出`ValueError`；
+3. 硬件保护:接线前需断电，避免引脚接反/短路导致芯片损坏；
+4. 时钟配置:AD9833的`fmclk`（主时钟）需与实际硬件匹配（默认25MHz），否则频率计算会偏差；
+5. 关断模式:MCP41010进入关断模式后，电位器调节功能失效，需重新调用`set_value`恢复。
 
 ## 联系方式
 
-如有任何问题或需要帮助，请通过以下方式联系开发者：  
-📧 **邮箱**：<liqinghsui@freakstudio.cn>  
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+如有任何问题或需要帮助，请通过以下方式联系开发者:  
+📧 **邮箱**:<liqinghsui@freakstudio.cn>  
+💻 **GitHub**:[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ## 许可协议
 

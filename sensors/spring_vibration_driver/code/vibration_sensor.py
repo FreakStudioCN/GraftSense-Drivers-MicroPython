@@ -184,7 +184,7 @@ class VibrationSensor:
 
     def _irq_handler(self, pin: Pin) -> None:
         """
-        内部方法：IRQ 触发时调度回调（带消抖）。
+        内部方法:IRQ 触发时调度回调（带消抖）。
 
         Args:
             pin (Pin): 触发中断的引脚对象。

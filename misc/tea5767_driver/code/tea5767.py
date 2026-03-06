@@ -374,11 +374,11 @@ class Radio:
         # 初始化5字节配置缓冲区
         buf: bytearray = bytearray(5)
 
-        # 配置第1字节：频率高8位 + 静音位 + 搜索模式位
+        # 配置第1字节:频率高8位 + 静音位 + 搜索模式位
         buf[0] = int(freqB) >> 8 | self.mute_mode << 7 | self.search_mode << 6
-        # 配置第2字节：频率低8位
+        # 配置第2字节:频率低8位
         buf[1] = int(freqB) & 0xFF
-        # 配置第3字节：搜索方向 + 保留位 + 立体声模式位
+        # 配置第3字节:搜索方向 + 保留位 + 立体声模式位
         buf[2] = self.search_direction << 7 | 1 << 4 | self.stereo_mode << 3
 
         try:
@@ -387,11 +387,11 @@ class Radio:
         except:
             pass
 
-        # 配置第3字节：待机模式 + 频段类型 + 保留位
+        # 配置第3字节:待机模式 + 频段类型 + 保留位
         buf[3] = self.standby_mode << 6 | (self.band_limits == "JP") << 5 | 1 << 4
-        # 配置第3字节：软静音 + 高频截止 + 立体声降噪
+        # 配置第3字节:软静音 + 高频截止 + 立体声降噪
         buf[3] += self.soft_mute_mode << 3 | self.high_cut_mode << 2 | self.stereo_noise_cancelling_mode << 1
-        # 配置第4字节：保留位
+        # 配置第4字节:保留位
         buf[4] = 0
 
         # 将配置数据写入I2C设备

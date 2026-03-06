@@ -11,12 +11,12 @@ repos:
       - id: flake8
         args: ["--ignore=E203,E501,W503", "--max-line-length=150"]
 
-  # 新增：执行 hello.py 的本地钩子
+  # 新增:执行 hello.py 的本地钩子
   - repo: local
     hooks:
       - id: run-code-checker
         name: Run Code Checker
         entry: python code_checker.py  # 指向你的检查脚本
         language: system
-        pass_filenames: true  # 关键：传递本次提交的文件名给脚本
+        pass_filenames: true  # 关键:传递本次提交的文件名给脚本
         types: [python]  # 仅对Python文件触发，避免不必要执行

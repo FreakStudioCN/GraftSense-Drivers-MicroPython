@@ -4,7 +4,7 @@
 # @Author  : 李清水
 # @File    : sd_block_dev.py
 # @Description : 自定义SD卡块设备类
-# 参考代码：https://github.com/micropython/micropython-lib/blob/master/micropython/drivers/storage/sdcard/sdcard.py#L291
+# 参考代码:https://github.com/micropython/micropython-lib/blob/master/micropython/drivers/storage/sdcard/sdcard.py#L291
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -278,7 +278,7 @@ class SDCARDBlockDevice(AbstractBlockDev):
             OSError: 如果操作码无效或者擦除块号无效。
 
         Notes:
-            支持的操作包括：设备初始化（IOCTL_INIT）、设备关闭（IOCTL_SHUTDOWN）、
+            支持的操作包括:设备初始化（IOCTL_INIT）、设备关闭（IOCTL_SHUTDOWN）、
             数据同步（IOCTL_SYNC）、获取块数量（IOCTL_BLK_COUNT）、获取块大小（IOCTL_BLK_SIZE）、
             擦除块（IOCTL_BLK_ERASE）。
 

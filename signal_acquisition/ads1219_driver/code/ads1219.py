@@ -128,21 +128,21 @@ class ADS1219:
     """
 
     # 通道配置常量
-    # 差分通道：AIN0(+) - AIN1(-)
+    # 差分通道:AIN0(+) - AIN1(-)
     CHANNEL_AIN0_AIN1 = const(0b00000000)
-    # 差分通道：AIN2(+) - AIN3(-)
+    # 差分通道:AIN2(+) - AIN3(-)
     CHANNEL_AIN2_AIN3 = const(0b00100000)
-    # 差分通道：AIN1(+) - AIN2(-)
+    # 差分通道:AIN1(+) - AIN2(-)
     CHANNEL_AIN1_AIN2 = const(0b01000000)
-    # 单端通道：AIN0
+    # 单端通道:AIN0
     CHANNEL_AIN0 = const(0b01100000)
-    # 单端通道：AIN1
+    # 单端通道:AIN1
     CHANNEL_AIN1 = const(0b10000000)
-    # 单端通道：AIN2
+    # 单端通道:AIN2
     CHANNEL_AIN2 = const(0b10100000)
-    # 单端通道：AIN3
+    # 单端通道:AIN3
     CHANNEL_AIN3 = const(0b11000000)
-    # 测试通道：AVDD/2
+    # 测试通道:AVDD/2
     CHANNEL_MID_AVDD = const(0b11100000)
 
     # 增益配置常量
@@ -194,7 +194,7 @@ class ADS1219:
             None
 
         Notes:
-            初始化时自动调用reset()方法将芯片恢复默认配置，默认配置：AIN0-AIN1差分通道、1x增益、20SPS、单次转换、内部参考电压
+            初始化时自动调用reset()方法将芯片恢复默认配置，默认配置:AIN0-AIN1差分通道、1x增益、20SPS、单次转换、内部参考电压
             Automatically call reset() method to restore chip to default configuration during initialization, 
             default config: AIN0-AIN1 differential channel, 1x gain, 20SPS, single-shot conversion, internal VREF
         """
@@ -226,7 +226,7 @@ class ADS1219:
         """
         # 读取当前配置寄存器值
         as_is = self.read_config()
-        # 计算新配置值：清除mask位，设置新值
+        # 计算新配置值:清除mask位，设置新值
         to_be = (as_is & ~mask) | value
         # 打包写配置命令和新配置值
         wreg = ustruct.pack('BB', _COMMAND_WREG_CONFIG, to_be)
@@ -289,7 +289,7 @@ class ADS1219:
         Set sampling channel
 
         Args:
-            channel (int): 通道配置值，可选类常量：CHANNEL_AIN0_AIN1/CHANNEL_AIN2_AIN3/CHANNEL_AIN1_AIN2/
+            channel (int): 通道配置值，可选类常量:CHANNEL_AIN0_AIN1/CHANNEL_AIN2_AIN3/CHANNEL_AIN1_AIN2/
                            CHANNEL_AIN0/CHANNEL_AIN1/CHANNEL_AIN2/CHANNEL_AIN3/CHANNEL_MID_AVDD
                            Channel config value, optional class constants as listed above
 
@@ -309,7 +309,7 @@ class ADS1219:
         Set gain
 
         Args:
-            gain (int): 增益配置值，可选类常量：GAIN_1X/GAIN_4X
+            gain (int): 增益配置值，可选类常量:GAIN_1X/GAIN_4X
                         Gain config value, optional class constants: GAIN_1X/GAIN_4X
 
         Returns:
@@ -328,14 +328,14 @@ class ADS1219:
         Set data rate
 
         Args:
-            dr (int): 数据速率配置值，可选类常量：DR_20_SPS/DR_90_SPS/DR_330_SPS/DR_1000_SPS
+            dr (int): 数据速率配置值，可选类常量:DR_20_SPS/DR_90_SPS/DR_330_SPS/DR_1000_SPS
                       Data rate config value, optional class constants as listed above
 
         Returns:
             None
 
         Notes:
-            数据速率越高，转换越快但精度略低：20SPS(最高精度)、90SPS、330SPS、1000SPS(最快速度)
+            数据速率越高，转换越快但精度略低:20SPS(最高精度)、90SPS、330SPS、1000SPS(最快速度)
             Higher data rate means faster conversion but slightly lower precision: 20SPS (highest precision), 90SPS, 330SPS, 1000SPS (fastest speed)
         """
         # 调用读-改-写方法设置数据速率配置
@@ -347,14 +347,14 @@ class ADS1219:
         Set conversion mode
 
         Args:
-            cm (int): 转换模式配置值，可选类常量：CM_SINGLE/CM_CONTINUOUS
+            cm (int): 转换模式配置值，可选类常量:CM_SINGLE/CM_CONTINUOUS
                       Conversion mode config value, optional class constants: CM_SINGLE/CM_CONTINUOUS
 
         Returns:
             None
 
         Notes:
-            单次模式：每次读取数据时启动一次转换；连续模式：持续转换，数据就绪后更新结果寄存器
+            单次模式:每次读取数据时启动一次转换；连续模式:持续转换，数据就绪后更新结果寄存器
             Single-shot mode: start one conversion each time data is read; 
             Continuous mode: continuous conversion, update result register when data is ready
         """
@@ -367,7 +367,7 @@ class ADS1219:
         Set reference voltage source
 
         Args:
-            vref (int): 参考电压配置值，可选类常量：VREF_INTERNAL/VREF_EXTERNAL
+            vref (int): 参考电压配置值，可选类常量:VREF_INTERNAL/VREF_EXTERNAL
                         Reference voltage config value, optional class constants as listed above
 
         Returns:

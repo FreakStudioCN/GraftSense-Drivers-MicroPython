@@ -18,7 +18,7 @@ I2C_SCL = 5
 I2C_SDA = 4
 # Tea5767默认I2C地址
 RADIO_ADDR = 0x60
-# 搜索频段：US(87.5-108.0) / JP(76.0-91.0)
+# 搜索频段:US(87.5-108.0) / JP(76.0-91.0)
 SEARCH_BAND = "US"
 # FM频率步进（固定0.1MHz）
 STEP = 0.1

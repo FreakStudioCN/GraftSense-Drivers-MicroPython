@@ -5,15 +5,15 @@
 本仓库是 GraftSense 系列硬件模块的 MicroPython 驱动程序集合，涵盖输入、输出、传感器、通信、存储等多类硬件，所有驱动均附带 package.json 配置，支持通过 MicroPython 包管理工具（mip）、mpremote 命令行工具或 upypi 包源 直接下载安装。驱动程序遵循统一设计规范，包含详细文档和示例代码，适配树莓派 Pico 等主流 MicroPython 开发板，便于开发者快速集成硬件功能。
 
 🔗 核心资源链接:
-* upypi 包源地址：https://upypi.net/
-* 项目 Wiki 文档：https://freakstudio.cn/
+* upypi 包源地址:https://upypi.net/
+* 项目 Wiki 文档:https://freakstudio.cn/
 
 ![图片描述](docs/upypi.png)
 ![图片描述](docs/wiki.png)
 
 # 📂 目录结构与模块说明
 
-仓库按硬件功能分类，结构清晰，以下是各文件夹及包含模块的详细介绍：
+仓库按硬件功能分类，结构清晰，以下是各文件夹及包含模块的详细介绍:
 
 ```plantuml
 GraftSense-Drivers-MicroPython/
@@ -41,12 +41,12 @@ GraftSense-Drivers-MicroPython/
 
 所有模块均通过 package.json 标准化配置，支持多种安装方式，满足不同开发场景需求。
 
-## 方式一：代码内通过 mip 安装（开发板联网）
+## 方式一:代码内通过 mip 安装（开发板联网）
 
-适用于开发板已连接网络（如 WiFi）的场景，直接在代码中执行安装：
+适用于开发板已连接网络（如 WiFi）的场景，直接在代码中执行安装:
 
 1. 确保开发板已烧录 MicroPython 固件（推荐 v1.23.0 及以上版本）。
-2. 在代码中通过 `mip` 安装指定模块，示例：
+2. 在代码中通过 `mip` 安装指定模块，示例:
 3. python
 4. 运行
 
@@ -60,7 +60,7 @@ mip.install("github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/rcwl962
 mip.install("github:FreakStudioCN/GraftSense-Drivers-MicroPython/input/ps2_joystick_driver")
 ```
 
-1. 安装后直接导入使用，示例（以 TCR5000 循迹模块为例）：
+1. 安装后直接导入使用，示例（以 TCR5000 循迹模块为例）:
 2. python
 3. 运行
 
@@ -69,38 +69,38 @@ from tcr5000 import TCR5000
 from machine import Pin
 
 # 初始化模块（连接GP2引脚）
-# 读取检测状态（0=检测到黑线，1=检测到白线）print("检测状态：", sensor.read())
+# 读取检测状态（0=检测到黑线，1=检测到白线）print("检测状态:", sensor.read())
 sensor = TCR5000(Pin(2, Pin.IN))
 ```
 
-## 方式二：通过 mpremote 命令行安装（开发板串口连接）
+## 方式二:通过 mpremote 命令行安装（开发板串口连接）
 
-适用于开发板未联网、仅通过串口连接电脑的场景，需先安装 mpremote 工具：
+适用于开发板未联网、仅通过串口连接电脑的场景，需先安装 mpremote 工具:
 
-步骤 1：安装 mpremote（电脑端）
+步骤 1:安装 mpremote（电脑端）
 ```bash
 # 使用pip安装mpremote
 pip install mpremote
 ```
 
-步骤 2：通过串口执行 mip 安装
+步骤 2:通过串口执行 mip 安装
 ```bash
 # 简化写法（自动识别串口）
 mpremote mip install github:FreakStudioCN/GraftSense-Drivers-MicroPython/input/ps2_joystick_driver
 ```
 
-## 方式三：通过 upypi 包源安装（推荐）
-我们提供专属 upypi 包源，访问速度更快、安装更稳定，你可以访问[**upypi网站**](https://upypi.net/)，搜索要安装的对应包的名称，打开直接复制指令在 终端运行即可：
+## 方式三:通过 upypi 包源安装（推荐）
+我们提供专属 upypi 包源，访问速度更快、安装更稳定，你可以访问[**upypi网站**](https://upypi.net/)，搜索要安装的对应包的名称，打开直接复制指令在 终端运行即可:
 ![图片描述](docs/upypi-install.png)
 
 # 🔧 开发环境准备
 
-1. **固件烧录**：从 [MicroPython 官网](https://micropython.org/) 下载对应开发板固件（如树莓派 Pico 选择 `rp2-pico` 系列），按住 `BOOTSEL` 键连接电脑，将 `.uf2` 固件拖入识别的 U 盘完成烧录。
-2. **开发工具**：推荐使用 Thonny（[thonny.org](https://thonny.org/)），支持语法高亮、串口调试和文件传输，连接后在右下角选择设备为 `MicroPython (Raspberry Pi Pico)` 即可开发。
+1. **固件烧录**:从 [MicroPython 官网](https://micropython.org/) 下载对应开发板固件（如树莓派 Pico 选择 `rp2-pico` 系列），按住 `BOOTSEL` 键连接电脑，将 `.uf2` 固件拖入识别的 U 盘完成烧录。
+2. **开发工具**:推荐使用 Thonny（[thonny.org](https://thonny.org/)），支持语法高亮、串口调试和文件传输，连接后在右下角选择设备为 `MicroPython (Raspberry Pi Pico)` 即可开发。
 
 # 辅助工具使用
 
-仓库内置 3 个实用工具，提升开发效率：
+仓库内置 3 个实用工具，提升开发效率:
 ```bash
 # 1. 可视化扫描所有package.json（查看字段完整性、双击打开文件）
 python list_package_info.py
@@ -121,40 +121,40 @@ python rename_readme.py
 
 # 🧹 代码规范与提交检查
 
-`.pre-commit-config.yaml` 是仓库的 `pre-commit` 钩子配置文件，用于定义代码提交前需要执行的检查规则，核心作用：
+`.pre-commit-config.yaml` 是仓库的 `pre-commit` 钩子配置文件，用于定义代码提交前需要执行的检查规则，核心作用:
 * 指定要使用的代码检查工具（如 `black`、`flake8`）及对应版本；
 * 配置工具的运行参数（如 `black` 的行长度、`flake8` 忽略的错误码）；
 * 实现「提交代码前自动执行规范检查」，避免不合规代码推送到远程仓库。
 
-仓库已内置 Windows 兼容版 Git 钩子脚本，开发工程师只需执行以下步骤完成初始化：
+仓库已内置 Windows 兼容版 Git 钩子脚本，开发工程师只需执行以下步骤完成初始化:
 
-通过下面命令进行安装：
-开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具：
+通过下面命令进行安装:
+开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具:
 ```bash
 pre-commit install
 ```
 
-开发过程中需遵循代码规范，确保提交的代码符合质量要求，以下是核心操作说明：
+开发过程中需遵循代码规范，确保提交的代码符合质量要求，以下是核心操作说明:
 
 ## 依赖安装
-开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具：
+开发工程师需先在电脑端通过 `pip` 安装代码规范检查工具:
 ```bash
 # 安装black（代码格式化工具）和flake8（代码语法/规范检查工具）
 pip install black flake8 pre-commit
 ```
 
-接着在仓库根目录，双击运行 `init-hooks.bat`，该脚本会自动：
+接着在仓库根目录，双击运行 `init-hooks.bat`，该脚本会自动:
 * 检查仓库根目录和钩子模板文件；
 * 将 git-hooks/ 目录下的 pre-commit、post-push 钩子复制到 .git/hooks/；
 * 初始化 pre-commit 配置。
 
-初始化完成后，后续提交代码时，pre-commit 钩子会自动执行：
+初始化完成后，后续提交代码时，pre-commit 钩子会自动执行:
 * 检查并自动安装 black/flake8/pre-commit 依赖；
 * 执行代码格式化（black）和规范检查（flake8）；
 * 若检查不通过，会阻止提交，提示修复问题。
 
 ## 推送前手动检查
-我们也可以使用下面命令手动执行全量检查，提前发现规范问题：
+我们也可以使用下面命令手动执行全量检查，提前发现规范问题:
 ```bash
 # 执行所有pre-commit钩子检查（包含black格式化、flake8语法检查）
 pre-commit run --all-files
@@ -164,12 +164,12 @@ pre-commit run --all-files
 部分检查报错是由于 MicroPython（mpy）与标准 Python（py）语法 / 内置对象差异导致的误报，并非代码实际功能问题。
 
 ## 临时跳过钩子推送（谨慎使用）
-若需临时跳过检查推送代码，可执行以下命令临时禁用 Git 钩子：
+若需临时跳过检查推送代码，可执行以下命令临时禁用 Git 钩子:
 ```bash
 # 临时禁用本地Git钩子（Windows系统）
 git config --local core.hooksPath NUL
 ```
-⚠️ 重要提醒：推送完成后，务必执行以下命令恢复钩子配置，避免后续提交永久跳过检查：
+⚠️ 重要提醒:推送完成后，务必执行以下命令恢复钩子配置，避免后续提交永久跳过检查:
 ```bash
 # 恢复本地Git钩子配置
 git config --local --unset core.hooksPath
@@ -184,7 +184,7 @@ git config --local --unset core.hooksPath
 
 如有问题或建议，欢迎提交 Issue 或 Pull Request 参与贡献！
 
-- 邮箱：10696531183@qq.com
-- GitHub 仓库：[https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython](https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython)
+- 邮箱:10696531183@qq.com
+- GitHub 仓库:[https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython](https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython)
 
 ![图片描述](docs/freakstudio.jpg)

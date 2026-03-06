@@ -46,7 +46,7 @@ def get_formatted_time() -> str:
 
 def test_basic_reading() -> None:
     """
-    基本读取测试：连续打印原始值、归一化值和电压。
+    基本读取测试:连续打印原始值、归一化值和电压。
 
     Raises:
         KeyboardInterrupt: 用户中断时退出。
@@ -98,7 +98,7 @@ def test_basic_reading() -> None:
 
 def test_with_gain_control() -> None:
     """
-    增益控制测试：切换低增益和高增益模式并采样。
+    增益控制测试:切换低增益和高增益模式并采样。
 
     Raises:
         KeyboardInterrupt: 用户中断时退出。
@@ -155,7 +155,7 @@ def test_with_gain_control() -> None:
 
 def test_sound_detection() -> None:
     """
-    声音检测测试：基于阈值判断环境是否有声音。
+    声音检测测试:基于阈值判断环境是否有声音。
     Raises:
         KeyboardInterrupt: 用户中断时退出。
     Notes:

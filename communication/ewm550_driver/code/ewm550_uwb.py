@@ -302,7 +302,7 @@ class EWM550_UWB:
         Returns:
             (bool, str|None): 成功返回(True, 版本号)，失败返回(False, 错误信息)
         Notes:
-            成功后更新实例属性version，版本号示例：7530-0-11
+            成功后更新实例属性version，版本号示例:7530-0-11
         """
         ok, err = self._send_cmd(b"AT+VERSION")
         if not ok:
@@ -557,9 +557,9 @@ class EWM550_UWB:
             (bool, str|None): 成功返回(True, "+OK")，失败返回(False, 错误信息)
         Notes:
             1. 成功后更新实例属性dst_addr（统一转为大写）
-            2. 基站模式：前4*N位为N个标签的源地址，超出部分无效
-            3. 标签模式：仅前4位为基站源地址，其余无效
-            4. 透传模式：仅前4位有效，为目标模块源地址
+            2. 基站模式:前4*N位为N个标签的源地址，超出部分无效
+            3. 标签模式:仅前4位为基站源地址，其余无效
+            4. 透传模式:仅前4位有效，为目标模块源地址
         """
         addr = addr.strip().upper()
         if len(addr) != 20 or not all(c in "0123456789ABCDEF" for c in addr):
@@ -638,8 +638,8 @@ class EWM550_UWB:
             (bool, str|None): 成功返回(True, "+OK")，失败返回(False, 错误信息)
         Notes:
             1. 成功后更新实例属性sleep_mode
-            2. 掉电模式：UWB停止所有工作，需拉低WKP引脚唤醒
-            3. 周期休眠模式：低功耗工作，串口不接收数据
+            2. 掉电模式:UWB停止所有工作，需拉低WKP引脚唤醒
+            3. 周期休眠模式:低功耗工作，串口不接收数据
         """
         if sleep_mode not in self.SLEEP.values():
             return False, f"invalid sleep mode, must be {self.SLEEP.values()}"
@@ -664,7 +664,7 @@ class EWM550_UWB:
         """
         try:
             data_str = data.decode("utf-8").strip()
-            # 基站端数据格式：P0,AA00,10cm,20dB / LP1,2222,20cm,20dB（L表示休眠）
+            # 基站端数据格式:P0,AA00,10cm,20dB / LP1,2222,20cm,20dB（L表示休眠）
             if "," in data_str and ("cm" in data_str and "dB" in data_str):
                 parts = data_str.split(",")
                 if len(parts) != 4:
@@ -680,7 +680,7 @@ class EWM550_UWB:
                     "snr": int(parts[3].replace("dB", "").strip()),
                     "sleep": sleep_flag,
                 }
-            # 标签端数据格式：P,1111,10cm
+            # 标签端数据格式:P,1111,10cm
             elif data_str.startswith("P,") and "cm" in data_str:
                 parts = data_str.split(",")
                 if len(parts) != 3:

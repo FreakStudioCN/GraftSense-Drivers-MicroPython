@@ -3,7 +3,7 @@
 # @Time    : 2025/1/16 上午10:21
 # @Author  : 李清水
 # @File    : pca9685.py
-# @Description : PCA9685 16路PWM驱动芯片的驱动模块，参考代码：https://github.com/adafruit/micropython-adafruit-pca9685/blob/master/pca9685.py
+# @Description : PCA9685 16路PWM驱动芯片的驱动模块，参考代码:https://github.com/adafruit/micropython-adafruit-pca9685/blob/master/pca9685.py
 # @License : MIT
 
 __version__ = "0.1.0"

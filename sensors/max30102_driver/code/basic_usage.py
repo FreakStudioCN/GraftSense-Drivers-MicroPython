@@ -3,7 +3,7 @@
 # @Time    : 2025/09/16 18:00
 # @Author  : 侯钧瀚
 # @File    : basic_usage.py
-# @Description : MAX30102 温度和PPG数据读取示例，参考自：https://github.com/n-elia/MAX30102-MicroPython-driver
+# @Description : MAX30102 温度和PPG数据读取示例，参考自:https://github.com/n-elia/MAX30102-MicroPython-driver
 
 # ======================================== 导入相关模块 =========================================
 
@@ -21,8 +21,8 @@ from max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
 # ======================================== 初始化配置 ==========================================
 
 # I2C软件实例
-# I2C引脚配置：sda=Pin4, scl=Pin5
-# 快速模式：400kHz，慢速模式：100kHz
+# I2C引脚配置:sda=Pin4, scl=Pin5
+# 快速模式:400kHz，慢速模式:100kHz
 i2c = SoftI2C(sda=Pin(4), scl=Pin(5), freq=400000)
 
 # 传感器实例
@@ -39,18 +39,18 @@ else:
     print("Sensor connected and recognized.")
 
 # 可以使用setup_sensor()方法一次性设置传感器
-# 如果不提供参数，则加载默认配置：
-# LED模式：2 (红光 + 红外光)
-# ADC范围：16384
-# 采样率：400 Hz
-# LED功率：最大 (50.0mA - 检测距离约12英寸)
-# 平均采样数：8
-# 脉冲宽度：411
+# 如果不提供参数，则加载默认配置:
+# LED模式:2 (红光 + 红外光)
+# ADC范围:16384
+# 采样率:400 Hz
+# LED功率:最大 (50.0mA - 检测距离约12英寸)
+# 平均采样数:8
+# 脉冲宽度:411
 print("Setting up sensor with default configuration.", "\n")
 sensor.setup_sensor()
 
 # 也可以逐个调整配置参数
-# 将采样率设置为400：传感器每秒采集400个样本
+# 将采样率设置为400:传感器每秒采集400个样本
 sensor.set_sample_rate(400)
 # 设置每个读数的平均采样数
 sensor.set_fifo_average(8)
@@ -59,7 +59,7 @@ sensor.set_active_leds_amplitude(MAX30105_PULSE_AMP_MEDIUM)
 
 time.sleep(1)
 
-# readTemperature()方法允许提取芯片温度（单位：°C）
+# readTemperature()方法允许提取芯片温度（单位:°C）
 print("Reading temperature in °C.", "\n")
 print(sensor.read_temperature())
 

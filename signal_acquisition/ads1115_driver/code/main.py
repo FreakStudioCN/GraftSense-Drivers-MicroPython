@@ -23,7 +23,7 @@ import struct
 
 # 外置ADC地址
 ADC_ADDRESS = 0
-# 旋转电位器连接的通道：AIN0
+# 旋转电位器连接的通道:AIN0
 POT_CHANNEL = 0
 
 # 滑动均值滤波器相关变量
@@ -199,7 +199,7 @@ timer.init(period=10, mode=Timer.PERIODIC, callback=timer_callback)
 
 # ========================================  主程序  ============================================
 
-# 无限循环：无具体操作
+# 无限循环:无具体操作
 while True:
     # 延时1s
     time.sleep(1)

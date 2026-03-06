@@ -66,8 +66,8 @@ class TouchKey:
             pin_num（int）:接收按键信号GPIO编号，用于提供输出信号
             idle_stete（int）:用于设置空闲状态电平（high = 1， low = 0）
             debounce_time（int）:用于设置防抖电平（默认50ms）
-            press_callback：按下回调函数
-            release_callback：松开回调函数
+            press_callback:按下回调函数
+            release_callback:松开回调函数
 
         Returns:
                None: 此方法没有返回值。

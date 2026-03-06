@@ -21,7 +21,7 @@ import json
 
 # ======================================== 全局变量 ============================================
 
-# 修改：新增矩阵尺寸配置（默认8x8，可根据实际灯板修改）
+# 修改:新增矩阵尺寸配置（默认8x8，可根据实际灯板修改）
 MATRIX_WIDTH = 8  # 矩阵宽度（列数）
 MATRIX_HEIGHT = 8  # 矩阵高度（行数）
 
@@ -60,7 +60,7 @@ animation_frames = [json_img1, json_img2, json_img3]
 
 def color_wipe(color, delay=0.1):
     """
-    颜色填充特效：逐像素点亮整个矩阵，形成流水灯效果。
+    颜色填充特效:逐像素点亮整个矩阵，形成流水灯效果。
 
     Args:
         color (int): 填充颜色，采用RGB565格式。
@@ -83,7 +83,7 @@ def color_wipe(color, delay=0.1):
         - The effect is similar to "pixels lighting up from left to right, top to bottom".
     """
     matrix.fill(0)
-    # 修改：替换硬编码的8为全局尺寸变量
+    # 修改:替换硬编码的8为全局尺寸变量
     for i in range(MATRIX_WIDTH):
         for j in range(MATRIX_HEIGHT):
             matrix.pixel(i, j, color)
@@ -94,7 +94,7 @@ def color_wipe(color, delay=0.1):
 
 def optimized_scrolling_lines():
     """
-    优化后的滚动线条动画：包含两个阶段的动画效果。
+    优化后的滚动线条动画:包含两个阶段的动画效果。
 
     1. 蓝色横线从上向下滚动，空白区域用绿色填充
     2. 红色竖线在青色背景上从左向右循环滚动
@@ -117,13 +117,13 @@ def optimized_scrolling_lines():
     # 1. 蓝色横线从上向下滚动
     matrix.fill(0)
     matrix.show()
-    # 修改：适配不同宽度，横线长度改为矩阵宽度的一半（保持原4/8的比例）
+    # 修改:适配不同宽度，横线长度改为矩阵宽度的一半（保持原4/8的比例）
     hline_length = MATRIX_WIDTH
     matrix.hline(0, 0, hline_length, NeopixelMatrix.COLOR_BLUE)
     matrix.show()
     time.sleep(0.5)
 
-    # 修改：滚动次数适配矩阵高度（原3次对应8行，改为高度//3）
+    # 修改:滚动次数适配矩阵高度（原3次对应8行，改为高度//3）
     scroll_times = MATRIX_HEIGHT
     for _ in range(scroll_times):
         matrix.scroll(0, 1, clear_color=NeopixelMatrix.COLOR_GREEN)
@@ -134,13 +134,13 @@ def optimized_scrolling_lines():
     matrix.fill(0)
     # 左侧红线
     matrix.fill(NeopixelMatrix.COLOR_CYAN)
-    # 修改：竖线高度适配矩阵高度的一半（保持原2/4的比例）
+    # 修改:竖线高度适配矩阵高度的一半（保持原2/4的比例）
     vline_height = MATRIX_HEIGHT
     matrix.vline(0, 0, vline_height, NeopixelMatrix.COLOR_RED)
     matrix.show()
     time.sleep(0.5)
 
-    # 修改：滚动次数适配矩阵宽度（原8次对应8列，改为矩阵宽度）
+    # 修改:滚动次数适配矩阵宽度（原8次对应8列，改为矩阵宽度）
     for _ in range(MATRIX_WIDTH):
         matrix.scroll(1, 0, wrap=True)
         matrix.show()
@@ -213,14 +213,14 @@ def load_animation_frames():
     """
     frames = []
     for i in range(30):
-        # 补零生成文件名：test_image_frame_000000.json 到 test_image_frame_000029.json
+        # 补零生成文件名:test_image_frame_000000.json 到 test_image_frame_000029.json
         filename = "test_image_frame_{:06d}.json".format(i)
         try:
             with open(filename) as f:
                 frames.append(json.load(f))
         except Exception as e:
             print("Error loading frame {}: {}".format(filename, e))
-            # 修改：空白帧尺寸适配全局配置（若需固定4x4可改回[width:4, height:4]）
+            # 修改:空白帧尺寸适配全局配置（若需固定4x4可改回[width:4, height:4]）
             frames.append({"pixels": [0] * (MATRIX_WIDTH * MATRIX_HEIGHT), "width": MATRIX_WIDTH, "height": MATRIX_HEIGHT})
     return frames
 
@@ -284,7 +284,7 @@ def play_animation(matrix, frames, fps=30):
 
 time.sleep(3)
 print("FreakStudio:WS2812 LED Matrix Test")
-# 修改：替换硬编码的8x8为全局尺寸变量
+# 修改:替换硬编码的8x8为全局尺寸变量
 matrix = NeopixelMatrix(
     MATRIX_WIDTH, MATRIX_HEIGHT, Pin(6), layout=NeopixelMatrix.LAYOUT_ROW, brightness=0.2, order=NeopixelMatrix.ORDER_BRG, flip_v=True
 )

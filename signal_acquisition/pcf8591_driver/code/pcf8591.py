@@ -142,7 +142,7 @@ class PCF8591:
                         No valid I2C object or SDA/SCL pins provided
 
         Notes:
-            支持两种初始化方式：1) 传入已初始化的I2C对象 2) 传入SDA/SCL引脚号自动创建I2C对象；
+            支持两种初始化方式:1) 传入已初始化的I2C对象 2) 传入SDA/SCL引脚号自动创建I2C对象；
             默认禁用DAC输出，初始化时记录上一次操作状态为None
             Support two initialization methods: 1) Pass initialized I2C object 2) Pass SDA/SCL pin numbers to create I2C object automatically;
             Disable DAC output by default, record last operation status as None during initialization
@@ -210,7 +210,7 @@ class PCF8591:
 
         Notes:
             组合输出使能位、输入模式位、自动增量位和通道位生成完整的配置字节，
-            配置字节格式：D7(输出使能)|D6-D5(输入模式)|D4(自动增量)|D3-D0(通道)
+            配置字节格式:D7(输出使能)|D6-D5(输入模式)|D4(自动增量)|D3-D0(通道)
             Combine output enable bit, input mode bits, auto-increment bit and channel bits to generate complete config byte,
             config byte format: D7(output enable)|D6-D5(input mode)|D4(auto-increment)|D3-D0(channel)
         """
@@ -306,7 +306,7 @@ class PCF8591:
                  8-bit sampling value (0-255) of specified channel
 
         Notes:
-            单通道读取模式，根据DAC输出状态选择返回数据的位置：
+            单通道读取模式，根据DAC输出状态选择返回数据的位置:
             启用输出时返回第一个字节，禁用时返回第二个字节（PCF8591硬件特性）
             Single-channel reading mode, select return data position according to DAC output status:
             Return first byte when output is enabled, return second byte when disabled (PCF8591 hardware feature)
@@ -338,7 +338,7 @@ class PCF8591:
                    Voltage value (0-reference_voltage) of specified channel
 
         Notes:
-            基于8位采样值转换为实际电压值，计算公式：电压 = 采样值 × 参考电压 / 255；
+            基于8位采样值转换为实际电压值，计算公式:电压 = 采样值 × 参考电压 / 255；
             采用单端输入模式进行采样，结果为浮点数，精度取决于参考电压
             Convert 8-bit sampling value to actual voltage value with formula: Voltage = sampling value × reference voltage / 255;
             Use single-ended input mode for sampling, result is floating point number, precision depends on reference voltage
@@ -365,7 +365,7 @@ class PCF8591:
             None
 
         Notes:
-            将电压值转换为8位模拟值后写入DAC，计算公式：模拟值 = 电压值 × 255 / 参考电压；
+            将电压值转换为8位模拟值后写入DAC，计算公式:模拟值 = 电压值 × 255 / 参考电压；
             输出电压精度为参考电压/255，例如3.3V参考电压下约0.0129V/步
             Convert voltage value to 8-bit analog value and write to DAC with formula: Analog value = voltage value × 255 / reference voltage;
             Output voltage precision is reference voltage/255, e.g., about 0.0129V/step with 3.3V reference voltage

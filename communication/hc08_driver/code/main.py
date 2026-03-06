@@ -44,6 +44,6 @@ while True:
     # 当有数据成功接收打印data，并回传
     if ok:
         print(data)
-        hc0.send_data("get data：")
+        hc0.send_data("get data:")
         hc0.send_data(data)
     time.sleep(0.05)

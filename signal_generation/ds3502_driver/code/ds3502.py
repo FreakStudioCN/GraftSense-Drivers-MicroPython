@@ -66,7 +66,7 @@ class DS3502:
         read_wiper() -> int: Read wiper register (WR) value.
     """
 
-    # 定义类变量：寄存器地址
+    # 定义类变量:寄存器地址
     # WR滑动寄存器地址
     REG_WIPER = const(0x00)
     # CR控制寄存器地址

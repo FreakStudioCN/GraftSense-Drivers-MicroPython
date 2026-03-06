@@ -4,7 +4,7 @@
 # @Author  : hogeiha
 # @File    : max30100.py
 # @Description : MAX30100驱动
-# @Repository  : 参考自：https://github.com/kontakt/MAX30100
+# @Repository  : 参考自:https://github.com/kontakt/MAX30100
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -155,7 +155,7 @@ class MAX30100(object):
     FIFO 数据读取、温度测量、中断管理和电源控制等功能。支持单路或多路 LED
     配置，适用于心率监测和血氧饱和度测量应用。
 
-    主要特性：
+    主要特性:
         - 完整的寄存器级别配置控制
         - 支持 1-3 个 LED 通道（红/红外/绿）
         - 可配置的采样率（50-3200 SPS）
@@ -164,7 +164,7 @@ class MAX30100(object):
         - FIFO 数据缓冲和溢出保护
         - 可编程中断系统
 
-    注意：
+    注意:
         1. 本驱动未改动核心业务逻辑，仅完善注释与文档。
         2. "set_pulse_amplitude_it" 方法名沿用原代码（IR 电流），未更名以避免影响现有业务。
         3. I2C 读写操作可能抛出 OSError（如 ETIMEDOUT、ENODEV 等）。
@@ -344,10 +344,10 @@ class MAX30100(object):
         Args:
             i2c: I2C通信接口对象
             mode (int): 初始工作模式，MODE_HR或MODE_SPO2
-            sample_rate (int): 采样率，单位：Hz
-            led_current_red (float): 红光LED电流，单位：mA
-            led_current_ir (float): 红外LED电流，单位：mA
-            pulse_width (int): LED脉冲宽度，单位：μs
+            sample_rate (int): 采样率，单位:Hz
+            led_current_red (float): 红光LED电流，单位:mA
+            led_current_ir (float): 红外LED电流，单位:mA
+            pulse_width (int): LED脉冲宽度，单位:μs
             max_buffer_len (int): 数据缓冲区最大长度
 
         =========================================
@@ -434,8 +434,8 @@ class MAX30100(object):
         设置红光和红外LED的电流。
 
         Args:
-            led_current_red (float): 红光LED电流，单位：mA
-            led_current_ir (float): 红外LED电流，单位：mA
+            led_current_red (float): 红光LED电流，单位:mA
+            led_current_ir (float): 红外LED电流，单位:mA
 
         =========================================
         Set red and infrared LED currents.
@@ -471,8 +471,8 @@ class MAX30100(object):
         设置SpO2配置。
 
         Args:
-            sample_rate (int): 采样率，单位：Hz
-            pulse_width (int): LED脉冲宽度，单位：μs
+            sample_rate (int): 采样率，单位:Hz
+            pulse_width (int): LED脉冲宽度，单位:μs
 
         =========================================
         Set SpO2 configuration.

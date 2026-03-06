@@ -139,7 +139,7 @@ class AD8232_DataFlowProcessor:
         self.active_reporting = False
 
         # 上报频率
-        self.reporting_frequency = 100  # 单位：HZ
+        self.reporting_frequency = 100  # 单位:HZ
         # 导联状态
         self.lead_status = 0
         # 工作状态
@@ -338,7 +338,7 @@ class AD8232_DataFlowProcessor:
             2. 返回本地存储的最新值。
 
         Note:
-            - 协议帧格式：AA 55 01 01 00 01 0D 0A
+            - 协议帧格式:AA 55 01 01 00 01 0D 0A
             - 此方法会触发传感器发送最新数据，但返回的是本地缓存值。
             - 实际值需要通过update_properties_from_frame方法更新。
 
@@ -374,7 +374,7 @@ class AD8232_DataFlowProcessor:
             2. 返回本地存储的最新状态。
 
         Note:
-            - 协议帧格式：AA 55 03 01 00 03 0D 0A
+            - 协议帧格式:AA 55 03 01 00 03 0D 0A
             - 状态值需要等待传感器响应更新。
 
         ==========================================
@@ -408,7 +408,7 @@ class AD8232_DataFlowProcessor:
             2. 返回本地存储的最新值。
 
         Note:
-            - 协议帧格式：AA 55 02 01 00 02 0D 0A
+            - 协议帧格式:AA 55 02 01 00 02 0D 0A
             - 滤波数据经过多级数字滤波器处理。
 
         ==========================================
@@ -443,7 +443,7 @@ class AD8232_DataFlowProcessor:
             2. 返回当前上报频率。
 
         Note:
-            - 协议帧格式：AA 55 04 01 02 06 0D 0A
+            - 协议帧格式:AA 55 04 01 02 06 0D 0A
             - 注意数据字段为0x02，表示设置动作。
             - 此方法固定设置主动输出模式，不支持参数化。
 
@@ -464,7 +464,7 @@ class AD8232_DataFlowProcessor:
             - This method sets active output mode fixedly, does not support parameterization.
         """
         # AA 55 04 01 02 06 0D 0A
-        # 注意：这里数据是02，不是01
+        # 注意:这里数据是02，不是01
         self.DataFlowProcessor.build_and_send_frame(0x04, bytes([0x02]))
         return self.reporting_frequency
 
@@ -483,7 +483,7 @@ class AD8232_DataFlowProcessor:
             2. 返回当前主动上报模式状态。
 
         Note:
-            - 协议帧格式：AA 55 05 01 00 05 0D 0A
+            - 协议帧格式:AA 55 05 01 00 05 0D 0A
             - 状态参数会被转换为字节格式发送。
 
         ==========================================
@@ -524,7 +524,7 @@ class AD8232_DataFlowProcessor:
             2. 返回当前工作状态。
 
         Note:
-            - 协议帧格式：AA 55 06 01 00 06 0D 0A
+            - 协议帧格式:AA 55 06 01 00 06 0D 0A
             - 此命令控制传感器的电源状态。
 
         ==========================================
@@ -561,8 +561,8 @@ class AD8232_DataFlowProcessor:
             2. 返回当前工作状态。
 
         Note:
-            - 协议帧格式：AA 55 07 01 00 07 0D 0A
-            - 状态包括：停止、运行、未知等。
+            - 协议帧格式:AA 55 07 01 00 07 0D 0A
+            - 状态包括:停止、运行、未知等。
 
         ==========================================
 
@@ -595,7 +595,7 @@ class AD8232_DataFlowProcessor:
             2. 返回当前心率值。
 
         Note:
-            - 协议帧格式：AA 55 08 01 00 08 0D 0A
+            - 协议帧格式:AA 55 08 01 00 08 0D 0A
             - 心率值经过R波检测算法计算得出。
 
         ==========================================

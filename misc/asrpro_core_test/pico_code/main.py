@@ -42,16 +42,16 @@ print("FreakStudio: Use ASRPRO UART to control onboard LED.")
 # 初始化板载 LED（GPIO25，输出模式）
 led = machine.Pin(25, machine.Pin.OUT)
 
-# 初始化串口：波特率115200，TX=GPIO16，RX=GPIO17（Pico默认硬件串口0）
+# 初始化串口:波特率115200，TX=GPIO16，RX=GPIO17（Pico默认硬件串口0）
 uart = machine.UART(0, baudrate=115200, tx=machine.Pin(16), rx=machine.Pin(17))
 
 # ========================================  主程序  ============================================
 
-# 主循环：持续监听串口数据
+# 主循环:持续监听串口数据
 while True:
     # 检测是否有串口数据接收
     if uart.any():
-        # 读取1字节数据（关键：只读1个字节，匹配0x01/0x02/0x03）
+        # 读取1字节数据（关键:只读1个字节，匹配0x01/0x02/0x03）
         data = uart.read(1)
         # 确保数据读取成功
         if data is not None:
@@ -70,6 +70,6 @@ while True:
             elif cmd == 0x03:
                 print("Received command 0x03, LED turned on")
                 led.value(1)
-            # 其他指令：提示无效
+            # 其他指令:提示无效
             else:
                 print(f"Received invalid command: 0x{cmd:02X}, ignoring")

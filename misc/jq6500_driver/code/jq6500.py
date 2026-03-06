@@ -2,7 +2,7 @@
 # @Time    : 2026/3/3
 # @Author  : rdagger
 # @File    : jq6500.py
-# @Description : JQ6500 mini MP3模块驱动（MicroPython）参考自：https://github.com/rdagger/micropython-jq6500
+# @Description : JQ6500 mini MP3模块驱动（MicroPython）参考自:https://github.com/rdagger/micropython-jq6500
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -211,17 +211,17 @@ class Player(object):
     SRC_BUILTIN = 4
 
     # 循环模式常量
-    # 全部循环：播放所有曲目并重复
+    # 全部循环:播放所有曲目并重复
     LOOP_ALL = 0
-    # 文件夹循环：播放当前文件夹所有曲目并重复
+    # 文件夹循环:播放当前文件夹所有曲目并重复
     LOOP_FOLDER = 1
-    # 单曲循环：播放当前曲目并重复
+    # 单曲循环:播放当前曲目并重复
     LOOP_ONE = 2
-    # 未知模式：RAM循环（未明确定义）
+    # 未知模式:RAM循环（未明确定义）
     LOOP_RAM = 3
-    # 单曲播放停止：播放完当前曲目后停止
+    # 单曲播放停止:播放完当前曲目后停止
     LOOP_ONE_STOP = 4
-    # 无循环：同LOOP_ONE_STOP
+    # 无循环:同LOOP_ONE_STOP
     LOOP_NONE = 4
 
     # 播放状态常量
@@ -232,7 +232,7 @@ class Player(object):
     # 暂停状态
     STATUS_PAUSED = 2
 
-    # 串口读取延迟：确保模块有足够时间返回数据
+    # 串口读取延迟:确保模块有足够时间返回数据
     READ_DELAY = 0.1
 
     def __init__(self, port=2, volume=20):
@@ -285,7 +285,7 @@ class Player(object):
 
     def play_pause(self):
         """
-        切换播放/暂停状态：暂停/停止时播放，播放时暂停。
+        切换播放/暂停状态:暂停/停止时播放，播放时暂停。
 
         ---
         Toggle play/pause status: play when paused/stopped, pause when playing.

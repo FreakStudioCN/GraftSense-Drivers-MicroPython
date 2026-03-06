@@ -84,7 +84,7 @@ print("Alert tone playback finished.")
 
 # 合成文本
 while not tts.synthesize_text(
-    "欢迎使用我司的TTS语音合[w0]成测试模块。请注意以下发音细节：这个要[=yao1]求很重[=zhong4]要[=yao4]。（避免“要[yao]求”和“重[chong]要”的错误发音）本次会议共有[n1]25人参加。"
+    "欢迎使用我司的TTS语音合[w0]成测试模块。请注意以下发音细节:这个要[=yao1]求很重[=zhong4]要[=yao4]。（避免“要[yao]求”和“重[chong]要”的错误发音）本次会议共有[n1]25人参加。"
 ):
     time.sleep(1)
     continue

@@ -4,7 +4,7 @@
 # @Author  : 李清水
 # @File    : st7789.py
 # @Description : LCD屏幕驱动芯片st7789的类实现
-# 参考russhughes st7789py_mpy：https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
+# 参考russhughes st7789py_mpy:https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
 
 # ======================================== 导入相关模块 ========================================
 
@@ -172,12 +172,12 @@ def color565(red: int, green: int = 0, blue: int = 0) -> int:
     将红、绿、蓝通道值（0-255）转换为 16 位 BGR565 编码。
 
     Args:
-        red (int): 红色通道数值，取值范围 0 到 255（MicroPython 内置类型：int）。
-        green (int, optional): 绿色通道数值，取值范围 0 到 255，默认 0（MicroPython 内置类型：int）。
-        blue (int, optional): 蓝色通道数值，取值范围 0 到 255，默认 0（MicroPython 内置类型：int）。
+        red (int): 红色通道数值，取值范围 0 到 255（MicroPython 内置类型:int）。
+        green (int, optional): 绿色通道数值，取值范围 0 到 255，默认 0（MicroPython 内置类型:int）。
+        blue (int, optional): 蓝色通道数值，取值范围 0 到 255，默认 0（MicroPython 内置类型:int）。
 
     Returns:
-        int: 对应颜色的 BGR565 编码值（16 位整数，MicroPython 内置类型：int）。
+        int: 对应颜色的 BGR565 编码值（16 位整数，MicroPython 内置类型:int）。
 
     Raises:
         ValueError: 如果任一颜色通道值不在 0 到 255 范围内，则抛出该异常。
@@ -189,7 +189,7 @@ def color565(red: int, green: int = 0, blue: int = 0) -> int:
     r = max(0, min(red, 255))
     g = max(0, min(green, 255))
     b = max(0, min(blue, 255))
-    # 计算 RGB565 编码，BGR565编码的计算公式如下：
+    # 计算 RGB565 编码，BGR565编码的计算公式如下:
     # R = (Red & 0b11111000) >> 3
     # G = (Green & 0b11111100) >> 2
     # B = (Blue & 0b11111000) >> 3
@@ -209,22 +209,22 @@ class ST7789:
     窗口设置、像素/矩形/直线/多边形等基础绘制操作，并为更高层的 UI 类（如 LCD）提供稳定的底层支持。
 
     Attributes:
-        spi (machine.SPI): 用于与显示器通信的 SPI 实例。（MicroPython 内置类型：machine.SPI）
-        dc (machine.Pin): 数据/命令选择引脚实例。（MicroPython 内置类型：machine.Pin）
-        reset (machine.Pin | None): 复位引脚实例或 None。（MicroPython 内置类型：machine.Pin / None）
-        cs (machine.Pin | None): 片选引脚实例或 None。（MicroPython 内置类型：machine.Pin / None）
-        backlight (machine.Pin | None): 背光引脚实例或 None。（MicroPython 内置类型：machine.Pin / None）
-        width (int): 当前逻辑宽度（像素，随 rotation 变化）。（MicroPython 内置类型：int）
-        height (int): 当前逻辑高度（像素，随 rotation 变化）。（MicroPython 内置类型：int）
-        physical_width (int): 屏幕物理宽度（像素）。（MicroPython 内置类型：int）
-        physical_height (int): 屏幕物理高度（像素）。（MicroPython 内置类型：int）
-        xstart (int): 列偏移（MicroPython 内置类型：int）。
-        ystart (int): 行偏移（MicroPython 内置类型：int）。
-        rotations (tuple): 支持的旋转表（每项包含 MADCTL/width/height/xstart/ystart/needs_swap）。（MicroPython 内置类型：tuple）
-        init_cmds (tuple): 用于初始化显示器的命令序列（command,data,delay_ms）。（MicroPython 内置类型：tuple）
-        needs_swap (bool): 指示写入像素时是否需要交换字节序（MicroPython 内置类型：bool）。
-        color_order (int): 像素字节顺序标志（例如 BGR/RGB 常量）。（MicroPython 内置类型：int）
-        _rotation (int): 当前旋转索引 0-3。（MicroPython 内置类型：int）
+        spi (machine.SPI): 用于与显示器通信的 SPI 实例。（MicroPython 内置类型:machine.SPI）
+        dc (machine.Pin): 数据/命令选择引脚实例。（MicroPython 内置类型:machine.Pin）
+        reset (machine.Pin | None): 复位引脚实例或 None。（MicroPython 内置类型:machine.Pin / None）
+        cs (machine.Pin | None): 片选引脚实例或 None。（MicroPython 内置类型:machine.Pin / None）
+        backlight (machine.Pin | None): 背光引脚实例或 None。（MicroPython 内置类型:machine.Pin / None）
+        width (int): 当前逻辑宽度（像素，随 rotation 变化）。（MicroPython 内置类型:int）
+        height (int): 当前逻辑高度（像素，随 rotation 变化）。（MicroPython 内置类型:int）
+        physical_width (int): 屏幕物理宽度（像素）。（MicroPython 内置类型:int）
+        physical_height (int): 屏幕物理高度（像素）。（MicroPython 内置类型:int）
+        xstart (int): 列偏移（MicroPython 内置类型:int）。
+        ystart (int): 行偏移（MicroPython 内置类型:int）。
+        rotations (tuple): 支持的旋转表（每项包含 MADCTL/width/height/xstart/ystart/needs_swap）。（MicroPython 内置类型:tuple）
+        init_cmds (tuple): 用于初始化显示器的命令序列（command,data,delay_ms）。（MicroPython 内置类型:tuple）
+        needs_swap (bool): 指示写入像素时是否需要交换字节序（MicroPython 内置类型:bool）。
+        color_order (int): 像素字节顺序标志（例如 BGR/RGB 常量）。（MicroPython 内置类型:int）
+        _rotation (int): 当前旋转索引 0-3。（MicroPython 内置类型:int）
 
     Methods:
         __init__(self, spi: machine.SPI, width: int, height: int,
@@ -242,13 +242,13 @@ class ST7789:
             按序发送初始化命令序列。commands 每项格式为 (command: bytes, data: bytes, delay_ms: int)。
 
         _write(self, command: bytes = None, data: bytes = None) -> None:
-            低级写入：处理 CS/DC 引脚并通过 SPI 发送 command/data（command 或 data 可为 None）。
+            低级写入:处理 CS/DC 引脚并通过 SPI 发送 command/data（command 或 data 可为 None）。
 
         hard_reset(self) -> None:
-            硬复位：使用 reset 引脚执行时序（包含必要的延时），并在结束时释放 CS。
+            硬复位:使用 reset 引脚执行时序（包含必要的延时），并在结束时释放 CS。
 
         soft_reset(self) -> None:
-            软复位：发送 SWRESET 命令并等待。
+            软复位:发送 SWRESET 命令并等待。
 
         sleep_mode(self, value: bool) -> None:
             进入/退出睡眠（SLPIN/SLPOUT），value=True 表示进入睡眠。
@@ -257,7 +257,7 @@ class ST7789:
             打开/关闭显示反转（INVON/INVOFF），value 表示是否开启。
 
         rotation(self, rotation: int) -> None:
-            应用旋转索引：更新 MADCTL/width/height/xstart/ystart/needs_swap，并写入 MADCTL。
+            应用旋转索引:更新 MADCTL/width/height/xstart/ystart/needs_swap，并写入 MADCTL。
 
         _set_window(self, x0: int, y0: int, x1: int, y1: int) -> None:
             限定后续像素写入矩形区域，向 CASET/RASET 写入地址并发送 RAMWR。
@@ -292,10 +292,10 @@ class ST7789:
             基于 16 宽字形的文本绘制实现（调用 _pack16 + blit_buffer）。
 
         text(self, font, text: str, x0: int, y0: int, color: int = WHITE, background: int = BLACK) -> None:
-            高层文本接口：根据 font.WIDTH 自动切换 _text8/_text16，并在必要时调整字节序。
+            高层文本接口:根据 font.WIDTH 自动切换 _text8/_text16，并在必要时调整字节序。
 
         bitmap / pbitmap:
-            位图绘制方法：bitmap 一次性打包整个位图（占用内存较大），pbitmap 按行绘制以节省内存。
+            位图绘制方法:bitmap 一次性打包整个位图（占用内存较大），pbitmap 按行绘制以节省内存。
 
         write(self, font, string: str, x: int, y: int, fg: int = WHITE, bg: int = BLACK) -> None:
             使用转换后的 TrueType 风格字体逐字符写入（支持 variable-width 与偏移表的字体）。
@@ -332,20 +332,20 @@ class ST7789:
         ST7789 的初始化方法。
 
         Args:
-            spi (machine.SPI): 已配置的 SPI 实例，用于与显示屏通信（MicroPython 内置类型：machine.SPI）。
-            width (int): 屏幕物理宽度（像素）。 (MicroPython 内置类型：int)
-            height (int): 屏幕物理高度（像素）。 (MicroPython 内置类型：int)
-            reset (machine.Pin, optional): 复位引脚实例，若不需要可传 None。默认 None。（MicroPython 内置类型：machine.Pin）
-            dc (machine.Pin, optional): 数据/命令引脚实例。**必需**（若未提供将抛出 ValueError）。默认 None。（MicroPython 内置类型：machine.Pin）
-            cs (machine.Pin, optional): 片选引脚实例，若使用可提供，默认 None。（MicroPython 内置类型：machine.Pin）
-            backlight (machine.Pin, optional): 背光引脚实例，若提供则会初始化并置为开启状态，默认 None。（MicroPython 内置类型：machine.Pin）
-            rotation (int, optional): 旋转索引值（0-3），指示显示方向。默认 0。（MicroPython 内置类型：int）
-            color_order (int, optional): 指定像素数据的顺序（例如 BGR/RGB 常量）。默认 BGR。（MicroPython 内置类型：int）
-            custom_init (tuple, optional): 自定义初始化命令的元组，若提供则覆盖默认初始化命令。默认 None。（MicroPython 内置类型：tuple）
-            custom_rotations (tuple, optional): 自定义旋转信息的元组，若提供则覆盖自动查找的旋转表。默认 None。（MicroPython 内置类型：tuple）
+            spi (machine.SPI): 已配置的 SPI 实例，用于与显示屏通信（MicroPython 内置类型:machine.SPI）。
+            width (int): 屏幕物理宽度（像素）。 (MicroPython 内置类型:int)
+            height (int): 屏幕物理高度（像素）。 (MicroPython 内置类型:int)
+            reset (machine.Pin, optional): 复位引脚实例，若不需要可传 None。默认 None。（MicroPython 内置类型:machine.Pin）
+            dc (machine.Pin, optional): 数据/命令引脚实例。**必需**（若未提供将抛出 ValueError）。默认 None。（MicroPython 内置类型:machine.Pin）
+            cs (machine.Pin, optional): 片选引脚实例，若使用可提供，默认 None。（MicroPython 内置类型:machine.Pin）
+            backlight (machine.Pin, optional): 背光引脚实例，若提供则会初始化并置为开启状态，默认 None。（MicroPython 内置类型:machine.Pin）
+            rotation (int, optional): 旋转索引值（0-3），指示显示方向。默认 0。（MicroPython 内置类型:int）
+            color_order (int, optional): 指定像素数据的顺序（例如 BGR/RGB 常量）。默认 BGR。（MicroPython 内置类型:int）
+            custom_init (tuple, optional): 自定义初始化命令的元组，若提供则覆盖默认初始化命令。默认 None。（MicroPython 内置类型:tuple）
+            custom_rotations (tuple, optional): 自定义旋转信息的元组，若提供则覆盖自动查找的旋转表。默认 None。（MicroPython 内置类型:tuple）
 
         Returns:
-            None: 构造函数不返回值。（MicroPython 内置类型：None）
+            None: 构造函数不返回值。（MicroPython 内置类型:None）
 
         Raises:
             ValueError: 当所给 width x height 不在支持的显示列表中时，会抛出该异常，消息中包含支持的分辨率列表。
@@ -404,12 +404,12 @@ class ST7789:
         根据屏幕的物理尺寸和逻辑尺寸，找到支持的旋转信息。
 
         Args:
-            width (int): 屏幕宽度（像素）。(MicroPython 内置类型：int)
-            height (int): 屏幕高度（像素）。(MicroPython 内置类型：int)
+            width (int): 屏幕宽度（像素）。(MicroPython 内置类型:int)
+            height (int): 屏幕高度（像素）。(MicroPython 内置类型:int)
 
         Returns:
-            tuple | None: 若找到匹配项，返回该显示规格对应的旋转表（tuple，MicroPython 内置类型：tuple）。
-                          若未找到，返回 None（MicroPython 内置类型：None）。
+            tuple | None: 若找到匹配项，返回该显示规格对应的旋转表（tuple，MicroPython 内置类型:tuple）。
+                          若未找到，返回 None（MicroPython 内置类型:None）。
 
         """
         for display in _SUPPORTED_DISPLAYS:
@@ -422,15 +422,15 @@ class ST7789:
         初始化屏幕。
 
         Args:
-            commands (tuple): 初始化命令的元组。每个元素应为三元组：(command_bytes, data_bytes, delay_ms)。
-                              - command_bytes (bytes): 命令字节序列（MicroPython 内置类型：bytes）
-                              - data_bytes (bytes): 紧随命令发送的数据字节序列（MicroPython 内置类型：bytes）
-                              - delay_ms (int): 发送该命令后需要等待的毫秒数（MicroPython 内置类型：int）
-                          整体类型为 tuple（MicroPython 内置类型：tuple），例如:
+            commands (tuple): 初始化命令的元组。每个元素应为三元组:(command_bytes, data_bytes, delay_ms)。
+                              - command_bytes (bytes): 命令字节序列（MicroPython 内置类型:bytes）
+                              - data_bytes (bytes): 紧随命令发送的数据字节序列（MicroPython 内置类型:bytes）
+                              - delay_ms (int): 发送该命令后需要等待的毫秒数（MicroPython 内置类型:int）
+                          整体类型为 tuple（MicroPython 内置类型:tuple），例如:
                           ((b'\x01', b'', 150), (b'\x11', b'', 255), ...)
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Raises:
             TypeError: 如果 commands 不是可迭代的三元组序列，调用方可能收到此类异常（实现层会在迭代/解包时触发）。
@@ -444,11 +444,11 @@ class ST7789:
         向屏幕写入数据或命令。
 
         Args:
-            command (bytes, optional): 要发送的命令字节序列，若无命令可传 None。默认 None。（MicroPython 内置类型：bytes 或 None）
-            data (bytes, optional): 要发送的数据字节序列，若无数据可传 None。默认 None。（MicroPython 内置类型：bytes 或 None）
+            command (bytes, optional): 要发送的命令字节序列，若无命令可传 None。默认 None。（MicroPython 内置类型:bytes 或 None）
+            data (bytes, optional): 要发送的数据字节序列，若无数据可传 None。默认 None。（MicroPython 内置类型:bytes 或 None）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 如果存在片选引脚(self.cs)，发送前会将其拉低以选择设备，数据/命令区分由 dc 引脚控制。
@@ -479,7 +479,7 @@ class ST7789:
             None
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 当存在片选引脚(self.cs)时，会在复位前拉低 CS 以选择设备，复位完成后拉高 CS 以结束传输。
@@ -514,7 +514,7 @@ class ST7789:
             None
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 该方法向设备发送 _ST7789_SWRESET 命令并等待固定延时以确保生效。
@@ -530,10 +530,10 @@ class ST7789:
 
         Args:
             value (bool): 如果为 True，则启用休眠模式（发送 SLPIN）；如果为 False，则退出休眠模式（发送 SLPOUT）。
-                          (MicroPython 内置类型：bool)
+                          (MicroPython 内置类型:bool)
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         if value:
             self._write(_ST7789_SLPIN)
@@ -546,10 +546,10 @@ class ST7789:
 
         Args:
             value (bool): True 表示开启屏幕反转（INVON），False 表示关闭屏幕反转（INVOFF）。
-                          (MicroPython 内置类型：bool)
+                          (MicroPython 内置类型:bool)
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         if value:
             self._write(_ST7789_INVON)
@@ -561,15 +561,15 @@ class ST7789:
         设置并应用显示旋转/翻转模式 (更新 MADCTL 寄存器并调整逻辑宽高/偏移)。
 
         Args:
-            rotation (int): 旋转索引（0-3），代表：
+            rotation (int): 旋转索引（0-3），代表:
                            - 0: Portrait（竖屏 / 默认）
                            - 1: Landscape（横屏）
                            - 2: Inverted Portrait（竖屏翻转）
                            - 3: Inverted Landscape（横屏翻转）
-                           (MicroPython 内置类型：int)
+                           (MicroPython 内置类型:int)
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Raises:
             IndexError: 如果 self.rotations 为空或结构不正确，索引访问可能抛出异常（通常在初始化阶段已被校验以避免此情况）。
@@ -602,13 +602,13 @@ class ST7789:
         设置窗口区域，将屏幕上的像素数据更新到指定的矩形区域内。
 
         Args:
-            x0 (int): 窗口区域的左上角横坐标，取值范围为 [0, self.width)。（MicroPython 内置类型：int）
-            y0 (int): 窗口区域的左上角纵坐标，取值范围为 [0, self.height)。（MicroPython 内置类型：int）
-            x1 (int): 窗口区域的右下角横坐标，取值范围为 [x0, self.width)。（MicroPython 内置类型：int）
-            y1 (int): 窗口区域的右下角纵坐标，取值范围为 [y0, self.height)。（MicroPython 内置类型：int）
+            x0 (int): 窗口区域的左上角横坐标，取值范围为 [0, self.width)。（MicroPython 内置类型:int）
+            y0 (int): 窗口区域的左上角纵坐标，取值范围为 [0, self.height)。（MicroPython 内置类型:int）
+            x1 (int): 窗口区域的右下角横坐标，取值范围为 [x0, self.width)。（MicroPython 内置类型:int）
+            y1 (int): 窗口区域的右下角纵坐标，取值范围为 [y0, self.height)。（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 如果提供的坐标不合法（不满足 x0 <= x1 <= self.width 或 y0 <= y1 <= self.height），
@@ -638,13 +638,13 @@ class ST7789:
         在指定位置绘制垂直线。
 
         Args:
-            x (int): 线的起始横坐标（MicroPython 内置类型：int）。
-            y (int): 线的起始纵坐标（MicroPython 内置类型：int）。
-            length (int): 线的高度（像素数）（MicroPython 内置类型：int）。
-            color (int): 颜色值，16-bit 565 编码（MicroPython 内置类型：int）。
+            x (int): 线的起始横坐标（MicroPython 内置类型:int）。
+            y (int): 线的起始纵坐标（MicroPython 内置类型:int）。
+            length (int): 线的高度（像素数）（MicroPython 内置类型:int）。
+            color (int): 颜色值，16-bit 565 编码（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         self.fill_rect(x, y, 1, length, color)
 
@@ -653,13 +653,13 @@ class ST7789:
         在指定位置绘制水平线。
 
         Args:
-            x (int): 线的起始横坐标（MicroPython 内置类型：int）。
-            y (int): 线的起始纵坐标（MicroPython 内置类型：int）。
-            length (int): 线的宽度（像素数）（MicroPython 内置类型：int）。
-            color (int): 颜色值，16-bit 565 编码（MicroPython 内置类型：int）。
+            x (int): 线的起始横坐标（MicroPython 内置类型:int）。
+            y (int): 线的起始纵坐标（MicroPython 内置类型:int）。
+            length (int): 线的宽度（像素数）（MicroPython 内置类型:int）。
+            color (int): 颜色值，16-bit 565 编码（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         self.fill_rect(x, y, length, 1, color)
 
@@ -668,12 +668,12 @@ class ST7789:
         在指定位置绘制单个像素点。
 
         Args:
-            x (int): 像素点的横坐标。（MicroPython 内置类型：int）
-            y (int): 像素点的纵坐标。（MicroPython 内置类型：int）
-            color (int): 像素颜色，16-bit 565 编码（MicroPython 内置类型：int）
+            x (int): 像素点的横坐标。（MicroPython 内置类型:int）
+            y (int): 像素点的纵坐标。（MicroPython 内置类型:int）
+            color (int): 像素颜色，16-bit 565 编码（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 会调用 _set_window 将窗口限定为单像素区域，然后根据 self.needs_swap 选择像素打包格式发送。
@@ -692,14 +692,14 @@ class ST7789:
         在指定位置绘制一个缓冲区中的图像。
 
         Args:
-            buffer (bytes | bytearray | memoryview): 要绘制的图像缓冲区，按像素顺序组织（MicroPython 内置类型：bytes/bytearray/memoryview）。
-            x (int): 图像在屏幕上的起始横坐标（MicroPython 内置类型：int）。
-            y (int): 图像在屏幕上的起始纵坐标（MicroPython 内置类型：int）。
-            width (int): 图像的宽度（像素）（MicroPython 内置类型：int）。
-            height (int): 图像的高度（像素）（MicroPython 内置类型：int）。
+            buffer (bytes | bytearray | memoryview): 要绘制的图像缓冲区，按像素顺序组织（MicroPython 内置类型:bytes/bytearray/memoryview）。
+            x (int): 图像在屏幕上的起始横坐标（MicroPython 内置类型:int）。
+            y (int): 图像在屏幕上的起始纵坐标（MicroPython 内置类型:int）。
+            width (int): 图像的宽度（像素）（MicroPython 内置类型:int）。
+            height (int): 图像的高度（像素）（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 假定 buffer 的长度与 width*height*(bytes_per_pixel) 一致。
@@ -715,14 +715,14 @@ class ST7789:
         绘制矩形边框。
 
         Args:
-            x (int): 矩形左上角横坐标（MicroPython 内置类型：int）。
-            y (int): 矩形左上角纵坐标（MicroPython 内置类型：int）。
-            w (int): 矩形宽度（像素）（MicroPython 内置类型：int）。
-            h (int): 矩形高度（像素）（MicroPython 内置类型：int）。
-            color (int): 矩形边框颜色，16-bit 565 编码（MicroPython 内置类型：int）。
+            x (int): 矩形左上角横坐标（MicroPython 内置类型:int）。
+            y (int): 矩形左上角纵坐标（MicroPython 内置类型:int）。
+            w (int): 矩形宽度（像素）（MicroPython 内置类型:int）。
+            h (int): 矩形高度（像素）（MicroPython 内置类型:int）。
+            color (int): 矩形边框颜色，16-bit 565 编码（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         self.hline(x, y, w, color)
         self.vline(x, y, h, color)
@@ -734,14 +734,14 @@ class ST7789:
         绘制一个填充的矩形。
 
         Args:
-            x (int): 矩形左上角横坐标（MicroPython 内置类型：int）。
-            y (int): 矩形左上角纵坐标（MicroPython 内置类型：int）。
-            width (int): 矩形宽度（像素）（MicroPython 内置类型：int）。
-            height (int): 矩形高度（像素）（MicroPython 内置类型：int）。
-            color (int): 矩形填充颜色，16-bit 565 编码（MicroPython 内置类型：int）。
+            x (int): 矩形左上角横坐标（MicroPython 内置类型:int）。
+            y (int): 矩形左上角纵坐标（MicroPython 内置类型:int）。
+            width (int): 矩形宽度（像素）（MicroPython 内置类型:int）。
+            height (int): 矩形高度（像素）（MicroPython 内置类型:int）。
+            color (int): 矩形填充颜色，16-bit 565 编码（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 使用常量 _BUFFER_SIZE 将像素数量分块发送以节省内存。
@@ -776,10 +776,10 @@ class ST7789:
         使用指定颜色填充整个屏幕。
 
         Args:
-            color (int): 填充颜色，16-bit 565 编码（MicroPython 内置类型：int）。
+            color (int): 填充颜色，16-bit 565 编码（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         self.fill_rect(0, 0, self.width, self.height, color)
 
@@ -788,14 +788,14 @@ class ST7789:
         绘制一条直线（Bresenham 算法实现）。
 
         Args:
-            x0 (int): 起点横坐标（MicroPython 内置类型：int）。
-            y0 (int): 起点纵坐标（MicroPython 内置类型：int）。
-            x1 (int): 终点横坐标（MicroPython 内置类型：int）。
-            y1 (int): 终点纵坐标（MicroPython 内置类型：int）。
-            color (int): 线段颜色，16-bit 565 编码（MicroPython 内置类型：int）。
+            x0 (int): 起点横坐标（MicroPython 内置类型:int）。
+            y0 (int): 起点纵坐标（MicroPython 内置类型:int）。
+            x1 (int): 终点横坐标（MicroPython 内置类型:int）。
+            y1 (int): 终点纵坐标（MicroPython 内置类型:int）。
+            color (int): 线段颜色，16-bit 565 编码（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 若线段斜率大于 1，会交换 x/y 以减少循环次数（steep 优化）。
@@ -836,15 +836,15 @@ class ST7789:
         """
         设置垂直滚动显示的区域（Top Fixed Area / Vertical Scroll Area / Bottom Fixed Area）。
 
-        示例（对于 135x240 屏幕）：tfa=40, vsa=240, bfa=40。
+        示例（对于 135x240 屏幕）:tfa=40, vsa=240, bfa=40。
 
         Args:
-            tfa (int): 顶部固定区域高度（像素）（MicroPython 内置类型：int）。
-            vsa (int): 垂直滚动区域高度（像素）（MicroPython 内置类型：int）。
-            bfa (int): 底部固定区域高度（像素）（MicroPython 内置类型：int）。
+            tfa (int): 顶部固定区域高度（像素）（MicroPython 内置类型:int）。
+            vsa (int): 垂直滚动区域高度（像素）（MicroPython 内置类型:int）。
+            bfa (int): 底部固定区域高度（像素）（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         # 将屏幕的垂直滚动起始地址、垂直滚动结束地址和缓冲区地址写入到 ST7789 液晶屏的寄存器中
         self._write(_ST7789_VSCRDEF, struct.pack(">HHH", tfa, vsa, bfa))
@@ -854,10 +854,10 @@ class ST7789:
         设置垂直滚动起始地址（Vertical Scroll Start Address），定义从帧内存中哪个行开始显示。
 
         Args:
-            vssa (int): 垂直滚动起始地址（MicroPython 内置类型：int）。
+            vssa (int): 垂直滚动起始地址（MicroPython 内置类型:int）。
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Example:
             for line in range(40, 280, 1):
@@ -877,13 +877,13 @@ class ST7789:
         @micropython.viper 不支持你在函数签名里使用像 bytearray、联合类型（bytes | bytearray | memoryview）或返回类型注解（-> bytearray）这类高级类型注释
 
         Args:
-            glyphs (bytes | bytearray | memoryview): 字形表，包含字符的字形数据（MicroPython 内置类型：bytes/bytearray/memoryview）。
-            idx (int): 要处理的字符在字形表中的起始索引偏移（MicroPython 内置类型：int）。
-            fg_color (int): 前景色（用于像素为 1 的位置）（MicroPython 内置类型：int）。
-            bg_color (int): 背景色（用于像素为 0 的位置）（MicroPython 内置类型：int）。
+            glyphs (bytes | bytearray | memoryview): 字形表，包含字符的字形数据（MicroPython 内置类型:bytes/bytearray/memoryview）。
+            idx (int): 要处理的字符在字形表中的起始索引偏移（MicroPython 内置类型:int）。
+            fg_color (int): 前景色（用于像素为 1 的位置）（MicroPython 内置类型:int）。
+            bg_color (int): 背景色（用于像素为 0 的位置）（MicroPython 内置类型:int）。
 
         Returns:
-            bytearray: 返回一个包含打包后像素值的字节数组（长度 128 字节），可直接用于 blit（MicroPython 内置类型：bytearray）。
+            bytearray: 返回一个包含打包后像素值的字节数组（长度 128 字节），可直接用于 blit（MicroPython 内置类型:bytearray）。
 
         Notes:
             - 本函数使用 viper 优化并假设可用 ptr8/ptr16 类型转换函数以提高速度。
@@ -924,13 +924,13 @@ class ST7789:
         @micropython.viper 不支持你在函数签名里使用像 bytearray、联合类型（bytes | bytearray | memoryview）或返回类型注解（-> bytearray）这类高级类型注释
 
         Args:
-            glyphs (bytes | bytearray | memoryview): 字形表（MicroPython 内置类型：bytes/bytearray/memoryview）。
-            idx (int): 字形表中的起始字节索引（MicroPython 内置类型：int）。
-            fg_color (int): 前景色（MicroPython 内置类型：int）。
-            bg_color (int): 背景色（MicroPython 内置类型：int）。
+            glyphs (bytes | bytearray | memoryview): 字形表（MicroPython 内置类型:bytes/bytearray/memoryview）。
+            idx (int): 字形表中的起始字节索引（MicroPython 内置类型:int）。
+            fg_color (int): 前景色（MicroPython 内置类型:int）。
+            bg_color (int): 背景色（MicroPython 内置类型:int）。
 
         Returns:
-            bytearray: 返回一个包含打包后像素值的字节数组（长度 256 字节），可直接用于 blit（MicroPython 内置类型：bytearray）。
+            bytearray: 返回一个包含打包后像素值的字节数组（长度 256 字节），可直接用于 blit（MicroPython 内置类型:bytearray）。
         """
 
         # 创建一个大小为 256 字节的字节数组 buffer
@@ -976,15 +976,15 @@ class ST7789:
         用于绘制宽度为 8 的字符（高度为 8 或 16）。
 
         Args:
-            font (module | object): 字体模块/对象，需包含 FIRST, LAST, WIDTH, HEIGHT, FONT 常量/属性（MicroPython 内置类型：module/object）。
-            text (str): 要绘制的文本字符串。（MicroPython 内置类型：str）
-            x0 (int): 开始绘制的列（MicroPython 内置类型：int）。
-            y0 (int): 开始绘制的行（MicroPython 内置类型：int）。
-            fg_color (int, optional): 前景色（默认 WHITE）。（MicroPython 内置类型：int）
-            bg_color (int, optional): 背景色（默认 BLACK）。（MicroPython 内置类型：int）
+            font (module | object): 字体模块/对象，需包含 FIRST, LAST, WIDTH, HEIGHT, FONT 常量/属性（MicroPython 内置类型:module/object）。
+            text (str): 要绘制的文本字符串。（MicroPython 内置类型:str）
+            x0 (int): 开始绘制的列（MicroPython 内置类型:int）。
+            y0 (int): 开始绘制的行（MicroPython 内置类型:int）。
+            fg_color (int, optional): 前景色（默认 WHITE）。（MicroPython 内置类型:int）
+            bg_color (int, optional): 背景色（默认 BLACK）。（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
 
         # 遍历文本中的每个字符
@@ -1020,15 +1020,15 @@ class ST7789:
         用于绘制宽度为 16 的字符（高度为 16 或 32）。
 
         Args:
-            font (module | object): 字体模块/对象，需包含 FIRST, LAST, WIDTH, HEIGHT, FONT 常量/属性（MicroPython 内置类型：module/object）。
-            text (str): 要绘制的文本字符串。（MicroPython 内置类型：str）
-            x0 (int): 开始绘制的列（MicroPython 内置类型：int）。
-            y0 (int): 开始绘制的行（MicroPython 内置类型：int）。
-            fg_color (int, optional): 前景色（默认 WHITE）。（MicroPython 内置类型：int）
-            bg_color (int, optional): 背景色（默认 BLACK）。（MicroPython 内置类型：int）
+            font (module | object): 字体模块/对象，需包含 FIRST, LAST, WIDTH, HEIGHT, FONT 常量/属性（MicroPython 内置类型:module/object）。
+            text (str): 要绘制的文本字符串。（MicroPython 内置类型:str）
+            x0 (int): 开始绘制的列（MicroPython 内置类型:int）。
+            y0 (int): 开始绘制的行（MicroPython 内置类型:int）。
+            fg_color (int, optional): 前景色（默认 WHITE）。（MicroPython 内置类型:int）
+            bg_color (int, optional): 背景色（默认 BLACK）。（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         # 遍历文本中的每个字符
         for char in text:
@@ -1061,15 +1061,15 @@ class ST7789:
         在指定位置绘制文本。
 
         Args:
-            font (module | object): 要使用的字体模块/对象，需包含 WIDTH, HEIGHT 等属性。（MicroPython 内置类型：module/object）
-            text (str): 要写入的文本字符串。（MicroPython 内置类型：str）
-            x0 (int): 开始绘制的列（MicroPython 内置类型：int）
-            y0 (int): 开始绘制的行（MicroPython 内置类型：int）
-            color (int, optional): 前景色（默认 WHITE），为 16-bit 565 编码。（MicroPython 内置类型：int）
-            background (int, optional): 背景色（默认 BLACK），为 16-bit 565 编码。（MicroPython 内置类型：int）
+            font (module | object): 要使用的字体模块/对象，需包含 WIDTH, HEIGHT 等属性。（MicroPython 内置类型:module/object）
+            text (str): 要写入的文本字符串。（MicroPython 内置类型:str）
+            x0 (int): 开始绘制的列（MicroPython 内置类型:int）
+            y0 (int): 开始绘制的行（MicroPython 内置类型:int）
+            color (int, optional): 前景色（默认 WHITE），为 16-bit 565 编码。（MicroPython 内置类型:int）
+            background (int, optional): 背景色（默认 BLACK），为 16-bit 565 编码。（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 根据 self.needs_swap 调整前景色和背景色的字节序，然后根据字体宽度选择 _text8 或 _text16。
@@ -1089,13 +1089,13 @@ class ST7789:
         在指定位置绘制位图（一次性把整个位图打包到内存并写出）。
 
         Args:
-            bitmap (module | object): 位图模块/对象，需包含 WIDTH, HEIGHT, BPP, PALETTE, BITMAP 等属性。（MicroPython 内置类型：module/object）
-            x (int): 绘制起始横坐标。（MicroPython 内置类型：int）
-            y (int): 绘制起始纵坐标。（MicroPython 内置类型：int）
-            index (int, optional): 位图调色板索引偏移，默认为 0。（MicroPython 内置类型：int）
+            bitmap (module | object): 位图模块/对象，需包含 WIDTH, HEIGHT, BPP, PALETTE, BITMAP 等属性。（MicroPython 内置类型:module/object）
+            x (int): 绘制起始横坐标。（MicroPython 内置类型:int）
+            y (int): 绘制起始纵坐标。（MicroPython 内置类型:int）
+            index (int, optional): 位图调色板索引偏移，默认为 0。（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Notes:
             - 每个像素占用两个字节（16-bit），生成的缓冲区大小为 width*height*2 字节。
@@ -1157,13 +1157,13 @@ class ST7789:
         在指定位置按行逐行绘制位图（节省内存，一次写入一行）。
 
         Args:
-            bitmap (module | object): 位图模块/对象，需包含 WIDTH, HEIGHT, BPP, PALETTE, BITMAP 等属性。（MicroPython 内置类型：module/object）
-            x (int): 绘制起始横坐标。（MicroPython 内置类型：int）
-            y (int): 绘制起始纵坐标。（MicroPython 内置类型：int）
-            index (int, optional): 位图调色板索引偏移，默认为 0。（MicroPython 内置类型：int）
+            bitmap (module | object): 位图模块/对象，需包含 WIDTH, HEIGHT, BPP, PALETTE, BITMAP 等属性。（MicroPython 内置类型:module/object）
+            x (int): 绘制起始横坐标。（MicroPython 内置类型:int）
+            y (int): 绘制起始纵坐标。（MicroPython 内置类型:int）
+            index (int, optional): 位图调色板索引偏移，默认为 0。（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         # 获取位图的宽度、高度、大小、位深度、起始位、调色板和是否需要交换字节序
         width = bitmap.WIDTH
@@ -1207,15 +1207,15 @@ class ST7789:
         使用转换后的 TrueType 风格字体在显示屏上从指定的列和行开始写入字符串。
 
         Args:
-            font (module | object): 转换后的字体对象，需包含 HEIGHT, MAX_WIDTH, MAP, OFFSET_WIDTH, OFFSETS, WIDTHS, BITMAPS 等属性。（MicroPython 内置类型：module/object）
-            string (str): 要写入的文本字符串。（MicroPython 内置类型：str）
-            x (int): 开始绘制的列（MicroPython 内置类型：int）
-            y (int): 开始绘制的行（MicroPython 内置类型：int）
-            fg (int, optional): 前景色，默认为 WHITE。（MicroPython 内置类型：int）
-            bg (int, optional): 背景色，默认为 BLACK。（MicroPython 内置类型：int）
+            font (module | object): 转换后的字体对象，需包含 HEIGHT, MAX_WIDTH, MAP, OFFSET_WIDTH, OFFSETS, WIDTHS, BITMAPS 等属性。（MicroPython 内置类型:module/object）
+            string (str): 要写入的文本字符串。（MicroPython 内置类型:str）
+            x (int): 开始绘制的列（MicroPython 内置类型:int）
+            y (int): 开始绘制的行（MicroPython 内置类型:int）
+            fg (int, optional): 前景色，默认为 WHITE。（MicroPython 内置类型:int）
+            bg (int, optional): 背景色，默认为 BLACK。（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
         """
         buffer_len = font.HEIGHT * font.MAX_WIDTH * 2
         # 创建一个长度为 `buffer_len` 的字节数组 `buffer` 用于存储字符的像素数据
@@ -1275,11 +1275,11 @@ class ST7789:
         计算使用指定字体绘制字符串时所占的总宽度（像素）。
 
         Args:
-            font (module | object): 字体模块/对象，需包含 MAP 和 WIDTHS。（MicroPython 内置类型：module/object）
-            string (str): 要测量的字符串。（MicroPython 内置类型：str）
+            font (module | object): 字体模块/对象，需包含 MAP 和 WIDTHS。（MicroPython 内置类型:module/object）
+            string (str): 要测量的字符串。（MicroPython 内置类型:str）
 
         Returns:
-            int: 字符串占用的像素宽度。（MicroPython 内置类型：int）
+            int: 字符串占用的像素宽度。（MicroPython 内置类型:int）
         """
         # 初始化宽度为0
         width = 0
@@ -1304,16 +1304,16 @@ class ST7789:
         绘制闭合多边形。
 
         Args:
-            points (list): 要绘制的点列表，每个点为 (x, y) 二元组。（MicroPython 内置类型：list/tuple）
-            x (int): 多边形整体偏移横坐标。（MicroPython 内置类型：int）
-            y (int): 多边形整体偏移纵坐标。（MicroPython 内置类型：int）
-            color (int): 绘制颜色，16-bit 565 编码。（MicroPython 内置类型：int）
-            angle (float, optional): 旋转角度（弧度），默认 0。若为 0 则不做旋转。（MicroPython 内置类型：float）
-            center_x (int, optional): 旋转中心的 X 坐标偏移，默认 0。（MicroPython 内置类型：int）
-            center_y (int, optional): 旋转中心的 Y 坐标偏移，默认 0。（MicroPython 内置类型：int）
+            points (list): 要绘制的点列表，每个点为 (x, y) 二元组。（MicroPython 内置类型:list/tuple）
+            x (int): 多边形整体偏移横坐标。（MicroPython 内置类型:int）
+            y (int): 多边形整体偏移纵坐标。（MicroPython 内置类型:int）
+            color (int): 绘制颜色，16-bit 565 编码。（MicroPython 内置类型:int）
+            angle (float, optional): 旋转角度（弧度），默认 0。若为 0 则不做旋转。（MicroPython 内置类型:float）
+            center_x (int, optional): 旋转中心的 X 坐标偏移，默认 0。（MicroPython 内置类型:int）
+            center_y (int, optional): 旋转中心的 Y 坐标偏移，默认 0。（MicroPython 内置类型:int）
 
         Returns:
-            None: 本方法不返回值。（MicroPython 内置类型：None）
+            None: 本方法不返回值。（MicroPython 内置类型:None）
 
         Raises:
             ValueError: 当 points 中点的数量少于 3 时抛出该异常。

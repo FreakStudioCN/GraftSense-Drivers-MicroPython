@@ -190,7 +190,7 @@ class SerialServo:
 
     """
 
-    # 类变量：指令及其参数长度或返回数据长度
+    # 类变量:指令及其参数长度或返回数据长度
     # 写入指令及其对应的参数长度
     # 读取指令及其对应的参数长度和返回数据长度
 
@@ -263,13 +263,13 @@ class SerialServo:
     # 舵机LED报警闪烁值读取指令
     SERVO_LED_ERROR_READ = (36, 3, 4)
 
-    # 类变量：舵机工作模式
+    # 类变量:舵机工作模式
     # 0 代表位置控制模式
     MODE_POSITION = 0
     # 1 代表电机控制模式
     MODE_MOTOR = 1
 
-    # 类变量：LED报警故障类型
+    # 类变量:LED报警故障类型
     ERROR_NO_ALARM = 0  # 无报警
     ERROR_OVER_TEMP = 1  # 过温报警
     ERROR_OVER_VOLT = 2  # 过压报警
@@ -279,7 +279,7 @@ class SerialServo:
     ERROR_OVER_VOLT_AND_STALL = 6  # 过压和堵转报警
     ERROR_ALL = 7  # 过温、过压和堵转报警
 
-    # 读取命令集合：根据指令的元组长度来确定哪些是读取命令（命令编号，参数长度，返回数据长度）
+    # 读取命令集合:根据指令的元组长度来确定哪些是读取命令（命令编号，参数长度，返回数据长度）
     READ_COMMANDS = {
         2,  # SERVO_MOVE_TIME_READ
         8,  # SERVO_MOVE_TIME_WAIT_READ
@@ -385,7 +385,7 @@ class SerialServo:
 
         # 数据包长度（指令+参数+校验和）
         length = 3 + len(params)
-        # 构建数据包：帧头 + ID + 数据长度 + 命令 + 参数 + 校验和
+        # 构建数据包:帧头 + ID + 数据长度 + 命令 + 参数 + 校验和
         packet = [0x55, 0x55, servo_id, length, cmd] + params
         # 计算校验和（从ID到最后一个参数）
         checksum = self.calculate_checksum(packet[2:])
@@ -1569,7 +1569,7 @@ class SerialServo:
             servo_id (int): 舵机的ID。
 
         Returns:
-            tuple: 返回舵机的工作模式、转动速度（单位：转/分钟）。如果读取失败，则返回 None。
+            tuple: 返回舵机的工作模式、转动速度（单位:转/分钟）。如果读取失败，则返回 None。
 
         Raises:
             ValueError: 如果模式无效，或在电机控制模式下转动速度超出范围（-1000 ~ 1000），或模式和速度不匹配。

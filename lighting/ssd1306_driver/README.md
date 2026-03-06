@@ -31,37 +31,37 @@
 
 ## 硬件要求
 
-- 核心模块：0.96 寸 SSD1306 OLED 模块（I2C 接口，地址 0x3C/0x3D）
-- 开发平台：支持 MicroPython 的开发板（如 ESP32、ESP8266 等）
-- 连接引脚：OLED 的 SDA、SCL 引脚对应连接开发板 I2C 外设引脚
-- 供电：3.3V 或 5V 电源（模块支持宽电压输入）
+- 核心模块:0.96 寸 SSD1306 OLED 模块（I2C 接口，地址 0x3C/0x3D）
+- 开发平台:支持 MicroPython 的开发板（如 ESP32、ESP8266 等）
+- 连接引脚:OLED 的 SDA、SCL 引脚对应连接开发板 I2C 外设引脚
+- 供电:3.3V 或 5V 电源（模块支持宽电压输入）
 
 ## 软件设计核心思想
 
-1. 分层封装：通过 SSD1306 基础类封装 OLED 显示核心逻辑，SSD1306_I2C 子类实现 I2C 通信细节，分离硬件通信与显示控制，便于扩展 SPI 等其他接口。
-2. 缓冲区驱动：基于 framebuf 实现图形缓冲区，所有绘制操作先更新缓冲区，再通过 show()方法同步到屏幕，提升显示效率。
-3. 兼容性设计：支持自动识别 OLED 地址，适配不同 ADDR 短接配置的模块，降低使用门槛。
+1. 分层封装:通过 SSD1306 基础类封装 OLED 显示核心逻辑，SSD1306_I2C 子类实现 I2C 通信细节，分离硬件通信与显示控制，便于扩展 SPI 等其他接口。
+2. 缓冲区驱动:基于 framebuf 实现图形缓冲区，所有绘制操作先更新缓冲区，再通过 show()方法同步到屏幕，提升显示效率。
+3. 兼容性设计:支持自动识别 OLED 地址，适配不同 ADDR 短接配置的模块，降低使用门槛。
 
 ## 使用说明
 
-### 硬件连接：
+### 硬件连接:
 
 - 将 OLED 模块的 SDA 引脚连接到开发板 I2C_SDA 引脚（示例中为 Pin 4）
 - 将 OLED 模块的 SCL 引脚连接到开发板 I2C_SCL 引脚（示例中为 Pin 5）
 - 为模块提供 3.3V 或 5V 供电，GND 共地
 
-### 软件部署：
+### 软件部署:
 
 - 将 ssd1306.py 和 main.py 文件上传到 MicroPython 设备的文件系统
 - 确保 MicroPython 版本为 v1.23.0 及以上
 
-### 运行测试：
+### 运行测试:
 
 - 运行 main.py，观察串口输出的 I2C 扫描结果和 OLED 屏幕显示内容
 
 ## 示例程序
 
-以下为 main.py 核心逻辑示例，实现 I2C 扫描、OLED 初始化及内容显示：
+以下为 main.py 核心逻辑示例，实现 I2C 扫描、OLED 初始化及内容显示:
 
 ```python
 from ssd1306 import SSD1306_I2C
@@ -104,11 +104,11 @@ while True:
 
 ## 联系方式
 
-如有任何问题或需要帮助，请通过以下方式联系开发者：
+如有任何问题或需要帮助，请通过以下方式联系开发者:
 
-📧 **邮箱**：liqinghsui@freakstudio.cn
+📧 **邮箱**:liqinghsui@freakstudio.cn
 
-💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+💻 **GitHub**:[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ## 许可协议
 

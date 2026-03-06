@@ -37,11 +37,11 @@ print(ok, resp, "Detect module communication")
 # 设为标签
 ok, resp = ewm550_base.set_role(ewm550_base.Role["BASE"])
 print(ok, resp, "Set to base station mode")
-# 标签源地址：0000（与标签目标地址匹配）
+# 标签源地址:0000（与标签目标地址匹配）
 ok, resp = ewm550_base.set_src_addr("0000")
 print(ok, resp, "Set tag source address to 0000")
 
-# 目标地址：前4位为基站地址1111，后16位补0（标签仅前4位生效）
+# 目标地址:前4位为基站地址1111，后16位补0（标签仅前4位生效）
 ok, resp = ewm550_base.set_dst_addr("11110000000000000000")
 print(ok, resp, "Bind base station address to 1111")
 
@@ -65,11 +65,11 @@ print(ok, resp, "Detect module communication")
 # 设为标签
 ok, resp = ewm550_tag.set_role(ewm550_tag.Role["TAG"])
 print(ok, resp, "Set to tag mode")
-# 标签源地址：1111（与基站目标地址匹配）
+# 标签源地址:1111（与基站目标地址匹配）
 ok, resp = ewm550_tag.set_src_addr("1111")
 print(ok, resp, "Set tag source address to 1111")
 
-# 目标地址：前4位为基站地址0000，后16位补0（标签仅前4位生效）
+# 目标地址:前4位为基站地址0000，后16位补0（标签仅前4位生效）
 ok, resp = ewm550_tag.set_dst_addr("00000000000000000000")
 print(ok, resp, "Bind base station address to 0000")
 
