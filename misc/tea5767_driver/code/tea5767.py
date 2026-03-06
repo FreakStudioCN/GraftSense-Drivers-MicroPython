@@ -14,7 +14,6 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
 
-# 导入时间模块，用于延时操作
 import time
 
 # ======================================== 全局变量 ============================================
@@ -23,6 +22,7 @@ import time
 
 
 # ======================================== 自定义类 ============================================
+
 class Radio:
     """
     FM收音机模块控制类
@@ -77,32 +77,41 @@ class Radio:
                                  Current signal strength ADC level
 
     Methods:
-        __init__(i2c, addr=0x60, freq=0.0, band='US', stereo=True, soft_mute=True, noise_cancel=True, high_cut=True): 初始化收音机控制器
-                                                                                                                      Initialize radio controller
-        set_frequency(freq): 设置FM接收频率
-                             Set FM reception frequency
-        change_freqency(change): 调整FM接收频率
-                                 Adjust FM reception frequency
-        search(mode, dir=1, adc=7): 设置自动搜索参数
-                                    Set auto search parameters
-        mute(mode): 设置静音模式
-                    Set mute mode
-        standby(mode): 设置待机模式
-                       Set standby mode
-        read(): 从收音机模块读取状态数据
-                Read status data from radio module
-        update(): 更新收音机模块配置并同步状态
-                  Update radio module configuration and synchronize status
+        __init__(i2c: I2C, addr: int = 0x60, freq: float = 0.0, band: str = 'US', stereo: bool = True,
+                 soft_mute: bool = True, noise_cancel: bool = True, high_cut: bool = True) -> None:
+            初始化收音机控制器
+            Initialize radio controller
+        set_frequency(freq: float) -> None:
+            设置FM接收频率
+            Set FM reception frequency
+        change_freqency(change: float) -> None:
+            调整FM接收频率
+            Adjust FM reception frequency
+        search(mode: bool, dir: int = 1, adc: int = 7) -> None:
+            设置自动搜索参数
+            Set auto search parameters
+        mute(mode: bool) -> None:
+            设置静音模式
+            Set mute mode
+        standby(mode: bool) -> None:
+            设置待机模式
+            Set standby mode
+        read() -> None:
+            从收音机模块读取状态数据
+            Read status data from radio module
+        update() -> None:
+            更新收音机模块配置并同步状态
+            Update radio module configuration and synchronize status
     """
 
     # 美国FM频段范围(MHz)
-    FREQ_RANGE_US = (87.5, 108.0)
+    FREQ_RANGE_US: Tuple[float, float] = (87.5, 108.0)
     # 日本FM频段范围(MHz)
-    FREQ_RANGE_JP = (76.0, 91.0)
+    FREQ_RANGE_JP: Tuple[float, float] = (76.0, 91.0)
     # ADC检测级别有效值
-    ADC = (0, 5, 7, 10)
+    ADC: Tuple[int, int, int, int] = (0, 5, 7, 10)
     # ADC级别对应的位配置值
-    ADC_BIT = (0, 1, 2, 3)
+    ADC_BIT: Tuple[int, int, int, int] = (0, 1, 2, 3)
 
     __slot__ = [
         "_i2c",
@@ -123,7 +132,8 @@ class Radio:
         "signal_adc_level",
     ]
 
-    def __init__(self, i2c, addr=0x60, freq=0.0, band="US", stereo=True, soft_mute=True, noise_cancel=True, high_cut=True):
+    def __init__(self, i2c: I2C, addr: int = 0x60, freq: float = 0.0, band: str = 'US', stereo: bool = True,
+                 soft_mute: bool = True, noise_cancel: bool = True, high_cut: bool = True) -> None:
         """
         初始化收音机控制器
         Initialize radio controller
@@ -154,41 +164,41 @@ class Radio:
             Initialize all configuration parameters and call update() method to write configuration to radio module to complete controller initialization
         """
         # 保存I2C通信对象
-        self._i2c = i2c
+        self._i2c: I2C = i2c
         # 保存I2C设备地址
-        self._address = addr
+        self._address: int = addr
         # 初始化FM频率值
-        self.frequency = freq
+        self.frequency: float = freq
         # 初始化频段类型
-        self.band_limits = band
+        self.band_limits: str = band
         # 初始化待机模式状态
-        self.standby_mode = False
+        self.standby_mode: bool = False
         # 初始化静音模式状态
-        self.mute_mode = False
+        self.mute_mode: bool = False
         # 初始化软静音模式状态
-        self.soft_mute_mode = soft_mute
+        self.soft_mute_mode: bool = soft_mute
         # 初始化自动搜索模式状态
-        self.search_mode = False
+        self.search_mode: bool = False
         # 初始化搜索方向
-        self.search_direction = 1
+        self.search_direction: int = 1
         # 初始化搜索灵敏度ADC级别
-        self.search_adc_level = 7
+        self.search_adc_level: int = 7
         # 初始化立体声模式状态
-        self.stereo_mode = stereo
+        self.stereo_mode: bool = stereo
         # 初始化立体声降噪模式状态
-        self.stereo_noise_cancelling_mode = noise_cancel
+        self.stereo_noise_cancelling_mode: bool = noise_cancel
         # 初始化高频截止模式状态
-        self.high_cut_mode = high_cut
+        self.high_cut_mode: bool = high_cut
         # 初始化模块就绪状态
-        self.is_ready = False
+        self.is_ready: bool = False
         # 初始化立体声接收状态
-        self.is_stereo = False
+        self.is_stereo: bool = False
         # 初始化信号强度ADC级别
-        self.signal_adc_level = 0
+        self.signal_adc_level: int = 0
         # 更新配置到收音机模块
         self.update()
 
-    def set_frequency(self, freq):
+    def set_frequency(self, freq: float) -> None:
         """
         设置FM接收频率
         Set FM reception frequency
@@ -209,7 +219,7 @@ class Radio:
         # 更新配置到收音机模块
         self.update()
 
-    def change_freqency(self, change):
+    def change_freqency(self, change: float) -> None:
         """
         调整FM接收频率
         Adjust FM reception frequency
@@ -232,7 +242,7 @@ class Radio:
         # 更新配置到收音机模块
         self.update()
 
-    def search(self, mode, dir=1, adc=7):
+    def search(self, mode: bool, dir: int = 1, adc: int = 7) -> None:
         """
         设置自动搜索参数
         Set auto search parameters
@@ -261,7 +271,7 @@ class Radio:
         # 更新配置到收音机模块
         self.update()
 
-    def mute(self, mode):
+    def mute(self, mode: bool) -> None:
         """
         设置静音模式
         Set mute mode
@@ -282,7 +292,7 @@ class Radio:
         # 更新配置到收音机模块
         self.update()
 
-    def standby(self, mode):
+    def standby(self, mode: bool) -> None:
         """
         设置待机模式
         Set standby mode
@@ -303,7 +313,7 @@ class Radio:
         # 更新配置到收音机模块
         self.update()
 
-    def read(self):
+    def read(self) -> None:
         """
         从收音机模块读取状态数据
         Read status data from radio module
@@ -319,9 +329,9 @@ class Radio:
             Read 5-byte status data, parse frequency, ready status, stereo status, signal strength and other information and update to instance attributes
         """
         # 从I2C设备读取5字节状态数据
-        buf = self._i2c.readfrom(self._address, 5)
+        buf: bytearray = self._i2c.readfrom(self._address, 5)
         # 解析频率数据（原始值转换为MHz）
-        freqB = int((buf[0] & 0x3F) << 8 | buf[1])
+        freqB: int = int((buf[0] & 0x3f) << 8 | buf[1])
         # 计算实际FM频率并保留1位小数
         self.frequency = round((freqB * 32768 / 4 - 225000) / 1000000, 1)
         # 解析模块就绪状态（第1字节第7位）
@@ -331,7 +341,7 @@ class Radio:
         # 解析信号强度ADC级别（第4字节高4位）
         self.signal_adc_level = int(buf[3] >> 4)
 
-    def update(self):
+    def update(self) -> None:
         """
         更新收音机模块配置并同步状态
         Update radio module configuration and synchronize status
@@ -359,10 +369,10 @@ class Radio:
             self.frequency = min(max(self.frequency, Radio.FREQ_RANGE_US[0]), Radio.FREQ_RANGE_US[1])
 
         # 将频率值转换为模块所需的原始值
-        freqB = 4 * (self.frequency * 1000000 + 225000) / 32768
+        freqB: float = 4 * (self.frequency * 1000000 + 225000) / 32768
 
         # 初始化5字节配置缓冲区
-        buf = bytearray(5)
+        buf: bytearray = bytearray(5)
 
         # 配置第1字节：频率高8位 + 静音位 + 搜索模式位
         buf[0] = int(freqB) >> 8 | self.mute_mode << 7 | self.search_mode << 6
