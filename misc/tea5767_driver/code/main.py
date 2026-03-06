@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/9
-# @Author  : alankrantas
+# @Author  : hogeiha
 # @File    : tea5767_search_max_signal_simple.py
 # @Description : 基于原有Radio类搜索最高信号频率（无新增类）
 
@@ -27,6 +27,23 @@ STEP = 0.1
 
 # 1. 初始化I2C和Radio实例
 i2c = I2C(0, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=400000)
+devices_list: list[int] = i2c.scan()
+print("START I2C SCANNER")
+
+# 若devices list为空，则没有设备连接到I2C总线上
+if len(devices_list) == 0:
+    # 若非空，则打印从机设备地址
+    print("No i2c device !")
+else:
+    # 遍历从机设备地址列表
+    print("i2c devices found:", len(devices_list))
+for device in devices_list:
+    # 判断设备地址是否为的RADIO地址
+    if device == 0x60:
+        # 找到的设备是RADIO地址
+        print("I2c hexadecimal address:", hex(device))
+        RADIO_ADDR = device
+
 if RADIO_ADDR not in i2c.scan():
     print(f"Error: Tea5767 module not detected (I2C address {hex(RADIO_ADDR)})")
 else:
