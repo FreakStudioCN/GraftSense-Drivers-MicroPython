@@ -326,7 +326,6 @@ class AD9833:
             # 将角度转换为弧度
             pout = radians(pout)
 
-
         # 根据弧度计算相位寄存器的值
         phaseR = int(pout * 4096 / (2 * pi))
 
