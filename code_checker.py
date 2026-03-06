@@ -40,20 +40,20 @@ def read_file_content(file_path: Path) -> str:
         with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
     except Exception as e:
-        print(f"❌ Error reading file {file_path}: {str(e)}")
+        print(f"[FAIL] Error reading file {file_path}: {str(e)}")
         return ""
 
 
 def check_required_globals(content: str, file_path: Path) -> bool:
     """检查4个必填全局变量是否存在（仅非main.py文件需要检查）"""
     if file_path.name == "main.py":
-        print(f"✅ {file_path}: main.py 无需检查全局变量，跳过")
+        print(f"[PASS] {file_path}: main.py 无需检查全局变量，跳过")
         return True
 
     try:
         tree = ast.parse(content)
     except Exception as e:
-        print(f"❌ {file_path}: Failed to parse code AST: {str(e)}")
+        print(f"[FAIL] {file_path}: Failed to parse code AST: {str(e)}")
         return False
 
     missing_vars = []
@@ -69,23 +69,23 @@ def check_required_globals(content: str, file_path: Path) -> bool:
             missing_vars.append(var_name)
 
     if missing_vars:
-        print(f"❌ {file_path}: Missing required global variables: {', '.join(missing_vars)}")
+        print(f"[FAIL] {file_path}: Missing required global variables: {', '.join(missing_vars)}")
         return False
-    print(f"✅ {file_path}: All 4 required global variables exist")
+    print(f"[PASS] {file_path}: All 4 required global variables exist")
     return True
 
 
 def check_license_comment(content: str, file_path: Path) -> bool:
     """精准匹配独立的 # @License : MIT 注释行（仅非main.py文件需要检查）"""
     if file_path.name == "main.py":
-        print(f"✅ {file_path}: main.py 无需检查License注释，跳过")
+        print(f"[PASS] {file_path}: main.py 无需检查License注释，跳过")
         return True
 
     lines = [line.strip() for line in content.split("\n")]
     if LICENSE_COMMENT.strip() in lines:
-        print(f"✅ {file_path}: # @License : MIT comment exists")
+        print(f"[PASS] {file_path}: # @License : MIT comment exists")
         return True
-    print(f"❌ {file_path}: Missing # @License : MIT comment")
+    print(f"[FAIL] {file_path}: Missing # @License : MIT comment")
     return False
 
 
@@ -102,9 +102,9 @@ def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
                     error_lines.append(line_num)
 
     if error_lines:
-        print(f"❌ {file_path}: Chinese characters found in raise/print (lines: {', '.join(map(str, error_lines))})")
+        print(f"[FAIL] {file_path}: Chinese characters found in raise/print (lines: {', '.join(map(str, error_lines))})")
         return False
-    print(f"✅ {file_path}: No Chinese in raise/print messages")
+    print(f"[PASS] {file_path}: No Chinese in raise/print messages")
     return True
 
 
@@ -134,7 +134,7 @@ def extract_section_content(content: str, marker: str) -> str:
 def check_init_config_section(content: str, file_path: Path) -> bool:
     """检查初始化配置区（仅main.py需要检查，非main.py跳过）"""
     if file_path.name != "main.py":
-        print(f"✅ {file_path}: 非main.py文件，无需检查初始化配置区，跳过")
+        print(f"[PASS] {file_path}: 非main.py文件，无需检查初始化配置区，跳过")
         return True
 
     init_content = extract_section_content(content, INIT_CONFIG_MARKER)
@@ -148,16 +148,16 @@ def check_init_config_section(content: str, file_path: Path) -> bool:
         errors.append('print("FreakStudio: xxx")')
 
     if errors:
-        print(f"❌ {file_path}: Init config section missing: {', '.join(errors)}")
+        print(f"[FAIL] {file_path}: Init config section missing: {', '.join(errors)}")
         return False
-    print(f"✅ {file_path}: Init config section has required content")
+    print(f"[PASS] {file_path}: Init config section has required content")
     return True
 
 
 def check_main_py_instance_location(content: str, file_path: Path) -> bool:
     """精准检查main.py实例化位置（仅main.py需要检查）"""
     if "main.py" not in str(file_path):
-        print(f"✅ {file_path}: 非main.py文件，无需检查实例化位置，跳过")
+        print(f"[PASS] {file_path}: 非main.py文件，无需检查实例化位置，跳过")
         return True
 
     global_content = extract_section_content(
@@ -184,16 +184,16 @@ def check_main_py_instance_location(content: str, file_path: Path) -> bool:
         errors.append("No instance found in init config section (required)")
 
     if errors:
-        print(f"❌ {file_path}: {'; '.join(errors)}")
+        print(f"[FAIL] {file_path}: {'; '.join(errors)}")
         return False
-    print(f"✅ {file_path}: main.py instance location is correct")
+    print(f"[PASS] {file_path}: main.py instance location is correct")
     return True
 
 
 def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     """精准检查while循环仅在主程序区（仅main.py需要检查）"""
     if "main.py" not in str(file_path):
-        print(f"✅ {file_path}: 非main.py文件，无需检查while循环位置，跳过")
+        print(f"[PASS] {file_path}: 非main.py文件，无需检查while循环位置，跳过")
         return True
 
     main_content = extract_section_content(content, MAIN_SECTION_MARKER)
@@ -209,13 +209,13 @@ def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     while_in_main = re.search(r"while\s*\(", main_content) is not None
 
     if while_in_non_main:
-        print(f"❌ {file_path}: while loop found outside main program section (invalid)")
+        print(f"[FAIL] {file_path}: while loop found outside main program section (invalid)")
         return False
     if "while" in content and not while_in_main:
-        print(f"❌ {file_path}: while loop not found in main program section (required)")
+        print(f"[FAIL] {file_path}: while loop not found in main program section (required)")
         return False
 
-    print(f"✅ {file_path}: main.py while loop location is correct")
+    print(f"[PASS] {file_path}: main.py while loop location is correct")
     return True
 
 
@@ -224,7 +224,7 @@ def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
     try:
         tree = ast.parse(content)
     except Exception as e:
-        print(f"❌ {file_path}: Failed to parse code AST for type check: {str(e)}")
+        print(f"[FAIL] {file_path}: Failed to parse code AST for type check: {str(e)}")
         return False
 
     has_type_hints = False
@@ -240,14 +240,14 @@ def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
 
     # 无__init__方法则跳过检查
     if not has_init_method:
-        print(f"✅ {file_path}: 无__init__方法，跳过类型注解检查")
+        print(f"[PASS] {file_path}: 无__init__方法，跳过类型注解检查")
         return True
 
     # 仅校验类型注解
     if not has_type_hints:
-        print(f"❌ {file_path}: No type hints found in __init__ parameters")
+        print(f"[FAIL] {file_path}: No type hints found in __init__ parameters")
         return False
-    print(f"✅ {file_path}: Type hints exist in __init__ parameters")
+    print(f"[PASS] {file_path}: Type hints exist in __init__ parameters")
     return True
 
 
@@ -255,13 +255,13 @@ def check_method_param_validation(content: str, file_path: Path) -> bool:
     """检查非main.py文件中类的所有有参数方法是否包含参数合法性校验（isinstance/hasattr/取值判断+raise）"""
     # main.py跳过该检查
     if file_path.name == "main.py":
-        print(f"✅ {file_path}: main.py 无需检查方法参数校验，跳过")
+        print(f"[PASS] {file_path}: main.py 无需检查方法参数校验，跳过")
         return True
 
     try:
         tree = ast.parse(content)
     except Exception as e:
-        print(f"❌ {file_path}: Failed to parse code AST for param check: {str(e)}")
+        print(f"[FAIL] {file_path}: Failed to parse code AST for param check: {str(e)}")
         return False
 
     # 存储缺少参数校验的方法
@@ -317,9 +317,9 @@ def check_method_param_validation(content: str, file_path: Path) -> bool:
                         missing_validation_methods.append(f"{class_name}.{func_name}")
 
     if missing_validation_methods:
-        print(f"❌ {file_path}: Methods missing parameter validation: {', '.join(missing_validation_methods)}")
+        print(f"[FAIL] {file_path}: Methods missing parameter validation: {', '.join(missing_validation_methods)}")
         return False
-    print(f"✅ {file_path}: All methods with parameters have valid parameter validation")
+    print(f"[PASS] {file_path}: All methods with parameters have valid parameter validation")
     return True
 
 
@@ -346,6 +346,7 @@ def check_file(file_path: Path) -> bool:
             all_passed = False
 
     return all_passed
+
 
 def main():
     """
@@ -377,7 +378,7 @@ def main():
             py_files.append(path)
         # 情况2：传入的是文件，但不是.py文件 → 跳过并提示
         elif path.is_file() and path.suffix != ".py":
-            print(f"跳过非.py文件：{path_str}")
+            print(f"[WARNING] 跳过非.py文件：{path_str}")
         # 情况3：传入的是目录 → 遍历目录下的.py文件
         elif path.is_dir():
             if args.recursive:
@@ -398,25 +399,26 @@ def main():
     failed_files = []
     print(f"共找到 {len(py_files)} 个.py文件，开始检查...\n")
     for file_path in py_files:
-        print(f"检查文件：{file_path}")
+        print(f"[DOING] 检查文件：{file_path}")
         if not check_file(file_path):
             passed = False
             failed_files.append(str(file_path))
         print("-" * 80)  # 分隔线
 
     # 输出汇总结果
-    print("\n检查汇总：")
+    print("\n[DONE] 检查汇总：")
     print(f"总文件数：{len(py_files)}")
     print(f"通过数：{len(py_files) - len(failed_files)}")
     print(f"失败数：{len(failed_files)}")
     if failed_files:
-        print(f"\n检查失败的文件：")
+        print(f"\n[FAIL] 检查失败的文件：")
         for f in failed_files:
             print(f"  - {f}")
         exit(1)
     else:
-        print("\n所有文件检查通过！")
+        print("\n[PASS] 所有文件检查通过！")
         exit(0)
+
 
 if __name__ == "__main__":
     main()
