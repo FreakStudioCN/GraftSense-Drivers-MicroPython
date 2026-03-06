@@ -20,7 +20,9 @@ import time
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
+
 
 class Radio:
     """
@@ -112,12 +114,36 @@ class Radio:
     # ADC级别对应的位配置值
     ADC_BIT: Tuple[int, int, int, int] = (0, 1, 2, 3)
 
-    __slot__ = ['_i2c', '_address', 'frequency', 'band_limits', 'standby_mode', 'mute_mode', 'soft_mute_mode',
-                'search_mode', 'search_direction', 'search_adc_level', 'stereo_mode', 'stereo_noise_cancelling_mode',
-                'high_cut_mode', 'is_ready', 'is_stereo', 'signal_adc_level']
+    __slot__ = [
+        "_i2c",
+        "_address",
+        "frequency",
+        "band_limits",
+        "standby_mode",
+        "mute_mode",
+        "soft_mute_mode",
+        "search_mode",
+        "search_direction",
+        "search_adc_level",
+        "stereo_mode",
+        "stereo_noise_cancelling_mode",
+        "high_cut_mode",
+        "is_ready",
+        "is_stereo",
+        "signal_adc_level",
+    ]
 
-    def __init__(self, i2c: I2C, addr: int = 0x60, freq: float = 0.0, band: str = 'US', stereo: bool = True,
-                 soft_mute: bool = True, noise_cancel: bool = True, high_cut: bool = True) -> None:
+    def __init__(
+        self,
+        i2c: I2C,
+        addr: int = 0x60,
+        freq: float = 0.0,
+        band: str = "US",
+        stereo: bool = True,
+        soft_mute: bool = True,
+        noise_cancel: bool = True,
+        high_cut: bool = True,
+    ) -> None:
         """
         初始化收音机控制器
         Initialize radio controller
@@ -315,7 +341,7 @@ class Radio:
         # 从I2C设备读取5字节状态数据
         buf: bytearray = self._i2c.readfrom(self._address, 5)
         # 解析频率数据（原始值转换为MHz）
-        freqB: int = int((buf[0] & 0x3f) << 8 | buf[1])
+        freqB: int = int((buf[0] & 0x3F) << 8 | buf[1])
         # 计算实际FM频率并保留1位小数
         self.frequency = round((freqB * 32768 / 4 - 225000) / 1000000, 1)
         # 解析模块就绪状态（第1字节第7位）
@@ -345,14 +371,12 @@ class Radio:
             3. Read module status after 1ms delay to complete synchronization
         """
         # 根据频段类型限制频率范围（JP频段）
-        if self.band_limits == 'JP':
-            self.frequency = min(
-                max(self.frequency, Radio.FREQ_RANGE_JP[0]), Radio.FREQ_RANGE_JP[1])
+        if self.band_limits == "JP":
+            self.frequency = min(max(self.frequency, Radio.FREQ_RANGE_JP[0]), Radio.FREQ_RANGE_JP[1])
         # 默认使用US频段
         else:
-            self.band_limits = 'US'
-            self.frequency = min(
-                max(self.frequency, Radio.FREQ_RANGE_US[0]), Radio.FREQ_RANGE_US[1])
+            self.band_limits = "US"
+            self.frequency = min(max(self.frequency, Radio.FREQ_RANGE_US[0]), Radio.FREQ_RANGE_US[1])
 
         # 将频率值转换为模块所需的原始值
         freqB: float = 4 * (self.frequency * 1000000 + 225000) / 32768
@@ -360,26 +384,24 @@ class Radio:
         # 初始化5字节配置缓冲区
         buf: bytearray = bytearray(5)
 
-        # 配置第1字节：频率高8位 + 静音位 + 搜索模式位
+        # 配置第1字节:频率高8位 + 静音位 + 搜索模式位
         buf[0] = int(freqB) >> 8 | self.mute_mode << 7 | self.search_mode << 6
-        # 配置第2字节：频率低8位
-        buf[1] = int(freqB) & 0xff
-        # 配置第3字节：搜索方向 + 保留位 + 立体声模式位
+        # 配置第2字节:频率低8位
+        buf[1] = int(freqB) & 0xFF
+        # 配置第3字节:搜索方向 + 保留位 + 立体声模式位
         buf[2] = self.search_direction << 7 | 1 << 4 | self.stereo_mode << 3
 
         try:
             # 配置ADC级别对应的位（异常时忽略）
-            buf[2] += Radio.ADC_BIT[Radio.ADC.index(
-                self.search_adc_level)] << 5
+            buf[2] += Radio.ADC_BIT[Radio.ADC.index(self.search_adc_level)] << 5
         except:
             pass
 
-        # 配置第3字节：待机模式 + 频段类型 + 保留位
-        buf[3] = self.standby_mode << 6 | (
-                self.band_limits == 'JP') << 5 | 1 << 4
-        # 配置第3字节：软静音 + 高频截止 + 立体声降噪
+        # 配置第3字节:待机模式 + 频段类型 + 保留位
+        buf[3] = self.standby_mode << 6 | (self.band_limits == "JP") << 5 | 1 << 4
+        # 配置第3字节:软静音 + 高频截止 + 立体声降噪
         buf[3] += self.soft_mute_mode << 3 | self.high_cut_mode << 2 | self.stereo_noise_cancelling_mode << 1
-        # 配置第4字节：保留位
+        # 配置第4字节:保留位
         buf[4] = 0
 
         # 将配置数据写入I2C设备
@@ -388,6 +410,7 @@ class Radio:
         time.sleep_ms(1)
         # 读取模块状态完成同步
         self.read()
+
 
 # ======================================== 初始化配置 ===========================================
 

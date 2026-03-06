@@ -4,7 +4,7 @@
 # @Author  : 李清水
 # @File    : sdcard.py
 # @Description : 自定义用于SD卡读写的SDCard类
-# 参考代码：https://github.com/micropython/micropython-lib/blob/master/micropython/drivers/storage/sdcard/sdcard.py#L291
+# 参考代码:https://github.com/micropython/micropython-lib/blob/master/micropython/drivers/storage/sdcard/sdcard.py#L291
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -28,9 +28,9 @@ from machine import SPI, Pin
 # 定义SD卡相关常量
 # 命令超时时间常量
 CMD_TIMEOUT = const(100)
-# R1响应状态：空闲状态
+# R1响应状态:空闲状态
 R1_IDLE_STATE = const(1 << 0)
-# R1响应状态：非法命令
+# R1响应状态:非法命令
 R1_ILLEGAL_COMMAND = const(1 << 2)
 # 数据传输命令令牌
 TOKEN_CMD25 = const(0xFC)
@@ -225,7 +225,7 @@ class SDCard:
             None
 
         Raises:
-            OSError: 如果出现以下情况：
+            OSError: 如果出现以下情况:
                 - 卡片无响应
                 - 版本识别失败
                 - CSD格式不支持
@@ -426,7 +426,7 @@ class SDCard:
             skip1 (bool, optional): 是否跳过首字节，默认为False
 
         Returns:
-            int: 响应状态：
+            int: 响应状态:
                 - 0x00: 正常
                 - 0x01: 空闲状态
                 - -1: 超时
@@ -595,7 +595,7 @@ class SDCard:
             buf (bytearray): 源数据（必须512字节）
 
         Returns:
-            bool: 写入结果：
+            bool: 写入结果:
                 - True: 成功
                 - False: 失败
 

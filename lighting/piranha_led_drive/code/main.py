@@ -61,7 +61,7 @@ except KeyboardInterrupt:
     # 用户手动中断（如Ctrl+C）
     pass
 except Exception as e:
-    # 捕获其他异常（可选：记录日志）
+    # 捕获其他异常（可选:记录日志）
     pass
 finally:
     # 确保LED关闭，安全退出

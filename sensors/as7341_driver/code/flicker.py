@@ -19,9 +19,9 @@ if not sensor.isconnected():
     sys.exit(1)
 
 sensor.set_measure_mode(AS7341_MODE_SPM)  # (SPM mode)
-sensor.set_atime(29)                 # 30 ASTEPS
-sensor.set_astep(599)                # ASTEP = 1.67 ms
-sensor.set_again(4)                  # factor 8 (for with pretty much light)
+sensor.set_atime(29)  # 30 ASTEPS
+sensor.set_astep(599)  # ASTEP = 1.67 ms
+sensor.set_again(4)  # factor 8 (for with pretty much light)
 
 try:
     while True:

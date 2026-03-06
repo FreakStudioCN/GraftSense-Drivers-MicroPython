@@ -7,13 +7,4 @@ from .ftp import FTP
 from .phonebook import Phonebook
 from .tcpip import TCPIP
 
-__all__ = [
-    'SIM7600',
-    'SMS',
-    'Calling',
-    'GPRS',
-    'HTTP',
-    'FTP',
-    'Phonebook',
-    'TCPIP'
-]
+__all__ = ["SIM7600", "SMS", "Calling", "GPRS", "HTTP", "FTP", "Phonebook", "TCPIP"]

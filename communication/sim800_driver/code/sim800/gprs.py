@@ -21,6 +21,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class SIM800GPRS(SIM800):
     """
@@ -74,7 +75,7 @@ class SIM800GPRS(SIM800):
             Use AT+CGATT=1 command to attach to GPRS network, subsequent data communication is only possible after successful attachment
         """
         # 发送GPRS附着指令并返回响应
-        return self.send_command('AT+CGATT=1')
+        return self.send_command("AT+CGATT=1")
 
     def detach_gprs(self):
         """
@@ -93,9 +94,9 @@ class SIM800GPRS(SIM800):
             Use AT+CGATT=0 command to detach from GPRS network, data communication is not possible after detachment
         """
         # 发送GPRS分离指令并返回响应
-        return self.send_command('AT+CGATT=0')
+        return self.send_command("AT+CGATT=0")
 
-    def set_apn(self, apn, user='', pwd=''):
+    def set_apn(self, apn, user="", pwd=""):
         """
         设置APN并激活GPRS上下文
         Set APN and activate GPRS context
@@ -119,7 +120,7 @@ class SIM800GPRS(SIM800):
         # 发送设置APN参数指令
         self.send_command(f'AT+CSTT="{apn}","{user}","{pwd}"')
         # 发送激活GPRS上下文指令并返回响应
-        return self.send_command('AT+CIICR')
+        return self.send_command("AT+CIICR")
 
     def get_ip_address(self):
         """
@@ -138,7 +139,7 @@ class SIM800GPRS(SIM800):
             Use AT+CIFSR command to get local IP address assigned by GPRS network, GPRS context must be activated first
         """
         # 发送获取IP地址指令并返回响应
-        return self.send_command('AT+CIFSR')
+        return self.send_command("AT+CIFSR")
 
     def start_tcp_connection(self, mode, ip, port):
         """
@@ -182,7 +183,7 @@ class SIM800GPRS(SIM800):
             First send AT+CIPSEND command to specify data length, then send actual data, add ASCII code 26 (CTRL+Z) at end to indicate completion
         """
         # 发送数据长度指令
-        self.send_command(f'AT+CIPSEND={len(data)}')
+        self.send_command(f"AT+CIPSEND={len(data)}")
         # 发送实际数据并添加结束符(ASCII 26)
         self.uart.write(data + chr(26))
         # 读取并返回发送响应
@@ -205,7 +206,7 @@ class SIM800GPRS(SIM800):
             Use AT+CIPCLOSE=1 command to close TCP connection and release network resources
         """
         # 发送关闭TCP连接指令并返回响应
-        return self.send_command('AT+CIPCLOSE=1')
+        return self.send_command("AT+CIPCLOSE=1")
 
     def shutdown_gprs(self):
         """
@@ -224,7 +225,7 @@ class SIM800GPRS(SIM800):
             Use AT+CIPSHUT command to close GPRS PDP context and release all GPRS-related resources
         """
         # 发送关闭GPRS指令并返回响应
-        return self.send_command('AT+CIPSHUT')
+        return self.send_command("AT+CIPSHUT")
 
     def get_gsm_location(self):
         """
@@ -243,9 +244,10 @@ class SIM800GPRS(SIM800):
             Use AT+CIPGSMLOC=1,1 command to get location information based on GSM base station, including LAC, CI and other base station parameters
         """
         # 发送获取GSM定位信息指令
-        response = self.send_command('AT+CIPGSMLOC=1,1')
+        response = self.send_command("AT+CIPGSMLOC=1,1")
         # 返回定位响应数据
         return response
+
 
 # ======================================== 初始化配置 ===========================================
 

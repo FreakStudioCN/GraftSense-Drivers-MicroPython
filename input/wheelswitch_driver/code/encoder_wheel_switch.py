@@ -20,6 +20,7 @@ from machine import Pin, Timer
 
 # ======================================== 自定义类 ============================================
 
+
 class EncoderWheelSwitch:
     """
         EncoderWheelSwitch 类用于控制拨轮开关（UP/DOWN双引脚），支持防抖、中断触发、状态读取
@@ -65,8 +66,9 @@ class EncoderWheelSwitch:
 
     high, low = (1, 0)
 
-    def __init__(self, pin_up: int, pin_down: int, debounce_ms: int = 20, idle_state: int = 1,
-                 callback_up: callable = None, callback_down: callable = None):
+    def __init__(
+        self, pin_up: int, pin_down: int, debounce_ms: int = 20, idle_state: int = 1, callback_up: callable = None, callback_down: callable = None
+    ):
         """
         初始化拨轮开关实例
 
@@ -198,11 +200,7 @@ class EncoderWheelSwitch:
         if self.debounce_timer_up:
             self.debounce_timer_up.deinit()
         self.debounce_timer_up = Timer(-1)
-        self.debounce_timer_up.init(
-            period=self.debounce_ms,
-            mode=Timer.ONE_SHOT,
-            callback=self._debounce_handler_up
-        )
+        self.debounce_timer_up.init(period=self.debounce_ms, mode=Timer.ONE_SHOT, callback=self._debounce_handler_up)
 
     def _irq_handler_down(self, pin):
         """
@@ -213,11 +211,7 @@ class EncoderWheelSwitch:
         if self.debounce_timer_down:
             self.debounce_timer_down.deinit()
         self.debounce_timer_down = Timer(-1)
-        self.debounce_timer_down.init(
-            period=self.debounce_ms,
-            mode=Timer.ONE_SHOT,
-            callback=self._debounce_handler_down
-        )
+        self.debounce_timer_down.init(period=self.debounce_ms, mode=Timer.ONE_SHOT, callback=self._debounce_handler_down)
 
     def enable_irq(self) -> bool:
         """
@@ -233,14 +227,8 @@ class EncoderWheelSwitch:
         """
         try:
             # 配置双边缘触发中断
-            self.pin_up.irq(
-                trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING,
-                handler=self._irq_handler_up
-            )
-            self.pin_down.irq(
-                trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING,
-                handler=self._irq_handler_down
-            )
+            self.pin_up.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=self._irq_handler_up)
+            self.pin_down.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=self._irq_handler_down)
             self.irq_enabled = True
             return True
         except Exception as e:
@@ -277,6 +265,7 @@ class EncoderWheelSwitch:
         except Exception as e:
             print(f"Disable IRQ failed: {e}")
             return False
+
 
 # ======================================== 初始化配置 ==========================================
 

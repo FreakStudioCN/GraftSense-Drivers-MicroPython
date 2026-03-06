@@ -7,12 +7,10 @@ uart = machine.UART(1, baudrate=115200, tx=17, rx=16)
 sim7600 = SIM7600(uart)
 
 
-
-
 sms = SMS(sim7600)
 
 # Send an SMS
-sms.send_sms('+1234567890', 'Hello, world!')
+sms.send_sms("+1234567890", "Hello, world!")
 
 # Read an SMS
 response = sms.read_sms(1)
@@ -22,5 +20,5 @@ print(response)
 sms.delete_sms(1)
 
 # List all SMS
-response = sms.list_sms('ALL')
+response = sms.list_sms("ALL")
 print(response)

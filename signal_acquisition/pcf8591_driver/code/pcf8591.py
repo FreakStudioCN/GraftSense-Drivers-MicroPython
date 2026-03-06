@@ -15,6 +15,7 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 # ======================================== 导入相关模块 =========================================
 # 导入微秒级时间模块，用于I2C通信延时
 import utime
+
 # 从machine模块导入I2C和Pin类，用于硬件接口控制
 from machine import I2C, Pin
 
@@ -30,6 +31,7 @@ AIN3 = CHANNEL3 = 0b00000011
 
 
 # ======================================== 功能函数 ============================================
+
 
 # ======================================== 自定义类 ============================================
 class PCF8591:
@@ -142,7 +144,7 @@ class PCF8591:
                         No valid I2C object or SDA/SCL pins provided
 
         Notes:
-            支持两种初始化方式：1) 传入已初始化的I2C对象 2) 传入SDA/SCL引脚号自动创建I2C对象；
+            支持两种初始化方式:1) 传入已初始化的I2C对象 2) 传入SDA/SCL引脚号自动创建I2C对象；
             默认禁用DAC输出，初始化时记录上一次操作状态为None
             Support two initialization methods: 1) Pass initialized I2C object 2) Pass SDA/SCL pin numbers to create I2C object automatically;
             Disable DAC output by default, record last operation status as None during initialization
@@ -159,7 +161,7 @@ class PCF8591:
             self._i2c = I2C(i2c_id, scl=Pin(scl), sda=Pin(sda))
         else:
             # 未提供有效参数，抛出异常
-            raise ValueError('Either i2c or sda and scl must be provided')
+            raise ValueError("Either i2c or sda and scl must be provided")
 
         # 保存芯片I2C地址
         self._address = address
@@ -180,7 +182,7 @@ class PCF8591:
 
         Notes:
             通过I2C扫描功能检测指定地址的设备是否存在，是初始化后的必要检测步骤
-            Detect if device at specified address exists through I2C scan function, 
+            Detect if device at specified address exists through I2C scan function,
             which is a necessary detection step after initialization
         """
         # 扫描I2C总线，检查指定地址是否存在
@@ -210,14 +212,12 @@ class PCF8591:
 
         Notes:
             组合输出使能位、输入模式位、自动增量位和通道位生成完整的配置字节，
-            配置字节格式：D7(输出使能)|D6-D5(输入模式)|D4(自动增量)|D3-D0(通道)
+            配置字节格式:D7(输出使能)|D6-D5(输入模式)|D4(自动增量)|D3-D0(通道)
             Combine output enable bit, input mode bits, auto-increment bit and channel bits to generate complete config byte,
             config byte format: D7(output enable)|D6-D5(input mode)|D4(auto-increment)|D3-D0(channel)
         """
         # 组合各配置位生成操作字节
-        return 0 | (self._output_status & self.OUTPUT_MASK) | read_type | \
-            (self.AUTOINCREMENT_READ if auto_increment else 0) | \
-            channel
+        return 0 | (self._output_status & self.OUTPUT_MASK) | read_type | (self.AUTOINCREMENT_READ if auto_increment else 0) | channel
 
     def _write_operation(self, operation):
         """
@@ -264,7 +264,7 @@ class PCF8591:
         Notes:
             启用自动增量模式，依次读取4个通道的采样值；启用DAC输出以支持多通道读取；
             每个通道值为8位无符号整数，对应0-Vref的电压范围
-            Enable auto-increment mode to read sampling values of 4 channels in sequence; 
+            Enable auto-increment mode to read sampling values of 4 channels in sequence;
             enable DAC output to support multi-channel reading;
             Each channel value is an 8-bit unsigned integer, corresponding to voltage range of 0-Vref
         """
@@ -278,14 +278,10 @@ class PCF8591:
         # 初始化数据列表
         data = []
         # 依次读取4个通道的数据
-        data.append(int.from_bytes(
-            self._i2c.readfrom(self._address, 1), 'big'))
-        data.append(int.from_bytes(
-            self._i2c.readfrom(self._address, 1), 'big'))
-        data.append(int.from_bytes(
-            self._i2c.readfrom(self._address, 1), 'big'))
-        data.append(int.from_bytes(
-            self._i2c.readfrom(self._address, 1), 'big'))
+        data.append(int.from_bytes(self._i2c.readfrom(self._address, 1), "big"))
+        data.append(int.from_bytes(self._i2c.readfrom(self._address, 1), "big"))
+        data.append(int.from_bytes(self._i2c.readfrom(self._address, 1), "big"))
+        data.append(int.from_bytes(self._i2c.readfrom(self._address, 1), "big"))
 
         # 返回4个通道的整数值元组
         return int(data[0]), int(data[1]), int(data[2]), int(data[3])
@@ -306,14 +302,13 @@ class PCF8591:
                  8-bit sampling value (0-255) of specified channel
 
         Notes:
-            单通道读取模式，根据DAC输出状态选择返回数据的位置：
+            单通道读取模式，根据DAC输出状态选择返回数据的位置:
             启用输出时返回第一个字节，禁用时返回第二个字节（PCF8591硬件特性）
             Single-channel reading mode, select return data position according to DAC output status:
             Return first byte when output is enabled, return second byte when disabled (PCF8591 hardware feature)
         """
         # 生成单通道读取的操作配置字节
-        operation = self._get_operation(
-            auto_increment=False, channel=channel, read_type=read_type)
+        operation = self._get_operation(auto_increment=False, channel=channel, read_type=read_type)
         # 写入配置字节
         self._write_operation(operation)
 
@@ -338,7 +333,7 @@ class PCF8591:
                    Voltage value (0-reference_voltage) of specified channel
 
         Notes:
-            基于8位采样值转换为实际电压值，计算公式：电压 = 采样值 × 参考电压 / 255；
+            基于8位采样值转换为实际电压值，计算公式:电压 = 采样值 × 参考电压 / 255；
             采用单端输入模式进行采样，结果为浮点数，精度取决于参考电压
             Convert 8-bit sampling value to actual voltage value with formula: Voltage = sampling value × reference voltage / 255;
             Use single-ended input mode for sampling, result is floating point number, precision depends on reference voltage
@@ -365,7 +360,7 @@ class PCF8591:
             None
 
         Notes:
-            将电压值转换为8位模拟值后写入DAC，计算公式：模拟值 = 电压值 × 255 / 参考电压；
+            将电压值转换为8位模拟值后写入DAC，计算公式:模拟值 = 电压值 × 255 / 参考电压；
             输出电压精度为参考电压/255，例如3.3V参考电压下约0.0129V/步
             Convert voltage value to 8-bit analog value and write to DAC with formula: Analog value = voltage value × 255 / reference voltage;
             Output voltage precision is reference voltage/255, e.g., about 0.0129V/step with 3.3V reference voltage
@@ -400,15 +395,14 @@ class PCF8591:
         # 验证输入值范围
         if value > 255 or value < 0:
             # 超出范围抛出异常
-            Exception('Value must be between 0 and 255')
+            Exception("Value must be between 0 and 255")
 
         # 启用DAC输出
         self._output_status = self.ENABLE_OUTPUT
         # 重置上一次操作状态（强制重新写入配置）
         self._last_operation = None
         # 写入输出使能配置和模拟值
-        self._i2c.writeto(self._address, bytearray(
-            [self.ENABLE_OUTPUT, value]))
+        self._i2c.writeto(self._address, bytearray([self.ENABLE_OUTPUT, value]))
 
     def disable_output(self):
         """
@@ -429,6 +423,7 @@ class PCF8591:
         self._output_status = self.DISABLE_OUTPUT
         # 写入禁用输出的配置字节
         self._i2c.writeto(self._address, bytearray([self.DISABLE_OUTPUT]))
+
 
 # ======================================== 初始化配置 ===========================================
 

@@ -11,9 +11,10 @@ addrlist = " ".join(["0x{:02X}".format(x) for x in i2c.scan()])
 print("Detected devices at I2C-addresses:", addrlist)
 
 from as7341 import *
+
 sensor = AS7341(i2c)
 
-sensor.set_gpio_input(True)     # enable input mode
+sensor.set_gpio_input(True)  # enable input mode
 
 try:
     while True:

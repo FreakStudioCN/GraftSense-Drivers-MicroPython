@@ -8,16 +8,16 @@ from sensor_pack_2.bus_service import I2cAdapter
 def pa_mmhg(value: float) -> float:
     """Перевод атмосферного давления из Па в мм рт.ст.
     Convert air pressure from Pa to mm Hg."""
-    return 7.50062E-3 * value
+    return 7.50062e-3 * value
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # пожалуйста установите выводы scl и sda в конструкторе I2C, для вашей платы, иначе ничего не заработает!
     # please set scl and sda pins for your board, otherwise nothing will work!
     # https://docs.micropython.org/en/latest/library/machine.I2C.html#machine-i2c
     # bus =  I2C(scl=Pin(4), sda=Pin(5), freq=100000)   # на esp8266    !
     # i2c = I2C(id=0, scl=Pin(13), sda=Pin(12), freq=400_000)  # on Arduino Nano RP2040 Connect
-    i2c = I2C(id=1, scl=Pin(7), sda=Pin(6), freq=400_000)   # on Raspberry Pi Pico
+    i2c = I2C(id=1, scl=Pin(7), sda=Pin(6), freq=400_000)  # on Raspberry Pi Pico
     adaptor = I2cAdapter(i2c)
     # ps - pressure sensor
     ps = bmp390mod.Bmp390(adaptor)

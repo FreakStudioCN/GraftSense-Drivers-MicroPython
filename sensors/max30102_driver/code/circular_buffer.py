@@ -3,7 +3,7 @@
 # @Time    : 2025/09/16 18:00
 # @Author  : 侯钧瀚
 # @File    : heartratemonitor.py
-# @Description : MAX30102/MAX30105 心率与PPG读取驱动，参考自：https://github.com/n-elia/MAX30102-MicroPython-driver
+# @Description : MAX30102/MAX30105 心率与PPG读取驱动，参考自:https://github.com/n-elia/MAX30102-MicroPython-driver
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -33,7 +33,7 @@ class CircularBuffer(object):
     Methods:
         append(item): 追加元素（满则丢弃最早元素）。
         pop(): 弹出最早元素。
-        pop_head(): 弹出最新元素（注意：原实现含边界逻辑）。
+        pop_head(): 弹出最新元素（注意:原实现含边界逻辑）。
         clear(): 清空。
         is_empty(): 是否为空。
 
@@ -168,7 +168,7 @@ class CircularBuffer(object):
         Pop the "newest" element (keeps original implementation semantics).
 
         Returns:
-            Any|int: 0 if empty, els法 2：通过 GitHub 客户端e the element.
+            Any|int: 0 if empty, els法 2:通过 GitHub 客户端e the element.
         """
         buffer_size = len(self.data)
         temp = self.data

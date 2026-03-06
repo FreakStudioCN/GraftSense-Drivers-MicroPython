@@ -26,121 +26,217 @@ DEFAULT_CYCLES = 5
 DEFAULT_DISPLAY_BRIGHTNESS = 0.3
 
 CHARS = (
-    0b00000000, 0b00000000, #
-    0b01000000, 0b00000110, # !
-    0b00000010, 0b00100000, # "
-    0b00010010, 0b11001110, # #
-    0b00010010, 0b11101101, # $
-    0b00001100, 0b00100100, # %
-    0b00100011, 0b01011101, # &
-    0b00000100, 0b00000000, # '
-    0b00100100, 0b00000000, # (
-    0b00001001, 0b00000000, # )
-    0b00111111, 0b11000000, # *
-    0b00010010, 0b11000000, # +
-    0b00001000, 0b00000000, # ,
-    0b00000000, 0b11000000, # -
-    0b00000000, 0b00000000, # .
-    0b00001100, 0b00000000, # /
-    0b00001100, 0b00111111, # 0
-    0b00000000, 0b00000110, # 1
-    0b00000000, 0b11011011, # 2
-    0b00000000, 0b10001111, # 3
-    0b00000000, 0b11100110, # 4
-    0b00100000, 0b01101001, # 5
-    0b00000000, 0b11111101, # 6
-    0b00000000, 0b00000111, # 7
-    0b00000000, 0b11111111, # 8
-    0b00000000, 0b11101111, # 9
-    0b00010010, 0b00000000, # :
-    0b00001010, 0b00000000, # ;
-    0b00100100, 0b01000000, # <
-    0b00000000, 0b11001000, # =
-    0b00001001, 0b10000000, # >
-    0b01100000, 0b10100011, # ?
-    0b00000010, 0b10111011, # @
-    0b00000000, 0b11110111, # A
-    0b00010010, 0b10001111, # B
-    0b00000000, 0b00111001, # C
-    0b00010010, 0b00001111, # D
-    0b00000000, 0b11111001, # E
-    0b00000000, 0b01110001, # F
-    0b00000000, 0b10111101, # G
-    0b00000000, 0b11110110, # H
-    0b00010010, 0b00000000, # I
-    0b00000000, 0b00011110, # J
-    0b00100100, 0b01110000, # K
-    0b00000000, 0b00111000, # L
-    0b00000101, 0b00110110, # M
-    0b00100001, 0b00110110, # N
-    0b00000000, 0b00111111, # O
-    0b00000000, 0b11110011, # P
-    0b00100000, 0b00111111, # Q
-    0b00100000, 0b11110011, # R
-    0b00000000, 0b11101101, # S
-    0b00010010, 0b00000001, # T
-    0b00000000, 0b00111110, # U
-    0b00001100, 0b00110000, # V
-    0b00101000, 0b00110110, # W
-    0b00101101, 0b00000000, # X
-    0b00010101, 0b00000000, # Y
-    0b00001100, 0b00001001, # Z
-    0b00000000, 0b00111001, # [
-    0b00100001, 0b00000000, # \
-    0b00000000, 0b00001111, # ]
-    0b00001100, 0b00000011, # ^
-    0b00000000, 0b00001000, # _
-    0b00000001, 0b00000000, # `
-    0b00010000, 0b01011000, # a
-    0b00100000, 0b01111000, # b
-    0b00000000, 0b11011000, # c
-    0b00001000, 0b10001110, # d
-    0b00001000, 0b01011000, # e
-    0b00000000, 0b01110001, # f
-    0b00000100, 0b10001110, # g
-    0b00010000, 0b01110000, # h
-    0b00010000, 0b00000000, # i
-    0b00000000, 0b00001110, # j
-    0b00110110, 0b00000000, # k
-    0b00000000, 0b00110000, # l
-    0b00010000, 0b11010100, # m
-    0b00010000, 0b01010000, # n
-    0b00000000, 0b11011100, # o
-    0b00000001, 0b01110000, # p
-    0b00000100, 0b10000110, # q
-    0b00000000, 0b01010000, # r
-    0b00100000, 0b10001000, # s
-    0b00000000, 0b01111000, # t
-    0b00000000, 0b00011100, # u
-    0b00100000, 0b00000100, # v
-    0b00101000, 0b00010100, # w
-    0b00101000, 0b11000000, # x
-    0b00100000, 0b00001100, # y
-    0b00001000, 0b01001000, # z
-    0b00001001, 0b01001001, # {
-    0b00010010, 0b00000000, # |
-    0b00100100, 0b10001001, # }
-    0b00000101, 0b00100000, # ~
-    0b00111111, 0b11111111,
+    0b00000000,
+    0b00000000,  #
+    0b01000000,
+    0b00000110,  # !
+    0b00000010,
+    0b00100000,  # "
+    0b00010010,
+    0b11001110,  # #
+    0b00010010,
+    0b11101101,  # $
+    0b00001100,
+    0b00100100,  # %
+    0b00100011,
+    0b01011101,  # &
+    0b00000100,
+    0b00000000,  # '
+    0b00100100,
+    0b00000000,  # (
+    0b00001001,
+    0b00000000,  # )
+    0b00111111,
+    0b11000000,  # *
+    0b00010010,
+    0b11000000,  # +
+    0b00001000,
+    0b00000000,  # ,
+    0b00000000,
+    0b11000000,  # -
+    0b00000000,
+    0b00000000,  # .
+    0b00001100,
+    0b00000000,  # /
+    0b00001100,
+    0b00111111,  # 0
+    0b00000000,
+    0b00000110,  # 1
+    0b00000000,
+    0b11011011,  # 2
+    0b00000000,
+    0b10001111,  # 3
+    0b00000000,
+    0b11100110,  # 4
+    0b00100000,
+    0b01101001,  # 5
+    0b00000000,
+    0b11111101,  # 6
+    0b00000000,
+    0b00000111,  # 7
+    0b00000000,
+    0b11111111,  # 8
+    0b00000000,
+    0b11101111,  # 9
+    0b00010010,
+    0b00000000,  # :
+    0b00001010,
+    0b00000000,  # ;
+    0b00100100,
+    0b01000000,  # <
+    0b00000000,
+    0b11001000,  # =
+    0b00001001,
+    0b10000000,  # >
+    0b01100000,
+    0b10100011,  # ?
+    0b00000010,
+    0b10111011,  # @
+    0b00000000,
+    0b11110111,  # A
+    0b00010010,
+    0b10001111,  # B
+    0b00000000,
+    0b00111001,  # C
+    0b00010010,
+    0b00001111,  # D
+    0b00000000,
+    0b11111001,  # E
+    0b00000000,
+    0b01110001,  # F
+    0b00000000,
+    0b10111101,  # G
+    0b00000000,
+    0b11110110,  # H
+    0b00010010,
+    0b00000000,  # I
+    0b00000000,
+    0b00011110,  # J
+    0b00100100,
+    0b01110000,  # K
+    0b00000000,
+    0b00111000,  # L
+    0b00000101,
+    0b00110110,  # M
+    0b00100001,
+    0b00110110,  # N
+    0b00000000,
+    0b00111111,  # O
+    0b00000000,
+    0b11110011,  # P
+    0b00100000,
+    0b00111111,  # Q
+    0b00100000,
+    0b11110011,  # R
+    0b00000000,
+    0b11101101,  # S
+    0b00010010,
+    0b00000001,  # T
+    0b00000000,
+    0b00111110,  # U
+    0b00001100,
+    0b00110000,  # V
+    0b00101000,
+    0b00110110,  # W
+    0b00101101,
+    0b00000000,  # X
+    0b00010101,
+    0b00000000,  # Y
+    0b00001100,
+    0b00001001,  # Z
+    0b00000000,
+    0b00111001,  # [
+    0b00100001,
+    0b00000000,  # \
+    0b00000000,
+    0b00001111,  # ]
+    0b00001100,
+    0b00000011,  # ^
+    0b00000000,
+    0b00001000,  # _
+    0b00000001,
+    0b00000000,  # `
+    0b00010000,
+    0b01011000,  # a
+    0b00100000,
+    0b01111000,  # b
+    0b00000000,
+    0b11011000,  # c
+    0b00001000,
+    0b10001110,  # d
+    0b00001000,
+    0b01011000,  # e
+    0b00000000,
+    0b01110001,  # f
+    0b00000100,
+    0b10001110,  # g
+    0b00010000,
+    0b01110000,  # h
+    0b00010000,
+    0b00000000,  # i
+    0b00000000,
+    0b00001110,  # j
+    0b00110110,
+    0b00000000,  # k
+    0b00000000,
+    0b00110000,  # l
+    0b00010000,
+    0b11010100,  # m
+    0b00010000,
+    0b01010000,  # n
+    0b00000000,
+    0b11011100,  # o
+    0b00000001,
+    0b01110000,  # p
+    0b00000100,
+    0b10000110,  # q
+    0b00000000,
+    0b01010000,  # r
+    0b00100000,
+    0b10001000,  # s
+    0b00000000,
+    0b01111000,  # t
+    0b00000000,
+    0b00011100,  # u
+    0b00100000,
+    0b00000100,  # v
+    0b00101000,
+    0b00010100,  # w
+    0b00101000,
+    0b11000000,  # x
+    0b00100000,
+    0b00001100,  # y
+    0b00001000,
+    0b01001000,  # z
+    0b00001001,
+    0b01001001,  # {
+    0b00010010,
+    0b00000000,  # |
+    0b00100100,
+    0b10001001,  # }
+    0b00000101,
+    0b00100000,  # ~
+    0b00111111,
+    0b11111111,
 )
 NUMBERS = (
-    0x3F, # 0
-    0x06, # 1
-    0x5B, # 2
-    0x4F, # 3
-    0x66, # 4
-    0x6D, # 5
-    0x7D, # 6
-    0x07, # 7
-    0x7F, # 8
-    0x6F, # 9
-    0x77, # a
-    0x7C, # b
-    0x39, # C
-    0x5E, # d
-    0x79, # E
-    0x71, # F
-    0x40, # -
+    0x3F,  # 0
+    0x06,  # 1
+    0x5B,  # 2
+    0x4F,  # 3
+    0x66,  # 4
+    0x6D,  # 5
+    0x7D,  # 6
+    0x07,  # 7
+    0x7F,  # 8
+    0x6F,  # 9
+    0x77,  # a
+    0x7C,  # b
+    0x39,  # C
+    0x5E,  # d
+    0x79,  # E
+    0x71,  # F
+    0x40,  # -
 )
 
 
@@ -193,9 +289,7 @@ class Seg14x4(HT16K33):
         if not 32 <= ord(char) <= 127:
             return
         if char == ".":
-            self._set_buffer(
-                index * 2 + 1, self._get_buffer(index * 2 + 1) | 0b01000000
-            )
+            self._set_buffer(index * 2 + 1, self._get_buffer(index * 2 + 1) | 0b01000000)
             return
         character = ord(char) * 2 - 64
         self._set_buffer(index * 2, CHARS[1 + character])
@@ -226,8 +320,8 @@ class Seg14x4(HT16K33):
         Returns: The output text string to be displayed.
         """
         if number < 0:
-          raise ValueError("Input underflow: {0} is negative - unable to display!".format(number))
-          
+            raise ValueError("Input underflow: {0} is negative - unable to display!".format(number))
+
         # Initialize
         auto_write = self._auto_write
         self._auto_write = False
@@ -241,41 +335,41 @@ class Seg14x4(HT16K33):
         dot = stnum.find(".")
 
         if dot > 0:
-          whole = len(stnum[:dot])
-          dec_places = len(stnum[dot + 1:])
+            whole = len(stnum[:dot])
+            dec_places = len(stnum[dot + 1 :])
         else:
-          whole = stnum_len
-          dec_places = 0
+            whole = stnum_len
+            dec_places = 0
 
         if auto_round:
-          # Automatically round up to when there is no decimal part
-          while whole + dec_places > 4 and dec_places >= 0:
-            dec_places -= 1
-            num = round(num, dec_places)  #dec_places)
-            
-          stnum = str(num)
-          stnum_len = len(stnum)
-        elif decimal >= 1:
-          # Round according to the number of decimal places requested
-          num = round(number, decimal)
-          dec_places = decimal
-          stnum = str(num)
-          dot = stnum.find(".")
-          
-          if dot > 0:
-            whole = len(stnum[:dot])
-            stnum = stnum[:dot + decimal + 1]
+            # Automatically round up to when there is no decimal part
+            while whole + dec_places > 4 and dec_places >= 0:
+                dec_places -= 1
+                num = round(num, dec_places)  # dec_places)
+
+            stnum = str(num)
             stnum_len = len(stnum)
-         
+        elif decimal >= 1:
+            # Round according to the number of decimal places requested
+            num = round(number, decimal)
+            dec_places = decimal
+            stnum = str(num)
+            dot = stnum.find(".")
+
+            if dot > 0:
+                whole = len(stnum[:dot])
+                stnum = stnum[: dot + decimal + 1]
+                stnum_len = len(stnum)
+
         if whole + dec_places > 5:
-          raise ValueError("Input overflow - '{0}' is too large for the display!".format(number))
+            raise ValueError("Input overflow - '{0}' is too large for the display!".format(number))
 
         # Set decimal places, if number of decimal places is specified (decimal > 0)
         if dec_places > 0 and dot > 0 and stnum[0] == ".":
-          txt = "0" + stnum[dot:]
+            txt = "0" + stnum[dot:]
         else:
-          txt = stnum
-        
+            txt = stnum
+
         if len(txt) > 5:
             raise ValueError("Output string '{0}' is too long!".format(txt))
 
@@ -283,7 +377,7 @@ class Seg14x4(HT16K33):
         self._auto_write = auto_write
 
         return txt
-    
+
     def set_digit_raw(self, index, bitmask):
         """Set digit at position to raw bitmask value. Position should be a value
         of 0 to 3 with 0 being the left most character on the display.
@@ -355,14 +449,11 @@ class Seg14x4(HT16K33):
             raise ValueError("The delay between frames must be positive!")
         for dig in digits:
             if not 0 <= dig <= 3:
-                raise ValueError(
-                    "Digit value must be an integer in the range: 0-3")
+                raise ValueError("Digit value must be an integer in the range: 0-3")
 
             for bits in bitmasks:
                 if not 0 <= bits <= 0xFFFF:
-                    raise ValueError(
-                        "Bitmask value must be an integer in the range: 0-65535"
-    )
+                    raise ValueError("Bitmask value must be an integer in the range: 0-65535")
 
                 self.set_digit_raw(dig, bits)
 
@@ -398,9 +489,7 @@ class Seg7x4(Seg14x4):
         else:
             offset = 1
         for i in range(3):
-            self._set_buffer(
-                self.POSITIONS[i + offset], self._get_buffer(self.POSITIONS[i + count])
-            )
+            self._set_buffer(self.POSITIONS[i + offset], self._get_buffer(self.POSITIONS[i + count]))
 
     def _push(self, char):
         """Scroll the display and add a character at the end."""

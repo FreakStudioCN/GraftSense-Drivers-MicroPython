@@ -42,18 +42,19 @@ Ported to microPython by Alexander Olikevich (openfablab) with some changes:
 from struct import pack_into
 from time import sleep
 
-_MCP4728_DEFAULT_ADDRESS = 0x60 #0x61
+_MCP4728_DEFAULT_ADDRESS = 0x60  # 0x61
 _MCP4728_CH_A_MULTI_EEPROM = 0x50
+
 
 class MCP4728:
     """Helper library for the Microchip MCP4728 I2C 12-bit Quad DAC.
-        :param i2c_bus: The I2C bus the MCP4728 is connected to.
-        :param address: The I2C slave address of the sensor
+    :param i2c_bus: The I2C bus the MCP4728 is connected to.
+    :param address: The I2C slave address of the sensor
     """
 
     def __init__(self, i2c_bus, address=_MCP4728_DEFAULT_ADDRESS):
         self.i2c_device = i2c_bus
-        self.address=address
+        self.address = address
         raw_registers = self._read_registers()
         self.a = Channel(self, self._cache_page(*raw_registers[0]), 0)
         self.b = Channel(self, self._cache_page(*raw_registers[1]), 1)
@@ -74,7 +75,7 @@ class MCP4728:
     def _read_registers(self):
         buf = bytearray(24)
 
-        self.i2c_device.readfrom_into(self.address,buf)
+        self.i2c_device.readfrom_into(self.address, buf)
         # stride is 6 because we get 6 bytes for each channel; 3 for the output regs
         # and 3 for the eeprom. Here we only care about the output regoster so we throw out
         # the eeprom values as 'n/a'
@@ -84,12 +85,12 @@ class MCP4728:
             # pylint:enable=unused-variable
             value = (high_byte & 0b00001111) << 8 | low_byte
             vref, gain, power_state = self._get_flags(high_byte)
-            current_values.append((int(value), int(vref), int(gain)+1, int(power_state)))
+            current_values.append((int(value), int(vref), int(gain) + 1, int(power_state)))
         return current_values
 
     def save_settings(self):
         """Saves the currently selected values, Vref, and gain selections for each channel
-           to the EEPROM, setting them as defaults on power up"""
+        to the EEPROM, setting them as defaults on power up"""
         byte_list = []
         byte_list += self._generate_bytes_with_flags(self.a)
         byte_list += self._generate_bytes_with_flags(self.b)
@@ -102,7 +103,7 @@ class MCP4728:
         buffer_list = [_MCP4728_CH_A_MULTI_EEPROM]
         buffer_list += byte_list
         buf = bytearray(buffer_list)
-        self.i2c_device.writeto(self.address,buf)
+        self.i2c_device.writeto(self.address, buf)
         sleep(0.015)  # the better to write you with
 
     def sync_vrefs(self):
@@ -114,29 +115,29 @@ class MCP4728:
         vref_setter_command |= self.d._vref
         buf = bytearray(1)
         pack_into(">B", buf, 0, vref_setter_command)
-        self.i2c_device.writeto(self.address,buf)
+        self.i2c_device.writeto(self.address, buf)
 
     def sync_gains(self):
         """Syncs the driver's gain state with the DAC"""
         gain_setter_command = 0b11000000
-        gain_setter_command |= (self.a._gain-1) << 3
-        gain_setter_command |= (self.b._gain-1) << 2
-        gain_setter_command |= (self.c._gain-1) << 1
-        gain_setter_command |= (self.d._gain-1)
+        gain_setter_command |= (self.a._gain - 1) << 3
+        gain_setter_command |= (self.b._gain - 1) << 2
+        gain_setter_command |= (self.c._gain - 1) << 1
+        gain_setter_command |= self.d._gain - 1
         buf = bytearray(1)
         pack_into(">B", buf, 0, gain_setter_command)
-        self.i2c_device.writeto(self.address,buf)
+        self.i2c_device.writeto(self.address, buf)
 
     def sync_pdms(self):
         """Syncs the driver's gain state with the DAC"""
         pdm_setter_command_1 = 0b10100000
         pdm_setter_command_1 |= (self.a._pdm) << 2
-        pdm_setter_command_1 |= (self.b._pdm) 
+        pdm_setter_command_1 |= self.b._pdm
         pdm_setter_command_2 = 0b00000000
         pdm_setter_command_2 |= (self.c._pdm) << 6
         pdm_setter_command_2 |= (self.d._pdm) << 4
-        output_buffer = bytearray([pdm_setter_command_1,pdm_setter_command_2])
-        self.i2c_device.writeto(self.address,output_buffer)
+        output_buffer = bytearray([pdm_setter_command_1, pdm_setter_command_2])
+        self.i2c_device.writeto(self.address, output_buffer)
 
     def _set_value(self, channel):
         channel_bytes = self._generate_bytes_with_flags(channel)
@@ -144,14 +145,14 @@ class MCP4728:
         write_command_byte |= channel.channel_index << 1
         output_buffer = bytearray([write_command_byte])
         output_buffer.extend(channel_bytes)
-        self.i2c_device.writeto(self.address,output_buffer)
+        self.i2c_device.writeto(self.address, output_buffer)
 
     @staticmethod
     def _generate_bytes_with_flags(channel):
         buf = bytearray(2)
         pack_into(">H", buf, 0, channel._value)
         buf[0] |= channel._vref << 7
-        buf[0] |= (channel._gain-1) << 4
+        buf[0] |= (channel._gain - 1) << 4
         return buf
 
     @staticmethod
@@ -176,7 +177,7 @@ class Channel:
     @property
     def normalized_value(self):
         """The DAC value as a floating point number in the range 0.0 to 1.0."""
-        return self.value / (2 ** 12 - 1)
+        return self.value / (2**12 - 1)
 
     @normalized_value.setter
     def normalized_value(self, value):
@@ -187,17 +188,15 @@ class Channel:
 
     @property
     def value(self):
-      """The 12-bit current value for the channel."""
-      self._value=self._dac._read_registers()[self.channel_index][0] 
-      return self._value
+        """The 12-bit current value for the channel."""
+        self._value = self._dac._read_registers()[self.channel_index][0]
+        return self._value
 
     @value.setter
     def value(self, value):
-        if value < 0 or value > (2 ** 12 - 1):
-            raise AttributeError(
-                "`raw_value` must be a 12-bit integer between 0 and %s" % (2 ** 12 - 1)
-            )
-        self._value=value
+        if value < 0 or value > (2**12 - 1):
+            raise AttributeError("`raw_value` must be a 12-bit integer between 0 and %s" % (2**12 - 1))
+        self._value = value
         self._dac._set_value(self)  # pylint:disable=protected-access
 
     @property
@@ -207,7 +206,7 @@ class Channel:
 
         With gain set to 1, the output voltage goes from 0v to 2.048V. If a channe's gain is set
         to 2, the voltage goes from 0v to 4.096V. `gain` Must be 1 or 2"""
-        self._gain=self._dac._read_registers()[self.channel_index][2] 
+        self._gain = self._dac._read_registers()[self.channel_index][2]
         return self._gain
 
     @gain.setter
@@ -220,7 +219,7 @@ class Channel:
     @property
     def vref(self):
         """Sets the DAC's voltage reference source. Must be 0 (VDD) or 1 (Internal 2.048V)"""
-        self._vref=self._dac._read_registers()[self.channel_index][1] 
+        self._vref = self._dac._read_registers()[self.channel_index][1]
         return self._vref
 
     @vref.setter
@@ -233,22 +232,24 @@ class Channel:
     @property
     def pdm(self):
         """Sets the DAC's power down mode. 0 for normal operation, or
-            other to turn off most of the channel circuits and connect VOUT to GND by 
-            resistor (1: 1 kΩ, 2: 100 kΩ, 3: 500 kΩ)."""
-        self._pdm=self._dac._read_registers()[self.channel_index][3] 
+        other to turn off most of the channel circuits and connect VOUT to GND by
+        resistor (1: 1 kΩ, 2: 100 kΩ, 3: 500 kΩ)."""
+        self._pdm = self._dac._read_registers()[self.channel_index][3]
         return self._pdm
 
     @pdm.setter
     def pdm(self, value):
         if not value in (0, 1, 2, 3):
-            raise AttributeError("""Power down mode must be 0 for normal operation, or
+            raise AttributeError(
+                """Power down mode must be 0 for normal operation, or
             other to turn off most of the channel circuits and connect VOUT to GND by 
-            resistor (1: 1 kΩ, 2: 100 kΩ, 3: 500 kΩ).""")
+            resistor (1: 1 kΩ, 2: 100 kΩ, 3: 500 kΩ)."""
+            )
         self._pdm = value
         self._dac.sync_pdms()
 
     def config(self, value=0, vref=1, gain=1, pdm=0):
-        self.vref=vref
-        self.gain=gain
-        self.value=value
-        self.pdm=pdm
+        self.vref = vref
+        self.gain = gain
+        self.value = value
+        self.pdm = pdm

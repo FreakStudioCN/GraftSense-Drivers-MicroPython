@@ -21,8 +21,7 @@ adc_channels = namedtuple("adc_channels", "channels differential_channels")
 # предельное кол-во значащих бит в отсчете, текущий номер канала, количество обычных накалов(Vxx..GND),
 # предельное кол-во обычных каналов, предельное кол-во дифференциальных каналов,
 # текущая частота отсчетов(current sample rate), Гц
-adc_general_props = namedtuple("adc_general_props",
-                               "ref_voltage resolution max_resolution current_channel channels diff_channels")
+adc_general_props = namedtuple("adc_general_props", "ref_voltage resolution max_resolution current_channel channels diff_channels")
 # основные 'сырые' настройки, характерные для всех(!) АЦП
 adc_general_raw_props = namedtuple("adc_general_raw_props", "sample_rate gain_amplifier single_shot_mode")
 
@@ -33,8 +32,7 @@ adc_general_raw_props = namedtuple("adc_general_raw_props", "sample_rate gain_am
 # channels - количество обычных(single ended) каналов
 # differential_channels - количество дифференциальных(differential) каналов
 # differential_mode - Если истина, то это дифференциальный АЦП. для метода get_lsb.
-adc_init_props = namedtuple("adc_init_props",
-                            "reference_voltage max_resolution channels differential_channels differential_mode")
+adc_init_props = namedtuple("adc_init_props", "reference_voltage max_resolution channels differential_channels differential_mode")
 # для метода get_raw_value_ex
 # value - значение АЦП, сырое(!)
 # если low_limit в Истина, то "стрелка" АЦП на нижнем крае шкалы (underflow)
@@ -57,7 +55,7 @@ def _get_reg_raw_limits(adc_resolution: int, differential: bool) -> raw_value_ex
         _base = 2 ** (adc_resolution - 1)
         return raw_value_ex(value=0, low_limit=_base, hi_limit=_base - 1)
     # для обычных АЦП
-    return raw_value_ex(value=0, low_limit=0, hi_limit=2 ** adc_resolution - 1)
+    return raw_value_ex(value=0, low_limit=0, hi_limit=2**adc_resolution - 1)
 
 
 class ADC:
@@ -70,7 +68,9 @@ class ADC:
         self.init_props = init_props
         adc_ip = self.init_props
         if adc_ip.reference_voltage <= 0 or adc_ip.channels < 0 or adc_ip.differential_channels < 0:
-            raise ValueError(f"Неверный параметр! Опорное напряжение, В: {adc_ip.reference_voltage}; Кол-во каналов: {adc_ip.channels}/{adc_ip.differential_channels}")
+            raise ValueError(
+                f"Неверный параметр! Опорное напряжение, В: {adc_ip.reference_voltage}; Кол-во каналов: {adc_ip.channels}/{adc_ip.differential_channels}"
+            )
         # текущее количество выполняемых преобразований аналогового сигнала в цифровой! RAW, сырое значение!
         # для записи в регистр
         self._curr_raw_data_rate = None
@@ -102,13 +102,15 @@ class ADC:
     def get_general_props(self) -> adc_general_props:
         """Возвращает основные свойства АЦП"""
         ipr = self.init_props
-        return adc_general_props(ipr.reference_voltage, self.current_resolution, ipr.max_resolution, self._curr_channel,
-                                 ipr.channels, ipr.differential_channels)
+        return adc_general_props(
+            ipr.reference_voltage, self.current_resolution, ipr.max_resolution, self._curr_channel, ipr.channels, ipr.differential_channels
+        )
 
     def get_general_raw_props(self) -> adc_general_raw_props:
         """Возвращает основные 'сырые' свойства АЦП, которые считываются из регистра"""
-        return adc_general_raw_props(sample_rate=self._curr_raw_data_rate, gain_amplifier=self._curr_raw_gain,
-                                     single_shot_mode=self._single_shot_mode)
+        return adc_general_raw_props(
+            sample_rate=self._curr_raw_data_rate, gain_amplifier=self._curr_raw_gain, single_shot_mode=self._single_shot_mode
+        )
 
     def get_specific_props(self):
         """Возвращает характерные для АЦП свойства, желательно в виде именованного кортежа.
@@ -121,8 +123,7 @@ class ADC:
         value должно быть в диапазоне 0..self._channels/self._diff_channels"""
         ipr = self.init_props
         _max = ipr.differential_channels if diff else ipr.channels
-        check_value(value, range(_max),
-                    f"Неверный номер канала АЦП: {value}; дифф: {diff}. Допустимый диапазон: 0..{_max - 1}")
+        check_value(value, range(_max), f"Неверный номер канала АЦП: {value}; дифф: {diff}. Допустимый диапазон: 0..{_max - 1}")
         return value
 
     def check_gain_raw(self, gain_raw: int) -> int:
@@ -140,7 +141,7 @@ class ADC:
         gain - коэффициент усиления/ослабления входного делителя АЦП, должен быть больше нуля!"""
         ipr = self.init_props
         _k = 2 if ipr.differential_mode else 1
-        return _k * ipr.reference_voltage / (self.gain * 2 ** self.current_resolution)
+        return _k * ipr.reference_voltage / (self.gain * 2**self.current_resolution)
 
     def get_conversion_cycle_time(self) -> int:
         """возвращает время преобразования в [мкc/мс] аналогового значения в цифровое в зависимости от
@@ -167,8 +168,11 @@ class ADC:
         delta - 'зазор'"""
         raw = self.get_raw_value()
         limits = _get_reg_raw_limits(self.current_resolution, self.init_props.differential_mode)
-        return raw_value_ex(value=raw, low_limit=raw in range(limits.low_limit, 1 + delta + limits.low_limit),
-                            hi_limit=raw in range(limits.hi_limit - delta, 1 + limits.hi_limit))
+        return raw_value_ex(
+            value=raw,
+            low_limit=raw in range(limits.low_limit, 1 + delta + limits.low_limit),
+            hi_limit=raw in range(limits.hi_limit - delta, 1 + limits.hi_limit),
+        )
 
     def raw_value_to_real(self, raw_val: int) -> float:
         """Преобразует 'сырое' значение из регистра АЦП в значение в Вольтах"""
@@ -207,8 +211,7 @@ class ADC:
         ipr = self.init_props
         return ipr.differential_channels if self._is_diff_channel else ipr.channels
 
-    def start_measurement(self, single_shot: bool, data_rate_raw: int, gain_raw: int, channel: int,
-                          differential_channel: bool):
+    def start_measurement(self, single_shot: bool, data_rate_raw: int, gain_raw: int, channel: int, differential_channel: bool):
         """Запуск однократного(single_shot в Истина) или многократного(single_shot в Ложь) измерения.
         data_rate_raw - частота получения выборок АЦП, отсчетов в сек., RAW-параметр, смотри в datasheet битовое поле!
         gain_raw - коэффициент усиления входного аналогового напряжения, RAW-параметр, смотри в datasheet битовое поле!
@@ -217,8 +220,8 @@ class ADC:
         Внимание! Последней строкой этого метода всегда вызывайте метод raw_config_to_adc_properties для
         записи значений в соответствующие поля класса!
         Скорее всего этот метод не потребуется переопределять, в крайнем случае и это можно сделать."""
-        self.check_gain_raw(gain_raw=gain_raw)   # проверка на правильность
-        self.check_data_rate_raw(data_rate_raw=data_rate_raw)   # проверка на правильность
+        self.check_gain_raw(gain_raw=gain_raw)  # проверка на правильность
+        self.check_data_rate_raw(data_rate_raw=data_rate_raw)  # проверка на правильность
         self.check_channel_number(channel, differential_channel)  # проверка на правильность
         #
         self._single_shot_mode = single_shot
@@ -231,8 +234,8 @@ class ADC:
         _raw_cfg = self.adc_properties_to_raw_config()
         self.set_raw_config(_raw_cfg)
         # читаю config АЦП и обновляю поля класса
-        _raw_cfg = self.get_raw_config()    # читаю настройки АЦП
-        self.raw_config_to_adc_properties(_raw_cfg)     # обновляю поля экземпляра класса
+        _raw_cfg = self.get_raw_config()  # читаю настройки АЦП
+        self.raw_config_to_adc_properties(_raw_cfg)  # обновляю поля экземпляра класса
         # пересчет в реальное усиление
         self._real_gain = self.gain_raw_to_real(self._curr_raw_gain)
 

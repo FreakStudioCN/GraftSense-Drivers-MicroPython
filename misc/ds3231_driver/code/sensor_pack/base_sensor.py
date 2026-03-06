@@ -33,9 +33,9 @@ class Device:
     def _get_byteorder_as_str(self) -> tuple:
         """Return byteorder as string"""
         if self.is_big_byteorder():
-            return 'big', '>'
+            return "big", ">"
         else:
-            return 'little', '<'
+            return "little", "<"
 
     def unpack(self, fmt_char: str, source: bytes) -> tuple:
         """распаковка массива, считанного из датчика.
@@ -52,6 +52,7 @@ class Device:
 
 class BaseSensor(Device):
     """Base sensor class"""
+
     def get_id(self):
         raise NotImplementedError
 

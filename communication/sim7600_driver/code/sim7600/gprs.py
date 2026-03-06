@@ -19,6 +19,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class GPRS:
     """
@@ -68,7 +69,7 @@ class GPRS:
         # 保存SIM7600模块核心对象引用
         self.sim7600 = sim7600
 
-    def set_apn(self, apn, user='', password=''):
+    def set_apn(self, apn, user="", password=""):
         """
         配置GPRS的APN参数及认证信息
         Configure APN parameters and authentication information for GPRS
@@ -111,9 +112,9 @@ class GPRS:
             First perform GPRS attach to network, then activate PDP context 1 to complete GPRS function enabling
         """
         # 执行GPRS网络附着
-        self.sim7600.send_command('AT+CGATT=1')
+        self.sim7600.send_command("AT+CGATT=1")
         # 激活PDP上下文1
-        self.sim7600.send_command('AT+CGACT=1,1')
+        self.sim7600.send_command("AT+CGACT=1,1")
 
     def disable_gprs(self):
         """
@@ -131,9 +132,9 @@ class GPRS:
             First deactivate PDP context 1, then perform GPRS network detach to release GPRS-related resources
         """
         # 去激活PDP上下文1
-        self.sim7600.send_command('AT+CGACT=0,1')
+        self.sim7600.send_command("AT+CGACT=0,1")
         # 执行GPRS网络分离
-        self.sim7600.send_command('AT+CGATT=0')
+        self.sim7600.send_command("AT+CGATT=0")
 
     def get_ip_address(self):
         """
@@ -152,7 +153,7 @@ class GPRS:
             Use AT+CIFSR command to get local IP address assigned by GPRS network, GPRS attach and activate must be completed first
         """
         # 发送获取IP地址指令并返回响应
-        return self.sim7600.send_command('AT+CIFSR')
+        return self.sim7600.send_command("AT+CIFSR")
 
     def send_data(self, data):
         """
@@ -191,6 +192,7 @@ class GPRS:
         """
         # 读取并返回接收到的GPRS数据
         return self.sim7600.read_uart()
+
 
 # ======================================== 初始化配置 ===========================================
 

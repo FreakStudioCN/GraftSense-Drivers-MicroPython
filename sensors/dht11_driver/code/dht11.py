@@ -120,7 +120,7 @@ class DHT11:
         Raises InvalidPulseCount if pulse count is invalid.
     """
 
-    # DHT11传感器类相关类变量：
+    # DHT11传感器类相关类变量:
 
     # 引脚电平不改变的最大计数值
     MAX_UNCHANGED = const(100)
@@ -200,7 +200,7 @@ class DHT11:
     @property
     def humidity(self) -> float:
         """
-        获取当前湿度值（单位：%RH）。
+        获取当前湿度值（单位:%RH）。
 
         Returns:
             float: 湿度值。
@@ -227,7 +227,7 @@ class DHT11:
     @property
     def temperature(self) -> float:
         """
-        获取当前温度值（单位：℃）。
+        获取当前温度值（单位:℃）。
 
         Returns:
             float: 温度值。
@@ -302,7 +302,7 @@ class DHT11:
         idx = 0
 
         # 创建一个空数组，用于存储84个脉冲
-        # 其中：
+        # 其中:
         #       前4个脉冲为从机应答产生的脉冲
         #       后80个脉冲为数据位
         transitions = bytearray(DHT11.EXPECTED_PULSES)
@@ -373,7 +373,7 @@ class DHT11:
         # range(0, len(pulses), 2)表示从索引0开始，每次递增2，直到达到pulses列表的长度为止
         # 这段代码将会遍历pulses列表中的所有奇数索引的元素
         for idx in range(0, len(pulses), 2):
-            # 将当前的binary值左移一位，并将pulses列表中对应索引的元素与DHT11.HIGH_LEVEL比较：
+            # 将当前的binary值左移一位，并将pulses列表中对应索引的元素与DHT11.HIGH_LEVEL比较:
             #   如果大于DHT11.HIGH_LEVEL，则将1加到binary中
             #   否则将0加到binary中
             # 这个过程相当于将pulses列表中的二进制数据拼接到一起，形成一个40位的二进制数

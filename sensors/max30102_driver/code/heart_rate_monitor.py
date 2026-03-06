@@ -3,7 +3,7 @@
 # @Time    : 2025/09/16 18:00
 # @Author  : 侯钧瀚
 # @File    : heartratemonitor.py
-# @Description : MAX30102/MAX30105驱动，参考自：https://github.com/n-elia/MAX30102-MicroPython-driver
+# @Description : MAX30102/MAX30105驱动，参考自:https://github.com/n-elia/MAX30102-MicroPython-driver
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -24,7 +24,7 @@ from time import ticks_diff, ticks_ms
 
 class HeartRateMonitor:
     """
-    简易心率监测器：对输入样本做滑动窗口平滑与阈值峰值检测，估计 BPM。
+    简易心率监测器:对输入样本做滑动窗口平滑与阈值峰值检测，估计 BPM。
 
     Attributes:
         sample_rate (int): 采样率（Hz）。

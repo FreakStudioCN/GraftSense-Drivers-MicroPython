@@ -371,7 +371,7 @@ class Air530Z(NMEAParser):
     # ---------------- 内部方法 ----------------
     def _send(self, sentence: str) -> bool:
         """
-        私有方法：发送一条 NMEA 配置指令到 GPS 模块。
+        私有方法:发送一条 NMEA 配置指令到 GPS 模块。
 
         Args:
             sentence (str): 完整的 NMEA 指令字符串。
@@ -396,7 +396,7 @@ class Air530Z(NMEAParser):
 
     def _recv(self) -> str:
         """
-        私有方法：接收 GPS 模块返回的 NMEA 响应。
+        私有方法:接收 GPS 模块返回的 NMEA 响应。
 
         Args:
             timeout (int): 超时时间，默认 3 秒。

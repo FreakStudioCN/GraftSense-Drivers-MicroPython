@@ -193,7 +193,7 @@ class TAS_755C_ETH:
 
     def _send_at(self, cmd):
         """
-        私有方法：发送 AT 命令并等待响应，直到收到 OK 或 ERROR。
+        私有方法:发送 AT 命令并等待响应，直到收到 OK 或 ERROR。
 
         Args:
             cmd (str): 完整的 AT 命令字符串。

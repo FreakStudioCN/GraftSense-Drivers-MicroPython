@@ -3,7 +3,7 @@
 # @Time    : 2025/8/26 下午10:12
 # @Author  : 缪贵成
 # @File    : __init__.py
-# @Description : 红外接收模块基类，参考自：https://github.com/peterhinch/micropython_ir
+# @Description : 红外接收模块基类，参考自:https://github.com/peterhinch/micropython_ir
 # @License : MIT
 
 # ======================================== 导入相关模块 =========================================

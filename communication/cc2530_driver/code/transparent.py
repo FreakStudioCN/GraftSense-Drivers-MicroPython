@@ -25,7 +25,7 @@ from cc253x_ttl import CC253xTTL
 # 上电延时3s
 time.sleep(3)
 # 打印调试信息
-print("FreakStudio： cc253x_ttl transparent test")
+print("FreakStudio: cc253x_ttl transparent test")
 
 # 声明串口实例
 uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))

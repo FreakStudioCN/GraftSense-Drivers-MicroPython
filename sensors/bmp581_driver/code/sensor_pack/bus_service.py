@@ -17,6 +17,7 @@ def _mpy_bl(value: int) -> int:
 
 class BusAdapter:
     """Посредник между шиной ввода/вывода и классом ввода/вывода устройства"""
+
     def __init__(self, bus: [I2C, SPI]):
         self.bus = bus
 
@@ -31,8 +32,7 @@ class BusAdapter:
         bytes_count - размер значения в байтах."""
         raise NotImplementedError
 
-    def write_register(self, device_addr: [int, Pin], reg_addr: int, value: [int, bytes, bytearray],
-                       bytes_count: int, byte_order: str):
+    def write_register(self, device_addr: [int, Pin], reg_addr: int, value: [int, bytes, bytearray], bytes_count: int, byte_order: str):
         """записывает данные value в датчик, по адресу reg_addr.
         bytes_count - кол-во записываемых байт из value.
         byte_order - порядок расположения байт в записываемом значении."""
@@ -72,11 +72,11 @@ class BusAdapter:
 
 class I2cAdapter(BusAdapter):
     """"""
+
     def __init__(self, bus: I2C):
         super().__init__(bus)
 
-    def write_register(self, device_addr: int, reg_addr: int, value: [int, bytes, bytearray],
-                       bytes_count: int, byte_order: str):
+    def write_register(self, device_addr: int, reg_addr: int, value: [int, bytes, bytearray], bytes_count: int, byte_order: str):
         """записывает данные value в датчик, по адресу reg_addr.
         bytes_count - кол-во записываемых данных
         value - должно быть типов int, bytes, bytearray"""
@@ -99,7 +99,7 @@ class I2cAdapter(BusAdapter):
     def readfrom_into(self, device_addr: int, buf):
         """Читает из устройства на шине с адресом device_addr в буфер buf количество байт, равное длине(len) буфера!"""
         return self.bus.readfrom_into(device_addr, buf)
-    
+
     def read_buf_from_mem(self, device_addr: int, mem_addr, buf):
         """Читает из устройства с адресом device_addr в буфер buf, начиная с адреса в устройстве mem_addr.
         Количество считываемых байт определяется длинной буфера buf."""
@@ -117,6 +117,7 @@ class I2cAdapter(BusAdapter):
 class SpiAdapter(BusAdapter):
     """Параметр data_mode представляет собой вывод MCU, который используется для установки флага, что посылка является
     данными (high) или командой (low). Например это необходимо при обмене ILI9481."""
+
     def __init__(self, bus: SPI, data_mode: Pin = None):
         super().__init__(bus)
         # вывод MCU для режима данных
@@ -130,8 +131,7 @@ class SpiAdapter(BusAdapter):
     def read_register(self, device_addr: Pin, reg_addr: int, bytes_count: int) -> bytes:
         raise NotImplementedError
 
-    def write_register(self, device_addr: Pin, reg_addr: int, value: [int, bytes, bytearray],
-                       bytes_count: int, byte_order: str):
+    def write_register(self, device_addr: Pin, reg_addr: int, value: [int, bytes, bytearray], bytes_count: int, byte_order: str):
         raise NotImplementedError
 
     def read(self, device_addr: Pin, n_bytes: int) -> bytes:
@@ -164,7 +164,7 @@ class SpiAdapter(BusAdapter):
         The data_packet parameter is an indication that the package is data (high) or command (low).
          For example, this is necessary when exchanging ILI9481."""
         try:
-            device_addr.low()   # chip select
+            device_addr.low()  # chip select
             self._manage_dmp()
             return self.bus.write(buf)
         finally:
@@ -178,7 +178,7 @@ class SpiAdapter(BusAdapter):
         The data_packet parameter is an indication that the package is data (high) or command (low).
          For example, this is necessary when exchanging ILI9481."""
         try:
-            device_addr.low()   # chip select
+            device_addr.low()  # chip select
             self._manage_dmp()
             return self.bus.write_readinto(wr_buf, rd_buf)
         finally:

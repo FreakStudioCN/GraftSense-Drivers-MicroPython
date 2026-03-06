@@ -24,22 +24,22 @@ i2c = SoftI2C(sda=Pin(4), scl=Pin(5), freq=100000)
 monitor = AirQualityMonitor(i2c)
 
 
-# 通道0：VOC传感器注册与校准
+# 通道0:VOC传感器注册与校准
 print("Registering and calibrating VOC sensor on channel 0...")
 monitor.register_sensor(0, MEMSGasSensor.TYPE_VOC)
 monitor.calibrate_sensor(MEMSGasSensor.TYPE_VOC)
 
-# 通道1：CO传感器注册与校准
+# 通道1:CO传感器注册与校准
 print("Registering and calibrating CO sensor on channel 1...")
 monitor.register_sensor(1, MEMSGasSensor.TYPE_CO)
 monitor.calibrate_sensor(MEMSGasSensor.TYPE_CO)
 
-# 通道2：H2S传感器注册与校准
+# 通道2:H2S传感器注册与校准
 print("Registering and calibrating H2S sensor on channel 2...")
 monitor.register_sensor(2, MEMSGasSensor.TYPE_H2S)
 monitor.calibrate_sensor(MEMSGasSensor.TYPE_H2S)
 
-# 通道3：NO2传感器注册与校准
+# 通道3:NO2传感器注册与校准
 print("Registering and calibrating NO2 sensor on channel 3...")
 monitor.register_sensor(3, MEMSGasSensor.TYPE_NO2)
 monitor.calibrate_sensor(MEMSGasSensor.TYPE_NO2)

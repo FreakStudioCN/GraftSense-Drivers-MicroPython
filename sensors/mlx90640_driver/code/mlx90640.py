@@ -3,7 +3,7 @@
 # @Time    : 2025/9/4 下午11:14
 # @Author  : 缪贵成
 # @File    : mlx90640.py
-# @Description : mlx90640点阵红外温度传感器模块驱动文件，参考自：https://github.com/michael-sulyak/micropython-mlx90640
+# @Description : mlx90640点阵红外温度传感器模块驱动文件，参考自:https://github.com/michael-sulyak/micropython-mlx90640
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -337,7 +337,7 @@ class I2CDevice:
             ValueError: out_start/out_end 或 in_start/in_end 超出缓冲区长度范围。
 
         Notes:
-            - 常用于寄存器访问：先写寄存器地址再读寄存器内容。
+            - 常用于寄存器访问:先写寄存器地址再读寄存器内容。
             - 内部使用memoryview避免额外内存分配。
             - 非ISR-safe。
 

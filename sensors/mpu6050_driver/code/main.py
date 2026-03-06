@@ -145,7 +145,7 @@ try:
             )
 
             # 准备发送给上位机的数据
-            # 串口发送格式：角度数据 - 陀螺仪_Roll,卡尔曼_Roll,陀螺仪_Pitch,卡尔曼_Pitch
+            # 串口发送格式:角度数据 - 陀螺仪_Roll,卡尔曼_Roll,陀螺仪_Pitch,卡尔曼_Pitch
             angle_data = "{:.2f}, {:.2f}, {:.2f}, {:.2f}\r\n".format(
                 gyro_roll_deg,
                 kalman_roll_deg,

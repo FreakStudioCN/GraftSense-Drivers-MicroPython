@@ -3,7 +3,7 @@
 # @Time    : 2025/8/26 下午10:12
 # @Author  : 缪贵成
 # @File    : acquire.py
-# @Description : 用于嗅探 回放，参考自：https://github.com/peterhinch/micropython_ir
+# @Description : 用于嗅探 回放，参考自:https://github.com/peterhinch/micropython_ir
 # @License : MIT
 
 __version__ = "0.1.0"

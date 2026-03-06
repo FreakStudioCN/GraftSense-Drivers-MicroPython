@@ -24,6 +24,7 @@ def int_to_bcd(value: int) -> int:
 class DS3221(Device, Iterator):
     """Class for work with DS3231 clock from Maxim Integrated или как эта фирма сейчас называется!?
     Please read DS3231 datasheet!"""
+
     #           alarm 1 register masks            alarm 2 register masks
     _mask_alarms = (0x0E, 0x0C, 0x08, 0x00, 0x10), (0x06, 0x04, 0x00, 0x08)
 
@@ -36,9 +37,9 @@ class DS3221(Device, Iterator):
         # print(f"hour_byte: {hex(hour_byte)}")
         # In the 24-hour mode, bit 5 is the 20-hour bit (20–23 hours)
         hour = bcd_to_int(hour_byte & 0x3F)
-        if hour_byte & 0x40:    # When high, 12-hour mode is selected
+        if hour_byte & 0x40:  # When high, 12-hour mode is selected
             hour = bcd_to_int(hour_byte & 0x1F)
-            if hour_byte & 0x20:    # AM/PM bit with logic-high being PM
+            if hour_byte & 0x20:  # AM/PM bit with logic-high being PM
                 hour = 12 + hour_byte
         return hour
 
@@ -46,9 +47,9 @@ class DS3221(Device, Iterator):
     def _get_day_or_date(value: int) -> int:
         """return day of week or day of month by value"""
         if 0x40 & value:
-            return bcd_to_int(0x0F & value)     # day of week
+            return bcd_to_int(0x0F & value)  # day of week
         else:
-            return bcd_to_int(0x3F & value)     # day of month
+            return bcd_to_int(0x3F & value)  # day of month
 
     def __init__(self, adapter: bus_service.BusAdapter, address: int = 0x68):
         super().__init__(adapter, address, False)
@@ -75,6 +76,7 @@ class DS3221(Device, Iterator):
         Bit 1:              Alarm 2 Flag (A2F)
         Bit 0:              Alarm 1 Flag (A1F)
     """
+
     def get_status(self) -> int:
         """Чтение 8 bit регистра состояния 0x0F"""
         return self._read_register(0x0F, 1)[0]
@@ -89,10 +91,11 @@ class DS3221(Device, Iterator):
         Bit 1:              Alarm 2 Interrupt Enable (A2IE)
         Bit 0:              Alarm 1 Interrupt Enable (A1IE)
     """
+
     def set_status(self, new_value: int) -> int:
         """Only three bits are available for writing in the status register. EN32kHz, A2F, A1F"""
         return self._write_register(0x0F, new_value, 1)
-    
+
     def get_alarm_flags(self, clear: bool = True) -> tuple:
         """Return two clock alarms flag (alarm_id_1, alarm_id_0) and clear it, if clear is true!"""
         s = self.get_status()
@@ -121,11 +124,11 @@ class DS3221(Device, Iterator):
 
     def get_aging_offset(self) -> int:
         return self._read_register(0x10, 1)[0]
-    
+
     def get_time(self) -> tuple:
         """возвращает время, как в виде кортежа (как localtime())
         (year, month, mday, hour, minute, second, weekday, yearday)"""
-        buf, mask = self._tbuf, 0x1f
+        buf, mask = self._tbuf, 0x1F
         self.adapter.read_buf_from_mem(self.address, 0, buf)
         for i, val in enumerate(buf):
             if i in (0, 1, 4, 6):
@@ -136,10 +139,19 @@ class DS3221(Device, Iterator):
                 buf[i] = bcd_to_int(val & mask)
         # -----       YY       MM      DD      HH      MM      SS    WDAY    no year day
         # WDAY in range [0, 6], Monday is 0
-        return 2_000+buf[6], buf[5], buf[4], buf[2], buf[1], buf[0], buf[3]-1, -1,  
-    
+        return (
+            2_000 + buf[6],
+            buf[5],
+            buf[4],
+            buf[2],
+            buf[1],
+            buf[0],
+            buf[3] - 1,
+            -1,
+        )
+
     def set_time(self, local_time):
-        """      YYYY, MM, DD, HH, MM, SS, day of week, year day
+        """YYYY, MM, DD, HH, MM, SS, day of week, year day
                  ГГГГ, ММ, ДД, ЧЧ, ММ, СС, день недели, день года
         index:    0     1   2   3   4   5       6
         это формат времени, возвращаемого функцией localtime().
@@ -151,13 +163,13 @@ class DS3221(Device, Iterator):
             if ind not in v:
                 value = int_to_bcd(local_time[k[ind]])
             else:
-                if 3 == ind:   # WDAY start value in chip start from 1!
+                if 3 == ind:  # WDAY start value in chip start from 1!
                     value = int_to_bcd(local_time[k[ind]] + 1)
-                if 5 == ind:   # MONTH
+                if 5 == ind:  # MONTH
                     value = 0x80 + int_to_bcd(local_time[k[ind]])
-                if 6 == ind:   # YEAR
+                if 6 == ind:  # YEAR
                     value = int_to_bcd(local_time[k[ind]] - 2_000)
-        
+
             self.adapter.write_buf_to_mem(self.address, ind, value.to_bytes(1, sys.byteorder))
 
     def get_alarm(self, alarm_id: int = 0) -> tuple:
@@ -178,34 +190,29 @@ class DS3221(Device, Iterator):
         self.adapter.read_buf_from_mem(self.address, alarm_addr, a_buf)
         if 0 == alarm_id:
             # sec   min     hour    day
-            t = bcd_to_int(mask7f & a_buf[0]), \
-                bcd_to_int(mask7f & a_buf[1]), \
-                DS3221._convert_hours(a_buf[2]), \
-                self._get_day_or_date(a_buf[3])
-        else:   # min     hour    day
-            t = bcd_to_int(mask7f & a_buf[0]), \
-                DS3221._convert_hours(a_buf[1]), \
-                self._get_day_or_date(a_buf[2])
+            t = bcd_to_int(mask7f & a_buf[0]), bcd_to_int(mask7f & a_buf[1]), DS3221._convert_hours(a_buf[2]), self._get_day_or_date(a_buf[3])
+        else:  # min     hour    day
+            t = bcd_to_int(mask7f & a_buf[0]), DS3221._convert_hours(a_buf[1]), self._get_day_or_date(a_buf[2])
 
         # alarm bitmask
         alarm_byte = 0
         _max = 4
         if alarm_id > 0:
             _max -= 1
-        for i in range(_max):   # AxM1, AxM2, AxM3, AxM4 bits
+        for i in range(_max):  # AxM1, AxM2, AxM3, AxM4 bits
             if mask7 & a_buf[i]:
                 alarm_byte |= 1 << i
-        
-        if mask6 & a_buf[_max - 1]:    # DY_DT bit
+
+        if mask6 & a_buf[_max - 1]:  # DY_DT bit
             alarm_byte |= mask6
 
         tt = self._get_alarm_mask(alarm_id)
         # print(tt, hex(alarm_byte))
         if alarm_byte in tt:
-            alarm_byte = tt.index(alarm_byte)     # match mode
+            alarm_byte = tt.index(alarm_byte)  # match mode
         else:
-            alarm_byte = None        # no match mode
-        
+            alarm_byte = None  # no match mode
+
         return t, alarm_byte
 
     #   alarm_time - tuple (second, minute, hour, day)
@@ -226,9 +233,7 @@ class DS3221(Device, Iterator):
     def set_alarm(self, alarm_time: tuple, match_value: int = 2, alarm_id: int = 0):
         """Set alarm time. Alarm_id must be 0 or 1!"""
         base_sensor.check_value(alarm_id, (0, 1), f"Invalid alarm_id parameter: {alarm_id}")
-        base_sensor.check_value(match_value,
-                                range(5 if 0 == alarm_id else 4),
-                                f"Invalid match_value parameter: {match_value}")
+        base_sensor.check_value(match_value, range(5 if 0 == alarm_id else 4), f"Invalid match_value parameter: {match_value}")
         a_buf = self._alarm_buf
         alarm_addr = 7
         if alarm_id > 0:
@@ -250,12 +255,7 @@ class DS3221(Device, Iterator):
             a_buf[i] = mask | int_to_bcd(alarm_time[i + offs])
 
         byte_order = self._get_byteorder_as_str()[0]
-        self.adapter.write_register(self.address,
-                                    alarm_addr,
-                                    a_buf,
-                                    cnt,
-                                    byte_order
-                                    )
+        self.adapter.write_register(self.address, alarm_addr, a_buf, cnt, byte_order)
 
     def control_alarm_interrupt(self, irq_alarm_1_enable: bool = False, irq_alarm_0_enable: bool = False):
         """Включает или отключает прерывание от будильников (два) на выводе микросхемы INT/SQW.

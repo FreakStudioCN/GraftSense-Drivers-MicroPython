@@ -17,12 +17,13 @@ def _bitmask(bit_rng: range) -> int:
     """возвращает битовую маску по занимаемым битам"""
     # if bit_rng.step < 0 or bit_rng.start <= bit_rng.stop:
     #    raise ValueError(f"_bitmask: {bit_rng.start}; {bit_rng.stop}; {bit_rng.step}")
-    return sum(map(lambda x: 2 ** x, bit_rng))
+    return sum(map(lambda x: 2**x, bit_rng))
 
 
 class BitFields:
     """Хранилище информации о битовых полях с доступом по индексу.
     _source - кортеж именованных кортежей, описывающих битовые поля;"""
+
     @staticmethod
     def _check(fields_info: tuple[bit_field_info, ...]):
         """Проверки на правильность информации!"""
@@ -71,16 +72,15 @@ class BitFields:
         if item.valid_values and validate:
             raise NotImplemented("Если вы решили проверить значение поля при его возвращении, то делайте это самостоятельно!!!")
         if 1 == len(pos):
-            return 0 != val     # bool
-        return val              # int
+            return 0 != val  # bool
+        return val  # int
 
-    def set_field_value(self, value: int, source: [int, None] = None, field: [str, int, None] = None,
-                        validate: bool = True) -> int:
+    def set_field_value(self, value: int, source: [int, None] = None, field: [str, int, None] = None, validate: bool = True) -> int:
         """Записывает value в битовый диапазон, определяемый параметром field, в source.
         Возвращает значение с измененным битовым полем.
         Если field is None, то имя поля берется из свойства self._active_field_name.
         Если source is None, то значение поля, подлежащее изменению, изменяется в свойстве self._source_val"""
-        item = self._get_field(key=field)     #   *
+        item = self._get_field(key=field)  #   *
         rng = item.valid_values
         if rng and validate:
             check_value(value, rng, get_error_str(self.field_name, value, rng))
@@ -100,7 +100,7 @@ class BitFields:
     def __setitem__(self, field_name: str, value: [int, bool]):
         """Волшебный метод, вызывает set_field_value.
         До его вызова нужно установить свойства BitField source"""
-        self.set_field_value(value=value, source=None, field=field_name, validate=True)     #   *
+        self.set_field_value(value=value, source=None, field=field_name, validate=True)  #   *
 
     def _get_source(self, source: [int, None]) -> int:
         return source if source else self._source_val
@@ -140,5 +140,5 @@ class BitFields:
             self._idx += 1
             return ss[self._idx - 1]
         except IndexError:
-            self._idx = 0   # для возможности выполнения повторной итерации!
+            self._idx = 0  # для возможности выполнения повторной итерации!
             raise StopIteration

@@ -28,7 +28,7 @@ class DataFlowProcessor:
     Attributes:
         uart (UART): 串口通信实例，用于数据收发。
         buffer (bytearray): 数据缓冲区，用于存储接收到的原始字节数据。
-        stats (dict): 数据流转与解析统计信息字典，包含：
+        stats (dict): 数据流转与解析统计信息字典，包含:
             total_bytes_received (int): 总接收字节数
             total_frames_parsed (int): 总解析帧数
             crc_errors (int): CRC校验错误次数
@@ -290,7 +290,7 @@ class DataFlowProcessor:
             int: 解析出的数据长度值，解析失败返回0。
 
         Note:
-            - 长度字段采用大端格式存储：高字节在前，低字节在后。
+            - 长度字段采用大端格式存储:高字节在前，低字节在后。
             - 需要确保length_pos+1不超出缓冲区范围。
             - 返回值为数据部分的实际字节长度。
 
@@ -311,7 +311,7 @@ class DataFlowProcessor:
         """
         if length_pos + 1 >= len(self.buffer):
             return 0
-        # 大端格式：高字节在前，低字节在后
+        # 大端格式:高字节在前，低字节在后
         return (self.buffer[length_pos] << 8) | self.buffer[length_pos + 1]
 
     def _validate_trailer(self, frame_data: bytes) -> bool:
@@ -359,8 +359,8 @@ class DataFlowProcessor:
             bool: CRC验证通过返回True，否则返回False。
 
         Note:
-            - CRC校验范围：帧头到数据部分（不包括CRC字节和帧尾）。
-            - 计算方式：对校验数据求和后取低8位。
+            - CRC校验范围:帧头到数据部分（不包括CRC字节和帧尾）。
+            - 计算方式:对校验数据求和后取低8位。
             - CRC位于帧数据倒数第3个字节位置。
 
         ==========================================
@@ -402,7 +402,7 @@ class DataFlowProcessor:
             Exception: 解析过程中发生异常时记录错误信息。
 
         Note:
-            - 按协议格式依次解析：帧头→控制字→命令字→长度字段→数据→CRC→帧尾。
+            - 按协议格式依次解析:帧头→控制字→命令字→长度字段→数据→CRC→帧尾。
             - 返回字典包含所有解析出的字段和原始数据。
             - 解析失败会记录到invalid_frames统计中。
 
@@ -487,7 +487,7 @@ class DataFlowProcessor:
 
         Note:
             - 返回统计信息的深拷贝，防止外部修改影响内部数据。
-            - 统计信息包括：接收字节数、解析帧数、各类错误计数等。
+            - 统计信息包括:接收字节数、解析帧数、各类错误计数等。
 
         ==========================================
 
@@ -551,7 +551,7 @@ class DataFlowProcessor:
             Exception: 帧构建或发送过程中发生异常时记录错误信息。
 
         Note:
-            - 按照协议格式构建完整帧：帧头→控制字→命令字→长度→数据→CRC→帧尾。
+            - 按照协议格式构建完整帧:帧头→控制字→命令字→长度→数据→CRC→帧尾。
             - 自动计算数据长度和CRC校验码。
             - 通过串口发送构建好的帧数据。
 
@@ -619,7 +619,7 @@ class DataFlowProcessor:
             int: 计算出的CRC校验码（1字节）。
 
         Note:
-            - 校验码计算：对输入数据所有字节求和后，取低8位。
+            - 校验码计算:对输入数据所有字节求和后，取低8位。
             - 此CRC算法为简单求和校验，适用于基本错误检测。
             - CRC校验范围通常为帧头到数据部分。
 

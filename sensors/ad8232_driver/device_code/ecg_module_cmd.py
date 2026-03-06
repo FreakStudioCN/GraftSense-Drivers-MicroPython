@@ -190,7 +190,7 @@ class ECGModuleCMD:
         self.active_reporting = False
 
         # 上报频率
-        self.reporting_frequency = 100  # 单位：HZ
+        self.reporting_frequency = 100  # 单位:HZ
         # 导联状态
         self.lead_status = 0
         # 工作状态
@@ -229,7 +229,7 @@ class ECGModuleCMD:
         Process:
             1. 更新所有传感器数据属性。
             2. 如果主动上报模式开启，按协议格式发送各种数据帧。
-            3. 上报数据类型包括：原始ECG、滤波后ECG、导联状态、工作状态、心率。
+            3. 上报数据类型包括:原始ECG、滤波后ECG、导联状态、工作状态、心率。
 
         Note:
             - 上报频率由reporting_frequency属性控制。
@@ -337,9 +337,9 @@ class ECGModuleCMD:
 
         Process:
             1. 提取帧类型（命令）和数据内容。
-            2. 根据命令类型执行相应操作：
-               - 查询类命令：读取当前属性值并发送响应帧。
-               - 设置类命令：更新属性值并发送确认帧。
+            2. 根据命令类型执行相应操作:
+               - 查询类命令:读取当前属性值并发送响应帧。
+               - 设置类命令:更新属性值并发送确认帧。
             3. 调试模式下打印操作信息。
 
         Command mapping:

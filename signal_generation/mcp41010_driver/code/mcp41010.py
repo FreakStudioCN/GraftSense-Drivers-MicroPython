@@ -97,7 +97,7 @@ class MCP41010:
         if value < 0 or value > self.max_value:
             raise ValueError("Value must be between 0 and %d" % self.max_value)
 
-        # 命令字节：C1=0, C0=1（写入数据），P1=0, P0=1（电位器选择）
+        # 命令字节:C1=0, C0=1（写入数据），P1=0, P0=1（电位器选择）
         command_byte = 0b00010001
         data_byte = value
         self._send_command(command_byte, data_byte)
@@ -115,7 +115,7 @@ class MCP41010:
             None: 此方法没有返回值。
         """
 
-        # 命令字节：C1=1, C0=0（关闭模式），P1=0, P0=1（电位器选择）
+        # 命令字节:C1=1, C0=0（关闭模式），P1=0, P0=1（电位器选择）
         command_byte = 0b00100001
         # 数据位为“无关位”
         data_byte = 0x00

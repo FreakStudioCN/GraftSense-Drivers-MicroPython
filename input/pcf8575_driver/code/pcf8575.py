@@ -4,7 +4,7 @@
 # @Author  : 李清水
 # @File    : pcf8575.py
 # @Description : 自定义PCF8575类，通过I2C总线操作
-# 参考代码：https://github.com/mcauser/micropython-pcf8575
+# 参考代码:https://github.com/mcauser/micropython-pcf8575
 
 # ======================================== 导入相关模块 =========================================
 
@@ -209,8 +209,8 @@ class PCF8575:
         """
 
         # pin 有效范围 0..7 和 10-17 (偏移到 8-15)
-        # 第一位：端口 (0-1)
-        # 第二位：IO (0-7)
+        # 第一位:端口 (0-1)
+        # 第二位:IO (0-7)
         if not 0 <= pin <= 7 and not 10 <= pin <= 17:
             # 抛出错误
             raise ValueError(f"Invalid pin {pin}. Use 0-7 or 10-17.")

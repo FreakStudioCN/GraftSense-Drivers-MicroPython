@@ -3,7 +3,7 @@
 # @Time    : 2025/9/4 下午3:32
 # @Author  : 缪贵成
 # @File    : pn532_uart.py
-# @Description : 串口通信，继承pn532，参考自：https://github.com/luiz-brandao/micropython_pn532/tree/main/pn532
+# @Description : 串口通信，继承pn532，参考自:https://github.com/luiz-brandao/micropython_pn532/tree/main/pn532
 # @License : MIT
 
 __version__ = "0.1.0"

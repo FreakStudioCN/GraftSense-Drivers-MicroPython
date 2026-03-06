@@ -59,7 +59,7 @@ print("disable_oscillator =", ds1307rtc.disable_oscillator, "\n")
 print("Current DS1307 datetime:", ds1307rtc.datetime, "\n")
 
 # 设置时间
-# 参数：(year, month, day, hour, minute, second, weekday, None)
+# 参数:(year, month, day, hour, minute, second, weekday, None)
 ds1307rtc.datetime = (2025, 9, 17, 17, 47, 17, 6)
 
 # 再次读取时间

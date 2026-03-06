@@ -71,7 +71,7 @@ class IMU:
     """
     六轴陀螺仪类，负责与 IMU 传感器进行串口通信，支持指令发送、数据接收和解析。
 
-    功能包括：
+    功能包括:
     - 设置陀螺仪的工作模式、传输模式和安装模式。
     - 接收三轴加速度、角速度（陀螺仪数据）和角度（倾角）。
     - 提供指令发送接口（如校准、清零、模式切换）。
@@ -150,7 +150,7 @@ class IMU:
             Receive and parse acceleration, gyro, and angle data.
     """
 
-    # 声明类变量：类变量在类的所有实例之间共享，用于存储与类相关的共享数据
+    # 声明类变量:类变量在类的所有实例之间共享，用于存储与类相关的共享数据
 
     # 以下变量为用于陀螺仪数据转换的系数和常量
     k_acc = 16
@@ -181,7 +181,7 @@ class IMU:
     # 带宽设置指令不常用，留给用户自行实现即可
     # ============ 带宽协议 ============
     # | HEARDER1 | HEARDER2 |  CMD  |
-    # CMD可选为：
+    # CMD可选为:
     # 0x81 - 带宽为 256 Hz
     # 0x82 - 带宽为 188 Hz
     # 0x83 - 带宽为 98  Hz
@@ -193,18 +193,18 @@ class IMU:
     # 需要在self.SendCMD方法的入口参数判断中添加对应类变量
 
     # 代表工作模式的类变量
-    # WORK_MODE  - 工作模式：1
-    # SLEEP_MODE - 睡眠模式：0
+    # WORK_MODE  - 工作模式:1
+    # SLEEP_MODE - 睡眠模式:0
     WORK_MODE, SLEEP_MODE = (1, 0)
 
     # 代表数据传输模式的类变量
-    # UART_MODE  - 串口传输模式：1
-    # IIC_MODE   - IIC传输模式：0
+    # UART_MODE  - 串口传输模式:1
+    # IIC_MODE   - IIC传输模式:0
     UART_MODE, IIC_MODE = (1, 0)
 
     # 代表安装模式的类变量
-    # HORIZ_INST - 水平安装模式：1
-    # VERT_INST  - 垂直安装模式：0
+    # HORIZ_INST - 水平安装模式:1
+    # VERT_INST  - 垂直安装模式:0
     HORIZ_INST, VERT_INST = (1, 0)
 
     # 初始化函数
@@ -258,7 +258,7 @@ class IMU:
         self.rcvcount: int = 0
 
         # 陀螺仪不同类型数据接收完成的标志量
-        # 0：未接收完成，1：已接收完成
+        # 0:未接收完成，1:已接收完成
         # 加速度数据接收完成标志量
         self.recv_acc_flag: int = 0
         # 角加速度数据接收完成标志量
@@ -279,7 +279,7 @@ class IMU:
         # 加速度校准
         self.SendCMD(IMU.ACCCALBCMD)
 
-    # 私有方法：计算校验和是否正确
+    # 私有方法:计算校验和是否正确
     def __CalChecksum(self) -> bool:
         """
         计算并验证接收数据的校验和。

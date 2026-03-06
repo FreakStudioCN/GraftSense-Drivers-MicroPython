@@ -20,6 +20,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 自定义类 ============================================
 
+
 class HTTP:
     """
     SIM7600模块HTTP功能类
@@ -72,7 +73,7 @@ class HTTP:
         # 保存SIM7600模块核心对象引用
         self.sim7600 = sim7600
 
-    def set_apn(self, apn, user='', password=''):
+    def set_apn(self, apn, user="", password=""):
         """
         配置HTTP使用的APN参数及认证信息
         Configure APN parameters and authentication information for HTTP
@@ -117,11 +118,11 @@ class HTTP:
             Activate network bearer, query IP address, initialize HTTP service context in sequence
         """
         # 激活承载1的网络连接
-        self.sim7600.send_command('AT+SAPBR=1,1')
+        self.sim7600.send_command("AT+SAPBR=1,1")
         # 查询承载1的IP地址信息
-        self.sim7600.send_command('AT+SAPBR=2,1')
+        self.sim7600.send_command("AT+SAPBR=2,1")
         # 初始化HTTP服务上下文
-        self.sim7600.send_command('AT+HTTPINIT')
+        self.sim7600.send_command("AT+HTTPINIT")
 
     def disable_http(self):
         """
@@ -139,9 +140,9 @@ class HTTP:
             First terminate HTTP service context, then close network bearer to release related network resources
         """
         # 终止HTTP服务上下文
-        self.sim7600.send_command('AT+HTTPTERM')
+        self.sim7600.send_command("AT+HTTPTERM")
         # 关闭承载1的网络连接
-        self.sim7600.send_command('AT+SAPBR=0,1')
+        self.sim7600.send_command("AT+SAPBR=0,1")
 
     def set_url(self, url):
         """
@@ -198,7 +199,7 @@ class HTTP:
             Use AT+HTTPACTION=0 command to execute GET request, read response data via UART
         """
         # 发送HTTP GET请求指令
-        self.sim7600.send_command('AT+HTTPACTION=0')
+        self.sim7600.send_command("AT+HTTPACTION=0")
         # 读取并返回GET请求的响应数据
         return self.sim7600.read_uart()
 
@@ -220,11 +221,11 @@ class HTTP:
             First use AT+HTTPDATA command to set POST data (10-second timeout), then execute POST request and read response
         """
         # 配置POST数据长度和超时时间(10000ms)
-        self.sim7600.send_command(f'AT+HTTPDATA={len(data)},10000')
+        self.sim7600.send_command(f"AT+HTTPDATA={len(data)},10000")
         # 发送POST请求的具体数据
         self.sim7600.write_uart(data)
         # 发送HTTP POST请求指令
-        self.sim7600.send_command('AT+HTTPACTION=1')
+        self.sim7600.send_command("AT+HTTPACTION=1")
         # 读取并返回POST请求的响应数据
         return self.sim7600.read_uart()
 
@@ -245,7 +246,8 @@ class HTTP:
             Use AT+HTTPREAD command to read all data content of HTTP response
         """
         # 发送读取HTTP响应数据指令并返回响应
-        return self.sim7600.send_command('AT+HTTPREAD')
+        return self.sim7600.send_command("AT+HTTPREAD")
+
 
 # ======================================== 初始化配置 ===========================================
 

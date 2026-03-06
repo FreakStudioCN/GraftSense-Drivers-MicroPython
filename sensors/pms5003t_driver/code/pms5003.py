@@ -56,8 +56,18 @@ def set_debug(debug):
 
 
 class PMS5003_base:
-    def __init__(self, uart, lock=None, set_pin=None, reset_pin=None, interval_passive_mode=None,
-                 event=None, active_mode=True, eco_mode=True, assume_sleeping=True):
+    def __init__(
+        self,
+        uart,
+        lock=None,
+        set_pin=None,
+        reset_pin=None,
+        interval_passive_mode=None,
+        event=None,
+        active_mode=True,
+        eco_mode=True,
+        assume_sleeping=True,
+    ):
         self._uart = uart  # accepts a uart object
         self._set_pin = set_pin
         if set_pin is not None:
@@ -71,9 +81,7 @@ class PMS5003_base:
         self._sreader = asyncio.StreamReader(uart)
         self._interval_passive_mode = interval_passive_mode or 60  # in case someone forgets to set it
         if self._eco_mode and self._active_mode is False and self._interval_passive_mode < WAIT_AFTER_WAKEUP + 5:
-            self._error(
-                "interval_passive_mode can't be less than DEVICE_WAKEUP_TIME of {!s}s".format(
-                    WAIT_AFTER_WAKEUP + 5))
+            self._error("interval_passive_mode can't be less than DEVICE_WAKEUP_TIME of {!s}s".format(WAIT_AFTER_WAKEUP + 5))
             self._interval_passive_mode = 60
         self._event = event
         self._lock = asyncio.Lock()
@@ -103,9 +111,7 @@ class PMS5003_base:
         """Puts device to sleep between readings in passive mode"""
         self._eco_mode = value
         if self._eco_mode and self._active_mode is False and self._interval_passive_mode < WAIT_AFTER_WAKEUP + 5:
-            self._error(
-                "interval_passive_mode can't be less than DEVICE_WAKEUP_TIME of {!s}s".format(
-                    WAIT_AFTER_WAKEUP + 5))
+            self._error("interval_passive_mode can't be less than DEVICE_WAKEUP_TIME of {!s}s".format(WAIT_AFTER_WAKEUP + 5))
             self._interval_passive_mode = 60
 
     async def setActiveMode(self):
@@ -115,10 +121,10 @@ class PMS5003_base:
         self._debug("setActiveMode")
         async with self._lock:
             self._debug("setActiveMode got lock")
-            res = await self._sendCommand(0xe1, 0x01)
+            res = await self._sendCommand(0xE1, 0x01)
             if res is None:
                 await asyncio.sleep_ms(100)
-                res = await self._sendCommand(0xe1, 0x01)
+                res = await self._sendCommand(0xE1, 0x01)
                 if res is None:
                     self._error("Error putting device in active mode")
                     return False
@@ -133,19 +139,17 @@ class PMS5003_base:
         self._debug("setPassiveMode")
         async with self._lock:
             self._debug("setPassiveMode got lock")
-            res = await self._sendCommand(0xe1, 0x00)
+            res = await self._sendCommand(0xE1, 0x00)
             if res is None:
                 await asyncio.sleep_ms(100)
-                res = await self._sendCommand(0xe1, 0x00)
+                res = await self._sendCommand(0xE1, 0x00)
                 if res is None:
                     self._error("Error putting device in passive mode")
                     return False
             if interval is not None:
                 self._interval_passive_mode = interval
                 if self._eco_mode and self._active_mode is False and self._interval_passive_mode < WAIT_AFTER_WAKEUP + 5:
-                    self._error(
-                        "interval_passive_mode can't be less than DEVICE_WAKEUP_TIME of {!s}s".format(
-                            WAIT_AFTER_WAKEUP + 5))
+                    self._error("interval_passive_mode can't be less than DEVICE_WAKEUP_TIME of {!s}s".format(WAIT_AFTER_WAKEUP + 5))
                     self._interval_passive_mode = 60
             self._active_mode = False
             await asyncio.sleep_ms(100)
@@ -161,10 +165,10 @@ class PMS5003_base:
                 self._set_pin.value(0)
                 # response on pin change?
             else:
-                res = await self._sendCommand(0xe4, 0x00)
+                res = await self._sendCommand(0xE4, 0x00)
                 if res is None:
                     await asyncio.sleep_ms(100)
-                    res = await self._sendCommand(0xe4, 0x00)
+                    res = await self._sendCommand(0xE4, 0x00)
                     if res is None:
                         self._sleeping_state = True  # just to make it possible for wakeUp to try again
                         self._error("Error putting device to sleep")
@@ -188,12 +192,10 @@ class PMS5003_base:
                     self._error("No response to wakeup pin change")
                     return False
             else:
-                res = await self._sendCommand(0xe4, 0x01, False, delay=16000,
-                                              wait=WAIT_AFTER_WAKEUP * 1000)
+                res = await self._sendCommand(0xE4, 0x01, False, delay=16000, wait=WAIT_AFTER_WAKEUP * 1000)
                 if res is None:
                     await asyncio.sleep_ms(100)
-                    res = await self._sendCommand(0xe4, 0x01, False, delay=16000,
-                                                  wait=WAIT_AFTER_WAKEUP * 1000)
+                    res = await self._sendCommand(0xE4, 0x01, False, delay=16000, wait=WAIT_AFTER_WAKEUP * 1000)
                     if res is None:
                         self._error("No response to wakeup command")
                         return False
@@ -227,11 +229,10 @@ class PMS5003_base:
             return False
 
     async def _sendCommand(self, command, data, expect_command=True, delay=1000, wait=None):
-        self._debug(
-            "Sending command: {!s},{!s},{!s},{!s}".format(command, data, expect_command, delay))
+        self._debug("Sending command: {!s},{!s},{!s},{!s}".format(command, data, expect_command, delay))
         arr = bytearray(7)
         arr[0] = 0x42
-        arr[1] = 0x4d
+        arr[1] = 0x4D
         arr[2] = command
         arr[3] = 0x00
         arr[4] = data
@@ -295,17 +296,18 @@ class PMS5003_base:
             print("")
             print("---------------------------------------------")
             t = time.localtime()
-            print("Measurement {!s}ms ago at {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
-                time.ticks_ms() - self._timestamp, t[0], t[1], t[2], t[3], t[4], t[5]))
+            print(
+                "Measurement {!s}ms ago at {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
+                    time.ticks_ms() - self._timestamp, t[0], t[1], t[2], t[3], t[4], t[5]
+                )
+            )
             print("---------------------------------------------")
             print("Concentration Units (standard)")
             print("---------------------------------------------")
-            print("PM 1.0: %d\tPM2.5: %d\tPM10: %d" % (
-                self._pm10_standard, self._pm25_standard, self._pm100_standard))
+            print("PM 1.0: %d\tPM2.5: %d\tPM10: %d" % (self._pm10_standard, self._pm25_standard, self._pm100_standard))
             print("Concentration Units (environmental)")
             print("---------------------------------------------")
-            print("PM 1.0: %d\tPM2.5: %d\tPM10: %d" % (
-                self._pm10_env, self._pm25_env, self._pm100_env))
+            print("PM 1.0: %d\tPM2.5: %d\tPM10: %d" % (self._pm10_env, self._pm25_env, self._pm100_env))
             print("---------------------------------------------")
             print("Particles > 0.3um / 0.1L air:", self._particles_03um)
             print("Particles > 0.5um / 0.1L air:", self._particles_05um)
@@ -352,7 +354,7 @@ class PMS5003_base:
                         if self._active_mode:
                             frame = await self._read_frame(False, True)  # lock already acquired
                         else:
-                            frame = await self._sendCommand(0xe2, 0x00, False, delay=10000)
+                            frame = await self._sendCommand(0xE2, 0x00, False, delay=10000)
                         if frame is not None:
                             self._pm10_standard = frame[0]
                             self._pm25_standard = frame[1]
@@ -370,8 +372,7 @@ class PMS5003_base:
                             if self._active and self._event is not None:
                                 self._event.set()
                             if self._active and self._callback is not None:
-                                cbs = [self._callback] if type(
-                                    self._callback) != list else self._callback
+                                cbs = [self._callback] if type(self._callback) != list else self._callback
                                 for cb in cbs:
                                     # call callback or await coroutine, should be short.
                                     tmp = cb()
@@ -388,7 +389,7 @@ class PMS5003_base:
                 sleep = self._interval_passive_mode - (time.ticks_ms() - last_reading) / 1000
                 if self._eco_mode:
                     await self.sleep()
-                    sleep -= (WAIT_AFTER_WAKEUP + 1)
+                    sleep -= WAIT_AFTER_WAKEUP + 1
                     # +1 is experience as commands to wakeup and set mode take time
                 else:
                     woke_up = None  # probably changed mode during sleep
@@ -436,9 +437,7 @@ class PMS5003_base:
             self._debug("Throwing away old data_frames, #bytes {!s}".format(available - 32))
         while True:
             if with_async is False and time.ticks_ms() - start > timeout:
-                self._debug(
-                    "Reading a lot of noise on RX line to exceed timeout of {!s}ms, availble bytes {!s}".format(
-                        timeout, self._uart.any()))
+                self._debug("Reading a lot of noise on RX line to exceed timeout of {!s}ms, availble bytes {!s}".format(timeout, self._uart.any()))
                 return None
             preframe_len = 4 + CMD_FRAME_LENGTH - len(buffer)
             if with_async:
@@ -457,13 +456,12 @@ class PMS5003_base:
                 self._debug("Read no data from uart despite having waited for data")
                 return None
             if len(data) != preframe_len and len(data) > 0:
-                self._error(
-                    "Short read, expected {!s} bytes, got {!s}".format(preframe_len, len(data)))
+                self._error("Short read, expected {!s} bytes, got {!s}".format(preframe_len, len(data)))
                 return None
-            if data == b'':
+            if data == b"":
                 return None
             buffer += list(data)
-            while len(buffer) >= 2 and buffer[0] != 0x42 and buffer[1] != 0x4d:
+            while len(buffer) >= 2 and buffer[0] != 0x42 and buffer[1] != 0x4D:
                 buffer.pop(0)
             if len(buffer) == 0:
                 continue
@@ -484,12 +482,11 @@ class PMS5003_base:
                     await self.__await_bytes(frame_len - CMD_FRAME_LENGTH, 100)
                     data = self._uart.read(frame_len - CMD_FRAME_LENGTH)
                 if len(data) != DATA_FRAME_LENGTH - CMD_FRAME_LENGTH:
-                    self._error(
-                        "Short read, expected {!s} bytes, got {!s}".format(frame_len, len(data)))
+                    self._error("Short read, expected {!s} bytes, got {!s}".format(frame_len, len(data)))
                     return None
                 buffer += list(data)
                 check = buffer[-2] * 256 + buffer[-1]
-                checksum = sum(buffer[0:frame_len + 2])
+                checksum = sum(buffer[0 : frame_len + 2])
                 if check == checksum:
                     if self._uart.any() > 32:
                         self._flush_uart()  # just to prevent getting flooded if a callback took too long
@@ -509,7 +506,7 @@ class PMS5003_base:
                         return frame
             elif frame_len == CMD_FRAME_LENGTH:
                 check = buffer[-2] * 256 + buffer[-1]
-                checksum = sum(buffer[0:frame_len + 2])
+                checksum = sum(buffer[0 : frame_len + 2])
                 if check == checksum:
                     self._debug("Received command response frame: {!s}".format(buffer))
                     return True
@@ -518,8 +515,7 @@ class PMS5003_base:
             elif frame_len == 0:
                 pass  # wrong frame/bytes received
             else:
-                self._warn("Unexpected frame_len {!s}, probably random or scrambled bytes".format(
-                    frame_len))
+                self._warn("Unexpected frame_len {!s}, probably random or scrambled bytes".format(frame_len))
 
             buffer = []
             continue
@@ -592,10 +588,20 @@ class PMS5003_base:
 
     def read(self):
         if self._active:
-            return (self._pm10_standard, self._pm25_standard, self._pm100_standard,
-                    self._pm10_env, self._pm25_env, self._pm100_env,
-                    self._particles_03um, self._particles_05um, self._particles_10um,
-                    self._particles_25um, self._particles_50um, self._particles_100um)
+            return (
+                self._pm10_standard,
+                self._pm25_standard,
+                self._pm100_standard,
+                self._pm10_env,
+                self._pm25_env,
+                self._pm100_env,
+                self._particles_03um,
+                self._particles_05um,
+                self._particles_10um,
+                self._particles_25um,
+                self._particles_50um,
+                self._particles_100um,
+            )
         return None
 
     @property
@@ -604,12 +610,28 @@ class PMS5003_base:
 
 
 class PMS5003(PMS5003_base):
-    def __init__(self, uart, lock=None, set_pin=None, reset_pin=None, interval_passive_mode=None,
-                 event=None, active_mode=True, eco_mode=True, assume_sleeping=True):
-        super().__init__(uart, set_pin=set_pin, reset_pin=reset_pin,
-                         interval_passive_mode=interval_passive_mode,
-                         event=event, active_mode=active_mode, eco_mode=eco_mode,
-                         assume_sleeping=assume_sleeping)
+    def __init__(
+        self,
+        uart,
+        lock=None,
+        set_pin=None,
+        reset_pin=None,
+        interval_passive_mode=None,
+        event=None,
+        active_mode=True,
+        eco_mode=True,
+        assume_sleeping=True,
+    ):
+        super().__init__(
+            uart,
+            set_pin=set_pin,
+            reset_pin=reset_pin,
+            interval_passive_mode=interval_passive_mode,
+            event=event,
+            active_mode=active_mode,
+            eco_mode=eco_mode,
+            assume_sleeping=assume_sleeping,
+        )
 
     async def _makeResilient(self, *args, **kwargs):
         if "first_try" not in kwargs:

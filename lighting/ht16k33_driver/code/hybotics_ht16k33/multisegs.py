@@ -1,6 +1,7 @@
 """
 Docstring
 """
+
 from utime import sleep
 from micropython import const
 from hybotics_ht16k33.segments import Seg14x4
@@ -32,11 +33,7 @@ class MultiSeg14x4(Seg14x4):
             print("DEBUG: (multisegments.py) multi-display")
 
             for index, addr in enumerate(self._address):
-                print(
-                    "DEBUG (multisegments.py) display {0} at self._address = {1}".format(
-                        index, hex(addr)
-                    )
-                )
+                print("DEBUG (multisegments.py) display {0} at self._address = {1}".format(index, hex(addr)))
 
                 self.devices.append(Seg14x4(i2c, addr, auto_write, brightness))
                 self.devices[index]._address = addr
@@ -45,11 +42,7 @@ class MultiSeg14x4(Seg14x4):
 
             self._NUMBER_OF_DISPLAYS = const(len(self.devices))
             self._NUMBER_OF_DIGITS = const(self._NUMBER_OF_DISPLAYS * 4)
-            print(
-                "DEBUG (multisegments.py) There are {0} displays".format(
-                    len(self.devices)
-                )
-            )
+            print("DEBUG (multisegments.py) There are {0} displays".format(len(self.devices)))
 
     def clear(self, show=True):
         for nr, _ in enumerate(self._address):
@@ -90,24 +83,18 @@ class MultiSeg14x4(Seg14x4):
             if scroll:
                 pass
             else:
-                raise ValueError(
-                    "Input overflow - '{0}' is too long for the display!".format(text)
-                )
+                raise ValueError("Input overflow - '{0}' is too long for the display!".format(text))
 
         if length > self._NUMBER_OF_DIGITS:
             # Also could choose to scroll the text instead of raising an error
-            raise ValueError(
-                "The text, '{0}', is too long for the display!".format(text)
-            )
+            raise ValueError("The text, '{0}', is too long for the display!".format(text))
 
         self.clear(self._devices)
 
         for nr, _ in enumerate(self._address):
             self._devices[nr].print(text[length - (nr + 1) * 4 : length - (nr * 4)])
 
-        self._devices[len(self._address) - 1].print(
-            text[0 : length - int(length / 4) * 4]
-        )
+        self._devices[len(self._address) - 1].print(text[0 : length - int(length / 4) * 4])
 
         if show:
             for nr, _ in enumerate(self._address):
@@ -148,11 +135,7 @@ class MultiSeg14x4(Seg14x4):
 
             if not shifting:
                 print("Initializing displays for shifting")
-                print(
-                    "DEBUG(2) disp_nr = {0}, disp_pos = {1}, char = '{2}'".format(
-                        disp_nr, disp_pos, text[char_nr]
-                    )
-                )
+                print("DEBUG(2) disp_nr = {0}, disp_pos = {1}, char = '{2}'".format(disp_nr, disp_pos, text[char_nr]))
 
                 self._devices[disp_nr].print(text[char_nr])
 
@@ -160,9 +143,7 @@ class MultiSeg14x4(Seg14x4):
                     disp_pos = 0
 
                     if disp_nr < self._NUMBER_OF_DISPLAYS:
-                        print(
-                            "DEBUG(3) Resetting display position and incrementing display"
-                        )
+                        print("DEBUG(3) Resetting display position and incrementing display")
 
                         disp_nr += 1
                 else:
@@ -184,11 +165,7 @@ class MultiSeg14x4(Seg14x4):
             while shifting and disp_nr > 0 and char_nr < length:
                 print("Inside the shifty state")
 
-                print(
-                    "DEBUG(4) disp_nr = {0}, char = '{1}', disp_shift = {2}, disp_pos = {3}".format(
-                        disp_nr, text[char_nr], disp_shift, disp_pos
-                    )
-                )
+                print("DEBUG(4) disp_nr = {0}, char = '{1}', disp_shift = {2}, disp_pos = {3}".format(disp_nr, text[char_nr], disp_shift, disp_pos))
 
                 """
                 Do all the shifting
@@ -197,33 +174,17 @@ class MultiSeg14x4(Seg14x4):
                     if disp_pos == 3:
                         disp_pos = 0
 
-                    print(
-                        "Shifting for display {0}, disp_shift = {1}".format(
-                            disp_nr, disp_shift
-                        )
-                    )
+                    print("Shifting for display {0}, disp_shift = {1}".format(disp_nr, disp_shift))
 
-                    print(
-                        "    Shifting character '{0}' to the left on display {1}".format(
-                            text[disp_shift[disp_nr]], disp_nr
-                        )
-                    )
+                    print("    Shifting character '{0}' to the left on display {1}".format(text[disp_shift[disp_nr]], disp_nr))
 
                     self._devices[disp_nr].print(text[disp_shift[disp_nr]])
                     disp_shift[disp_nr] += 1
 
-                    print(
-                        "DEBUG(5) disp_pos = {0}, char_nr = {1},  disp_nr = {2}".format(
-                            disp_pos, char_nr, disp_nr
-                        )
-                    )
+                    print("DEBUG(5) disp_pos = {0}, char_nr = {1},  disp_nr = {2}".format(disp_pos, char_nr, disp_nr))
 
                     if disp_nr < 2:
-                        print(
-                            "    Adding new character '{0}' to display 0".format(
-                                text[char_nr]
-                            )
-                        )
+                        print("    Adding new character '{0}' to display 0".format(text[char_nr]))
 
                         self._devices[0].print(text[char_nr])
                         char_nr += 1
@@ -243,13 +204,13 @@ class MultiSeg14x4(Seg14x4):
 
     def _number(self, number, decimal=0):
         """
-		Display a floating point or integer number on the Adafruit HT16K33 based displays
+                Display a floating point or integer number on the Adafruit HT16K33 based displays
 
-		param: number int or float - The floating point or integer number to be displayed, which must be
-			in the range 0 (zero) to 9999 for integers and floating point or integer numbers
-			and between 0.0 and 999.0 or 99.00 or 9.000 for floating point numbers.
-		param: decimal int - The number of decimal places for a floating point number if decimal
-			is greater than zero, or the input number is an integer if decimal is zero.
+                param: number int or float - The floating point or integer number to be displayed, which must be
+                        in the range 0 (zero) to 9999 for integers and floating point or integer numbers
+                        and between 0.0 and 999.0 or 99.00 or 9.000 for floating point numbers.
+                param: decimal int - The number of decimal places for a floating point number if decimal
+                        is greater than zero, or the input number is an integer if decimal is zero.
 
         Returns: The output text string to be displayed.
         """
@@ -259,12 +220,8 @@ class MultiSeg14x4(Seg14x4):
         stnum = str(number)
         dot = stnum.find(".")
 
-        if len(stnum) > self._NUMBER_OF_DIGITS + 1 or (
-            (len(stnum) > self._NUMBER_OF_DIGITS) and (dot < 0)
-        ):
-            raise ValueError(
-                "Input overflow - {0} is too long for the display!".format(number)
-            )
+        if len(stnum) > self._NUMBER_OF_DIGITS + 1 or ((len(stnum) > self._NUMBER_OF_DIGITS) and (dot < 0)):
+            raise ValueError("Input overflow - {0} is too long for the display!".format(number))
 
         if dot < 0:
             # No decimal point (Integer)
@@ -286,9 +243,7 @@ class MultiSeg14x4(Seg14x4):
             txt = stnum[:places]
 
         if len(txt) > self._NUMBER_OF_DIGITS + 1:
-            raise ValueError(
-                "Input overflow - {0} is too long for the display!".format(txt)
-            )
+            raise ValueError("Input overflow - {0} is too long for the display!".format(txt))
 
         self._multi_text(txt)
         self._auto_write = auto_write

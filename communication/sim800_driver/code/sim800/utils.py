@@ -21,6 +21,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class SIM800Utils:
     """
@@ -68,7 +69,7 @@ class SIM800Utils:
         # 记录等待开始时间
         start_time = utime.ticks_ms()
         # 初始化响应数据缓冲区
-        response = b''
+        response = b""
 
         # 循环等待响应直到超时
         while utime.ticks_diff(utime.ticks_ms(), start_time) < timeout:
@@ -79,7 +80,7 @@ class SIM800Utils:
                 # 检查是否包含期望的响应字符串
                 if expected_response.encode() in response:
                     # 解码响应并返回
-                    return response.decode('utf-8')
+                    return response.decode("utf-8")
             # 短暂延时后继续检查
             utime.sleep_ms(100)
 
@@ -134,9 +135,10 @@ class SIM800Utils:
         # 发送指令前清空UART缓冲区
         SIM800Utils.clear_uart_buffer(uart)
         # 发送AT指令，末尾添加回车符
-        uart.write(command + '\r')
+        uart.write(command + "\r")
         # 等待并返回响应
         return SIM800Utils.wait_for_response(uart, wait_for, timeout)
+
 
 # ======================================== 初始化配置 ===========================================
 

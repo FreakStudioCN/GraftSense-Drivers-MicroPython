@@ -41,9 +41,9 @@ class Device:
     def _get_byteorder_as_str(self) -> tuple:
         """Return byteorder as string"""
         if self.is_big_byteorder():
-            return 'big', '>'
+            return "big", ">"
         else:
-            return 'little', '<'
+            return "little", "<"
 
     def unpack(self, fmt_char: str, source: bytes, redefine_byte_order: str = None) -> tuple:
         """распаковка массива, считанного из датчика.
@@ -63,6 +63,7 @@ class Device:
 
 class BaseSensor(Device):
     """Base sensor class"""
+
     def get_id(self):
         raise NotImplementedError
 
@@ -80,6 +81,7 @@ class Iterator:
 
 class TemperatureSensor:
     """Вспомогательный или основной датчик температуры"""
+
     def enable_temp_meas(self, enable: bool = True):
         """Включает измерение температуры при enable в Истина
         Для переопределения программистом!!!"""

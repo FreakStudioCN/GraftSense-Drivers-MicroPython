@@ -69,7 +69,7 @@ else:
     print("Erase the data of the first three pages")
     erase_data(at24c256, 0, DATA_SIZE + 1)
 
-    # 写入单字节：写入0xAB到地址0x00
+    # 写入单字节:写入0xAB到地址0x00
     print("Writing single byte...")
     at24c256.write_byte(0x00, 0xAB)
     print("Written single byte 0xAB at address 0x00.")

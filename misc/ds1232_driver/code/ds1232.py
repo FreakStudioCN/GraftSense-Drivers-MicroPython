@@ -119,7 +119,7 @@ class DS1232:
 
     def _feed(self, t: Timer) -> None:
         """
-        定时器回调函数：周期性翻转 WDI 引脚。
+        定时器回调函数:周期性翻转 WDI 引脚。
 
         Args:
             t (Timer): 触发本回调的定时器对象。
@@ -192,7 +192,7 @@ class DS1232:
 
     def kick(self) -> None:
         """
-        手动喂狗：立即翻转一次 WDI 引脚。
+        手动喂狗:立即翻转一次 WDI 引脚。
 
         Args:
             None

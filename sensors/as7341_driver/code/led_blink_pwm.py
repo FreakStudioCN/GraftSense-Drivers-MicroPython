@@ -18,23 +18,25 @@ if not sensor.isconnected():
     print("Failed to contact AS7341, terminating")
     sys.exit(1)
 
+
 def blink_led(n, freq, curr):
     print("Blink LED {:d} times at freq {:d} Hz with {:d} mA".format(n, freq, curr))
     for _ in range(n):
-        sensor.set_led_current(curr)    # LED on with <curr> mA
-        sleep_ms(500 // freq)           # half period
-        sensor.set_led_current(0)       # LED effectively off
-        sleep_ms(500 // freq)           # half period
+        sensor.set_led_current(curr)  # LED on with <curr> mA
+        sleep_ms(500 // freq)  # half period
+        sensor.set_led_current(0)  # LED effectively off
+        sleep_ms(500 // freq)  # half period
+
 
 try:
     while True:
-        blink_led(2, 1, 4)              # blink 2 times at 1 Hz with 4 mA
-        blink_led(4, 2, 20)             # blink 4 times at 2 Hz with 20 mA
+        blink_led(2, 1, 4)  # blink 2 times at 1 Hz with 4 mA
+        blink_led(4, 2, 20)  # blink 4 times at 2 Hz with 20 mA
 
 except KeyboardInterrupt:
     print("Interrupted from keyboard")
 
-sensor.set_led_current(0)               # LED off
+sensor.set_led_current(0)  # LED off
 sensor.disable()
 
 #

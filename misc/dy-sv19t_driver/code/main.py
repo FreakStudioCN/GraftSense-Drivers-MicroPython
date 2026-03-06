@@ -80,7 +80,7 @@ def select_and_play_demo():
     Select a track without playing it immediately, and demonstrate the usage of pause,
     resume, and track switching.
     """
-    # 根据文件路径选择不播放：曲目序号是由存储顺序决定！
+    # 根据文件路径选择不播放:曲目序号是由存储顺序决定！
     player.select_track(1, play=False)
     print("Select track 1 no play")
     # 5秒后播放曲目1
@@ -206,15 +206,15 @@ time.sleep(3)
 # 打印调试消息
 print("FreakStudio:  DY-SV19T Play Test ")
 
-# 初始化硬件串口：选择 UART0，波特率 9600，TX=GP16，RX=GP17（需与模块连线一致）
+# 初始化硬件串口:选择 UART0，波特率 9600，TX=GP16，RX=GP17（需与模块连线一致）
 uart = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
 
 # 创建定时器
 tim = Timer(-1)
-# 初始化定时器：每 1000ms（1秒）触发一次
+# 初始化定时器:每 1000ms（1秒）触发一次
 tim.init(period=1000, mode=Timer.PERIODIC, callback=tick)
 
-# 创建播放器实例：设定默认音量/盘符/模式/通道与读取超时
+# 创建播放器实例:设定默认音量/盘符/模式/通道与读取超时
 player = DYSV19T(
     # 传入已配置的 UART 实例
     uart,
@@ -243,21 +243,21 @@ player.set_dac_channel(player.CH_MP3)
 # 通过曲目序号直接播放一段音频，监听播放进度并等待播放结束。
 
 player.query_status()
-# 查询当前盘符：返回 DISK_USB/DISK_SD/DISK_FLASH 或 None，并更新内部 current_disk
+# 查询当前盘符:返回 DISK_USB/DISK_SD/DISK_FLASH 或 None，并更新内部 current_disk
 player.query_current_disk()
-# 查询当前曲目号：返回 1..65535 或 None
+# 查询当前曲目号:返回 1..65535 或 None
 player.query_current_track()
-# 查询当前曲目总播放时间：返回 (h,m,s) 或 None
+# 查询当前曲目总播放时间:返回 (h,m,s) 或 None
 player.query_current_track_time()
-# 查询当前短文件名（8.3）：返回 ASCII 短名或 None
+# 查询当前短文件名（8.3）:返回 ASCII 短名或 None
 player.query_short_filename()
-# 查询设备总曲目数：返回整数或 None
+# 查询设备总曲目数:返回整数或 None
 player.query_total_tracks()
-# 查询当前文件夹首曲：返回曲目号或 None
+# 查询当前文件夹首曲:返回曲目号或 None
 player.query_folder_first_track()
-# 查询当前文件夹曲目总数：返回整数或 None
+# 查询当前文件夹曲目总数:返回整数或 None
 player.query_folder_total_tracks()
-# 查询在线盘符位图：bit0=USB, bit1=SD, bit2=FLASH
+# 查询在线盘符位图:bit0=USB, bit1=SD, bit2=FLASH
 player.query_online_disks()
 player.enable_play_time_send()
 player.play()

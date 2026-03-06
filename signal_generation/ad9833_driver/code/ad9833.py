@@ -4,8 +4,13 @@
 # @Author  : 李清水
 # @File    : ad9833.py
 # @Description : DDS信号芯片AD9833驱动模块
-# 代码参考：https://github.com/owainm713/AD9833-MicroPython-Module/blob/main/AD9833example.py#L54
+# 代码参考:https://github.com/owainm713/AD9833-MicroPython-Module/blob/main/AD9833example.py#L54
 # 这部分代码由 owainm713 开发，采用 GNU General Public License v3.0 License.
+
+__version__ = "1.0.0"
+__author__ = "owainm713"
+__license__ = "GNU General Public License v3.0 License"
+__platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
 
@@ -134,6 +139,9 @@ class AD9833:
         Raises:
             ValueError: 如果传入的data参数不是整数类型，则抛出该异常。
         """
+        # 校验参数类型和长度
+        if not isinstance(data, int):
+            raise TypeError(f"data must be a int, got {type(data)}")
 
         # 将数据转换为字节数组
         data = bytearray(data)
@@ -261,7 +269,7 @@ class AD9833:
         # 计算频率寄存器需要写入的值
         freqR = int((fout * pow(2, 28)) / self.fmclk)
 
-        # 将频率寄存器的值拆分为两个14位段：fMSB高14位和fLSB低14位
+        # 将频率寄存器的值拆分为两个14位段:fMSB高14位和fLSB低14位
         fMSB = (freqR & 0xFFFC000) >> 14
         fLSB = freqR & 0x3FFF
 
@@ -325,10 +333,8 @@ class AD9833:
         if rads is False:
             # 将角度转换为弧度
             pout = radians(pout)
-
         # 根据弧度计算相位寄存器的值
         phaseR = int(pout * 4096 / (2 * pi))
-
         # 将相位值与地址合并
         phaseR = phaseR + (0b11 << 14) + (phaseSelect << 13)
 
@@ -344,10 +350,10 @@ class AD9833:
         """
         设置AD9833输出波形的类型，根据输入的模式选择不同的波形。
 
-        根据传入的`mode`参数设置AD9833输出信号的波形类型。支持的波形包括：正弦波、三角波、方波、二分之一频率的方波、复位和关闭模式。
+        根据传入的`mode`参数设置AD9833输出信号的波形类型。支持的波形包括:正弦波、三角波、方波、二分之一频率的方波、复位和关闭模式。
 
         Args:
-            mode (str): 选择输出波形的类型，支持的值有：
+            mode (str): 选择输出波形的类型，支持的值有:
                 - 'SIN': 正弦波
                 - 'TRIANGLE': 三角波
                 - 'SQUARE': 方波
@@ -396,16 +402,16 @@ class AD9833:
         """
         设置频率寄存器的写入模式。
 
-        该方法用于配置频率寄存器的写入方式，支持三种模式：
-        - 'BOTH'：同时写入MSB和LSB；
-        - 'MSB'：只写入高14位（MSB）；
-        - 'LSB'：只写入低14位（LSB）。
+        该方法用于配置频率寄存器的写入方式，支持三种模式:
+        - 'BOTH':同时写入MSB和LSB；
+        - 'MSB':只写入高14位（MSB）；
+        - 'LSB':只写入低14位（LSB）。
 
         Args:
-            writeMode (str): 写入模式。支持的选项有：
-                - 'BOTH'：同时写入频率寄存器的MSB和LSB；
-                - 'MSB'：只写入频率寄存器的高14位；
-                - 'LSB'：只写入频率寄存器的低14位。
+            writeMode (str): 写入模式。支持的选项有:
+                - 'BOTH':同时写入频率寄存器的MSB和LSB；
+                - 'MSB':只写入频率寄存器的高14位；
+                - 'LSB':只写入频率寄存器的低14位。
                 默认值是'BOTH'。
 
         Returns:

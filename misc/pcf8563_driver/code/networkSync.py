@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2019 lewis he
@@ -24,7 +24,7 @@ SOFTWARE.
 networkSync.py - MicroPython library for NXP PCF8563 Real-time clock/calendar
 Created by Lewis he on September 17, 2019.
 github:https://github.com/lewisxhe/PCF8563_PythonLibrary
-'''
+"""
 
 import utime
 import network
@@ -48,18 +48,18 @@ rtc = RTC()
 rtc.ntp_sync(server="hr.pool.ntp.org", tz="CST-8")
 
 while rtc.synced() == False:
-    print('sync rtc now...')
+    print("sync rtc now...")
     time.sleep(1)
-print('sync success')
+print("sync success")
 utime.localtime()
 
 i2c = I2C(scl=22, sda=21)
 r = pcf8563.PCF8563(i2c)
 
-print('rtc time')
+print("rtc time")
 r.datetime()
 time.sleep(1)
-print('sync system to pcf8563')
+print("sync system to pcf8563")
 r.write_now()
 
 while True:

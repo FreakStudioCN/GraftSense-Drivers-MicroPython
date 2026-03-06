@@ -27,9 +27,9 @@ class CH9328:
     """
     CH9328 UART转USB HID键盘模拟器驱动类。
 
-    该类提供CH9328芯片的完整驱动功能，支持多种工作模式下的键盘模拟操作：
-    - Mode0/1/2：直接ASCII字符发送
-    - Mode3：透传模式，支持原始HID数据包发送
+    该类提供CH9328芯片的完整驱动功能，支持多种工作模式下的键盘模拟操作:
+    - Mode0/1/2:直接ASCII字符发送
+    - Mode3:透传模式，支持原始HID数据包发送
     支持单键按下、释放、组合键、字符串输入等功能。
 
     Attributes:
@@ -390,7 +390,7 @@ class CH9328:
         Note:
             - 默认设置为Mode0（模式0）。
             - UART参数需提前配置（波特率、数据位、停止位等）。
-            - 常见波特率：9600, 19200, 38400, 57600, 115200等。
+            - 常见波特率:9600, 19200, 38400, 57600, 115200等。
 
         ==========================================
 
@@ -418,8 +418,8 @@ class CH9328:
             ValueError: 模式不在支持范围内时抛出。
 
         Note:
-            - 模式0/1/2：ASCII模式，自动转HID码。
-            - 模式3：透传模式，需手动构造HID数据包。
+            - 模式0/1/2:ASCII模式，自动转HID码。
+            - 模式3:透传模式，需手动构造HID数据包。
             - 模式设置需配合硬件IO2~IO4引脚电平。
 
         ==========================================
@@ -439,14 +439,14 @@ class CH9328:
         """
         # 校验模式合法性
         if mode not in CH9328.KEYBOARD_MODE:
-            raise ValueError(f"无效工作模式，仅支持：{CH9328.KEYBOARD_MODE}")
+            raise ValueError(f"无效工作模式，仅支持:{CH9328.KEYBOARD_MODE}")
         self.current_mode = mode
 
     def crlf(self):
         """
         发送回车换行符（CR/LF），根据当前模式选择不同的控制字符。
 
-        该方法根据设备当前的工作模式发送相应的回车换行控制字符：
+        该方法根据设备当前的工作模式发送相应的回车换行控制字符:
         - 当模式为0时，发送ESC字符（0x1B）
         - 当模式为2时，发送'('字符（0x28）
 
@@ -475,7 +475,7 @@ class CH9328:
         # 验证current_mode是否等于0或2
         if self.current_mode not in (0, 2):
             # 返回当前模式，说明不可用
-            print(f"错误：当前模式 {self.current_mode} 不支持此操作，仅支持模式0或2")
+            print(f"错误:当前模式 {self.current_mode} 不支持此操作，仅支持模式0或2")
             return False
 
         # 验证通过，执行相应操作
@@ -522,7 +522,7 @@ class CH9328:
         """
         # 校验工作模式
         if self.current_mode == 3:
-            print("警告：透传模式（Mode3）不支持send_ascii，建议使用send_hid_packet")
+            print("警告:透传模式（Mode3）不支持send_ascii，建议使用send_hid_packet")
             return
 
         # 发送ASCII码（仅单个字符）
@@ -562,7 +562,7 @@ class CH9328:
         """
         # 校验工作模式
         if self.current_mode == 3:
-            print("警告：透传模式（Mode3）不支持send_ascii，建议使用send_hid_packet")
+            print("警告:透传模式（Mode3）不支持send_ascii，建议使用send_hid_packet")
             return
         for char in text:
             self.send_ascii(char)
@@ -600,10 +600,10 @@ class CH9328:
         """
         # 1. 校验模式和数据包长度
         if self.current_mode != 3:
-            print("错误：仅透传模式（Mode3）支持send_hid_packet")
+            print("错误:仅透传模式（Mode3）支持send_hid_packet")
             return False
         if len(packet) != 8:
-            print("错误：HID数据包必须为8字节")
+            print("错误:HID数据包必须为8字节")
             return False
 
         # 2. 发送数据包
@@ -612,7 +612,7 @@ class CH9328:
             time.sleep_ms(1)
             return True
         except Exception as e:
-            print(f"发送失败：{e}")
+            print(f"发送失败:{e}")
             return False
 
     def press_key(self, key_code: int, modifier: int = MODIFIER_NONE) -> None:
@@ -641,20 +641,20 @@ class CH9328:
             - Constructs standard 8-byte keyboard press data packet.
             - Unused key positions filled with 0x00.
         """
-        # 构造键盘按下数据包：[修饰键, 保留位, 按键1, 按键2~6]（未使用按键填0）
+        # 构造键盘按下数据包:[修饰键, 保留位, 按键1, 按键2~6]（未使用按键填0）
         packet = bytes(
             [
-                # 第1字节：修饰键
+                # 第1字节:修饰键
                 modifier,
-                # 第2字节：保留位
+                # 第2字节:保留位
                 0x00,
-                # 第3字节：主按键
+                # 第3字节:主按键
                 key_code,
-                # 第4~6字节：未使用按键
+                # 第4~6字节:未使用按键
                 0x00,
                 0x00,
                 0x00,
-                # 第7~8字节：未使用按键
+                # 第7~8字节:未使用按键
                 0x00,
                 0x00,
             ]
@@ -783,7 +783,7 @@ class CH9328:
         """
         for char in text:
             if char not in CH9328.CHAR_TO_HID:
-                print(f"警告：字符{char}不支持，跳过发送")
+                print(f"警告:字符{char}不支持，跳过发送")
                 continue
 
             # 判断是否需要Shift修饰键（大写字母）

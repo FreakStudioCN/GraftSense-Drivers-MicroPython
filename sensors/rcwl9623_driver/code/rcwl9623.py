@@ -35,7 +35,7 @@ class RCWL9623:
     注意，该超声波芯片有效测量距离为25CM到700CM，超出范围将返回 None。
 
     Attributes:
-        mode (int): 当前工作模式，取值为类常量之一：
+        mode (int): 当前工作模式，取值为类常量之一:
             GPIO_MODE, ONEWIRE_MODE, UART_MODE, I2C_MODE。
         trig (Pin): GPIO 模式下的触发引脚对象（仅 GPIO 模式有效）。
         echo (Pin): GPIO 模式下的回波引脚对象（仅 GPIO 模式有效）。
@@ -49,7 +49,7 @@ class RCWL9623:
             初始化超声波模块，根据模式配置相应的接口。
 
         read_distance() -> float | None:
-            读取距离（单位：厘米），如果失败则返回 None。
+            读取距离（单位:厘米），如果失败则返回 None。
 
         _read_gpio() -> float | None:
             GPIO 模式下的测距实现（内部方法）。
@@ -112,7 +112,7 @@ class RCWL9623:
         初始化 RCWL9623 超声波测距模块驱动。
 
         Args:
-            mode (int): 工作模式，必须为类常量之一：
+            mode (int): 工作模式，必须为类常量之一:
                 RCWL9623.GPIO_MODE / RCWL9623.ONEWIRE_MODE /
                 RCWL9623.UART_MODE / RCWL9623.I2C_MODE。
             gpio_pins (tuple[int, int] | list[int, int] | None):
@@ -295,7 +295,7 @@ class RCWL9623:
 
         注意:
             - 使用 time.sleep_us() / time.ticks_us() 等精确定时函数，依赖于阻塞延时，**非 ISR-safe**。
-            - 采用声速 343 m/s 进行换算：distance_cm = duration_us * 34300 / 1e6 / 2。
+            - 采用声速 343 m/s 进行换算:distance_cm = duration_us * 34300 / 1e6 / 2。
             - 对上/下降沿等待有超时保护（以避免长时间阻塞），超时时返回 None。
             - 调用前请确保 self.trig 和 self.echo 已由构造函数正确创建并配置为输出/输入。
 

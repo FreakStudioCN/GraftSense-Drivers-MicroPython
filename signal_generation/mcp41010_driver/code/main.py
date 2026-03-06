@@ -32,9 +32,9 @@ time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Using AD9833 and DS3502 to implement DDS signal generator")
 
-# # 创建AD9833芯片实例，使用SPI0外设：MOSI-GP19、SCLK-GP18、CS-GP20
+# # 创建AD9833芯片实例，使用SPI0外设:MOSI-GP19、SCLK-GP18、CS-GP20
 ad9833 = AD9833(sdo=19, clk=18, cs=20, fmclk=25, spi_id=0)
-# # 创建MCP41010芯片实例，使用SPI0外设：MOSI-GP19、SCLK-GP18、CS-GP21
+# # 创建MCP41010芯片实例，使用SPI0外设:MOSI-GP19、SCLK-GP18、CS-GP21
 mcp41010 = MCP41010(clk_pin=18, cs_pin=21, mosi_pin=19, spi_id=0, max_value=255)
 
 # ========================================  主程序  ===========================================

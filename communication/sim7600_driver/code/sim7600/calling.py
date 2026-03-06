@@ -17,10 +17,10 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 # ======================================== 全局变量 ============================================
 
 
-
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class Calling:
     """
@@ -86,7 +86,7 @@ class Calling:
             Use ATD command for dialing, number must end with semicolon ; to indicate voice call
         """
         # 发送拨号指令并返回响应
-        return self.sim7600.send_command(f'ATD{number};')
+        return self.sim7600.send_command(f"ATD{number};")
 
     def hang_up(self):
         """
@@ -105,7 +105,7 @@ class Calling:
             Use ATH command to hang up all current calls, suitable for active hang up or rejecting incoming calls
         """
         # 发送挂断通话指令并返回响应
-        return self.sim7600.send_command('ATH')
+        return self.sim7600.send_command("ATH")
 
     def answer_call(self):
         """
@@ -124,7 +124,7 @@ class Calling:
             Use ATA command to answer the currently ringing incoming call, need to call in time after detecting incoming call
         """
         # 发送接听来电指令并返回响应
-        return self.sim7600.send_command('ATA')
+        return self.sim7600.send_command("ATA")
 
     def call_status(self):
         """
@@ -143,7 +143,7 @@ class Calling:
             Use AT+CLCC command to query current call list and status, return data includes call direction, status, number and other information
         """
         # 发送查询通话状态指令并返回响应
-        return self.sim7600.send_command('AT+CLCC')
+        return self.sim7600.send_command("AT+CLCC")
 
     def set_call_volume(self, level):
         """
@@ -163,7 +163,8 @@ class Calling:
             Use AT+CLVL command to set call volume, higher level means louder volume, recommended range 1-8
         """
         # 发送设置通话音量指令并返回响应
-        return self.sim7600.send_command(f'AT+CLVL={level}')
+        return self.sim7600.send_command(f"AT+CLVL={level}")
+
 
 # ======================================== 初始化配置 ===========================================
 

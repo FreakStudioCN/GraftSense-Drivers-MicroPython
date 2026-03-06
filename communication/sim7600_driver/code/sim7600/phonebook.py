@@ -18,6 +18,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class Phonebook:
     """
@@ -108,7 +109,7 @@ class Phonebook:
             Use AT+CPBR command to read contact information of specified index, return data includes name, number and other content
         """
         # 发送读取联系人指令并返回响应
-        return self.sim7600.send_command(f'AT+CPBR={index}')
+        return self.sim7600.send_command(f"AT+CPBR={index}")
 
     def delete_contact(self, storage, index):
         """
@@ -130,7 +131,7 @@ class Phonebook:
             Use AT+CPBW command with only index specified to delete contact at corresponding position
         """
         # 发送删除联系人指令并返回响应
-        return self.sim7600.send_command(f'AT+CPBW={index}')
+        return self.sim7600.send_command(f"AT+CPBW={index}")
 
     def list_contacts(self, storage):
         """
@@ -151,6 +152,7 @@ class Phonebook:
         """
         # 发送查询电话本信息指令并返回响应
         return self.sim7600.send_command(f'AT+CPBS="{storage}"')
+
 
 # ======================================== 初始化配置 ===========================================
 

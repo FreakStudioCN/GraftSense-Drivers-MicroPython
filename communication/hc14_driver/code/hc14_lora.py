@@ -142,7 +142,7 @@ class HC14_Lora:
     CH_MAX = const(50)
     CH_DEFAULT = const(28)
 
-    # 透明传输：每个无线速率每包最大字节数（厂商说明）
+    # 透明传输:每个无线速率每包最大字节数（厂商说明）
     # 注意这里用 const 的值放在 dict 中（dict 的值也为 const）
     MAX_PAYLOAD_PER_RATE = {
         1: const(40),
@@ -155,7 +155,7 @@ class HC14_Lora:
         8: const(250),
     }
 
-    # 私有：接收超时时间（秒），固定 3s（接口要求）
+    # 私有:接收超时时间（秒），固定 3s（接口要求）
     _RECV_TIMEOUT_S = const(3)
 
     def __init__(self, uart: UART, baud: int = BAUD_DEFAULT):
@@ -168,7 +168,7 @@ class HC14_Lora:
             line_terminator (bytes, optional): AT 命令行结束符，默认 b'\\r\\n'。
 
         Notes:
-            初始化时不主动查询模块，仅配置内部缓存：
+            初始化时不主动查询模块，仅配置内部缓存:
             baud/rate/power/channel/firmware_version。
         ==========================================
         Initialize HC14_Lora driver, bind UART and set default parameters.
@@ -611,7 +611,7 @@ class HC14_Lora:
 
     def get_params(self) -> (bool, dict | str):
         """
-        查询模块所有参数，发送 `AT+RX` 并解析多行响应：
+        查询模块所有参数，发送 `AT+RX` 并解析多行响应:
         OK+B:..., OK+C:..., OK+S:..., OK+P:...
 
         Returns:
@@ -687,7 +687,7 @@ class HC14_Lora:
 
     def transparent_recv(self, max_total_bytes: int = 1024, timeout_ms: int = 5000, quiet_ms: int = 2300):
         """
-        从 UART 读取并合并分片：当在 quiet_ms 时间内没有新数据到达时返回。
+        从 UART 读取并合并分片:当在 quiet_ms 时间内没有新数据到达时返回。
         timeout_ms 为最大等待时间，避免死等。
         """
         t_start = time.ticks_ms()
@@ -710,7 +710,7 @@ class HC14_Lora:
                     # 如果在 quiet_ms 内没有新数据，则认为包完整
                     if time.ticks_diff(time.ticks_ms(), last_activity) >= quiet_ms:
                         return (True, bytes(buf))
-                # 超时处理：如果起始等待时间超过 timeout_ms 且没有收到任何数据，超时返回
+                # 超时处理:如果起始等待时间超过 timeout_ms 且没有收到任何数据，超时返回
                 if time.ticks_diff(time.ticks_ms(), t_start) >= timeout_ms:
                     if len(buf) > 0:
                         return (True, bytes(buf))  # 收到部分数据但超时，还是返回

@@ -19,6 +19,7 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class FTP:
     """
@@ -66,7 +67,7 @@ class FTP:
         # 保存SIM7600模块核心对象引用
         self.sim7600 = sim7600
 
-    def set_ftp_parameters(self, server, port=21, user='', password=''):
+    def set_ftp_parameters(self, server, port=21, user="", password=""):
         """
         配置FTP服务器连接参数
         Configure FTP server connection parameters
@@ -89,11 +90,11 @@ class FTP:
             Configure CID, server address, port, username and password for FTP in sequence, CID is fixed to 1 corresponding to GPRS bearer 1
         """
         # 设置FTP使用的承载ID为1
-        self.sim7600.send_command(f'AT+FTPCID=1')
+        self.sim7600.send_command(f"AT+FTPCID=1")
         # 设置FTP服务器地址
         self.sim7600.send_command(f'AT+FTPSERV="{server}"')
         # 设置FTP服务器端口号
-        self.sim7600.send_command(f'AT+FTPPORT={port}')
+        self.sim7600.send_command(f"AT+FTPPORT={port}")
         # 设置FTP登录用户名
         self.sim7600.send_command(f'AT+FTPUN="{user}"')
         # 设置FTP登录密码
@@ -123,11 +124,11 @@ class FTP:
         # 设置FTP上传的远程路径为根目录
         self.sim7600.send_command(f'AT+FTPPUTPATH="/"')
         # 启动FTP上传模式
-        self.sim7600.send_command('AT+FTPPUT=1')
+        self.sim7600.send_command("AT+FTPPUT=1")
         # 以二进制模式打开本地文件
-        with open(local_path, 'rb') as file:
+        with open(local_path, "rb") as file:
             # 循环读取文件内容，每次读取512字节直到文件结束
-            for chunk in iter(lambda: file.read(512), b''):
+            for chunk in iter(lambda: file.read(512), b""):
                 # 发送文件数据块到FTP服务器
                 self.sim7600.write_uart(chunk)
         # 读取并返回上传完成后的响应数据
@@ -157,11 +158,11 @@ class FTP:
         # 设置FTP下载的远程路径为根目录
         self.sim7600.send_command(f'AT+FTPGETPATH="/"')
         # 启动FTP下载模式
-        self.sim7600.send_command('AT+FTPGET=1')
+        self.sim7600.send_command("AT+FTPGET=1")
         # 读取下载的文件数据
         data = self.sim7600.read_uart()
         # 以二进制模式写入本地文件
-        with open(local_path, 'wb') as file:
+        with open(local_path, "wb") as file:
             file.write(data)
         # 返回下载的文件数据
         return data
@@ -209,6 +210,7 @@ class FTP:
         self.sim7600.send_command(f'AT+FTPLIST="{remote_path}"')
         # 读取并返回文件列表响应数据
         return self.sim7600.read_uart()
+
 
 # ======================================== 初始化配置 ===========================================
 

@@ -3,7 +3,7 @@
 # @Time    : 2025/09/08 10:00
 # @Author  : 侯钧瀚
 # @File    : silicon5351.py
-# @Description : silicon5351时钟驱动 for MicroPython，代码参考自：https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
+# @Description : silicon5351时钟驱动 for MicroPython，代码参考自:https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -492,7 +492,7 @@ class SI5351_I2C:
 
     def __init__(self, i2c, crystal, load=SI5351_CRYSTAL_LOAD_10PF, address=SI5351_I2C_ADDRESS_DEFAULT):
         """
-        初始化 SI5351 对象：
+        初始化 SI5351 对象:
 
         Args:
             i2c: I2C 总线对象。
@@ -756,7 +756,7 @@ class SI5351_I2C:
         """
 
         if type(div) is not int or div < 4:
-            raise ValueError("bad multisynth divisor：div (int): Integer divider [4-2047].")
+            raise ValueError("bad multisynth divisor:div (int): Integer divider [4-2047].")
         if output == 0:
             reg = self.SI5351_REGISTER_MULTISYNTH0_PARAMETERS_1
         if output == 1:

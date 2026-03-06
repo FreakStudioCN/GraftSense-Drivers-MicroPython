@@ -213,8 +213,10 @@ class CS1237:
     def power_up(self):
         self.clock(0)
 
+
 class CS1238(CS1237):
     pass
+
 
 class CS1237P(CS1237):
 
@@ -247,6 +249,7 @@ class CS1237P(CS1237):
         for i in range(self.buffer_size):
             self.buffer[i] = self.read()
         self.data_acquired = True
+
 
 class CS1238P(CS1237P):
     pass

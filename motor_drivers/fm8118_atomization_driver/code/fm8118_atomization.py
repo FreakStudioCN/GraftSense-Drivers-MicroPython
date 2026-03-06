@@ -132,15 +132,15 @@ class FM8118_Atomization:
             - Short delays are added for level transition recognition.
             - Not ISR-safe.
         """
-        # 步骤1：拉高电平
+        # 步骤1:拉高电平
         self._pin.value(1)
         # 延时100ms
         time.sleep_ms(100)
-        # 步骤2：拉低电平
+        # 步骤2:拉低电平
         self._pin.value(0)
         # 延时100ms
         time.sleep_ms(100)
-        # 步骤3：再次拉高电平（最终保持高电平）
+        # 步骤3:再次拉高电平（最终保持高电平）
         self._pin.value(1)
         self._state = False
 

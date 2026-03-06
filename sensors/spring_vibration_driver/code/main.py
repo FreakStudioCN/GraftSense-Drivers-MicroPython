@@ -25,7 +25,7 @@ def vibration_callback() -> None:
     """
     震动回调函数，在检测到震动时触发。
 
-    Notes：
+    Notes:
         该函数由中断触发，通过 micropython.schedule 调度执行。
         采用节流措施，每50ms只处理一次中断，其他忽略。
 

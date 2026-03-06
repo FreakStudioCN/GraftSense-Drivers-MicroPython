@@ -16,12 +16,14 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 
 # 导入硬件控制模块，用于UART串口配置
 import machine
+
 # 导入时间模块，用于超时判断和时间戳计算
 import time
 
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 
 # ======================================== 自定义类 ============================================
 class SIM7600:
@@ -31,7 +33,7 @@ class SIM7600:
 
     实现SIM7600模块的核心基础功能，包括UART通信初始化、AT指令发送、模块电源管理、网络连接管理、状态监控等，
     是所有扩展功能类的基础父类
-    Implement core basic functions of SIM7600 module, including UART communication initialization, AT command sending, 
+    Implement core basic functions of SIM7600 module, including UART communication initialization, AT command sending,
     module power management, network connection management, status monitoring, etc., and is the basic parent class of all extended function classes
 
     Attributes:
@@ -108,7 +110,7 @@ class SIM7600:
             Automatically add \r\n terminator to command, cycle to read response until timeout, decode all response data to string and return after concatenation
         """
         # 为AT指令添加回车换行结束符
-        command += '\r\n'
+        command += "\r\n"
         # 向UART写入AT指令
         self.uart.write(command)
         # 记录指令发送开始时间戳
@@ -122,7 +124,7 @@ class SIM7600:
                 # 读取UART数据并解码为字符串，添加到响应列表
                 response.append(self.uart.read().decode())
         # 将响应列表拼接为完整字符串并返回
-        return ''.join(response)
+        return "".join(response)
 
     def power_on(self):
         """
@@ -141,7 +143,7 @@ class SIM7600:
             Use AT+CFUN=1 command to set module to full function mode, enable all RF functions
         """
         # 发送开启全功能模式指令并返回响应
-        return self.send_command('AT+CFUN=1')
+        return self.send_command("AT+CFUN=1")
 
     def power_off(self):
         """
@@ -160,7 +162,7 @@ class SIM7600:
             Use AT+CPOF command to turn off module power, module will enter low-power shutdown state
         """
         # 发送关闭模块电源指令并返回响应
-        return self.send_command('AT+CPOF')
+        return self.send_command("AT+CPOF")
 
     def reset_module(self):
         """
@@ -179,7 +181,7 @@ class SIM7600:
             Use AT+CRESET command to soft reset module, module will restart and restore default configuration
         """
         # 发送模块重置指令并返回响应
-        return self.send_command('AT+CRESET')
+        return self.send_command("AT+CRESET")
 
     def set_power_mode(self, mode):
         """
@@ -199,7 +201,7 @@ class SIM7600:
             Use AT+CSCLK command to set module sleep mode, different modes correspond to different power consumption levels and response speeds
         """
         # 发送设置功耗模式指令并返回响应
-        return self.send_command(f'AT+CSCLK={mode}')
+        return self.send_command(f"AT+CSCLK={mode}")
 
     def monitor_voltage(self):
         """
@@ -218,9 +220,9 @@ class SIM7600:
             Use AT+CBC command to query module battery voltage and power status, response format: +CBC: <batt_status>,<batt_voltage>,<batt_percent>
         """
         # 发送监控电压指令并返回响应
-        return self.send_command('AT+CBC')
+        return self.send_command("AT+CBC")
 
-    def connect(self, apn, user='', password=''):
+    def connect(self, apn, user="", password=""):
         """
         建立GPRS网络连接
         Establish GPRS network connection
@@ -242,13 +244,13 @@ class SIM7600:
             Execute GPRS attach, set APN parameters, activate PDP context, get IP address in sequence to complete network connection establishment
         """
         # 执行GPRS网络附着
-        self.send_command('AT+CGATT=1')
+        self.send_command("AT+CGATT=1")
         # 设置APN参数及认证信息
         self.send_command(f'AT+CSTT="{apn}","{user}","{password}"')
         # 激活PDP上下文
-        self.send_command('AT+CIICR')
+        self.send_command("AT+CIICR")
         # 获取分配的IP地址并返回
-        return self.send_command('AT+CIFSR')
+        return self.send_command("AT+CIFSR")
 
     def disconnect(self):
         """
@@ -267,7 +269,7 @@ class SIM7600:
             Use AT+CGATT=0 command to detach from GPRS network and disconnect all data connections
         """
         # 发送断开网络连接指令并返回响应
-        return self.send_command('AT+CGATT=0')
+        return self.send_command("AT+CGATT=0")
 
     def get_network_status(self):
         """
@@ -286,7 +288,7 @@ class SIM7600:
             Use AT+CREG? command to query network registration status, response format: +CREG: <n>,<stat>, stat=1 means registered to local network
         """
         # 发送查询网络状态指令并返回响应
-        return self.send_command('AT+CREG?')
+        return self.send_command("AT+CREG?")
 
     def set_flight_mode(self, enable):
         """
@@ -306,7 +308,8 @@ class SIM7600:
             Use AT+CFUN command to set flight mode, set to 0 (disable RF) when enable=True, set to 1 (enable RF) when enable=False
         """
         # 发送设置飞行模式指令并返回响应
-        return self.send_command(f'AT+CFUN={0 if enable else 1}')
+        return self.send_command(f"AT+CFUN={0 if enable else 1}")
+
 
 # ======================================== 初始化配置 ===========================================
 

@@ -450,9 +450,7 @@ class DPS310:
 
         """
         if self.mode in (IDLE, ONE_TEMPERATURE, CONT_TEMP):
-            raise RuntimeError(
-                "Sensor mode is set to idle or temperature measurement, can't wait for a pressure measurement"
-            )
+            raise RuntimeError("Sensor mode is set to idle or temperature measurement, can't wait for a pressure measurement")
         while self._pressure_ready is False:
             time.sleep(0.001)
 
@@ -462,9 +460,7 @@ class DPS310:
         error if the sensor isn't configured for temperate measurements,
         """
         if self.mode in (IDLE, ONE_PRESSURE, CONT_PRESSURE):
-            raise RuntimeError(
-                "Sensor mode is set to idle or pressure measurement, can't wait for a temperature measurement"
-            )
+            raise RuntimeError("Sensor mode is set to idle or pressure measurement, can't wait for a temperature measurement")
         while self._temp_ready is False:
             time.sleep(0.001)
 
@@ -478,9 +474,7 @@ class DPS310:
         coeffs = [None] * 18
         for offset in range(18):
             register = 0x10 + offset
-            coeffs[offset] = struct.unpack(
-                "B", self._i2c.readfrom_mem(self._address, register, 1)
-            )[0]
+            coeffs[offset] = struct.unpack("B", self._i2c.readfrom_mem(self._address, register, 1))[0]
 
         self._c0 = (coeffs[0] << 4) | ((coeffs[1] >> 4) & 0x0F)
         self._c0 = self._twos_complement(self._c0, 12)
@@ -533,10 +527,8 @@ class DPS310:
 
         pres_calc = (
             self._c00
-            + scaled_rawpres
-            * (self._c10 + scaled_rawpres * (self._c20 + scaled_rawpres * self._c30))
-            + scaled_rawtemp
-            * (self._c01 + scaled_rawpres * (self._c11 + scaled_rawpres * self._c21))
+            + scaled_rawpres * (self._c10 + scaled_rawpres * (self._c20 + scaled_rawpres * self._c30))
+            + scaled_rawtemp * (self._c01 + scaled_rawpres * (self._c11 + scaled_rawpres * self._c21))
         )
 
         final_pressure = pres_calc / 100
@@ -549,9 +541,7 @@ class DPS310:
         The altitude in meters based on the sea level pressure
         (:attr:`sea_level_pressure`) - which you must enter ahead of time
         """
-        return 44330.0 * (
-            1.0 - math.pow(self.pressure / self._sea_level_pressure, 0.1903)
-        )
+        return 44330.0 * (1.0 - math.pow(self.pressure / self._sea_level_pressure, 0.1903))
 
     @altitude.setter
     def altitude(self, value: float) -> None:

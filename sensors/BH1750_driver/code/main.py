@@ -44,7 +44,6 @@ for device in devices_list:
         print("I2c hexadecimal address:", hex(device))
         bh_addr = device
 
-
 sensor = BH1750(bh_addr, i2c)
 
 # ========================================  主程序  ============================================

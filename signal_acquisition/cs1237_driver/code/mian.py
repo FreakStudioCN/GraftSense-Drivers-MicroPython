@@ -1,5 +1,3 @@
-
-
 import array
 from cs1237 import CS1237
 from machine import Pin

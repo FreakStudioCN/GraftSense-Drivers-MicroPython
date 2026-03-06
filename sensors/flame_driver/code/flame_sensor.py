@@ -191,7 +191,7 @@ class FlameSensor:
 
     def _irq_handler(self, pin: Pin) -> None:
         """
-        内部方法：数字引脚 IRQ 中断处理函数。
+        内部方法:数字引脚 IRQ 中断处理函数。
         仅更新时间标志和检测状态，避免在 ISR 内进行耗时操作。
         使用 micropython.schedule 调度用户回调。
 

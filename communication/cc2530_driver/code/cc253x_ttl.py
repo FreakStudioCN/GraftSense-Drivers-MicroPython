@@ -194,7 +194,7 @@ class CC253xTTL:
     """
 
     # 前导与控制码
-    PREFIX = const("02A879C3")  # 示例：也可用 bytes 表示
+    PREFIX = const("02A879C3")  # 示例:也可用 bytes 表示
     # 默认值（const)
     DEFAULT_BAUD = const(9600)
     DEFAULT_CHANNEL = const(0x0B)
@@ -238,7 +238,7 @@ class CC253xTTL:
     # 私有辅助方法
     def _send(self, cmd):
         """
-        私有方法：发送 AT 命令并等待响应，直到收到 OK 或 ERROR。
+        私有方法:发送 AT 命令并等待响应，直到收到 OK 或 ERROR。
 
         Args:
             cmd (str): 完整的 AT 命令字符串。
@@ -284,11 +284,11 @@ class CC253xTTL:
     def read_status(self) -> str:
         """
         查询入网状态。
-        02：设备没有加入网络
-        06：EndDevice已经入网
-        07：Router已经入网
-        08：Coordiator正在启动
-        09：Coordinator已经启动
+        02:设备没有加入网络
+        06:EndDevice已经入网
+        07:Router已经入网
+        08:Coordiator正在启动
+        09:Coordinator已经启动
 
         Returns:
             int: 入网状态码（来自模块返回的 1 字节值）。
@@ -432,11 +432,11 @@ class CC253xTTL:
 
         Args:
             baud_idx (int): 波特率索引（0–4）。
-        00：9600
-        01：19200
-        02：38400
-        03：57600
-        04：115200
+        00:9600
+        01:19200
+        02:38400
+        03:57600
+        04:115200
 
         Returns:
             bool: 成功返回 True。

@@ -1618,7 +1618,7 @@ class R60ABD1:
             tuple: (x, y, z) 坐标值，单位cm。
 
         Note:
-            - 位置信息有正负：16位数据，最高位为符号位，剩余15位为数据位。
+            - 位置信息有正负:16位数据，最高位为符号位，剩余15位为数据位。
             - 使用_parse_signed_16bit_special方法解析每个坐标。
 
         ==========================================
@@ -1646,7 +1646,7 @@ class R60ABD1:
 
     def _parse_signed_16bit_special(self, two_bytes) -> int:
         """
-        解析有符号16位数据（特殊格式：首位符号位 + 后15位数值位）。
+        解析有符号16位数据（特殊格式:首位符号位 + 后15位数值位）。
 
         Args:
             two_bytes: 2字节的字节序列（大端序）。
@@ -2111,7 +2111,7 @@ class R60ABD1:
                 for frame in frames:
                     self.update_properties_from_frame(frame)
 
-            # 返回操作执行结果：(指令发送成功状态, 实际执行结果)
+            # 返回操作执行结果:(指令发送成功状态, 实际执行结果)
             return True, self._query_result
 
         except Exception as e:
@@ -2950,7 +2950,7 @@ class R60ABD1:
             response_data: 响应数据
             response_name: 响应名称（用于调试）
         """
-        # 情况1：正确时间正确读取
+        # 情况1:正确时间正确读取
         if self._query_in_progress and self._current_query_type == expected_type and not self._query_response_received:
 
             self._query_result = response_data
@@ -2960,13 +2960,13 @@ class R60ABD1:
                 query_name = self.QUERY_NAME_MAP.get(expected_type, f"Unknown({expected_type})")
                 print(f"[Query] {query_name} response received: {response_data}")
 
-        # 情况2：当前正在进行其他类型的查询，但收到了本响应
+        # 情况2:当前正在进行其他类型的查询，但收到了本响应
         elif self._query_in_progress and self._current_query_type != expected_type:
             if R60ABD1.DEBUG_ENABLED:
                 current_query = self.QUERY_NAME_MAP.get(self._current_query_type, f"Unknown({self._current_query_type})")
                 print(f"[Query] Unexpected {response_name} response during {current_query} query: {response_data}")
 
-        # 情况3：没有查询在进行，但收到了查询响应
+        # 情况3:没有查询在进行，但收到了查询响应
         elif not self._query_in_progress:
             if R60ABD1.DEBUG_ENABLED:
                 print(f"[Query] Unsolicited {response_name} response: {response_data}")
@@ -3432,7 +3432,7 @@ class R60ABD1:
                     # 更新对应的睡眠统计属性
                     self.sleep_quality_score = stats_data[0]
                     if R60ABD1.DEBUG_ENABLED:
-                        # 注意：stats_data[1]是总睡眠时长，需要根据实际情况决定如何分配
+                        # 注意:stats_data[1]是总睡眠时长，需要根据实际情况决定如何分配
                         print(f"[Sleep] Statistics updated")
 
             elif command == 0x0E:  # 睡眠异常

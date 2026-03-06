@@ -98,7 +98,7 @@ class SSD1306(framebuf.FrameBuffer):
         # framebuf.FrameBuffer类的构造方法
         # framebuf.FrameBuffer.__init__(self, buffer, width, height, format, stride, mapper)
         # 添加self.buffer到数据缓冲区来保存 I2C 数据/命令字节
-        # framebuf.MONO_VLSB：表示使用单色（黑白）显示，并且最低位在前（小端字节序）
+        # framebuf.MONO_VLSB:表示使用单色（黑白）显示，并且最低位在前（小端字节序）
         super().__init__(self.buffer, self.width, self.height, framebuf.MONO_VLSB)
         self.init_display()
 

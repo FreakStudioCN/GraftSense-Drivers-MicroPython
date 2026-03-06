@@ -23,7 +23,7 @@ import time
 
 def demo_brightness(disp: tm1637):
     """
-    演示亮度调节：
+    演示亮度调节:
     逐级增加亮度并显示数值，最后回到适合的亮度等级。
 
     Args:
@@ -46,7 +46,7 @@ def demo_brightness(disp: tm1637):
 
 def demo_show(disp: tm1637):
     """
-    演示字符串显示：
+    演示字符串显示:
     直接显示字符串和冒号显示效果。
 
     Args:
@@ -67,7 +67,7 @@ def demo_show(disp: tm1637):
 
 def demo_numbers(disp: tm1637):
     """
-    演示两组数字显示：
+    演示两组数字显示:
     显示带冒号的两组数字，并演示范围裁剪。
 
     Args:
@@ -88,7 +88,7 @@ def demo_numbers(disp: tm1637):
 
 def demo_number(disp: tm1637):
     """
-    演示单个数字显示：
+    演示单个数字显示:
     循环展示不同的整数，含正数与负数。
 
     Args:
@@ -108,7 +108,7 @@ def demo_number(disp: tm1637):
 
 def demo_hex(disp: tm1637):
     """
-    演示十六进制数显示：
+    演示十六进制数显示:
     循环显示不同的十六进制数。
 
     Args:
@@ -128,7 +128,7 @@ def demo_hex(disp: tm1637):
 
 def demo_temperature(disp: tm1637):
     """
-    演示温度显示：
+    演示温度显示:
     循环显示不同的温度值（范围 -15 ~ 120）。
 
     Args:
@@ -148,7 +148,7 @@ def demo_temperature(disp: tm1637):
 
 def demo_scroll(disp: tm1637):
     """
-    演示字符串滚动：
+    演示字符串滚动:
     循环滚动显示字符串。
 
     Args:
@@ -166,7 +166,7 @@ def demo_scroll(disp: tm1637):
 
 def demo_raw_write(disp: tm1637):
     """
-    演示原始段码写入：
+    演示原始段码写入:
     使用自定义段码绘制中横杠，再清空。
 
     Args:
@@ -206,4 +206,4 @@ while True:
     demo_hex(tm)  # 十六进制显示
     demo_temperature(tm)  # 温度显示（含 lo/hi）
     demo_scroll(tm)  # 滚动文本
-    demo_raw_write(tm)  # 原始段码：显示“----”和空白
+    demo_raw_write(tm)  # 原始段码:显示“----”和空白

@@ -344,9 +344,7 @@ class KX132:
         else:
             valid_range = range(0, 10)
         if value not in valid_range:
-            raise ValueError(
-                "Value must be a valid setting in relation with the performance mode"
-            )
+            raise ValueError("Value must be a valid setting in relation with the performance mode")
         self._operating_mode = STANDBY_MODE
         self._output_data_rate = value
         self._operating_mode = NORMAL_MODE

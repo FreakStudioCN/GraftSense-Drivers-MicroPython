@@ -89,7 +89,7 @@ class RelayController:
             Release resources, including timer and GPIO pins.
     """
 
-    # 类属性：继电器类型字典
+    # 类属性:继电器类型字典
     RELAY_TYPES = {
         # 普通单线圈继电器
         "normal": "Standard single-coil relay",
@@ -167,7 +167,7 @@ class RelayController:
         """
         获取继电器当前状态。
 
-        注意：对于普通继电器，返回实际引脚状态；对于磁保持继电器，返回最后一次设置的状态（可能不准确）。
+        注意:对于普通继电器，返回实际引脚状态；对于磁保持继电器，返回最后一次设置的状态（可能不准确）。
 
         Args:
             None: 此方法不接受任何参数。
@@ -201,7 +201,7 @@ class RelayController:
 
     def _reset_pins(self, timer: Timer = None) -> None:
         """
-        定时器回调函数：脉冲结束后复位所有引脚。
+        定时器回调函数:脉冲结束后复位所有引脚。
 
         该方法作为定时器回调函数，在脉冲结束后将所有控制引脚置为低电平。
 
