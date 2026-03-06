@@ -1,6 +1,6 @@
 # Python env   : MicroPython v1.23.0 on Raspberry Pi Pico
 # -*- coding: utf-8 -*-
-# @Time    : 2025/4/18
+# @Time    : 2026/3/06
 # @Author  : hogeiha
 # @File    : main.py
 # @Description : 拨轮开关库函数（适配Raspberry Pi Pico）
