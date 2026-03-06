@@ -7,14 +7,21 @@
 
 import time
 from machine import I2C, Pin
-from tea5767 import Radio  # 导入原有Radio类
+# 导入原有Radio类
+from tea5767 import Radio
 
 # ======================== 硬件配置（根据实际接线修改）========================
-I2C_SCL = 5  # Pico I2C SCL引脚
-I2C_SDA = 4  # Pico I2C SDA引脚
-RADIO_ADDR = 0x60  # Tea5767默认I2C地址
-SEARCH_BAND = "US"  # 搜索频段：US(87.5-108.0) / JP(76.0-91.0)
-STEP = 0.1  # FM频率步进（固定0.1MHz）
+
+# Pico I2C SCL引脚
+I2C_SCL = 5
+# Pico I2C SDA引脚
+I2C_SDA = 4
+# Tea5767默认I2C地址
+RADIO_ADDR = 0x60
+# 搜索频段：US(87.5-108.0) / JP(76.0-91.0)
+SEARCH_BAND = "US"
+# FM频率步进（固定0.1MHz）
+STEP = 0.1
 
 # ======================== 核心搜索逻辑 ========================
 
@@ -46,7 +53,8 @@ else:
         # 设置当前频率并等待稳定
         radio.set_frequency(current_freq)
         time.sleep_ms(20)
-        radio.read()  # 读取最新状态
+        # 读取最新状态
+        radio.read()
 
         # 更新最高信号记录
         if radio.signal_adc_level > max_signal_level:
