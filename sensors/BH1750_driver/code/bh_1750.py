@@ -16,6 +16,7 @@ __platform__ = "MicroPython v1.23"
 import math
 from micropython import const
 from time import sleep_ms
+import machine
 
 # ======================================== 全局变量 ============================================
 
@@ -90,7 +91,7 @@ class BH1750:
     MEASUREMENT_TIME_MIN = const(31)
     MEASUREMENT_TIME_MAX = const(254)
 
-    def __init__(self, address, i2c):
+    def __init__(self, address: int, i2c: machine.I2C):
         """
         初始化 BH1750 传感器。
 
