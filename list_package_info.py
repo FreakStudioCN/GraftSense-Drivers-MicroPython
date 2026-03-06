@@ -11,7 +11,6 @@ import sys
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 
-
 def scan_package_json_recursive(root_dir, parent_subdir=""):
     """递归扫描目录，收集所有package.json信息"""
     package_info = []

@@ -1,17 +1,21 @@
-#!/usr/bin/env python3
+# Python env   : Python v3.12.0
 # -*- coding: utf-8 -*-
+# @Time    : 2026/3/06 下午6:36
+# @Author  : 李清水
+# @File    : list_package_info.py
+# @Description : MicroPython代码规范检查工具，自动化校验驱动文件和main.py是否符合8条预设编码规范，支持单文件、多文件及目录（递归/非递归）批量检查
 
 """
-Pre-commit code checker for MicroPython driver files & main.py
-Check all specified rules:
-1. 非main.py文件:必须包含4个顶层全局变量(__version__, __author__, __license__, __platform__)
-2. 非main.py文件:必须包含独立的 # @License : MIT 注释行
-3. 所有文件:raise/print中无中文字符
-4. main.py:全局变量区无实例化，初始化配置区有实例化
-5. main.py:while循环仅在主程序区
-6. main.py:初始化配置区有time.sleep(3)和FreakStudio打印（非main.py跳过）
-7. 所有文件:__init__方法有参数类型注解+try-except
-8. 非main.py文件:类中所有有入口参数的方法必须包含参数合法性校验（isinstance/hasattr/取值判断+raise）
+    Pre-commit code checker for MicroPython driver files & main.py
+    Check all specified rules:
+    1. 非main.py文件:必须包含4个顶层全局变量(__version__, __author__, __license__, __platform__)
+    2. 非main.py文件:必须包含独立的 # @License : MIT 注释行
+    3. 所有文件:raise/print中无中文字符
+    4. main.py:全局变量区无实例化，初始化配置区有实例化
+    5. main.py:while循环仅在主程序区
+    6. main.py:初始化配置区有time.sleep(3)和FreakStudio打印（非main.py跳过）
+    7. 所有文件:__init__方法有参数类型注解+try-except
+    8. 非main.py文件:类中所有有入口参数的方法必须包含参数合法性校验（isinstance/hasattr/取值判断+raise）
 """
 
 # ======================================== 导入相关模块 =========================================
