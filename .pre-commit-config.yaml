@@ -10,3 +10,13 @@ repos:
     hooks:
       - id: flake8
         args: ["--ignore=E203,E501,W503", "--max-line-length=150"]
+
+  # 新增：执行 hello.py 的本地钩子
+  - repo: local
+    hooks:
+      - id: run-hello-script
+        name: Run Hello Script
+        entry: python hello.py  # Windows 下用 python 或 python3 都可以，看你的环境
+        language: system
+        pass_filenames: false
+        always_run: true  # 每次提交都执行
