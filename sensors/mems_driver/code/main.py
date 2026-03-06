@@ -20,9 +20,7 @@ print("FreakStudio : Using IIC to read MEMS sensor")
 
 i2c = SoftI2C(sda=Pin(4), scl=Pin(5), freq=100000)
 
-
 monitor = AirQualityMonitor(i2c)
-
 
 # 通道0：VOC传感器注册与校准
 print("Registering and calibrating VOC sensor on channel 0...")
