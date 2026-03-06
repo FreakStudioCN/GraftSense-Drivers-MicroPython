@@ -15,6 +15,7 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 # ======================================== 导入相关模块 =========================================
 # 导入硬件控制模块，用于I2C和引脚配置
 import machine
+
 # 导入时间模块，用于延时操作
 import time
 
@@ -74,6 +75,7 @@ _4BITMODE = 0x00
 
 # ======================================== 自定义类 ============================================
 
+
 class LCD:
     """
     I2C接口LCD1602显示屏驱动类
@@ -81,7 +83,7 @@ class LCD:
 
     实现基于I2C通信协议的LCD1602显示屏完整控制功能，包括显示开关、光标管理、清屏、
     字符输出、光标定位等核心功能，适配Raspberry Pi Pico的硬件I2C接口
-    Implement complete control functions of LCD1602 display based on I2C communication protocol, including core functions such as display on/off, 
+    Implement complete control functions of LCD1602 display based on I2C communication protocol, including core functions such as display on/off,
     cursor management, screen clearing, character output, cursor positioning, and adapt to hardware I2C interface of Raspberry Pi Pico
 
     Attributes:
@@ -130,7 +132,7 @@ class LCD:
         Notes:
             根据SCL引脚编号自动选择I2C0或I2C1接口，初始化后默认开启显示、关闭光标和闪烁，
             光标定位在(0,0)位置，输入模式为左移、不移位
-            Automatically select I2C0 or I2C1 interface according to SCL pin number, after initialization, display is turned on by default, 
+            Automatically select I2C0 or I2C1 interface according to SCL pin number, after initialization, display is turned on by default,
             cursor and blink are turned off, cursor is positioned at (0,0), input mode is left shift and no shift
         """
         # 初始化光标列位置
@@ -301,7 +303,7 @@ class LCD:
             # 字符输出间隔延时
             time.sleep_ms(10)
             # 发送字符数据（0x40为数据写入标志）
-            self.i2c.writeto(self.address, b'\x40' + s[i])
+            self.i2c.writeto(self.address, b"\x40" + s[i])
             # 更新当前列位置
             self.column = self.column + 1
             # 检查是否需要换行
@@ -333,6 +335,7 @@ class LCD:
         self.i2c.writeto(self.address, self.command)
         # 指令执行延时
         time.sleep_ms(1)
+
 
 # ======================================== 初始化配置 ===========================================
 

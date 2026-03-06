@@ -22,6 +22,7 @@ import time
 
 # ======================================== 自定义类 ============================================
 
+
 class EWM550_UWB:
     """
     EWM550-7G9T10SP UWB模组驱动类，基于UART接口实现AT指令配置、测距模式、透传模式控制。
@@ -156,13 +157,11 @@ class EWM550_UWB:
         _recv_resp():
             Low-level UART response reception (internal method).
     """
+
     # 模块角色常量
     Role = {"TAG": 0, "BASE": 1, "TRANSMODE": 2}
     # 波特率常量，键为AT指令参数，值为实际波特率
-    Baud = {
-        0: 9600, 1: 19200, 2: 38400, 3: 57600, 4: 115200,
-        5: 230400, 6: 460800, 7: 921600, 8: 1000000, 9: 2000000
-    }
+    Baud = {0: 9600, 1: 19200, 2: 38400, 3: 57600, 4: 115200, 5: 230400, 6: 460800, 7: 921600, 8: 1000000, 9: 2000000}
     # 工作信道常量
     CHANNEL = {"CH5": 5, "CH9": 9}
     # 功率档位常量
@@ -679,21 +678,18 @@ class EWM550_UWB:
                     "tag_addr": parts[1].strip(),
                     "distance": int(parts[2].replace("cm", "").strip()),
                     "snr": int(parts[3].replace("dB", "").strip()),
-                    "sleep": sleep_flag
+                    "sleep": sleep_flag,
                 }
             # 标签端数据格式：P,1111,10cm
             elif data_str.startswith("P,") and "cm" in data_str:
                 parts = data_str.split(",")
                 if len(parts) != 3:
                     return None
-                return {
-                    "type": "tag",
-                    "base_addr": parts[1].strip(),
-                    "distance": int(parts[2].replace("cm", "").strip())
-                }
+                return {"type": "tag", "base_addr": parts[1].strip(), "distance": int(parts[2].replace("cm", "").strip())}
             return None
         except Exception:
             return None
+
 
 # ======================================== 初始化配置 ==========================================
 

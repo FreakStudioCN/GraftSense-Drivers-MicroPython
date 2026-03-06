@@ -26,5 +26,4 @@ radio = Radio(i2c, freq=106.7)
 
 # ========================================  主程序  ============================================
 
-print('Frequency: FM {}\nReady: {}\nStereo: {}\nADC level: {}'.format(
-    radio.frequency, radio.is_ready,  radio.is_stereo, radio.signal_adc_level))
+print("Frequency: FM {}\nReady: {}\nStereo: {}\nADC level: {}".format(radio.frequency, radio.is_ready, radio.is_stereo, radio.signal_adc_level))

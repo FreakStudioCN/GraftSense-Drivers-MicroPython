@@ -21,6 +21,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class SIM800TCPIP(SIM800):
     """
@@ -119,7 +120,7 @@ class SIM800TCPIP(SIM800):
             First send AT+CIPSEND command to specify data length, then send actual data, add ASCII code 26 (CTRL+Z) at end to indicate completion
         """
         # 发送数据长度指令
-        self.send_command(f'AT+CIPSEND={len(data)}')
+        self.send_command(f"AT+CIPSEND={len(data)}")
         # 发送实际数据并添加结束符(ASCII 26)
         self.uart.write(data + chr(26))
         # 读取并返回响应
@@ -142,7 +143,7 @@ class SIM800TCPIP(SIM800):
             Use AT+CIPRXGET=2 command to read received TCP data
         """
         # 发送读取TCP数据指令并返回响应
-        return self.send_command('AT+CIPRXGET=2')
+        return self.send_command("AT+CIPRXGET=2")
 
     def close_tcp_connection(self):
         """
@@ -161,7 +162,7 @@ class SIM800TCPIP(SIM800):
             Use AT+CIPCLOSE=1 command to close TCP connection
         """
         # 发送关闭TCP连接指令并返回响应
-        return self.send_command('AT+CIPCLOSE=1')
+        return self.send_command("AT+CIPCLOSE=1")
 
     def start_udp_connection(self, ip, port):
         """
@@ -204,9 +205,9 @@ class SIM800TCPIP(SIM800):
         """
         # 判断数据类型，字符串转换为字节串
         if isinstance(data, str):
-            data = data.encode('utf-8')
+            data = data.encode("utf-8")
         # 发送数据长度指令
-        self.send_command(f'AT+CIPSEND={len(data)}')
+        self.send_command(f"AT+CIPSEND={len(data)}")
         # 发送实际数据并添加结束符(字节26)
         self.uart.write(data + bytes([26]))
         # 读取并返回响应
@@ -230,7 +231,7 @@ class SIM800TCPIP(SIM800):
             Use AT+CIPRXGET=2 command to read UDP data of specified length
         """
         # 发送读取UDP数据指令并返回响应
-        return self.send_command(f'AT+CIPRXGET=2,{max_length}')
+        return self.send_command(f"AT+CIPRXGET=2,{max_length}")
 
     def close_udp_connection(self):
         """
@@ -249,7 +250,7 @@ class SIM800TCPIP(SIM800):
             Use AT+CIPCLOSE=1 command to close UDP connection
         """
         # 发送关闭UDP连接指令并返回响应
-        return self.send_command('AT+CIPCLOSE=1')
+        return self.send_command("AT+CIPCLOSE=1")
 
     def shutdown_gprs(self):
         """
@@ -268,7 +269,7 @@ class SIM800TCPIP(SIM800):
             Use AT+CIPSHUT command to close GPRS PDP context
         """
         # 发送关闭GPRS指令并返回响应
-        return self.send_command('AT+CIPSHUT')
+        return self.send_command("AT+CIPSHUT")
 
     def get_ip_address(self):
         """
@@ -287,7 +288,7 @@ class SIM800TCPIP(SIM800):
             Use AT+CIFSR command to get assigned local IP address
         """
         # 发送获取IP地址指令并返回响应
-        return self.send_command('AT+CIFSR')
+        return self.send_command("AT+CIFSR")
 
     def http_init(self):
         """
@@ -306,7 +307,7 @@ class SIM800TCPIP(SIM800):
             Use AT+HTTPINIT command to initialize HTTP service context
         """
         # 发送HTTP初始化指令并返回响应
-        return self.send_command('AT+HTTPINIT')
+        return self.send_command("AT+HTTPINIT")
 
     def http_set_param(self, param, value):
         """
@@ -350,7 +351,7 @@ class SIM800TCPIP(SIM800):
         # 设置HTTP请求URL参数
         self.http_set_param("URL", url)
         # 发送HTTP GET请求指令
-        self.send_command('AT+HTTPACTION=0')
+        self.send_command("AT+HTTPACTION=0")
         # 读取并返回响应
         return self.read_response()
 
@@ -376,11 +377,11 @@ class SIM800TCPIP(SIM800):
         # 设置HTTP请求URL参数
         self.http_set_param("URL", url)
         # 设置POST数据长度和超时时间(10000ms)
-        self.send_command(f'AT+HTTPDATA={len(data)},10000')
+        self.send_command(f"AT+HTTPDATA={len(data)},10000")
         # 发送POST数据
         self.uart.write(data)
         # 发送HTTP POST请求指令
-        self.send_command('AT+HTTPACTION=1')
+        self.send_command("AT+HTTPACTION=1")
         # 读取并返回响应
         return self.read_response()
 
@@ -401,7 +402,7 @@ class SIM800TCPIP(SIM800):
             Use AT+HTTPTERM command to close HTTP service context
         """
         # 发送终止HTTP服务指令并返回响应
-        return self.send_command('AT+HTTPTERM')
+        return self.send_command("AT+HTTPTERM")
 
     def ftp_init(self, server, username, password, port=21):
         """
@@ -429,13 +430,13 @@ class SIM800TCPIP(SIM800):
         # 设置SAPBR连接类型为GPRS
         self.send_command('AT+SAPBR=3,1,"Contype","GPRS"')
         # 激活SAPBR承载
-        self.send_command('AT+SAPBR=1,1')
+        self.send_command("AT+SAPBR=1,1")
         # 设置FTP使用的CID
-        self.send_command(f'AT+FTPCID=1')
+        self.send_command(f"AT+FTPCID=1")
         # 设置FTP服务器地址
         self.send_command(f'AT+FTPSERV="{server}"')
         # 设置FTP服务器端口
-        self.send_command(f'AT+FTPPORT={port}')
+        self.send_command(f"AT+FTPPORT={port}")
         # 设置FTP登录用户名
         self.send_command(f'AT+FTPUN="{username}"')
         # 设置FTP登录密码并返回响应
@@ -465,9 +466,9 @@ class SIM800TCPIP(SIM800):
         # 设置FTP下载文件名
         self.send_command(f'AT+FTPGETNAME="{filename}"')
         # 启动FTP下载
-        self.send_command('AT+FTPGET=1')
+        self.send_command("AT+FTPGET=1")
         # 读取下载文件数据(超时10000ms)并返回响应
-        return self.send_command('AT+FTPGET=2,1024', timeout=10000)
+        return self.send_command("AT+FTPGET=2,1024", timeout=10000)
 
     def ftp_put_file(self, filename, remote_path, data):
         """
@@ -495,11 +496,11 @@ class SIM800TCPIP(SIM800):
         # 设置FTP上传文件名
         self.send_command(f'AT+FTPPUTNAME="{filename}"')
         # 启动FTP上传
-        self.send_command('AT+FTPPUT=1')
+        self.send_command("AT+FTPPUT=1")
         # 设置上传数据长度
-        self.send_command(f'AT+FTPPUT=2,{len(data)}')
+        self.send_command(f"AT+FTPPUT=2,{len(data)}")
         # 发送上传数据(自动转换为字节串)
-        self.uart.write(data if isinstance(data, bytes) else data.encode('utf-8'))
+        self.uart.write(data if isinstance(data, bytes) else data.encode("utf-8"))
         # 读取并返回响应
         return self.read_response()
 
@@ -520,7 +521,8 @@ class SIM800TCPIP(SIM800):
             Use AT+SAPBR=0,1 command to close SAPBR bearer to terminate FTP connection
         """
         # 发送关闭FTP连接指令并返回响应
-        return self.send_command('AT+SAPBR=0,1')
+        return self.send_command("AT+SAPBR=0,1")
+
 
 # ======================================== 初始化配置 ===========================================
 

@@ -15,8 +15,10 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 # ======================================== 导入相关模块 =========================================
 # 导入时间模块，用于系统时间交互
 import time
+
 # 导入I2C通信模块，用于与PCF8563进行数据交互
 from machine import I2C
+
 # 导入常量定义工具，用于定义硬件寄存器地址
 from micropython import const
 
@@ -108,6 +110,7 @@ CLOCK_CLK_HIGH_IMPEDANCE = const(0x0)
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class PCF8563:
     """
@@ -116,7 +119,7 @@ class PCF8563:
 
     实现PCF8563实时时钟模块的完整功能控制，包括时间读取/写入、系统时间同步、闹钟设置/清除、
     时钟输出频率配置等核心功能，基于I2C通信协议实现与硬件模块的交互
-    Implement complete function control of PCF8563 real-time clock module, including core functions such as time reading/writing, 
+    Implement complete function control of PCF8563 real-time clock module, including core functions such as time reading/writing,
     system time synchronization, alarm setting/clearing, clock output frequency configuration, and realize interaction with hardware module based on I2C communication protocol
 
     Attributes:
@@ -270,7 +273,7 @@ class PCF8563:
             RTC module stores time in BCD code format, which needs to be converted to decimal for easy use
         """
         # 高4位转换为十位，低4位转换为个位，合并为十进制数
-        return (((bcd & 0xf0) >> 4) * 10 + (bcd & 0x0f))
+        return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F)
 
     def __dec2bcd(self, dec):
         """
@@ -446,12 +449,9 @@ class PCF8563:
             Return time tuple compatible with time.localtime() format (without microseconds and DST)
         """
         # 组合完整的日期时间元组并返回
-        return (self.year(), self.month(), self.date(),
-                self.day(), self.hours(), self.minutes(),
-                self.seconds())
+        return (self.year(), self.month(), self.date(), self.day(), self.hours(), self.minutes(), self.seconds())
 
-    def write_all(self, seconds=None, minutes=None, hours=None, day=None,
-                  date=None, month=None, year=None):
+    def write_all(self, seconds=None, minutes=None, hours=None, day=None, date=None, month=None, year=None):
         """
         写入指定时间字段
         Write specified time fields
@@ -487,7 +487,7 @@ class PCF8563:
         if seconds is not None:
             # 验证秒数范围
             if seconds < 0 or seconds > 59:
-                raise ValueError('Seconds is out of range [0,59].')
+                raise ValueError("Seconds is out of range [0,59].")
             # 转换为BCD码并写入寄存器
             seconds_reg = self.__dec2bcd(seconds)
             self.__write_byte(PCF8563_SEC_REG, seconds_reg)
@@ -496,7 +496,7 @@ class PCF8563:
         if minutes is not None:
             # 验证分钟范围
             if minutes < 0 or minutes > 59:
-                raise ValueError('Minutes is out of range [0,59].')
+                raise ValueError("Minutes is out of range [0,59].")
             # 转换为BCD码并写入寄存器
             self.__write_byte(PCF8563_MIN_REG, self.__dec2bcd(minutes))
 
@@ -504,7 +504,7 @@ class PCF8563:
         if hours is not None:
             # 验证小时范围
             if hours < 0 or hours > 23:
-                raise ValueError('Hours is out of range [0,23].')
+                raise ValueError("Hours is out of range [0,23].")
             # 转换为BCD码并写入寄存器
             self.__write_byte(PCF8563_HR_REG, self.__dec2bcd(hours))
 
@@ -512,7 +512,7 @@ class PCF8563:
         if year is not None:
             # 验证年份范围
             if year < 0 or year > 99:
-                raise ValueError('Years is out of range [0,99].')
+                raise ValueError("Years is out of range [0,99].")
             # 转换为BCD码并写入寄存器
             self.__write_byte(PCF8563_YEAR_REG, self.__dec2bcd(year))
 
@@ -520,7 +520,7 @@ class PCF8563:
         if month is not None:
             # 验证月份范围
             if month < 1 or month > 12:
-                raise ValueError('Month is out of range [1,12].')
+                raise ValueError("Month is out of range [1,12].")
             # 转换为BCD码并写入寄存器
             self.__write_byte(PCF8563_MONTH_REG, self.__dec2bcd(month))
 
@@ -528,7 +528,7 @@ class PCF8563:
         if date is not None:
             # 验证日期范围
             if date < 1 or date > 31:
-                raise ValueError('Date is out of range [1,31].')
+                raise ValueError("Date is out of range [1,31].")
             # 转换为BCD码并写入寄存器
             self.__write_byte(PCF8563_DAY_REG, self.__dec2bcd(date))
 
@@ -536,7 +536,7 @@ class PCF8563:
         if day is not None:
             # 验证星期范围
             if day < 0 or day > 6:
-                raise ValueError('Day is out of range [0,6].')
+                raise ValueError("Day is out of range [0,6].")
             # 转换为BCD码并写入寄存器
             self.__write_byte(PCF8563_WEEKDAY_REG, self.__dec2bcd(day))
 
@@ -557,8 +557,7 @@ class PCF8563:
             Time tuple format is consistent with datetime() return value, only last two digits of year are taken (0-99)
         """
         # 解析时间元组并写入所有字段
-        self.write_all(dt[6], dt[5], dt[4], dt[3],
-                       dt[2], dt[1], dt[0] % 100)
+        self.write_all(dt[6], dt[5], dt[4], dt[3], dt[2], dt[1], dt[0] % 100)
 
     def write_now(self):
         """
@@ -634,7 +633,7 @@ class PCF8563:
         # 读取当前闹钟状态
         alarm_state = self.__read_byte(PCF8563_STAT2_REG)
         # 清除闹钟标志位
-        self.__write_byte(PCF8563_STAT2_REG, alarm_state & 0xf7)
+        self.__write_byte(PCF8563_STAT2_REG, alarm_state & 0xF7)
 
     def clear_alarm(self):
         """
@@ -708,7 +707,7 @@ class PCF8563:
         # 清除闹钟标志位
         alarm_state &= ~PCF8563_ALARM_AF
         # 设置定时器标志位和闹钟中断使能位
-        alarm_state |= (PCF8563_TIMER_TF | PCF8563_ALARM_AIE)
+        alarm_state |= PCF8563_TIMER_TF | PCF8563_ALARM_AIE
         # 写入更新后的状态
         self.__write_byte(PCF8563_STAT2_REG, alarm_state)
 
@@ -770,10 +769,9 @@ class PCF8563:
         else:
             # 验证分钟范围
             if minutes < 0 or minutes > 59:
-                raise ValueError('Minutes is out of range [0,59].')
+                raise ValueError("Minutes is out of range [0,59].")
             # 转换为BCD码并写入寄存器
-            self.__write_byte(PCF8563_ALARM_MINUTES,
-                              self.__dec2bcd(minutes) & 0x7f)
+            self.__write_byte(PCF8563_ALARM_MINUTES, self.__dec2bcd(minutes) & 0x7F)
 
         # 设置闹钟小时（如果指定）
         if hours is None:
@@ -783,10 +781,9 @@ class PCF8563:
         else:
             # 验证小时范围
             if hours < 0 or hours > 23:
-                raise ValueError('Hours is out of range [0,23].')
+                raise ValueError("Hours is out of range [0,23].")
             # 转换为BCD码并写入寄存器
-            self.__write_byte(PCF8563_ALARM_HOURS, self.__dec2bcd(
-                hours) & 0x7f)
+            self.__write_byte(PCF8563_ALARM_HOURS, self.__dec2bcd(hours) & 0x7F)
 
         # 设置闹钟日期（如果指定）
         if date is None:
@@ -796,10 +793,9 @@ class PCF8563:
         else:
             # 验证日期范围
             if date < 1 or date > 31:
-                raise ValueError('date is out of range [1,31].')
+                raise ValueError("date is out of range [1,31].")
             # 转换为BCD码并写入寄存器
-            self.__write_byte(PCF8563_ALARM_DAY, self.__dec2bcd(
-                date) & 0x7f)
+            self.__write_byte(PCF8563_ALARM_DAY, self.__dec2bcd(date) & 0x7F)
 
         # 设置闹钟星期（如果指定）
         if weekday is None:
@@ -809,10 +805,10 @@ class PCF8563:
         else:
             # 验证星期范围
             if weekday < 0 or weekday > 6:
-                raise ValueError('weekday is out of range [0,6].')
+                raise ValueError("weekday is out of range [0,6].")
             # 转换为BCD码并写入寄存器
-            self.__write_byte(PCF8563_ALARM_WEEKDAY, self.__dec2bcd(
-                weekday) & 0x7f)
+            self.__write_byte(PCF8563_ALARM_WEEKDAY, self.__dec2bcd(weekday) & 0x7F)
+
 
 # ======================================== 初始化配置 ===========================================
 

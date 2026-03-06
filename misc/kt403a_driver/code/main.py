@@ -1,4 +1,3 @@
-
 from kt403A import KT403A
 
 print("-----------------")

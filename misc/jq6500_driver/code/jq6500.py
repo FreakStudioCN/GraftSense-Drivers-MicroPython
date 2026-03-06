@@ -13,10 +13,12 @@ __platform__ = "MicroPython"
 # ======================================== 导入相关模块 =========================================
 # 导入MicroPython的UART串口通信模块
 from machine import UART
+
 # 导入时间延迟模块
 from time import sleep
 
 # ======================================== 自定义类 ============================================
+
 
 class Player(object):
     """
@@ -267,7 +269,7 @@ class Player(object):
         # 复位模块到初始状态
         self.reset()
         # 判断uart对象是否有deinit方法
-        if 'deinit' in dir(self.uart):
+        if "deinit" in dir(self.uart):
             # 释放UART硬件资源
             self.uart.deinit()
 
@@ -455,7 +457,7 @@ class Player(object):
             AssertionError: Triggered when volume level is out of 0-30 range.
         """
         # 断言检查音量值范围
-        assert (0 <= level <= 30)
+        assert 0 <= level <= 30
         # 发送设置音量指令（0x06 + 音量值）
         self.write_bytes([0x06, level])
 

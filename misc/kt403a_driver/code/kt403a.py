@@ -16,8 +16,10 @@ __platform__ = "MicroPython v1.23"
 
 # 导入MicroPython的UART串口通信模块
 from machine import UART
+
 # 导入MicroPython的毫秒级延迟模块
 from utime import sleep_ms
+
 # 导入MicroPython的字节解包模块
 from ustruct import unpack
 
@@ -26,6 +28,7 @@ from ustruct import unpack
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class KT403A:
     """
@@ -126,10 +129,10 @@ class KT403A:
 
     ==========================================
 
-    KT403A audio decoding module driver class, implementing full-featured control of the audio playback module 
+    KT403A audio decoding module driver class, implementing full-featured control of the audio playback module
     through the UART serial communication interface.
-    Provides core functions such as audio source switching, volume adjustment, EQ effect setting, track playback 
-    control, loop mode configuration, and supports auxiliary functions like device status query and file count 
+    Provides core functions such as audio source switching, volume adjustment, EQ effect setting, track playback
+    control, loop mode configuration, and supports auxiliary functions like device status query and file count
     statistics, adapted to the MicroPython development environment.
 
     Attributes:
@@ -248,13 +251,7 @@ class KT403A:
     # EQ音效常量 - 重低音模式
     EQ_BASS = 5
 
-    def __init__(self,
-                 uartBus,
-                 txPinNum,
-                 rxPinNum,
-                 device=None,
-                 volume=70,
-                 eq=None):
+    def __init__(self, uartBus, txPinNum, rxPinNum, device=None, volume=70, eq=None):
         """
         初始化KT403A音频模块实例，配置UART通信参数并设置初始工作状态。
 
@@ -294,17 +291,12 @@ class KT403A:
         # 构造RX引脚ID字符串（格式：P+引脚编号）
         rxPinId = "P" + str(rxPinNum)
         # 初始化UART通信实例，配置9600波特率、8位数据位、无校验、1位停止位
-        self._uart = UART(uartBus,
-                          baudrate=9600,
-                          bits=8,
-                          parity=None,
-                          stop=1,
-                          pins=(txPinId, rxPinId, None, None))
+        self._uart = UART(uartBus, baudrate=9600, bits=8, parity=None, stop=1, pins=(txPinId, rxPinId, None, None))
         # 设置初始音源设备（未指定时默认使用SD卡）
         self.SetDevice(device if device else KT403A.DEVICE_SD)
         # 检查模块初始化状态，获取不到状态则抛出异常
         if not self.GetState():
-            raise Exception('KT403A could not be initialized.')
+            raise Exception("KT403A could not be initialized.")
         # 设置初始音量值
         self.SetVolume(volume)
         # 设置初始EQ音效模式（未指定时默认使用普通模式）
@@ -336,21 +328,21 @@ class KT403A:
             Different delay times are set according to command types to ensure module processing completion
         """
         # 发送指令帧起始字节（0x7E）
-        self._uart.write(b'\x7E')
+        self._uart.write(b"\x7E")
         # 发送固件版本字节（0xFF）
-        self._uart.write(b'\xFF')
+        self._uart.write(b"\xFF")
         # 发送指令长度字节（0x06）
-        self._uart.write(b'\x06')
+        self._uart.write(b"\x06")
         # 发送指令字字节
         self._uart.write(bytes([cmd]))
         # 发送反馈标志字节（0x00）
-        self._uart.write(b'\x00')
+        self._uart.write(b"\x00")
         # 发送数据高字节
         self._uart.write(bytes([dataH]))
         # 发送数据低字节
         self._uart.write(bytes([dataL]))
         # 发送指令帧结束字节（0xEF）
-        self._uart.write(b'\xEF')
+        self._uart.write(b"\xEF")
         # 根据指令类型设置延迟：0x09(切换设备)200ms，0x0C(复位)1000ms，其他30ms
         sleep_ms(200 if cmd == 0x09 else 1000 if cmd == 0x0C else 30)
 
@@ -382,16 +374,11 @@ class KT403A:
             # 读取10字节响应数据
             buf = self._uart.read(10)
             # 验证响应帧格式有效性：非空、长度10、帧头帧尾正确、版本和长度字段匹配
-            if buf is not None and \
-               len(buf) == 10 and \
-               buf[0] == 0x7E and \
-               buf[1] == 0xFF and \
-               buf[2] == 0x06 and \
-               buf[9] == 0xEF:
+            if buf is not None and len(buf) == 10 and buf[0] == 0x7E and buf[1] == 0xFF and buf[2] == 0x06 and buf[9] == 0xEF:
                 # 提取响应指令字
                 cmd = buf[3]
                 # 大端序解包5-7字节为16位整数数据
-                data = unpack('>H', buf[5:7])[0]
+                data = unpack(">H", buf[5:7])[0]
                 # 返回指令字和数据元组
                 return (cmd, data)
         # 无有效响应返回None
@@ -481,7 +468,7 @@ class KT403A:
             the module has no response when the index is out of range
         """
         # 发送播放指定曲目指令（指令字0x03），拆分索引为高低字节
-        self._txCmd(0x03, int(trackIndex % 256), int(trackIndex/256))
+        self._txCmd(0x03, int(trackIndex % 256), int(trackIndex / 256))
 
     def VolumeUp(self):
         """
@@ -542,7 +529,7 @@ class KT403A:
         elif percent > 100:
             percent = 100
         # 转换百分比为模块音量级（0-30）并发送设置音量指令（指令字0x06）
-        self._txCmd(0x06, int(percent*0x1E/100))
+        self._txCmd(0x06, int(percent * 0x1E / 100))
 
     def SetEqualizer(self, eq):
         """
@@ -1115,6 +1102,7 @@ class KT403A:
         """
         # 检查状态值是否为暂停状态（0x0202）
         return self.GetState() == 0x0202
+
 
 # ======================================== 初始化配置 ==========================================
 

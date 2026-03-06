@@ -8,17 +8,17 @@ sim7600 = SIM7600(uart)
 ftp = FTP(sim7600)
 
 # Set FTP parameters
-ftp.set_ftp_parameters('ftp.example.com', user='username', password='password')
+ftp.set_ftp_parameters("ftp.example.com", user="username", password="password")
 
 # Upload a file
-ftp.upload_file('/local/path/file.txt', '/remote/path/file.txt')
+ftp.upload_file("/local/path/file.txt", "/remote/path/file.txt")
 
 # Download a file
-ftp.download_file('/remote/path/file.txt', '/local/path/file.txt')
+ftp.download_file("/remote/path/file.txt", "/local/path/file.txt")
 
 # Delete a file
-ftp.delete_file('/remote/path/file.txt')
+ftp.delete_file("/remote/path/file.txt")
 
 # List files
-files = ftp.list_files('/remote/path/')
+files = ftp.list_files("/remote/path/")
 print(files)

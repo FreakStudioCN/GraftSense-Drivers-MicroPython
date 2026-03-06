@@ -115,6 +115,7 @@ class MEMSGasSensor:
         Zero calibration is recommended to be performed in clean air environment, it is ideal to verify the reading is 0 after calibration, minor deviations are normal.
         Supported gas types must use the built-in TYPE_* constants of the class, custom values are not allowed.
     """
+
     # 气体类型标识常量
     TYPE_VOC = const(1)
     TYPE_H2 = const(2)
@@ -172,9 +173,18 @@ class MEMSGasSensor:
 
         # 验证气体类型合法性
         valid_types = {
-            MEMSGasSensor.TYPE_VOC, MEMSGasSensor.TYPE_H2, MEMSGasSensor.TYPE_CO, MEMSGasSensor.TYPE_NH3,
-            MEMSGasSensor.TYPE_H2S, MEMSGasSensor.TYPE_ETHANOL, MEMSGasSensor.TYPE_PROPANE, MEMSGasSensor.TYPE_FREON,
-            MEMSGasSensor.TYPE_NO2, MEMSGasSensor.TYPE_SMOKE, MEMSGasSensor.TYPE_HCHO, MEMSGasSensor.TYPE_ACETONE
+            MEMSGasSensor.TYPE_VOC,
+            MEMSGasSensor.TYPE_H2,
+            MEMSGasSensor.TYPE_CO,
+            MEMSGasSensor.TYPE_NH3,
+            MEMSGasSensor.TYPE_H2S,
+            MEMSGasSensor.TYPE_ETHANOL,
+            MEMSGasSensor.TYPE_PROPANE,
+            MEMSGasSensor.TYPE_FREON,
+            MEMSGasSensor.TYPE_NO2,
+            MEMSGasSensor.TYPE_SMOKE,
+            MEMSGasSensor.TYPE_HCHO,
+            MEMSGasSensor.TYPE_ACETONE,
         }
         if sensor_type not in valid_types:
             raise ValueError(f"Invalid sensor_type {sensor_type}, use TYPE_* constants")
@@ -376,6 +386,7 @@ class PCA9546ADR:
         Only the lower 4 bits of the channel control byte are valid, each bit corresponds to a channel (bit 0 = channel 0, bit 1 = channel 1, and so on).
         It is recommended to wait 10ms after switching channels to ensure the channel switch is completed and avoid I2C communication conflicts.
     """
+
     # 多路复用器配置常量
     addr7 = const(0x70)
     MAX_CH = const(4)
@@ -594,6 +605,7 @@ class AirQualityMonitor:
         When registering a sensor, it will automatically switch to the target channel and disable other channels to avoid I2C address conflicts.
         When reading data from multiple sensors, it will automatically switch channels and add 20ms operation delay to ensure data stability.
     """
+
     # 重启延迟配置常量
     RESTART_DELAY_MS = const(5000)
 
@@ -672,7 +684,7 @@ class AirQualityMonitor:
         # 注册传感器到映射表
         self.sensors[channel] = sensor
         self.channel_map[sensor_type] = channel
-        self.enabled_mask |= (1 << channel)
+        self.enabled_mask |= 1 << channel
         print(f"Registered {self._sensor_type_name(sensor_type)} sensor on channel {channel}")
         return sensor
 
@@ -816,9 +828,10 @@ class AirQualityMonitor:
             MEMSGasSensor.TYPE_NO2: "NO2",
             MEMSGasSensor.TYPE_SMOKE: "SMOKE",
             MEMSGasSensor.TYPE_HCHO: "HCHO",
-            MEMSGasSensor.TYPE_ACETONE: "ACETONE"
+            MEMSGasSensor.TYPE_ACETONE: "ACETONE",
         }
         return type_names.get(sensor_type, f"UNKNOWN({sensor_type})")
+
 
 # ======================================== 初始化配置 ==========================================
 
