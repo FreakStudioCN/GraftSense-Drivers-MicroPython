@@ -269,7 +269,7 @@ class HC08:
         try:
             if self._uart.any():
                 resp = self._uart.read()
-            if resp == None:
+            if resp is None:
                 return False, "RECV NONE"
             return True, resp.decode("utf-8").strip()
         except Exception:
@@ -736,7 +736,7 @@ class HC08:
 
         if baud_rate not in (1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200):
             return False, "invalid baud"
-        if not parity in (HC08.PARITY_NONE, HC08.PARITY_EVEN, HC08.PARITY_ODD):
+        if parity not in (HC08.PARITY_NONE, HC08.PARITY_EVEN, HC08.PARITY_ODD):
             return False, "invalid parity"
         cmd = f"AT+BAUD={baud_rate},{parity}".encode()
         ok, err = self._send(cmd)
@@ -780,7 +780,7 @@ class HC08:
             rate, *_ = resp.split(",")
             self.baud = int(rate)
             return True, resp
-        except:
+        except Exception:
             return False, "parse error"
 
     def clear(self) -> (bool, str | None):
