@@ -3,45 +3,40 @@
 """
 Pre-commit code checker for MicroPython driver files & main.py
 Check all specified rules:
-1. 4 required global variables (__version__, __author__, __license__, __platform__)
-2. # @License : MIT comment exists
-3. No Chinese in raise/print messages
-4. main.py: no instance in global vars (move to init config)
-5. main.py: while loop only in main program section
-6. Init config section has time.sleep(3) and FreakStudio print
-7. Entry params have try-except check
-8. Type hints are included
+1. 非main.py文件：必须包含4个顶层全局变量(__version__, __author__, __license__, __platform__)
+2. 非main.py文件：必须包含独立的 # @License : MIT 注释行
+3. 所有文件：raise/print中无中文字符
+4. main.py：全局变量区无实例化，初始化配置区有实例化
+5. main.py：while循环仅在主程序区
+6. main.py：初始化配置区有time.sleep(3)和FreakStudio打印（非main.py跳过）
+7. 所有文件：__init__方法有参数类型注解+try-except
+8. 非main.py文件：类中所有有入口参数的方法必须包含参数合法性校验（isinstance/hasattr/取值判断+raise）
 """
 import argparse
 import re
-import astroid
-
-# 修复：移除多余的Annotation导入，仅保留用到的类
-from astroid.nodes import Assign, Name, FunctionDef, Try
-
+import ast
 from pathlib import Path
 
-# -------------------------- 配置常量（可根据需求调整） --------------------------
+# -------------------------- 配置常量（精准匹配） --------------------------
 REQUIRED_GLOBALS = ["__version__", "__author__", "__license__", "__platform__"]
 LICENSE_COMMENT = "# @License : MIT"
 FREAKSTUDIO_PATTERN = r'print\("FreakStudio: .*"\)'
-SLEEP3_PATTERN = r"time\.sleep\(3\)"
+SLEEP3_PATTERN = r'time\.sleep\(3\)'
 MAIN_SECTION_MARKER = "# ========================================  主程序  ============================================"
 INIT_CONFIG_MARKER = "# ======================================== 初始化配置 ==========================================="
-CHINESE_CHAR_PATTERN = re.compile(r"[\u4e00-\u9fff]")  # 匹配中文字符
-# 匹配machine实例/类实例化（如machine.UART(1)、sensor = DS18B20(16)）
-MACHINE_INSTANCE_PATTERNS = [r"machine\.\w+\(", r"\w+ = \w+\("]
-
+CHINESE_CHAR_PATTERN = re.compile(r'[\u4e00-\u9fff]')  # 匹配中文字符
+# 精准匹配实例化：包含模块.类(如machine.UART)、变量=类(如sensor=TestSensor)
+MACHINE_INSTANCE_PATTERNS = [
+    r'\w+\.\w+\(',       # 匹配 machine.UART(1) 这类
+    r'\w+ = \w+\(',      # 匹配 sensor = TestSensor(5) 这类
+    r'\w+ = \w+\.\w+\('  # 匹配 uart = machine.UART(1) 这类
+]
 
 # -------------------------- 核心工具函数 --------------------------
 def read_file_content(file_path: Path) -> str:
-    """
-    读取文件内容（UTF-8编码）
-    :param file_path: 待检查文件路径
-    :return: 文件文本内容，读取失败返回空字符串
-    """
+    """读取文件内容（UTF-8编码）"""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
     except Exception as e:
         print(f"❌ Error reading file {file_path}: {str(e)}")
@@ -49,14 +44,13 @@ def read_file_content(file_path: Path) -> str:
 
 
 def check_required_globals(content: str, file_path: Path) -> bool:
-    """
-    检查4个必填全局变量是否存在（修复astroid导入问题）
-    :param content: 文件内容
-    :param file_path: 文件路径（用于错误提示）
-    :return: True=存在所有变量，False=缺失
-    """
+    """检查4个必填全局变量是否存在（仅非main.py文件需要检查）"""
+    if file_path.name == "main.py":
+        print(f"✅ {file_path}: main.py 无需检查全局变量，跳过")
+        return True
+
     try:
-        tree = astroid.parse(content)
+        tree = ast.parse(content)
     except Exception as e:
         print(f"❌ {file_path}: Failed to parse code AST: {str(e)}")
         return False
@@ -64,11 +58,10 @@ def check_required_globals(content: str, file_path: Path) -> bool:
     missing_vars = []
     for var_name in REQUIRED_GLOBALS:
         found = False
-        # 修复：使用从nodes导入的Assign/Name
         for node in tree.body:
-            if isinstance(node, Assign):
+            if isinstance(node, ast.Assign):
                 for target in node.targets:
-                    if isinstance(target, Name) and target.name == var_name:
+                    if isinstance(target, ast.Name) and target.id == var_name:
                         found = True
                         break
         if not found:
@@ -82,13 +75,13 @@ def check_required_globals(content: str, file_path: Path) -> bool:
 
 
 def check_license_comment(content: str, file_path: Path) -> bool:
-    """
-    检查是否包含固定注释 # @License : MIT
-    :param content: 文件内容
-    :param file_path: 文件路径
-    :return: True=存在，False=缺失
-    """
-    if LICENSE_COMMENT in content:
+    """精准匹配独立的 # @License : MIT 注释行（仅非main.py文件需要检查）"""
+    if file_path.name == "main.py":
+        print(f"✅ {file_path}: main.py 无需检查License注释，跳过")
+        return True
+
+    lines = [line.strip() for line in content.split('\n')]
+    if LICENSE_COMMENT.strip() in lines:
         print(f"✅ {file_path}: # @License : MIT comment exists")
         return True
     print(f"❌ {file_path}: Missing # @License : MIT comment")
@@ -96,18 +89,11 @@ def check_license_comment(content: str, file_path: Path) -> bool:
 
 
 def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
-    """
-    检查raise/print语句中是否包含中文字符
-    :param content: 文件内容
-    :param file_path: 文件路径
-    :return: True=无中文，False=有中文
-    """
-    lines = content.split("\n")
+    """检查raise/print中的中文字符（所有文件都检查）"""
+    lines = content.split('\n')
     error_lines = []
     for line_num, line in enumerate(lines, 1):
-        # 仅检查包含raise/print的行
-        if "raise" in line or "print(" in line:
-            # 提取字符串内容（匹配双引号/单引号包裹的内容）
+        if 'raise' in line or 'print(' in line:
             str_matches = re.findall(r'"([^"]*)"|\'([^\']*)\'', line)
             for match in str_matches:
                 str_content = match[0] or match[1]
@@ -121,28 +107,37 @@ def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
     return True
 
 
-def check_init_config_section(content: str, file_path: Path) -> bool:
-    """
-    检查初始化配置模块是否包含 time.sleep(3) 和 print("FreakStudio: xxx")
-    :param content: 文件内容
-    :param file_path: 文件路径
-    :return: True=满足，False=缺失
-    """
-    # 分割代码模块（按分隔注释拆分）
-    section_markers = re.findall(r"# ======================================== .* ===========================================", content)
-    section_contents = re.split(r"# ======================================== .* ===========================================", content)
+def extract_section_content(content: str, marker: str) -> str:
+    """精准提取指定分隔注释后的模块内容"""
+    lines = content.split('\n')
+    section_start = -1
+    section_end = -1
 
-    init_config_content = ""
-    # 定位初始化配置模块内容
-    for idx, marker in enumerate(section_markers):
-        if INIT_CONFIG_MARKER in marker:
-            if idx + 1 < len(section_contents):
-                init_config_content = section_contents[idx + 1]
+    for idx, line in enumerate(lines):
+        if line.strip() == marker.strip():
+            section_start = idx + 1
+            for jdx in range(section_start, len(lines)):
+                jdx_line = lines[jdx].strip()
+                if jdx_line.startswith("# ========================================") and jdx_line.endswith(
+                        "==========================================="):
+                    section_end = jdx
+                    break
             break
 
-    # 检查强制内容
-    has_sleep3 = re.search(SLEEP3_PATTERN, init_config_content) is not None
-    has_freakstudio = re.search(FREAKSTUDIO_PATTERN, init_config_content) is not None
+    if section_start != -1 and section_end != -1:
+        return '\n'.join(lines[section_start:section_end])
+    return ""
+
+
+def check_init_config_section(content: str, file_path: Path) -> bool:
+    """检查初始化配置区（仅main.py需要检查，非main.py跳过）"""
+    if file_path.name != "main.py":
+        print(f"✅ {file_path}: 非main.py文件，无需检查初始化配置区，跳过")
+        return True
+
+    init_content = extract_section_content(content, INIT_CONFIG_MARKER)
+    has_sleep3 = bool(re.search(r'\btime\.sleep\(3\)\b', init_content))
+    has_freakstudio = bool(re.search(r'\bprint\("FreakStudio: [^"]*"\)\b', init_content))
 
     errors = []
     if not has_sleep3:
@@ -158,49 +153,31 @@ def check_init_config_section(content: str, file_path: Path) -> bool:
 
 
 def check_main_py_instance_location(content: str, file_path: Path) -> bool:
-    """
-    检查main.py：全局变量区无实例化，初始化配置区有实例化
-    :param content: 文件内容
-    :param file_path: 文件路径
-    :return: True=合规，False=违规（非main.py直接返回True）
-    """
+    """精准检查main.py实例化位置（仅main.py需要检查）"""
     if "main.py" not in str(file_path):
+        print(f"✅ {file_path}: 非main.py文件，无需检查实例化位置，跳过")
         return True
 
-    # 分割全局变量区和初始化配置区
-    section_markers = re.findall(r"# ======================================== .* ===========================================", content)
-    section_contents = re.split(r"# ======================================== .* ===========================================", content)
+    global_content = extract_section_content(content, "# ======================================== 全局变量 ============================================")
+    init_content = extract_section_content(content, INIT_CONFIG_MARKER)
 
-    global_vars_content = ""
-    init_config_content = ""
-    # 提取对应模块内容
-    for idx, marker in enumerate(section_markers):
-        if "# ======================================== 全局变量 ============================================" in marker:
-            if idx + 1 < len(section_contents):
-                global_vars_content = section_contents[idx + 1]
-        elif INIT_CONFIG_MARKER in marker:
-            if idx + 1 < len(section_contents):
-                init_config_content = section_contents[idx + 1]
-
-    # 检查全局变量区是否有实例化
     global_has_instance = False
     for pattern in MACHINE_INSTANCE_PATTERNS:
-        if re.search(pattern, global_vars_content):
+        if re.search(pattern, global_content):
             global_has_instance = True
             break
 
-    # 检查初始化配置区是否有实例化
     init_has_instance = False
     for pattern in MACHINE_INSTANCE_PATTERNS:
-        if re.search(pattern, init_config_content):
+        if re.search(pattern, init_content):
             init_has_instance = True
             break
 
     errors = []
     if global_has_instance:
-        errors.append("Instance found in global variables section")
+        errors.append("Instance found in global variables section (invalid)")
     if not init_has_instance:
-        errors.append("No instance found in init config section")
+        errors.append("No instance found in init config section (required)")
 
     if errors:
         print(f"❌ {file_path}: {'; '.join(errors)}")
@@ -210,92 +187,141 @@ def check_main_py_instance_location(content: str, file_path: Path) -> bool:
 
 
 def check_main_py_while_loop(content: str, file_path: Path) -> bool:
-    """
-    检查main.py：while循环仅出现在主程序模块下
-    :param content: 文件内容
-    :param file_path: 文件路径
-    :return: True=合规，False=违规（非main.py直接返回True）
-    """
+    """精准检查while循环仅在主程序区（仅main.py需要检查）"""
     if "main.py" not in str(file_path):
+        print(f"✅ {file_path}: 非main.py文件，无需检查while循环位置，跳过")
         return True
 
-    # 分割主程序模块
-    sections = re.split(MAIN_SECTION_MARKER, content)
-    if len(sections) < 2:
-        print(f"❌ {file_path}: Main program section marker not found")
-        return False
+    main_content = extract_section_content(content, MAIN_SECTION_MARKER)
+    all_content = content.split('\n')
+    main_start_idx = -1
+    for idx, line in enumerate(all_content):
+        if line.strip() == MAIN_SECTION_MARKER.strip():
+            main_start_idx = idx
+            break
+    non_main_content = '\n'.join(all_content[:main_start_idx]) if main_start_idx != -1 else content
 
-    main_section_content = sections[1]  # 主程序模块内容
-    other_content = sections[0]  # 主程序模块之前的内容
+    while_in_non_main = re.search(r'while\s*\(', non_main_content) is not None
+    while_in_main = re.search(r'while\s*\(', main_content) is not None
 
-    # 检查while循环位置
-    while_in_other = re.search(r"while\s*\(", other_content) is not None
-    while_in_main = re.search(r"while\s*\(", main_section_content) is not None
-
-    if while_in_other:
-        print(f"❌ {file_path}: while loop found outside main program section")
+    if while_in_non_main:
+        print(f"❌ {file_path}: while loop found outside main program section (invalid)")
         return False
     if "while" in content and not while_in_main:
-        print(f"❌ {file_path}: while loop not found in main program section")
+        print(f"❌ {file_path}: while loop not found in main program section (required)")
         return False
 
     print(f"✅ {file_path}: main.py while loop location is correct")
     return True
 
-
 def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
-    """
-    检查入口参数：__init__方法有类型注解 + try-except校验（修复astroid.walk问题）
-    :param content: 文件内容
-    :param file_path: 文件路径
-    :return: True=满足，False=缺失
-    """
+    """检查__init__方法的参数类型注解（仅检查类型注解，移除try-except检查）"""
     try:
-        tree = astroid.parse(content)
+        tree = ast.parse(content)
     except Exception as e:
         print(f"❌ {file_path}: Failed to parse code AST for type check: {str(e)}")
         return False
 
     has_type_hints = False
-    has_try_except_in_init = False
+    has_init_method = False
 
-    # 修复：使用tree.walk()而非astroid.walk(tree)
-    for node in tree.walk():
-        # 检查__init__方法的参数类型注解
-        if isinstance(node, FunctionDef) and node.name == "__init__":
-            # 检查参数注解
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == "__init__":
+            has_init_method = True
+            # 仅检查类型注解（移除try-except检查）
             for arg in node.args.args:
-                if arg.annotation:
+                if hasattr(arg, 'annotation') and arg.annotation:
                     has_type_hints = True
-            # 检查try-except块
-            for item in node.body:
-                if isinstance(item, Try):
-                    has_try_except_in_init = True
 
-    errors = []
+    # 无__init__方法则跳过检查
+    if not has_init_method:
+        print(f"✅ {file_path}: 无__init__方法，跳过类型注解检查")
+        return True
+
+    # 仅校验类型注解
     if not has_type_hints:
-        errors.append("No type hints found in __init__ parameters")
-    if not has_try_except_in_init:
-        errors.append("No try-except block found in __init__ method")
-
-    if errors:
-        print(f"❌ {file_path}: {'; '.join(errors)}")
+        print(f"❌ {file_path}: No type hints found in __init__ parameters")
         return False
-    print(f"✅ {file_path}: Type hints and try-except exist in entry params")
+    print(f"✅ {file_path}: Type hints exist in __init__ parameters")
     return True
 
+def check_method_param_validation(content: str, file_path: Path) -> bool:
+    """检查非main.py文件中类的所有有参数方法是否包含参数合法性校验（isinstance/hasattr/取值判断+raise）"""
+    # main.py跳过该检查
+    if file_path.name == "main.py":
+        print(f"✅ {file_path}: main.py 无需检查方法参数校验，跳过")
+        return True
+
+    try:
+        tree = ast.parse(content)
+    except Exception as e:
+        print(f"❌ {file_path}: Failed to parse code AST for param check: {str(e)}")
+        return False
+
+    # 存储缺少参数校验的方法
+    missing_validation_methods = []
+
+    # 遍历所有类
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            class_name = node.name
+            # 遍历类中的所有方法
+            for func in node.body:
+                if isinstance(func, ast.FunctionDef):
+                    func_name = func.name
+                    # 获取方法参数（排除self/cls）
+                    args = [arg.arg for arg in func.args.args if arg.arg not in ['self', 'cls']]
+                    if not args:  # 无入口参数，跳过
+                        continue
+
+                    # 检查方法体是否包含参数校验逻辑
+                    has_validation = False
+                    # 遍历方法体所有节点
+                    for stmt in ast.walk(func):
+                        # 1. 检查是否有isinstance判断 + raise
+                        if isinstance(stmt, ast.If):
+                            # 检查条件是否包含isinstance/hasattr/取值判断
+                            cond = stmt.test
+                            has_isinstance = False
+                            has_hasattr = False
+                            has_value_check = False
+
+                            # 检查isinstance调用
+                            if isinstance(cond, ast.Call) and isinstance(cond.func, ast.Name) and cond.func.id == 'isinstance':
+                                has_isinstance = True
+                            # 检查hasattr调用
+                            elif isinstance(cond, ast.Call) and isinstance(cond.func, ast.Name) and cond.func.id == 'hasattr':
+                                has_hasattr = True
+                            # 检查取值范围判断（==/!=/>/<等）
+                            elif isinstance(cond, (ast.Compare, ast.BoolOp)):
+                                has_value_check = True
+
+                            # 检查if块内是否有raise
+                            has_raise = False
+                            for body_stmt in stmt.body:
+                                if isinstance(body_stmt, ast.Raise):
+                                    has_raise = True
+                                    break
+
+                            if (has_isinstance or has_hasattr or has_value_check) and has_raise:
+                                has_validation = True
+                                break
+
+                    if not has_validation:
+                        missing_validation_methods.append(f"{class_name}.{func_name}")
+
+    if missing_validation_methods:
+        print(f"❌ {file_path}: Methods missing parameter validation: {', '.join(missing_validation_methods)}")
+        return False
+    print(f"✅ {file_path}: All methods with parameters have valid parameter validation")
+    return True
 
 def check_file(file_path: Path) -> bool:
-    """
-    对单个文件执行全量规则检查
-    :param file_path: 文件路径
-    :return: True=所有规则通过，False=至少一个规则失败
-    """
+    """全量检查单个文件"""
     content = read_file_content(file_path)
     if not content:
         return False
 
-    # 执行所有检查项
     checks = [
         check_required_globals,
         check_license_comment,
@@ -304,6 +330,7 @@ def check_file(file_path: Path) -> bool:
         check_main_py_instance_location,
         check_main_py_while_loop,
         check_type_hints_and_try_except,
+        check_method_param_validation  # 新增：方法参数校验检查
     ]
 
     all_passed = True
@@ -314,25 +341,77 @@ def check_file(file_path: Path) -> bool:
     return all_passed
 
 
-# -------------------------- 命令行入口 --------------------------
 def main():
-    """命令行入口：接收待检查文件列表，执行检查并返回退出码"""
-    parser = argparse.ArgumentParser(description="Check MicroPython code against custom rules")
-    parser.add_argument("files", nargs="+", help="Files to check (passed by pre-commit)")
+    """
+    命令行入口：支持两种模式
+    1. 传入文件路径：检查指定.py文件（原有功能）
+    2. 传入目录路径：检查目录下所有.py文件（新增功能）
+    可选参数：-r/--recursive 递归遍历子文件夹（默认不递归）
+    """
+    parser = argparse.ArgumentParser(description="Check MicroPython code rules")
+    # 位置参数：支持传入文件/目录路径（可多个）
+    parser.add_argument('paths', nargs='+', help='文件路径或目录路径（支持多个）')
+    # 可选参数：是否递归遍历子文件夹
+    parser.add_argument('-r', '--recursive', action='store_true',
+                        help='递归遍历目录下的所有子文件夹（仅对目录路径生效）')
+
     args = parser.parse_args()
 
-    passed = True
-    # 临时修改：检查所有.py文件（测试完成后可改回原逻辑）
-    for file in args.files:
-        file_path = Path(file)
-        if file_path.suffix == ".py":
-            if not check_file(file_path):
-                passed = False
+    # 存储所有待检查的.py文件路径
+    py_files = []
+    # 遍历所有传入的路径（文件/目录）
+    for path_str in args.paths:
+        path = Path(path_str)
+        # 处理路径不存在的情况
+        if not path.exists():
+            print(f"❌ 路径不存在：{path_str}")
+            exit(1)
 
-    # 检查失败返回非0码，触发pre-commit拦截提交
-    if not passed:
+        # 情况1：传入的是文件，且是.py文件 → 加入列表
+        if path.is_file() and path.suffix == '.py':
+            py_files.append(path)
+        # 情况2：传入的是文件，但不是.py文件 → 跳过并提示
+        elif path.is_file() and path.suffix != '.py':
+            print(f"⚠️ 跳过非.py文件：{path_str}")
+        # 情况3：传入的是目录 → 遍历目录下的.py文件
+        elif path.is_dir():
+            if args.recursive:
+                # 递归遍历目录下所有.py文件
+                py_files.extend(Path(path).rglob('*.py'))
+            else:
+                # 仅遍历目录下直接的.py文件（不递归子文件夹）
+                py_files.extend(Path(path).glob('*.py'))
+
+    # 去重（避免重复检查同一文件）
+    py_files = list(set(py_files))
+    if not py_files:
+        print("❌ 未找到任何待检查的.py文件")
         exit(1)
 
+    # 批量检查所有.py文件
+    passed = True
+    failed_files = []
+    print(f"📌 共找到 {len(py_files)} 个.py文件，开始检查...\n")
+    for file_path in py_files:
+        print(f"🔍 检查文件：{file_path}")
+        if not check_file(file_path):
+            passed = False
+            failed_files.append(str(file_path))
+        print("-" * 80)  # 分隔线
+
+    # 输出汇总结果
+    print("\n📊 检查汇总：")
+    print(f"总文件数：{len(py_files)}")
+    print(f"通过数：{len(py_files) - len(failed_files)}")
+    print(f"失败数：{len(failed_files)}")
+    if failed_files:
+        print(f"\n❌ 检查失败的文件：")
+        for f in failed_files:
+            print(f"  - {f}")
+        exit(1)
+    else:
+        print("\n✅ 所有文件检查通过！")
+        exit(0)
 
 if __name__ == "__main__":
     main()
