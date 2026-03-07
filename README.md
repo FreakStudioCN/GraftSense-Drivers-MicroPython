@@ -27,10 +27,8 @@ GraftSense-Drivers-MicroPython/
 ├── sensors/                # 传感器类模块（如温湿度、气压、红外、超声波等）
 ├── communication/          # 通信类模块（如UART、I2C、SPI、蓝牙等）
 ├── docs/                   # 详细文档、应用说明和项目截图
-├── git-hooks/              # Git 钩子脚本目录
-│   ├── pre-commit          # 提交前自动检查钩子（依赖安装+代码规范检查）
-│   └── post-push           # 推送后自动恢复钩子配置（Windows 兼容版）
 ├── code_checker.py         # 自定义代码规范检查脚本，用于检查 MicroPython 驱动文件的全局变量、参数校验等规则
+├── easy_driver_module_scanner.py # 驱动模块扫描工具，递归扫描所有code文件夹，筛选单文件单类驱动模块
 ├── list_package_info.py    # 可视化扫描工具，查看所有package.json配置
 ├── modify_package_json.py  # 批量修改工具，标准化urls路径和字段
 ├── rename_readme.py        # 批量重命名工具，统一README.md文件名
@@ -110,6 +108,9 @@ python modify_package_json.py
 
 # 3. 统一文档命名（递归将所有.md文件重命名为README.md）
 python rename_readme.py
+
+# 4. 驱动模块扫描（递归扫描code文件夹，筛选单文件单类驱动）
+python easy_driver_module_scanner.py
 ```
 
 ![图片描述](docs/1.png)
