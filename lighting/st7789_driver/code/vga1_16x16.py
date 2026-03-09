@@ -4,7 +4,7 @@
 # @Author  : 李清水
 # @File    : vga1_16x16.py
 # @Description : vga_16x16字体库
-# 参考russhughes st7789py_mpy：https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
+# 参考russhughes st7789py_mpy:https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
 
 # 宽度为 16 像素
 WIDTH = 16

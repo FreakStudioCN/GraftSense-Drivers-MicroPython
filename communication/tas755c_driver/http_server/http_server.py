@@ -58,7 +58,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             <head><title>Python 简单 HTTP 服务器</title></head>
             <body style="text-align: center; margin-top: 50px;">
                 <h1>✅ 服务器响应成功！</h1>
-                <p>请求信息：</p>
+                <p>请求信息:</p>
                 <p>客户端 IP: {client_ip}:{client_port}</p>
                 <p>请求方法: {self.command}</p>
                 <p>请求路径: {self.path}</p>
@@ -95,7 +95,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             <head><title>Python 简单 HTTP 服务器</title></head>
             <body style="text-align: center; margin-top: 50px;">
                 <h1>✅ POST 请求处理成功！</h1>
-                <p>请求信息：</p>
+                <p>请求信息:</p>
                 <p>客户端 IP: {client_ip}:{client_port}</p>
                 <p>请求方法: {self.command}</p>
                 <p>请求路径: {self.path}</p>

@@ -23,6 +23,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 自定义类 ============================================
 
+
 class SIM800SMS(SIM800):
     """
     SIM800模块SMS扩展类
@@ -70,7 +71,7 @@ class SIM800SMS(SIM800):
             Use AT+CMGF command to set SMS format, text mode is easier to use, PDU mode supports extended character sets like Chinese
         """
         # 发送设置短信格式指令并返回响应
-        return self.send_command(f'AT+CMGF={format}')
+        return self.send_command(f"AT+CMGF={format}")
 
     def send_sms(self, number, message):
         """
@@ -116,7 +117,7 @@ class SIM800SMS(SIM800):
             Use AT+CMGR command to read SMS with specified index, index starts from 1
         """
         # 发送读取指定索引短信的指令并返回响应
-        return self.send_command(f'AT+CMGR={index}')
+        return self.send_command(f"AT+CMGR={index}")
 
     def delete_sms(self, index):
         """
@@ -136,7 +137,7 @@ class SIM800SMS(SIM800):
             Use AT+CMGD command to delete SMS with specified index, subsequent SMS indexes will be reordered after deletion
         """
         # 发送删除指定索引短信的指令并返回响应
-        return self.send_command(f'AT+CMGD={index}')
+        return self.send_command(f"AT+CMGD={index}")
 
     def read_all_sms(self):
         """
@@ -175,6 +176,7 @@ class SIM800SMS(SIM800):
         """
         # 发送删除所有短信的指令并返回响应
         return self.send_command('AT+CMGDA="DEL ALL"')
+
 
 # ======================================== 初始化配置 ===========================================
 

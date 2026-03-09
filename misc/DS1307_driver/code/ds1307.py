@@ -3,7 +3,7 @@
 # @Time    : 2025/9/8 下午4:51
 # @Author  : 缪贵成
 # @File    : ds1307.py
-# @Description : 基于DS1307的RTC时钟，参考地址：https://github.com/peter-l5/DS1307
+# @Description : 基于DS1307的RTC时钟，参考地址:https://github.com/peter-l5/DS1307
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -78,7 +78,7 @@ class DS1307:
         - I2C-related methods are not ISR-safe.
     """
 
-    def __init__(self, i2c_bus: I2C, addr=None):
+    def __init__(self, i2c_bus: I2C, addr=0x68):
         """
         初始化 DS1307 实例。
 
@@ -110,8 +110,8 @@ class DS1307:
         """
         if not isinstance(i2c_bus, I2C):
             raise TypeError("i2c_bus must be an instance of machine.I2C")
-        if not (0x00 <= addr <= 0x7F):
-            raise ValueError("I2C address must be 0x00~0x7F")
+        if not (0x68 <= addr <= 0x69):
+            raise ValueError("I2C address must be 0x68~0x69")
         self.i2c = i2c_bus
         self.addr = addr
         self.buf = bytearray(7)

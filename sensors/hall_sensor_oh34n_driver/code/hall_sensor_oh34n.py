@@ -158,7 +158,7 @@ class HallSensorOH34N:
 
     def _irq_handler(self, pin: Pin) -> None:
         """
-        内部方法：IRQ 中断处理函数。
+        内部方法:IRQ 中断处理函数。
         调用 micropython.schedule 调度用户回调函数。
 
         Args:
@@ -178,7 +178,7 @@ class HallSensorOH34N:
 
     def _scheduled_callback(self, arg: int) -> None:
         """
-        内部方法：真正执行用户回调。
+        内部方法:真正执行用户回调。
 
         Args:
             arg (int): 占位参数，由 micropython.schedule 传入。

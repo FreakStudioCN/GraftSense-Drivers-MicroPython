@@ -28,7 +28,7 @@ import time
 
 class DYSV19T:
     """
-    DY-SV19T 音频模块控制类（UART）。支持：播放/暂停/停止、上下曲、音量、EQ、循环模式、
+    DY-SV19T 音频模块控制类（UART）。支持:播放/暂停/停止、上下曲、音量、EQ、循环模式、
     指定曲目/路径播放、插播、快进快退、复读、查询状态/曲目/时间、组合播放（ZH）。
 
     Attributes:
@@ -42,8 +42,8 @@ class DYSV19T:
         dac_channel (int): DAC 输出通道（CH_*）
 
     Notes:
-        - 帧结构：AA CMD LEN DATA... SM。SM 为从 AA 到最后一个 DATA 字节逐字节求和取低 8 位。
-        - 16 位数值：高字节在前（big-endian）。
+        - 帧结构:AA CMD LEN DATA... SM。SM 为从 AA 到最后一个 DATA 字节逐字节求和取低 8 位。
+        - 16 位数值:高字节在前（big-endian）。
         - 路径必须以 '/' 起始，文件夹名 1..8 字节，字符集仅允许 A-Z/0-9/_（另允许协议格式符 '*' 和 '.'）。
         - 查询方法在超时未取到完整帧时返回 None，不抛异常；控制方法写串口失败可能抛 IOError/IOError。
     ==========================================
@@ -329,7 +329,7 @@ class DYSV19T:
             raise ValueError("The path must start with '/'")
         if path[0] != "/":
             raise ValueError("The path must start with '/'")
-        # 允许的字符集：A-Z, 0-9, '_', '/', '*', '.'
+        # 允许的字符集:A-Z, 0-9, '_', '/', '*', '.'
         for ch in path:
             o = ord(ch)
             if ch in ("/", "*", "."):
@@ -357,7 +357,7 @@ class DYSV19T:
 
     def _build_frame(self, cmd: int, data: bytes) -> bytes:
         """
-        构造完整帧：AA CMD LEN DATA... SM
+        构造完整帧:AA CMD LEN DATA... SM
 
         Args:
             cmd (int): 命令码
@@ -662,7 +662,7 @@ class DYSV19T:
 
     def end_insert(self):
         """
-        结束插播：等价于结束播放（AA 10 00 SM）。
+        结束插播:等价于结束播放（AA 10 00 SM）。
 
         ==========================================
 

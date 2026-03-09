@@ -37,17 +37,17 @@ class GT911:
     适用于基于 MicroPython 的嵌入式设备（例如使用触摸屏的 ST7789 显示模块）。
 
     Attributes:
-        i2c (machine.I2C): 与 GT911 通信的 I2C 接口实例。（MicroPython 内置类型：machine.I2C）
-        addr (int): GT911 的 I2C 地址，通常为 0x5D 或 0x14。（MicroPython 内置类型：int）
-        int_pin_label (int): 用于构造中断引脚的引脚编号标签/编号。（MicroPython 内置类型：int）
-        rst_pin_label (int): 用于构造复位引脚的引脚编号标签/编号。（MicroPython 内置类型：int）
-        rst_pin (machine.Pin): 复位引脚实例（配置为输出用于复位时序）。（MicroPython 内置类型：machine.Pin）
-        int_pin (machine.Pin): 中断引脚实例（输入模式，用于检测触摸事件）。（MicroPython 内置类型：machine.Pin）
-        user_callback (callable | None): 用户注册的中断回调函数，若未注册则为 None。（MicroPython 内置类型：callable/None）
-        points_data (list): 长度为 5 的触摸点数据数组，每项为 array("H",[id,x,y,size]) 用于存放解包后的触摸点信息。（MicroPython 内置类型：list/array）
-        width (int): 配置的触摸区域宽度（像素）。（MicroPython 内置类型：int）
-        height (int): 配置的触摸区域高度（像素）。（MicroPython 内置类型：int）
-        touch_points (int): 支持的最大触摸点数（1..5）。（MicroPython 内置类型：int）
+        i2c (machine.I2C): 与 GT911 通信的 I2C 接口实例。（MicroPython 内置类型:machine.I2C）
+        addr (int): GT911 的 I2C 地址，通常为 0x5D 或 0x14。（MicroPython 内置类型:int）
+        int_pin_label (int): 用于构造中断引脚的引脚编号标签/编号。（MicroPython 内置类型:int）
+        rst_pin_label (int): 用于构造复位引脚的引脚编号标签/编号。（MicroPython 内置类型:int）
+        rst_pin (machine.Pin): 复位引脚实例（配置为输出用于复位时序）。（MicroPython 内置类型:machine.Pin）
+        int_pin (machine.Pin): 中断引脚实例（输入模式，用于检测触摸事件）。（MicroPython 内置类型:machine.Pin）
+        user_callback (callable | None): 用户注册的中断回调函数，若未注册则为 None。（MicroPython 内置类型:callable/None）
+        points_data (list): 长度为 5 的触摸点数据数组，每项为 array("H",[id,x,y,size]) 用于存放解包后的触摸点信息。（MicroPython 内置类型:list/array）
+        width (int): 配置的触摸区域宽度（像素）。（MicroPython 内置类型:int）
+        height (int): 配置的触摸区域高度（像素）。（MicroPython 内置类型:int）
+        touch_points (int): 支持的最大触摸点数（1..5）。（MicroPython 内置类型:int）
 
     Constants (寄存器地址常量，均为 int):
         COMMAND, CONFIG_START, RESOLUTION_X, RESOLUTION_Y, TOUCH_POINTS, MODULE_SWITCH1,
@@ -65,7 +65,7 @@ class GT911:
                 ValueError: 当 addr 不在 (0x5D, 0x14) 或 touch_points > 5 时抛出。
 
         reset(self) -> None:
-            根据 GT911 要求执行硬件复位时序：
+            根据 GT911 要求执行硬件复位时序:
             - 控制 RST/INT 电平以选择地址
             - 保持必要延时，然后将 INT 设为输入
             返回 None。
@@ -111,13 +111,13 @@ class GT911:
                 - 回调仅安排用户回调执行，不在 IRQ 中做耗时/阻塞操作。
 
     Usage Notes & Implementation Considerations:
-        - I2C 地址：GT911 常见地址为 0x5D（INT 低电平）或 0x14（INT 高电平），__init__ 会依据 addr 控制启动时 INT 电平以选定地址。
-        - addrsize=16：对 GT911 寄存器访问需要使用 16-bit 寄存器地址（MicroPython I2C 的 addrsize=16 参数用于此目的）。
-        - 内存/缓冲：read_touch 使用预分配的 array("H") 列表以减少临时分配；若需要提高性能可复用 buf 以避免频繁分配。
-        - 中断：若提供 user_callback，会在 __init__ 中为 int_pin 注册下降沿 IRQ（Pin.IRQ_FALLING）并在 irq_callback 中通过 micropython.schedule 调用用户回调。
-        - 校验和：reflash_config 读取 CONFIG_START 区域（184 字节）计算补码校验和（~sum + 1）并写回 CONFIG_CHKSUM。
-        - 错误处理：对 I2C/硬件可能出现的异常（总线错误、引脚配置错误等）不在内部吞掉，调用者应根据平台需要捕获并处理异常。
-        - MicroPython 版本：此实现以 MicroPython v1.23.0 行为测试，某些底层 API（如 I2C readfrom_mem_into 的 addrsize 参数）在不同移植中可能存在差异，部署前请在目标板上验证。
+        - I2C 地址:GT911 常见地址为 0x5D（INT 低电平）或 0x14（INT 高电平），__init__ 会依据 addr 控制启动时 INT 电平以选定地址。
+        - addrsize=16:对 GT911 寄存器访问需要使用 16-bit 寄存器地址（MicroPython I2C 的 addrsize=16 参数用于此目的）。
+        - 内存/缓冲:read_touch 使用预分配的 array("H") 列表以减少临时分配；若需要提高性能可复用 buf 以避免频繁分配。
+        - 中断:若提供 user_callback，会在 __init__ 中为 int_pin 注册下降沿 IRQ（Pin.IRQ_FALLING）并在 irq_callback 中通过 micropython.schedule 调用用户回调。
+        - 校验和:reflash_config 读取 CONFIG_START 区域（184 字节）计算补码校验和（~sum + 1）并写回 CONFIG_CHKSUM。
+        - 错误处理:对 I2C/硬件可能出现的异常（总线错误、引脚配置错误等）不在内部吞掉，调用者应根据平台需要捕获并处理异常。
+        - MicroPython 版本:此实现以 MicroPython v1.23.0 行为测试，某些底层 API（如 I2C readfrom_mem_into 的 addrsize 参数）在不同移植中可能存在差异，部署前请在目标板上验证。
     """
 
     # 寄存器和相应位段对应地址

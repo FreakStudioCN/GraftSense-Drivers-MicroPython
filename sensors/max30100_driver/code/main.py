@@ -24,7 +24,7 @@ time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Use the MAX30100 to read values and calculate blood oxygen levels..")
 
-# I2C：SDA=GP4，SCL=GP5
+# I2C:SDA=GP4，SCL=GP5
 i2c = I2C(0, scl=Pin((5)), sda=Pin((4)))
 
 # 开始扫描I2C总线上的设备，返回从机地址的列表

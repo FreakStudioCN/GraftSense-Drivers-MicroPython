@@ -22,7 +22,7 @@ time.sleep(3)
 print("FreakStudio: SoilMoistureSensor Test Start")
 print("Please prepare the sensor for calibration (dry and wet)...")
 
-# 初始化传感器 (例：ADC 引脚 26)
+# 初始化传感器 (例:ADC 引脚 26)
 sensor = SoilMoistureSensor(pin=26)
 print("Sensor initialized on ADC pin 26")
 

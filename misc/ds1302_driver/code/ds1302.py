@@ -113,7 +113,7 @@ class DS1302:
             读取或写入RAM寄存器的值。
     """
 
-    # 类变量：定义DS1302芯片寄存器地址
+    # 类变量:定义DS1302芯片寄存器地址
     DS1302_REG_SECOND = const(0x80)  # 秒寄存器
     DS1302_REG_MINUTE = const(0x82)  # 分寄存器
     DS1302_REG_HOUR = const(0x84)  # 时寄存器

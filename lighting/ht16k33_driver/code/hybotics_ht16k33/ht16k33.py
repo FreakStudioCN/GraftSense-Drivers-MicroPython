@@ -28,6 +28,7 @@ _HT16K33_OSCILATOR_ON = const(0x21)
 RETRY_MAX = 10
 RETRY_WAIT_SEC = 1.0
 
+
 class HT16K33:
     """The base class for all HT16K33-based backpacks and wings."""
 
@@ -70,9 +71,7 @@ class HT16K33:
     @brightness.setter
     def brightness(self, brightness):
         if not 0.0 <= brightness <= 1.0:
-            raise ValueError(
-                "Brightness must be a decimal number in the range: 0.0-1.0"
-            )
+            raise ValueError("Brightness must be a decimal number in the range: 0.0-1.0")
 
         self._brightness = brightness
         xbright = round(15 * brightness)

@@ -4,7 +4,7 @@
 # @Author  : 侯钧瀚
 # @File    : heartratemonitor.py
 # @Description : MAX30102/MAX30105驱动
-# @Repository  : 参考自：https://github.com/n-elia/MAX30102-MicroPython-driver
+# @Repository  : 参考自:https://github.com/n-elia/MAX30102-MicroPython-driver
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -332,7 +332,7 @@ class MAX30102(object):
 
     def __del__(self):
         """
-        析构：设备转入低功耗。
+        析构:设备转入低功耗。
 
         =========================================
         Destructor: put device into low power mode.
@@ -984,7 +984,7 @@ class MAX30102(object):
 
         Args:
             slot_number (int): 槽位 1..4。
-            device (int): 槽位绑定：SLOT_* 常量之一。
+            device (int): 槽位绑定:SLOT_* 常量之一。
 
         Raises:
             TypeError: 如果 device 不是 int。
@@ -1263,7 +1263,7 @@ class MAX30102(object):
 
     def next_sample(self):
         """
-        与 SparkFun 库行为对齐的占位函数：仅检查是否存在可用数据。
+        与 SparkFun 库行为对齐的占位函数:仅检查是否存在可用数据。
 
         Returns:
             bool|None: 有数据返回 True；否则返回 None。

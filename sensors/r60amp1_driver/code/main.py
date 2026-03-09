@@ -22,7 +22,7 @@ R60AMP1.DEBUG_ENABLED = True
 # 上次打印时间
 last_print_time = time.ticks_ms()
 
-# 定时打印间隔：2秒打印一次
+# 定时打印间隔:2秒打印一次
 print_interval = 2000
 
 # ======================================== 功能函数 ============================================
@@ -32,7 +32,7 @@ def print_report_sensor_data():
     """
     打印传感器上报数据到Thonny控制台。
 
-    Note：此函数打印的是设备主动上报的数据，不是查询结果。
+    Note:此函数打印的是设备主动上报的数据，不是查询结果。
     数据来源于R60AMP1类的属性值，这些属性会在定时器回调中自动更新。
 
     ==========================================
@@ -98,7 +98,7 @@ def print_active_query_data(timeout=200):
     Args:
         timeout: 单次查询超时时间，单位毫秒。
 
-    Note：
+    Note:
         - 此函数执行阻塞式查询，会依次查询所有传感器数据。
         - 每个查询之间有200ms延时，避免设备处理不过来。
         - 查询失败会显示失败信息，成功则显示具体数据。
@@ -250,7 +250,7 @@ time.sleep(3)
 # 打印调试信息
 print("FreakStudio: Using R60AMP1 Multi-person Trajectory Radar")
 
-# 初始化UART0：TX=16, RX=17，波特率115200
+# 初始化UART0:TX=16, RX=17，波特率115200
 uart = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17), timeout=0)
 uart1 = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9), timeout=0)
 

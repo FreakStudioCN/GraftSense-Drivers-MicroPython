@@ -3,7 +3,7 @@
 # @Time    : 2025/9/23 下午4:17
 # @Author  : 缪贵成
 # @File    : bh_1750.py
-# @Description : BH1750光照强度传感器驱动文件，代码参考自：：https://github.com/octaprog7/BH1750/tree/master
+# @Description : BH1750光照强度传感器驱动文件，代码参考自::https://github.com/octaprog7/BH1750/tree/master
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -16,6 +16,7 @@ __platform__ = "MicroPython v1.23"
 import math
 from micropython import const
 from time import sleep_ms
+import machine
 
 # ======================================== 全局变量 ============================================
 
@@ -90,7 +91,7 @@ class BH1750:
     MEASUREMENT_TIME_MIN = const(31)
     MEASUREMENT_TIME_MAX = const(254)
 
-    def __init__(self, address, i2c):
+    def __init__(self, address: int, i2c: machine.I2C):
         """
         初始化 BH1750 传感器。
 

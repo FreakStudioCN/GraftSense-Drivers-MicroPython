@@ -104,7 +104,7 @@ class GUVA_S12SD:
         读取模拟输入电压值（V），通过多次采样取平均值。
 
         Returns:
-            float: 电压值（单位：V）。
+            float: 电压值（单位:V）。
 
         Notes:
             默认采样 10 次，延时 5ms，可减少噪声影响。

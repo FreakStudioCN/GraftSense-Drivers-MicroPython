@@ -18,6 +18,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class TCPIP:
     """
@@ -65,7 +66,7 @@ class TCPIP:
         # 保存SIM7600模块核心对象引用
         self.sim7600 = sim7600
 
-    def set_apn(self, apn, user='', password=''):
+    def set_apn(self, apn, user="", password=""):
         """
         配置APN参数及认证信息
         Configure APN parameters and authentication information
@@ -114,7 +115,7 @@ class TCPIP:
             First use AT+NETOPEN to open network service, then use AT+CIPOPEN to establish specified type of network connection (channel 0)
         """
         # 发送打开网络服务指令
-        self.sim7600.send_command('AT+NETOPEN')
+        self.sim7600.send_command("AT+NETOPEN")
         # 发送建立网络连接指令并返回响应
         return self.sim7600.send_command(f'AT+CIPOPEN=0,"{protocol}","{remote_ip}",{remote_port}')
 
@@ -135,7 +136,7 @@ class TCPIP:
             Use AT+CIPCLOSE=0 to close network connection of channel 0 and release related network resources
         """
         # 发送关闭网络连接指令并返回响应
-        return self.sim7600.send_command('AT+CIPCLOSE=0')
+        return self.sim7600.send_command("AT+CIPCLOSE=0")
 
     def send_data(self, data):
         """
@@ -155,7 +156,7 @@ class TCPIP:
             First send AT+CIPSEND to specify channel 0 and data length, then send actual data via UART, finally read response
         """
         # 发送指定数据长度的指令（通道0）
-        self.sim7600.send_command(f'AT+CIPSEND=0,{len(data)}')
+        self.sim7600.send_command(f"AT+CIPSEND=0,{len(data)}")
         # 通过UART发送实际数据内容
         self.sim7600.write_uart(data)
         # 读取并返回数据发送后的响应
@@ -178,7 +179,8 @@ class TCPIP:
             Use AT+CIPRXGET=2,0 to read all data received on channel 0
         """
         # 发送读取网络数据指令并返回响应
-        return self.sim7600.send_command('AT+CIPRXGET=2,0')
+        return self.sim7600.send_command("AT+CIPRXGET=2,0")
+
 
 # ======================================== 初始化配置 ===========================================
 

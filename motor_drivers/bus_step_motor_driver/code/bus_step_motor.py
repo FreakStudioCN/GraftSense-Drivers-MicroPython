@@ -94,38 +94,38 @@ class BusStepMotor:
         start_step_motion(motor_id: int, direction: int, driver_mode: int, speed: int, steps: int): Starts the stepwise motion of the specified motor, executing according to the specified steps.
     """
 
-    # 步进电机驱动模式：单相、双相、半步驱动
+    # 步进电机驱动模式:单相、双相、半步驱动
     DRIVER_MODE_SINGLE, DRIVER_MODE_DOUBLE, DRIVER_MODE_HALF_STEP = (0, 1, 2)
-    # 步进电机方向：正转、反转
+    # 步进电机方向:正转、反转
     FORWARD, BACKWARD = (0, 1)
 
     # 不同驱动模式的相位序列
     PHASES = {
         DRIVER_MODE_SINGLE: [
-            [1, 0, 0, 0],  # 步进1：A+
-            [0, 1, 0, 0],  # 步进2：A-
-            [0, 0, 1, 0],  # 步进3：B+
-            [0, 0, 0, 1],  # 步进4：B-
+            [1, 0, 0, 0],  # 步进1:A+
+            [0, 1, 0, 0],  # 步进2:A-
+            [0, 0, 1, 0],  # 步进3:B+
+            [0, 0, 0, 1],  # 步进4:B-
         ],
         DRIVER_MODE_DOUBLE: [
-            [1, 1, 0, 0],  # 步进1：A+ 和 A-
-            [0, 1, 1, 0],  # 步进2：A- 和 B+
-            [0, 0, 1, 1],  # 步进3：B+ 和 B-
-            [1, 0, 0, 1],  # 步进4：A+ 和 B-
+            [1, 1, 0, 0],  # 步进1:A+ 和 A-
+            [0, 1, 1, 0],  # 步进2:A- 和 B+
+            [0, 0, 1, 1],  # 步进3:B+ 和 B-
+            [1, 0, 0, 1],  # 步进4:A+ 和 B-
         ],
         DRIVER_MODE_HALF_STEP: [
-            [1, 0, 0, 0],  # 步进1：A+
-            [1, 1, 0, 0],  # 步进2：A+ 和 B+
-            [0, 1, 0, 0],  # 步进3：B+
-            [0, 1, 1, 0],  # 步进4：B+ 和 B-
-            [0, 0, 1, 0],  # 步进5：B-
-            [0, 0, 1, 1],  # 步进6：B- 和 A-
-            [0, 0, 0, 1],  # 步进7：A-
-            [1, 0, 0, 1],  # 步进8：A+ 和 A-
+            [1, 0, 0, 0],  # 步进1:A+
+            [1, 1, 0, 0],  # 步进2:A+ 和 B+
+            [0, 1, 0, 0],  # 步进3:B+
+            [0, 1, 1, 0],  # 步进4:B+ 和 B-
+            [0, 0, 1, 0],  # 步进5:B-
+            [0, 0, 1, 1],  # 步进6:B- 和 A-
+            [0, 0, 0, 1],  # 步进7:A-
+            [1, 0, 0, 1],  # 步进8:A+ 和 A-
         ],
     }
 
-    # 步进电机运动模式：定步运动、连续运动
+    # 步进电机运动模式:定步运动、连续运动
     CONTINUOUS_MOTION, STEP_MOTION = (0, 1)
 
     def __init__(self, pca9685: PCA9685, motor_count: int = 2):
@@ -180,7 +180,7 @@ class BusStepMotor:
         self.pca9685.reset()
         # 设置PCA9685芯片的频率为5000Hz
         self.pca9685.freq(5000)
-        # 根据电机数量设置PCA9685芯片不同PWM通道占空比为0：一个步进电机对应四个PWM通道
+        # 根据电机数量设置PCA9685芯片不同PWM通道占空比为0:一个步进电机对应四个PWM通道
         # 同时步进电机编号从0开始，对应PWM通道从0开始，以4个PWM通道递增
         for i in range(motor_count * 4):
             self.pca9685.duty(i, 0)

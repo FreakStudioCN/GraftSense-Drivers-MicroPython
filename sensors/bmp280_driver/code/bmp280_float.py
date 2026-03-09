@@ -3,7 +3,7 @@
 # @Time    : 2025/9/9 上午11:25
 # @Author  : 缪贵成
 # @File    : bmp280_float.py
-# @Description : 基于BMP280的大气压强温湿度传感器模块驱动（浮点型版本），代码参考自：https://github.com/robert-hh/BME280/blob/master
+# @Description : 基于BMP280的大气压强温湿度传感器模块驱动（浮点型版本），代码参考自:https://github.com/robert-hh/BME280/blob/master
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -285,7 +285,7 @@ class BMP280:
 
         Notes:
             - 自动应用 BMP280 校准参数进行补偿。
-            - 温度范围：-40~85 °C，气压范围：30000~110000 Pa，湿度范围：0~100%。
+            - 温度范围:-40~85 °C，气压范围:30000~110000 Pa，湿度范围:0~100%。
             - 非 ISR-safe。
 
         ==========================================

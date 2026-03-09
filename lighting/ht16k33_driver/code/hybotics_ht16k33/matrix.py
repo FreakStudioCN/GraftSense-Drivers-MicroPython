@@ -121,11 +121,7 @@ class Matrix8x8(HT16K33):
         be in 1 bit mode and a size equal to the display size."""
         imwidth, imheight = img.size
         if imwidth != self.columns or imheight != self.rows:
-            raise ValueError(
-                "Image must be same dimensions as display ({0}x{1}).".format(
-                    self.columns, self.rows
-                )
-            )
+            raise ValueError("Image must be same dimensions as display ({0}x{1}).".format(self.columns, self.rows))
         # Grab all the pixels from the image, faster than getpixel.
         pixels = img.convert("1").load()
         auto_write = self.auto_write
@@ -214,11 +210,7 @@ class Matrix8x8x2(Matrix8x8):
         be a size equal to the display size."""
         imwidth, imheight = img.size
         if imwidth != self.columns or imheight != self.rows:
-            raise ValueError(
-                "Image must be same dimensions as display ({0}x{1}).".format(
-                    self.columns, self.rows
-                )
-            )
+            raise ValueError("Image must be same dimensions as display ({0}x{1}).".format(self.columns, self.rows))
         # Grab all the pixels from the image, faster than getpixel.
         pixels = img.convert("RGB").load()
         auto_write = self.auto_write

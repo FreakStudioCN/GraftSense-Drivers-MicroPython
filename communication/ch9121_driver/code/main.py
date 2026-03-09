@@ -20,6 +20,7 @@ TARGET_PORT = 8080
 
 # ======================================== 功能函数 ============================================
 
+
 async def main(eth):
     await asyncio.sleep(1)
     await eth.set_mode(CH9121.TCP_CLIENT)
@@ -31,6 +32,7 @@ async def main(eth):
         line = await eth.readline()
         print(line)
         await eth.write(line)
+
 
 # ======================================== 自定义类 ============================================
 

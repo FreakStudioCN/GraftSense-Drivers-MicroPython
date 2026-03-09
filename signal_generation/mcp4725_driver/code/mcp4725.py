@@ -3,7 +3,7 @@
 # @Time    : 2024/9/1 下午2:10
 # @Author  : 李清水
 # @File    : mcp4725.py
-# @Description : 12位DAC芯片mcp4725驱动模块，参考代码：https://github.com/wayoda/micropython-mcp4725/blob/master/mcp4725.py
+# @Description : 12位DAC芯片mcp4725驱动模块，参考代码:https://github.com/wayoda/micropython-mcp4725/blob/master/mcp4725.py
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -121,7 +121,7 @@ class MCP4725:
 
         该方法从MCP4725芯片读取5个字节的数据，并解析出电源关断状态、DAC输出值和EEPROM中的数据。
 
-        返回的数据包括：
+        返回的数据包括:
         - EEPROM写入是否忙碌
         - 当前的电源关断模式
         - 当前的DAC输出值
@@ -129,7 +129,7 @@ class MCP4725:
         - EEPROM中的DAC输出值
 
         Returns:
-            tuple: 如果读取成功，返回一个包含以下信息的元组：
+            tuple: 如果读取成功，返回一个包含以下信息的元组:
                 - eeprom_write_busy (布尔值): EEPROM写入是否忙碌，True表示未忙碌，False表示忙碌。
                 - power_down (字符串): 当前电源关断模式（如“正常运行”或“关断”）。
                 - value (整数): 当前DAC的输出值，范围为0到4095。

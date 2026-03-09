@@ -30,7 +30,7 @@ STOP_FEED_DELAY = 10000
 # 定义全局变量
 wdg = None
 stop_feed_timer = None
-# 全局标记：检测是否触发 RST
+# 全局标记:检测是否触发 RST
 system_reset_flag = False
 
 # ======================================== 功能函数 ============================================
@@ -56,7 +56,7 @@ def rst_callback(pin: Pin) -> None:
 
 def stop_feed_callback(t: Timer) -> None:
     """
-    定时器回调：停止自动喂狗，模拟喂狗失败触发复位。
+    定时器回调:停止自动喂狗，模拟喂狗失败触发复位。
 
     Args:
         t (Timer): 定时器对象

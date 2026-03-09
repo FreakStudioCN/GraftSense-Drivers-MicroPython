@@ -242,9 +242,9 @@ class R60AFD1:
         TYPE_QUERY_INIT_COMPLETE: {"control_byte": 0x05, "command_byte": 0x81, "data": bytes([0x0F])},
         TYPE_QUERY_SCENE_INFO: {"control_byte": 0x05, "command_byte": 0x07, "data": bytes([0x0F])},
         # 安装参数
-        TYPE_SET_INSTALL_ANGLE: {"control_byte": 0x06, "command_byte": 0x01, "data": None},  # 动态设置：6字节角度数据
+        TYPE_SET_INSTALL_ANGLE: {"control_byte": 0x06, "command_byte": 0x01, "data": None},  # 动态设置:6字节角度数据
         TYPE_QUERY_INSTALL_ANGLE: {"control_byte": 0x06, "command_byte": 0x81, "data": bytes([0x0F])},
-        TYPE_SET_INSTALL_HEIGHT: {"control_byte": 0x06, "command_byte": 0x02, "data": None},  # 动态设置：2字节高度
+        TYPE_SET_INSTALL_HEIGHT: {"control_byte": 0x06, "command_byte": 0x02, "data": None},  # 动态设置:2字节高度
         TYPE_QUERY_INSTALL_HEIGHT: {"control_byte": 0x06, "command_byte": 0x82, "data": bytes([0x0F])},
         TYPE_AUTO_HEIGHT_MEASURE: {"control_byte": 0x83, "command_byte": 0x90, "data": bytes([0x0F])},
         # 人体存在
@@ -258,7 +258,7 @@ class R60AFD1:
         TYPE_QUERY_TRACK_POINT: {"control_byte": 0x83, "command_byte": 0x92, "data": bytes([0x0F])},
         TYPE_QUERY_TRACK_FREQUENCY: {"control_byte": 0x83, "command_byte": 0x93, "data": bytes([0x0F])},
         TYPE_CONTROL_TRACK_SWITCH: {
-            # 动态设置：开关值
+            # 动态设置:开关值
             "control_byte": 0x83,
             "command_byte": 0x94,
             "data": None,
@@ -266,28 +266,28 @@ class R60AFD1:
         TYPE_QUERY_TRACK_SWITCH: {"control_byte": 0x83, "command_byte": 0x94, "data": bytes([0x0F])},
         # 参数设置
         TYPE_SET_STATIC_DISTANCE: {
-            # 动态设置：2字节距离
+            # 动态设置:2字节距离
             "control_byte": 0x80,
             "command_byte": 0x0D,
             "data": None,
         },
         TYPE_QUERY_STATIC_DISTANCE: {"control_byte": 0x80, "command_byte": 0x8D, "data": bytes([0x0F])},
         TYPE_SET_MOTION_DISTANCE: {
-            # 动态设置：2字节距离
+            # 动态设置:2字节距离
             "control_byte": 0x80,
             "command_byte": 0x0E,
             "data": None,
         },
         TYPE_QUERY_MOTION_DISTANCE: {"control_byte": 0x80, "command_byte": 0x8E, "data": bytes([0x0F])},
         TYPE_SET_NO_PERSON_TIME: {
-            # 动态设置：4字节时间
+            # 动态设置:4字节时间
             "control_byte": 0x80,
             "command_byte": 0x12,
             "data": None,
         },
         TYPE_QUERY_NO_PERSON_TIME: {"control_byte": 0x80, "command_byte": 0x92, "data": bytes([0x0F])},
         TYPE_SET_PRESENCE_THRESHOLD: {
-            # 动态设置：4字节阈值
+            # 动态设置:4字节阈值
             "control_byte": 0x80,
             "command_byte": 0x11,
             "data": None,
@@ -303,14 +303,14 @@ class R60AFD1:
         TYPE_QUERY_FALL_DETECTION_SWITCH: {"control_byte": 0x83, "command_byte": 0x80, "data": bytes([0x0F])},
         TYPE_QUERY_FALL_STATUS: {"control_byte": 0x83, "command_byte": 0x81, "data": bytes([0x0F])},
         TYPE_SET_FALL_DURATION: {
-            # 动态设置：4字节时长
+            # 动态设置:4字节时长
             "control_byte": 0x83,
             "command_byte": 0x0C,
             "data": None,
         },
         TYPE_QUERY_FALL_DURATION: {"control_byte": 0x83, "command_byte": 0x8C, "data": bytes([0x0F])},
         TYPE_SET_STATIC_STAY_DURATION: {
-            # 动态设置：4字节时长
+            # 动态设置:4字节时长
             "control_byte": 0x83,
             "command_byte": 0x0A,
             "data": None,
@@ -321,14 +321,14 @@ class R60AFD1:
         TYPE_QUERY_STATIC_STAY_SWITCH: {"control_byte": 0x83, "command_byte": 0x8B, "data": bytes([0x0F])},
         TYPE_QUERY_STATIC_STAY_STATUS: {"control_byte": 0x83, "command_byte": 0x85, "data": bytes([0x0F])},
         TYPE_SET_HEIGHT_ACCUMULATION_TIME: {
-            # 动态设置：4字节时间
+            # 动态设置:4字节时间
             "control_byte": 0x83,
             "command_byte": 0x0F,
             "data": None,
         },
         TYPE_QUERY_HEIGHT_ACCUMULATION_TIME: {"control_byte": 0x83, "command_byte": 0x8F, "data": bytes([0x0F])},
         TYPE_SET_FALL_BREAK_HEIGHT: {
-            # 动态设置：2字节高度
+            # 动态设置:2字节高度
             "control_byte": 0x83,
             "command_byte": 0x11,
             "data": None,
@@ -339,13 +339,13 @@ class R60AFD1:
         TYPE_QUERY_HEIGHT_RATIO_SWITCH: {"control_byte": 0x83, "command_byte": 0x95, "data": bytes([0x0F])},
         TYPE_QUERY_FALL_SENSITIVITY: {"control_byte": 0x83, "command_byte": 0x8D, "data": bytes([0x0F])},
         TYPE_SET_TRACK_FREQUENCY: {
-            # 动态设置：4字节时间
+            # 动态设置:4字节时间
             "control_byte": 0x83,
             "command_byte": 0x13,
             "data": None,
         },
         TYPE_SET_TRACK_SWITCH: {
-            # 动态设置：开关值
+            # 动态设置:开关值
             "control_byte": 0x83,
             "command_byte": 0x14,
             "data": None,
@@ -921,7 +921,7 @@ class R60AFD1:
                 for frame in frames:
                     self.update_properties_from_frame(frame)
 
-            # 返回操作执行结果：(指令发送成功状态, 实际执行结果)
+            # 返回操作执行结果:(指令发送成功状态, 实际执行结果)
             return True, self._query_result
 
         except Exception as e:
@@ -1452,7 +1452,7 @@ class R60AFD1:
             response_data: 响应数据
             response_name: 响应名称（用于调试）
         """
-        # 情况1：正确时间正确读取
+        # 情况1:正确时间正确读取
         if self._query_in_progress and self._current_query_type == expected_type and not self._query_response_received:
 
             self._query_result = response_data
@@ -1462,13 +1462,13 @@ class R60AFD1:
                 query_name = self.QUERY_NAME_MAP.get(expected_type, f"Unknown({expected_type})")
                 print(f"[Query] {query_name} response received: {response_data}")
 
-        # 情况2：当前正在进行其他类型的查询，但收到了本响应
+        # 情况2:当前正在进行其他类型的查询，但收到了本响应
         elif self._query_in_progress and self._current_query_type != expected_type:
             if R60AFD1.DEBUG_ENABLED:
                 current_query = self.QUERY_NAME_MAP.get(self._current_query_type, f"Unknown({self._current_query_type})")
                 print(f"[Query] Unexpected {response_name} response during {current_query} query: {response_data}")
 
-        # 情况3：没有查询在进行，但收到了查询响应
+        # 情况3:没有查询在进行，但收到了查询响应
         elif not self._query_in_progress:
             if R60AFD1.DEBUG_ENABLED:
                 print(f"[Query] Unsolicited {response_name} response: {response_data}")
@@ -1483,16 +1483,16 @@ class R60AFD1:
 
         """
         if data and len(data) >= 6:
-            # 第一个字节：高8位
+            # 第一个字节:高8位
             height_total_high = data[0]
-            # 第二个字节：低8位
+            # 第二个字节:低8位
             height_total_low = data[1]
             height_total = (height_total_high << 8) | height_total_low
-            # 第三个字节：0-0.5m高度占比
+            # 第三个字节:0-0.5m高度占比
             ratio_0_05 = data[2]
-            # 第四个字节：0.5-1m高度占比
+            # 第四个字节:0.5-1m高度占比
             ratio_05_1 = data[3]
-            # 第五个字节：1-1.5m高度占比
+            # 第五个字节:1-1.5m高度占比
             ratio_1_15 = data[4]
             # 第六个字节: 1.5-2m高度占比
             ratio_15_2 = data[5]
@@ -1502,7 +1502,7 @@ class R60AFD1:
         """
         解析三轴角度数据
 
-        数据格式：
+        数据格式:
         字节1-2: X轴角度 (16位有符号整数)
         字节3-4: Y轴角度 (16位有符号整数)
         字节5-6: Z轴角度 (16位有符号整数)
@@ -1552,7 +1552,7 @@ class R60AFD1:
 
     def _parse_signed_16bit_special(self, two_bytes: bytes) -> int:
         """
-        解析有符号16位数据（特殊格式：首位符号位 + 后15位数值位）。
+        解析有符号16位数据（特殊格式:首位符号位 + 后15位数值位）。
 
         Args:
             two_bytes: 2字节的字节序列（大端序）。
@@ -1741,7 +1741,7 @@ class R60AFD1:
             # 初始化是否完成查询
             elif command == 0x81:
                 if data and len(data) >= 1:
-                    # 01：已完成 00：未完成
+                    # 01:已完成 00:未完成
                     system_initialized = data[0] == 0x01
                     self.system_initialized = system_initialized
                     self.system_initialized_timestamp = time.ticks_ms()
@@ -2190,7 +2190,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_QUERY_INSTALL_HEIGHT, timeout=timeout)
 
     def auto_measure_height(self, timeout=500):
-        """自动测高（注意：容易受干扰导致测不准）实测一直为00 00"""
+        """自动测高（注意:容易受干扰导致测不准）实测一直为00 00"""
         return self._execute_operation(R60AFD1.TYPE_AUTO_HEIGHT_MEASURE, timeout=timeout)
 
     # ============================ 人体存在功能查询指令 ============================
@@ -2340,7 +2340,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_INSTALL_ANGLE, timeout=timeout, data=data)
 
     def set_install_height(self, height_cm, timeout: int = 200) -> tuple:
-        """设置安装高度（单位：cm）"""
+        """设置安装高度（单位:cm）"""
         if height_cm < 0 or height_cm > 65535:
             raise ValueError("Height must be within the range of 0-65535 cm")
         data = bytearray(2)
@@ -2349,7 +2349,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_INSTALL_HEIGHT, timeout=timeout, data=data)
 
     def set_static_distance(self, distance_cm, timeout: int = 200) -> tuple:
-        """设置静坐水平距离（单位：cm，范围0-300）"""
+        """设置静坐水平距离（单位:cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
             raise ValueError("The horizontal distance for sitting must be within the range of 0-300 cm.")
         data = bytearray(2)
@@ -2358,7 +2358,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_STATIC_DISTANCE, timeout=timeout, data=data)
 
     def set_motion_distance(self, distance_cm, timeout: int = 200) -> tuple:
-        """设置运动水平距离（单位：cm，范围0-300）"""
+        """设置运动水平距离（单位:cm，范围0-300）"""
         if distance_cm < 0 or distance_cm > 300:
             raise ValueError("The level of movement distance must be within the range of 0-300 cm.")
         data = bytearray(2)
@@ -2367,7 +2367,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_MOTION_DISTANCE, timeout=timeout, data=data)
 
     def set_no_person_time(self, seconds, timeout: int = 200) -> tuple:
-        """设置无人时间（单位：秒，范围5-1800）"""
+        """设置无人时间（单位:秒，范围5-1800）"""
         if seconds <= 5 or seconds >= 1800:
             raise ValueError("Idle time must be within the range of 5-1800 seconds")
         data = bytearray(4)
@@ -2389,7 +2389,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_PRESENCE_THRESHOLD, timeout=timeout, data=data)
 
     def set_fall_duration(self, seconds, timeout: int = 200) -> tuple:
-        """设置跌倒时长（单位：秒，范围5-180）"""
+        """设置跌倒时长（单位:秒，范围5-180）"""
         if seconds <= 5 or seconds >= 180:
             raise ValueError("The fall duration must be between 5 and 180 seconds.")
         data = bytearray(4)
@@ -2400,7 +2400,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_FALL_DURATION, timeout=timeout, data=data)
 
     def set_static_stay_duration(self, seconds, timeout: int = 200) -> tuple:
-        """设置静止驻留时长（单位：秒，范围60-3600）"""
+        """设置静止驻留时长（单位:秒，范围60-3600）"""
         if seconds <= 60 or seconds >= 3600:
             raise ValueError("The duration of stationary stay must be within the range of 60-3600 seconds.")
         data = bytearray(4)
@@ -2411,7 +2411,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_STATIC_STAY_DURATION, timeout=timeout, data=data)
 
     def set_height_accumulation_time(self, seconds, timeout: int = 200) -> tuple:
-        """设置高度累积时间（单位：秒，范围0-300）"""
+        """设置高度累积时间（单位:秒，范围0-300）"""
         if seconds < 0 or seconds > 300:
             raise ValueError("The cumulative height time must be within the range of 0-300 seconds.")
         data = bytearray(4)
@@ -2422,7 +2422,7 @@ class R60AFD1:
         return self._execute_operation(R60AFD1.TYPE_SET_HEIGHT_ACCUMULATION_TIME, timeout=timeout, data=data)
 
     def set_fall_break_height(self, height_cm, timeout: int = 200) -> tuple:
-        """设置跌倒打破高度（单位：cm，范围0-150）"""
+        """设置跌倒打破高度（单位:cm，范围0-150）"""
         if height_cm < 0 or height_cm > 150:
             raise ValueError("The fall height must be between 0-150 cm")
         data = bytearray(2)
@@ -2432,7 +2432,7 @@ class R60AFD1:
 
     # 该功能查询和设置均与手册不符，查询方法和设置方法待核实后修改
     def set_track_frequency(self, seconds, timeout: int = 200) -> tuple:
-        """设置轨迹点上报频率（单位：秒，范围0-0xffffffff）"""
+        """设置轨迹点上报频率（单位:秒，范围0-0xffffffff）"""
         if seconds < 0 or seconds > 0xFFFFFFFF:
             raise ValueError("The reporting frequency of trajectory points is out of range")
         data = bytearray(4)

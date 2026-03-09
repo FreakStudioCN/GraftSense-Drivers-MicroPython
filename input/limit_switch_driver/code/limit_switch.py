@@ -54,7 +54,7 @@ class LimitSwitch:
             返回绑定的数字引脚对象。
 
     Notes:
-        用户回调函数会接收一个 bool 参数：
+        用户回调函数会接收一个 bool 参数:
         True = released（未触发）
         False = pressed（已触发）
 
@@ -188,7 +188,7 @@ class LimitSwitch:
     def _debounce_handler(self, timer: Timer):
         """
 
-        内部方法：定时器消抖处理函数。
+        内部方法:定时器消抖处理函数。
         检查开关状态变化，如果变化则调度用户回调。
 
         Args:
@@ -218,7 +218,7 @@ class LimitSwitch:
 
     def _scheduled_callback(self, state: int):
         """
-        内部方法：通过 micropython.schedule 调度用户回调。
+        内部方法:通过 micropython.schedule 调度用户回调。
 
         Args:
             state (int): 引脚状态值（0 或 1）。

@@ -18,6 +18,7 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class SMS:
     """
@@ -85,7 +86,7 @@ class SMS:
         # 发送指定接收号码的短信发送指令
         self.sim7600.send_command(f'AT+CMGS="{number}"')
         # 发送短信内容并添加结束符(ASCII 26)
-        self.sim7600.write_uart(message + '\x1A')
+        self.sim7600.write_uart(message + "\x1A")
         # 读取并返回短信发送后的响应数据
         return self.sim7600.read_uart()
 
@@ -107,7 +108,7 @@ class SMS:
             Use AT+CMGR command to read SMS with specified index, index corresponds to SMS storage location in SIM card
         """
         # 发送读取指定索引短信的指令并返回响应
-        return self.sim7600.send_command(f'AT+CMGR={index}')
+        return self.sim7600.send_command(f"AT+CMGR={index}")
 
     def delete_sms(self, index):
         """
@@ -127,7 +128,7 @@ class SMS:
             Use AT+CMGD command to delete SMS with specified index, subsequent SMS indexes will be reordered after deletion
         """
         # 发送删除指定索引短信的指令并返回响应
-        return self.sim7600.send_command(f'AT+CMGD={index}')
+        return self.sim7600.send_command(f"AT+CMGD={index}")
 
     def list_sms(self, status):
         """
@@ -135,7 +136,7 @@ class SMS:
         Query SMS list by status
 
         Args:
-            status (str): 短信状态筛选条件，可选值："REC UNREAD"(未读)、"REC READ"(已读)、"STO UNSENT"(未发送)、"STO SENT"(已发送)、"ALL"(全部)
+            status (str): 短信状态筛选条件，可选值:"REC UNREAD"(未读)、"REC READ"(已读)、"STO UNSENT"(未发送)、"STO SENT"(已发送)、"ALL"(全部)
                           SMS status filter condition, optional values: "REC UNREAD" (unread), "REC READ" (read), "STO UNSENT" (unsent), "STO SENT" (sent), "ALL" (all)
 
         Returns:
@@ -148,6 +149,7 @@ class SMS:
         """
         # 发送按状态查询短信列表的指令并返回响应
         return self.sim7600.send_command(f'AT+CMGL="{status}"')
+
 
 # ======================================== 初始化配置 ===========================================
 

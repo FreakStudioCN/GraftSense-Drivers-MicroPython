@@ -117,7 +117,7 @@ uart = UART(0, 115200)
 # 设置串口超时时间为100ms
 uart.init(baudrate=115200, bits=8, parity=None, stop=1, tx=0, rx=1, timeout=100)
 
-# 创建ADC实例：ADC2-GP28
+# 创建ADC实例:ADC2-GP28
 adc = ADC(2)
 # 创建软件定时器对象
 timer = Timer(-1)

@@ -246,7 +246,7 @@ class SoilMoistureSensor:
         """
         获取湿度等级。
         Returns:
-            str: 湿度等级，取值范围：
+            str: 湿度等级，取值范围:
                  "dry"   : 湿度 < 30%
                  "moist" : 30% ≤ 湿度 < 70%
                  "wet"   : 湿度 ≥ 70%

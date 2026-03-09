@@ -81,7 +81,7 @@ class AT24CXX:
         Address range is 0 to chip_size-1, exceeding range will raise ValueError.
     """
 
-    # 类常量：定义 EEPROM 不同容量
+    # 类常量:定义 EEPROM 不同容量
     # 4KiB
     AT24C32 = 4096
     # 8KiB

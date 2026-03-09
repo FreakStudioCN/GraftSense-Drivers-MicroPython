@@ -45,9 +45,9 @@ class AbstractBlockDev:
             控制设备操作和查询参数
 
     Note:
-        - 简单接口：要求缓冲区长度与块大小对齐（offset=0）
-        - 扩展接口：支持任意偏移和长度（offset≠0）
-        - 写入时必须遵守：
+        - 简单接口:要求缓冲区长度与块大小对齐（offset=0）
+        - 扩展接口:支持任意偏移和长度（offset≠0）
+        - 写入时必须遵守:
             - 简单接口需自动处理擦除
             - 扩展接口禁止隐式擦除
     ==========================================
@@ -205,7 +205,7 @@ class AbstractBlockDev:
         设备控制操作。
 
         Args:
-            op (int): 操作码（应使用类常量）：
+            op (int): 操作码（应使用类常量）:
                 - `AbstractBlockDev.IOCTL_INIT` (1)       : 设备初始化
                 - `AbstractBlockDev.IOCTL_SHUTDOWN` (2)   : 设备关闭
                 - `AbstractBlockDev.IOCTL_SYNC` (3)       : 数据同步
@@ -213,7 +213,7 @@ class AbstractBlockDev:
                 - `AbstractBlockDev.IOCTL_BLK_SIZE` (5)   : 获取块大小（可选）
                 - `AbstractBlockDev.IOCTL_BLK_ERASE` (6)  : 擦除块（littlefs 需要）
 
-            arg (int): 操作参数（依赖 op），部分操作无需参数：
+            arg (int): 操作参数（依赖 op），部分操作无需参数:
                 - `IOCTL_BLK_ERASE` (6) 需要传入要擦除的块号
                 - 其他操作可传 `0` 或 `None`，由子类具体定义
 

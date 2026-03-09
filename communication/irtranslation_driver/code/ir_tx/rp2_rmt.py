@@ -3,7 +3,7 @@
 # @Time    : 2025/8/26 下午10:13
 # @Author  : 缪贵成
 # @File    : rp2_rmt.py
-# @Description : RP2 平台的 IR 发射驱动库,为上层协议提供接口，参考自：https://github.com/peterhinch/micropython_ir
+# @Description : RP2 平台的 IR 发射驱动库,为上层协议提供接口，参考自:https://github.com/peterhinch/micropython_ir
 # @License : MIT
 
 __version__ = "0.1.0"

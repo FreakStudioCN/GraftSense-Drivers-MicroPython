@@ -9,7 +9,7 @@ sim7600 = SIM7600(uart)
 calling = Calling(sim7600)
 
 # Make a call
-calling.make_call('+1234567890')
+calling.make_call("+1234567890")
 
 # Hang up the call
 calling.hang_up()

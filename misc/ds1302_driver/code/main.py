@@ -238,14 +238,14 @@ print("FreakStudio: Implement an alarm clock using DS1302")
 ds1302 = DS1302(clk=Pin(10), dio=Pin(11), cs=Pin(12))
 
 # 在烧录程序之前，务必使用 mpremote rtc --set 命令设置内置RTC实时时钟时间为电脑主机时间
-# 接着打开REPL，输入下面命令：
+# 接着打开REPL，输入下面命令:
 #   from machine import Pin,  RTC
 #   from ds1302 import DS1302
 #   rtc = RTC()
 #   year, month, day, weekday, hour, minute, second, _ = rtc.datetime()
 #   ds1302 = DS1302(clk=Pin(10), dio=Pin(11), cs=Pin(12))
 #   ds1302.date_time([year, month, day, weekday, hour, minute, second])
-# 然后退出REPL模式，重启设备：mpremote reset
+# 然后退出REPL模式，重启设备:mpremote reset
 
 # 创建硬件I2C的实例，使用I2C1外设，时钟频率为400KHz，SDA引脚为6，SCL引脚为7
 i2c = I2C(id=1, sda=Pin(6), scl=Pin(7), freq=400000)

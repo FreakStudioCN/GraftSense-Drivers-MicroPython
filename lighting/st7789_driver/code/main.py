@@ -5,7 +5,7 @@
 # @File    : main.py
 # @Description : SPI类实验，使用SPI类实现LCD屏的显示
 # 字库文件和ST7789驱动文件参考
-# 参考russhughes st7789py_mpy：https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
+# 参考russhughes st7789py_mpy:https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
 
 # ======================================== 导入相关模块 ========================================
 

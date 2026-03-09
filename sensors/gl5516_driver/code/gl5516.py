@@ -33,7 +33,7 @@ class GL5516:
         get_calibrated_light() -> float: 获取校准后的光强百分比（0~100%）。
 
     Properties:
-        voltage (float): 当前电压值（单位：伏特）。
+        voltage (float): 当前电压值（单位:伏特）。
         adc_value (int): 当前 ADC 原始数值。
         light_percent (float): 当前校准后的光强百分比（0~100%）。
 

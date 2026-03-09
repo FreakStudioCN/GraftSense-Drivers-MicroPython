@@ -4,7 +4,7 @@
 # @Author  : 李清水
 # @File    : vga1_8x8.py
 # @Description : vga_8x8字体库
-# 参考russhughes st7789py_mpy：https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
+# 参考russhughes st7789py_mpy:https://github.com/russhughes/st7789py_mpy/blob/master/lib/st7789py.py
 
 # 宽度为 8 像素
 WIDTH = 8

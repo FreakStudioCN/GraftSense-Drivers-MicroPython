@@ -31,11 +31,11 @@ import json
 # ======================================== 全局变量 ============================================
 
 # Gamma校正系数
-# 红通道：线性，无校正
+# 红通道:线性，无校正
 GAMMA_RED = 1.0
-# 绿通道：线性，无校正
+# 绿通道:线性，无校正
 GAMMA_GREEN = 1.0
-# 蓝通道：线性，无校正
+# 蓝通道:线性，无校正
 GAMMA_BLUE = 1.0
 
 # ======================================== 功能函数 ============================================
@@ -115,7 +115,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         if not isinstance(flip_h, bool) or not isinstance(flip_v, bool):
             raise ValueError("flip_h and flip_v must be bool")
 
-        # 检查旋转角度是否合法：只能为0、90、180、270
+        # 检查旋转角度是否合法:只能为0、90、180、270
         if not (rotate == 0 or rotate == 90 or rotate == 180 or rotate == 270):
             raise ValueError("rotate must be 90, 180 or 270")
 
@@ -125,9 +125,9 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         self.width = width
         self.height = height
 
-        # 保存布局类型（行/蛇形）：
-        #   行优先排列：每一行从左到右依次编号，每一行的方向都相同。
-        #   蛇形排列：偶数行（第 0、2、4 行等）从左到右，奇数行（第 1、3、5 行等）从右到左。
+        # 保存布局类型（行/蛇形）:
+        #   行优先排列:每一行从左到右依次编号，每一行的方向都相同。
+        #   蛇形排列:偶数行（第 0、2、4 行等）从左到右，奇数行（第 1、3、5 行等）从右到左。
         self.layout = layout
         # 创建用于 framebuf 的 RGB565 缓冲区（2 字节一个像素）
         self.buffer = memoryview(bytearray(width * height * 2))
@@ -198,10 +198,10 @@ class NeopixelMatrix(framebuf.FrameBuffer):
         if self.flip_v:
             y = self.height - 1 - y
 
-        # 行优先：直接线性排列
+        # 行优先:直接线性排列
         if self.layout == NeopixelMatrix.LAYOUT_ROW:
             return y * self.width + x
-        # 蛇形排列：奇数行方向反转
+        # 蛇形排列:奇数行方向反转
         elif self.layout == NeopixelMatrix.LAYOUT_SNAKE:
             return y * self.width + (x if y % 2 == 0 else self.width - 1 - x)
 
@@ -342,7 +342,7 @@ class NeopixelMatrix(framebuf.FrameBuffer):
             ystep: 垂直滚动步数(正数向下，负数向上)
             clear_color: 清除残留区域使用的颜色(默认COLOR_BLACK)
             wrap: True=循环滚动 False=普通滚动(默认)
-        需要注意：
+        需要注意:
             不允许同时设置水平和垂直滚动步数（xstep和ystep不能同时非零）
         """
         # 如果没有指定清除颜色，使用默认黑色

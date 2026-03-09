@@ -3,7 +3,7 @@
 # @Time    : 2025/9/4 上午11:20
 # @Author  : 缪贵成
 # @File    : pn532.py
-# @Description : 基于PN532的NFC通信模块驱动程序，参考自：https://github.com/luiz-brandao/micropython_pn532/tree/main/pn532
+# @Description : 基于PN532的NFC通信模块驱动程序，参考自:https://github.com/luiz-brandao/micropython_pn532/tree/main/pn532
 # @License : MIT
 
 __version__ = "0.1.0"

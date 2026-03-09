@@ -3,7 +3,7 @@
 # @Time    : 2024/10/7 下午2:24
 # @Author  : 李清水
 # @File    : ads1115.py
-# @Description : 外置ADC芯片ADS1115驱动类，参考代码：https://github.com/robert-hh/ads1x15
+# @Description : 外置ADC芯片ADS1115驱动类，参考代码:https://github.com/robert-hh/ads1x15
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -139,30 +139,30 @@ class ADS1115:
     # 配置寄存器位掩码和常量
     # 操作状态掩码
     OS_MASK = const(0x8000)
-    # 写入：启动单次转换
+    # 写入:启动单次转换
     OS_SINGLE = const(0x8000)
-    # 读取：转换进行中
+    # 读取:转换进行中
     OS_BUSY = const(0x0000)
-    # 读取：转换完成
+    # 读取:转换完成
     OS_NOTBUSY = const(0x8000)
 
     # 多路复用掩码
     MUX_MASK = const(0x7000)
-    # 差分输入：AIN0 - AIN1（默认）
+    # 差分输入:AIN0 - AIN1（默认）
     MUX_DIFF_0_1 = const(0x0000)
-    # 差分输入：AIN0 - AIN3
+    # 差分输入:AIN0 - AIN3
     MUX_DIFF_0_3 = const(0x1000)
-    # 差分输入：AIN1 - AIN3
+    # 差分输入:AIN1 - AIN3
     MUX_DIFF_1_3 = const(0x2000)
-    # 差分输入：AIN2 - AIN3
+    # 差分输入:AIN2 - AIN3
     MUX_DIFF_2_3 = const(0x3000)
-    # 单端输入：AIN0
+    # 单端输入:AIN0
     MUX_SINGLE_0 = const(0x4000)
-    # 单端输入：AIN1
+    # 单端输入:AIN1
     MUX_SINGLE_1 = const(0x5000)
-    # 单端输入：AIN2
+    # 单端输入:AIN2
     MUX_SINGLE_2 = const(0x6000)
-    # 单端输入：AIN3
+    # 单端输入:AIN3
     MUX_SINGLE_3 = const(0x7000)
 
     # 程度增益掩码
@@ -318,7 +318,7 @@ class ADS1115:
             ValueError: 如果增益值不在有效范围内。
 
         Notes:
-            支持的增益值：2/3, 1, 2, 4, 8, 16。
+            支持的增益值:2/3, 1, 2, 4, 8, 16。
             如果设置了警报引脚，默认使用下降沿触发中断。
 
         ==========================================
@@ -471,7 +471,7 @@ class ADS1115:
             float: 转换后的电压值。
 
         Notes:
-            转换公式：电压 = 原始值 × (满量程电压 / 32768)。
+            转换公式:电压 = 原始值 × (满量程电压 / 32768)。
 
         ==========================================
 

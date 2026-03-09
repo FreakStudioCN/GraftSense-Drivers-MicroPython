@@ -20,7 +20,7 @@ RELAY_TYPE = "normal"  # 'normal' 或 'latching'
 RELAY_PIN1 = 14  # 控制引脚1
 RELAY_PIN2 = 15  # 控制引脚2
 
-# 音乐节奏定义 (单位：毫秒)
+# 音乐节奏定义 (单位:毫秒)
 # 每个元组表示 (持续时间, 是否在结束时切换)
 MUSIC_NOTES = [
     # 前奏强节奏

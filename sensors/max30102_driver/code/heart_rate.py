@@ -1,9 +1,9 @@
-# Python环境：MicroPython v1.23.0
+# Python环境:MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @时间    : 2025/09/16 18:00
 # @作者    : n-elia
 # @文件    : main.py
-# @描述    : MAX30102 心率与PPG数据读取+简易心率计算器示例，参考自：https://github.com/n-elia/MAX30102-MicroPython-driver
+# @描述    : MAX30102 心率与PPG数据读取+简易心率计算器示例，参考自:https://github.com/n-elia/MAX30102-MicroPython-driver
 
 # ======================================== 导入相关模块 =========================================
 
@@ -37,7 +37,7 @@ hr_compute_interval = 2
 time.sleep(3)
 # 打印调试消息
 print("FreakStudio: Use MAX30102 to read heart rate and temperature.")
-# I2C：SDA=GP4，SCL=GP5，400kHz
+# I2C:SDA=GP4，SCL=GP5，400kHz
 i2c = SoftI2C(
     sda=Pin(4),
     scl=Pin(5),
@@ -61,7 +61,7 @@ else:
 print("Setting up sensor with default configuration.", "\n")
 sensor.setup_sensor()
 
-# 将采样率设置为400：传感器每秒采集400个样本
+# 将采样率设置为400:传感器每秒采集400个样本
 sensor_sample_rate = 400
 sensor.set_sample_rate(sensor_sample_rate)
 
@@ -72,7 +72,7 @@ sensor.set_fifo_average(sensor_fifo_average)
 # 将LED亮度设置为中等值
 sensor.set_active_leds_amplitude(MAX30105_PULSE_AMP_MEDIUM)
 
-# 预期采集速率：400 Hz / 8 = 50 Hz
+# 预期采集速率:400 Hz / 8 = 50 Hz
 actual_acquisition_rate = int(sensor_sample_rate / sensor_fifo_average)
 
 # 初始化心率监测器
@@ -100,7 +100,7 @@ while True:
         ir_reading = sensor.pop_ir_from_storage()
 
         # 将红外读数添加到心率监测器
-        # 注意：根据肤色，使用红光、红外光或绿光LED
+        # 注意:根据肤色，使用红光、红外光或绿光LED
         # 可以使心率计算更准确。
         hr_monitor.add_sample(ir_reading)
 

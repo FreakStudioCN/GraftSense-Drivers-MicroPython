@@ -3,7 +3,7 @@
 # @Time    : 2025/9/8 下午1:34
 # @Author  : 缪贵成
 # @File    : pcf8574.py
-# @Description : pcf8574扩展芯片驱动，参考代码：https://github.com/mcauser/micropython-pcf8574/blob/master/src/pcf8574.py
+# @Description : pcf8574扩展芯片驱动，参考代码:https://github.com/mcauser/micropython-pcf8574/blob/master/src/pcf8574.py
 # @License : MIT
 
 __version__ = "0.1.0"
@@ -136,14 +136,14 @@ class PCF8574:
             # 端口状态发生变化时，将触发中断，调用回调函数
             pin = Pin(int_pin, Pin.IN, Pin.PULL_UP)
 
-            # 定义中断处理器：此函数在中断上下文中运行，应尽量简短
+            # 定义中断处理器:此函数在中断上下文中运行，应尽量简短
             def _int_handler(p):
                 # 调度用户回调，读取端口状态并触发回调
                 micropython.schedule(self._scheduled_handler, None)
 
             # 保存中断引脚对象，防止被垃圾回收
             self._int_pin = pin
-            # 注册中断：当 INT 引脚出现下降沿时触发 _int_handler
+            # 注册中断:当 INT 引脚出现下降沿时触发 _int_handler
             self._int_pin.irq(trigger=trigger, handler=_int_handler)
 
     def _scheduled_handler(self, _: None) -> None:
