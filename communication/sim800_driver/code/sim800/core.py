@@ -7,7 +7,7 @@
 # @License : MIT
 
 __version__ = "1.0.0"
-__author__ = "alankrantas"
+__author__ = "basanovase"
 __license__ = "MIT"
 __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 
