@@ -3,8 +3,9 @@
 # @Time    : 2026/3/18 下午2:15
 # @Author  : peter-l5
 # @File    : sh1107.py
-# @Description : SH1107 OLED显示驱动，支持I2C和SPI接口，提供基本的绘图功能。
+# @Description : SH1107 OLED显示驱动，支持I2C和SPI接口，提供基本的绘图功能。参考自：https://github.com/peter-l5/SH1107
 # @License : MIT
+
 __version__ = "v319"
 __author__ = "peter-l5"
 __license__ = "MIT"
@@ -18,32 +19,32 @@ try:
     import framebuf2 as framebuf
 
     _fb_variant = 2
-except:
+except ImportError:
     import framebuf
 
     _fb_variant = 1
-print("SH1107: framebuf is ", ("standard" if _fb_variant ==
-      1 else "extended"))
+print("SH1107: framebuf is ", ("standard" if _fb_variant == 1 else "extended"))
 
 # ======================================== 全局变量 ============================================
 # SH1107命令常量定义
-_LOW_COLUMN_ADDRESS = const(0x00)      # 低列地址设置
-_HIGH_COLUMN_ADDRESS = const(0x10)     # 高列地址设置
-_MEM_ADDRESSING_MODE = const(0x20)     # 内存寻址模式设置
-_SET_CONTRAST = const(0x8100)          # 对比度设置命令（双字节）
-_SET_SEGMENT_REMAP = const(0xA0)       # 段重映射设置
-_SET_MULTIPLEX_RATIO = const(0xA800)   # 多路复用比率设置（双字节）
-_SET_NORMAL_INVERSE = const(0xA6)      # 正常/反色显示设置
-_SET_DISPLAY_OFFSET = const(0xD300)    # 显示偏移设置（双字节）
-_SET_DC_DC_CONVERTER_SF = const(0xAD81) # DC-DC转换器设置（双字节）
-_SET_DISPLAY_OFF = const(0xAE)         # 关闭显示
-_SET_DISPLAY_ON = const(0xAF)          # 开启显示
-_SET_PAGE_ADDRESS = const(0xB0)        # 页地址设置
-_SET_SCAN_DIRECTION = const(0xC0)      # 扫描方向设置
-_SET_DISP_CLK_DIV = const(0xD550)      # 显示时钟分频设置（双字节）
-_SET_DIS_PRECHARGE = const(0xD922)     # 预充电周期设置（双字节）
-_SET_VCOM_DSEL_LEVEL = const(0xDB35)   # VCOMH电压级别设置（双字节）
-_SET_DISPLAY_START_LINE = const(0xDC00) # 显示起始行设置（双字节）
+_LOW_COLUMN_ADDRESS = const(0x00)  # 低列地址设置
+_HIGH_COLUMN_ADDRESS = const(0x10)  # 高列地址设置
+_MEM_ADDRESSING_MODE = const(0x20)  # 内存寻址模式设置
+_SET_CONTRAST = const(0x8100)  # 对比度设置命令（双字节）
+_SET_SEGMENT_REMAP = const(0xA0)  # 段重映射设置
+_SET_MULTIPLEX_RATIO = const(0xA800)  # 多路复用比率设置（双字节）
+_SET_NORMAL_INVERSE = const(0xA6)  # 正常/反色显示设置
+_SET_DISPLAY_OFFSET = const(0xD300)  # 显示偏移设置（双字节）
+_SET_DC_DC_CONVERTER_SF = const(0xAD81)  # DC-DC转换器设置（双字节）
+_SET_DISPLAY_OFF = const(0xAE)  # 关闭显示
+_SET_DISPLAY_ON = const(0xAF)  # 开启显示
+_SET_PAGE_ADDRESS = const(0xB0)  # 页地址设置
+_SET_SCAN_DIRECTION = const(0xC0)  # 扫描方向设置
+_SET_DISP_CLK_DIV = const(0xD550)  # 显示时钟分频设置（双字节）
+_SET_DIS_PRECHARGE = const(0xD922)  # 预充电周期设置（双字节）
+_SET_VCOM_DSEL_LEVEL = const(0xDB35)  # VCOMH电压级别设置（双字节）
+_SET_DISPLAY_START_LINE = const(0xDC00)  # 显示起始行设置（双字节）
+
 
 # ======================================== 自定义类 ============================================
 class SH1107(framebuf.FrameBuffer):
@@ -211,12 +212,9 @@ class SH1107(framebuf.FrameBuffer):
         self.reset()
         self.poweroff()
         self.fill(0)
-        self.write_command(
-            (_SET_MULTIPLEX_RATIO | multiplex_ratio).to_bytes(2, "big"))
-        self.write_command((_MEM_ADDRESSING_MODE | (
-            0x00 if self.rotate90 else 0x01)).to_bytes(1, "big"))
-        self.write_command(_SET_PAGE_ADDRESS.to_bytes(
-            1, "big"))
+        self.write_command((_SET_MULTIPLEX_RATIO | multiplex_ratio).to_bytes(2, "big"))
+        self.write_command((_MEM_ADDRESSING_MODE | (0x00 if self.rotate90 else 0x01)).to_bytes(1, "big"))
+        self.write_command(_SET_PAGE_ADDRESS.to_bytes(1, "big"))
         self.write_command(_SET_DC_DC_CONVERTER_SF.to_bytes(2, "big"))
         self.write_command(_SET_DISP_CLK_DIV.to_bytes(2, "big"))
         self.write_command(_SET_VCOM_DSEL_LEVEL.to_bytes(2, "big"))
@@ -296,7 +294,7 @@ class SH1107(framebuf.FrameBuffer):
             raise ValueError("value cannot be None")
         if not isinstance(value, bool):
             raise TypeError("value must be boolean")
-        if value == True:
+        if value:
             self.poweroff()
         else:
             self.poweron()
@@ -357,11 +355,9 @@ class SH1107(framebuf.FrameBuffer):
             row_offset = 0x20 if (self.rotate == 180) ^ flag else 0x60
         remap = 0x00 if (self.rotate in (90, 180)) ^ flag else 0x01
         direction = 0x08 if (self.rotate in (180, 270)) ^ flag else 0x00
-        self.write_command(
-            (_SET_DISPLAY_OFFSET | row_offset).to_bytes(2, "big"))
+        self.write_command((_SET_DISPLAY_OFFSET | row_offset).to_bytes(2, "big"))
         self.write_command((_SET_SEGMENT_REMAP | remap).to_bytes(1, "big"))
-        self.write_command(
-            (_SET_SCAN_DIRECTION | direction).to_bytes(1, "big"))
+        self.write_command((_SET_SCAN_DIRECTION | direction).to_bytes(1, "big"))
         self.flip_flag = flag
         if update:
             self.show(True)
@@ -393,8 +389,7 @@ class SH1107(framebuf.FrameBuffer):
             raise TypeError("value must be integer")
         if value < 0 or value > 0x7F:
             raise ValueError("display start line must be 0-127")
-        self.write_command(
-            (_SET_DISPLAY_START_LINE | (value & 0x7F)).to_bytes(2, "big"))
+        self.write_command((_SET_DISPLAY_START_LINE | (value & 0x7F)).to_bytes(2, "big"))
 
     def contrast(self, contrast: int) -> None:
         """
@@ -423,8 +418,7 @@ class SH1107(framebuf.FrameBuffer):
             raise TypeError("contrast must be integer")
         if contrast < 0 or contrast > 0xFF:
             raise ValueError("contrast must be 0-255")
-        self.write_command(
-            (_SET_CONTRAST | (contrast & 0xFF)).to_bytes(2, "big"))
+        self.write_command((_SET_CONTRAST | (contrast & 0xFF)).to_bytes(2, "big"))
 
     def invert(self, invert: bool | None = None) -> None:
         """
@@ -447,10 +441,9 @@ class SH1107(framebuf.FrameBuffer):
         """
         if invert is not None and not isinstance(invert, bool):
             raise TypeError("invert must be boolean or None")
-        if invert == None:
+        if invert is None:
             invert = not self.inverse
-        self.write_command(
-            (_SET_NORMAL_INVERSE | (invert & 1)).to_bytes(1, "big"))
+        self.write_command((_SET_NORMAL_INVERSE | (invert & 1)).to_bytes(1, "big"))
         self.inverse = invert
 
     def show(self, full_update: bool = False) -> None:
@@ -491,7 +484,7 @@ class SH1107(framebuf.FrameBuffer):
                     buffer_3Bytes[0] = _SET_PAGE_ADDRESS | page
                     self.write_command(buffer_3Bytes)
                     page_start = w * page
-                    self.write_data(db_mv[page_start: page_start + w])
+                    self.write_data(db_mv[page_start : page_start + w])
                 current_page <<= 1
         else:
             row_bytes = w // 8
@@ -504,8 +497,7 @@ class SH1107(framebuf.FrameBuffer):
                         buffer_2Bytes[1] = _HIGH_COLUMN_ADDRESS | (row >> 4)
                         self.write_command(buffer_2Bytes)
                         slice_start = row * row_bytes
-                        self.write_data(
-                            db_mv[slice_start: slice_start + row_bytes])
+                        self.write_data(db_mv[slice_start : slice_start + row_bytes])
                 current_page <<= 1
         self.pages_to_update = 0
 
@@ -839,7 +831,8 @@ class SH1107(framebuf.FrameBuffer):
             raise ValueError("c must be 0 or 1")
         try:
             super().fill_rect(x, y, w, h, c)
-        except:
+        except AttributeError:
+            # 若 framebuf 不支持 fill_rect，回退为 rect + fill
             super().rect(x, y, w, h, c, f=True)
         self.register_updates(y, y + h - 1)
 
@@ -882,12 +875,13 @@ class SH1107(framebuf.FrameBuffer):
             raise ValueError("c must be 0 or 1")
         if f is not None and not isinstance(f, bool):
             raise TypeError("f must be boolean or None")
-        if f == None or f == False:
+        if f is None or f is False:
             super().rect(x, y, w, h, c)
         else:
             try:
                 super().rect(x, y, w, h, c, f)
-            except:
+            except TypeError:
+                # 若当前 framebuf 的 rect 不支持 f 参数，则回退为 fill_rect
                 super().fill_rect(x, y, w, h, c)
         self.register_updates(y, y + h - 1)
 
@@ -1004,10 +998,9 @@ class SH1107(framebuf.FrameBuffer):
                 raise ValueError("rotation must be 0, 90, 180, or 270")
             try:
                 super().large_text(s, x, y, m, c, r, *args, **kwargs)
-            except:
+            except AttributeError:
                 raise Exception("extended framebuffer v206+ required")
-            h = (8 * m) * (1 if r is None or r %
-                           360 // 90 in (0, 2) else len(s))
+            h = (8 * m) * (1 if r is None or r % 360 // 90 in (0, 2) else len(s))
             self.register_updates(y, y + h - 1)
 
         def circle(self, x: int, y: int, radius: int, c: int, f: bool | None = None) -> None:
@@ -1079,7 +1072,15 @@ class SH1107(framebuf.FrameBuffer):
             """
             if x0 is None or y0 is None or x1 is None or y1 is None or x2 is None or y2 is None or c is None:
                 raise ValueError("all coordinates and c cannot be None")
-            if not isinstance(x0, int) or not isinstance(y0, int) or not isinstance(x1, int) or not isinstance(y1, int) or not isinstance(x2, int) or not isinstance(y2, int) or not isinstance(c, int):
+            if (
+                not isinstance(x0, int)
+                or not isinstance(y0, int)
+                or not isinstance(x1, int)
+                or not isinstance(y1, int)
+                or not isinstance(x2, int)
+                or not isinstance(y2, int)
+                or not isinstance(c, int)
+            ):
                 raise TypeError("coordinates and c must be integers")
             if c not in (0, 1):
                 raise ValueError("c must be 0 or 1")
@@ -1142,7 +1143,7 @@ class SH1107(framebuf.FrameBuffer):
         Args:
             res: 复位引脚对象（具有高低电平控制功能）
         Raises:
-            ValueError: 如果res为None
+            TypeError: 如果res存在但不是可调用对象
         Notes:
             无
 
@@ -1151,10 +1152,12 @@ class SH1107(framebuf.FrameBuffer):
         Args:
             res: reset pin object (with high/low control)
         Raises:
-            ValueError: if res is None
+            TypeError: if res is provided but not callable
         Notes:
             None
         """
+        if res is not None and not callable(res):
+            raise TypeError("reset pin must be callable (e.g., Pin object)")
         if res is not None:
             res(1)
             time.sleep_ms(1)
@@ -1206,7 +1209,7 @@ class SH1107_I2C(SH1107):
             raise TypeError("width and height must be integers")
         if not isinstance(address, int):
             raise TypeError("address must be integer")
-        if address < 0x3C or address > 0x3F:   # 常见SH1107地址范围
+        if address < 0x3C or address > 0x3F:  # 常见SH1107地址范围
             raise ValueError("I2C address out of typical range 0x3C-0x3F")
         if not isinstance(rotate, int):
             raise TypeError("rotate must be integer")
@@ -1457,8 +1460,8 @@ class SH1107_SPI(SH1107):
         """
         super().reset(self.res)
 
+
 # ======================================== 初始化配置 ===========================================
-# （无初始化代码）
+
 
 # ========================================  主程序  ============================================
-# （无主程序逻辑）
