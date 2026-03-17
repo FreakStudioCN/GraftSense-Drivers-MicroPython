@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/16 下午4:16
 # @Author  : mcauser
-# @File    : main.py
+# @File    : ht16k33_matrix.py
 # @Description : HT16K33点阵屏驱动 实现HT16K33芯片控制各类点阵屏的基础功能 参考自:https://github.com/mcauser/deshipu-micropython-ht16k33
 # @License : MIT
 __version__ = "0.1.0"
