@@ -3,8 +3,9 @@
 # @Time    : 2026/3/17 下午3:45
 # @Author  : lewisxhe
 # @File    : pcf8563.py
-# @Description : PCF8563 RTC实时时钟模块驱动，实现时间读写、闹钟设置、时钟输出配置
+# @Description : PCF8563 RTC实时时钟模块驱动，实现时间读写、闹钟设置、时钟输出配置参考自：https://github.com/lewisxhe/PCF8563_PythonLibrary
 # @License : MIT
+
 __version__ = "1.0.0"
 __author__ = "lewisxhe"
 __license__ = "MIT"
