@@ -3,7 +3,7 @@
 # @Time    : 2026/3/17 下午2:00
 # @Author  : wybiral
 # @File    : main.py
-# @Description : CH9121串口转网络模块异步驱动，支持TCP/UDP的客户端/服务端模式配置与数据读写，封装了模块的配置指令发送、参数读写、数据透传等核心功能
+# @Description : CH9121串口转网络模块异步驱动,封装了模块的配置指令发送、参数读写、数据透传等核心功能 参考自:https://github.com/wybiral/micropython-ch9121
 # @License : MIT
 
 __version__ = "0.1.0"
