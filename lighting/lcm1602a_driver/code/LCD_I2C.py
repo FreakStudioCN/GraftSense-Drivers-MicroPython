@@ -3,7 +3,7 @@
 # @Time    : 2025/9/9 下午5:00
 # @Author  : bhavi-thiran
 # @File    : lcd_i2c.py
-# @Description : I2C接口LCD1602显示屏驱动 实现显示控制、光标管理、字符输出等核心功能
+# @Description : I2C接口LCD1602显示屏驱动 实现显示控制、光标管理、字符输出等核心功能 参考自：https://github.com/Bhavithiran97/LCM1602-14_LCD_Library
 # @License : MIT
 __version__ = "1.0.0"
 __author__ = "bhavi-thiran"
