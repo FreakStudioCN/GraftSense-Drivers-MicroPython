@@ -1,9 +1,9 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/8 下午6:00
-# @Author  : alankrantas
+# @Author  : basanovase
 # @File    : core.py
-# @Description : SIM800模块驱动 实现基础AT指令通信、拨号、挂断、获取网络时间等功能
+# @Description : SIM800模块驱动 实现基础AT指令通信、拨号、挂断、获取网络时间等功能 参考自:https://github.com/basanovase/sim800
 # @License : MIT
 
 __version__ = "1.0.0"

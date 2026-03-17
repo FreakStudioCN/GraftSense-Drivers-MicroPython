@@ -1,9 +1,9 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/8 下午8:00
-# @Author  : alankrantas
+# @Author  : basanovase
 # @File    : gprs.py
-# @Description : SIM800模块GPRS扩展类 实现GPRS附着/分离、APN配置、TCP通信、GSM定位等功能
+# @Description : SIM800模块GPRS扩展类 实现GPRS附着/分离、APN配置、TCP通信、GSM定位等功能 参考自:https://github.com/basanovase/sim800
 # @License : MIT
 
 __version__ = "1.0.0"

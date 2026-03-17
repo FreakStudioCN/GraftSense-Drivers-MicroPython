@@ -1,9 +1,9 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/8 下午6:30
-# @Author  : alankrantas
+# @Author  : basanovase
 # @File    : utils.py
-# @Description : SIM800模块工具类 提供UART通信、指令发送、响应等待等通用工具函数
+# @Description : SIM800模块工具类 提供UART通信、指令发送、响应等待等通用工具函数 参考自:https://github.com/basanovase/sim800
 # @License : MIT
 # @Platform: MicroPython v1.23.0
 
