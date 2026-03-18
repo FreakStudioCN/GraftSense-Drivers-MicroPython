@@ -6,6 +6,11 @@
 # @Description : 红外接收模块基类，参考自:https://github.com/peterhinch/micropython_ir
 # @License : MIT
 
+__version__ = "1.0.0"
+__author__ = "缪贵成"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 =========================================
 
 from machine import Pin, Timer

@@ -5,6 +5,11 @@
 # @File    : adxl345.py
 # @Description : ADXL345三轴加速度传感器驱动 初始化传感器 配置参数 读取XYZ轴加速度数据 参考自:https://github.com/fanday/adxl345_micropython
 
+__version__ = "1.0.0"
+__author__ = "fanday"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 =========================================
 
 # 导入Pin模块用于硬件引脚控制

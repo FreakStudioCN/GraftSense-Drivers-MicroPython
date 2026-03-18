@@ -6,6 +6,11 @@
 # @Description : 自定义PCF8575类，通过I2C总线操作
 # 参考代码:https://github.com/mcauser/micropython-pcf8575
 
+__version__ = "1.0.0"
+__author__ = "李清水"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 =========================================
 
 # 导入硬件相关模块
