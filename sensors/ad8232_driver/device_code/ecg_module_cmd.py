@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/9/5 下午10:12
 # @Author  : hogeiha
-# @File    : ecg_module_cmd
+# @File    : ecg_module_cmd.py
 # @Description : 心率串口模块命令发送解析
 # @License : MIT
 
