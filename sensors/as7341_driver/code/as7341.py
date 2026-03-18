@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/12 下午10:00
 # @Author  : Rob Hamerling
-# @File    : main.py
+# @File    : as7341.py
 # @Description : AS7341多光谱数字传感器MicroPython驱动 支持光谱测量 闪烁检测 GPIO/LED控制 中断配置 参考自:https://gitlab.com/robhamerling/micropython-as7341
 # @License : MIT
 __version__ = "0.1.0"
