@@ -1,12 +1,12 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/13 下午5:40
-# @Author  : Mike Causer
+# @Author  : mcauser
 # @File    : mcp23017.py
-# @Description : MCP23017 16位I/O扩展器驱动  I2C接口，实现GPIO扩展、输入输出、上拉、中断功能
+# @Description : MCP23017 16位I/O扩展器驱动  I2C接口，实现GPIO扩展、输入输出、上拉、中断功能 参考自:https://github.com/mcauser/micropython-mcp23017
 # @License : MIT
 __version__ = "0.1.4"
-__author__ = "Mike Causer"
+__author__ = "mcauser"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 

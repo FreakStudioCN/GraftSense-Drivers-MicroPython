@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/13 下午6:20
-# @Author  : FreakStudio
+# @Author  : hogeiha
 # @File    : main.py
 # @Description : MCP23017测试  配置I2C扫描、引脚输入输出、虚拟引脚操作、极性反转验证
 
