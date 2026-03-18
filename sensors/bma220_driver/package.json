@@ -1,0 +1,47 @@
+{
+  "name": "bma220_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control bma220_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "micropython_bma220/__init__.py",
+      "code/micropython_bma220/__init__.py"
+    ],
+    [
+      "micropython_bma220/bma220.py",
+      "code/micropython_bma220/bma220.py"
+    ],
+    [
+      "micropython_bma220/bma220_const.py",
+      "code/micropython_bma220/bma220_const.py"
+    ],
+    [
+      "micropython_bma220/bma220_lowg_detection.py",
+      "code/micropython_bma220/bma220_lowg_detection.py"
+    ],
+    [
+      "micropython_bma220/bma220_orientation.py",
+      "code/micropython_bma220/bma220_orientation.py"
+    ],
+    [
+      "micropython_bma220/bma220_slope.py",
+      "code/micropython_bma220/bma220_slope.py"
+    ],
+    [
+      "micropython_bma220/bma220_tap_sensing.py",
+      "code/micropython_bma220/bma220_tap_sensing.py"
+    ],
+    [
+      "micropython_bma220/i2c_helpers.py",
+      "code/micropython_bma220/i2c_helpers.py"
+    ]
+  ]
+}

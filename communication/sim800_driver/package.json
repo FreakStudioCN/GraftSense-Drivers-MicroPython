@@ -1,0 +1,39 @@
+{
+  "name": "sim800_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control sim800_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "sim800/__init__.py",
+      "code/sim800/__init__.py"
+    ],
+    [
+      "sim800/core.py",
+      "code/sim800/core.py"
+    ],
+    [
+      "sim800/gprs.py",
+      "code/sim800/gprs.py"
+    ],
+    [
+      "sim800/sms.py",
+      "code/sim800/sms.py"
+    ],
+    [
+      "sim800/tcpip.py",
+      "code/sim800/tcpip.py"
+    ],
+    [
+      "sim800/utils.py",
+      "code/sim800/utils.py"
+    ]
+  ]
+}

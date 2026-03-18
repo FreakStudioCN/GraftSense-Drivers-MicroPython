@@ -1,0 +1,23 @@
+{
+  "name": "ht16k33_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control ht16k33_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "ht16k33_matrix.py",
+      "code/ht16k33_matrix.py"
+    ],
+    [
+      "ht16k33_seg.py",
+      "code/ht16k33_seg.py"
+    ]
+  ]
+}
