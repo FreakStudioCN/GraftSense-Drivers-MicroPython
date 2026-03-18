@@ -1,12 +1,13 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/16 下午4:52
-# @Author  : 作者名
+# @Author  : openfablab
 # @File    : mcp4728.py
-# @Description : MCP4728四通道12位I2C DAC驱动  实现DAC通道值、参考电压、增益、掉电模式的配置与读写
+# @Description : MCP4728四通道12位I2C DAC驱动  实现DAC通道值、参考电压、增益、掉电模式的配置与读写 参考自: https://github.com/openfablab/mcp4728
 # @License : MIT
+
 __version__ = "0.1.0"
-__author__ = "作者名"
+__author__ = "openfablab"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 

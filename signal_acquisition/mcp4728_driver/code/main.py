@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/16 下午2:00
-# @Author  : 【作者名】
+# @Author  : hogeiha
 # @File    : main.py
 # @Description : 验证MCP4728四通道DAC模块的输出功能，通过ADC读取DAC通道B的输出电压，确认数值、参考电压、增益等参数设置生效
 
