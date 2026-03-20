@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/16 下午8:00
-# @Author  : 【作者名】
+# @Author  : hogeiha
 # @File    : main.py
 # @Description : PCF8563实时时钟模块完整使用示例，包含时间读写、时钟输出配置、闹钟功能等核心操作
 
