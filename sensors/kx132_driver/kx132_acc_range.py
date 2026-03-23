@@ -6,7 +6,7 @@ import time
 from machine import Pin, I2C
 from micropython_kx132 import kx132
 
-i2c = I2C(1, sda=Pin(2), scl=Pin(3))
+i2c = I2C(0, sda=Pin(4), scl=Pin(5))
 kx = kx132.KX132(i2c)
 
 kx.acc_range = kx132.ACC_RANGE_16

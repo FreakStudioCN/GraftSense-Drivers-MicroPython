@@ -14,9 +14,6 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
-# 导入MicroPython的UART串口通信模块
-from machine import UART
-
 # 导入MicroPython的毫秒级延迟模块
 from utime import sleep_ms
 
@@ -251,7 +248,7 @@ class KT403A:
     # EQ音效常量 - 重低音模式
     EQ_BASS = 5
 
-    def __init__(self, uartBus, txPinNum, rxPinNum, device=None, volume=70, eq=None):
+    def __init__(self, uart, device=None, volume=70, eq=None):
         """
         初始化KT403A音频模块实例，配置UART通信参数并设置初始工作状态。
 
@@ -286,12 +283,8 @@ class KT403A:
         Notes:
             Pin numbers are automatically converted to pin IDs in "P+number" format; module communication status is verified during initialization
         """
-        # 构造TX引脚ID字符串（格式:P+引脚编号）
-        txPinId = "P" + str(txPinNum)
-        # 构造RX引脚ID字符串（格式:P+引脚编号）
-        rxPinId = "P" + str(rxPinNum)
         # 初始化UART通信实例，配置9600波特率、8位数据位、无校验、1位停止位
-        self._uart = UART(uartBus, baudrate=9600, bits=8, parity=None, stop=1, pins=(txPinId, rxPinId, None, None))
+        self._uart = uart
         # 设置初始音源设备（未指定时默认使用SD卡）
         self.SetDevice(device if device else KT403A.DEVICE_SD)
         # 检查模块初始化状态，获取不到状态则抛出异常
