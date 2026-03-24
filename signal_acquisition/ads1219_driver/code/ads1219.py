@@ -3,7 +3,7 @@
 # @Time    : 2025/9/9 下午9:00
 # @Author  : miketeachman
 # @File    : ads1219.py
-# @Description : ADS1219 24位高精度ADC模数转换芯片驱动 支持多通道选择 增益配置 数据速率调节
+# @Description : ADS1219 24位高精度ADC模数转换芯片驱动 支持多通道选择 增益配置 数据速率调节 参考自:https://github.com/miketeachman/micropython-ads1219
 # @License : MIT
 # @Platform: Raspberry Pi Pico / MicroPython
 
@@ -15,8 +15,10 @@ __platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
 # ======================================== 导入相关模块 =========================================
 # 从micropython模块导入常量定义工具
 from micropython import const
+
 # 导入结构化数据打包/解包模块，用于I2C数据格式转换
 import ustruct
+
 # 导入微秒级时间模块，用于转换等待延时
 import utime
 
@@ -57,6 +59,7 @@ _DRDY_NEW_RESULT_READY = const(0b10000000)
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class ADS1219:
     """
@@ -65,8 +68,8 @@ class ADS1219:
 
     实现ADS1219芯片的完整功能驱动，支持差分/单端通道选择、可编程增益(1x/4x)、多档数据速率(20-1000SPS)、
     单次/连续转换模式、内部/外部参考电压切换，通过I2C接口与芯片通信，提供简洁的配置和数据读取接口
-    Implement complete function driver for ADS1219 chip, support differential/single-ended channel selection, 
-    programmable gain (1x/4x), multiple data rates (20-1000SPS), single/continuous conversion mode, 
+    Implement complete function driver for ADS1219 chip, support differential/single-ended channel selection,
+    programmable gain (1x/4x), multiple data rates (20-1000SPS), single/continuous conversion mode,
     internal/external reference voltage switching, communicate with chip through I2C interface,
     provide simple configuration and data reading interface
 
@@ -195,7 +198,7 @@ class ADS1219:
 
         Notes:
             初始化时自动调用reset()方法将芯片恢复默认配置，默认配置：AIN0-AIN1差分通道、1x增益、20SPS、单次转换、内部参考电压
-            Automatically call reset() method to restore chip to default configuration during initialization, 
+            Automatically call reset() method to restore chip to default configuration during initialization,
             default config: AIN0-AIN1 differential channel, 1x gain, 20SPS, single-shot conversion, internal VREF
         """
         # 保存I2C总线对象
@@ -221,7 +224,7 @@ class ADS1219:
 
         Notes:
             先读取当前配置，保留非mask位，替换mask位为新值，再写入配置寄存器，避免修改无关配置
-            First read current configuration, keep non-mask bits, replace mask bits with new value, 
+            First read current configuration, keep non-mask bits, replace mask bits with new value,
             then write to config register to avoid modifying unrelated configurations
         """
         # 读取当前配置寄存器值
@@ -229,7 +232,7 @@ class ADS1219:
         # 计算新配置值：清除mask位，设置新值
         to_be = (as_is & ~mask) | value
         # 打包写配置命令和新配置值
-        wreg = ustruct.pack('BB', _COMMAND_WREG_CONFIG, to_be)
+        wreg = ustruct.pack("BB", _COMMAND_WREG_CONFIG, to_be)
         # 写入配置寄存器
         self._i2c.writeto(self._address, wreg)
 
@@ -250,7 +253,7 @@ class ADS1219:
             Send read config register command then read 1-byte data, return current value of config register
         """
         # 打包读取配置寄存器命令
-        rreg = ustruct.pack('B', _COMMAND_RREG_CONFIG)
+        rreg = ustruct.pack("B", _COMMAND_RREG_CONFIG)
         # 发送读取命令
         self._i2c.writeto(self._address, rreg)
         # 读取1字节配置数据
@@ -275,7 +278,7 @@ class ADS1219:
             Send read status register command then read 1-byte data, mainly focus on bit7 (DRDY) to judge if new data is available
         """
         # 打包读取状态寄存器命令
-        rreg = ustruct.pack('B', _COMMAND_RREG_STATUS)
+        rreg = ustruct.pack("B", _COMMAND_RREG_STATUS)
         # 发送读取命令
         self._i2c.writeto(self._address, rreg)
         # 读取1字节状态数据
@@ -355,7 +358,7 @@ class ADS1219:
 
         Notes:
             单次模式：每次读取数据时启动一次转换；连续模式：持续转换，数据就绪后更新结果寄存器
-            Single-shot mode: start one conversion each time data is read; 
+            Single-shot mode: start one conversion each time data is read;
             Continuous mode: continuous conversion, update result register when data is ready
         """
         # 调用读-改-写方法设置转换模式配置
@@ -395,28 +398,28 @@ class ADS1219:
         Notes:
             单次模式下自动启动转换并等待数据就绪，连续模式下直接读取最新数据；
             返回值为24位无符号整数，可根据参考电压和增益转换为实际电压值
-            In single-shot mode, automatically start conversion and wait for data ready; 
+            In single-shot mode, automatically start conversion and wait for data ready;
             in continuous mode, directly read latest data;
             Return value is 24-bit unsigned integer, can be converted to actual voltage value according to reference voltage and gain
         """
         # 判断是否为单次转换模式
-        if ((self.read_config() & _CM_MASK) == self.CM_SINGLE):
+        if (self.read_config() & _CM_MASK) == self.CM_SINGLE:
             # 启动单次转换
             self.start_sync()
 
             # 等待转换完成（轮询DRDY位）
-            while ((self.read_status() & _DRDY_MASK) == _DRDY_NO_NEW_RESULT):
+            while (self.read_status() & _DRDY_MASK) == _DRDY_NO_NEW_RESULT:
                 # 每次等待100微秒
                 utime.sleep_us(100)
 
         # 打包读取数据命令
-        rreg = ustruct.pack('B', _COMMAND_RDATA)
+        rreg = ustruct.pack("B", _COMMAND_RDATA)
         # 发送读取命令
         self._i2c.writeto(self._address, rreg)
         # 读取3字节转换数据
         data = self._i2c.readfrom(self._address, 3)
         # 拼接为4字节（补0）并解包为无符号整数返回
-        return ustruct.unpack('>I', b'\x00' + data)[0]
+        return ustruct.unpack(">I", b"\x00" + data)[0]
 
     def read_data_irq(self):
         """
@@ -432,17 +435,17 @@ class ADS1219:
 
         Notes:
             不检查转换状态和模式，直接读取转换结果寄存器，适用于外部中断通知数据就绪的场景
-            Does not check conversion status and mode, directly read conversion result register, 
+            Does not check conversion status and mode, directly read conversion result register,
             suitable for scenarios where external interrupt notifies data ready
         """
         # 打包读取数据命令
-        rreg = ustruct.pack('B', _COMMAND_RDATA)
+        rreg = ustruct.pack("B", _COMMAND_RDATA)
         # 发送读取命令
         self._i2c.writeto(self._address, rreg)
         # 读取3字节转换数据
         data = self._i2c.readfrom(self._address, 3)
         # 拼接为4字节（补0）并解包为无符号整数返回
-        return ustruct.unpack('>I', b'\x00' + data)[0]
+        return ustruct.unpack(">I", b"\x00" + data)[0]
 
     def reset(self):
         """
@@ -457,11 +460,11 @@ class ADS1219:
 
         Notes:
             发送复位命令将芯片所有寄存器恢复为出厂默认值，复位后需重新配置参数
-            Send reset command to restore all chip registers to factory default values, 
+            Send reset command to restore all chip registers to factory default values,
             need to reconfigure parameters after reset
         """
         # 打包复位命令
-        data = ustruct.pack('B', _COMMAND_RESET)
+        data = ustruct.pack("B", _COMMAND_RESET)
         # 发送复位命令到芯片
         self._i2c.writeto(self._address, data)
 
@@ -478,11 +481,11 @@ class ADS1219:
 
         Notes:
             单次模式下启动一次转换；连续模式下同步转换时序，重启连续转换
-            In single-shot mode, start one conversion; 
+            In single-shot mode, start one conversion;
             in continuous mode, sync conversion timing and restart continuous conversion
         """
         # 打包启动/同步命令
-        data = ustruct.pack('B', _COMMAND_START_SYNC)
+        data = ustruct.pack("B", _COMMAND_START_SYNC)
         # 发送启动/同步命令到芯片
         self._i2c.writeto(self._address, data)
 
@@ -502,9 +505,10 @@ class ADS1219:
             Send power-down command to put chip into low-power mode, can be woken up by start_sync command
         """
         # 打包掉电命令
-        data = ustruct.pack('B', _COMMAND_POWERDOWN)
+        data = ustruct.pack("B", _COMMAND_POWERDOWN)
         # 发送掉电命令到芯片
         self._i2c.writeto(self._address, data)
+
 
 # ======================================== 初始化配置 ===========================================
 
