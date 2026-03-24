@@ -9,27 +9,31 @@
 
 # 导入软I2C和引脚控制模块
 from machine import SoftI2C, Pin
+
 # 导入BMP581传感器驱动模块
 import bmp581mod
+
 # 导入时间控制模块
 import time
+
 # 导入I2C适配器模块
 from sensor_pack.bus_service import I2cAdapter
 
 # ======================================== 全局变量 ============================================
 
 # Raspberry Pi Pico的I2C SCL引脚编号
-I2C_SCL_PIN = 3
+I2C_SCL_PIN = 5
 # Raspberry Pi Pico的I2C SDA引脚编号
-I2C_SDA_PIN = 2
+I2C_SDA_PIN = 4
 # I2C总线通信频率
 I2C_FREQ = 400_000
 # BMP581传感器默认I2C地址（硬件配置可改为0x47）
-TARGET_SENSOR_ADDR = 0x46
+TARGET_SENSOR_ADDR = 0x47
 # 输出分隔符，由32个短横线组成
 txt_break = 32 * "-"
 
 # ======================================== 功能函数 ============================================
+
 
 def get_wait_time_ms(output_data_rate: int) -> int:
     """
@@ -37,7 +41,7 @@ def get_wait_time_ms(output_data_rate: int) -> int:
     Args:输出数据率，单位为Hz，范围1-400
     Raises:ValueError - 当输出数据率小于1或大于400时抛出
     Notes:无
-    
+
     ==========================================
     Calculate data output period (ms) based on output data rate
     Args:output_data_rate: int, unit is Hz, range 1-400
@@ -45,8 +49,9 @@ def get_wait_time_ms(output_data_rate: int) -> int:
     Notes:None
     """
     if output_data_rate < 1 or output_data_rate > 400:
-        raise ValueError(f"Invalid output data rate!")
+        raise ValueError("Invalid output data rate!")
     return 1 + int(1000 / output_data_rate)
+
 
 # ======================================== 自定义类 ============================================
 
@@ -129,7 +134,9 @@ status = ps.get_status(1)
 # 解析中断状态寄存器数据
 drdy_data_reg, fifo_full, fifo_ths, oor_p, por = status
 # 打印中断状态寄存器解析结果
-print(f"ISR Status: data_rdy: {drdy_data_reg}, FIFO full: {fifo_full}, FIFO Threshold: {fifo_ths}, Pressure data out of range: {oor_p}, POR or software reset complete: {por}")
+print(
+    f"ISR Status: data_rdy: {drdy_data_reg}, FIFO full: {fifo_full}, FIFO Threshold: {fifo_ths}, Pressure data out of range: {oor_p}, POR or software reset complete: {por}"
+)
 
 # 判断传感器核心状态是否正常
 status_ok = status_nvm_rdy and not status_nvm_err and por
@@ -202,7 +209,7 @@ for _ in range(100):
         print(f"Temperature [°C]: {temperature}")
     else:
         # 打印无数据可读提示
-        print(f"No data to read!")
+        print("No data to read!")
 
 # 打印分隔符
 print(txt_break)
@@ -228,7 +235,7 @@ for _ in range(200):
         print(f"Temperature [°C]: {temperature}; Pressure [Pa]: {pressure}")
     else:
         # 打印无数据可读提示
-        print(f"No data to read!")
+        print("No data to read!")
 
 # 打印分隔符
 print(txt_break)
@@ -250,7 +257,7 @@ for items in ps:
         print(f"Temperature [°C]: {temperature}; Pressure [Pa]: {pressure}")
     else:
         # 打印无数据可读提示
-        print(f"No data to read!")
+        print("No data to read!")
     # 启动传感器按需测量（模式2：按需测量）
     tmp = ps.start_measurement(mode=2, output_data_rate=0)
     # 等待数据输出周期
