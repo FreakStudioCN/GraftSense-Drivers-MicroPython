@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/16 上午10:16
-# @Author  :
+# @Author  : mcauser
 # @File    : main.py
 # @Description : 基于HT16K33驱动的4位7段数码管显示测试程序
 

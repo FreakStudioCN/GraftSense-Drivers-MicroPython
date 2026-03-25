@@ -1,7 +1,7 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/13 下午4:52
-# @Author  : User
+# @Author  : mcauser
 # @File    : main.py
 # @Description : ADS1015读取电压并控制GPIO引脚电平切换  通过ADS1015采集通道0电压，周期性切换GPIO16输出电平并读取验证
 
