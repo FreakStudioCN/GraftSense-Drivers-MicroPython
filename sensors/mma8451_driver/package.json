@@ -1,0 +1,27 @@
+{
+  "name": "mma8451_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control mma8451_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "micropython_mma8451/__init__.py",
+      "code/micropython_mma8451/__init__.py"
+    ],
+    [
+      "micropython_mma8451/i2c_helpers.py",
+      "code/micropython_mma8451/i2c_helpers.py"
+    ],
+    [
+      "micropython_mma8451/mma8451.py",
+      "code/micropython_mma8451/mma8451.py"
+    ]
+  ]
+}

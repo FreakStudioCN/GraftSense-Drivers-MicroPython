@@ -6,6 +6,11 @@
 # @Description : R60AMP1多人轨迹雷达设备业务处理类
 # @License : MIT
 
+__version__ = "1.0.0"
+__author__ = "hogeiha"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 =========================================
 
 from machine import Timer

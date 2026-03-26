@@ -1,0 +1,43 @@
+{
+  "name": "sim7600_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control sim7600_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "sim7600/__init__.py",
+      "code/sim7600/__init__.py"
+    ],
+    [
+      "sim7600/calling.py",
+      "code/sim7600/calling.py"
+    ],
+    [
+      "sim7600/core.py",
+      "code/sim7600/core.py"
+    ],
+    [
+      "sim7600/http.py",
+      "code/sim7600/http.py"
+    ],
+    [
+      "sim7600/location.py",
+      "code/sim7600/location.py"
+    ],
+    [
+      "sim7600/sms.py",
+      "code/sim7600/sms.py"
+    ],
+    [
+      "sim7600/tcpip.py",
+      "code/sim7600/tcpip.py"
+    ]
+  ]
+}

@@ -114,12 +114,16 @@ class RegisterStruct:
         if self.lenght <= 2:
             value = struct.unpack(
                 self.format,
-                memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)),
+                memoryview(
+                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+                ),
             )[0]
         else:
             value = struct.unpack(
                 self.format,
-                memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)),
+                memoryview(
+                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+                ),
             )
         return value
 

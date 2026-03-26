@@ -1,29 +1,23 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2025/9/9 下午4:00
+# @Time    : 2026/3/17 下午3:45
 # @Author  : lewisxhe
 # @File    : pcf8563.py
-# @Description : PCF8563 RTC实时时钟模块驱动 实现时间读写、闹钟设置、时钟输出配置等功能
+# @Description : PCF8563 RTC实时时钟模块驱动，实现时间读写、闹钟设置、时钟输出配置参考自：https://github.com/lewisxhe/PCF8563_PythonLibrary
 # @License : MIT
-# @Platform: MicroPython v1.23.0
 
 __version__ = "1.0.0"
 __author__ = "lewisxhe"
 __license__ = "MIT"
-__platform__ = "Raspberry Pi Pico / MicroPython v1.23.0"
+__platform__ = "MicroPython v1.23.0"
 
 # ======================================== 导入相关模块 =========================================
-# 导入时间模块，用于系统时间交互
 import time
-
-# 导入I2C通信模块，用于与PCF8563进行数据交互
 from machine import I2C
-
-# 导入常量定义工具，用于定义硬件寄存器地址
 from micropython import const
 
 # ======================================== 全局变量 ============================================
-# PCF8563模块I2C从机地址
+# PCF8563 I2C从机地址
 PCF8563_SLAVE_ADDRESS = const(0x51)
 # 状态寄存器1地址
 PCF8563_STAT1_REG = const(0x00)
@@ -50,21 +44,21 @@ PCF8563_TIMER1_REG = const(0x0E)
 # 定时器寄存器2地址
 PCF8563_TIMER2_REG = const(0x0F)
 
-# 电压低掩码位
+# 电压低标志位掩码
 PCF8563_VOL_LOW_MASK = const(0x80)
-# 分钟寄存器掩码位
+# 分钟寄存器数据掩码
 PCF8563_minuteS_MASK = const(0x7F)
-# 小时寄存器掩码位
+# 小时寄存器数据掩码
 PCF8563_HOUR_MASK = const(0x3F)
-# 星期寄存器掩码位
+# 星期寄存器数据掩码
 PCF8563_WEEKDAY_MASK = const(0x07)
-# 世纪掩码位
+# 世纪标志位掩码
 PCF8563_CENTURY_MASK = const(0x80)
-# 日期寄存器掩码位
+# 日期寄存器数据掩码
 PCF8563_DAY_MASK = const(0x3F)
-# 月份寄存器掩码位
+# 月份寄存器数据掩码
 PCF8563_MONTH_MASK = const(0x1F)
-# 定时器控制掩码位
+# 定时器控制位掩码
 PCF8563_TIMER_CTL_MASK = const(0x03)
 
 # 闹钟标志位
@@ -80,9 +74,9 @@ PCF8563_TIMER_TE = const(0x80)
 # 定时器频率选择位
 PCF8563_TIMER_TD10 = const(0x03)
 
-# 无闹钟标志
+# 无闹钟匹配值
 PCF8563_NO_ALARM = const(0xFF)
-# 闹钟使能位
+# 闹钟使能标志
 PCF8563_ALARM_ENABLE = const(0x80)
 # 时钟输出使能位
 PCF8563_CLK_ENABLE = const(0x80)
@@ -96,720 +90,767 @@ PCF8563_ALARM_DAY = const(0x0B)
 # 闹钟星期寄存器地址
 PCF8563_ALARM_WEEKDAY = const(0x0C)
 
-# 时钟输出频率-32.768KHz
+# 时钟输出 32.768KHz
 CLOCK_CLK_OUT_FREQ_32_DOT_768KHZ = const(0x80)
-# 时钟输出频率-1.024KHz
+# 时钟输出 1.024KHz
 CLOCK_CLK_OUT_FREQ_1_DOT_024KHZ = const(0x81)
-# 时钟输出频率-32KHz
+# 时钟输出 32KHz
 CLOCK_CLK_OUT_FREQ_32_KHZ = const(0x82)
-# 时钟输出频率-1Hz
+# 时钟输出 1Hz
 CLOCK_CLK_OUT_FREQ_1_HZ = const(0x83)
 # 时钟输出高阻抗模式
-CLOCK_CLK_HIGH_IMPEDANCE = const(0x0)
+CLOCK_CLK_HIGH_IMPEDANCE = const(0x00)
+
+# 允许的时钟输出频率值列表（用于参数验证）
+ALLOWED_CLK_FREQUENCIES = (
+    CLOCK_CLK_OUT_FREQ_32_DOT_768KHZ,
+    CLOCK_CLK_OUT_FREQ_1_DOT_024KHZ,
+    CLOCK_CLK_OUT_FREQ_32_KHZ,
+    CLOCK_CLK_OUT_FREQ_1_HZ,
+    CLOCK_CLK_HIGH_IMPEDANCE,
+)
 
 
 # ======================================== 功能函数 ============================================
+def convert_sys_dt_to_rtc_dt(sys_dt: tuple) -> tuple:
+    """
+    将系统时间元组转换为RTC适配格式
+    Convert system time tuple to RTC compatible format
+
+    Args:
+        sys_dt (tuple): 系统本地时间元组
+    Returns:
+        tuple: RTC驱动可用的时间元组
+    Raises:
+        ValueError: 输入元组长度不足
+    Notes:
+        系统星期(0=周一)转为RTC星期(0=周日)
+
+    ==========================================
+    English description
+    Args:
+        sys_dt (tuple): System local time tuple
+    Returns:
+        tuple: RTC compatible time tuple
+    Raises:
+        ValueError: Input tuple length is insufficient
+    Notes:
+    Convert system week(0=Monday) to RTC week(0=Sunday)
+    """
+    if len(sys_dt) < 7:
+        raise ValueError(f"Input time tuple length insufficient: {len(sys_dt)}")
+
+    sys_year = sys_dt[0]
+    sys_month = sys_dt[1]
+    sys_day = sys_dt[2]
+    sys_hour = sys_dt[3]
+    sys_minute = sys_dt[4]
+    sys_second = sys_dt[5]
+    sys_weekday = sys_dt[6]
+
+    rtc_year = sys_year % 100
+    rtc_weekday = (sys_weekday + 1) % 7
+
+    rtc_dt = (rtc_year, sys_month, sys_day, rtc_weekday, sys_hour, sys_minute, sys_second)
+
+    return rtc_dt
 
 
 # ======================================== 自定义类 ============================================
 class PCF8563:
     """
-    PCF8563 RTC实时时钟模块驱动类
-    PCF8563 RTC Real-Time Clock Module Driver Class
-
-    实现PCF8563实时时钟模块的完整功能控制，包括时间读取/写入、系统时间同步、闹钟设置/清除、
-    时钟输出频率配置等核心功能，基于I2C通信协议实现与硬件模块的交互
-    Implement complete function control of PCF8563 real-time clock module, including core functions such as time reading/writing,
-    system time synchronization, alarm setting/clearing, clock output frequency configuration, and realize interaction with hardware module based on I2C communication protocol
+    PCF8563 RTC实时时钟驱动类
+    PCF8563 RTC real-time clock driver class
 
     Attributes:
-        i2c (machine.I2C): I2C通信对象，用于与PCF8563模块进行数据交互
-                           I2C communication object for data interaction with PCF8563 module
-        address (int): PCF8563模块I2C设备地址，默认0x51
-                       PCF8563 module I2C device address, default 0x51
-        buffer (bytearray): 16字节数据缓冲区，用于I2C数据传输
-                            16-byte data buffer for I2C data transmission
-        bytebuf (memoryview): 单字节内存视图，优化单字节读写性能
-                              Single-byte memory view to optimize single-byte read/write performance
+        i2c (I2C): I2C通信对象
+        address (int): I2C从机地址
+        buffer (bytearray): I2C数据缓冲区
+        bytebuf (memoryview): 单字节内存视图
 
     Methods:
-        __init__(i2c, address=None): 初始化PCF8563 RTC模块驱动
-                                     Initialize PCF8563 RTC module driver
-        __write_byte(reg, val): 私有方法-向指定寄存器写入单字节数据
-                                Private method - write single byte data to specified register
-        __read_byte(reg): 私有方法-从指定寄存器读取单字节数据
-                          Private method - read single byte data from specified register
-        __bcd2dec(bcd): 私有方法-BCD码转换为十进制数
-                        Private method - convert BCD code to decimal number
-        __dec2bcd(dec): 私有方法-十进制数转换为BCD码
-                        Private method - convert decimal number to BCD code
-        seconds(): 获取当前秒数(0-59)
-                   Get current seconds (0-59)
-        minutes(): 获取当前分钟数(0-59)
-                   Get current minutes (0-59)
-        hours(): 获取当前小时数(0-23)
-                 Get current hours (0-23)
-        day(): 获取当前星期数(0-6)
-               Get current weekday (0-6)
-        date(): 获取当前日期(1-31)
-                Get current date (1-31)
-        month(): 获取当前月份(1-12)
-                 Get current month (1-12)
-        year(): 获取当前年份(0-99)
-                Get current year (0-99)
-        datetime(): 获取完整日期时间元组
-                    Get complete datetime tuple
-        write_all(seconds=None, minutes=None, hours=None, day=None, date=None, month=None, year=None): 写入指定时间字段
-                                                                                                       Write specified time fields
-        set_datetime(dt): 设置完整日期时间
-                          Set complete datetime
-        write_now(): 同步系统时间到RTC模块
-                     Synchronize system time to RTC module
-        set_clk_out_frequency(frequency=CLOCK_CLK_OUT_FREQ_1_HZ): 设置时钟输出频率
-                                                                 Set clock output frequency
-        check_if_alarm_on(): 检查闹钟是否触发
-                             Check if alarm is triggered
-        turn_alarm_off(): 关闭闹钟功能
-                          Turn off alarm function
-        clear_alarm(): 清除闹钟设置
-                       Clear alarm settings
-        check_for_alarm_interrupt(): 检查闹钟中断是否使能
-                                     Check if alarm interrupt is enabled
-        enable_alarm_interrupt(): 启用闹钟中断
-                                  Enable alarm interrupt
-        disable_alarm_interrupt(): 禁用闹钟中断
-                                   Disable alarm interrupt
-        set_daily_alarm(hours=None, minutes=None, date=None, weekday=None): 设置每日闹钟
-                                                                            Set daily alarm
+        __init__: 初始化驱动
+        __write_byte: 写单字节到寄存器
+        __read_byte: 从寄存器读单字节
+        __bcd2dec: BCD转十进制
+        __dec2bcd: 十进制转BCD
+        seconds: 获取秒
+        minutes: 获取分
+        hours: 获取时
+        day: 获取星期
+        date: 获取日期
+        month: 获取月
+        year: 获取年
+        datetime: 获取完整时间
+        write_all: 写入指定时间项
+        set_datetime: 设置完整时间
+        write_now: 同步系统时间到RTC
+        set_clk_out_frequency: 设置时钟输出频率
+        check_if_alarm_on: 查询闹钟是否触发
+        turn_alarm_off: 关闭当前闹钟触发
+        clear_alarm: 清除闹钟配置
+        check_for_alarm_interrupt: 查询闹钟中断使能状态
+        enable_alarm_interrupt: 使能闹钟中断
+        disable_alarm_interrupt: 关闭闹钟中断
+        set_daily_alarm: 设置每日闹钟
+
+    Notes:
+        基于I2C通信，使用BCD码存储时间
+
+    ==========================================
+    English description
+    Attributes:
+        i2c (I2C): I2C communication object
+        address (int): I2C slave address
+        buffer (bytearray): I2C data buffer
+        bytebuf (memoryview): Single byte memory view
+
+    Methods:
+        __init__: Initialize driver
+        __write_byte: Write byte to register
+        __read_byte: Read byte from register
+        __bcd2dec: BCD to decimal
+        __dec2bcd: Decimal to BCD
+        seconds: Get seconds
+        minutes: Get minutes
+        hours: Get hours
+        day: Get weekday
+        date: Get date
+        month: Get month
+        year: Get year
+        datetime: Get full datetime
+        write_all: Write specified time items
+        set_datetime: Set full datetime
+        write_now: Sync system time to RTC
+        set_clk_out_frequency: Set clock output frequency
+        check_if_alarm_on: Check alarm trigger
+        turn_alarm_off: Turn off current alarm
+        clear_alarm: Clear alarm config
+        check_for_alarm_interrupt: Check alarm interrupt enable
+        enable_alarm_interrupt: Enable alarm interrupt
+        disable_alarm_interrupt: Disable alarm interrupt
+        set_daily_alarm: Set daily alarm
+
+    Notes:
+        I2C based, time stored in BCD format
     """
 
-    def __init__(self, i2c, address=None):
+    def __init__(self, i2c: I2C, address: int | None = None) -> None:
         """
-        初始化PCF8563 RTC模块驱动
-        Initialize PCF8563 RTC module driver
+        初始化PCF8563驱动
+        Initialize PCF8563 driver
 
         Args:
-            i2c (machine.I2C): I2C通信对象
-                               I2C communication object
-            address (int, optional): I2C设备地址，默认使用PCF8563_SLAVE_ADDRESS(0x51)
-                                     I2C device address, default to PCF8563_SLAVE_ADDRESS(0x51)
-
+            i2c (I2C): I2C对象
+            address (int | None): I2C地址，默认None
         Returns:
             None
-
         Notes:
-            初始化数据缓冲区和内存视图，优化I2C单字节读写性能
-            Initialize data buffer and memory view to optimize I2C single-byte read/write performance
+            地址为None时使用默认0x51
+
+        ==========================================
+        English description
+        Args:
+            i2c (I2C): I2C object
+            address (int | None): I2C address, default None
+        Returns:
+            None
+        Notes:
+            Use default 0x51 if address is None
         """
-        # 保存I2C通信对象
+        if i2c is None:
+            raise ValueError("I2C object cannot be None")
         self.i2c = i2c
-        # 配置I2C设备地址（使用默认值或自定义值）
-        self.address = address if address else PCF8563_SLAVE_ADDRESS
-        # 初始化16字节数据缓冲区
+        self.address = address if address is not None else PCF8563_SLAVE_ADDRESS
         self.buffer = bytearray(16)
-        # 创建单字节内存视图，用于高效读写
         self.bytebuf = memoryview(self.buffer[0:1])
 
-    def __write_byte(self, reg, val):
+    def __write_byte(self, reg: int, val: int) -> None:
         """
-        私有方法-向指定寄存器写入单字节数据
-        Private method - write single byte data to specified register
+        向寄存器写入单字节
+        Write single byte to register
 
         Args:
             reg (int): 寄存器地址
-                       Register address
-            val (int): 要写入的字节数据(0-255)
-                       Byte data to write (0-255)
-
+            val (int): 写入值
         Returns:
             None
-
-        Notes:
-            内部使用方法，通过I2C寄存器写入接口实现单字节数据传输
-            Internal use method, realize single-byte data transmission through I2C register write interface
+        Raises:
+            TypeError: If reg or val is not integer
+            ValueError: If reg is out of 0-0x0F range or val is out of 0-255 range
         """
-        # 将数据写入单字节缓冲区
+        # Parameter type validation
+        if type(reg) is not int:
+            raise TypeError(f"Register address must be integer, got {type(reg).__name__}")
+        if type(val) is not int:
+            raise TypeError(f"Write value must be integer, got {type(val).__name__}")
+
+        # Parameter range validation
+        if reg < 0 or reg > 0x0F:
+            raise ValueError(f"Register address must be between 0 and 15 (0x0F), got {reg}")
+        if val < 0 or val > 255:
+            raise ValueError(f"Write value must be between 0 and 255, got {val}")
+
         self.bytebuf[0] = val
-        # 通过I2C写入指定寄存器地址的数据
         self.i2c.writeto_mem(self.address, reg, self.bytebuf)
 
-    def __read_byte(self, reg):
+    def __read_byte(self, reg: int) -> int:
         """
-        私有方法-从指定寄存器读取单字节数据
-        Private method - read single byte data from specified register
+        从寄存器读取单字节
+        Read single byte from register
 
         Args:
             reg (int): 寄存器地址
-                       Register address
-
         Returns:
-            int: 读取到的字节数据(0-255)
-                 Read byte data (0-255)
-
-        Notes:
-            内部使用方法，通过I2C寄存器读取接口实现单字节数据获取
-            Internal use method, realize single-byte data acquisition through I2C register read interface
+            int: 读取到的字节
+        Raises:
+            TypeError: If reg is not integer
+            ValueError: If reg is out of 0-0x0F range
         """
-        # 从指定寄存器读取数据到单字节缓冲区
+        # Parameter type validation
+        if type(reg) is not int:
+            raise TypeError(f"Register address must be integer, got {type(reg).__name__}")
+
+        # Parameter range validation
+        if reg < 0 or reg > 0x0F:
+            raise ValueError(f"Register address must be between 0 and 15 (0x0F), got {reg}")
+
         self.i2c.readfrom_mem_into(self.address, reg, self.bytebuf)
-        # 返回读取到的字节数据
         return self.bytebuf[0]
 
-    def __bcd2dec(self, bcd):
+    def __bcd2dec(self, bcd: int) -> int:
         """
-        私有方法-BCD码转换为十进制数
-        Private method - convert BCD code to decimal number
+        BCD码转十进制
+        BCD to decimal conversion
 
         Args:
-            bcd (int): BCD码值(0-99对应的BCD编码)
-                       BCD code value (BCD encoding corresponding to 0-99)
-
+            bcd (int): BCD code
         Returns:
-            int: 转换后的十进制数
-                 Converted decimal number
-
-        Notes:
-            RTC模块存储时间使用BCD码格式，需转换为十进制便于使用
-            RTC module stores time in BCD code format, which needs to be converted to decimal for easy use
+            int: Decimal value
+        Raises:
+            TypeError: If bcd is not integer
+            ValueError: If bcd is out of 0-255 range
         """
-        # 高4位转换为十位，低4位转换为个位，合并为十进制数
+        # Parameter type validation
+        if type(bcd) is not int:
+            raise TypeError(f"BCD value must be integer, got {type(bcd).__name__}")
+
+        # Parameter range validation
+        if bcd < 0 or bcd > 255:
+            raise ValueError(f"BCD value must be between 0 and 255, got {bcd}")
+
         return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F)
 
-    def __dec2bcd(self, dec):
+    def __dec2bcd(self, dec: int) -> int:
         """
-        私有方法-十进制数转换为BCD码
-        Private method - convert decimal number to BCD code
+        十进制转BCD码
+        Decimal to BCD conversion
 
         Args:
-            dec (int): 十进制数(0-99)
-                       Decimal number (0-99)
-
+            dec (int): Decimal number
         Returns:
-            int: 转换后的BCD码值
-                 Converted BCD code value
-
-        Notes:
-            将十进制时间值转换为BCD码格式，用于写入RTC寄存器
-            Convert decimal time value to BCD code format for writing to RTC register
+            int: BCD code
+        Raises:
+            TypeError: If dec is not integer
+            ValueError: If dec is out of 0-99 range
         """
-        # 拆分十位和个位
+        # Parameter type validation
+        if type(dec) is not int:
+            raise TypeError(f"Decimal value must be integer, got {type(dec).__name__}")
+
+        # Parameter range validation
+        if dec < 0 or dec > 99:
+            raise ValueError(f"Decimal value must be between 0 and 99, got {dec}")
+
         tens, units = divmod(dec, 10)
-        # 组合为BCD码（十位左移4位 + 个位）
         return (tens << 4) + units
 
-    def seconds(self):
+    def seconds(self) -> int:
         """
-        获取当前秒数(0-59)
-        Get current seconds (0-59)
+        获取当前秒
+        Get current seconds
 
         Args:
             None
-
         Returns:
-            int: 当前秒数(0-59)
-                 Current seconds (0-59)
+            int: 秒(0-59)
 
-        Notes:
-            读取秒寄存器并掩码掉电压低标志位，转换为十进制返回
-            Read second register and mask out low voltage flag bit, convert to decimal and return
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            int: Seconds(0-59)
         """
-        # 读取秒寄存器值并掩码，转换为十进制
         return self.__bcd2dec(self.__read_byte(PCF8563_SEC_REG) & 0x7F)
 
-    def minutes(self):
+    def minutes(self) -> int:
         """
-        获取当前分钟数(0-59)
-        Get current minutes (0-59)
+        获取当前分钟
+        Get current minutes
 
         Args:
             None
-
         Returns:
-            int: 当前分钟数(0-59)
-                 Current minutes (0-59)
+            int: 分钟(0-59)
 
-        Notes:
-            读取分寄存器并掩码，转换为十进制返回
-            Read minute register and mask, convert to decimal and return
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            int: Minutes(0-59)
         """
-        # 读取分寄存器值并掩码，转换为十进制
         return self.__bcd2dec(self.__read_byte(PCF8563_MIN_REG) & 0x7F)
 
-    def hours(self):
+    def hours(self) -> int:
         """
-        获取当前小时数(0-23)
-        Get current hours (0-23)
+        获取当前小时
+        Get current hours
 
         Args:
             None
-
         Returns:
-            int: 当前小时数(0-23)
-                 Current hours (0-23)
+            int: 小时(0-23)
 
-        Notes:
-            读取时寄存器并掩码，转换为十进制返回
-            Read hour register and mask, convert to decimal and return
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            int: Hours(0-23)
         """
-        # 读取时寄存器值并掩码
         d = self.__read_byte(PCF8563_HR_REG) & 0x3F
-        # 转换为十进制并返回
         return self.__bcd2dec(d & 0x3F)
 
-    def day(self):
+    def day(self) -> int:
         """
-        获取当前星期数(0-6)
-        Get current weekday (0-6)
+        获取当前星期
+        Get current weekday
 
         Args:
             None
-
         Returns:
-            int: 当前星期数(0-6)
-                 Current weekday (0-6)
+            int: 星期(0-6)
 
-        Notes:
-            读取星期寄存器并掩码，转换为十进制返回
-            Read weekday register and mask, convert to decimal and return
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            int: Weekday(0-6)
         """
-        # 读取星期寄存器值并掩码，转换为十进制
         return self.__bcd2dec(self.__read_byte(PCF8563_WEEKDAY_REG) & 0x07)
 
-    def date(self):
+    def date(self) -> int:
         """
-        获取当前日期(1-31)
-        Get current date (1-31)
+        获取当前日期
+        Get current date
 
         Args:
             None
-
         Returns:
-            int: 当前日期(1-31)
-                 Current date (1-31)
+            int: 日期(1-31)
 
-        Notes:
-            读取日寄存器并掩码，转换为十进制返回
-            Read day register and mask, convert to decimal and return
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            int: Date(1-31)
         """
-        # 读取日寄存器值并掩码，转换为十进制
         return self.__bcd2dec(self.__read_byte(PCF8563_DAY_REG) & 0x3F)
 
-    def month(self):
+    def month(self) -> int:
         """
-        获取当前月份(1-12)
-        Get current month (1-12)
+        获取当前月份
+        Get current month
 
         Args:
             None
-
         Returns:
-            int: 当前月份(1-12)
-                 Current month (1-12)
+            int: 月(1-12)
 
-        Notes:
-            读取月寄存器并掩码，转换为十进制返回
-            Read month register and mask, convert to decimal and return
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            int: Month(1-12)
         """
-        # 读取月寄存器值并掩码，转换为十进制
         return self.__bcd2dec(self.__read_byte(PCF8563_MONTH_REG) & 0x1F)
 
-    def year(self):
+    def year(self) -> int:
         """
-        获取当前年份(0-99)
-        Get current year (0-99)
+        获取当前年份(后两位)
+        Get current year(last two digits)
 
         Args:
             None
-
         Returns:
-            int: 当前年份(0-99)
-                 Current year (0-99)
+            int: 年(0-99)
 
-        Notes:
-            PCF8563仅存储年份后两位，范围0-99，需自行处理世纪信息
-            PCF8563 only stores the last two digits of the year, range 0-99, need to handle century information by yourself
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            int: Year(0-99)
         """
-        # 读取年寄存器值，转换为十进制
         return self.__bcd2dec(self.__read_byte(PCF8563_YEAR_REG))
 
-    def datetime(self):
+    def datetime(self) -> tuple:
         """
-        获取完整日期时间元组
-        Get complete datetime tuple
+        获取完整时间元组
+        Get full datetime tuple
 
         Args:
             None
-
         Returns:
-            tuple: (年, 月, 日, 星期, 时, 分, 秒)
-                   (year, month, date, weekday, hour, minute, second)
+            tuple: (年,月,日,星期,时,分,秒)
 
-        Notes:
-            返回与time.localtime()格式兼容的时间元组（不含微秒和夏令时）
-            Return time tuple compatible with time.localtime() format (without microseconds and DST)
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            tuple: (year,month,date,weekday,hour,minute,second)
         """
-        # 组合完整的日期时间元组并返回
         return (self.year(), self.month(), self.date(), self.day(), self.hours(), self.minutes(), self.seconds())
 
-    def write_all(self, seconds=None, minutes=None, hours=None, day=None, date=None, month=None, year=None):
+    def write_all(
+        self,
+        seconds: int | None = None,
+        minutes: int | None = None,
+        hours: int | None = None,
+        day: int | None = None,
+        date: int | None = None,
+        month: int | None = None,
+        year: int | None = None,
+    ) -> None:
         """
-        写入指定时间字段
-        Write specified time fields
+        批量写入时间字段
+        Write time fields in batch
 
         Args:
-            seconds (int, optional): 秒(0-59)，None则不修改
-                                     Seconds (0-59), None means no modification
-            minutes (int, optional): 分(0-59)，None则不修改
-                                     Minutes (0-59), None means no modification
-            hours (int, optional): 时(0-23)，None则不修改
-                                   Hours (0-23), None means no modification
-            day (int, optional): 星期(0-6)，None则不修改
-                                 Weekday (0-6), None means no modification
-            date (int, optional): 日(1-31)，None则不修改
-                                  Date (1-31), None means no modification
-            month (int, optional): 月(1-12)，None则不修改
-                                   Month (1-12), None means no modification
-            year (int, optional): 年(0-99)，None则不修改
-                                  Year (0-99), None means no modification
-
+            seconds (int | None): 秒
+            minutes (int | None): 分
+            hours (int | None): 时
+            day (int | None): 星期
+            date (int | None): 日期
+            month (int | None): 月
+            year (int | None): 年
         Returns:
             None
-
         Raises:
-            ValueError: 当参数值超出有效范围时抛出
-                        Raised when parameter value is out of valid range
+            ValueError: 参数超出合法范围
 
-        Notes:
-            仅修改指定的时间字段，未指定的字段保持不变，所有参数需在有效范围内
-            Only modify specified time fields, unspecified fields remain unchanged, all parameters must be within valid range
+        ==========================================
+        English description
+        Args:
+            seconds (int | None): Seconds
+            minutes (int | None): Minutes
+            hours (int | None): Hours
+            day (int | None): Weekday
+            date (int | None): Date
+            month (int | None): Month
+            year (int | None): Year
+        Returns:
+            None
+        Raises:
+            ValueError: Parameter out of valid range
         """
-        # 写入秒数（如果指定）
         if seconds is not None:
-            # 验证秒数范围
             if seconds < 0 or seconds > 59:
-                raise ValueError("Seconds is out of range [0,59].")
-            # 转换为BCD码并写入寄存器
-            seconds_reg = self.__dec2bcd(seconds)
-            self.__write_byte(PCF8563_SEC_REG, seconds_reg)
+                raise ValueError("Seconds out of range [0,59].")
+            self.__write_byte(PCF8563_SEC_REG, self.__dec2bcd(seconds))
 
-        # 写入分钟（如果指定）
         if minutes is not None:
-            # 验证分钟范围
             if minutes < 0 or minutes > 59:
-                raise ValueError("Minutes is out of range [0,59].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("Minutes out of range [0,59].")
             self.__write_byte(PCF8563_MIN_REG, self.__dec2bcd(minutes))
 
-        # 写入小时（如果指定）
         if hours is not None:
-            # 验证小时范围
             if hours < 0 or hours > 23:
-                raise ValueError("Hours is out of range [0,23].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("Hours out of range [0,23].")
             self.__write_byte(PCF8563_HR_REG, self.__dec2bcd(hours))
 
-        # 写入年份（如果指定）
         if year is not None:
-            # 验证年份范围
             if year < 0 or year > 99:
-                raise ValueError("Years is out of range [0,99].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("Years out of range [0,99].")
             self.__write_byte(PCF8563_YEAR_REG, self.__dec2bcd(year))
 
-        # 写入月份（如果指定）
         if month is not None:
-            # 验证月份范围
             if month < 1 or month > 12:
-                raise ValueError("Month is out of range [1,12].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("Month out of range [1,12].")
             self.__write_byte(PCF8563_MONTH_REG, self.__dec2bcd(month))
 
-        # 写入日期（如果指定）
         if date is not None:
-            # 验证日期范围
             if date < 1 or date > 31:
-                raise ValueError("Date is out of range [1,31].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("Date out of range [1,31].")
             self.__write_byte(PCF8563_DAY_REG, self.__dec2bcd(date))
 
-        # 写入星期（如果指定）
         if day is not None:
-            # 验证星期范围
             if day < 0 or day > 6:
-                raise ValueError("Day is out of range [0,6].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("Day out of range [0,6].")
             self.__write_byte(PCF8563_WEEKDAY_REG, self.__dec2bcd(day))
 
-    def set_datetime(self, dt):
+    def set_datetime(self, dt: tuple) -> None:
         """
-        设置完整日期时间
-        Set complete datetime
+        设置完整时间
+        Set full datetime
 
         Args:
-            dt (tuple): 时间元组，格式为(年, 月, 日, 星期, 时, 分, 秒)
-                        Time tuple in format (year, month, date, weekday, hour, minute, second)
-
+            dt (tuple): 时间元组
         Returns:
             None
 
-        Notes:
-            时间元组格式与datetime()返回值一致，年份仅取后两位(0-99)
-            Time tuple format is consistent with datetime() return value, only last two digits of year are taken (0-99)
+        ==========================================
+        English description
+        Args:
+            dt (tuple): Time tuple
+        Returns:
+            None
         """
-        # 解析时间元组并写入所有字段
+        if dt is None:
+            raise ValueError("Datetime tuple cannot be None")
         self.write_all(dt[6], dt[5], dt[4], dt[3], dt[2], dt[1], dt[0] % 100)
 
-    def write_now(self):
+    def write_now(self) -> None:
         """
-        同步系统时间到RTC模块
-        Synchronize system time to RTC module
+        将系统时间写入RTC
+        Write system time to RTC
 
         Args:
             None
-
         Returns:
             None
 
-        Notes:
-            获取系统本地时间并写入RTC模块，实现时间同步
-            Get system local time and write to RTC module to realize time synchronization
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            None
         """
-        # 获取系统本地时间并设置到RTC
-        self.set_datetime(time.localtime())
+        self.set_datetime(convert_sys_dt_to_rtc_dt(time.localtime()))
 
-    def set_clk_out_frequency(self, frequency=CLOCK_CLK_OUT_FREQ_1_HZ):
+    def set_clk_out_frequency(self, frequency: int = CLOCK_CLK_OUT_FREQ_1_HZ) -> None:
         """
         设置时钟输出频率
         Set clock output frequency
 
         Args:
-            frequency (int, optional): 输出频率常量，默认1Hz
-                                       Output frequency constant, default 1Hz
-
+            frequency (int): 频率常量
         Returns:
             None
+        Raises:
+            TypeError: 频率值非整数
+            ValueError: 频率值不在允许的列表中
 
-        Notes:
-            支持的频率:32.768KHz/1.024KHz/32KHz/1Hz/高阻抗
-            Supported frequencies: 32.768KHz/1.024KHz/32KHz/1Hz/high impedance
+        ==========================================
+        English description
+        Args:
+            frequency (int): Frequency constant
+        Returns:
+            None
+        Raises:
+            TypeError: Frequency value is not integer
+            ValueError: Frequency value not in allowed list
         """
-        # 写入时钟输出频率配置
+        # 参数类型验证
+        if not isinstance(frequency, int):
+            raise TypeError(f"Frequency must be integer, got {type(frequency)}")
+        # 参数范围验证（仅允许预定义的频率常量）
+        if frequency not in ALLOWED_CLK_FREQUENCIES:
+            raise ValueError(f"Frequency must be one of {ALLOWED_CLK_FREQUENCIES}, got {frequency}")
+
         self.__write_byte(PCF8563_SQW_REG, frequency)
 
-    def check_if_alarm_on(self):
+    def check_if_alarm_on(self) -> bool:
         """
         检查闹钟是否触发
         Check if alarm is triggered
 
         Args:
             None
-
         Returns:
-            bool: True-闹钟已触发，False-未触发
-                  True-alarm triggered, False-not triggered
+            bool: 触发状态
 
-        Notes:
-            通过状态寄存器2的闹钟标志位判断闹钟状态
-            Judge alarm status by alarm flag bit of status register 2
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            bool: Trigger status
         """
-        # 读取状态寄存器2并检查闹钟标志位
         return bool(self.__read_byte(PCF8563_STAT2_REG) & PCF8563_ALARM_AF)
 
-    def turn_alarm_off(self):
+    def turn_alarm_off(self) -> None:
         """
-        关闭闹钟功能
-        Turn off alarm function
+        关闭当前闹钟触发状态
+        Turn off current alarm trigger
 
         Args:
             None
-
         Returns:
             None
 
-        Notes:
-            清除闹钟标志位但保留闹钟设置，仅关闭当前触发状态
-            Clear alarm flag bit but keep alarm settings, only turn off current trigger status
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            None
         """
-        # 读取当前闹钟状态
         alarm_state = self.__read_byte(PCF8563_STAT2_REG)
-        # 清除闹钟标志位
         self.__write_byte(PCF8563_STAT2_REG, alarm_state & 0xF7)
 
-    def clear_alarm(self):
+    def clear_alarm(self) -> None:
         """
-        清除闹钟设置
-        Clear alarm settings
+        清除所有闹钟配置
+        Clear all alarm settings
 
         Args:
             None
-
         Returns:
             None
 
-        Notes:
-            清除闹钟标志位和使能位，重置所有闹钟相关寄存器
-            Clear alarm flag bit and enable bit, reset all alarm-related registers
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            None
         """
-        # 读取当前闹钟状态
         alarm_state = self.__read_byte(PCF8563_STAT2_REG)
-        # 清除闹钟标志位
         alarm_state &= ~(PCF8563_ALARM_AF)
-        # 保留定时器标志位
         alarm_state |= PCF8563_TIMER_TF
-        # 写入更新后的状态
         self.__write_byte(PCF8563_STAT2_REG, alarm_state)
 
-        # 重置闹钟分钟寄存器
         self.__write_byte(PCF8563_ALARM_MINUTES, 0x80)
-        # 重置闹钟小时寄存器
         self.__write_byte(PCF8563_ALARM_HOURS, 0x80)
-        # 重置闹钟日期寄存器
         self.__write_byte(PCF8563_ALARM_DAY, 0x80)
-        # 重置闹钟星期寄存器
         self.__write_byte(PCF8563_ALARM_WEEKDAY, 0x80)
 
-    def check_for_alarm_interrupt(self):
+    def check_for_alarm_interrupt(self) -> bool:
         """
         检查闹钟中断是否使能
         Check if alarm interrupt is enabled
 
         Args:
             None
-
         Returns:
-            bool: True-中断已使能，False-未使能
-                  True-interrupt enabled, False-not enabled
+            bool: 中断使能状态
 
-        Notes:
-            检查状态寄存器2的闹钟中断使能位
-            Check alarm interrupt enable bit of status register 2
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            bool: Interrupt enable status
         """
-        # 读取状态寄存器2并检查闹钟中断使能位
         return bool(self.__read_byte(PCF8563_STAT2_REG) & 0x02)
 
-    def enable_alarm_interrupt(self):
+    def enable_alarm_interrupt(self) -> None:
         """
-        启用闹钟中断
+        使能闹钟中断
         Enable alarm interrupt
 
         Args:
             None
-
         Returns:
             None
 
-        Notes:
-            设置闹钟中断使能位，清除闹钟标志位，保留定时器标志位
-            Set alarm interrupt enable bit, clear alarm flag bit, keep timer flag bit
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            None
         """
-        # 读取当前闹钟状态
         alarm_state = self.__read_byte(PCF8563_STAT2_REG)
-        # 清除闹钟标志位
         alarm_state &= ~PCF8563_ALARM_AF
-        # 设置定时器标志位和闹钟中断使能位
         alarm_state |= PCF8563_TIMER_TF | PCF8563_ALARM_AIE
-        # 写入更新后的状态
         self.__write_byte(PCF8563_STAT2_REG, alarm_state)
 
-    def disable_alarm_interrupt(self):
+    def disable_alarm_interrupt(self) -> None:
         """
-        禁用闹钟中断
+        关闭闹钟中断
         Disable alarm interrupt
 
         Args:
             None
-
         Returns:
             None
 
-        Notes:
-            清除闹钟中断使能位和标志位，保留定时器标志位
-            Clear alarm interrupt enable bit and flag bit, keep timer flag bit
+        ==========================================
+        English description
+        Args:
+            None
+        Returns:
+            None
         """
-        # 读取当前闹钟状态
         alarm_state = self.__read_byte(PCF8563_STAT2_REG)
-        # 清除闹钟标志位和中断使能位
         alarm_state &= ~(PCF8563_ALARM_AF | PCF8563_ALARM_AIE)
-        # 设置定时器标志位
         alarm_state |= PCF8563_TIMER_TF
-        # 写入更新后的状态
         self.__write_byte(PCF8563_STAT2_REG, alarm_state)
 
-    def set_daily_alarm(self, hours=None, minutes=None, date=None, weekday=None):
+    def set_daily_alarm(self, hours: int | None = None, minutes: int | None = None, date: int | None = None, weekday: int | None = None) -> None:
         """
         设置每日闹钟
         Set daily alarm
 
         Args:
-            hours (int, optional): 小时(0-23)，None则不设置该字段
-                                   Hours (0-23), None means not set this field
-            minutes (int, optional): 分钟(0-59)，None则不设置该字段
-                                     Minutes (0-59), None means not set this field
-            date (int, optional): 日期(1-31)，None则不设置该字段
-                                  Date (1-31), None means not set this field
-            weekday (int, optional): 星期(0-6)，None则不设置该字段
-                                     Weekday (0-6), None means not set this field
-
+            hours (int | None): 小时
+            minutes (int | None): 分钟
+            date (int | None): 日期
+            weekday (int | None): 星期
         Returns:
             None
-
         Raises:
-            ValueError: 当参数值超出有效范围时抛出
-                        Raised when parameter value is out of valid range
+            ValueError: 参数超出范围
 
-        Notes:
-            None参数表示该字段不参与闹钟匹配（任意值都触发），所有数值参数需在有效范围内
-            None parameter means the field does not participate in alarm matching (any value triggers), all numeric parameters must be within valid range
+        ==========================================
+        English description
+        Args:
+            hours (int | None): Hours
+            minutes (int | None): Minutes
+            date (int | None): Date
+            weekday (int | None): Weekday
+        Returns:
+            None
+        Raises:
+            ValueError: Parameter out of range
         """
-        # 设置闹钟分钟（如果指定）
         if minutes is None:
-            # 不设置分钟匹配
             minutes = PCF8563_ALARM_ENABLE
             self.__write_byte(PCF8563_ALARM_MINUTES, minutes)
         else:
-            # 验证分钟范围
             if minutes < 0 or minutes > 59:
-                raise ValueError("Minutes is out of range [0,59].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("Minutes out of range [0,59].")
             self.__write_byte(PCF8563_ALARM_MINUTES, self.__dec2bcd(minutes) & 0x7F)
 
-        # 设置闹钟小时（如果指定）
         if hours is None:
-            # 不设置小时匹配
             hours = PCF8563_ALARM_ENABLE
             self.__write_byte(PCF8563_ALARM_HOURS, hours)
         else:
-            # 验证小时范围
             if hours < 0 or hours > 23:
-                raise ValueError("Hours is out of range [0,23].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("Hours out of range [0,23].")
             self.__write_byte(PCF8563_ALARM_HOURS, self.__dec2bcd(hours) & 0x7F)
 
-        # 设置闹钟日期（如果指定）
         if date is None:
-            # 不设置日期匹配
             date = PCF8563_ALARM_ENABLE
             self.__write_byte(PCF8563_ALARM_DAY, date)
         else:
-            # 验证日期范围
             if date < 1 or date > 31:
-                raise ValueError("date is out of range [1,31].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("date out of range [1,31].")
             self.__write_byte(PCF8563_ALARM_DAY, self.__dec2bcd(date) & 0x7F)
 
-        # 设置闹钟星期（如果指定）
         if weekday is None:
-            # 不设置星期匹配
             weekday = PCF8563_ALARM_ENABLE
             self.__write_byte(PCF8563_ALARM_WEEKDAY, weekday)
         else:
-            # 验证星期范围
             if weekday < 0 or weekday > 6:
-                raise ValueError("weekday is out of range [0,6].")
-            # 转换为BCD码并写入寄存器
+                raise ValueError("weekday out of range [0,6].")
             self.__write_byte(PCF8563_ALARM_WEEKDAY, self.__dec2bcd(weekday) & 0x7F)
-
-
-# ======================================== 初始化配置 ===========================================
-
-# ========================================  主程序  ===========================================

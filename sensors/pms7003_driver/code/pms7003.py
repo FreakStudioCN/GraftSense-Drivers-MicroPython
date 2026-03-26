@@ -10,7 +10,7 @@ class UartError(Exception):
 class Pms7003:
 
     START_BYTE_1 = 0x42
-    START_BYTE_2 = 0x4D
+    START_BYTE_2 = 0x4d
 
     PMS_FRAME_LENGTH = 0
     PMS_PM1_0 = 1
@@ -50,7 +50,7 @@ class Pms7003:
         nr_of_written_bytes = self.uart.write(request)
 
         if nr_of_written_bytes != len(request):
-            raise UartError("Failed to write to UART")
+            raise UartError('Failed to write to UART')
 
         if response:
             time.sleep(2)
@@ -58,7 +58,9 @@ class Pms7003:
 
             if buffer != response:
                 raise UartError(
-                    "Wrong UART response, expecting: {}, getting: {}".format(Pms7003._format_bytearray(response), Pms7003._format_bytearray(buffer))
+                    'Wrong UART response, expecting: {}, getting: {}'.format(
+                        Pms7003._format_bytearray(response), Pms7003._format_bytearray(buffer)
+                    )
                 )
 
     def read(self):
@@ -78,7 +80,7 @@ class Pms7003:
             if len(read_bytes) < 30:
                 continue
 
-            data = struct.unpack("!HHHHHHHHHHHHHBBH", read_bytes)
+            data = struct.unpack('!HHHHHHHHHHHHHBBH', read_bytes)
 
             checksum = Pms7003.START_BYTE_1 + Pms7003.START_BYTE_2
             checksum += sum(read_bytes[:28])
@@ -87,22 +89,22 @@ class Pms7003:
                 continue
 
             return {
-                "FRAME_LENGTH": data[Pms7003.PMS_FRAME_LENGTH],
-                "PM1_0": data[Pms7003.PMS_PM1_0],
-                "PM2_5": data[Pms7003.PMS_PM2_5],
-                "PM10_0": data[Pms7003.PMS_PM10_0],
-                "PM1_0_ATM": data[Pms7003.PMS_PM1_0_ATM],
-                "PM2_5_ATM": data[Pms7003.PMS_PM2_5_ATM],
-                "PM10_0_ATM": data[Pms7003.PMS_PM10_0_ATM],
-                "PCNT_0_3": data[Pms7003.PMS_PCNT_0_3],
-                "PCNT_0_5": data[Pms7003.PMS_PCNT_0_5],
-                "PCNT_1_0": data[Pms7003.PMS_PCNT_1_0],
-                "PCNT_2_5": data[Pms7003.PMS_PCNT_2_5],
-                "PCNT_5_0": data[Pms7003.PMS_PCNT_5_0],
-                "PCNT_10_0": data[Pms7003.PMS_PCNT_10_0],
-                "VERSION": data[Pms7003.PMS_VERSION],
-                "ERROR": data[Pms7003.PMS_ERROR],
-                "CHECKSUM": data[Pms7003.PMS_CHECKSUM],
+                'FRAME_LENGTH': data[Pms7003.PMS_FRAME_LENGTH],
+                'PM1_0': data[Pms7003.PMS_PM1_0],
+                'PM2_5': data[Pms7003.PMS_PM2_5],
+                'PM10_0': data[Pms7003.PMS_PM10_0],
+                'PM1_0_ATM': data[Pms7003.PMS_PM1_0_ATM],
+                'PM2_5_ATM': data[Pms7003.PMS_PM2_5_ATM],
+                'PM10_0_ATM': data[Pms7003.PMS_PM10_0_ATM],
+                'PCNT_0_3': data[Pms7003.PMS_PCNT_0_3],
+                'PCNT_0_5': data[Pms7003.PMS_PCNT_0_5],
+                'PCNT_1_0': data[Pms7003.PMS_PCNT_1_0],
+                'PCNT_2_5': data[Pms7003.PMS_PCNT_2_5],
+                'PCNT_5_0': data[Pms7003.PMS_PCNT_5_0],
+                'PCNT_10_0': data[Pms7003.PMS_PCNT_10_0],
+                'VERSION': data[Pms7003.PMS_VERSION],
+                'ERROR': data[Pms7003.PMS_ERROR],
+                'CHECKSUM': data[Pms7003.PMS_CHECKSUM],
             }
 
 
@@ -113,23 +115,36 @@ class PassivePms7003(Pms7003):
     https://patchwork.ozlabs.org/cover/1039261/
     https://joshefin.xyz/air-quality-with-raspberrypi-pms7003-and-java/
     """
-
-    ENTER_PASSIVE_MODE_REQUEST = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xE1, 0x00, 0x00, 0x01, 0x70])
-    ENTER_PASSIVE_MODE_RESPONSE = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0x00, 0x04, 0xE1, 0x00, 0x01, 0x74])
-    SLEEP_REQUEST = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xE4, 0x00, 0x00, 0x01, 0x73])
-    SLEEP_RESPONSE = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0x00, 0x04, 0xE4, 0x00, 0x01, 0x77])
+    ENTER_PASSIVE_MODE_REQUEST = bytearray(
+        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xe1, 0x00, 0x00, 0x01, 0x70]
+    )
+    ENTER_PASSIVE_MODE_RESPONSE = bytearray(
+        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0x00, 0x04, 0xe1, 0x00, 0x01, 0x74]
+    )
+    SLEEP_REQUEST = bytearray(
+        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xe4, 0x00, 0x00, 0x01, 0x73]
+    )
+    SLEEP_RESPONSE = bytearray(
+        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0x00, 0x04, 0xe4, 0x00, 0x01, 0x77]
+    )
     # NO response
-    WAKEUP_REQUEST = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xE4, 0x00, 0x01, 0x01, 0x74])
+    WAKEUP_REQUEST = bytearray(
+        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xe4, 0x00, 0x01, 0x01, 0x74]
+    )
     # data as response
-    READ_IN_PASSIVE_REQUEST = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xE2, 0x00, 0x00, 0x01, 0x71])
+    READ_IN_PASSIVE_REQUEST = bytearray(
+        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xe2, 0x00, 0x00, 0x01, 0x71]
+    )
 
     def __init__(self, uart):
         super().__init__(uart=uart)
         # use passive mode pms7003
-        self._send_cmd(request=PassivePms7003.ENTER_PASSIVE_MODE_REQUEST, response=PassivePms7003.ENTER_PASSIVE_MODE_RESPONSE)
+        self._send_cmd(request=PassivePms7003.ENTER_PASSIVE_MODE_REQUEST,
+                       response=PassivePms7003.ENTER_PASSIVE_MODE_RESPONSE)
 
     def sleep(self):
-        self._send_cmd(request=PassivePms7003.SLEEP_REQUEST, response=PassivePms7003.SLEEP_RESPONSE)
+        self._send_cmd(request=PassivePms7003.SLEEP_REQUEST,
+                       response=PassivePms7003.SLEEP_RESPONSE)
 
     def wakeup(self):
         self._send_cmd(request=PassivePms7003.WAKEUP_REQUEST, response=None)
