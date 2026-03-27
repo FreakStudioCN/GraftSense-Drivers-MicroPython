@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from machine import Pin, I2C
+from machine import Pin, I2C, SoftI2C
 from mma8452q import MMA8452Q
 
 # ======================================== 全局变量 ============================================
@@ -17,8 +17,9 @@ from mma8452q import MMA8452Q
 I2C_SCL_PIN = 5
 I2C_SDA_PIN = 4
 I2C_FREQ = 400000
+# 自动识别传感器地址，定义全局目标地址列表（支持多地址，单个也用[]）
 # MMA8452Q target I2C address (0x1C default, 0x1D if ADDR pin connected to VCC)
-TARGET_SENSOR_ADDR = 0x1C
+TARGET_SENSOR_ADDRS = [0x1C, 0x1D]
 
 
 # ======================================== 功能函数 ============================================
@@ -69,7 +70,6 @@ def safe_set_param(mma, param_name, value, valid_values):
 
 
 # ======================================== 自定义类 ============================================
-# No custom classes required for this example
 
 # ======================================== 初始化配置 ===========================================
 time.sleep(3)
@@ -77,32 +77,36 @@ print("FreakStudio: MMA8452Q accelerometer configuration and data reading demo")
 
 # Initialize I2C bus
 try:
-    i2c_bus = I2C(0, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
-    # Scan I2C devices
+    # I2C初始化（兼容I2C/SoftI2C）
+    i2c_bus = SoftI2C(sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
+    
+    # 开始扫描I2C总线上的设备
     devices_list: list[int] = i2c_bus.scan()
     print("START I2C SCANNER")
 
-    # Check scan results
+    # 检查I2C设备扫描结果
     if len(devices_list) == 0:
         print("No i2c device !")
         raise SystemExit("I2C scan found no devices, program exited")
     else:
         print("i2c devices found:", len(devices_list))
 
-    # Initialize MMA8452Q sensor
-    mma_sensor = None
+    # 遍历地址列表初始化目标传感器
+    mma_sensor = None  # 初始化传感器对象占位符
     for device in devices_list:
-        if device == TARGET_SENSOR_ADDR:
+        if device in TARGET_SENSOR_ADDRS:
             print("I2c hexadecimal address:", hex(device))
             try:
+                # 自动识别并初始化对应传感器
                 mma_sensor = MMA8452Q(i2c_bus, address=device)
-                print("Target sensor initialization successful")
+                print("Sensor initialization successful")
                 break
             except Exception as e:
                 print(f"Sensor Initialization failed: {e}")
                 continue
-    if mma_sensor is None:
-        raise Exception("No TargetSensor found")
+    else:
+        # 未找到目标设备，抛出异常
+        raise Exception("No target sensor device found in I2C bus")
 
 except Exception as e:
     print(f"Initialization error: {e}")

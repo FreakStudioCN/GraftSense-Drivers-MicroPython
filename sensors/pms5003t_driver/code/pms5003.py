@@ -1,33 +1,17 @@
-# MIT License
-#
-# Copyright (c) 2018-2020, Kevin Köck
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2025/1/1 12:00
+# @Author  : Kevin Köck
+# @File    : main.py
+# @Description : PMS5003空气质量传感器驱动，支持主动/被动模式、节能模式、异步读取等。
+# @License : MIT
 
-# based on circuitpython-code of adafruit: https://learn.adafruit.com/pm25-air-quality-sensor/circuitpython-code
-# and some inspiration from https://github.com/RigacciOrg/AirPi/blob/master/lib/pms5003
+__version__ = "0.1.0"
+__author__ = "Kevin Köck"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23.0"
 
-# command responses are only processed generally but can't distinguish between different responses
-
-__updated__ = "2020-07-04"
-__version__ = "1.9.12"
-
+# ======================================== 导入相关模块 =========================================
 import uasyncio as asyncio
 import time
 
@@ -36,28 +20,180 @@ try:
 except ImportError:
     import ustruct as struct
 
-# Sensor settling after wakeup requires at least 30 seconds (sensor sepcifications).
+# ======================================== 全局变量 ============================================
+# 传感器唤醒后需要至少30秒稳定
 WAIT_AFTER_WAKEUP = 40
 
-# Normal data frame length.
+# 正常数据帧长度
 DATA_FRAME_LENGTH = 28
-# Command response frame length.
+# 命令响应帧长度
 CMD_FRAME_LENGTH = 4
 
-# Maximum tries after which the device is being reset, the actual tries are twice as much as library tries 2 times
+# 命令失败最大重试次数，实际尝试次数是库尝试次数的两倍
 MAX_COMMAND_FAILS = 3
 
 DEBUG = False
 
+# ======================================== 功能函数 ============================================
+def set_debug(debug: bool) -> None:
+    """设置调试输出开关
 
-def set_debug(debug):
+    Args:
+        debug (bool): 是否启用调试输出
+
+    Notes:
+        启用后会在控制台打印更多调试信息
+
+    ==========================================
+    Set debug output switch
+
+    Args:
+        debug (bool): enable debug output or not
+
+    Notes:
+        More debug information will be printed to console when enabled
+    """
     global DEBUG
     DEBUG = debug
 
 
+# ======================================== 自定义类 ============================================
 class PMS5003_base:
+    """
+    PMS5003空气质量传感器基础类，实现与传感器的通信协议和基本控制。
+
+    Attributes:
+        _uart (UART): UART通信对象
+        _set_pin (Pin): 控制SET引脚（可选）
+        _reset_pin (Pin): 控制RESET引脚（可选）
+        _active (bool): 传感器是否处于活动状态
+        _active_mode (bool): 是否为主动模式
+        _eco_mode (bool): 是否启用节能模式（仅被动模式有效）
+        _sreader (StreamReader): UART异步流读取器
+        _interval_passive_mode (int): 被动模式下的采样间隔（秒）
+        _event (Event): 事件对象，用于通知新数据到达
+        _lock (Lock): 异步锁，保护共享资源
+        _timestamp (int): 最近一次数据的时间戳（毫秒）
+        _sleeping_state (bool): 传感器是否处于睡眠状态
+        _callback (callable): 数据更新回调函数或协程
+        _pm10_standard (int): PM1.0标准浓度
+        _pm25_standard (int): PM2.5标准浓度
+        _pm100_standard (int): PM10标准浓度
+        _pm10_env (int): PM1.0环境浓度
+        _pm25_env (int): PM2.5环境浓度
+        _pm100_env (int): PM10环境浓度
+        _particles_03um (int): >0.3µm颗粒物计数
+        _particles_05um (int): >0.5µm颗粒物计数
+        _particles_10um (int): >1.0µm颗粒物计数
+        _particles_25um (int): >2.5µm颗粒物计数
+        _particles_50um (int): >5.0µm颗粒物计数
+        _particles_100um (int): >10µm颗粒物计数
+
+    Methods:
+        setEcoMode(): 设置节能模式
+        setActiveMode(): 切换到主动模式
+        setPassiveMode(): 切换到被动模式
+        sleep(): 使传感器进入睡眠状态
+        wakeUp(): 唤醒传感器
+        reset(): 硬件复位传感器
+        stop(): 停止传感器并进入睡眠
+        start(): 启动传感器读取任务
+        registerCallback(): 注册数据更新回调
+        registerEvent(): 注册事件通知
+        print(): 打印当前测量数据
+        read(): 获取当前所有测量数据
+        timestamp(): 获取最后数据时间戳
+
+    Notes:
+        本类为异步驱动基础类，使用asyncio进行协程调度。
+        在主动模式下传感器持续发送数据，被动模式需通过命令请求数据。
+
+    ==========================================
+    PMS5003 air quality sensor base class, implements communication protocol and basic control.
+
+    Attributes:
+        _uart (UART): UART communication object
+        _set_pin (Pin): SET pin control (optional)
+        _reset_pin (Pin): RESET pin control (optional)
+        _active (bool): Sensor active state
+        _active_mode (bool): Active mode flag
+        _eco_mode (bool): Eco mode flag (only effective in passive mode)
+        _sreader (StreamReader): UART async stream reader
+        _interval_passive_mode (int): Sampling interval in passive mode (seconds)
+        _event (Event): Event object for new data notification
+        _lock (Lock): Async lock for shared resources
+        _timestamp (int): Timestamp of last data (milliseconds)
+        _sleeping_state (bool): Sensor sleeping state
+        _callback (callable): Data update callback or coroutine
+        _pm10_standard (int): PM1.0 standard concentration
+        _pm25_standard (int): PM2.5 standard concentration
+        _pm100_standard (int): PM10 standard concentration
+        _pm10_env (int): PM1.0 environmental concentration
+        _pm25_env (int): PM2.5 environmental concentration
+        _pm100_env (int): PM10 environmental concentration
+        _particles_03um (int): >0.3µm particle count
+        _particles_05um (int): >0.5µm particle count
+        _particles_10um (int): >1.0µm particle count
+        _particles_25um (int): >2.5µm particle count
+        _particles_50um (int): >5.0µm particle count
+        _particles_100um (int): >10µm particle count
+
+    Methods:
+        setEcoMode(): Set eco mode
+        setActiveMode(): Switch to active mode
+        setPassiveMode(): Switch to passive mode
+        sleep(): Put sensor to sleep
+        wakeUp(): Wake up sensor
+        reset(): Hardware reset sensor
+        stop(): Stop sensor and put to sleep
+        start(): Start sensor reading task
+        registerCallback(): Register data update callback
+        registerEvent(): Register event notification
+        print(): Print current measurement data
+        read(): Get all current measurement data
+        timestamp(): Get last data timestamp
+
+    Notes:
+        This is an asynchronous base driver class, uses asyncio for coroutine scheduling.
+        In active mode sensor continuously sends data; in passive mode data is requested by command.
+    """
+
     def __init__(self, uart, lock=None, set_pin=None, reset_pin=None, interval_passive_mode=None,
-                 event=None, active_mode=True, eco_mode=True, assume_sleeping=True):
+                 event=None, active_mode=True, eco_mode=True, assume_sleeping=True) -> None:
+        """
+        初始化PMS5003传感器对象
+
+        Args:
+            uart (UART): UART通信对象
+            lock (asyncio.Lock, optional): 外部异步锁，用于多任务同步
+            set_pin (Pin, optional): SET引脚控制对象
+            reset_pin (Pin, optional): RESET引脚控制对象
+            interval_passive_mode (int, optional): 被动模式下的采样间隔（秒），默认60
+            event (asyncio.Event, optional): 事件对象，新数据时设置
+            active_mode (bool): 初始模式，True为主动模式，False为被动模式
+            eco_mode (bool): 是否启用节能模式（仅被动模式有效）
+            assume_sleeping (bool): 假设传感器初始处于睡眠状态
+
+        Notes:
+            set_pin和reset_pin若提供，将使用硬件引脚控制；否则使用软件命令。
+
+        ==========================================
+        Initialize PMS5003 sensor object
+
+        Args:
+            uart (UART): UART communication object
+            lock (asyncio.Lock, optional): External async lock for multi-task synchronization
+            set_pin (Pin, optional): SET pin control object
+            reset_pin (Pin, optional): RESET pin control object
+            interval_passive_mode (int, optional): Sampling interval in passive mode (seconds), default 60
+            event (asyncio.Event, optional): Event object, set when new data arrives
+            active_mode (bool): Initial mode, True for active mode, False for passive mode
+            eco_mode (bool): Enable eco mode (only effective in passive mode)
+            assume_sleeping (bool): Assume sensor initially in sleep state
+
+        Notes:
+            If set_pin and reset_pin are provided, hardware pin control will be used; otherwise software commands.
+        """
         self._uart = uart  # accepts a uart object
         self._set_pin = set_pin
         if set_pin is not None:
@@ -84,23 +220,91 @@ class PMS5003_base:
         asyncio.create_task(self._read())
 
     @staticmethod
-    def _error(message):
-        # Default logging implementation, to be overriden in subclasses if logging required
+    def _error(message: str) -> None:
+        """
+        错误日志输出（可被子类重写）
+
+        Args:
+            message (str): 错误信息
+
+        Notes:
+            默认实现为打印到标准输出
+
+        ==========================================
+        Error log output (can be overridden by subclass)
+
+        Args:
+            message (str): Error message
+
+        Notes:
+            Default implementation prints to stdout
+        """
         print(message)
 
     @staticmethod
-    def _warn(message):
-        # Default logging implementation, to be overriden in subclasses if logging required
+    def _warn(message: str) -> None:
+        """
+        警告日志输出（可被子类重写）
+
+        Args:
+            message (str): 警告信息
+
+        Notes:
+            默认实现为打印到标准输出
+
+        ==========================================
+        Warning log output (can be overridden by subclass)
+
+        Args:
+            message (str): Warning message
+
+        Notes:
+            Default implementation prints to stdout
+        """
         print(message)
 
     @staticmethod
-    def _debug(message):
-        # Default logging implementation, to be overriden in subclasses if logging required
+    def _debug(message: str) -> None:
+        """
+        调试日志输出（可被子类重写）
+
+        Args:
+            message (str): 调试信息
+
+        Notes:
+            仅在全局DEBUG为True时输出
+
+        ==========================================
+        Debug log output (can be overridden by subclass)
+
+        Args:
+            message (str): Debug message
+
+        Notes:
+            Output only when global DEBUG is True
+        """
         if DEBUG:
             print(message)
 
-    def setEcoMode(self, value=True):
-        """Puts device to sleep between readings in passive mode"""
+    def setEcoMode(self, value: bool = True) -> None:
+        """
+        设置节能模式
+
+        Args:
+            value (bool): True启用，False禁用
+
+        Notes:
+            仅在被动模式下有效，启用后传感器在两次读取之间进入睡眠
+
+        ==========================================
+        Set eco mode
+
+        Args:
+            value (bool): True enable, False disable
+
+        Notes:
+            Only effective in passive mode, sensor will sleep between readings when enabled
+        """
         self._eco_mode = value
         if self._eco_mode and self._active_mode is False and self._interval_passive_mode < WAIT_AFTER_WAKEUP + 5:
             self._error(
@@ -108,7 +312,25 @@ class PMS5003_base:
                     WAIT_AFTER_WAKEUP + 5))
             self._interval_passive_mode = 60
 
-    async def setActiveMode(self):
+    async def setActiveMode(self) -> bool:
+        """
+        切换到主动模式
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        Notes:
+            传感器将开始连续发送数据，不再需要主动请求
+
+        ==========================================
+        Switch to active mode
+
+        Returns:
+            bool: True on success, False on failure
+
+        Notes:
+            Sensor will start continuous data transmission, no need to request actively
+        """
         if self._active is False:
             self._active_mode = True
             return True
@@ -126,7 +348,31 @@ class PMS5003_base:
             self._debug("setActiveMode Done")
         return True
 
-    async def setPassiveMode(self, interval=None):
+    async def setPassiveMode(self, interval: int = None) -> bool:
+        """
+        切换到被动模式
+
+        Args:
+            interval (int, optional): 采样间隔（秒），默认使用之前设置的值
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        Notes:
+            传感器仅在收到请求时发送数据，适合低功耗场景
+
+        ==========================================
+        Switch to passive mode
+
+        Args:
+            interval (int, optional): Sampling interval (seconds), default uses previously set value
+
+        Returns:
+            bool: True on success, False on failure
+
+        Notes:
+            Sensor sends data only on request, suitable for low power scenarios
+        """
         if self._active is False:
             self._active_mode = False
             return True
@@ -153,7 +399,25 @@ class PMS5003_base:
         self._debug("setPassiveMode done")
         return True
 
-    async def sleep(self):
+    async def sleep(self) -> bool:
+        """
+        使传感器进入睡眠状态
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        Notes:
+            睡眠状态下传感器停止测量，功耗极低
+
+        ==========================================
+        Put sensor to sleep
+
+        Returns:
+            bool: True on success, False on failure
+
+        Notes:
+            Sensor stops measuring in sleep state, very low power consumption
+        """
         self._debug("sleep")
         async with self._lock:
             self._debug("sleep got lock")
@@ -173,7 +437,25 @@ class PMS5003_base:
         self._debug("Putting device to sleep")
         return True
 
-    async def wakeUp(self):
+    async def wakeUp(self) -> bool:
+        """
+        唤醒传感器
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        Notes:
+            唤醒后需要等待WAIT_AFTER_WAKEUP秒才能稳定测量
+
+        ==========================================
+        Wake up sensor
+
+        Returns:
+            bool: True on success, False on failure
+
+        Notes:
+            Need to wait WAIT_AFTER_WAKEUP seconds after wake up for stable measurement
+        """
         self._debug("wakeUp")
         async with self._lock:
             self._debug("wakeUp got lock")
@@ -208,10 +490,40 @@ class PMS5003_base:
         self._debug("wakeUp done")
         return True
 
-    def isActive(self):
+    def isActive(self) -> bool:
+        """
+        检查传感器是否处于活动状态
+
+        Returns:
+            bool: 活动返回True，否则False
+
+        ==========================================
+        Check if sensor is active
+
+        Returns:
+            bool: True if active, otherwise False
+        """
         return self._active
 
-    async def reset(self):
+    async def reset(self) -> bool:
+        """
+        硬件复位传感器
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        Notes:
+            需要提供reset_pin引脚
+
+        ==========================================
+        Hardware reset sensor
+
+        Returns:
+            bool: True on success, False on failure
+
+        Notes:
+            reset_pin pin must be provided
+        """
         if self._reset_pin is not None:
             self._reset_pin.value(0)
             await asyncio.sleep(5)
@@ -226,7 +538,39 @@ class PMS5003_base:
             self._error("No reset pin defined, can't reset")
             return False
 
-    async def _sendCommand(self, command, data, expect_command=True, delay=1000, wait=None):
+    async def _sendCommand(self, command: int, data: int, expect_command: bool = True, delay: int = 1000, wait: int = None) -> bool or tuple:
+        """
+        发送命令并等待响应
+
+        Args:
+            command (int): 命令字节
+            data (int): 数据字节
+            expect_command (bool): 是否期望命令响应帧
+            delay (int): 超时等待时间（毫秒）
+            wait (int, optional): 额外等待时间（毫秒）
+
+        Returns:
+            bool or tuple: 成功返回True（命令响应）或数据帧元组，失败返回None
+
+        Notes:
+            内部使用，处理命令发送和响应接收
+
+        ==========================================
+        Send command and wait for response
+
+        Args:
+            command (int): Command byte
+            data (int): Data byte
+            expect_command (bool): Expect command response frame
+            delay (int): Timeout wait (milliseconds)
+            wait (int, optional): Additional wait time (milliseconds)
+
+        Returns:
+            bool or tuple: True on success (command response) or data frame tuple, None on failure
+
+        Notes:
+            Internal use, handles command sending and response reception
+        """
         self._debug(
             "Sending command: {!s},{!s},{!s},{!s}".format(command, data, expect_command, delay))
         arr = bytearray(7)
@@ -264,11 +608,35 @@ class PMS5003_base:
         self._debug("Got no available bytes")
         return None
 
-    async def stop(self):
+    async def stop(self) -> None:
+        """
+        停止传感器并进入睡眠
+
+        Notes:
+            调用后传感器不再读取数据，可通过start()重新启动
+
+        ==========================================
+        Stop sensor and put to sleep
+
+        Notes:
+            After call, sensor stops reading data, can be restarted with start()
+        """
         self._active = False
         await self.sleep()
 
-    async def start(self):
+    async def start(self) -> None:
+        """
+        启动传感器读取任务
+
+        Notes:
+            如果传感器已停止，重新启动后台读取任务
+
+        ==========================================
+        Start sensor reading task
+
+        Notes:
+            If sensor is stopped, restart background reading task
+        """
         # coroutine as everything else is a coroutine
         if self._active is False:
             self._active = True
@@ -276,7 +644,25 @@ class PMS5003_base:
         else:
             self._warn("Sensor already active")
 
-    def registerCallback(self, callback):
+    def registerCallback(self, callback) -> None:
+        """
+        注册数据更新回调函数
+
+        Args:
+            callback (callable): 回调函数或协程，无参数
+
+        Notes:
+            支持多次调用以注册多个回调，回调应快速执行
+
+        ==========================================
+        Register data update callback
+
+        Args:
+            callback (callable): Callback function or coroutine, no arguments
+
+        Notes:
+            Multiple callbacks can be registered by calling multiple times, callbacks should be fast
+        """
         # callback will be called on every new sensor value, should be fast in active mode
         if self._callback is None:
             self._callback = callback
@@ -285,12 +671,42 @@ class PMS5003_base:
         else:
             self._callback = [self._callback, callback]
 
-    def registerEvent(self, event):
+    def registerEvent(self, event) -> None:
+        """
+        注册事件对象，新数据到达时设置事件
+
+        Args:
+            event (asyncio.Event): 异步事件对象
+
+        Notes:
+            便于在主动模式下快速响应新数据
+
+        ==========================================
+        Register event object, set event when new data arrives
+
+        Args:
+            event (asyncio.Event): Async event object
+
+        Notes:
+            Useful for quick response to new data in active mode
+        """
         # enhances usability; by using an event with active mode a fast reaction to
         # changing values is possible
         self._event = event
 
-    def print(self):
+    def print(self) -> None:
+        """
+        打印当前测量数据到控制台
+
+        Notes:
+            仅当有有效数据时打印
+
+        ==========================================
+        Print current measurement data to console
+
+        Notes:
+            Only prints if valid data exists
+        """
         if self._active and self._timestamp is not None:
             print("")
             print("---------------------------------------------")
@@ -318,11 +734,37 @@ class PMS5003_base:
         else:
             print("PMS5003 Sensor not active")
 
-    def _flush_uart(self):
+    def _flush_uart(self) -> None:
+        """
+        清空UART接收缓冲区
+
+        Notes:
+            丢弃所有待读取数据
+
+        ==========================================
+        Flush UART receive buffer
+
+        Notes:
+            Discard all pending data
+        """
         while self._uart.any():
             self._uart.read(self._uart.any())
 
-    async def _read(self):
+    async def _read(self) -> None:
+        """
+        后台读取任务，循环获取传感器数据
+
+        Notes:
+            根据当前模式（主动/被动）和节能设置，定期读取数据并更新内部变量，
+            同时触发回调或事件。若长时间无数据则尝试复位。
+
+        ==========================================
+        Background reading task, periodically fetch sensor data
+
+        Notes:
+            Depending on current mode (active/passive) and eco settings, periodically read data
+            and update internal variables, trigger callbacks or events. Reset if no data for long time.
+        """
         woke_up = None
         if self._sleeping_state:
             await self.wakeUp()  # just in case controller rebooted and left device in sleep mode
@@ -404,7 +846,33 @@ class PMS5003_base:
 
         self._invalidateMeasurements()  # set values to None if device is not active anymore
 
-    async def _read_frame(self, with_lock=False, with_async=False):
+    async def _read_frame(self, with_lock: bool = False, with_async: bool = False) -> tuple or bool or None:
+        """
+        读取一个完整的数据帧或命令响应帧
+
+        Args:
+            with_lock (bool): 是否使用锁保护
+            with_async (bool): 是否使用异步流读取器
+
+        Returns:
+            tuple or bool or None: 数据帧元组、命令响应成功True，或失败None
+
+        Notes:
+            内部使用，处理帧同步和校验
+
+        ==========================================
+        Read a complete data frame or command response frame
+
+        Args:
+            with_lock (bool): Use lock protection or not
+            with_async (bool): Use async stream reader or not
+
+        Returns:
+            tuple or bool or None: Data frame tuple, command response True, or None on failure
+
+        Notes:
+            Internal use, handles frame synchronization and checksum
+        """
         # using lock to prevent multiple coroutines from reading at the same time
         self._debug("readFrame {!s} {!s}".format(with_lock, with_async))
         if with_lock:
@@ -418,14 +886,58 @@ class PMS5003_base:
             self._debug("readFrame got: {!s}".format(res))
             return res
 
-    async def __await_bytes(self, count, timeout):
+    async def __await_bytes(self, count: int, timeout: int) -> None:
+        """
+        等待UART接收指定字节数
+
+        Args:
+            count (int): 期望的字节数
+            timeout (int): 超时时间（毫秒）
+
+        Notes:
+            内部辅助函数，循环等待直到收到足够数据或超时
+
+        ==========================================
+        Wait for UART to receive specified number of bytes
+
+        Args:
+            count (int): Desired number of bytes
+            timeout (int): Timeout (milliseconds)
+
+        Notes:
+            Internal helper, loops until enough data or timeout
+        """
         st = time.ticks_ms()
         while self._uart.any() < count:
             await asyncio.sleep_ms(20)
             if time.ticks_ms() - st > timeout:
                 return
 
-    async def __read_frame(self, with_async):
+    async def __read_frame(self, with_async: bool) -> tuple or bool or None:
+        """
+        实际读取帧的核心实现
+
+        Args:
+            with_async (bool): 是否使用异步流读取器
+
+        Returns:
+            tuple or bool or None: 数据帧元组、命令响应True，或失败None
+
+        Notes:
+            内部函数，处理帧解析和校验
+
+        ==========================================
+        Core implementation of frame reading
+
+        Args:
+            with_async (bool): Use async stream reader or not
+
+        Returns:
+            tuple or bool or None: Data frame tuple, command response True, or None on failure
+
+        Notes:
+            Internal function, handles frame parsing and checksum
+        """
         buffer = []
         start = time.ticks_ms()
         timeout = 200
@@ -528,7 +1040,19 @@ class PMS5003_base:
             # pm25_env, pm100_env, particles_03um, particles_05um, particles_10um,
             # particles_25um, particles_50um, particles100um, skip, checksum=frame
 
-    def _invalidateMeasurements(self):
+    def _invalidateMeasurements(self) -> None:
+        """
+        将所有测量值设置为None
+
+        Notes:
+            当传感器未激活时调用
+
+        ==========================================
+        Set all measurement values to None
+
+        Notes:
+            Called when sensor is not active
+        """
         self._pm10_standard = None
         self._pm25_standard = None
         self._pm100_standard = None
@@ -543,54 +1067,78 @@ class PMS5003_base:
         self._particles_100um = None
 
     @property
-    def pm10_standard(self):
+    def pm10_standard(self) -> int:
+        """获取PM1.0标准浓度"""
         return self._pm10_standard
 
     @property
-    def pm25_standard(self):
+    def pm25_standard(self) -> int:
+        """获取PM2.5标准浓度"""
         return self._pm25_standard
 
     @property
-    def pm100_standard(self):
+    def pm100_standard(self) -> int:
+        """获取PM10标准浓度"""
         return self._pm100_standard
 
     @property
-    def pm10_env(self):
+    def pm10_env(self) -> int:
+        """获取PM1.0环境浓度"""
         return self._pm10_env
 
     @property
-    def pm25_env(self):
+    def pm25_env(self) -> int:
+        """获取PM2.5环境浓度"""
         return self._pm25_env
 
     @property
-    def pm100_env(self):
+    def pm100_env(self) -> int:
+        """获取PM10环境浓度"""
         return self._pm100_env
 
     @property
-    def particles_03um(self):
+    def particles_03um(self) -> int:
+        """获取>0.3µm颗粒物计数"""
         return self._particles_03um
 
     @property
-    def particles_05um(self):
+    def particles_05um(self) -> int:
+        """获取>0.5µm颗粒物计数"""
         return self._particles_05um
 
     @property
-    def particles_10um(self):
+    def particles_10um(self) -> int:
+        """获取>1.0µm颗粒物计数"""
         return self._particles_10um
 
     @property
-    def particles_25um(self):
+    def particles_25um(self) -> int:
+        """获取>2.5µm颗粒物计数"""
         return self._particles_25um
 
     @property
-    def particles_50um(self):
+    def particles_50um(self) -> int:
+        """获取>5.0µm颗粒物计数"""
         return self._particles_50um
 
     @property
-    def particles_100um(self):
+    def particles_100um(self) -> int:
+        """获取>10µm颗粒物计数"""
         return self._particles_100um
 
-    def read(self):
+    def read(self) -> tuple or None:
+        """
+        获取当前所有测量数据
+
+        Returns:
+            tuple or None: 包含12个测量值的元组，若传感器未激活则返回None
+
+        ==========================================
+        Get all current measurement data
+
+        Returns:
+            tuple or None: Tuple of 12 measurement values, or None if sensor not active
+        """
         if self._active:
             return (self._pm10_standard, self._pm25_standard, self._pm100_standard,
                     self._pm10_env, self._pm25_env, self._pm100_env,
@@ -599,19 +1147,91 @@ class PMS5003_base:
         return None
 
     @property
-    def timestamp(self):
+    def timestamp(self) -> int:
+        """获取最后一次数据的时间戳（毫秒）"""
         return self._timestamp
 
 
 class PMS5003(PMS5003_base):
+    """
+    PMS5003传感器增强类，增加了命令重试和自动复位机制。
+
+    Methods:
+        wakeUp(): 唤醒传感器（带重试）
+        sleep(): 使传感器睡眠（带重试）
+        setActiveMode(): 切换到主动模式（带重试）
+        setPassiveMode(): 切换到被动模式（带重试）
+
+    Notes:
+        继承自PMS5003_base，所有方法均通过_makeResilient增加重试逻辑，
+        当命令失败时会尝试复位传感器。
+
+    ==========================================
+    Enhanced PMS5003 sensor class with command retry and auto-reset mechanism.
+
+    Methods:
+        wakeUp(): Wake up sensor (with retry)
+        sleep(): Put sensor to sleep (with retry)
+        setActiveMode(): Switch to active mode (with retry)
+        setPassiveMode(): Switch to passive mode (with retry)
+
+    Notes:
+        Inherits from PMS5003_base, all methods are wrapped with retry logic via _makeResilient,
+        will attempt to reset sensor on command failure.
+    """
+
     def __init__(self, uart, lock=None, set_pin=None, reset_pin=None, interval_passive_mode=None,
-                 event=None, active_mode=True, eco_mode=True, assume_sleeping=True):
+                 event=None, active_mode=True, eco_mode=True, assume_sleeping=True) -> None:
+        """
+        初始化PMS5003传感器对象（增强版）
+
+        Args:
+            参数同PMS5003_base.__init__
+
+        Notes:
+            提供命令重试和自动复位能力
+
+        ==========================================
+        Initialize PMS5003 sensor object (enhanced)
+
+        Args:
+            Same as PMS5003_base.__init__
+
+        Notes:
+            Provides command retry and auto-reset capability
+        """
         super().__init__(uart, set_pin=set_pin, reset_pin=reset_pin,
                          interval_passive_mode=interval_passive_mode,
                          event=event, active_mode=active_mode, eco_mode=eco_mode,
                          assume_sleeping=assume_sleeping)
 
-    async def _makeResilient(self, *args, **kwargs):
+    async def _makeResilient(self, *args, **kwargs) -> bool:
+        """
+        包装原始方法，实现重试和复位逻辑
+
+        Args:
+            *args: 可变位置参数
+            **kwargs: 可变关键字参数，可包含first_try标志
+
+        Returns:
+            bool: 最终成功返回True，否则False
+
+        Notes:
+            内部方法，被其他方法调用
+
+        ==========================================
+        Wrap original method to implement retry and reset logic
+
+        Args:
+            *args: Variable positional arguments
+            **kwargs: Variable keyword arguments, may include first_try flag
+
+        Returns:
+            bool: True on final success, False otherwise
+
+        Notes:
+            Internal method, called by other methods
+        """
         if "first_try" not in kwargs:
             first_try = True
         else:
@@ -646,22 +1266,93 @@ class PMS5003(PMS5003_base):
         kwargs["first_try"] = False
         await self._makeResilient(*args, **kwargs)
 
-    async def wakeUp(self):
+    async def wakeUp(self) -> bool:
+        """
+        唤醒传感器（带重试和复位）
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        ==========================================
+        Wake up sensor (with retry and reset)
+
+        Returns:
+            bool: True on success, False on failure
+        """
         await self._makeResilient(super().wakeUp)
 
-    async def sleep(self):
+    async def sleep(self) -> bool:
+        """
+        使传感器睡眠（带重试和复位）
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        ==========================================
+        Put sensor to sleep (with retry and reset)
+
+        Returns:
+            bool: True on success, False on failure
+        """
         await self._makeResilient(super().sleep)
 
-    async def setActiveMode(self):
+    async def setActiveMode(self) -> bool:
+        """
+        切换到主动模式（带重试和复位）
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        Notes:
+            若传感器正在睡眠，会等待唤醒后再执行
+
+        ==========================================
+        Switch to active mode (with retry and reset)
+
+        Returns:
+            bool: True on success, False on failure
+
+        Notes:
+            If sensor is sleeping, will wait for wake up before executing
+        """
         while self._active is True and self._sleeping_state is True:
             await asyncio.sleep_ms(100)
             # device has to wake up first and after that we'll set the state or
             # weird behaviour possible otherwise
         await self._makeResilient(super().setActiveMode)
 
-    async def setPassiveMode(self, interval=None):
+    async def setPassiveMode(self, interval: int = None) -> bool:
+        """
+        切换到被动模式（带重试和复位）
+
+        Args:
+            interval (int, optional): 采样间隔（秒）
+
+        Returns:
+            bool: 成功返回True，失败返回False
+
+        Notes:
+            若传感器正在睡眠，会等待唤醒后再执行
+
+        ==========================================
+        Switch to passive mode (with retry and reset)
+
+        Args:
+            interval (int, optional): Sampling interval (seconds)
+
+        Returns:
+            bool: True on success, False on failure
+
+        Notes:
+            If sensor is sleeping, will wait for wake up before executing
+        """
         while self._active is True and self._sleeping_state is True:
             await asyncio.sleep_ms(100)
             # device has to wake up first and after that we'll set the state or
             # weird behaviour possible otherwise
         await self._makeResilient(super().setPassiveMode, interval=interval)
+
+
+# ======================================== 初始化配置 ===========================================
+
+# ========================================  主程序  ============================================
