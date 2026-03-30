@@ -1,10 +1,4 @@
-# GraftSense-基于 MEMS 气体传感器的空气质量监测模块(MicroPython)
-
-# GraftSense-基于 MEMS 气体传感器的空气质量监测模块(MicroPython)
-
-# GraftSense MEMS Gas Sensor-based Air Quality Monitoring Module
-
-## 目录
+# MEMS气体传感器多通道读取驱动
 
 - [简介](#简介)
 - [主要功能](#主要功能)
@@ -17,193 +11,128 @@
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
----
-
 ## 简介
-
-本项目是 **GraftSense 系列基于 MEMS 气体传感器的空气质量监测模块**，属于 FreakStudio 开源硬件项目。模块通过 PCA9546A I2C 扩展芯片挂载 4 路 MEMS 气体传感器（烟雾、一氧化碳、VOC、甲醛），配合 ADS1115 高精度 ADC 实现模拟量采集，支持将传感器电压转换为气体浓度（ppm），广泛适用于电子 DIY 环境监测实验、室内空气质量演示等场景。
-
----
+本项目是基于MicroPython v1.23.0开发的MEMS气体传感器多通道读取驱动及示例代码，实现了对VOC、CO、H2S、NO2等多种气体的浓度检测、校零校准功能，并通过PCA9546ADR I2C多路复用器实现4通道传感器的统一管理。代码遵循模块化设计思想，提供简洁易用的接口，适用于ESP32/ESP8266等支持MicroPython的开发板。
 
 ## 主要功能
-
-- **多传感器集成**:支持 4 路 MEMS 气体传感器（烟雾传感器 JED115、一氧化碳传感器 JED104、VOC 传感器 JED101、甲醛传感器 JED116），覆盖常见有害气体检测。
-- **I2C 扩展设计**:通过 PCA9546A 芯片扩展 I2C 总线，避免多传感器地址冲突，支持灵活扩展。
-- **高精度 ADC 采集**:基于 ADS1115 16 位 ADC，提供稳定的模拟电压采集，支持多通道切换与采样率配置。
-- **多项式校准**:内置多项式校准逻辑，支持自定义或使用内置多项式，将传感器电压线性转换为气体浓度（ppm）。
-- **灵活数据读取**:支持单次/多次采样取平均，可直接获取原始电压或浓度值，适配不同应用需求。
-- **Grove 接口兼容**:遵循 Grove 接口标准，连接便捷，适配主流 MCU 开发平台。
-
----
+1. 支持12种MEMS气体传感器类型（VOC、CO、H2S、NO2、H2、NH3等）的浓度读取；
+2. 提供传感器校零校准功能，支持自定义校准基准值；
+3. 实现PCA9546ADR I2C多路复用器驱动，支持4通道切换、状态读取及全通道禁用；
+4. 封装AirQualityMonitor类，统一管理多通道传感器的注册、读取和校准；
+5. 内置I2C通信异常捕获机制，示例程序添加全局异常处理，避免程序崩溃；
+6. 严格遵循MicroPython I2C通信规范，通信速率限制为100KHz，保证数据稳定性。
 
 ## 硬件要求
-
-- **核心芯片**:PCA9546A（I2C 扩展）、ADS1115（16 位 ADC）、4 路 MEMS 气体传感器（烟雾、CO、VOC、甲醛）。
-- **供电**:3.3V 或 5V 直流供电，模块内置 DC-DC 转换电路，适配不同平台供电需求。
-- **通信接口**:I2C 总线（SDA、SCL 引脚），遵循 Grove 接口定义，支持 400kHz 高速模式。
-- **传感器通道**:4 路模拟输出通道，分别对应 4 种气体传感器，通过 ADS1115 通道切换采集。
-
----
+1. 支持MicroPython v1.23.0的开发板（如ESP32、ESP8266等）；
+2. MEMS气体传感器（支持I2C通信，默认7位地址0x2A）；
+3. PCA9546ADR I2C多路复用器（默认7位地址0x70）；
+4. 接线要求：SDA接开发板Pin4，SCL接开发板Pin5，传感器/多路复用器需接好3.3V/5V电源和GND；
+5. 传感器需30秒预热时间，确保浓度读数准确。
 
 ## 文件说明
-
-- `ads1115.py`:ADS1115 ADC 驱动文件，封装了 ADC 初始化、通道切换、原始值读取、电压转换等核心功能，为 MEMS 传感器提供底层采集支持。
-- `mems_air_quality.py`:MEMS 空气质量传感器驱动文件，基于 ADS1115 实现传感器选择、电压读取、多项式校准、浓度计算等功能，提供统一的高层接口。
-- `main.py`:驱动测试与示例程序，演示了 I2C 总线初始化、设备扫描、传感器配置、电压与浓度读取的完整流程。
-
----
+| 文件名                | 功能说明                                                                 |
+|-----------------------|--------------------------------------------------------------------------|
+| `main.py`             | 示例代码，实现VOC/CO/H2S/NO2四种传感器的注册、校准和实时浓度读取（每秒打印一次） |
+| `mems_air_module.py`  | 核心驱动代码，包含3个核心类：<br>- `MEMSGasSensor`：MEMS传感器操作类<br>- `PCA9546ADR`：I2C多路复用器驱动类<br>- `AirQualityMonitor`：多传感器整合管理类 |
 
 ## 软件设计核心思想
-
-- **分层架构**:将底层 ADC 采集（ADS1115）与上层传感器逻辑（MEMS 驱动）分离，降低耦合度，提升代码复用性与可维护性。
-- **多项式校准抽象**:通过内置/自定义多项式实现电压到浓度的线性转换，适配不同传感器的特性曲线，提升检测精度。
-- **通道抽象化**:通过类常量（`CH20`/`SMK`/`VOC`/`CO`）封装传感器通道，简化通道选择逻辑，避免直接使用数字索引导致的错误。
-- **采样优化**:支持多次采样取平均，通过延时控制采样间隔，有效降低噪声干扰，提升数据稳定性。
-- **参数校验**:对输入参数（如传感器类型、多项式系数长度）进行严格校验，避免无效操作导致的程序异常。
-
----
+1. **模块化设计**：将传感器操作、多路复用器管理、多传感器整合拆分为独立类，降低代码耦合度，便于扩展和维护；
+2. **接口统一化**：通过`AirQualityMonitor`类封装底层I2C操作和通道切换逻辑，对外提供统一的`register_sensor`、`read_sensor`、`calibrate_sensor`等接口；
+3. **冲突避免**：切换I2C通道前先禁用所有通道，避免地址冲突；读取传感器数据时添加20ms操作延迟，保证数据稳定；
+4. **异常鲁棒性**：捕获I2C通信异常（如无ACK、数据不完整），示例程序中捕获全局异常，避免程序崩溃；
+5. **常量规范化**：使用`const`定义气体类型、I2C地址、命令字等固定值，提高代码可读性和可维护性。
 
 ## 使用说明
+### 1. 环境准备
+确保开发板已烧录MicroPython v1.23.0固件，可通过串口工具或开发板管理工具验证固件版本。
 
-1. **硬件连接**:
+### 2. 硬件接线
+- 开发板Pin4 → PCA9546ADR的SDA引脚；
+- 开发板Pin5 → PCA9546ADR的SCL引脚；
+- PCA9546ADR的4个通道分别连接不同类型的MEMS气体传感器；
+- 所有设备接好电源（3.3V/5V）和GND，确保接线牢固。
 
-   - 将模块通过 Grove 接口连接至 MCU 的 I2C 总线（SDA、SCL 引脚），接入 3.3V/5V 供电。
-   - 确保 4 路 MEMS 传感器已正确焊接至模块对应通道。
-2. **初始化配置**:
+### 3. 文件上传
+将`mems_air_module.py`和`main.py`上传到开发板的文件系统中（可使用Thonny、ampy等工具）。
 
-   ```python
-   ```
+### 4. 运行程序
+1. 给传感器上电，等待30秒预热完成；
+2. 执行`main.py`，程序会自动完成：
+   - 初始化I2C总线和空气质量监测器；
+   - 注册并校准0-3通道的VOC/CO/H2S/NO2传感器；
+   - 每秒读取一次所有传感器浓度值并打印；
+3. 若需停止程序，按下`Ctrl+C`中断。
 
-from machine import Pin, I2C
-from ads1115 import ADS1115
-from mems_air_quality import MEMSAirQuality
-
-# 初始化 I2C 总线（SDA=4, SCL=5, 400kHz）
-
-i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
-
-# 扫描 I2C 设备获取 ADS1115 地址
-
-devices = i2c.scan()
-adc_addr = devices[0] if devices else None
-
-if adc_addr:
-# 初始化 ADS1115（增益=1）
-adc = ADS1115(i2c, adc_addr, 1)
-# 初始化 MEMS 空气质量模块（采样率=7）
-mems = MEMSAirQuality(adc, adc_rate=7)
-
-```
-
-3. **传感器校准配置**:
-	```python
-# 查看 VOC 传感器的多项式系数
-mems.get_polynomial(MEMSAirQuality.VOC)
-# 设置 VOC 传感器自定义多项式（3 个系数）
-mems.set_custom_polynomial(MEMSAirQuality.VOC, [20, 100, 20])
-# 恢复 VOC 传感器内置多项式
-mems.select_builtin(MEMSAirQuality.VOC)
-```
-
-4. **数据读取**:
-   ```python
-   ```
-
-# 读取 VOC 传感器电压（V）
-
-voltage = mems.read_voltage(MEMSAirQuality.VOC)
-
-# 读取 VOC 传感器浓度（ppm），3 次采样取平均
-
-ppm = mems.read_ppm(MEMSAirQuality.VOC, samples=3, delay_ms=10)
-
-```
-
----
+### 5. 自定义扩展
+- 新增传感器类型：通过`monitor.register_sensor(通道号, MEMSGasSensor.TYPE_XXX)`注册（如TYPE_H2、TYPE_NH3等）；
+- 单独校准传感器：调用`monitor.calibrate_sensor(MEMSGasSensor.TYPE_XXX)`；
+- 单独读取某类气体浓度：调用`monitor.read_sensor(MEMSGasSensor.TYPE_XXX)`。
 
 ## 示例程序
-
+以下是`main.py`的核心代码（完整代码见项目文件）：
 ```python
-# MicroPython v1.23.0
-from machine import Pin, I2C
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2025/12/22 下午2:21
+# @Author  : hogeiha
+# @File    : main.py
+# @Description : MEMS气体传感器多通道读取示例代码，实现VOC/CO/H2S/NO2四种气体的校准和实时浓度读取
+
+from machine import Pin, SoftI2C
 import time
-from ads1115 import ADS1115
-from mems_air_quality import MEMSAirQuality
+from mems_air_module import MEMSGasSensor, PCA9546ADR, AirQualityMonitor
 
-# 上电延时
+# 延时等待设备初始化
 time.sleep(3)
-print("FreakStudio: MEMS Air Quality Sensor Test Program")
+print("FreakStudio : Using IIC to read MEMS sensor")
 
-# 初始化 I2C 总线
-i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
-devices = i2c.scan()
-print("I2C devices found:", [hex(d) for d in devices])
-adc_addr = devices[0] if devices else None
+# 初始化I2C总线
+i2c = SoftI2C(sda=Pin(4), scl=Pin(5), freq=100000)
+monitor = AirQualityMonitor(i2c)
 
-if not adc_addr:
-    print("No ADS1115 found!")
-    exit()
+# 注册并校准各通道传感器
+monitor.register_sensor(0, MEMSGasSensor.TYPE_VOC)
+monitor.calibrate_sensor(MEMSGasSensor.TYPE_VOC)
 
-# 初始化 ADC 与 MEMS 模块
-adc = ADS1115(i2c, adc_addr, 1)
-mems = MEMSAirQuality(adc, adc_rate=7)
+monitor.register_sensor(1, MEMSGasSensor.TYPE_CO)
+monitor.calibrate_sensor(MEMSGasSensor.TYPE_CO)
 
-# 配置 VOC 传感器多项式
-mems.select_builtin(MEMSAirQuality.VOC)
-print("VOC polynomial:", mems.get_polynomial(MEMSAirQuality.VOC))
+monitor.register_sensor(2, MEMSGasSensor.TYPE_H2S)
+monitor.calibrate_sensor(MEMSGasSensor.TYPE_H2S)
 
-# 循环读取数据
+monitor.register_sensor(3, MEMSGasSensor.TYPE_NO2)
+monitor.calibrate_sensor(MEMSGasSensor.TYPE_NO2)
+
+# 实时读取并打印浓度值
+print("\nStart reading gas concentration (press Ctrl+C to stop)...")
+print("-" * 50)
 while True:
-    voltage = mems.read_voltage(MEMSAirQuality.VOC)
-    ppm = mems.read_ppm(MEMSAirQuality.VOC, samples=3, delay_ms=10)
-    print(f"VOC Voltage: {voltage:.3f}V, Concentration: {ppm:.2f} ppm")
+    try:
+        results = monitor.read_all()
+        print(f"VOC concentration: {results[MEMSGasSensor.TYPE_VOC]}")
+        print(f"CO concentration: {results[MEMSGasSensor.TYPE_CO]}")
+        print(f"H2S concentration: {results[MEMSGasSensor.TYPE_H2S]}")
+        print(f"NO2 concentration: {results[MEMSGasSensor.TYPE_NO2]}")
+        print("-" * 50)
+    except Exception as e:
+        print(f"Error reading concentration: {str(e)}")
+        print("-" * 50)
     time.sleep(1)
 ```
 
----
-
 ## 注意事项
-
-1. **I2C 地址冲突**:使用 PCA9546A 扩展 I2C 时，需确保各传感器地址不冲突，模块已通过硬件设计规避该问题。
-2. **采样率选择**:`adc_rate` 取值范围为 0-7，对应不同采样速度，值越大采样速度越快，噪声也会相应增加，需根据场景平衡选择。
-3. **多项式校准**:自定义多项式需包含 3 个浮点数系数，若系数格式错误将导致浓度计算异常，建议先使用内置多项式验证。
-4. **传感器兼容性**:模块仅适配指定型号 MEMS 传感器（JED115/JED104/JED101/JED116），更换其他传感器需重新校准多项式。
-5. **供电稳定性**:模块内置 DC-DC 转换电路，需确保供电电压稳定，避免电压波动导致 ADC 采集精度下降。
-
----
+1. **传感器预热**：传感器上电后必须等待30秒预热，否则浓度读数会严重偏离实际值；
+2. **I2C速率限制**：I2C通信速率必须设置为100KHz，超出该速率会导致通信失败；
+3. **通道范围限制**：PCA9546ADR仅支持0-3通道，注册传感器时通道号超出范围会抛出`ValueError`；
+4. **校准环境**：校零校准需在清洁空气环境中执行，校准后读数理想值为0，±5以内的偏差属正常现象；
+5. **气体类型规范**：必须使用`MEMSGasSensor`类内置的`TYPE_*`常量（如`TYPE_VOC`），不可自定义数值；
+6. **接线检查**：若出现“I2C No ACK”错误，需检查硬件接线是否牢固、传感器/多路复用器地址是否正确；
+7. **操作延迟**：切换多路复用器通道后建议等待10ms，确保通道切换完成后再进行I2C通信。
 
 ## 联系方式
-
-如有任何问题或需要帮助，请通过以下方式联系开发者:
-
-📧 **邮箱**:liqinghsui@freakstudio.cn
-
-💻 **GitHub**:[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
-
----
+如有任何问题或需要帮助，请通过以下方式联系开发者：  
+📧 **邮箱**：liqinghsui@freakstudio.cn  
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
 
 ## 许可协议
-
-```
-MIT License
-
-Copyright (c) 2026 FreakStudio
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+本项目采用MIT开源许可协议，详细条款见代码内注释。您可以自由使用、修改和分发本代码，无需额外授权，但需保留原作者信息和许可声明。

@@ -21,8 +21,8 @@ I2C_SCL_PIN = 5
 I2C_SDA_PIN = 4
 # I2C通信频率，设置为400kHz
 I2C_FREQ = 400000
-# MMA8451传感器固定I2C地址
-TARGET_SENSOR_ADDR = 0x1C
+# 自动识别传感器地址，定义全局目标地址列表（支持多地址，单个也用[]）
+TARGET_SENSOR_ADDRS = [0x1C,0x1D]
 
 # ======================================== 功能函数 ============================================
 
@@ -34,41 +34,36 @@ TARGET_SENSOR_ADDR = 0x1C
 time.sleep(3)
 print("FreakStudio: MMA8451 sensor initialization")
 
-# 初始化硬件I2C
+# I2C初始化（兼容I2C/SoftI2C）
 i2c_bus = I2C(I2C_BUS_ID, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
 
 # 开始扫描I2C总线上的设备
 devices_list: list[int] = i2c_bus.scan()
 print("START I2C SCANNER")
 
-# 检查扫描结果是否为空
+# 检查I2C设备扫描结果
 if len(devices_list) == 0:
     print("No i2c device !")
     raise SystemExit("I2C scan found no devices, program exited")
 else:
     print("i2c devices found:", len(devices_list))
 
-# 标志位，记录是否成功初始化传感器
-sensor_initialized = False
-
-# 遍历扫描到的所有设备地址
+# 遍历地址列表初始化目标传感器
+mma = None  # 初始化传感器对象占位符
 for device in devices_list:
-    # 匹配目标传感器地址
-    if device == TARGET_SENSOR_ADDR:
+    if device in TARGET_SENSOR_ADDRS:
         print("I2c hexadecimal address:", hex(device))
         try:
-            # 使用扫描到的地址创建传感器对象
+            # 自动识别并初始化对应传感器
             mma = mma8451.MMA8451(i2c=i2c_bus, address=device)
-            print("Target sensor initialization successful")
-            sensor_initialized = True
+            print("Sensor initialization successful")
             break
         except Exception as e:
             print(f"Sensor Initialization failed: {e}")
             continue
-
-# 若未找到目标传感器，抛出异常终止程序
-if not sensor_initialized:
-    raise Exception("No TargetSensor found")
+else:
+    # 未找到目标设备，抛出异常
+    raise Exception("No target sensor device found in I2C bus")
 
 # 设置传感器数据输出速率为800Hz
 mma.data_rate = mma8451.DATARATE_800HZ

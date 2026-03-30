@@ -10,16 +10,6 @@ __author__ = "jposada202020"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23.0"
 
-"""
-`mma8451` - MMA8451 三轴加速度计 MicroPython 驱动模块
-===============================================================================
-
-MicroPython module for the MMA8451 3-axis accelerometer.
-MicroPython 模块，用于 MMA8451 三轴加速度计。
-
-* Author(s): Jose D. Montoya
-"""
-
 # ======================================== 导入相关模块 =========================================
 
 from micropython import const

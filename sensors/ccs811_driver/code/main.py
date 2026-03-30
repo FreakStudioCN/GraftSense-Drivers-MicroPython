@@ -7,7 +7,7 @@
 
 # ======================================== 导入相关模块 =========================================
 
-from machine import I2C, Pin
+from machine import I2C, Pin, SoftI2C
 import time
 from ccs811 import CCS811
 
@@ -23,6 +23,7 @@ time.sleep(3)
 print("FreakStudio: CCS811 sensor test - read eCO2 and TVOC data, configure drive mode, software reset sensor")
 # 初始化I2C总线（适配Raspberry Pi Pico，I2C 0，SCL=Pin(5), SDA=Pin(4)）
 i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
+#    i2c = SoftI2C(scl=Pin(5), sda=Pin(4), freq=100000)
 # 扫描I2C总线上的设备并打印地址
 print(f"I2C scanned device addresses: {[hex(addr) for addr in i2c.scan()]}")
 # 创建CCS811传感器实例

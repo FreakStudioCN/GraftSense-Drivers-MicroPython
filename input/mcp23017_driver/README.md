@@ -1,3 +1,84 @@
+# MCP23017 Driver for MicroPython
+
+# MCP23017 Driver for MicroPython
+
+## 目录
+
+- 简介
+- 主要功能
+- 硬件要求
+- 文件说明
+- 软件设计核心思想
+- 使用说明
+- 示例程序
+- 注意事项
+- 联系方式
+- 许可协议
+
+---
+
+## 简介
+
+`mcp23017_driver` 是一个用于 **MicroPython** 的 MCP23017 芯片驱动库，提供了对 MCP23017 16 位 I/O 扩展器的便捷控制接口。该库封装了 I2C 通信逻辑，支持引脚方向配置、电平读写、中断等核心功能，可在各类支持 MicroPython 的开发板上快速部署。
+
+---
+
+## 主要功能
+
+- 支持 I2C 接口通信，兼容标准 MCP23017 芯片
+- 配置引脚为输入 / 输出模式
+- 读写引脚电平（支持单个引脚 / 端口批量操作）
+- 配置上拉电阻
+- 支持中断触发配置
+- 无特定芯片或固件依赖，可在大部分 MicroPython 环境运行
+
+---
+
+## 硬件要求
+
+- 开发板：任意支持 MicroPython 且带有 I2C 外设的开发板（如 ESP32、ESP8266、RP2040 等）
+- 外设芯片：MCP23017 16 位 I/O 扩展器
+- 连接方式：通过 I2C 总线连接（SDA/SCL 引脚）
+- 供电：3.3V 或 5V（根据开发板与芯片规格选择）
+
+---
+
+## 文件说明
+
+<table>
+<tr>
+<td>**文件名**<br/></td><td>**用途**<br/></td></tr>
+<tr>
+<td>mcp23017.py<br/></td><td>驱动库核心实现，包含 MCP23017 类及所有操作方法<br/></td></tr>
+<tr>
+<td>package.json<br/></td><td>包管理配置文件，声明库名称、版本、作者、依赖等元数据<br/></td></tr>
+<tr>
+<td>LICENSE<br/></td><td>MIT 开源许可协议文本<br/></td></tr>
+</table>
+
+## 软件设计核心思想
+
+- **简洁易用**：对外暴露直观的 API，隐藏底层 I2C 通信细节
+- **兼容性优先**：不依赖特定固件或芯片，适配广泛的 MicroPython 环境
+- **模块化设计**：核心功能与硬件操作分离，便于维护与扩展
+- **资源轻量化**：代码精简，适合资源受限的嵌入式设备
+
+---
+
+## 使用说明
+
+1. **准备环境**：确保开发板已烧录支持 I2C 的 MicroPython 固件
+2. **文件上传**：将 `mcp23017.py` 上传至开发板的文件系统
+3. **导入库**：在你的项目中导入 `mcp23017` 模块
+4. **初始化 I2C**：根据开发板引脚配置初始化 I2C 总线
+5. **创建驱动实例**：传入 I2C 对象与芯片地址（默认 0x20）
+6. **调用 API**：配置引脚方向、读写电平或配置中断
+
+---
+
+## 示例程序
+
+```python
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/13 下午6:20
@@ -53,7 +134,8 @@ def test_mcp_functions():
         Verify different function modules in sequence and output key debugging information
     """
     # ---------- 演示1：基本读写（A3输出，A3读取） ----------
-    print("\n=== Demo 1: Basic Level Read/Write ===")
+    print("
+=== Demo 1: Basic Level Read/Write ===")
     # 切换A3电平为高，读取A3验证（短接后A3应同步为高）
     mcp.pin(A1_PIN, value=1)
     a3_val = mcp.pin(A3_PIN)  # 读取A3电平（返回True/False）
@@ -65,7 +147,8 @@ def test_mcp_functions():
     print(f"A3 Output Level: LOW (0) | A3 Read Level: {'HIGH (1)' if a3_val else 'LOW (0)'}")
 
     # ---------- 演示2：虚拟引脚用法（更直观的引脚操作） ----------
-    print("\n=== Demo 2: Virtual Pin Operation ===")
+    print("
+=== Demo 2: Virtual Pin Operation ===")
     # 获取A3和A3的虚拟引脚对象
     A3_vpin = mcp[A1_PIN]
     a3_vpin = mcp[A3_PIN]
@@ -76,7 +159,8 @@ def test_mcp_functions():
     print(f"Virtual Pin A3 Output: HIGH (1) | Virtual Pin A3 Read: {'HIGH (1)' if a3_val else 'LOW (0)'}")
 
     # ---------- 演示3：批量配置/读取寄存器（进阶） ----------
-    print("\n=== Demo 3: Batch Register Operation ===")
+    print("
+=== Demo 3: Batch Register Operation ===")
     # 读取PortA（A0-A7）的整体模式（IODIR寄存器）
     porta_mode = mcp.porta.mode
     print(f"PortA Mode Register Value: 0x{porta_mode:02X} (A3=Output(0), A3=Input(1) As Expected)")
@@ -86,7 +170,8 @@ def test_mcp_functions():
     print(f"PortA Pullup Register Value: 0x{porta_pullup:02X} (A3 Pullup Enabled(1) As Expected)")
 
     # ---------- 演示4：输入极性反转（可选，取消注释后验证） ----------
-    print("\n=== Demo 4: Input Polarity Inversion ===")
+    print("
+=== Demo 4: Input Polarity Inversion ===")
     # 启用A3极性反转
     mcp.pin(A3_PIN, polarity=1)
     # 再次设置A3为高，A3读取应为低（因为极性反转）
@@ -122,7 +207,8 @@ def loop_verify():
     Notes:
         Loop 5 times, output the level matching result each time, need to short-circuit A3 and A3 pins
     """
-    print("\n=== Loop Verification (Switch A3 Level Every 1 Second) ===")
+    print("
+=== Loop Verification (Switch A3 Level Every 1 Second) ===")
     print("Short-circuit A3 and A3, observe if A3 synchronizes with A3 level changes...")
     count = 0
     while count < 5:  # 循环5次
@@ -189,8 +275,59 @@ if __name__ == "__main__":
         test_mcp_functions()
         # 执行循环验证
         loop_verify()
-        print("\nProgram execution completed successfully!")
+        print("
+Program execution completed successfully!")
     except OSError as e:
         print(f"Error: {e}, Please check I2C wiring or MCP23017 address!")
     except Exception as e:
         print(f"Initialization Error: {e}")
+
+```
+
+## 注意事项
+
+- 请确认 MCP23017 的 I2C 地址与代码中传入的地址一致（由 A0/A1/A2 引脚电平决定）
+- 输入模式下如需稳定电平，建议开启内部上拉电阻
+- 批量操作端口时，注意 8 位端口的位映射关系
+- 中断功能需额外配置开发板外部中断引脚
+- 运行前请检查硬件接线，避免短路或电压不匹配
+
+---
+
+## 联系方式
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+
+---
+
+## 许可协议
+
+本项目采用 **MIT License** 开源协议，完整内容如下：
+
+```
+MIT License
+
+Copyright (c) 2026 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

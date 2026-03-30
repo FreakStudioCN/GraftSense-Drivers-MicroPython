@@ -1,3 +1,86 @@
+# GraftSense-Drivers-MicroPython
+
+# GraftSense-Drivers-MicroPython
+
+## 简介
+
+本项目是基于 MicroPython 开发的 GraftSense 系列传感器驱动库，当前主要包含对 MMA8452Q 加速度传感器的驱动支持，旨在为开发者提供简洁、高效的传感器控制接口，快速实现传感器数据读取、配置等功能，适配多种 MicroPython 开发板与运行环境。
+
+## 主要功能
+
+- 实现 MMA8452Q 加速度传感器的 MicroPython 底层驱动，支持基础数据读取、传感器模式配置、量程调整等核心操作。
+- 遵循 MicroPython 驱动开发规范，代码结构清晰，易于扩展其他传感器驱动。
+- 兼容无特定芯片 / 固件限制的 MicroPython 运行环境，适配性强。
+
+## 硬件要求
+
+- 主控设备：支持 MicroPython 的开发板（如 ESP32、STM32 等）。
+- 传感器：MMA8452Q 三轴加速度传感器。
+- 连接方式：I2C 通信接口（MMA8452Q 默认 I2C 地址为 0x1D）。
+- 供电：适配 MicroPython 开发板的供电电压（通常 3.3V-5V）。
+
+## 文件说明
+
+## 软件设计核心思想
+
+1. **模块化设计**：将 MMA8452Q 传感器的驱动逻辑独立封装为 `mma8452q.py` 模块，与项目配置文件分离，便于单独维护、更新和复用。
+2. **兼容性优先**：通过 `package.json` 明确标注无特定芯片 / 固件限制，适配主流 MicroPython 开发环境，降低开发者部署门槛。
+3. **MIT 开源规范**：全程遵循 MIT 协议，保障软件的自由使用、修改、分发权利，同时明确免责条款，保障开发者与使用者的合法权益。
+4. **轻量高效**：驱动代码精简，聚焦传感器核心功能实现，避免冗余逻辑，适配 MicroPython 嵌入式环境的资源占用特性。
+
+## 使用说明
+
+### 环境准备
+
+1. 确保开发板已刷入 MicroPython 固件（无特定固件版本限制，推荐稳定版）。
+2. 通过 I2C 接口将 MMA8452Q 传感器与开发板正确连接（SDA、SCL 引脚对应连接）。
+
+### 驱动安装与引入
+
+1. 将 `code/mma8452q.py` 文件上传至 MicroPython 开发板的 `/code` 目录下（可通过 Thonny、ampy 等工具实现）。
+2. 在 MicroPython 代码中通过以下方式引入驱动模块：
+
+```python
+from code.mma8452q import MMA8452Q
+```
+
+### 基础初始化
+
+```python
+from machine import I2C, Pin
+from code.mma8452q import MMA8452Q
+
+# 初始化I2C（引脚号根据实际开发板调整）
+i2c = I2C(0, scl=Pin(22), sda=Pin(21))
+# 初始化MMA8452Q传感器
+sensor = MMA8452Q(i2c)
+```
+
+### 核心功能调用
+
+- **读取加速度数据**：
+
+```python
+x, y, z = sensor.read_acceleration()
+print(f"X轴加速度：{x} g, Y轴加速度：{y} g, Z轴加速度：{z} g")
+```
+
+- **配置传感器量程**（支持 2g/4g/8g 量程）：
+
+```python
+sensor.set_range(MMA8452Q.RANGE_2G)  # 配置为2g量程
+```
+
+- **切换传感器工作模式**：
+
+```python
+sensor.set_mode(MMA8452Q.MODE_ACTIVE)  # 激活传感器
+sensor.set_mode(MMA8452Q.MODE_STANDBY)  # 待机模式（配置时需切换）
+```
+
+## 示例程序
+
+```python
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/3/12 下午5:20
@@ -25,7 +108,8 @@ TARGET_SENSOR_ADDRS = [0x1C, 0x1D]
 # ======================================== 功能函数 ============================================
 def print_separator(title):
     """Print separator line to optimize output readability"""
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print(f"=== {title}")
     print("=" * 60)
 
@@ -192,4 +276,50 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Failed to read final configuration: {e}")
 
-    print("\n=== Demo completed ===")
+    print("
+=== Demo completed ===")
+```
+
+## 注意事项
+
+1. **I2C 地址确认**：MMA8452Q 默认 I2C 地址为 `0x1D`，若硬件引脚连接导致地址变更，需在驱动中对应修改地址参数。
+2. **引脚匹配**：开发板 I2C 引脚（SDA/SCL）需与实际硬件连接一致，否则无法正常通信，可通过 `i2c.scan()` 验证传感器是否被识别。
+3. **供电要求**：MMA8452Q 供电电压范围为 1.95V-3.6V，需确保与 MicroPython 开发板供电匹配，避免电压过高损坏传感器。
+4. **资源占用**：驱动代码轻量设计，但仍需注意开发板内存资源，避免同时加载过多冗余模块。
+5. **协议遵守**：使用本项目代码需严格遵守 MIT 许可协议，在分发、修改时需保留原版权声明与许可条款。
+
+## 联系方式
+
+如有任何问题或需要帮助，请通过以下方式联系开发者：
+
+📧 **邮箱**：liqinghsui@freakstudio.cn
+
+💻 **GitHub**：[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+
+## 许可协议
+
+本项目采用 **MIT License** 开源协议，具体协议内容如下：
+
+```
+MIT License
+
+Copyright (c) 2026 FreakStudio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

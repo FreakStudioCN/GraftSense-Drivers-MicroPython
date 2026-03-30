@@ -1,0 +1,19 @@
+{
+  "name": "pms5003t_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control pms5003t_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "pms5003.py",
+      "code/pms5003.py"
+    ]
+  ]
+}
