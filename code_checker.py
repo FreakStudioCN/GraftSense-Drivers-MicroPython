@@ -217,33 +217,40 @@ def check_main_py_instance_location(content: str, file_path: Path) -> bool:
 def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     """
     精准检查while循环仅在主程序区（仅main.py需要检查）
+    修复：1.while正则匹配所有写法 2.全覆盖主程序区后代码
     """
-    if "main.py" not in str(file_path):
+    if file_path.name != "main.py":
         print(f"[PASS] {file_path}: Skip while loop location check (non-main.py file)")
         return True
 
-    main_content = extract_section_content(content, MAIN_SECTION_MARKER)
-    all_content = content.split("\n")
+    lines = content.split("\n")
     main_start_idx = -1
-    for idx, line in enumerate(all_content):
+    # 定位主程序分隔符
+    for idx, line in enumerate(lines):
         if line.strip() == MAIN_SECTION_MARKER.strip():
             main_start_idx = idx
             break
-    non_main_content = "\n".join(all_content[:main_start_idx]) if main_start_idx != -1 else content
 
-    while_in_non_main = re.search(r"while\s*\(", non_main_content) is not None
-    while_in_main = re.search(r"while\s*\(", main_content) is not None
+    # 划分区域：非主程序区 = 分隔符前所有代码；主程序区 = 分隔符后所有代码
+    non_main_content = "\n".join(lines[:main_start_idx]) if main_start_idx != -1 else content
+    main_content = "\n".join(lines[main_start_idx:]) if main_start_idx != -1 else ""
 
+    # 通用正则：匹配所有合法while循环（修复正则局限问题）
+    while_pattern = re.compile(r"^\s*while\s+", re.MULTILINE)
+    while_in_non_main = bool(while_pattern.search(non_main_content))
+    while_in_main = bool(while_pattern.search(main_content))
+    has_any_while = bool(while_pattern.search(content))
+
+    # 校验规则
     if while_in_non_main:
         print(f"[FAIL] {file_path}: while loop found outside main program section (invalid)")
         return False
-    if "while" in content and not while_in_main:
+    if has_any_while and not while_in_main:
         print(f"[FAIL] {file_path}: while loop not found in main program section (required)")
         return False
 
     print(f"[PASS] {file_path}: main.py while loop location is correct")
     return True
-
 
 def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
     """
