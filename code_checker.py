@@ -236,25 +236,32 @@ def check_main_py_instance_location(content: str, file_path: Path) -> bool:
 def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     """
     精准检查while循环仅在主程序区（仅main.py需要检查）
-    修复：1.while正则匹配所有写法 2.全覆盖主程序区后代码
+    修复：模糊匹配分隔符 + 忽略注释 + 支持所有while写法
     """
     if file_path.name != "main.py":
         print(f"[PASS] {file_path}: Skip while loop location check (non-main.py file)")
         return True
 
+    # 🔥 模糊匹配主程序分隔符（无视=数量、空格）
     lines = content.split("\n")
     main_start_idx = -1
-    # 定位主程序分隔符
+    target_main = re.sub(r'[=#\s]', '', MAIN_SECTION_MARKER)
+
     for idx, line in enumerate(lines):
-        if line.strip() == MAIN_SECTION_MARKER.strip():
+        clean_line = re.sub(r'[=#\s]', '', line)
+        if clean_line == target_main:
             main_start_idx = idx
             break
 
-    # 划分区域：非主程序区 = 分隔符前所有代码；主程序区 = 分隔符后所有代码
+    # 划分区域：非主程序区 = 分隔符前，主程序区 = 分隔符后
     non_main_content = "\n".join(lines[:main_start_idx]) if main_start_idx != -1 else content
     main_content = "\n".join(lines[main_start_idx:]) if main_start_idx != -1 else ""
 
-    # 通用正则：匹配所有合法while循环（修复正则局限问题）
+    # 去除注释，避免干扰
+    non_main_content = strip_python_comments(non_main_content)
+    main_content = strip_python_comments(main_content)
+
+    # 匹配所有while写法
     while_pattern = re.compile(r"^\s*while\s+", re.MULTILINE)
     while_in_non_main = bool(while_pattern.search(non_main_content))
     while_in_main = bool(while_pattern.search(main_content))
