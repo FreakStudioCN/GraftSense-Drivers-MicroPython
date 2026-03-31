@@ -1,6 +1,6 @@
 {
   "name": "cs1237_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control cs1237_driver ",
   "author": "leeqingshui",
   "license": "MIT",
