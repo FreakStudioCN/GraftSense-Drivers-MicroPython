@@ -13,6 +13,12 @@ from ccs811 import CCS811
 
 # ======================================== 全局变量 ============================================
 
+# 自动识别传感器地址，定义全局目标地址列表（支持多地址，单个也用[]）
+TARGET_CCS811_ADDRS = [0x5A,0x5B]
+I2C_SDA_PIN = 4
+I2C_SCL_PIN = 5
+I2C_FREQ = 100000
+
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
@@ -21,58 +27,82 @@ from ccs811 import CCS811
 
 time.sleep(3)
 print("FreakStudio: CCS811 sensor test - read eCO2 and TVOC data, configure drive mode, software reset sensor")
-# 初始化I2C总线（适配Raspberry Pi Pico，I2C 0，SCL=Pin(5), SDA=Pin(4)）
-i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
-#    i2c = SoftI2C(scl=Pin(5), sda=Pin(4), freq=100000)
-# 扫描I2C总线上的设备并打印地址
-print(f"I2C scanned device addresses: {[hex(addr) for addr in i2c.scan()]}")
-# 创建CCS811传感器实例
-ccs811 = CCS811(i2c)
+
+# I2C初始化（兼容I2C/SoftI2C）
+i2c_bus = I2C(0, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
+
+# 开始扫描I2C总线上的设备
+devices_list: list[int] = i2c_bus.scan()
+print("START I2C SCANNER")
+
+# 检查I2C设备扫描结果
+if len(devices_list) == 0:
+    print("No i2c device !")
+    raise SystemExit("I2C scan found no devices, program exited")
+else:
+    print("i2c devices found:", len(devices_list))
+
+# 遍历地址列表初始化目标传感器
+sensor = None  # 初始化传感器对象占位符
+for device in devices_list:
+    if device in TARGET_CCS811_ADDRS:
+        print("I2c hexadecimal address:", hex(device))
+        try:
+            # 自动识别并初始化对应传感器
+            sensor = CCS811(i2c=i2c_bus,addr = device)
+            print("Sensor initialization successful")
+            break
+        except Exception as e:
+            print(f"Sensor Initialization failed: {e}")
+            continue
+else:
+    # 未找到目标设备，抛出异常
+    raise Exception("No target sensor device found in I2C bus")
 
 # ========================================  主程序  ============================================
 
 try:
     # 初始化CCS811传感器
-    ccs811.setup()
+    sensor.setup()
     time.sleep(2)  # Wait for stabilization after initialization
 
     # 检查APP是否有效
-    app_valid = ccs811.app_valid()
+    app_valid = sensor.app_valid()
     print(f"\nAPP validity: {app_valid}")
 
     # 检查传感器是否存在错误
-    has_error = ccs811.check_for_error()
+    has_error = sensor.check_for_error()
     print(f"Sensor error status: {has_error}")
 
     # 获取传感器基线值
-    baseline = ccs811.get_base_line()
+    baseline = sensor.get_base_line()
     print(f"Sensor baseline value: 0x{baseline:04X}")
 
     # 修改驱动模式为1秒/次
     print("\nSet drive mode to 1 second per reading...")
-    ccs811.set_drive_mode(1)
+    sensor.set_drive_mode(1)
     time.sleep(1)
 
     # 循环读取eCO2和TVOC数据（读取5次）
     print("\nStart reading sensor data (5 times):")
     for i in range(5):
-        co2 = ccs811.read_eCO2()
+        co2 = sensor.read_eCO2()
         time.sleep(2)  # Wait according to drive mode
-        tvoc = ccs811.read_tVOC()
+        tvoc = sensor.read_tVOC()
         print(f"Reading {i+1} - eCO2: {co2} ppm, TVOC: {tvoc} ppb")
         time.sleep(2)  # Wait according to drive mode
 
     # 执行传感器软件重置
     print("\nPerform sensor software reset...")
-    ccs811.reset()
+    sensor.reset()
     time.sleep(2)
 
     # 重置后重新初始化并读取一次数据
     print("\nRe-initialize after reset...")
-    ccs811.setup()
+    sensor.setup()
     time.sleep(2)
-    co2 = ccs811.read_eCO2()
-    tvoc = ccs811.read_tVOC()
+    co2 = sensor.read_eCO2()
+    tvoc = sensor.read_tVOC()
     print(f"Reading after reset - eCO2: {co2} ppm, TVOC: {tvoc} ppb")
 
 except ValueError as e:
