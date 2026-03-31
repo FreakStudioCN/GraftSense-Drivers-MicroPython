@@ -28,14 +28,14 @@ from serial_servo import SerialServo
 # 延时3s等待设备上电完毕
 time.sleep(3)
 # 打印调试消息
-print("FreakStudio:  Serial Servo Test ")
+print("FreakStudio: Serial Servo Test ")
 # 配置UART串口
 uart = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
 
 # 初始化串口舵机控制类
 servo = SerialServo(uart)
 
-# ======================================== 主程序 ==========================================
+# ======================================== 主程序 ===========================================
 
 # 无限循环执行舵机的角度切换与状态查询逻辑
 while True:

@@ -43,6 +43,17 @@ MACHINE_INSTANCE_PATTERNS = [
 
 # ======================================== 功能函数 ============================================
 
+def strip_python_comments(code: str) -> str:
+    """
+    剥离Python代码中的所有注释，避免注释干扰检查
+    """
+    import re
+    # 移除多行注释
+    code = re.sub(r"'''[\s\S]*?'''", "", code)
+    code = re.sub(r'"""[\s\S]*?"""', "", code)
+    # 移除单行注释
+    code = re.sub(r"#.*", "", code)
+    return code.strip()
 
 def read_file_content(file_path: Path) -> str:
     """
@@ -54,7 +65,6 @@ def read_file_content(file_path: Path) -> str:
     except Exception as e:
         print(f"[FAIL] Error reading file {file_path}: {str(e)}")
         return ""
-
 
 def check_required_globals(content: str, file_path: Path) -> bool:
     """
@@ -128,20 +138,27 @@ def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
 
 def extract_section_content(content: str, marker: str) -> str:
     """
-    精准提取指定分隔注释后的模块内容
+    🔥 模糊匹配分隔符：无视 = 数量、空格、格式差异
+    只匹配标题核心文字，彻底解决分隔符不一致导致的提取失败
     """
+    import re
+    # 提取标题核心文字（去掉所有=和空格）
+    target_title = re.sub(r'[=#\s]', '', marker)
+
+    # 匹配所有分隔符行，提取标题
     lines = content.split("\n")
     section_start = -1
     section_end = -1
 
     for idx, line in enumerate(lines):
-        if line.strip() == marker.strip():
+        clean_line = re.sub(r'[=#\s]', '', line)
+        # 找到目标分区
+        if clean_line == target_title:
             section_start = idx + 1
+            # 找到下一个分区作为结束
             for jdx in range(section_start, len(lines)):
-                jdx_line = lines[jdx].strip()
-                if jdx_line.startswith("# ========================================") and jdx_line.endswith(
-                    "==========================================="
-                ):
+                next_clean = re.sub(r'[=#\s]', '', lines[jdx])
+                if next_clean in ["全局变量", "初始化配置", "主程序"]:
                     section_end = jdx
                     break
             break
@@ -154,14 +171,16 @@ def extract_section_content(content: str, marker: str) -> str:
 def check_init_config_section(content: str, file_path: Path) -> bool:
     """
     检查初始化配置区（仅main.py需要检查，非main.py跳过）
+    修复：宽松匹配，支持空格、忽略注释
     """
     if file_path.name != "main.py":
         print(f"[PASS] {file_path}: Skip init config section check (non-main.py file)")
         return True
 
     init_content = extract_section_content(content, INIT_CONFIG_MARKER)
-    has_sleep3 = bool(re.search(r"\btime\.sleep\(3\)\b", init_content))
-    has_freakstudio = bool(re.search(r'\bprint\("FreakStudio: [^"]*"\)\b', init_content))
+    # 宽松匹配：支持空格、换行
+    has_sleep3 = bool(re.search(r"time\.sleep\s*\(\s*3\s*\)", init_content))
+    has_freakstudio = bool(re.search(r'print\s*\(\s*"FreakStudio:', init_content))
 
     errors = []
     if not has_sleep3:
@@ -217,33 +236,47 @@ def check_main_py_instance_location(content: str, file_path: Path) -> bool:
 def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     """
     精准检查while循环仅在主程序区（仅main.py需要检查）
+    修复：模糊匹配分隔符 + 忽略注释 + 支持所有while写法
     """
-    if "main.py" not in str(file_path):
+    if file_path.name != "main.py":
         print(f"[PASS] {file_path}: Skip while loop location check (non-main.py file)")
         return True
 
-    main_content = extract_section_content(content, MAIN_SECTION_MARKER)
-    all_content = content.split("\n")
+    # 🔥 模糊匹配主程序分隔符（无视=数量、空格）
+    lines = content.split("\n")
     main_start_idx = -1
-    for idx, line in enumerate(all_content):
-        if line.strip() == MAIN_SECTION_MARKER.strip():
+    target_main = re.sub(r'[=#\s]', '', MAIN_SECTION_MARKER)
+
+    for idx, line in enumerate(lines):
+        clean_line = re.sub(r'[=#\s]', '', line)
+        if clean_line == target_main:
             main_start_idx = idx
             break
-    non_main_content = "\n".join(all_content[:main_start_idx]) if main_start_idx != -1 else content
 
-    while_in_non_main = re.search(r"while\s*\(", non_main_content) is not None
-    while_in_main = re.search(r"while\s*\(", main_content) is not None
+    # 划分区域：非主程序区 = 分隔符前，主程序区 = 分隔符后
+    non_main_content = "\n".join(lines[:main_start_idx]) if main_start_idx != -1 else content
+    main_content = "\n".join(lines[main_start_idx:]) if main_start_idx != -1 else ""
 
+    # 去除注释，避免干扰
+    non_main_content = strip_python_comments(non_main_content)
+    main_content = strip_python_comments(main_content)
+
+    # 匹配所有while写法
+    while_pattern = re.compile(r"^\s*while\s+", re.MULTILINE)
+    while_in_non_main = bool(while_pattern.search(non_main_content))
+    while_in_main = bool(while_pattern.search(main_content))
+    has_any_while = bool(while_pattern.search(content))
+
+    # 校验规则
     if while_in_non_main:
         print(f"[FAIL] {file_path}: while loop found outside main program section (invalid)")
         return False
-    if "while" in content and not while_in_main:
+    if has_any_while and not while_in_main:
         print(f"[FAIL] {file_path}: while loop not found in main program section (required)")
         return False
 
     print(f"[PASS] {file_path}: main.py while loop location is correct")
     return True
-
 
 def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
     """

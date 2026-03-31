@@ -87,4 +87,5 @@ driver.deinit()
 driver_inv.deinit()
 print("PWM released.")
 
+
 print("=== OptoMosSimple Test End ===")
