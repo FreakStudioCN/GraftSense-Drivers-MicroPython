@@ -1,5 +1,5 @@
 {
-  "name": "ch9328_driver",
+  "name": "snr9816_tts_driver",
   "version": "1.0.0",
   "description": "A MicroPython library controlling the SNR9816 TTS synthesis chip via UART interface",
   "author": "leeqingshui",

@@ -1,9 +1,9 @@
-# Python环境:MicroPython v1.23.0
+# Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @时间    : 2025/09/16 18:00
-# @作者    : n-elia
-# @文件    : main.py
-# @描述    : MAX30102 心率与PPG数据读取+简易心率计算器示例，参考自:https://github.com/n-elia/MAX30102-MicroPython-driver
+# @Time    : 2025/09/08 10:00
+# @Author  : n-elia
+# @File    : heart_rate.py
+# @Description : MAX30102 心率与PPG数据读取+简易心率计算器示例，参考自:https://github.com/n-elia/MAX30102-MicroPython-driver
 
 # ======================================== 导入相关模块 =========================================
 

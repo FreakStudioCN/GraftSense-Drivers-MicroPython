@@ -1,0 +1,27 @@
+{
+  "name": "h3lis200dl_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control h3lis200dl_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "micropython_h3lis200dl/__init__.py",
+      "code/micropython_h3lis200dl/__init__.py"
+    ],
+    [
+      "micropython_h3lis200dl/h3lis200dl.py",
+      "code/micropython_h3lis200dl/h3lis200dl.py"
+    ],
+    [
+      "micropython_h3lis200dl/i2c_helpers.py",
+      "code/micropython_h3lis200dl/i2c_helpers.py"
+    ]
+  ]
+}

@@ -6,6 +6,11 @@
 # @Description : LCD屏幕触摸芯片GT911自定义类
 # 参考代码 https://github.com/openmv/openmv/blob/master/scripts/libraries/gt911.py
 
+__version__ = "1.0.0"
+__author__ = "李清水"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
+
 # ======================================== 导入相关模块 ========================================
 
 # 导入引脚相关模块
