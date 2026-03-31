@@ -90,7 +90,7 @@ def modify_single_package_json(package_json_path):
             original_data = json.loads(content)
     except json.JSONDecodeError as e:
         # 提供更详细的解析错误信息
-        error_detail = f"JSON格式错误: 行{e.lineno}列{e.colpos} - {str(e)}"
+        error_detail = f"JSON格式错误: 行{e.lineno}列{e.colpo} - {str(e)}"
         return False, f"【解析失败】{package_json_path} - {error_detail}"
     except Exception as e:
         return False, f"【读取失败】{package_json_path} - {str(e)}"
