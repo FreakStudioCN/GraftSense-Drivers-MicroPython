@@ -43,6 +43,17 @@ MACHINE_INSTANCE_PATTERNS = [
 
 # ======================================== 功能函数 ============================================
 
+def strip_python_comments(code: str) -> str:
+    """
+    剥离Python代码中的所有注释，避免注释干扰检查
+    """
+    import re
+    # 移除多行注释
+    code = re.sub(r"'''[\s\S]*?'''", "", code)
+    code = re.sub(r'"""[\s\S]*?"""', "", code)
+    # 移除单行注释
+    code = re.sub(r"#.*", "", code)
+    return code.strip()
 
 def read_file_content(file_path: Path) -> str:
     """
@@ -54,7 +65,6 @@ def read_file_content(file_path: Path) -> str:
     except Exception as e:
         print(f"[FAIL] Error reading file {file_path}: {str(e)}")
         return ""
-
 
 def check_required_globals(content: str, file_path: Path) -> bool:
     """
@@ -128,40 +138,36 @@ def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
 
 def extract_section_content(content: str, marker: str) -> str:
     """
-    精准提取指定分隔注释后的模块内容
+    修复：模糊匹配分隔符，解决等号数量不一致问题 + 去除注释
     """
-    lines = content.split("\n")
-    section_start = -1
-    section_end = -1
+    # 模糊匹配分隔符（忽略等号数量差异）
+    pattern = re.compile(re.escape(marker.strip()).replace(r"\=", r"\=+"), re.MULTILINE)
+    match = pattern.search(content)
+    if not match:
+        return ""
 
-    for idx, line in enumerate(lines):
-        if line.strip() == marker.strip():
-            section_start = idx + 1
-            for jdx in range(section_start, len(lines)):
-                jdx_line = lines[jdx].strip()
-                if jdx_line.startswith("# ========================================") and jdx_line.endswith(
-                    "==========================================="
-                ):
-                    section_end = jdx
-                    break
-            break
-
-    if section_start != -1 and section_end != -1:
-        return "\n".join(lines[section_start:section_end])
-    return ""
+    # 截取分隔符后的内容
+    after = content[match.end():]
+    # 匹配下一个分区
+    next_sec = re.search(r"#\s*=+.*=+", after)
+    res = after[:next_sec.start()] if next_sec else after
+    # 去除注释
+    return strip_python_comments(res)
 
 
 def check_init_config_section(content: str, file_path: Path) -> bool:
     """
     检查初始化配置区（仅main.py需要检查，非main.py跳过）
+    修复：宽松匹配，支持空格、忽略注释
     """
     if file_path.name != "main.py":
         print(f"[PASS] {file_path}: Skip init config section check (non-main.py file)")
         return True
 
     init_content = extract_section_content(content, INIT_CONFIG_MARKER)
-    has_sleep3 = bool(re.search(r"\btime\.sleep\(3\)\b", init_content))
-    has_freakstudio = bool(re.search(r'\bprint\("FreakStudio: [^"]*"\)\b', init_content))
+    # 宽松匹配：支持空格、换行
+    has_sleep3 = bool(re.search(r"time\.sleep\s*\(\s*3\s*\)", init_content))
+    has_freakstudio = bool(re.search(r'print\s*\(\s*"FreakStudio:', init_content))
 
     errors = []
     if not has_sleep3:
