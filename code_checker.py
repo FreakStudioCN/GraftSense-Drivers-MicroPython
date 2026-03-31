@@ -138,21 +138,34 @@ def check_no_chinese_in_raise_print(content: str, file_path: Path) -> bool:
 
 def extract_section_content(content: str, marker: str) -> str:
     """
-    修复：模糊匹配分隔符，解决等号数量不一致问题 + 去除注释
+    🔥 模糊匹配分隔符：无视 = 数量、空格、格式差异
+    只匹配标题核心文字，彻底解决分隔符不一致导致的提取失败
     """
-    # 模糊匹配分隔符（忽略等号数量差异）
-    pattern = re.compile(re.escape(marker.strip()).replace(r"\=", r"\=+"), re.MULTILINE)
-    match = pattern.search(content)
-    if not match:
-        return ""
+    import re
+    # 提取标题核心文字（去掉所有=和空格）
+    target_title = re.sub(r'[=#\s]', '', marker)
 
-    # 截取分隔符后的内容
-    after = content[match.end():]
-    # 匹配下一个分区
-    next_sec = re.search(r"#\s*=+.*=+", after)
-    res = after[:next_sec.start()] if next_sec else after
-    # 去除注释
-    return strip_python_comments(res)
+    # 匹配所有分隔符行，提取标题
+    lines = content.split("\n")
+    section_start = -1
+    section_end = -1
+
+    for idx, line in enumerate(lines):
+        clean_line = re.sub(r'[=#\s]', '', line)
+        # 找到目标分区
+        if clean_line == target_title:
+            section_start = idx + 1
+            # 找到下一个分区作为结束
+            for jdx in range(section_start, len(lines)):
+                next_clean = re.sub(r'[=#\s]', '', lines[jdx])
+                if next_clean in ["全局变量", "初始化配置", "主程序"]:
+                    section_end = jdx
+                    break
+            break
+
+    if section_start != -1 and section_end != -1:
+        return "\n".join(lines[section_start:section_end])
+    return ""
 
 
 def check_init_config_section(content: str, file_path: Path) -> bool:
