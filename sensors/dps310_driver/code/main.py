@@ -25,7 +25,7 @@ print("FreakStudio: DPS310 Pressure Sensor I2C Auto Scan and Read")
 
 I2C_SDA_PIN = 4
 I2C_SCL_PIN = 5
-I2C_FREQ = 400_000
+I2C_FREQ = 100_000
 i2c_bus = SoftI2C(sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
 
 devices_list: list[int] = i2c_bus.scan()
@@ -42,7 +42,7 @@ for device in devices_list:
     if device in TARGET_DPS310_ADDRS:
         print(f"I2c hexadecimal address: {hex(device)}")
         try:
-            sensor = dps310.DPS310(i2c=i2c_bus)
+            sensor = dps310.DPS310(i2c=i2c_bus,address = device)
             print("Sensor initialization successful")
             break
         except Exception as e:
