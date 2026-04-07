@@ -11,10 +11,12 @@ import time
 from machine import Pin
 from cs1237 import CS1237
 
+
 # ======================================== 电压换算函数（自动算电压，新增！） ============================================
 def adc_to_voltage(adc_value):
     # 增益=1时，满量程8388607 = 1.25V
     return (adc_value / 8388607) * 1.25
+
 
 # ======================================== 功能函数 ============================================
 def demo_cs1237_basic():
@@ -50,6 +52,7 @@ def demo_cs1237_basic():
     except (ValueError, TypeError, OSError) as e:
         print(f"Initialization/Read failed: {e}")
 
+
 def demo_buffered_read():
     print("\n=== Buffered Batch Read Example ===")
     try:
@@ -70,6 +73,7 @@ def demo_buffered_read():
 
     except (ValueError, TypeError, OSError) as e:
         print(f"Buffered read failed: {e}")
+
 
 def demo_temperature_calibration():
     print("\n=== Temperature Calibration and Read Example ===")
@@ -92,6 +96,7 @@ def demo_temperature_calibration():
 
     except (ValueError, TypeError, OSError) as e:
         print(f"Temperature function failed: {e}")
+
 
 def demo_power_management():
     print("\n=== Power Management Example ===")
@@ -117,6 +122,7 @@ def demo_power_management():
 
     except (ValueError, TypeError, OSError) as e:
         print(f"Power management failed: {e}")
+
 
 # ======================================== 初始化配置 ===========================================
 time.sleep(3)

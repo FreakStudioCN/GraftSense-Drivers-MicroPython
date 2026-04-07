@@ -16,8 +16,9 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
-class _Subscriptable():
+class _Subscriptable:
     """
     伪实现可下标访问类型，用于兼容泛型注解语法
     Attributes:
@@ -36,6 +37,7 @@ class _Subscriptable():
     Notes:
         Internal helper class, no actual logic
     """
+
     def __getitem__(self, item: Any) -> None:
         """
         伪实现下标访问运算符
@@ -57,7 +59,9 @@ class _Subscriptable():
         """
         return None
 
+
 _subscriptable: _Subscriptable = _Subscriptable()
+
 
 class Any:
     """
@@ -70,7 +74,9 @@ class Any:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class NoReturn:
     """
@@ -83,7 +89,9 @@ class NoReturn:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class ClassVar:
     """
@@ -96,10 +104,13 @@ class ClassVar:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 Union: _Subscriptable = _subscriptable
 Optional: _Subscriptable = _subscriptable
+
 
 class Generic:
     """
@@ -112,7 +123,9 @@ class Generic:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class NamedTuple:
     """
@@ -125,7 +138,9 @@ class NamedTuple:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Hashable:
     """
@@ -138,7 +153,9 @@ class Hashable:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Awaitable:
     """
@@ -151,7 +168,9 @@ class Awaitable:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Coroutine:
     """
@@ -164,7 +183,9 @@ class Coroutine:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class AsyncIterable:
     """
@@ -177,7 +198,9 @@ class AsyncIterable:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class AsyncIterator:
     """
@@ -190,7 +213,9 @@ class AsyncIterator:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Iterable:
     """
@@ -203,7 +228,9 @@ class Iterable:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Iterator:
     """
@@ -216,7 +243,9 @@ class Iterator:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Reversible:
     """
@@ -229,7 +258,9 @@ class Reversible:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Sized:
     """
@@ -242,7 +273,9 @@ class Sized:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Container:
     """
@@ -255,7 +288,9 @@ class Container:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Collection:
     """
@@ -268,9 +303,12 @@ class Collection:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
 
+
 Callable: _Subscriptable = _subscriptable
+
 
 class AbstractSet:
     """
@@ -283,7 +321,9 @@ class AbstractSet:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class MutableSet:
     """
@@ -296,7 +336,9 @@ class MutableSet:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Mapping:
     """
@@ -309,7 +351,9 @@ class Mapping:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class MutableMapping:
     """
@@ -322,7 +366,9 @@ class MutableMapping:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Sequence:
     """
@@ -335,7 +381,9 @@ class Sequence:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class MutableSequence:
     """
@@ -348,7 +396,9 @@ class MutableSequence:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class ByteString:
     """
@@ -361,10 +411,13 @@ class ByteString:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 Tuple: _Subscriptable = _subscriptable
 List: _Subscriptable = _subscriptable
+
 
 class Deque:
     """
@@ -377,7 +430,9 @@ class Deque:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Set:
     """
@@ -390,7 +445,9 @@ class Set:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class dict_keys:
     """
@@ -403,7 +460,9 @@ class dict_keys:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class FrozenSet:
     """
@@ -416,7 +475,9 @@ class FrozenSet:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class MappingView:
     """
@@ -429,7 +490,9 @@ class MappingView:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class KeysView:
     """
@@ -442,7 +505,9 @@ class KeysView:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class ItemsView:
     """
@@ -455,7 +520,9 @@ class ItemsView:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class ValuesView:
     """
@@ -468,7 +535,9 @@ class ValuesView:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class ContextManager:
     """
@@ -481,7 +550,9 @@ class ContextManager:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class AsyncContextManager:
     """
@@ -494,9 +565,12 @@ class AsyncContextManager:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
 
+
 Dict: _Subscriptable = _subscriptable
+
 
 class DefaultDict:
     """
@@ -509,7 +583,9 @@ class DefaultDict:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Counter:
     """
@@ -522,7 +598,9 @@ class Counter:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class ChainMap:
     """
@@ -535,7 +613,9 @@ class ChainMap:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Generator:
     """
@@ -548,7 +628,9 @@ class Generator:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class AsyncGenerator:
     """
@@ -561,7 +643,9 @@ class AsyncGenerator:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 class Type:
     """
@@ -574,7 +658,9 @@ class Type:
     Notes:
         No actual function, only syntax compatibility
     """
+
     pass
+
 
 def cast(typ: Any, val: Any) -> Any:
     """
@@ -599,6 +685,7 @@ def cast(typ: Any, val: Any) -> Any:
     """
     return val
 
+
 def _overload_dummy(*args: Any, **kwds: Any) -> None:
     """
     重载装饰器辅助函数，禁止直接调用
@@ -621,6 +708,7 @@ def _overload_dummy(*args: Any, **kwds: Any) -> None:
         "by an implementation that is not @overload-ed."
     )
 
+
 def overload() -> Any:
     """
     伪实现overload装饰器
@@ -637,6 +725,7 @@ def overload() -> Any:
         No actual function, only syntax compatibility
     """
     return _overload_dummy
+
 
 # ======================================== 初始化配置 ===========================================
 

@@ -13,10 +13,14 @@ from qmc5883p import QMC5883P
 
 # ======================================== 全局变量 ============================================
 
-I2C_SCL_PIN = 5  # SCL引脚号
-I2C_SDA_PIN = 4  # SDA引脚号
-I2C_FREQ = 400_000  # I2C通信频率
-QMC5883P_ADDR = 0x2C  # QMC5883P默认I2C地址（十进制13）
+# SCL引脚号
+I2C_SCL_PIN = 5  
+# SDA引脚号
+I2C_SDA_PIN = 4  
+# I2C通信频率
+I2C_FREQ = 400_000  
+# QMC5883P默认I2C地址（十进制13）
+QMC5883P_ADDR = 0x2C  
 
 # ======================================== 功能函数 ============================================
 
@@ -42,7 +46,6 @@ if len(devices_list) == 0:
 else:
     print("i2c devices found:", len(devices_list))
 
-# 【关键修改4】遍历地址列表初始化目标传感器
 qmc5883 = None  # 初始化传感器对象变量
 for device in devices_list:
     if device == QMC5883P_ADDR:

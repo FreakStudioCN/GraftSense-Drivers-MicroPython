@@ -13,11 +13,14 @@ import pcf8563  # 导入PCF8563 RTC模块驱动
 
 # ======================================== 全局变量 ============================================
 
-# 新增：定义I2C相关常量（匹配示例代码风格）
-I2C_SCL_PIN = 5  # SCL引脚编号
-I2C_SDA_PIN = 4  # SDA引脚编号
-I2C_FREQ = 400000  # I2C通信频率
-TARGET_RTC_ADDR = 0x51  # PCF8563默认I2C地址
+# SCL引脚编号
+I2C_SCL_PIN = 5  
+# SDA引脚编号
+I2C_SDA_PIN = 4  
+# I2C通信频率
+I2C_FREQ = 400000  
+# PCF8563默认I2C地址
+TARGET_RTC_ADDR = 0x51  
 
 # ======================================== 功能函数 ============================================
 
@@ -27,10 +30,10 @@ TARGET_RTC_ADDR = 0x51  # PCF8563默认I2C地址
 time.sleep(3)
 print("FreakStudio: Initialize PCF8563 RTC module")
 
-# 1. 按示例风格初始化SoftI2C（保持原SoftI2C类型，仅调整格式）
+# 初始化SoftI2C
 i2c_bus = SoftI2C(scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
 
-# 2. 按示例风格执行I2C设备扫描
+# 执行I2C设备扫描
 devices_list: list[int] = i2c_bus.scan()
 print("START I2C SCANNER")
 
@@ -56,7 +59,6 @@ for device in devices_list:
 else:
     # 遍历结束未找到目标地址则抛出异常
     raise Exception("No PCF8563 RTC module found at I2C address 0x51")
-# ========== 关键修改部分结束 ==========
 
 # ========================================  主程序  ============================================
 print("\n=== 2. Basic time operations ===")

@@ -14,6 +14,7 @@ from mse_soil_sensor import MSESoilSensor
 
 # ======================================== 功能函数 ============================================
 
+
 def read_all():
     """
     读取并打印传感器所有寄存器数据
@@ -68,6 +69,7 @@ def read_all():
     # 打印结束分隔线
     print("=" * 50)
 
+
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ===========================================
@@ -78,13 +80,7 @@ time.sleep(3)
 print("FreakStudio: MSE soil sensor test start")
 
 # 创建传感器实例
-sensor = MSESoilSensor(
-    slave_addr=1,
-    baudrate=9600,
-    uart_id=0,
-    tx_pin=16,
-    rx_pin=17
-)
+sensor = MSESoilSensor(slave_addr=1, baudrate=9600, uart_id=0, tx_pin=16, rx_pin=17)
 
 # ========================================  主程序  ============================================
 
@@ -93,8 +89,8 @@ if __name__ == "__main__":
     # sensor.write_filter_count(20)      # 设置滤波次数
     # sensor.write_temp_comp_A(0.5)      # 设置温度补偿A
     # 写入温度补偿系数B
-    sensor.write_temp_comp_B(0.5) 
-    
+    sensor.write_temp_comp_B(0.5)
+
     # 主循环：每隔2秒读取一次所有数据
     while True:
         read_all()

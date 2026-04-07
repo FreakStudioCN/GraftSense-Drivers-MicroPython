@@ -17,6 +17,7 @@ from machine import Pin
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class MWFD:
     """
@@ -50,6 +51,7 @@ class MWFD:
         The passed Pin instance must already be initialized as input.
         The interrupt callback will receive a boolean argument indicating sensor status.
     """
+
     def __init__(self, input_pin: Pin) -> None:
         """
         初始化驱动
@@ -82,7 +84,7 @@ class MWFD:
         # 校验参数类型
         if not isinstance(input_pin, Pin):
             raise TypeError("must pass machine.Pin type instance")
-        
+
         self._pin: Pin = input_pin
         self._irq = None
         self._callback = None
@@ -145,18 +147,20 @@ class MWFD:
         if self._irq:
             self._irq.disable()
             self._irq = None
-        
+
         # 无回调 = 关闭中断
         if callback is None:
             self._callback = None
             return
-        
+
         # 绑定中断
         self._callback = callback
+
         def _handler(pin) -> None:
             self._callback(self.read())
-        
+
         self._irq = self._pin.irq(trigger=trigger, handler=_handler)
+
 
 # ======================================== 初始化配置 ===========================================
 

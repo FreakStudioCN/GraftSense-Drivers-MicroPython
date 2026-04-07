@@ -42,6 +42,7 @@ operation_mode_values = (LOW_POWER, NORMAL, LOW_NOISE, ULTRA_LOW_NOISE)
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class ICP10111:
     """
@@ -99,6 +100,7 @@ class ICP10111:
     Notes:
         Sensor communication is based on I2C protocol, ensure bus configuration is correct; data conversion relies on OTP calibration parameters, which are automatically read during initialization
     """
+
     def __init__(self, i2c, address: int = 0x63) -> None:
         """
         初始化ICP10111传感器对象，检测设备有效性并读取校准参数
@@ -135,7 +137,7 @@ class ICP10111:
             raise TypeError("address must be integer, got {}".format(type(address).__name__))
         if address < 0x00 or address > 0x7F:
             raise ValueError("address must be in range 0x00-0x7F, got 0x{:02X}".format(address))
-        
+
         self._i2c = i2c
         self._address = address
 
@@ -341,14 +343,8 @@ class ICP10111:
             p_lut[0] * p_lut[1] * (raw_pa[0] - raw_pa[1])
             + p_lut[1] * p_lut[2] * (raw_pa[1] - raw_pa[2])
             + p_lut[2] * p_lut[0] * (raw_pa[2] - raw_pa[0])
-        ) / (
-            p_lut[2] * (raw_pa[0] - raw_pa[1])
-            + p_lut[0] * (raw_pa[1] - raw_pa[2])
-            + p_lut[1] * (raw_pa[2] - raw_pa[0])
-        )
-        a = (
-            raw_pa[0] * p_lut[0] - raw_pa[1] * p_lut[1] - (raw_pa[1] - raw_pa[0]) * c
-        ) / (p_lut[0] - p_lut[1])
+        ) / (p_lut[2] * (raw_pa[0] - raw_pa[1]) + p_lut[0] * (raw_pa[1] - raw_pa[2]) + p_lut[1] * (raw_pa[2] - raw_pa[0]))
+        a = (raw_pa[0] * p_lut[0] - raw_pa[1] * p_lut[1] - (raw_pa[1] - raw_pa[0]) * c) / (p_lut[0] - p_lut[1])
         b = (raw_pa[0] - a) * (p_lut[0] + c)
         return a, b, c
 
@@ -390,21 +386,12 @@ class ICP10111:
             raise TypeError("raw_temperature must be int or float, got {}".format(type(raw_temperature).__name__))
 
         temperature_prov = raw_temperature - 32768.0
-        s1 = (
-            self._lut_lower
-            + float(self._sensor_constants[0] * temperature_prov * temperature_prov)
-            * self._quadr_factor
-        )
+        s1 = self._lut_lower + float(self._sensor_constants[0] * temperature_prov * temperature_prov) * self._quadr_factor
         s2 = (
             self._offset_factor * self._sensor_constants[3]
-            + float(self._sensor_constants[1] * temperature_prov * temperature_prov)
-            * self._quadr_factor
+            + float(self._sensor_constants[1] * temperature_prov * temperature_prov) * self._quadr_factor
         )
-        s3 = (
-            self._lut_upper
-            + float(self._sensor_constants[2] * temperature_prov * temperature_prov)
-            * self._quadr_factor
-        )
+        s3 = self._lut_upper + float(self._sensor_constants[2] * temperature_prov * temperature_prov) * self._quadr_factor
         a, b, c = self.calculate_conversion_constants(self._p_pa_calib, [s1, s2, s3])
         return a + b / (c + raw_pressure)
 
@@ -513,6 +500,7 @@ class ICP10111:
         if value not in operation_mode_values:
             raise ValueError("Value must be a valid operation_mode setting")
         self._mode = value
+
 
 # ======================================== 初始化配置 ===========================================
 

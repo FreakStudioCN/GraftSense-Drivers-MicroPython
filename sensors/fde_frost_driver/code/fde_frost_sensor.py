@@ -15,14 +15,17 @@ __platform__ = "MicroPython v1.23.0"
 
 # 导入时间模块，用于延时
 import time
+
 # 从umodbus库导入串口Modbus主站类
 from umodbus.serial import Serial as ModbusRTUMaster
+
 # 导入Modbus功能码函数
 from umodbus import functions
 
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
+
 
 def uint16_to_int16(raw: int) -> int:
     """
@@ -49,6 +52,7 @@ def uint16_to_int16(raw: int) -> int:
     """
     # 若数值大于等于32768则转换为负数
     return raw - 65536 if raw >= 32768 else raw
+
 
 def convert_fde_temperature(raw_data) -> float:
     """
@@ -81,7 +85,9 @@ def convert_fde_temperature(raw_data) -> float:
     # 协议规定除以10得到实际温度
     return raw / 10
 
+
 # ======================================== 自定义类 ============================================
+
 
 class FDEFrostSensor:
     """
@@ -179,14 +185,9 @@ class FDEFrostSensor:
 
         # 创建Modbus RTU主站对象
         self.host = ModbusRTUMaster(
-            pins=(self.tx_pin, self.rx_pin),
-            baudrate=self.baudrate,
-            data_bits=8,
-            stop_bits=1,
-            parity=None,
-            uart_id=self.uart_id
+            pins=(self.tx_pin, self.rx_pin), baudrate=self.baudrate, data_bits=8, stop_bits=1, parity=None, uart_id=self.uart_id
         )
-    
+
     def read_registers(self, slave_addr: int, starting_addr: int, register_qty: int, signed: bool = True):
         """
         读取Modbus保持寄存器（原始字节数据）
@@ -217,9 +218,7 @@ class FDEFrostSensor:
             Returns parsed byte list, internal logic clears buffer, sends request, validates response
         """
         # 构建读保持寄存器的Modbus PDU
-        modbus_pdu = functions.read_holding_registers(
-            starting_address=starting_addr,
-            quantity=register_qty)
+        modbus_pdu = functions.read_holding_registers(starting_address=starting_addr, quantity=register_qty)
         # 清空UART接收缓冲区
         self.host._uart.read()
 
@@ -227,11 +226,8 @@ class FDEFrostSensor:
         self.host._send(modbus_pdu=modbus_pdu, slave_addr=slave_addr)
         # 读取响应并校验
         response = self.host._uart_read()
-        return self.host._validate_resp_hdr(response=self.host._uart_read(),
-                                       slave_addr=slave_addr,
-                                       function_code=modbus_pdu[0],
-                                       count=True)
- 
+        return self.host._validate_resp_hdr(response=self.host._uart_read(), slave_addr=slave_addr, function_code=modbus_pdu[0], count=True)
+
     def fde_temperature(self) -> float:
         """
         读取传感器温度值
@@ -287,8 +283,8 @@ class FDEFrostSensor:
         # 读取寄存器0x0004（C1电容）
         data = self.read_registers(1, 0x04, 1, signed=False)
         # 拼接大端16位整数并除以1000
-        return (data[0]*256+data[1])/1000
-        
+        return (data[0] * 256 + data[1]) / 1000
+
     # C2电容 0x07
     def fde_c2(self) -> float:
         """
@@ -316,8 +312,8 @@ class FDEFrostSensor:
         # 读取寄存器0x0007（C2电容）
         data = self.read_registers(1, 0x07, 1, signed=False)
         # 拼接大端16位整数并除以1000
-        return (data[0]*256+data[1])/1000
-        
+        return (data[0] * 256 + data[1]) / 1000
+
     # C3电容 0x08
     def fde_c3(self) -> float:
         """
@@ -345,8 +341,8 @@ class FDEFrostSensor:
         # 读取寄存器0x0008（C3电容）
         data = self.read_registers(1, 0x08, 1, signed=False)
         # 拼接大端16位整数并除以1000
-        return (data[0]*256+data[1])/1000
-        
+        return (data[0] * 256 + data[1]) / 1000
+
     # C2+C3电容总和 0x0A
     def fde_c2_c3_sum(self) -> float:
         """
@@ -374,8 +370,8 @@ class FDEFrostSensor:
         # 读取寄存器0x000A（C2+C3和）
         data = self.read_registers(1, 0x0A, 1, signed=False)
         # 拼接大端16位整数并除以1000
-        return (data[0]*256+data[1])/1000
-        
+        return (data[0] * 256 + data[1]) / 1000
+
     # 空载电容预值 0x0F
     def fde_no_load_cap(self) -> int:
         """
@@ -403,8 +399,8 @@ class FDEFrostSensor:
         # 读取寄存器0x000F（空载电容预值）
         data = self.read_registers(1, 0x0F, 1, signed=False)
         # 拼接大端16位整数并直接返回
-        return data[0]*256+data[1]
-        
+        return data[0] * 256 + data[1]
+
     # 硬件版本 0x12
     def fde_hw_ver(self) -> int:
         """
@@ -432,8 +428,8 @@ class FDEFrostSensor:
         # 读取寄存器0x0012（硬件版本）
         data = self.read_registers(1, 0x12, 1, signed=False)
         # 拼接大端16位整数并返回
-        return data[0]*256+data[1]
-        
+        return data[0] * 256 + data[1]
+
     # 固件版本 0x13
     def fde_fw_ver(self) -> int:
         """
@@ -461,8 +457,7 @@ class FDEFrostSensor:
         # 读取寄存器0x0013（固件版本）
         data = self.read_registers(1, 0x13, 1, signed=False)
         # 拼接大端16位整数并返回
-        return data[0]*256+data[1]
-    
+        return data[0] * 256 + data[1]
 
     # 写入校准值（带参数传入，有参数=写入，无参数=仅查看）
     def fde_set_calibration(self, value: int = None):
@@ -501,6 +496,7 @@ class FDEFrostSensor:
         # 等待200ms确保写入完成
         time.sleep_ms(200)
         return True
+
 
 # ======================================== 初始化配置 ===========================================
 

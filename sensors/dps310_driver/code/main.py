@@ -12,7 +12,7 @@ from micropython_dps310 import dps310
 
 # ======================================== 全局变量 ============================================
 
-TARGET_DPS310_ADDRS = [0x76,0x77]
+TARGET_DPS310_ADDRS = [0x76, 0x77]
 
 # ======================================== 功能函数 ============================================
 
@@ -42,7 +42,7 @@ for device in devices_list:
     if device in TARGET_DPS310_ADDRS:
         print(f"I2c hexadecimal address: {hex(device)}")
         try:
-            sensor = dps310.DPS310(i2c=i2c_bus,address = device)
+            sensor = dps310.DPS310(i2c=i2c_bus, address=device)
             print("Sensor initialization successful")
             break
         except Exception as e:

@@ -48,9 +48,9 @@ while True:
     temp = sensor.read_temperature()
     # 读取水浸状态（1：有水报警，0：无水）
     status = sensor.read_water_status()
-    
+
     # 格式化打印所有参数（输出纯英文）
-    print("="*60)
+    print("=" * 60)
     print(f"Device ID: {dev_id if dev_id is not None else 'Read failed'}")
     print(f"485 Node Address: {node_addr if node_addr is not None else 'Read failed'}")
     print(f"Alarm threshold: {alarm_th} pF" if alarm_th is not None else "Alarm threshold: Read failed")
@@ -58,7 +58,7 @@ while True:
     print(f"Capacitance: {cap} pF" if cap is not None else "Capacitance: Read failed")
     print(f"Temperature: {temp} C" if temp is not None else "Temperature: Read failed")
     print(f"Water status: {'Water alarm' if status == 1 else 'No water'}" if status is not None else "Water status: Read failed")
-    print("="*60)
-    
+    print("=" * 60)
+
     # 延时1秒
     time.sleep(1)

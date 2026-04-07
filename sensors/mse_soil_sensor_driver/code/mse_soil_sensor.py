@@ -22,6 +22,7 @@ from umodbus.serial import Serial as ModbusRTUMaster
 
 # ======================================== 自定义类 ============================================
 
+
 class MSESoilSensor:
     """
     MSE土壤温湿度传感器Modbus RTU驱动类
@@ -134,12 +135,7 @@ class MSESoilSensor:
 
         # 初始化Modbus主机（完全沿用你的配置）
         self.host = ModbusRTUMaster(
-            pins=(self.tx_pin, self.rx_pin),
-            baudrate=self.baudrate,
-            data_bits=8,
-            stop_bits=1,
-            parity=None,
-            uart_id=self.uart_id
+            pins=(self.tx_pin, self.rx_pin), baudrate=self.baudrate, data_bits=8, stop_bits=1, parity=None, uart_id=self.uart_id
         )
 
     # 0x0001 节点地址 (只读)
@@ -752,18 +748,19 @@ class MSESoilSensor:
             if data and len(data) == 6:
                 # 96bit 正确移位组合（6个16bit寄存器）
                 uid_96bit = (
-                    (data[0] << 80) |  # 第1个寄存器(0x14)：最高16bit
-                    (data[1] << 64) |  # 第2个寄存器(0x15)
-                    (data[2] << 48) |  # 第3个寄存器(0x16)
-                    (data[3] << 32) |  # 第4个寄存器(0x17)
-                    (data[4] << 16) |  # 第5个寄存器(0x18)
-                    data[5]            # 第6个寄存器(0x19)：最低16bit
+                    (data[0] << 80)  # 第1个寄存器(0x14)：最高16bit
+                    | (data[1] << 64)  # 第2个寄存器(0x15)
+                    | (data[2] << 48)  # 第3个寄存器(0x16)
+                    | (data[3] << 32)  # 第4个寄存器(0x17)
+                    | (data[4] << 16)  # 第5个寄存器(0x18)
+                    | data[5]  # 第6个寄存器(0x19)：最低16bit
                 )
                 # 格式化输出：完整24位十六进制 = 96bit
                 return f"0x{uid_96bit:024X}"
             return None
         except:
             return None
+
 
 # ======================================== 初始化配置 ===========================================
 

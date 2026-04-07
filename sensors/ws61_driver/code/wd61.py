@@ -22,6 +22,7 @@ from umodbus.serial import Serial as ModbusRTUMaster
 
 # ======================================== 自定义类 ============================================
 
+
 class WS61Water:
     """
     敏源WS61电容式非接触水浸传感器 Modbus RTU 驱动类
@@ -112,12 +113,7 @@ class WS61Water:
 
         # 初始化Modbus RTU主机（严格匹配WS61协议）
         self.host = ModbusRTUMaster(
-            pins=(self.tx_pin, self.rx_pin),
-            baudrate=self.baudrate,
-            data_bits=8,
-            stop_bits=1,
-            parity=None,
-            uart_id=self.uart_id
+            pins=(self.tx_pin, self.rx_pin), baudrate=self.baudrate, data_bits=8, stop_bits=1, parity=None, uart_id=self.uart_id
         )
 
     def wake_up(self) -> bool:
@@ -138,7 +134,7 @@ class WS61Water:
         """
         try:
             # 发送唤醒指令
-            self.host._uart.write(b'\x8F')
+            self.host._uart.write(b"\x8F")
             time.sleep_ms(30)  # 官方要求≥30ms
             return True
         except:
@@ -408,6 +404,7 @@ class WS61Water:
             return True
         except:
             return False
+
 
 # ======================================== 初始化配置 ============================================
 

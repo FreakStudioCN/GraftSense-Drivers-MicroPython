@@ -14,7 +14,7 @@ from ccs811 import CCS811
 # ======================================== 全局变量 ============================================
 
 # 自动识别传感器地址，定义全局目标地址列表（支持多地址，单个也用[]）
-TARGET_CCS811_ADDRS = [0x5A,0x5B]
+TARGET_CCS811_ADDRS = [0x5A, 0x5B]
 I2C_SDA_PIN = 4
 I2C_SCL_PIN = 5
 I2C_FREQ = 100000
@@ -49,7 +49,7 @@ for device in devices_list:
         print("I2c hexadecimal address:", hex(device))
         try:
             # 自动识别并初始化对应传感器
-            sensor = CCS811(i2c=i2c_bus,addr = device)
+            sensor = CCS811(i2c=i2c_bus, addr=device)
             print("Sensor initialization successful")
             break
         except Exception as e:

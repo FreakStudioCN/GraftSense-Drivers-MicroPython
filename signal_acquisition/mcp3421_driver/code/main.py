@@ -30,10 +30,9 @@ my_data_rate = 1
 time.sleep(3)
 print("FreakStudio: MCP3421 ADC voltage measurement")
 
-# -------- 关键修改：按示例风格初始化I2C并执行扫描 --------
-# 初始化I2C总线（严格对齐示例代码风格）
-i2c_bus = I2C(1,scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
-print(f'I2C_FREQ={I2C_FREQ}')
+# 初始化I2C总线
+i2c_bus = I2C(1, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
+print(f"I2C_FREQ={I2C_FREQ}")
 # 开始扫描I2C总线上的设备
 devices_list: list[int] = i2c_bus.scan()
 print("START I2C SCANNER")
@@ -51,7 +50,7 @@ for device in devices_list:
     if device == TARGET_SENSOR_ADDR:
         print("I2c hexadecimal address:", hex(device))
         try:
-            # 创建I2C适配器实例（原逻辑保留）
+            # 创建I2C适配器实例
             adapter = I2cAdapter(i2c_bus)
             # 创建MCP342X ADC实例（初始化目标传感器）
             sensor = Mcp342X(adapter)
@@ -63,10 +62,8 @@ for device in devices_list:
 else:
     raise Exception("No Mcp3421 sensor found on I2C bus")
 
-# 替换原代码中的adc变量为初始化后的sensor（保持原逻辑一致性）
 adc = sensor
 
-# 以下为原代码功能逻辑，无修改
 # 打印单次测量模式提示
 print("---Single measurement mode---")
 
@@ -133,4 +130,3 @@ for voltage in adc:
     time.sleep_us(td)
     # 计数器加1
     _cnt += 1
-

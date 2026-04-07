@@ -103,7 +103,7 @@ print("FreakStudio: MCP4728 DAC output verification via ADC")
 # 初始化I2C总线，变量名改为i2c_bus，对齐示例代码风格
 i2c_bus = I2C(0, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
 
-# 新增完整的I2C扫描逻辑，严格对齐示例代码风格
+# 新增完整的I2C扫描逻辑
 # 开始扫描I2C总线上的设备
 devices_list: list[int] = i2c_bus.scan()
 print("START I2C SCANNER")

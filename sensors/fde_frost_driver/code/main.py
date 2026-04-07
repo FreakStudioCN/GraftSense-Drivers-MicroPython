@@ -9,6 +9,7 @@
 
 # 导入时间模块，用于延时
 import time
+
 # 导入FDE传感器驱动类
 from fde_frost_sensor import FDEFrostSensor
 
@@ -30,7 +31,7 @@ sensor = FDEFrostSensor(slave_addr=1, uart_id=0, tx_pin=16, rx_pin=17)
 # ========================================  主程序  ============================================
 
 # 校准值：校准空载电容值（当前注释，需要时可取消）
-# sensor.fde_set_calibration(1)  
+# sensor.fde_set_calibration(1)
 
 # 打印数据标题
 print("=== FDE Sensor Real-time Data ===")

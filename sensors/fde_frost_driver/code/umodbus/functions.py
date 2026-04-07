@@ -25,6 +25,7 @@ from .typing import List, Optional, Union
 
 # ======================================== 功能函数 ============================================
 
+
 def read_coils(starting_address: int, quantity: int) -> bytes:
     """
     创建读取线圈的Modbus协议数据单元(PDU)。
@@ -59,9 +60,9 @@ def read_coils(starting_address: int, quantity: int) -> bytes:
         Function code is Const.READ_COILS (0x01).
     """
     if not (1 <= quantity <= 2000):
-        raise ValueError('Invalid number of coils')
+        raise ValueError("Invalid number of coils")
 
-    return struct.pack('>BHH', Const.READ_COILS, starting_address, quantity)
+    return struct.pack(">BHH", Const.READ_COILS, starting_address, quantity)
 
 
 def read_discrete_inputs(starting_address: int, quantity: int) -> bytes:
@@ -98,12 +99,9 @@ def read_discrete_inputs(starting_address: int, quantity: int) -> bytes:
         Function code is Const.READ_DISCRETE_INPUTS (0x02).
     """
     if not (1 <= quantity <= 2000):
-        raise ValueError('Invalid number of discrete inputs')
+        raise ValueError("Invalid number of discrete inputs")
 
-    return struct.pack('>BHH',
-                       Const.READ_DISCRETE_INPUTS,
-                       starting_address,
-                       quantity)
+    return struct.pack(">BHH", Const.READ_DISCRETE_INPUTS, starting_address, quantity)
 
 
 def read_holding_registers(starting_address: int, quantity: int) -> bytes:
@@ -140,12 +138,9 @@ def read_holding_registers(starting_address: int, quantity: int) -> bytes:
         Function code is Const.READ_HOLDING_REGISTERS (0x03).
     """
     if not (1 <= quantity <= 125):
-        raise ValueError('Invalid number of holding registers')
+        raise ValueError("Invalid number of holding registers")
 
-    return struct.pack('>BHH',
-                       Const.READ_HOLDING_REGISTERS,
-                       starting_address,
-                       quantity)
+    return struct.pack(">BHH", Const.READ_HOLDING_REGISTERS, starting_address, quantity)
 
 
 def read_input_registers(starting_address: int, quantity: int) -> bytes:
@@ -182,16 +177,12 @@ def read_input_registers(starting_address: int, quantity: int) -> bytes:
         Function code is Const.READ_INPUT_REGISTER (0x04).
     """
     if not (1 <= quantity <= 125):
-        raise ValueError('Invalid number of input registers')
+        raise ValueError("Invalid number of input registers")
 
-    return struct.pack('>BHH',
-                       Const.READ_INPUT_REGISTER,
-                       starting_address,
-                       quantity)
+    return struct.pack(">BHH", Const.READ_INPUT_REGISTER, starting_address, quantity)
 
 
-def write_single_coil(output_address: int,
-                      output_value: Union[int, bool]) -> bytes:
+def write_single_coil(output_address: int, output_value: Union[int, bool]) -> bytes:
     """
     创建写单个线圈的Modbus协议数据单元(PDU)。
 
@@ -225,7 +216,7 @@ def write_single_coil(output_address: int,
         Function code is Const.WRITE_SINGLE_COIL (0x05). True is converted to 0xFF00 per Modbus spec.
     """
     if output_value not in [0x0000, 0xFF00, False, True, 0, 1]:
-        raise ValueError('Illegal coil value')
+        raise ValueError("Illegal coil value")
 
     if output_value not in [0x0000, 0xFF00]:
         if output_value:
@@ -233,15 +224,10 @@ def write_single_coil(output_address: int,
         else:
             output_value = 0x0000
 
-    return struct.pack('>BHH',
-                       Const.WRITE_SINGLE_COIL,
-                       output_address,
-                       output_value)
+    return struct.pack(">BHH", Const.WRITE_SINGLE_COIL, output_address, output_value)
 
 
-def write_single_register(register_address: int,
-                          register_value: int,
-                          signed: bool = True) -> bytes:
+def write_single_register(register_address: int, register_value: int, signed: bool = True) -> bytes:
     """
     创建写单个寄存器的Modbus协议数据单元(PDU)。
 
@@ -270,16 +256,12 @@ def write_single_register(register_address: int,
     Notes:
         Function code is Const.WRITE_SINGLE_REGISTER (0x06).
     """
-    fmt = 'h' if signed else 'H'
+    fmt = "h" if signed else "H"
 
-    return struct.pack('>BH' + fmt,
-                       Const.WRITE_SINGLE_REGISTER,
-                       register_address,
-                       register_value)
+    return struct.pack(">BH" + fmt, Const.WRITE_SINGLE_REGISTER, register_address, register_value)
 
 
-def write_multiple_coils(starting_address: int,
-                         value_list: List[Union[int, bool]]) -> bytes:
+def write_multiple_coils(starting_address: int, value_list: List[Union[int, bool]]) -> bytes:
     """
     创建写多个线圈的Modbus协议数据单元(PDU)。
 
@@ -313,9 +295,9 @@ def write_multiple_coils(starting_address: int,
         Function code is Const.WRITE_MULTIPLE_COILS (0x0F). Data is packed into bytes bitwise.
     """
     if not (1 <= len(value_list) <= 0x07B0):
-        raise ValueError('Invalid quantity of outputs')
+        raise ValueError("Invalid quantity of outputs")
 
-    sectioned_list = [value_list[i:i + 8] for i in range(0, len(value_list), 8)]    # noqa: E501
+    sectioned_list = [value_list[i : i + 8] for i in range(0, len(value_list), 8)]  # noqa: E501
 
     output_value = []
     for index, byte in enumerate(sectioned_list):
@@ -326,23 +308,16 @@ def write_multiple_coils(starting_address: int,
             output = (output << 1) | bit
         output_value.append(output)
 
-    fmt = 'B' * len(output_value)
+    fmt = "B" * len(output_value)
     quantity = len(value_list)
     byte_count = quantity // 8
     if quantity % 8:
         byte_count += 1
 
-    return struct.pack('>BHHB' + fmt,
-                       Const.WRITE_MULTIPLE_COILS,
-                       starting_address,
-                       quantity,
-                       byte_count,
-                       *output_value)
+    return struct.pack(">BHHB" + fmt, Const.WRITE_MULTIPLE_COILS, starting_address, quantity, byte_count, *output_value)
 
 
-def write_multiple_registers(starting_address: int,
-                             register_values: List[int],
-                             signed: bool = True) -> bytes:
+def write_multiple_registers(starting_address: int, register_values: List[int], signed: bool = True) -> bytes:
     """
     创建写多个寄存器的Modbus协议数据单元(PDU)。
 
@@ -378,26 +353,16 @@ def write_multiple_registers(starting_address: int,
         Function code is Const.WRITE_MULTIPLE_REGISTERS (0x10). Each register occupies 2 bytes.
     """
     if not (1 <= len(register_values) <= 123):
-        raise ValueError('Invalid number of registers')
+        raise ValueError("Invalid number of registers")
 
     quantity = len(register_values)
     byte_count = quantity * 2
-    fmt = ('h' if signed else 'H') * quantity
+    fmt = ("h" if signed else "H") * quantity
 
-    return struct.pack('>BHHB' + fmt,
-                       Const.WRITE_MULTIPLE_REGISTERS,
-                       starting_address,
-                       quantity,
-                       byte_count,
-                       *register_values)
+    return struct.pack(">BHHB" + fmt, Const.WRITE_MULTIPLE_REGISTERS, starting_address, quantity, byte_count, *register_values)
 
 
-def validate_resp_data(data: bytes,
-                       function_code: int,
-                       address: int,
-                       value: int = None,
-                       quantity: int = None,
-                       signed: bool = True) -> bool:
+def validate_resp_data(data: bytes, function_code: int, address: int, value: int = None, quantity: int = None, signed: bool = True) -> bool:
     """
     验证Modbus响应数据是否与请求匹配。
 
@@ -432,7 +397,7 @@ def validate_resp_data(data: bytes,
     Notes:
         For write single coil, response value is converted to bool for comparison.
     """
-    fmt = '>H' + ('h' if signed else 'H')
+    fmt = ">H" + ("h" if signed else "H")
 
     if function_code in [Const.WRITE_SINGLE_COIL, Const.WRITE_SINGLE_REGISTER]:
         resp_addr, resp_value = struct.unpack(fmt, data)
@@ -449,8 +414,7 @@ def validate_resp_data(data: bytes,
 
         if (address == resp_addr) and (value == resp_value):
             return True
-    elif function_code in [Const.WRITE_MULTIPLE_COILS,
-                           Const.WRITE_MULTIPLE_REGISTERS]:
+    elif function_code in [Const.WRITE_MULTIPLE_COILS, Const.WRITE_MULTIPLE_REGISTERS]:
         resp_addr, resp_qty = struct.unpack(fmt, data)
 
         if (address == resp_addr) and (quantity == resp_qty):
@@ -459,12 +423,14 @@ def validate_resp_data(data: bytes,
     return False
 
 
-def response(function_code: int,
-             request_register_addr: int,
-             request_register_qty: int,
-             request_data: list,
-             value_list: Optional[list] = None,
-             signed: bool = True) -> bytes:
+def response(
+    function_code: int,
+    request_register_addr: int,
+    request_register_qty: int,
+    request_data: list,
+    value_list: Optional[list] = None,
+    signed: bool = True,
+) -> bytes:
     """
     构造Modbus响应协议数据单元(PDU)。
 
@@ -507,7 +473,7 @@ def response(function_code: int,
         read registers, write single/multiple coils/registers.
     """
     if function_code in [Const.READ_COILS, Const.READ_DISCRETE_INPUTS]:
-        sectioned_list = [value_list[i:i + 8] for i in range(0, len(value_list), 8)]    # noqa: E501
+        sectioned_list = [value_list[i : i + 8] for i in range(0, len(value_list), 8)]  # noqa: E501
 
         output_value = []
         for index, byte in enumerate(sectioned_list):
@@ -519,44 +485,29 @@ def response(function_code: int,
                 output = (output << 1) | bit
             output_value.append(output)
 
-        fmt = 'B' * len(output_value)
-        return struct.pack('>BB' + fmt,
-                           function_code,
-                           ((len(value_list) - 1) // 8) + 1,
-                           *output_value)
+        fmt = "B" * len(output_value)
+        return struct.pack(">BB" + fmt, function_code, ((len(value_list) - 1) // 8) + 1, *output_value)
 
-    elif function_code in [Const.READ_HOLDING_REGISTERS,
-                           Const.READ_INPUT_REGISTER]:
+    elif function_code in [Const.READ_HOLDING_REGISTERS, Const.READ_INPUT_REGISTER]:
         quantity = len(value_list)
 
         if not (0x0001 <= quantity <= 0x007D):
-            raise ValueError('invalid number of registers')
+            raise ValueError("invalid number of registers")
 
         if signed is True or signed is False:
-            fmt = ('h' if signed else 'H') * quantity
+            fmt = ("h" if signed else "H") * quantity
         else:
-            fmt = ''
+            fmt = ""
             for s in signed:
-                fmt += 'h' if s else 'H'
+                fmt += "h" if s else "H"
 
-        return struct.pack('>BB' + fmt,
-                           function_code,
-                           quantity * 2,
-                           *value_list)
+        return struct.pack(">BB" + fmt, function_code, quantity * 2, *value_list)
 
-    elif function_code in [Const.WRITE_SINGLE_COIL,
-                           Const.WRITE_SINGLE_REGISTER]:
-        return struct.pack('>BHBB',
-                           function_code,
-                           request_register_addr,
-                           *request_data)
+    elif function_code in [Const.WRITE_SINGLE_COIL, Const.WRITE_SINGLE_REGISTER]:
+        return struct.pack(">BHBB", function_code, request_register_addr, *request_data)
 
-    elif function_code in [Const.WRITE_MULTIPLE_COILS,
-                           Const.WRITE_MULTIPLE_REGISTERS]:
-        return struct.pack('>BHH',
-                           function_code,
-                           request_register_addr,
-                           request_register_qty)
+    elif function_code in [Const.WRITE_MULTIPLE_COILS, Const.WRITE_MULTIPLE_REGISTERS]:
+        return struct.pack(">BHH", function_code, request_register_addr, request_register_qty)
 
 
 def exception_response(function_code: int, exception_code: int) -> bytes:
@@ -586,7 +537,7 @@ def exception_response(function_code: int, exception_code: int) -> bytes:
     Notes:
         Function code in response = original function code + Const.ERROR_BIAS (0x80).
     """
-    return struct.pack('>BB', Const.ERROR_BIAS + function_code, exception_code)
+    return struct.pack(">BB", Const.ERROR_BIAS + function_code, exception_code)
 
 
 def bytes_to_bool(byte_list: bytes, bit_qty: Optional[int] = 1) -> List[bool]:
@@ -627,7 +578,7 @@ def bytes_to_bool(byte_list: bytes, bit_qty: Optional[int] = 1) -> List[bool]:
             this_qty = 8
 
         # evil hack for missing keyword support in MicroPython format()
-        fmt = '{:0' + str(this_qty) + 'b}'
+        fmt = "{:0" + str(this_qty) + "b}"
 
         bool_list.extend([bool(int(x)) for x in fmt.format(byte)])
 
@@ -664,7 +615,7 @@ def to_short(byte_array: bytes, signed: bool = True) -> bytes:
         Each 2 bytes unpack to one short. Big-endian byte order.
     """
     response_quantity = int(len(byte_array) / 2)
-    fmt = '>' + (('h' if signed else 'H') * response_quantity)
+    fmt = ">" + (("h" if signed else "H") * response_quantity)
 
     return struct.unpack(fmt, byte_array)
 
@@ -697,9 +648,7 @@ def float_to_bin(num: float) -> bin:
     # no "zfill" available in MicroPython
     # return bin(struct.unpack('!I', struct.pack('!f', num))[0])[2:].zfill(32)
 
-    return '{:0>{w}}'.format(
-        bin(struct.unpack('!I', struct.pack('!f', num))[0])[2:],
-        w=32)
+    return "{:0>{w}}".format(bin(struct.unpack("!I", struct.pack("!f", num))[0])[2:], w=32)
 
 
 def bin_to_float(binary: str) -> float:
@@ -727,7 +676,7 @@ def bin_to_float(binary: str) -> float:
     Notes:
         Converts to integer first, then unpacks as float per IEEE 754 format.
     """
-    return struct.unpack('!f', struct.pack('!I', int(binary, 2)))[0]
+    return struct.unpack("!f", struct.pack("!I", int(binary, 2)))[0]
 
 
 def int_to_bin(num: int) -> str:
@@ -750,6 +699,7 @@ def int_to_bin(num: int) -> str:
         str: Binary representation string.
     """
     return "{0:b}".format(num)
+
 
 # ======================================== 自定义类 ============================================
 

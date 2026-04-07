@@ -66,7 +66,7 @@ for device in devices_list:
         print("I2c hexadecimal address:", hex(device))
         try:
             # 初始化ADS1219传感器实例
-            adc = ADS1219(i2c=i2c_bus ,address=device)
+            adc = ADS1219(i2c=i2c_bus, address=device)
             # 打印传感器初始化成功提示
             print("ADS1219 sensor initialization successful")
             break
