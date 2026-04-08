@@ -22,7 +22,7 @@ from machine import Pin
 class MWFD:
     """
     MWFD水流气泡探测器 Pico 专用驱动
-    中文简介
+    
     Attributes:
         _pin (Pin): 输入的Pin对象，用于读取传感器电平
         _irq (Optional[任何]): 中断对象，存储中断配置信息
@@ -37,7 +37,7 @@ class MWFD:
         中断回调函数会接收一个布尔参数表示传感器状态。
 
     ==========================================
-    English description
+    
     Attributes:
         _pin (Pin): Input Pin object for reading sensor level
         _irq (Optional[Any]): IRQ object storing interrupt configuration
@@ -55,7 +55,7 @@ class MWFD:
     def __init__(self, input_pin: Pin) -> None:
         """
         初始化驱动
-        中文简介
+        
         Args:
             input_pin (Pin): 已配置为输入模式的 Pin 实例
 
@@ -67,7 +67,7 @@ class MWFD:
             无
 
         ==========================================
-        English description
+        
         Args:
             input_pin (Pin): Pin instance already configured as input
 
@@ -92,7 +92,7 @@ class MWFD:
     def read(self) -> bool:
         """
         读取传感器状态
-        中文简介
+        
         Args:
             无
 
@@ -103,7 +103,7 @@ class MWFD:
             无
 
         ==========================================
-        English description
+        Read sensor status
         Args:
             None
 
@@ -118,7 +118,7 @@ class MWFD:
     def irq(self, callback=None, trigger: int = Pin.IRQ_RISING | Pin.IRQ_FALLING) -> None:
         """
         设置或关闭中断
-        中文简介
+        
         Args:
             callback (可选可调用对象): 状态变化回调函数，传 None 则关闭中断
             trigger (int): 触发方式，默认双边沿触发 (Pin.IRQ_RISING | Pin.IRQ_FALLING)
@@ -131,7 +131,7 @@ class MWFD:
             关闭中断时只需将 callback 设为 None。
 
         ==========================================
-        English description
+        Set or turn off interrupts
         Args:
             callback (Optional[Callable]): Status change callback, set None to disable interrupt
             trigger (int): Trigger mode, default both edges (Pin.IRQ_RISING | Pin.IRQ_FALLING)

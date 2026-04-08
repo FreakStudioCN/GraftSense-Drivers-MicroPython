@@ -3,7 +3,7 @@
 # @Time    : 2026/4/3 下午4:00
 # @Author  : hogeiha
 # @File    : main.py
-# @Description : 敏源WS61水浸传感器Modbus RTU驱动（无壳模组专用，严格匹配寄存器表V1.0）
+# @Description : 敏源WS61水浸传感器Modbus RTU驱动
 # @License : MIT
 
 __version__ = "1.1.0"
@@ -26,7 +26,7 @@ from umodbus.serial import Serial as ModbusRTUMaster
 class WS61Water:
     """
     敏源WS61电容式非接触水浸传感器 Modbus RTU 驱动类
-    适配无壳模组，严格匹配官方寄存器表V1.0，自动处理低功耗唤醒、数据缩放与类型转换
+    自动处理低功耗唤醒、数据缩放与类型转换
 
     Attributes:
         slave_addr (int): Modbus 从机地址（默认1）
@@ -54,10 +54,9 @@ class WS61Water:
         1. WS61为低功耗设备，每次通信前自动调用 wake_up()
         2. 电容值缩放系数 ×1000，温度缩放系数 ×10
         3. 水浸状态：0=无水，1=有水报警
-        4. 严格匹配寄存器表V1.0（202506-V1.0）
 
     ==========================================
-    English description
+    Minyuan WS61 Capacitive Non-contact Water Immersion Sensor Modbus RTU Driver Class
     Attributes:
         slave_addr (int): Modbus slave address (default 1)
         baudrate (int): Serial baud rate (fixed 9600)
@@ -98,7 +97,7 @@ class WS61Water:
             rx_pin (int): RX 引脚
 
         ==========================================
-        English description
+        Initialize the Modbus master, WS61 fixed baud rate 9600, 8N1
         Args:
             slave_addr (int): Modbus slave address
             uart_id (int): UART ID
@@ -111,7 +110,7 @@ class WS61Water:
         self.tx_pin = tx_pin
         self.rx_pin = rx_pin
 
-        # 初始化Modbus RTU主机（严格匹配WS61协议）
+        # 初始化Modbus RTU主机
         self.host = ModbusRTUMaster(
             pins=(self.tx_pin, self.rx_pin), baudrate=self.baudrate, data_bits=8, stop_bits=1, parity=None, uart_id=self.uart_id
         )
@@ -125,7 +124,7 @@ class WS61Water:
             bool: 唤醒成功返回 True，失败返回 False
 
         ==========================================
-        English description
+        
         Wake up low-power sensor: send 0x8F command, wait 30ms
         [Essential for WS61] Automatically called before any communication
 
@@ -149,7 +148,7 @@ class WS61Water:
             int | None: 成功返回设备 ID(1-252)，失败返回 None
 
         ==========================================
-        English description
+        
         Read device ID (register 0x0001)
 
         Returns:
@@ -172,7 +171,7 @@ class WS61Water:
             bool: 成功返回 True，失败返回 False
 
         ==========================================
-        English description
+        
         Write device ID (register 0x0001)
 
         Args:
@@ -199,7 +198,7 @@ class WS61Water:
             int | None: 成功返回节点地址(1-252)，失败返回 None
 
         ==========================================
-        English description
+        
         Read 485 node address (register 0x0002)
 
         Returns:
@@ -220,7 +219,7 @@ class WS61Water:
             float | None: 成功返回电容值(pF)，精度 0.001pF，失败返回 None
 
         ==========================================
-        English description
+        
         Read real-time capacitance (register 0x0012, raw value ×1000)
 
         Returns:
@@ -242,7 +241,7 @@ class WS61Water:
             float | None: 成功返回温度(℃)，精度 0.1℃，失败返回 None
 
         ==========================================
-        English description
+        
         Read ambient temperature (register 0x0013, raw value ×10)
 
         Returns:
@@ -264,7 +263,7 @@ class WS61Water:
             int | None: 成功返回 0(无水)/1(有水报警)，失败返回 None
 
         ==========================================
-        English description
+        
         Read water alarm status (register 0x0014)
 
         Returns:
@@ -285,7 +284,7 @@ class WS61Water:
             float | None: 成功返回阈值(pF)，精度 0.001pF，失败返回 None
 
         ==========================================
-        English description
+        
         Read water alarm capacitance threshold (register 0x0003, raw value ×1000)
 
         Returns:
@@ -309,7 +308,7 @@ class WS61Water:
             bool: 成功返回 True，失败返回 False
 
         ==========================================
-        English description
+        
         Set water alarm capacitance threshold (register 0x0003)
 
         Args:
@@ -337,7 +336,7 @@ class WS61Water:
             float | None: 成功返回阈值(pF)，精度 0.001pF，失败返回 None
 
         ==========================================
-        English description
+        
         Read water release alarm capacitance threshold (register 0x0004, raw value ×1000)
 
         Returns:
@@ -361,7 +360,7 @@ class WS61Water:
             bool: 成功返回 True，失败返回 False
 
         ==========================================
-        English description
+        
         Set water release alarm capacitance threshold (register 0x0004)
 
         Args:
@@ -390,7 +389,7 @@ class WS61Water:
             bool: 成功返回 True，失败返回 False
 
         ==========================================
-        English description
+        
         Perform no-load calibration (register 0x0007, write 1 to trigger)
         Must be executed when sensor is dry, unobstructed, and properly installed
 

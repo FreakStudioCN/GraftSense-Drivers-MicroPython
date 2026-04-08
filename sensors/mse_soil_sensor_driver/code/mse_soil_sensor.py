@@ -133,7 +133,7 @@ class MSESoilSensor:
         self.tx_pin = tx_pin
         self.rx_pin = rx_pin
 
-        # 初始化Modbus主机（完全沿用你的配置）
+        # 初始化Modbus主机
         self.host = ModbusRTUMaster(
             pins=(self.tx_pin, self.rx_pin), baudrate=self.baudrate, data_bits=8, stop_bits=1, parity=None, uart_id=self.uart_id
         )

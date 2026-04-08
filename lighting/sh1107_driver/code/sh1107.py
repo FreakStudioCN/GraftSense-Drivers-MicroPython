@@ -100,7 +100,7 @@ class SH1107(framebuf.FrameBuffer):
         - 使用页面更新机制，只刷新修改的区域以提升性能
 
     ==========================================
-    English description
+    
     Attributes:
         width (int): Display width in pixels (may swap after rotation)
         height (int): Display height in pixels (may swap after rotation)
@@ -200,7 +200,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             None
         Raises:
@@ -236,7 +236,7 @@ class SH1107(framebuf.FrameBuffer):
             调用后延迟delay_ms毫秒等待稳定
 
         ==========================================
-        English description
+        
         Args:
             None
         Raises:
@@ -260,7 +260,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             None
         Raises:
@@ -282,7 +282,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             value (bool): True to sleep, False to wake
         Raises:
@@ -309,7 +309,7 @@ class SH1107(framebuf.FrameBuffer):
             bool: True表示唤醒，False表示睡眠
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -329,7 +329,7 @@ class SH1107(framebuf.FrameBuffer):
             翻转包括段重映射和扫描方向调整
 
         ==========================================
-        English description
+        
         Args:
             flag (bool | None): Flip state, None to toggle current
             update (bool): Whether to update display immediately
@@ -374,7 +374,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             value (int): Start line index, range 0-127
         Raises:
@@ -403,7 +403,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             contrast (int): Contrast value, range 0-255
         Raises:
@@ -431,7 +431,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             invert (bool | None): True inverse, False normal, None toggle
         Raises:
@@ -457,7 +457,7 @@ class SH1107(framebuf.FrameBuffer):
             根据旋转模式采用不同的数据发送顺序
 
         ==========================================
-        English description
+        
         Args:
             full_update (bool): True to force update all pages, False update only marked pages
         Raises:
@@ -517,7 +517,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             x (int): x coordinate
             y (int): y coordinate
@@ -563,7 +563,7 @@ class SH1107(framebuf.FrameBuffer):
             自动注册更新的页面（字符高度8像素）
 
         ==========================================
-        English description
+        
         Args:
             text (str): String to draw
             x (int): Start x coordinate
@@ -602,7 +602,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             x0, y0: start point coordinates
             x1, y1: end point coordinates
@@ -636,7 +636,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             x, y: start coordinates
             w (int): length
@@ -674,7 +674,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             x, y: start coordinates
             h (int): height
@@ -710,7 +710,7 @@ class SH1107(framebuf.FrameBuffer):
             标记所有页需要更新
 
         ==========================================
-        English description
+        
         Args:
             c (int): color
         Raises:
@@ -743,7 +743,7 @@ class SH1107(framebuf.FrameBuffer):
             注册受影响的页面（整个高度范围）
 
         ==========================================
-        English description
+        
         Args:
             fbuf (framebuf.FrameBuffer): source framebuffer
             x, y (int): target top-left coordinates
@@ -778,7 +778,7 @@ class SH1107(framebuf.FrameBuffer):
             标记所有页需要更新
 
         ==========================================
-        English description
+        
         Args:
             x (int): horizontal scroll pixels
             y (int): vertical scroll pixels
@@ -808,7 +808,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             x, y: top-left coordinates
             w, h: width and height
@@ -851,7 +851,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             x, y: top-left coordinates
             w, h: width and height
@@ -900,7 +900,7 @@ class SH1107(framebuf.FrameBuffer):
             注册受影响页面（垂直范围）
 
         ==========================================
-        English description
+        
         Args:
             x, y: center coordinates
             xr, yr: x-radius and y-radius
@@ -936,7 +936,7 @@ class SH1107(framebuf.FrameBuffer):
             标记所有页需要更新（简化处理）
 
         ==========================================
-        English description
+        
         Args:
             *args, **kwargs: arguments passed to parent
         Raises:
@@ -967,7 +967,7 @@ class SH1107(framebuf.FrameBuffer):
                 无
 
             ==========================================
-            English description
+            
             Args:
                 s (str): string
                 x, y (int): start coordinates
@@ -1018,7 +1018,7 @@ class SH1107(framebuf.FrameBuffer):
                 无
 
             ==========================================
-            English description
+            
             Args:
                 x, y: center coordinates
                 radius (int): radius
@@ -1059,7 +1059,7 @@ class SH1107(framebuf.FrameBuffer):
                 无
 
             ==========================================
-            English description
+            
             Args:
                 x0,y0,x1,y1,x2,y2: three vertex coordinates
                 c (int): color
@@ -1102,7 +1102,7 @@ class SH1107(framebuf.FrameBuffer):
             内部方法，用于标记修改区域对应的页面
 
         ==========================================
-        English description
+        
         Args:
             y0 (int): start y coordinate
             y1 (int | None): end y coordinate, None for single page at y0
@@ -1148,7 +1148,7 @@ class SH1107(framebuf.FrameBuffer):
             无
 
         ==========================================
-        English description
+        
         Args:
             res: reset pin object (with high/low control)
         Raises:
@@ -1184,7 +1184,7 @@ class SH1107_I2C(SH1107):
         默认I2C地址为0x3D
 
     ==========================================
-    English description
+    
     Attributes:
         i2c (I2C): I2C bus object
         address (int): I2C device address
@@ -1243,7 +1243,7 @@ class SH1107_I2C(SH1107):
             在数据前附加控制字节0x00
 
         ==========================================
-        English description
+        
         Args:
             command_list (bytes or bytearray): command byte sequence
         Raises:
@@ -1268,7 +1268,7 @@ class SH1107_I2C(SH1107):
             在数据前附加控制字节0x40
 
         ==========================================
-        English description
+        
         Args:
             buf (bytes or bytearray or memoryview): data byte sequence
         Raises:
@@ -1293,7 +1293,7 @@ class SH1107_I2C(SH1107):
             调用父类reset方法，传入复位引脚对象
 
         ==========================================
-        English description
+        
         Args:
             None
         Raises:
@@ -1323,7 +1323,7 @@ class SH1107_SPI(SH1107):
         - 数据/命令引脚在发送前设置正确电平
 
     ==========================================
-    English description
+    
     Attributes:
         spi (SPI): SPI bus object
         dc (Pin): Data/Command select pin
@@ -1381,7 +1381,7 @@ class SH1107_SPI(SH1107):
             - dc置低表示命令模式
 
         ==========================================
-        English description
+        
         Args:
             cmd (bytes): command byte sequence
         Raises:
@@ -1416,7 +1416,7 @@ class SH1107_SPI(SH1107):
             - dc置高表示数据模式
 
         ==========================================
-        English description
+        
         Args:
             buf (bytes): data byte sequence
         Raises:
@@ -1450,7 +1450,7 @@ class SH1107_SPI(SH1107):
             调用父类reset方法，传入复位引脚对象
 
         ==========================================
-        English description
+        
         Args:
             None
         Raises:
