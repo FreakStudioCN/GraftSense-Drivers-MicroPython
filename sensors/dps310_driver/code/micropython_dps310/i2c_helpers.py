@@ -15,6 +15,7 @@ import struct
 
 # ======================================== 全局变量 ============================================
 
+
 # ======================================== 功能函数 ============================================
 def twos_complement(val: int, bits: int) -> int:
     """
@@ -45,6 +46,7 @@ def twos_complement(val: int, bits: int) -> int:
         val -= 1 << bits
 
     return val
+
 
 # ======================================== 自定义类 ============================================
 class CBits:
@@ -324,16 +326,12 @@ class RegisterStruct:
         if self.lenght <= 2:
             value = struct.unpack(
                 self.format,
-                memoryview(
-                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
-                ),
+                memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)),
             )[0]
         else:
             value = struct.unpack(
                 self.format,
-                memoryview(
-                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
-                ),
+                memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)),
             )
         return value
 
@@ -372,6 +370,7 @@ class RegisterStruct:
             raise ValueError("Sensor instance cannot be None")
         mem_value = struct.pack(self.format, value)
         obj._i2c.writeto_mem(obj._address, self.register, mem_value)
+
 
 # ======================================== 初始化配置 ===========================================
 

@@ -1,6 +1,6 @@
 {
   "name": "ms5803-01ba_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control ms5803-01ba_driver ",
   "author": "leeqingshui",
   "license": "MIT",
@@ -12,8 +12,8 @@
   },
   "urls": [
     [
-      "MS5803.py",
-      "code/MS5803.py"
+      "ms5803.py",
+      "code/ms5803.py"
     ]
   ]
 }

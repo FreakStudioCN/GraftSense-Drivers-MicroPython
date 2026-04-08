@@ -34,6 +34,7 @@ Copyright (c) 2022 Roman Shevchik
 
 # ======================================== 功能函数 ============================================
 
+
 def crc8(sequence, polynomial: int, init_value: int = 0x00) -> int:
     """
     计算 CRC-8 校验值
@@ -75,6 +76,7 @@ def crc8(sequence, polynomial: int, init_value: int = 0x00) -> int:
             else:
                 crc = mask & (crc << 1)
     return crc
+
 
 # ======================================== 自定义类 ============================================
 

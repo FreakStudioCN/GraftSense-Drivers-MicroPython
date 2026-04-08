@@ -127,7 +127,7 @@ def convert_sys_dt_to_rtc_dt(sys_dt: tuple) -> tuple:
         系统星期(0=周一)转为RTC星期(0=周日)
 
     ==========================================
-    English description
+    
     Args:
         sys_dt (tuple): System local time tuple
     Returns:
@@ -198,7 +198,7 @@ class PCF8563:
         基于I2C通信，使用BCD码存储时间
 
     ==========================================
-    English description
+    
     Attributes:
         i2c (I2C): I2C communication object
         address (int): I2C slave address
@@ -249,7 +249,7 @@ class PCF8563:
             地址为None时使用默认0x51
 
         ==========================================
-        English description
+        
         Args:
             i2c (I2C): I2C object
             address (int | None): I2C address, default None
@@ -376,7 +376,7 @@ class PCF8563:
             int: 秒(0-59)
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -395,7 +395,7 @@ class PCF8563:
             int: 分钟(0-59)
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -414,7 +414,7 @@ class PCF8563:
             int: 小时(0-23)
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -434,7 +434,7 @@ class PCF8563:
             int: 星期(0-6)
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -453,7 +453,7 @@ class PCF8563:
             int: 日期(1-31)
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -472,7 +472,7 @@ class PCF8563:
             int: 月(1-12)
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -491,7 +491,7 @@ class PCF8563:
             int: 年(0-99)
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -510,7 +510,7 @@ class PCF8563:
             tuple: (年,月,日,星期,时,分,秒)
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -546,7 +546,7 @@ class PCF8563:
             ValueError: 参数超出合法范围
 
         ==========================================
-        English description
+        
         Args:
             seconds (int | None): Seconds
             minutes (int | None): Minutes
@@ -606,7 +606,7 @@ class PCF8563:
             None
 
         ==========================================
-        English description
+        
         Args:
             dt (tuple): Time tuple
         Returns:
@@ -627,7 +627,7 @@ class PCF8563:
             None
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -649,7 +649,7 @@ class PCF8563:
             ValueError: 频率值不在允许的列表中
 
         ==========================================
-        English description
+        
         Args:
             frequency (int): Frequency constant
         Returns:
@@ -678,7 +678,7 @@ class PCF8563:
             bool: 触发状态
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -697,7 +697,7 @@ class PCF8563:
             None
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -717,7 +717,7 @@ class PCF8563:
             None
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -744,7 +744,7 @@ class PCF8563:
             bool: 中断使能状态
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -763,7 +763,7 @@ class PCF8563:
             None
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -785,7 +785,7 @@ class PCF8563:
             None
 
         ==========================================
-        English description
+        
         Args:
             None
         Returns:
@@ -812,7 +812,7 @@ class PCF8563:
             ValueError: 参数超出范围
 
         ==========================================
-        English description
+        
         Args:
             hours (int | None): Hours
             minutes (int | None): Minutes

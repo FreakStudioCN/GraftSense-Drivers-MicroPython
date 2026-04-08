@@ -38,11 +38,9 @@ time.sleep(3)
 # 打印功能标识，说明当前程序功能
 print("FreakStudio: SH1106 OLED Display Demo")
 
-# -------------------------- 关键修改点1：标准化I2C初始化格式 --------------------------
-# 初始化软件I2C总线，严格对齐指定风格（使用全局变量定义引脚/频率）
+# 初始化软件I2C总线
 i2c_bus = SoftI2C(sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
 
-# -------------------------- 关键修改点2：添加I2C设备扫描逻辑 --------------------------
 # 开始扫描I2C总线上的设备
 devices_list: list[int] = i2c_bus.scan()
 print("START I2C SCANNER")
@@ -53,8 +51,6 @@ if len(devices_list) == 0:
     raise SystemExit("I2C scan found no devices, program exited")
 else:
     print("i2c devices found:", len(devices_list))
-
-# -------------------------- 关键修改点3：遍历地址匹配目标OLED设备 --------------------------
 # 遍历地址列表初始化目标SH1106 OLED
 oled = None  # 初始化OLED对象占位符
 for device in devices_list:

@@ -19,6 +19,7 @@ __platform__ = "MicroPython v1.23.0"
 
 # ======================================== 自定义类 ============================================
 
+
 class AQI:
     """
     AQI (Air Quality Index) calculation class.
@@ -44,6 +45,7 @@ class AQI:
         Uses the US EPA AQI calculation formula.
         使用美国环保署（EPA）的AQI计算公式。
     """
+
     # AQI指数断点，对应不同空气质量等级
     AQI = (
         (0, 50),

@@ -1,6 +1,6 @@
 {
   "name": "adxl345_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control adxl345_driver ",
   "author": "leeqingshui",
   "license": "MIT",

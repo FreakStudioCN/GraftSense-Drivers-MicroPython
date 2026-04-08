@@ -1,6 +1,6 @@
 {
   "name": "kt403a_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control kt403a_driver ",
   "author": "leeqingshui",
   "license": "MIT",
