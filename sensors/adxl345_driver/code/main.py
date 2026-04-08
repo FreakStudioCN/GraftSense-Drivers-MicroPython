@@ -97,6 +97,6 @@ while True:
     # 读取三轴加速度数据，返回值单位是mg
     x, y, z = snsr.readXYZ()
     # 打印X、Y、Z轴数据（单位：mg）
-    print("x:", x, "y:", y, "z:", z, "unit:mg")  # 修正原代码笔误：uint→unit
+    print("x:", x, "y:", y, "z:", z, "unit:mg")
     # 延时0.5秒
     time.sleep(0.5)

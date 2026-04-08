@@ -14,14 +14,17 @@ __platform__ = "MicroPython v1.23.0"
 import machine
 import struct
 import time
+
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
+
 
 class UartError(Exception):
     """
     UART通信异常类 / UART Communication Exception Class
     """
+
     pass
 
 
@@ -46,7 +49,7 @@ class Pms7003:
 
     # 数据帧中各个数据字段的索引常量 / Constants for data field indices in the frame
     START_BYTE_1 = 0x42
-    START_BYTE_2 = 0x4d
+    START_BYTE_2 = 0x4D
 
     PMS_FRAME_LENGTH = 0
     PMS_PM1_0 = 1
@@ -142,7 +145,7 @@ class Pms7003:
 
         # 检查是否成功写入了所有字节 / Check if all bytes were written successfully
         if nr_of_written_bytes != len(request):
-            raise UartError('Failed to write to UART')
+            raise UartError("Failed to write to UART")
 
         # 如果提供了期望的响应，则进行验证 / If an expected response is provided, verify it
         if response:
@@ -154,9 +157,7 @@ class Pms7003:
             # 比较接收到的数据与期望的响应 / Compare received data with expected response
             if buffer != response:
                 raise UartError(
-                    'Wrong UART response, expecting: {}, getting: {}'.format(
-                        Pms7003._format_bytearray(response), Pms7003._format_bytearray(buffer)
-                    )
+                    "Wrong UART response, expecting: {}, getting: {}".format(Pms7003._format_bytearray(response), Pms7003._format_bytearray(buffer))
                 )
 
     def read(self) -> dict[str, int]:
@@ -190,7 +191,7 @@ class Pms7003:
                 continue
 
             # 使用struct模块按照大端序解析30个字节的数据 / Use struct module to parse the 30 bytes of data in big-endian order
-            data = struct.unpack('!HHHHHHHHHHHHHBBH', read_bytes)
+            data = struct.unpack("!HHHHHHHHHHHHHBBH", read_bytes)
 
             # 计算校验和：两个起始字节 + 前28个数据字节 / Calculate checksum: two start bytes + first 28 data bytes
             checksum = Pms7003.START_BYTE_1 + Pms7003.START_BYTE_2
@@ -202,22 +203,22 @@ class Pms7003:
 
             # 校验成功，将解析后的数据组织成字典并返回 / Checksum successful, organize parsed data into a dictionary and return
             return {
-                'FRAME_LENGTH': data[Pms7003.PMS_FRAME_LENGTH],
-                'PM1_0': data[Pms7003.PMS_PM1_0],
-                'PM2_5': data[Pms7003.PMS_PM2_5],
-                'PM10_0': data[Pms7003.PMS_PM10_0],
-                'PM1_0_ATM': data[Pms7003.PMS_PM1_0_ATM],
-                'PM2_5_ATM': data[Pms7003.PMS_PM2_5_ATM],
-                'PM10_0_ATM': data[Pms7003.PMS_PM10_0_ATM],
-                'PCNT_0_3': data[Pms7003.PMS_PCNT_0_3],
-                'PCNT_0_5': data[Pms7003.PMS_PCNT_0_5],
-                'PCNT_1_0': data[Pms7003.PMS_PCNT_1_0],
-                'PCNT_2_5': data[Pms7003.PMS_PCNT_2_5],
-                'PCNT_5_0': data[Pms7003.PMS_PCNT_5_0],
-                'PCNT_10_0': data[Pms7003.PMS_PCNT_10_0],
-                'VERSION': data[Pms7003.PMS_VERSION],
-                'ERROR': data[Pms7003.PMS_ERROR],
-                'CHECKSUM': data[Pms7003.PMS_CHECKSUM],
+                "FRAME_LENGTH": data[Pms7003.PMS_FRAME_LENGTH],
+                "PM1_0": data[Pms7003.PMS_PM1_0],
+                "PM2_5": data[Pms7003.PMS_PM2_5],
+                "PM10_0": data[Pms7003.PMS_PM10_0],
+                "PM1_0_ATM": data[Pms7003.PMS_PM1_0_ATM],
+                "PM2_5_ATM": data[Pms7003.PMS_PM2_5_ATM],
+                "PM10_0_ATM": data[Pms7003.PMS_PM10_0_ATM],
+                "PCNT_0_3": data[Pms7003.PMS_PCNT_0_3],
+                "PCNT_0_5": data[Pms7003.PMS_PCNT_0_5],
+                "PCNT_1_0": data[Pms7003.PMS_PCNT_1_0],
+                "PCNT_2_5": data[Pms7003.PMS_PCNT_2_5],
+                "PCNT_5_0": data[Pms7003.PMS_PCNT_5_0],
+                "PCNT_10_0": data[Pms7003.PMS_PCNT_10_0],
+                "VERSION": data[Pms7003.PMS_VERSION],
+                "ERROR": data[Pms7003.PMS_ERROR],
+                "CHECKSUM": data[Pms7003.PMS_CHECKSUM],
             }
 
 
@@ -239,30 +240,19 @@ class PassivePms7003(Pms7003):
         被动模式下，主机需要发送请求命令，传感器才会返回数据。 / In passive mode, the host must send a request command for the sensor to return data.
         更多关于被动模式的信息请参考类文档字符串中的链接。 / More about passive mode can be found in the links in the class docstring.
     """
+
     # 进入被动模式的请求命令 / Request command to enter passive mode
-    ENTER_PASSIVE_MODE_REQUEST = bytearray(
-        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xe1, 0x00, 0x00, 0x01, 0x70]
-    )
+    ENTER_PASSIVE_MODE_REQUEST = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xE1, 0x00, 0x00, 0x01, 0x70])
     # 进入被动模式的期望响应 / Expected response for entering passive mode
-    ENTER_PASSIVE_MODE_RESPONSE = bytearray(
-        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0x00, 0x04, 0xe1, 0x00, 0x01, 0x74]
-    )
+    ENTER_PASSIVE_MODE_RESPONSE = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0x00, 0x04, 0xE1, 0x00, 0x01, 0x74])
     # 进入睡眠模式的请求命令 / Request command to enter sleep mode
-    SLEEP_REQUEST = bytearray(
-        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xe4, 0x00, 0x00, 0x01, 0x73]
-    )
+    SLEEP_REQUEST = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xE4, 0x00, 0x00, 0x01, 0x73])
     # 进入睡眠模式的期望响应 / Expected response for entering sleep mode
-    SLEEP_RESPONSE = bytearray(
-        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0x00, 0x04, 0xe4, 0x00, 0x01, 0x77]
-    )
+    SLEEP_RESPONSE = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0x00, 0x04, 0xE4, 0x00, 0x01, 0x77])
     # 唤醒传感器的请求命令（无响应） / Request command to wake up the sensor (no response)
-    WAKEUP_REQUEST = bytearray(
-        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xe4, 0x00, 0x01, 0x01, 0x74]
-    )
+    WAKEUP_REQUEST = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xE4, 0x00, 0x01, 0x01, 0x74])
     # 在被动模式下请求读取数据的命令（响应为数据帧） / Command to request reading data in passive mode (response is a data frame)
-    READ_IN_PASSIVE_REQUEST = bytearray(
-        [Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xe2, 0x00, 0x00, 0x01, 0x71]
-    )
+    READ_IN_PASSIVE_REQUEST = bytearray([Pms7003.START_BYTE_1, Pms7003.START_BYTE_2, 0xE2, 0x00, 0x00, 0x01, 0x71])
 
     def __init__(self, uart: machine.UART) -> None:
         """
@@ -280,8 +270,7 @@ class PassivePms7003(Pms7003):
         # 调用父类初始化方法 / Call parent class initialization method
         super().__init__(uart=uart)
         # 发送命令使传感器进入被动模式 / Send command to make the sensor enter passive mode
-        self._send_cmd(request=PassivePms7003.ENTER_PASSIVE_MODE_REQUEST,
-                       response=PassivePms7003.ENTER_PASSIVE_MODE_RESPONSE)
+        self._send_cmd(request=PassivePms7003.ENTER_PASSIVE_MODE_REQUEST, response=PassivePms7003.ENTER_PASSIVE_MODE_RESPONSE)
 
     def sleep(self) -> None:
         """
@@ -290,8 +279,7 @@ class PassivePms7003(Pms7003):
         Raises:
             UartError: 如果UART通信失败或响应不正确 / If UART communication fails or response is incorrect.
         """
-        self._send_cmd(request=PassivePms7003.SLEEP_REQUEST,
-                       response=PassivePms7003.SLEEP_RESPONSE)
+        self._send_cmd(request=PassivePms7003.SLEEP_REQUEST, response=PassivePms7003.SLEEP_RESPONSE)
 
     def wakeup(self) -> None:
         """
@@ -316,6 +304,7 @@ class PassivePms7003(Pms7003):
         self._send_cmd(request=PassivePms7003.READ_IN_PASSIVE_REQUEST, response=None)
         # 调用父类的read方法读取并解析数据帧 / Call parent class's read method to read and parse the data frame
         return super().read()
+
 
 # ======================================== 初始化配置 ===========================================
 # ========================================  主程序  ============================================

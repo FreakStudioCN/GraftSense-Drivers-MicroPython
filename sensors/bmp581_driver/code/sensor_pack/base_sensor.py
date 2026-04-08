@@ -25,6 +25,7 @@ from machine import SPI
 
 # ======================================== 功能函数 ============================================
 
+
 @micropython.native
 def check_value(value: [int, None], valid_range, error_msg: str) -> [int, None]:
     """
@@ -65,7 +66,9 @@ def check_value(value: [int, None], valid_range, error_msg: str) -> [int, None]:
         raise ValueError(error_msg)
     return value
 
+
 # ======================================== 自定义类 ============================================
+
 
 class Device:
     """
@@ -136,9 +139,9 @@ class Device:
             tuple: (byte order string like 'big'/'little', struct prefix like '>'/'<')
         """
         if self.is_big_byteorder():
-            return 'big', '>'
+            return "big", ">"
         else:
-            return 'little', '<'
+            return "little", "<"
 
     def unpack(self, fmt_char: str, source: bytes, redefine_byte_order: str = None) -> tuple:
         """
@@ -213,6 +216,7 @@ class BaseSensor(Device):
     Notes:
         Subclasses must implement get_id and soft_reset methods.
     """
+
     def get_id(self) -> int:
         """
         获取传感器 ID。
@@ -257,6 +261,7 @@ class Iterator:
         __iter__(): Return iterator itself
         __next__(): Get next element (must be implemented by subclass)
     """
+
     def __iter__(self):
         """
         返回迭代器自身。
@@ -301,6 +306,7 @@ class TemperatureSensor:
     Notes:
         If sensor does not have temperature measurement, subclass may implement as no-op or return fixed value.
     """
+
     def enable_temp_meas(self, enable: bool = True) -> None:
         """
         启用或禁用温度测量。
@@ -338,6 +344,7 @@ class TemperatureSensor:
             NotImplementedError: Subclass must override this method
         """
         raise NotImplementedError
+
 
 # ======================================== 初始化配置 ============================================
 

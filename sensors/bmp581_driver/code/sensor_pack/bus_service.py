@@ -24,6 +24,7 @@ from machine import I2C, SPI, Pin
 
 # ======================================== 功能函数 ============================================
 
+
 def _mpy_bl(value: int) -> int:
     """
     计算整数占用的位数（模拟 int.bit_length()）
@@ -51,7 +52,9 @@ def _mpy_bl(value: int) -> int:
         return 0
     return 1 + int(math.log2(abs(value)))
 
+
 # ======================================== 自定义类 ============================================
+
 
 class BusAdapter:
     """
@@ -86,6 +89,7 @@ class BusAdapter:
     Notes:
         Subclasses must implement bus-specific read/write methods.
     """
+
     def __init__(self, bus: [I2C, SPI]) -> None:
         """
         初始化总线适配器
@@ -141,8 +145,7 @@ class BusAdapter:
         """
         raise NotImplementedError
 
-    def write_register(self, device_addr: [int, Pin], reg_addr: int, value: [int, bytes, bytearray],
-                       bytes_count: int, byte_order: str) -> None:
+    def write_register(self, device_addr: [int, Pin], reg_addr: int, value: [int, bytes, bytearray], bytes_count: int, byte_order: str) -> None:
         """
         写入设备寄存器
         Args:
@@ -288,6 +291,7 @@ class I2cAdapter(BusAdapter):
         write(): Write to I2C device
         write_buf_to_mem(): Write buffer to memory address
     """
+
     def __init__(self, bus: I2C) -> None:
         """
         初始化 I2C 适配器
@@ -301,8 +305,7 @@ class I2cAdapter(BusAdapter):
         """
         super().__init__(bus)
 
-    def write_register(self, device_addr: int, reg_addr: int, value: [int, bytes, bytearray],
-                       bytes_count: int, byte_order: str) -> None:
+    def write_register(self, device_addr: int, reg_addr: int, value: [int, bytes, bytearray], bytes_count: int, byte_order: str) -> None:
         """
         写入 I2C 寄存器
         Args:
@@ -475,6 +478,7 @@ class SpiAdapter(BusAdapter):
     Notes:
         SPI devices are selected via chip select pin (device_addr) and may support data/command mode switching.
     """
+
     def __init__(self, bus: SPI, data_mode: Pin = None) -> None:
         """
         初始化 SPI 适配器
@@ -509,8 +513,7 @@ class SpiAdapter(BusAdapter):
         """
         raise NotImplementedError
 
-    def write_register(self, device_addr: Pin, reg_addr: int, value: [int, bytes, bytearray],
-                       bytes_count: int, byte_order: str) -> None:
+    def write_register(self, device_addr: Pin, reg_addr: int, value: [int, bytes, bytearray], bytes_count: int, byte_order: str) -> None:
         """
         SPI 寄存器写入（未实现）
         Raises:
@@ -666,6 +669,7 @@ class SpiAdapter(BusAdapter):
             Pin: Data mode pin
         """
         return self._data_mode_pin
+
 
 # ======================================== 初始化配置 ===========================================
 

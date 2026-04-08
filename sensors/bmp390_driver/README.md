@@ -71,7 +71,7 @@ import time
 from bmp390 import I2cAdapter
 
 # ======================================== 全局变量 ============================================
-# 关键修改：定义I2C配置常量（对齐示例风格）
+# 定义I2C配置常量
 I2C_SCL_PIN = 5  # SCL引脚（针对Raspberry Pi Pico）
 I2C_SDA_PIN = 4  # SDA引脚（针对Raspberry Pi Pico）
 I2C_FREQ = 400_000  # I2C通信频率
@@ -111,8 +111,8 @@ def pa_mmhg(value: float) -> float:
 time.sleep(3)
 print("FreakStudio: BMP390 sensor test starting...")
 
-# 关键修改：按示例风格初始化I2C总线 + 扫描I2C设备
-# 1. 初始化I2C总线（严格对齐示例代码风格）
+# 按示例风格初始化I2C总线 + 扫描I2C设备
+# 1. 初始化I2C总线
 i2c_bus = I2C(0, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
 # 2. 开始扫描I2C总线上的设备
 devices_list: list[int] = i2c_bus.scan()
@@ -143,7 +143,6 @@ else:
     # 遍历完未找到目标地址时抛出异常
     raise Exception(f"No BMP390 found (target address: {hex(TARGET_SENSOR_ADDR)}, found addresses: {[hex(d) for d in devices_list]})")
 
-# 原代码逻辑：传感器初始化后的配置（完全保留）
 # 读取传感器 ID
 res = ps.get_id()
 print(f"chip_id: {res}")

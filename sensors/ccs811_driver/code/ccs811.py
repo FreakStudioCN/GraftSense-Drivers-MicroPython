@@ -98,7 +98,7 @@ class CCS811(object):
         reset(): Software reset sensor
     """
 
-    def __init__(self, i2c=None):
+    def __init__(self, i2c=None, addr=CCS811_ADDR):
         """
         初始化CCS811传感器驱动对象
         Initialize CCS811 sensor driver object
@@ -117,7 +117,7 @@ class CCS811(object):
             2. Ensure the incoming I2C object is correctly initialized (adapted for Raspberry Pi Pico hardware)
         """
         self.i2c = i2c
-        self.addr = CCS811_ADDR
+        self.addr = addr
         self.tVOC = 0
         self.CO2 = 0
 

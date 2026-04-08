@@ -29,11 +29,9 @@ TARGET_ADS1015_ADDR = 0x48  # ADS1015目标I2C地址
 time.sleep(3)
 print("FreakStudio: ADS1015 voltage read and GPIO pin level control")
 
-# -------------------------- 关键修改1：标准化I2C初始化格式 --------------------------
-# 按示例风格初始化I2C总线（变量名改为i2c_bus，参数使用全局变量）
+# 初始化I2C总线
 i2c_bus = I2C(0, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
 
-# -------------------------- 关键修改2：按示例风格实现I2C扫描逻辑 --------------------------
 # 开始扫描I2C总线上的设备
 devices_list: list[int] = i2c_bus.scan()
 print("START I2C SCANNER")
@@ -45,7 +43,6 @@ if len(devices_list) == 0:
 else:
     print("i2c devices found:", len(devices_list))
 
-# -------------------------- 关键修改3：遍历地址匹配目标ADS1015设备 --------------------------
 # 遍历地址列表初始化目标ADS1015传感器
 ads = None  # 初始化传感器对象占位符
 for device in devices_list:
@@ -54,7 +51,7 @@ for device in devices_list:
         try:
             # 找到目标地址，初始化ADS1015传感器
             ads = ADS1015(i2c=i2c_bus, address=device)
-            # 设置ADS1015增益（保留原逻辑）
+            # 设置ADS1015增益
             ads.gain = 0
             print("ADS1015 sensor initialization successful")
             break
@@ -65,7 +62,6 @@ else:
     # 遍历完所有设备未找到目标地址，抛出明确异常
     raise Exception(f"No ADS1015 sensor found (target address: {hex(TARGET_ADS1015_ADDR)})")
 
-# -------------------------- 保留原GPIO初始化逻辑 --------------------------
 # 初始化Pin16为输出模式，用于输出高低电平
 output_pin = Pin(16, Pin.OUT)
 # 将输出引脚设置为初始低电平
@@ -105,7 +101,7 @@ try:
 
 # 捕获所有异常并处理
 except Exception as e:
-    # 打印异常信息（英文格式，符合规范要求）
+    # 打印异常信息
     print(f"Error: {e}")
     # 程序出错后，将输出引脚置为低电平，保证硬件安全
     output_pin.value(0)

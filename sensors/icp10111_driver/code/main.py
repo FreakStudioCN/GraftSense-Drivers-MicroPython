@@ -9,8 +9,10 @@
 
 # 导入时间模块，用于实现延时功能
 import time
+
 # 导入machine模块中的Pin和I2C类，用于硬件引脚和I2C通信配置
 from machine import Pin, I2C
+
 # 导入micropython_icp10111库中的icp10111模块，用于操作ICP10111传感器
 import icp10111
 

@@ -66,7 +66,7 @@ for device in devices_list:
         print("I2c hexadecimal address:", hex(device))
         try:
             # 初始化ADS1219传感器实例
-            adc = ADS1219(i2c_bus)
+            adc = ADS1219(i2c=i2c_bus, address=device)
             # 打印传感器初始化成功提示
             print("ADS1219 sensor initialization successful")
             break
@@ -83,8 +83,8 @@ else:
 
 # ========================================  主程序  ============================================
 
-# 设置ADS1219的采样通道为AIN0通道
-adc.set_channel(ADS1219.CHANNEL_AIN0)
+# 设置ADS1219的采样通道为AIN1通道
+adc.set_channel(ADS1219.CHANNEL_AIN1)
 # 设置ADS1219的转换模式为单次转换模式
 adc.set_conversion_mode(ADS1219.CM_SINGLE)
 # 设置ADS1219的增益为1倍增益

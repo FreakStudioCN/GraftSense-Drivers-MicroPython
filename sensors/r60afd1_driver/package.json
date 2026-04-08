@@ -1,7 +1,7 @@
 {
   "name": "r60afd1_driver",
-  "version": "1.0.0",
-  "description": "A MicroPython library to control R60AFD1 sensors",
+  "version": "1.0.1",
+  "description": "A MicroPython library to control r60afd1_driver ",
   "author": "leeqingshui",
   "license": "MIT",
   "chips": "all",
@@ -12,12 +12,16 @@
   },
   "urls": [
     [
-      "r60afd1.py",
-      "code/r60afd1.py"
-    ],
-    [
       "data_flow_processor.py",
       "code/data_flow_processor.py"
+    ],
+    [
+      "hc08.py",
+      "code/hc08.py"
+    ],
+    [
+      "r60afd1.py",
+      "code/r60afd1.py"
     ]
   ]
 }

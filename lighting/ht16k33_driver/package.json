@@ -1,6 +1,6 @@
 {
   "name": "ht16k33_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control ht16k33_driver ",
   "author": "leeqingshui",
   "license": "MIT",

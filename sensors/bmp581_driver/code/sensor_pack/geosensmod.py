@@ -22,6 +22,7 @@ from sensor_pack.base_sensor import BaseSensor
 
 # ======================================== 功能函数 ============================================
 
+
 def _axis_to_int(axis: [set, str]) -> int:
     """
     将包含轴名称的集合或字符串转换为整数掩码
@@ -46,10 +47,10 @@ def _axis_to_int(axis: [set, str]) -> int:
         Example: {'X', 'Y'} returns 3 (0b011); 'XZ' returns 5 (0b101)
     """
     _axis = 0
-    _str_axis = 'XYZ'
+    _str_axis = "XYZ"
     for index, axs in enumerate(_str_axis):
         if axs in axis or str.lower(axis) in axis:
-            _axis += 2 ** index
+            _axis += 2**index
 
     return _axis
 
@@ -155,7 +156,9 @@ def axis_name_to_reg_addr(axis_name: int, offset: int, multiplier: int) -> int:
     """
     return offset + multiplier * axis_name
 
+
 # ======================================== 自定义类 ============================================
+
 
 class GeoMagneticSensor(BaseSensor):
     """
@@ -196,6 +199,7 @@ class GeoMagneticSensor(BaseSensor):
     Notes:
         Subclasses must implement abstract methods _get_all_meas_result() and read_raw().
     """
+
     def get_axis(self, axis: [int, str]) -> [int, tuple]:
         """
         获取指定轴或所有轴的磁场测量值
@@ -369,6 +373,7 @@ class GeoMagneticSensor(BaseSensor):
         Start measurement
         """
         raise NotImplementedError
+
 
 # ======================================== 初始化配置 ===========================================
 

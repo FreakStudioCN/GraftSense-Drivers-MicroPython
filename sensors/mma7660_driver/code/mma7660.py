@@ -48,7 +48,7 @@ class MMA7660_DATA:
         仅用于数据封装，不包含业务逻辑
 
     ==========================================
-    English description
+    A container class that stores all register data of the MMA7660
     Attributes:
         X (int|None): Raw X-axis data
         Y (int|None): Raw Y-axis data
@@ -98,7 +98,7 @@ class MMA7660_LOOKUP(object):
         用于存储预计算的加速度和角度值，加速传感器数据处理
 
     ==========================================
-    English description
+    Acceleration-Angle Lookup Table Entry Class
     Attributes:
         g (float|None): Acceleration value (in g)
         xyAngle (float|None): XY plane angle (degrees)
@@ -139,7 +139,7 @@ class Accelerometer(object):
         基于I2C通信，支持待机/工作模式切换，内置6位数据到g值的查找表转换
 
     ==========================================
-    English description
+    MMA7660 Three-Axis Accelerometer Driver Class
     Attributes:
         i2c (I2C): I2C bus object
         address (int): Device I2C address
@@ -216,7 +216,7 @@ class Accelerometer(object):
             初始化后传感器进入工作模式
 
         ==========================================
-        English description
+        Initialize the accelerometer object and configure the I2C interface and sensor parameters
         Args:
             i2c (I2C): Initialized I2C bus object
             address (int): Device I2C address, default 0x4C
@@ -277,7 +277,7 @@ class Accelerometer(object):
             使用MicroPython的writeto_mem方法
 
         ==========================================
-        English description
+        Write 1 byte of data to the specified register
         Args:
             register (int): Register address (0-127)
             data (int): Data to write (0-255)
@@ -331,7 +331,7 @@ class Accelerometer(object):
             使用MicroPython的readfrom_mem方法
 
         ==========================================
-        English description
+        Read 1 byte of data from the specified register
         Args:
             register (int): Register address (0-127)
 
@@ -377,7 +377,7 @@ class Accelerometer(object):
             计算64个条目的g值和角度值
 
         ==========================================
-        English description
+        Initialize acceleration-angle lookup table (adapted for 6-bit data format)
         Args:
             None
 
@@ -444,7 +444,7 @@ class Accelerometer(object):
             模式寄存器地址0x07
 
         ==========================================
-        English description
+        Set sensor mode (standby/active)
         Args:
             mode (int): Mode value, 0=standby, 1=active
 
@@ -485,7 +485,7 @@ class Accelerometer(object):
             采样率寄存器地址0x08，取值范围0-7
 
         ==========================================
-        English description
+        Set the sampling rate (fix the problem of the original code missing the rate parameter)
         Args:
             rate (int): Sample rate configuration value (0-7)
 
@@ -525,7 +525,7 @@ class Accelerometer(object):
             原始数据为6位有效位，通过查找表转换为g值
 
         ==========================================
-        English description
+        Read the raw data of X/Y/Z axes and convert it to g values (core method)
         Args:
             None
 
@@ -574,7 +574,7 @@ class Accelerometer(object):
             无
 
         ==========================================
-        English description
+        Obtain the acceleration value (m/s²), 1g = 9.81 m/s²
         Args:
             None
 
@@ -609,7 +609,7 @@ class Accelerometer(object):
             依次读取每个寄存器，读取失败的寄存器对应属性为None
 
         ==========================================
-        English description
+        Read all register data and return an MMA7660_DATA object
         Args:
             None
 

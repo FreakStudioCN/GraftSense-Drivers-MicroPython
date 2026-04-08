@@ -199,8 +199,7 @@ adc = ADC(Pin(26))
 verify_dac_output()
 
 # 读取并打印通道B的电源模式、参考电压、增益参数（英文输出）
-print("
-Current Channel B power mode: ", dac1.b.pdm)
+print("\nCurrent Channel B power mode: ", dac1.b.pdm)
 print("Current Channel B reference voltage: ", dac1.b.vref)
 print("Current Channel B gain: ", dac1.b.gain)
 

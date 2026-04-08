@@ -115,7 +115,7 @@ oled.text("Original (0)", 10, 10, 1)
 oled.show()
 time.sleep(1)
 
-# 关键修改7：旋转初始化时使用64高度
+# 旋转初始化时使用64高度
 oled = sh1107.SH1107_I2C(OLED_WIDTH, OLED_HEIGHT, i2c_bus, address=device, rotate=90)
 oled.fill(0)
 oled.text("Rotated 90°", 10, 10, 1)
