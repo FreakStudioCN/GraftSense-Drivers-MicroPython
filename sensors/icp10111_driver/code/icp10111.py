@@ -42,6 +42,7 @@ operation_mode_values = (LOW_POWER, NORMAL, LOW_NOISE, ULTRA_LOW_NOISE)
 
 # ======================================== 功能函数 ============================================
 
+
 # ======================================== 自定义类 ============================================
 class ICP10111:
     """
@@ -72,7 +73,7 @@ class ICP10111:
         传感器通信基于I2C协议，需确保总线配置正确；数据转换需依赖OTP校准参数，初始化时自动读取
 
     ==========================================
-    English description
+    
     MicroPython driver for TDK ICP-10111 barometric pressure and temperature sensor, implements device interaction and data parsing based on I2C communication protocol
     Attributes:
         _i2c (I2C): I2C bus object for sensor communication
@@ -99,6 +100,7 @@ class ICP10111:
     Notes:
         Sensor communication is based on I2C protocol, ensure bus configuration is correct; data conversion relies on OTP calibration parameters, which are automatically read during initialization
     """
+
     def __init__(self, i2c, address: int = 0x63) -> None:
         """
         初始化ICP10111传感器对象，检测设备有效性并读取校准参数
@@ -115,7 +117,7 @@ class ICP10111:
             初始化过程会自动读取OTP校准数据，若读取失败会抛出异常
 
         ==========================================
-        English description
+        
         Initialize ICP10111 sensor object, detect device validity and read calibration parameters
         Args:
             i2c (I2C): I2C bus object, cannot be None
@@ -135,7 +137,7 @@ class ICP10111:
             raise TypeError("address must be integer, got {}".format(type(address).__name__))
         if address < 0x00 or address > 0x7F:
             raise ValueError("address must be in range 0x00-0x7F, got 0x{:02X}".format(address))
-        
+
         self._i2c = i2c
         self._address = address
 
@@ -165,7 +167,7 @@ class ICP10111:
             返回的设备ID有效取值为0x48，否则表示设备未正确连接
 
         ==========================================
-        English description
+        
         Get sensor device ID for verifying device validity
         Args:
             None
@@ -194,7 +196,7 @@ class ICP10111:
             重置后需等待100ms确保传感器稳定，重置指令为0x80 0x5D
 
         ==========================================
-        English description
+        
         Reset the sensor to default state
         Args:
             None
@@ -224,7 +226,7 @@ class ICP10111:
             CRC多项式为0x31 (x^8 + x^5 + x^4 + 1)
 
         ==========================================
-        English description
+        
         8-bit CRC check algorithm for verifying sensor data integrity
         Args:
             data (Union[bytearray, memoryview]): Byte array/memory view of data to be checked, cannot be None
@@ -271,7 +273,7 @@ class ICP10111:
             共读取4组校准参数，每组参数需通过CRC校验
 
         ==========================================
-        English description
+        
         Read calibration conversion parameters from sensor OTP memory for subsequent data calibration calculation
         Args:
             None
@@ -311,7 +313,7 @@ class ICP10111:
             转换常量用于将原始气压值转换为实际物理值
 
         ==========================================
-        English description
+        
         Calculate temperature-dependent conversion constants (a, b, c) based on reference pressure values and lookup table values
         Args:
             raw_pa (list): List of reference pressure values, length 3, cannot be None
@@ -341,14 +343,8 @@ class ICP10111:
             p_lut[0] * p_lut[1] * (raw_pa[0] - raw_pa[1])
             + p_lut[1] * p_lut[2] * (raw_pa[1] - raw_pa[2])
             + p_lut[2] * p_lut[0] * (raw_pa[2] - raw_pa[0])
-        ) / (
-            p_lut[2] * (raw_pa[0] - raw_pa[1])
-            + p_lut[0] * (raw_pa[1] - raw_pa[2])
-            + p_lut[1] * (raw_pa[2] - raw_pa[0])
-        )
-        a = (
-            raw_pa[0] * p_lut[0] - raw_pa[1] * p_lut[1] - (raw_pa[1] - raw_pa[0]) * c
-        ) / (p_lut[0] - p_lut[1])
+        ) / (p_lut[2] * (raw_pa[0] - raw_pa[1]) + p_lut[0] * (raw_pa[1] - raw_pa[2]) + p_lut[1] * (raw_pa[2] - raw_pa[0]))
+        a = (raw_pa[0] * p_lut[0] - raw_pa[1] * p_lut[1] - (raw_pa[1] - raw_pa[0]) * c) / (p_lut[0] - p_lut[1])
         b = (raw_pa[0] - a) * (p_lut[0] + c)
         return a, b, c
 
@@ -367,7 +363,7 @@ class ICP10111:
             转换过程依赖OTP校准参数和温度补偿
 
         ==========================================
-        English description
+        
         Convert sensor raw pressure and temperature values to actual pressure value (unit: Pascal)
         Args:
             raw_pressure (float): Raw pressure reading, cannot be None
@@ -390,21 +386,12 @@ class ICP10111:
             raise TypeError("raw_temperature must be int or float, got {}".format(type(raw_temperature).__name__))
 
         temperature_prov = raw_temperature - 32768.0
-        s1 = (
-            self._lut_lower
-            + float(self._sensor_constants[0] * temperature_prov * temperature_prov)
-            * self._quadr_factor
-        )
+        s1 = self._lut_lower + float(self._sensor_constants[0] * temperature_prov * temperature_prov) * self._quadr_factor
         s2 = (
             self._offset_factor * self._sensor_constants[3]
-            + float(self._sensor_constants[1] * temperature_prov * temperature_prov)
-            * self._quadr_factor
+            + float(self._sensor_constants[1] * temperature_prov * temperature_prov) * self._quadr_factor
         )
-        s3 = (
-            self._lut_upper
-            + float(self._sensor_constants[2] * temperature_prov * temperature_prov)
-            * self._quadr_factor
-        )
+        s3 = self._lut_upper + float(self._sensor_constants[2] * temperature_prov * temperature_prov) * self._quadr_factor
         a, b, c = self.calculate_conversion_constants(self._p_pa_calib, [s1, s2, s3])
         return a + b / (c + raw_pressure)
 
@@ -422,7 +409,7 @@ class ICP10111:
             读取数据前需发送测量指令，等待30ms确保数据就绪
 
         ==========================================
-        English description
+        
         Get current pressure value (Pa) and temperature value (℃) measured by the sensor
         Args:
             None
@@ -460,7 +447,7 @@ class ICP10111:
             返回值为LOW_POWER/NORMAL/LOW_NOISE/ULTRA_LOW_NOISE对应的字符串
 
         ==========================================
-        English description
+        
         Get the name of the sensor's current operation mode
         Args:
             None
@@ -494,7 +481,7 @@ class ICP10111:
             不同模式对应不同的功耗和测量精度
 
         ==========================================
-        English description
+        
         Set the sensor operation mode
         Args:
             value (int): Operation mode value, must be one of LOW_POWER/NORMAL/LOW_NOISE/ULTRA_LOW_NOISE, cannot be None
@@ -513,6 +500,7 @@ class ICP10111:
         if value not in operation_mode_values:
             raise ValueError("Value must be a valid operation_mode setting")
         self._mode = value
+
 
 # ======================================== 初始化配置 ===========================================
 

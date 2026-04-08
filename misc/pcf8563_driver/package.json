@@ -1,6 +1,6 @@
 {
   "name": "pcf8563_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control pcf8563_driver ",
   "author": "leeqingshui",
   "license": "MIT",

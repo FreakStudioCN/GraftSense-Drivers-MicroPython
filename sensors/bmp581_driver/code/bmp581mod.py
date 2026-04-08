@@ -17,6 +17,7 @@ __platform__ = "MicroPython v1.23.0"
 # ======================================== 导入相关模块 =========================================
 
 import micropython
+
 # import array
 
 from sensor_pack import bus_service
@@ -25,9 +26,9 @@ from sensor_pack.base_sensor import BaseSensor, Iterator, check_value
 # ======================================== 全局变量 ============================================
 
 # 温度转换系数，将原始温度值转换为摄氏度
-_kT = 2 ** -16
+_kT = 2**-16
 # 压力转换系数，将原始压力值转换为帕斯卡
-_kP = 2 ** -6
+_kP = 2**-6
 
 # 温度过采样对应的时间倍数（单位：ms）
 _osr_t_times = 1.0, 1.1, 1.5, 2.1, 3.3, 5.8, 10.8, 20.8
@@ -35,6 +36,7 @@ _osr_t_times = 1.0, 1.1, 1.5, 2.1, 3.3, 5.8, 10.8, 20.8
 _osr_p_times = 1.0, 1.7, 2.9, 5.4, 10.4, 20.4, 40.4, 80.4
 
 # ======================================== 功能函数 ============================================
+
 
 def _get_conv_time_ms(temp_only: bool, osr_t: int, osr_p: int) -> float:
     """
@@ -91,7 +93,9 @@ def _all_none(*args) -> bool:
             return False
     return True
 
+
 # ======================================== 自定义类 ============================================
+
 
 class Bmp581(BaseSensor, Iterator):
     """
@@ -357,12 +361,12 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x7E, command_code)
 
     def _int_conf(
-            self,
-            pad_int_drv: [int, None] = None,   # bit 4..7,
-            int_en: [bool, None] = None,       # bit 3,
-            int_od: [bool, None] = None,       # bit 2,
-            int_pol: [bool, None] = None,      # bit 1,
-            int_mode: [bool, None] = None,     # bit 0,
+        self,
+        pad_int_drv: [int, None] = None,  # bit 4..7,
+        int_en: [bool, None] = None,  # bit 3,
+        int_od: [bool, None] = None,  # bit 2,
+        int_pol: [bool, None] = None,  # bit 1,
+        int_mode: [bool, None] = None,  # bit 0,
     ) -> int:
         """
         配置中断寄存器（0x14）
@@ -411,11 +415,11 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x14, val, 1)
 
     def _int_source_sel(
-            self,
-            oor_p_en: [int, None] = None,          # bit 3, Pressure data out-of-range (OOR_P)
-            fifo_ths_en: [bool, None] = None,      # bit 2, FIFO Threshold/Watermark (FIFO_THS)
-            fifo_full_en: [bool, None] = None,     # bit 1, FIFO Full (FIFO_FULL)
-            drdy_data_reg_en: [bool, None] = None, # bit 0, Data Ready
+        self,
+        oor_p_en: [int, None] = None,  # bit 3, Pressure data out-of-range (OOR_P)
+        fifo_ths_en: [bool, None] = None,  # bit 2, FIFO Threshold/Watermark (FIFO_THS)
+        fifo_full_en: [bool, None] = None,  # bit 1, FIFO Full (FIFO_FULL)
+        drdy_data_reg_en: [bool, None] = None,  # bit 0, Data Ready
     ) -> int:
         """
         配置中断源选择寄存器（0x15）
@@ -458,9 +462,9 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x15, val, 1)
 
     def _fifo_config(
-            self,
-            fifo_mode: [bool, None] = None,
-            fifo_threshold: [int, None] = None,
+        self,
+        fifo_mode: [bool, None] = None,
+        fifo_threshold: [int, None] = None,
     ) -> int:
         """
         配置 FIFO 寄存器（0x16）
@@ -493,10 +497,10 @@ class Bmp581(BaseSensor, Iterator):
         self._write_reg(0x16, val, 1)
 
     def _odr_config(
-            self,
-            deep_dis: [bool, None] = None,          # bit 7
-            output_data_rate: [int, None] = None,   # bit 6..2
-            power_mode: [int, None] = None,         # bit 1..0
+        self,
+        deep_dis: [bool, None] = None,  # bit 7
+        output_data_rate: [int, None] = None,  # bit 6..2
+        power_mode: [int, None] = None,  # bit 1..0
     ) -> int:
         """
         配置控制寄存器 0（0x37）
@@ -554,9 +558,9 @@ class Bmp581(BaseSensor, Iterator):
         return 0x3F & self._read_reg(0x17)[0]
 
     def _fifo_sel_config(
-            self,
-            fifo_dec_sel: [int, None] = None,
-            fifo_frame_sel: [int, None] = None,
+        self,
+        fifo_dec_sel: [int, None] = None,
+        fifo_frame_sel: [int, None] = None,
     ) -> int:
         """
         配置 FIFO 选择寄存器（0x18）
@@ -708,15 +712,16 @@ class Bmp581(BaseSensor, Iterator):
             # status_core_rdy, status_nvm_rdy, status_nvm_err, status_nvm_cmd_err, status_boot_err_corrected from Status register
             return tuple([0 != (mask & val) for mask in _masks])
 
-    def _dsp_config(self,
-                    oor_sel_iir_p: [bool, None] = None,         # bit 7
-                    fifo_sel_iir_p: [bool, None] = None,        # bit 6
-                    shdw_sel_iir_p: [bool, None] = None,        # bit 5
-                    fifo_sel_iir_t: [bool, None] = None,        # bit 4
-                    shdw_sel_iir_t: [bool, None] = None,        # bit 3
-                    iir_flush_forced_en: [bool, None] = None,   # bit 2
-                    comp_pt_en: [int, None] = None,             # bit 1..0
-                    ) -> int:
+    def _dsp_config(
+        self,
+        oor_sel_iir_p: [bool, None] = None,  # bit 7
+        fifo_sel_iir_p: [bool, None] = None,  # bit 6
+        shdw_sel_iir_p: [bool, None] = None,  # bit 5
+        fifo_sel_iir_t: [bool, None] = None,  # bit 4
+        shdw_sel_iir_t: [bool, None] = None,  # bit 3
+        iir_flush_forced_en: [bool, None] = None,  # bit 2
+        comp_pt_en: [int, None] = None,  # bit 1..0
+    ) -> int:
         """
         配置 DSP 寄存器（0x30）
         Args:
@@ -746,8 +751,7 @@ class Bmp581(BaseSensor, Iterator):
             int: Current register value (when all parameters are None)
         """
         val = self._read_reg(0x30)[0]
-        if _all_none(oor_sel_iir_p, fifo_sel_iir_p, shdw_sel_iir_p, fifo_sel_iir_t, shdw_sel_iir_t, iir_flush_forced_en,
-                     comp_pt_en):
+        if _all_none(oor_sel_iir_p, fifo_sel_iir_p, shdw_sel_iir_p, fifo_sel_iir_t, shdw_sel_iir_t, iir_flush_forced_en, comp_pt_en):
             return val
         if oor_sel_iir_p is not None:
             val &= ~(1 << 7)  # mask
@@ -772,10 +776,11 @@ class Bmp581(BaseSensor, Iterator):
             val |= comp_pt_en
         self._write_reg(0x30, val, 1)
 
-    def _dsp_iir_config(self,
-                        set_iir_p: [int, None] = None,   # bit 5..3
-                        set_iir_t: [int, None] = None,   # bit 2..0
-                        ) -> int:
+    def _dsp_iir_config(
+        self,
+        set_iir_p: [int, None] = None,  # bit 5..3
+        set_iir_t: [int, None] = None,  # bit 2..0
+    ) -> int:
         """
         配置 DSP IIR 滤波器系数寄存器（0x31）
         Args:
@@ -851,11 +856,12 @@ class Bmp581(BaseSensor, Iterator):
         tmp = self._dsp_iir_config()
         return (0b0011_1000 & tmp) >> 3, 0b0000_0111 & tmp
 
-    def _osr_config(self,
-                    press_en: [bool, None] = None,   # bit 6
-                    osr_p: [int, None] = None,       # bit 5..3
-                    osr_t: [int, None] = None,       # bit 2..0
-                    ) -> int:
+    def _osr_config(
+        self,
+        press_en: [bool, None] = None,  # bit 6
+        osr_p: [int, None] = None,  # bit 5..3
+        osr_t: [int, None] = None,  # bit 2..0
+    ) -> int:
         """
         配置过采样率寄存器（0x36）
         Args:
@@ -1139,6 +1145,7 @@ class Bmp581(BaseSensor, Iterator):
         if self.temperature_only:
             return temperature
         return self.get_pressure(), temperature
+
 
 # ======================================== 初始化配置 ===========================================
 

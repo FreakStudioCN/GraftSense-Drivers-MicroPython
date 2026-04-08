@@ -50,7 +50,7 @@ class CBits:
         # 参数None显式检查
         if None in (num_bits, register_address, start_bit):
             raise ValueError("num_bits, register_address, start_bit cannot be None")
-        
+
         # 计算指定位数对应的掩码并移位到起始位
         self.bit_mask = ((1 << num_bits) - 1) << start_bit
         # 寄存器地址
@@ -119,7 +119,7 @@ class CBits:
         # 参数None显式检查
         if value is None:
             raise ValueError("value cannot be None")
-        
+
         # 读取当前寄存器值
         memory_value = obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
 
@@ -132,7 +132,7 @@ class CBits:
         # 按顺序组合字节
         for i in order:
             reg = (reg << 8) | memory_value[i]
-        
+
         # 清空目标位段（使用掩码取反）
         reg &= ~self.bit_mask
 
@@ -166,7 +166,7 @@ class RegisterStruct:
         # 参数None显式检查
         if None in (register_address, form):
             raise ValueError("register_address and form cannot be None")
-        
+
         # struct格式字符串
         self.format = form
         # 寄存器地址
@@ -198,17 +198,13 @@ class RegisterStruct:
             # 长度小于等于2字节时，返回解包后的单个值
             value = struct.unpack(
                 self.format,
-                memoryview(
-                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
-                ),
+                memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)),
             )[0]
         else:
             # 长度大于2字节时，返回解包后的元组
             value = struct.unpack(
                 self.format,
-                memoryview(
-                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
-                ),
+                memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)),
             )
         return value
 
@@ -230,7 +226,7 @@ class RegisterStruct:
         # 参数None显式检查
         if value is None:
             raise ValueError("value cannot be None")
-        
+
         # 将整数转换为大端字节串
         mem_value = value.to_bytes(self.lenght, "big")
         # 写入寄存器

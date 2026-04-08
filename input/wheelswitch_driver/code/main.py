@@ -14,12 +14,15 @@ from encoder_wheel_switch import EncoderWheelSwitch
 
 # ======================================== 功能函数 ============================================
 
+
 # 测试回调函数
 def on_up_trigger():
     print("UP wheel triggered!")
 
+
 def on_down_trigger():
     print("DOWN wheel triggered!")
+
 
 # ======================================== 自定义类 ============================================
 
@@ -28,12 +31,7 @@ def on_down_trigger():
 
 # 初始化拨轮开关（示例引脚：UP=16，DOWN=17，空闲高电平，消抖20ms）
 encoder = EncoderWheelSwitch(
-    pin_up=14,
-    pin_down=15,
-    debounce_ms=20,
-    idle_state=EncoderWheelSwitch.high,
-    callback_up=on_up_trigger,
-    callback_down=on_down_trigger
+    pin_up=14, pin_down=15, debounce_ms=20, idle_state=EncoderWheelSwitch.high, callback_up=on_up_trigger, callback_down=on_down_trigger
 )
 
 # 读取原始状态

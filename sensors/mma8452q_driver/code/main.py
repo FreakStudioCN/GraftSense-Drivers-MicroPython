@@ -79,7 +79,7 @@ print("FreakStudio: MMA8452Q accelerometer configuration and data reading demo")
 try:
     # I2C初始化（兼容I2C/SoftI2C）
     i2c_bus = SoftI2C(sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
-    
+
     # 开始扫描I2C总线上的设备
     devices_list: list[int] = i2c_bus.scan()
     print("START I2C SCANNER")

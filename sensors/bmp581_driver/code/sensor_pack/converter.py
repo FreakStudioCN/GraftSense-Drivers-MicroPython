@@ -19,6 +19,7 @@ Converting values from one unit of measure to another"""
 
 # ======================================== 功能函数 ============================================
 
+
 def pa_mmhg(value: float) -> float:
     """
     将大气压力从帕斯卡转换为毫米汞柱
@@ -42,7 +43,8 @@ def pa_mmhg(value: float) -> float:
     Notes:
         Conversion factor is 7.50062E-3
     """
-    return 7.50062E-3 * value
+    return 7.50062e-3 * value
+
 
 # ======================================== 自定义类 ============================================
 

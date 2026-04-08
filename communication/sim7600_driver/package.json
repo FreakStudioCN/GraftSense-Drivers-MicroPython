@@ -1,6 +1,6 @@
 {
   "name": "sim7600_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control sim7600_driver ",
   "author": "leeqingshui",
   "license": "MIT",
@@ -11,6 +11,22 @@
     "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
   },
   "urls": [
+    [
+      "GPS.py",
+      "code/GPS.py"
+    ],
+    [
+      "HTTP.py",
+      "code/HTTP.py"
+    ],
+    [
+      "LBS.py",
+      "code/LBS.py"
+    ],
+    [
+      "calling.py",
+      "code/calling.py"
+    ],
     [
       "sim7600/__init__.py",
       "code/sim7600/__init__.py"
@@ -38,6 +54,10 @@
     [
       "sim7600/tcpip.py",
       "code/sim7600/tcpip.py"
+    ],
+    [
+      "sms.py",
+      "code/sms.py"
     ]
   ]
 }

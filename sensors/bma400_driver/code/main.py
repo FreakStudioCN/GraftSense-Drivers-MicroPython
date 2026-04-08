@@ -19,7 +19,7 @@ I2C_SCL_PIN = 5
 I2C_FREQ = 400000
 
 # 自动识别传感器地址，定义全局目标地址列表（支持多地址，单个也用[]）
-TARGET_BMA400_ADDRS = [0x14,0x15]
+TARGET_BMA400_ADDRS = [0x14, 0x15]
 
 # ======================================== 功能函数 ============================================
 
@@ -101,7 +101,7 @@ for device in devices_list:
         print("I2c hexadecimal address:", hex(device))
         try:
             # 自动识别并初始化对应传感器
-            sensor = BMA400(i2c=i2c_bus ,address=device)
+            sensor = BMA400(i2c=i2c_bus, address=device)
             print("Sensor initialization successful")
             break
         except Exception as e:

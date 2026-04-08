@@ -35,11 +35,9 @@ time.sleep(3)
 # 打印功能标识，说明当前功能为通过I2C控制LCD1602显示屏
 print("FreakStudio: Control LCD1602 via I2C")
 
-# -------------------------- 关键修改点1：标准化I2C初始化格式 --------------------------
-# 初始化I2C总线0，严格对齐指定风格（使用全局变量定义引脚/频率）
+# 初始化I2C总线0
 i2c_bus = I2C(0, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
 
-# -------------------------- 关键修改点2：添加I2C设备扫描逻辑 --------------------------
 # 开始扫描I2C总线上的设备
 devices_list: list[int] = i2c_bus.scan()
 print("START I2C SCANNER")
@@ -51,7 +49,6 @@ if len(devices_list) == 0:
 else:
     print("i2c devices found:", len(devices_list))
 
-# -------------------------- 关键修改点3：遍历地址匹配目标LCD设备 --------------------------
 # 遍历地址列表初始化目标LCD1602
 lcd = None  # 初始化LCD对象占位符
 for device in devices_list:

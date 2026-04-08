@@ -1,6 +1,6 @@
 {
   "name": "ads1219_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control ads1219_driver ",
   "author": "leeqingshui",
   "license": "MIT",

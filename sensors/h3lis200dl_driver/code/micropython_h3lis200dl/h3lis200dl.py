@@ -44,35 +44,35 @@ __repo__ = "https://github.com/jposada202020/MicroPython_H3LIS200DL.git"
 
 # 寄存器地址定义
 _REG_WHOAMI = const(0x0F)  # WHO_AM_I寄存器地址
-_CTRL_REG1 = const(0x20)   # 控制寄存器1地址
-_CTRL_REG2 = const(0x21)   # 控制寄存器2地址
-_CTRL_REG3 = const(0x22)   # 控制寄存器3地址
-_CTRL_REG4 = const(0x23)   # 控制寄存器4地址
-_INT1_CFG = const(0x30)    # 中断1配置寄存器地址
-_INT1_SRC = const(0x31)    # 中断1源寄存器地址
-_INT1_THS = const(0x32)    # 中断1阈值寄存器地址
-_INT1_DURATION = const(0x33) # 中断1持续时间寄存器地址
-_INT2_CFG = const(0x34)    # 中断2配置寄存器地址
-_INT2_SRC = const(0x35)    # 中断2源寄存器地址
-_INT2_THS = const(0x36)    # 中断2阈值寄存器地址
-_INT2_DURATION = const(0x37) # 中断2持续时间寄存器地址
+_CTRL_REG1 = const(0x20)  # 控制寄存器1地址
+_CTRL_REG2 = const(0x21)  # 控制寄存器2地址
+_CTRL_REG3 = const(0x22)  # 控制寄存器3地址
+_CTRL_REG4 = const(0x23)  # 控制寄存器4地址
+_INT1_CFG = const(0x30)  # 中断1配置寄存器地址
+_INT1_SRC = const(0x31)  # 中断1源寄存器地址
+_INT1_THS = const(0x32)  # 中断1阈值寄存器地址
+_INT1_DURATION = const(0x33)  # 中断1持续时间寄存器地址
+_INT2_CFG = const(0x34)  # 中断2配置寄存器地址
+_INT2_SRC = const(0x35)  # 中断2源寄存器地址
+_INT2_THS = const(0x36)  # 中断2阈值寄存器地址
+_INT2_DURATION = const(0x37)  # 中断2持续时间寄存器地址
 
 # 加速度数据寄存器地址
-_ACC_X = const(0x29)       # X轴加速度数据寄存器
-_ACC_Y = const(0x2B)       # Y轴加速度数据寄存器
-_ACC_Z = const(0x2D)       # Z轴加速度数据寄存器
+_ACC_X = const(0x29)  # X轴加速度数据寄存器
+_ACC_Y = const(0x2B)  # Y轴加速度数据寄存器
+_ACC_Z = const(0x2D)  # Z轴加速度数据寄存器
 
 # 重力加速度转换常数
-_G_TO_ACCEL = 9.80665      # g值到m/s²的转换因子
+_G_TO_ACCEL = 9.80665  # g值到m/s²的转换因子
 
 # 工作模式定义
-POWER_DOWN = const(0b000)          # 掉电模式
-NORMAL_MODE = const(0b001)         # 正常模式
-LOW_POWER_ODR0_5 = const(0b010)    # 低功耗模式，ODR=0.5Hz
-LOW_POWER_ODR1 = const(0b011)      # 低功耗模式，ODR=1Hz
-LOW_POWER_ODR2 = const(0b100)      # 低功耗模式，ODR=2Hz
-LOW_POWER_ODR5 = const(0b101)      # 低功耗模式，ODR=5Hz
-LOW_POWER_ODR10 = const(0b110)     # 低功耗模式，ODR=10Hz
+POWER_DOWN = const(0b000)  # 掉电模式
+NORMAL_MODE = const(0b001)  # 正常模式
+LOW_POWER_ODR0_5 = const(0b010)  # 低功耗模式，ODR=0.5Hz
+LOW_POWER_ODR1 = const(0b011)  # 低功耗模式，ODR=1Hz
+LOW_POWER_ODR2 = const(0b100)  # 低功耗模式，ODR=2Hz
+LOW_POWER_ODR5 = const(0b101)  # 低功耗模式，ODR=5Hz
+LOW_POWER_ODR10 = const(0b110)  # 低功耗模式，ODR=10Hz
 # 有效的工作模式值列表
 operation_mode_values = (
     POWER_DOWN,
@@ -85,42 +85,42 @@ operation_mode_values = (
 )
 
 # 数据速率定义
-RATE_50HZ = const(0b00)     # 50Hz
-RATE_100HZ = const(0b01)    # 100Hz
-RATE_400HZ = const(0b10)    # 400Hz
-RATE_1000HZ = const(0b11)   # 1000Hz
+RATE_50HZ = const(0b00)  # 50Hz
+RATE_100HZ = const(0b01)  # 100Hz
+RATE_400HZ = const(0b10)  # 400Hz
+RATE_1000HZ = const(0b11)  # 1000Hz
 # 有效的数据速率值列表
 data_rate_values = (RATE_50HZ, RATE_100HZ, RATE_400HZ, RATE_1000HZ)
 
 # 轴启用状态定义
-X_DISABLED = const(0b0)     # X轴禁用
-X_ENABLED = const(0b1)      # X轴启用
-Y_DISABLED = const(0b0)     # Y轴禁用
-Y_ENABLED = const(0b1)      # Y轴启用
-Z_DISABLED = const(0b0)     # Z轴禁用
-Z_ENABLED = const(0b1)      # Z轴启用
+X_DISABLED = const(0b0)  # X轴禁用
+X_ENABLED = const(0b1)  # X轴启用
+Y_DISABLED = const(0b0)  # Y轴禁用
+Y_ENABLED = const(0b1)  # Y轴启用
+Z_DISABLED = const(0b0)  # Z轴禁用
+Z_ENABLED = const(0b1)  # Z轴启用
 # 轴启用状态有效值列表
 axis_enabled_values = (X_DISABLED, X_ENABLED)
 
 # 满量程选择定义
-SCALE_100G = const(0b0)     # ±100g量程
-SCALE_200G = const(0b1)     # ±200g量程
+SCALE_100G = const(0b0)  # ±100g量程
+SCALE_200G = const(0b1)  # ±200g量程
 # 有效满量程值列表
 full_scale_selection_values = (SCALE_100G, SCALE_200G)
 # 满量程到实际值的映射
 full_scale = {SCALE_100G: 100, SCALE_200G: 200}
 
 # 高通滤波器模式定义
-FILTER_NORMAL_MODE = const(0b00)          # 正常模式
-FILTER_SIGNAL_FILTERING = const(0b01)     # 信号滤波模式
+FILTER_NORMAL_MODE = const(0b00)  # 正常模式
+FILTER_SIGNAL_FILTERING = const(0b01)  # 信号滤波模式
 # 有效高通滤波器模式值列表
 high_pass_filter_mode_values = (FILTER_NORMAL_MODE, FILTER_SIGNAL_FILTERING)
 
 # 高通滤波器截止频率选择定义
-HPCF8 = const(0b00)         # 截止频率系数8
-HPCF16 = const(0b01)        # 截止频率系数16
-HPCF32 = const(0b10)        # 截止频率系数32
-HPCF64 = const(0b11)        # 截止频率系数64
+HPCF8 = const(0b00)  # 截止频率系数8
+HPCF16 = const(0b01)  # 截止频率系数16
+HPCF32 = const(0b10)  # 截止频率系数32
+HPCF64 = const(0b11)  # 截止频率系数64
 # 有效高通滤波器截止频率值列表
 high_pass_filter_cutoff_values = (HPCF8, HPCF16, HPCF32, HPCF64)
 
@@ -130,6 +130,7 @@ AlertStatus = namedtuple("AlertStatus", ["high_g", "low_g"])
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 # pylint: disable=too-many-instance-attributes
 class H3LIS200DL:
@@ -199,36 +200,36 @@ class H3LIS200DL:
     """
 
     # 寄存器结构体定义
-    _device_id = RegisterStruct(_REG_WHOAMI, "B")                    # 设备ID寄存器
-    _int1_configuration = RegisterStruct(_INT1_CFG, "B")            # 中断1配置寄存器
-    _int1_source_register = RegisterStruct(_INT1_SRC, "B")          # 中断1源寄存器
-    _int1_threshold = RegisterStruct(_INT1_THS, "B")                # 中断1阈值寄存器
-    _int1_duration = RegisterStruct(_INT1_DURATION, "B")            # 中断1持续时间寄存器
-    _int1_latched = CBits(1, _CTRL_REG3, 2)                         # 中断1锁存位
+    _device_id = RegisterStruct(_REG_WHOAMI, "B")  # 设备ID寄存器
+    _int1_configuration = RegisterStruct(_INT1_CFG, "B")  # 中断1配置寄存器
+    _int1_source_register = RegisterStruct(_INT1_SRC, "B")  # 中断1源寄存器
+    _int1_threshold = RegisterStruct(_INT1_THS, "B")  # 中断1阈值寄存器
+    _int1_duration = RegisterStruct(_INT1_DURATION, "B")  # 中断1持续时间寄存器
+    _int1_latched = CBits(1, _CTRL_REG3, 2)  # 中断1锁存位
 
-    _int2_configuration = RegisterStruct(_INT2_CFG, "B")            # 中断2配置寄存器
-    _int2_source_register = RegisterStruct(_INT2_SRC, "B")          # 中断2源寄存器
-    _int2_threshold = RegisterStruct(_INT2_THS, "B")                # 中断2阈值寄存器
-    _int2_duration = RegisterStruct(_INT2_DURATION, "B")            # 中断2持续时间寄存器
-    _int2_latched = CBits(1, _CTRL_REG3, 5)                         # 中断2锁存位
+    _int2_configuration = RegisterStruct(_INT2_CFG, "B")  # 中断2配置寄存器
+    _int2_source_register = RegisterStruct(_INT2_SRC, "B")  # 中断2源寄存器
+    _int2_threshold = RegisterStruct(_INT2_THS, "B")  # 中断2阈值寄存器
+    _int2_duration = RegisterStruct(_INT2_DURATION, "B")  # 中断2持续时间寄存器
+    _int2_latched = CBits(1, _CTRL_REG3, 5)  # 中断2锁存位
 
     # 加速度数据寄存器
-    _acc_data_x = RegisterStruct(_ACC_X, "B")                       # X轴加速度数据
-    _acc_data_y = RegisterStruct(_ACC_Y, "B")                       # Y轴加速度数据
-    _acc_data_z = RegisterStruct(_ACC_Z, "B")                       # Z轴加速度数据
+    _acc_data_x = RegisterStruct(_ACC_X, "B")  # X轴加速度数据
+    _acc_data_y = RegisterStruct(_ACC_Y, "B")  # Y轴加速度数据
+    _acc_data_z = RegisterStruct(_ACC_Z, "B")  # Z轴加速度数据
 
-    _full_scale_selection = CBits(1, _CTRL_REG4, 4)                 # 满量程选择位
+    _full_scale_selection = CBits(1, _CTRL_REG4, 4)  # 满量程选择位
 
     # 控制寄存器1 (0x20) 位定义
-    _operation_mode = CBits(3, _CTRL_REG1, 5)                       # 工作模式位
-    _data_rate = CBits(2, _CTRL_REG1, 3)                            # 数据速率位
-    _z_enabled = CBits(1, _CTRL_REG1, 2)                            # Z轴使能位
-    _y_enabled = CBits(1, _CTRL_REG1, 1)                            # Y轴使能位
-    _x_enabled = CBits(1, _CTRL_REG1, 0)                            # X轴使能位
+    _operation_mode = CBits(3, _CTRL_REG1, 5)  # 工作模式位
+    _data_rate = CBits(2, _CTRL_REG1, 3)  # 数据速率位
+    _z_enabled = CBits(1, _CTRL_REG1, 2)  # Z轴使能位
+    _y_enabled = CBits(1, _CTRL_REG1, 1)  # Y轴使能位
+    _x_enabled = CBits(1, _CTRL_REG1, 0)  # X轴使能位
 
     # 控制寄存器2 (0x21) 位定义
-    _high_pass_filter_mode = CBits(2, _CTRL_REG2, 5)                # 高通滤波器模式位
-    _high_pass_filter_cutoff = CBits(2, _CTRL_REG2, 0)              # 高通滤波器截止频率位
+    _high_pass_filter_mode = CBits(2, _CTRL_REG2, 5)  # 高通滤波器模式位
+    _high_pass_filter_cutoff = CBits(2, _CTRL_REG2, 0)  # 高通滤波器截止频率位
 
     def __init__(self, i2c, address: int = 0x19) -> None:
         """
@@ -348,21 +349,9 @@ class H3LIS200DL:
         Notes:
             Data is scaled according to current full scale setting, raw data is 8-bit signed.
         """
-        x = (
-            self._twos_comp(self._acc_data_x, 8)
-            * full_scale[self._memory_full_scale_selection]
-            / 128
-        )
-        y = (
-            self._twos_comp(self._acc_data_y, 8)
-            * full_scale[self._memory_full_scale_selection]
-            / 128
-        )
-        z = (
-            self._twos_comp(self._acc_data_z, 8)
-            * full_scale[self._memory_full_scale_selection]
-            / 128
-        )
+        x = self._twos_comp(self._acc_data_x, 8) * full_scale[self._memory_full_scale_selection] / 128
+        y = self._twos_comp(self._acc_data_y, 8) * full_scale[self._memory_full_scale_selection] / 128
+        z = self._twos_comp(self._acc_data_z, 8) * full_scale[self._memory_full_scale_selection] / 128
         return x, y, z
 
     @property

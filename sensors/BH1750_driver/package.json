@@ -1,6 +1,6 @@
 {
-  "name": "bh1750",
-  "version": "1.0.1",
+  "name": "bh1750_driver",
+  "version": "1.0.0",
   "description": "A MicroPython library to control BH1750 driver",
   "author": "octaprog7",
   "license": "MIT",

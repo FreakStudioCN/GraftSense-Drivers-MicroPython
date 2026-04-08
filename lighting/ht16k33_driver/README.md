@@ -94,7 +94,7 @@ time.sleep(3)
 # 打印功能提示信息
 print("FreakStudio: HT16K33 7-segment display test")
 
-# 初始化I2C总线，严格对齐指定风格
+# 初始化I2C总线
 i2c_bus = I2C(0, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
 # 开始扫描I2C总线上的设备
 devices_list: list[int] = i2c_bus.scan()

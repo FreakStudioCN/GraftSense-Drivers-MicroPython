@@ -1,7 +1,7 @@
 {
   "name": "mems_driver",
-  "version": "1.0.0",
-  "description": "A MicroPython library to control MEMS sensors",
+  "version": "1.0.1",
+  "description": "A MicroPython library to control mems_driver ",
   "author": "leeqingshui",
   "license": "MIT",
   "chips": "all",

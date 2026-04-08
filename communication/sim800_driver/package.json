@@ -1,6 +1,6 @@
 {
   "name": "sim800_driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A MicroPython library to control sim800_driver ",
   "author": "leeqingshui",
   "license": "MIT",

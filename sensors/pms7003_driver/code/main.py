@@ -9,10 +9,13 @@
 
 # 导入AQI计算模块
 from aqi import AQI
+
 # 导入PMS7003传感器驱动模块
 from pms7003 import Pms7003
+
 # 导入机器模块的UART和Pin类
-from machine import UART,Pin
+from machine import UART, Pin
+
 # 导入时间模块
 import time
 
@@ -20,6 +23,7 @@ import time
 
 
 # ======================================== 功能函数 ============================================
+
 
 def demo_active_mode():
     """
@@ -43,7 +47,7 @@ def demo_active_mode():
     Notes:Sensor continuously outputs data in active mode, no wake-up required
     """
     print("=== Active Mode: Start reading PMS7003 data ===")
-    
+
     # 初始化UART0，波特率9600，TX引脚16，RX引脚17
     uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
     # 初始化PMS7003传感器对象
@@ -56,9 +60,9 @@ def demo_active_mode():
             # 读取传感器数据
             data = sensor.read()
             # 提取PM2.5浓度数据
-            pm25 = data['PM2_5_ATM']
+            pm25 = data["PM2_5_ATM"]
             # 提取PM10浓度数据
-            pm10 = data['PM10_0_ATM']
+            pm10 = data["PM10_0_ATM"]
             # 计算空气质量指数AQI
             aqi_value = AQI.aqi(pm25, pm10)
 
@@ -77,9 +81,10 @@ def demo_active_mode():
             print(f"UART error: {e}")
         except Exception as e:
             print(f"Read failed: {e}")
-        
+
         # 2秒后进行下一次读取
         time.sleep(2)
+
 
 def demo_passive_mode():
     """
@@ -103,7 +108,7 @@ def demo_passive_mode():
     Notes:Sensor needs to be woken up to output data in passive mode, can enter sleep mode after reading to reduce power consumption
     """
     print("=== Passive Mode: Start reading PMS7003 data ===")
-    
+
     # 初始化UART0，波特率9600，TX引脚16，RX引脚17
     uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
     # 初始化被动模式PMS7003传感器对象
@@ -123,9 +128,9 @@ def demo_passive_mode():
             # 读取传感器数据
             data = sensor.read()
             # 提取PM2.5浓度数据
-            pm25 = data['PM2_5_ATM']
+            pm25 = data["PM2_5_ATM"]
             # 提取PM10浓度数据
-            pm10 = data['PM10_0_ATM']
+            pm10 = data["PM10_0_ATM"]
             # 计算空气质量指数AQI
             aqi_value = AQI.aqi(pm25, pm10)
 
@@ -149,9 +154,10 @@ def demo_passive_mode():
             print(f"UART error: {e}")
         except Exception as e:
             print(f"Read failed: {e}")
-        
+
         # 10秒后进行下一次读取
         time.sleep(10)
+
 
 # ======================================== 自定义类 ============================================
 
