@@ -600,7 +600,10 @@ class Seg7x4(Seg14x4):
     """
 
     # 7段数码管字符在显示缓冲区中的位置索引
-    P: list[int] = [0, 2, 6, 8]  # The positions of characters.
+    # 通用版本的索引在这里保留
+    # P: list[int] = [0, 2, 6, 8]
+    # FreakStudio模块的索引
+    P: list[int] = [0, 2, 4, 6]
 
     def scroll(self, count: int = 1) -> None:
         """
