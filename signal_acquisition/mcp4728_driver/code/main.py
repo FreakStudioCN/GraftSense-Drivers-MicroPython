@@ -66,7 +66,7 @@ def verify_dac_output():
     # 示例3：使用归一化值（0.0-1.0）设置通道B输出
     dac1.b.normalized_value = 0.5
     # 延时0.1秒，等待DAC输出电压稳定
-    time.sleep(0.1)
+    time.sleep(3)
     # 读取ADC值
     adc_val = adc.read_u16()
     # 转换为实际电压
@@ -82,7 +82,7 @@ def verify_dac_output():
     # 设置通道B数值为4095
     dac1.b.value = 4095
     # 延时0.1秒，等待DAC输出电压稳定
-    time.sleep(0.1)
+    time.sleep(3)
     # 读取ADC值
     adc_val = adc.read_u16()
     # 转换为实际电压
