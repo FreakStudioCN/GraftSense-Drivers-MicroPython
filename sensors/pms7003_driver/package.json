@@ -1,6 +1,6 @@
 {
   "name": "pms7003_driver",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A MicroPython library to control pms7003_driver ",
   "author": "leeqingshui",
   "license": "MIT",

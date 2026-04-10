@@ -1,6 +1,6 @@
 {
   "name": "qmc5883l_driver",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A MicroPython library to control qmc5883l_driver ",
   "author": "leeqingshui",
   "license": "MIT",
