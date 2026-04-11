@@ -1,8 +1,8 @@
 {
-  "name": "mlx_90614_driver",
-  "version": "1.0.0",
-  "description": "A MicroPython library to control MLX90614 sensors",
-  "author": "mcauser",
+  "name": "mlx90614_driver",
+  "version": "1.0.2",
+  "description": "A MicroPython library to control mlx90614_driver ",
+  "author": "leeqingshui",
   "license": "MIT",
   "chips": "all",
   "fw": "all",

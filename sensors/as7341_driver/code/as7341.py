@@ -13,219 +13,10 @@ __platform__ = "MicroPython v1.23.0"
 # ======================================== 导入相关模块 =========================================
 
 from time import sleep_ms
-from struct import unpack, unpack_from
+from struct import unpack_from
 
 # ======================================== 全局变量 ============================================
 
-# SMUX通道选择配置字典，键为配置名称，值为对应的配置字节数组
-# SMUX channel selection configuration dictionary, key is configuration name, value is corresponding configuration byte array
-AS7341_SMUX_SELECT = {
-    # F1至F4通道、CLEAR通道、NIR通道配置
-    "F1F4CN": b"\x30\x01\x00\x00\x00\x42\x00\x00\x50\x00\x00\x00\x20\x04\x00\x30\x01\x50\x00\x06",
-    # F5至F8通道、CLEAR通道、NIR通道配置
-    "F5F8CN": b"\x00\x00\x00\x40\x02\x00\x10\x03\x50\x10\x03\x00\x00\x00\x24\x00\x00\x50\x00\x06",
-    # F2至F7通道配置
-    "F2F7": b"\x20\x00\x00\x00\x05\x31\x40\x06\x00\x40\x06\x00\x10\x03\x50\x20\x00\x00\x00\x00",
-    # F3至F8通道配置
-    "F3F8": b"\x10\x00\x00\x60\x04\x20\x30\x05\x00\x30\x05\x00\x00\x02\x46\x10\x00\x00\x00\x00",
-    # 仅闪烁检测配置
-    "FD": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x60",
-}
-
-# AS7341传感器默认I2C地址
-AS7341_I2C_ADDRESS = const(0x39)
-# AS7341传感器型号识别值（不含低2位）
-AS7341_ID_VALUE = const(0x24)
-
-# 寄存器地址及位域符号常量定义
-# Symbolic constants for register addresses and bit fields
-# 注意：地址范围0x60--0x6F的ASTATUS、ITIME和CHx_DATA寄存器未使用
-# Note: ASTATUS, ITIME and CHx_DATA registers in address range 0x60--0x6F are not used
-
-# 配置寄存器（CONFIG）地址及位域
-AS7341_CONFIG = const(0x70)  # 配置寄存器地址
-AS7341_CONFIG_INT_MODE_SPM = const(0x00)  # SPM单脉冲测量模式
-AS7341_MODE_SPM = AS7341_CONFIG_INT_MODE_SPM  # SPM模式别名
-AS7341_CONFIG_INT_MODE_SYNS = const(0x01)  # SYNS同步测量模式（GPIO触发）
-AS7341_MODE_SYNS = AS7341_CONFIG_INT_MODE_SYNS  # SYNS模式别名
-AS7341_CONFIG_INT_MODE_SYND = const(0x03)  # SYND同步测量模式（GPIO+EDGE触发）
-AS7341_MODE_SYND = AS7341_CONFIG_INT_MODE_SYND  # SYND模式别名
-AS7341_CONFIG_INT_SEL = const(0x04)  # 中断选择位
-AS7341_CONFIG_LED_SEL = const(0x08)  # LED选择位
-
-# 状态寄存器（STAT）地址及位域
-AS7341_STAT = const(0x71)  # 状态寄存器地址
-AS7341_STAT_READY = const(0x01)  # 就绪标志位
-AS7341_STAT_WAIT_SYNC = const(0x02)  # 等待同步标志位
-
-# 边缘检测寄存器（EDGE）地址
-AS7341_EDGE = const(0x72)
-
-# GPIO寄存器（GPIO）地址及位域
-AS7341_GPIO = const(0x73)  # GPIO寄存器地址
-AS7341_GPIO_PD_INT = const(0x01)  # INT引脚下拉使能位
-AS7341_GPIO_PD_GPIO = const(0x02)  # GPIO引脚下拉使能位
-
-# LED控制寄存器（LED）地址及位域
-AS7341_LED = const(0x74)  # LED控制寄存器地址
-AS7341_LED_LED_ACT = const(0x80)  # LED激活位
-
-# 使能寄存器（ENABLE）地址及位域
-AS7341_ENABLE = const(0x80)  # 使能寄存器地址
-AS7341_ENABLE_PON = const(0x01)  # 电源使能位
-AS7341_ENABLE_SP_EN = const(0x02)  # 光谱测量使能位
-AS7341_ENABLE_WEN = const(0x08)  # WTIME自动重启使能位
-AS7341_ENABLE_SMUXEN = const(0x10)  # SMUX使能位
-AS7341_ENABLE_FDEN = const(0x40)  # 闪烁检测使能位
-
-# 积分时间寄存器（ATIME）地址
-AS7341_ATIME = const(0x81)
-
-# WTIME寄存器（WTIME）地址
-AS7341_WTIME = const(0x83)
-
-# 光谱阈值寄存器（SP_TH）地址
-AS7341_SP_TH_LOW = const(0x84)  # 低阈值低字节地址
-AS7341_SP_TH_L_LSB = const(0x84)  # 低阈值低字节别名
-AS7341_SP_TH_L_MSB = const(0x85)  # 低阈值高字节地址
-AS7341_SP_TH_HIGH = const(0x86)  # 高阈值低字节地址
-AS7341_SP_TH_H_LSB = const(0x86)  # 高阈值低字节别名
-AS7341_SP_TH_H_MSB = const(0x87)  # 高阈值高字节地址
-
-# 辅助ID寄存器（AUXID）地址
-AS7341_AUXID = const(0x90)
-
-# 修订版本寄存器（REVID）地址
-AS7341_REVID = const(0x91)
-
-# 设备ID寄存器（ID）地址
-AS7341_ID = const(0x92)
-
-# 状态寄存器（STATUS）地址及位域
-AS7341_STATUS = const(0x93)  # 状态寄存器地址
-AS7341_STATUS_ASAT = const(0x80)  # 光谱饱和标志位
-AS7341_STATUS_AINT = const(0x08)  # 光谱中断标志位
-AS7341_STATUS_FINT = const(0x04)  # 闪烁检测中断标志位
-AS7341_STATUS_C_INT = const(0x02)  # 清除中断标志位
-AS7341_STATUS_SINT = const(0x01)  # 同步中断标志位
-
-# ASTATUS寄存器地址及位域
-AS7341_ASTATUS = const(0x94)  # ASTATUS寄存器起始地址（包含6个通道计数）
-AS7341_ASTATUS_ASAT_STATUS = const(0x80)  # 光谱饱和状态位
-AS7341_ASTATUS_AGAIN_STATUS = const(0x0F)  # 增益状态位
-
-# 通道数据寄存器（CH_DATA）地址
-AS7341_CH_DATA = const(0x95)  # 通道数据起始地址
-AS7341_CH0_DATA_L = const(0x95)  # CH0数据低字节地址
-AS7341_CH0_DATA_H = const(0x96)  # CH0数据高字节地址
-AS7341_CH1_DATA_L = const(0x97)  # CH1数据低字节地址
-AS7341_CH1_DATA_H = const(0x98)  # CH1数据高字节地址
-AS7341_CH2_DATA_L = const(0x99)  # CH2数据低字节地址
-AS7341_CH2_DATA_H = const(0x9A)  # CH2数据高字节地址
-AS7341_CH3_DATA_L = const(0x9B)  # CH3数据低字节地址
-AS7341_CH3_DATA_H = const(0x9C)  # CH3数据高字节地址
-AS7341_CH4_DATA_L = const(0x9D)  # CH4数据低字节地址
-AS7341_CH4_DATA_H = const(0x9E)  # CH4数据高字节地址
-AS7341_CH5_DATA_L = const(0x9F)  # CH5数据低字节地址
-AS7341_CH5_DATA_H = const(0xA0)  # CH5数据高字节地址
-
-# 状态寄存器2（STATUS_2）地址及位域
-AS7341_STATUS_2 = const(0xA3)  # 状态寄存器2地址
-AS7341_STATUS_2_AVALID = const(0x40)  # 数据有效标志位
-
-# 状态寄存器3（STATUS_3）地址
-AS7341_STATUS_3 = const(0xA4)
-
-# 状态寄存器5（STATUS_5）地址
-AS7341_STATUS_5 = const(0xA6)
-
-# 状态寄存器6（STATUS_6）地址
-AS7341_STATUS_6 = const(0xA7)
-
-# 配置寄存器0（CFG_0）地址及位域
-AS7341_CFG_0 = const(0xA9)  # 配置寄存器0地址
-AS7341_CFG_0_WLONG = const(0x04)  # 长等待时间使能位
-AS7341_CFG_0_REG_BANK = const(0x10)  # 寄存器库选择位（数据表图82）
-AS7341_CFG_0_LOW_POWER = const(0x20)  # 低功耗模式位
-
-# 配置寄存器1（CFG_1）地址
-AS7341_CFG_1 = const(0xAA)
-
-# 配置寄存器3（CFG_3）地址
-AS7341_CFG_3 = const(0xAC)
-
-# 配置寄存器6（CFG_6）地址及位域
-AS7341_CFG_6 = const(0xAF)  # 配置寄存器6地址
-AS7341_CFG_6_SMUX_CMD_ROM = const(0x00)  # SMUX ROM命令位
-AS7341_CFG_6_SMUX_CMD_READ = const(0x08)  # SMUX读命令位
-AS7341_CFG_6_SMUX_CMD_WRITE = const(0x10)  # SMUX写命令位
-
-# 配置寄存器8（CFG_8）地址
-AS7341_CFG_8 = const(0xB1)
-
-# 配置寄存器9（CFG_9）地址
-AS7341_CFG_9 = const(0xB2)
-
-# 配置寄存器10（CFG_10）地址
-AS7341_CFG_10 = const(0xB3)
-
-# 配置寄存器12（CFG_12）地址
-AS7341_CFG_12 = const(0xB5)
-
-# 中断持续寄存器（PERS）地址
-AS7341_PERS = const(0xBD)
-
-# GPIO2寄存器（GPIO_2）地址及位域
-AS7341_GPIO_2 = const(0xBE)  # GPIO2寄存器地址
-AS7341_GPIO_2_GPIO_IN = const(0x01)  # GPIO输入状态位
-AS7341_GPIO_2_GPIO_OUT = const(0x02)  # GPIO输出使能位
-AS7341_GPIO_2_GPIO_IN_EN = const(0x04)  # GPIO输入使能位
-AS7341_GPIO_2_GPIO_INV = const(0x08)  # GPIO输出反转位
-
-# ASTEP寄存器地址
-AS7341_ASTEP = const(0xCA)  # ASTEP低字节地址
-AS7341_ASTEP_L = const(0xCA)  # ASTEP低字节别名
-AS7341_ASTEP_H = const(0xCB)  # ASTEP高字节地址
-
-# AGC最大增益寄存器（AGC_GAIN_MAX）地址
-AS7341_AGC_GAIN_MAX = const(0xCF)
-
-# 自动零配置寄存器（AZ_CONFIG）地址
-AS7341_AZ_CONFIG = const(0xD6)
-
-# 闪烁检测时间寄存器（FD_TIME）地址
-AS7341_FD_TIME_1 = const(0xD8)
-AS7341_FD_TIME_2 = const(0xDA)
-
-# 闪烁检测配置寄存器0（FD_CFG0）地址
-AS7341_FD_CFG0 = const(0xD7)
-
-# 闪烁检测状态寄存器（FD_STATUS）地址及位域
-AS7341_FD_STATUS = const(0xDB)  # 闪烁检测状态寄存器地址
-AS7341_FD_STATUS_FD_100HZ = const(0x01)  # 100Hz闪烁检测标志位
-AS7341_FD_STATUS_FD_120HZ = const(0x02)  # 120Hz闪烁检测标志位
-AS7341_FD_STATUS_FD_100_VALID = const(0x04)  # 100Hz检测有效标志位
-AS7341_FD_STATUS_FD_120_VALID = const(0x08)  # 120Hz检测有效标志位
-AS7341_FD_STATUS_FD_SAT_DETECT = const(0x10)  # 饱和检测标志位
-AS7341_FD_STATUS_FD_MEAS_VALID = const(0x20)  # 测量有效标志位
-
-# 中断使能寄存器（INTENAB）地址及位域
-AS7341_INTENAB = const(0xF9)  # 中断使能寄存器地址
-AS7341_INTENAB_SP_IEN = const(0x08)  # 光谱中断使能位
-
-# 控制寄存器（CONTROL）地址
-AS7341_CONTROL = const(0xFA)
-
-# FIFO映射寄存器（FIFO_MAP）地址
-AS7341_FIFO_MAP = const(0xFC)
-
-# FIFO级别寄存器（FIFO_LVL）地址
-AS7341_FIFO_LVL = const(0xFD)
-
-# FIFO数据寄存器（FDATA）地址
-AS7341_FDATA = const(0xFE)  # FDATA低字节地址
-AS7341_FDATA_L = const(0xFE)  # FDATA低字节别名
-AS7341_FDATA_H = const(0xFF)  # FDATA高字节地址
 
 # ======================================== 功能函数 ============================================
 
@@ -334,6 +125,217 @@ class AS7341:
                       Configure SYNS mode interrupt
     """
 
+    # SMUX通道选择配置字典，键为配置名称，值为对应的配置字节数组
+    # SMUX channel selection configuration dictionary, key is configuration name, value is corresponding configuration byte array
+    AS7341_SMUX_SELECT = {
+        # F1至F4通道、CLEAR通道、NIR通道配置
+        "F1F4CN": b"\x30\x01\x00\x00\x00\x42\x00\x00\x50\x00\x00\x00\x20\x04\x00\x30\x01\x50\x00\x06",
+        # F5至F8通道、CLEAR通道、NIR通道配置
+        "F5F8CN": b"\x00\x00\x00\x40\x02\x00\x10\x03\x50\x10\x03\x00\x00\x00\x24\x00\x00\x50\x00\x06",
+        # F2至F7通道配置
+        "F2F7": b"\x20\x00\x00\x00\x05\x31\x40\x06\x00\x40\x06\x00\x10\x03\x50\x20\x00\x00\x00\x00",
+        # F3至F8通道配置
+        "F3F8": b"\x10\x00\x00\x60\x04\x20\x30\x05\x00\x30\x05\x00\x00\x02\x46\x10\x00\x00\x00\x00",
+        # 仅闪烁检测配置
+        "FD": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x60",
+    }
+
+    # AS7341传感器默认I2C地址
+    AS7341_I2C_ADDRESS = const(0x39)
+    # AS7341传感器型号识别值（不含低2位）
+    AS7341_ID_VALUE = const(0x24)
+
+    # 寄存器地址及位域符号常量定义
+    # Symbolic constants for register addresses and bit fields
+    # 注意：地址范围0x60--0x6F的ASTATUS、ITIME和CHx_DATA寄存器未使用
+    # Note: ASTATUS, ITIME and CHx_DATA registers in address range 0x60--0x6F are not used
+
+    # 配置寄存器（CONFIG）地址及位域
+    AS7341_CONFIG = const(0x70)  # 配置寄存器地址
+    AS7341_CONFIG_INT_MODE_SPM = const(0x00)  # SPM单脉冲测量模式
+    AS7341_MODE_SPM = AS7341_CONFIG_INT_MODE_SPM  # SPM模式别名
+    AS7341_CONFIG_INT_MODE_SYNS = const(0x01)  # SYNS同步测量模式（GPIO触发）
+    AS7341_MODE_SYNS = AS7341_CONFIG_INT_MODE_SYNS  # SYNS模式别名
+    AS7341_CONFIG_INT_MODE_SYND = const(0x03)  # SYND同步测量模式（GPIO+EDGE触发）
+    AS7341_MODE_SYND = AS7341_CONFIG_INT_MODE_SYND  # SYND模式别名
+    AS7341_CONFIG_INT_SEL = const(0x04)  # 中断选择位
+    AS7341_CONFIG_LED_SEL = const(0x08)  # LED选择位
+
+    # 状态寄存器（STAT）地址及位域
+    AS7341_STAT = const(0x71)  # 状态寄存器地址
+    AS7341_STAT_READY = const(0x01)  # 就绪标志位
+    AS7341_STAT_WAIT_SYNC = const(0x02)  # 等待同步标志位
+
+    # 边缘检测寄存器（EDGE）地址
+    AS7341_EDGE = const(0x72)
+
+    # GPIO寄存器（GPIO）地址及位域
+    AS7341_GPIO = const(0x73)  # GPIO寄存器地址
+    AS7341_GPIO_PD_INT = const(0x01)  # INT引脚下拉使能位
+    AS7341_GPIO_PD_GPIO = const(0x02)  # GPIO引脚下拉使能位
+
+    # LED控制寄存器（LED）地址及位域
+    AS7341_LED = const(0x74)  # LED控制寄存器地址
+    AS7341_LED_LED_ACT = const(0x80)  # LED激活位
+
+    # 使能寄存器（ENABLE）地址及位域
+    AS7341_ENABLE = const(0x80)  # 使能寄存器地址
+    AS7341_ENABLE_PON = const(0x01)  # 电源使能位
+    AS7341_ENABLE_SP_EN = const(0x02)  # 光谱测量使能位
+    AS7341_ENABLE_WEN = const(0x08)  # WTIME自动重启使能位
+    AS7341_ENABLE_SMUXEN = const(0x10)  # SMUX使能位
+    AS7341_ENABLE_FDEN = const(0x40)  # 闪烁检测使能位
+
+    # 积分时间寄存器（ATIME）地址
+    AS7341_ATIME = const(0x81)
+
+    # WTIME寄存器（WTIME）地址
+    AS7341_WTIME = const(0x83)
+
+    # 光谱阈值寄存器（SP_TH）地址
+    AS7341_SP_TH_LOW = const(0x84)  # 低阈值低字节地址
+    AS7341_SP_TH_L_LSB = const(0x84)  # 低阈值低字节别名
+    AS7341_SP_TH_L_MSB = const(0x85)  # 低阈值高字节地址
+    AS7341_SP_TH_HIGH = const(0x86)  # 高阈值低字节地址
+    AS7341_SP_TH_H_LSB = const(0x86)  # 高阈值低字节别名
+    AS7341_SP_TH_H_MSB = const(0x87)  # 高阈值高字节地址
+
+    # 辅助ID寄存器（AUXID）地址
+    AS7341_AUXID = const(0x90)
+
+    # 修订版本寄存器（REVID）地址
+    AS7341_REVID = const(0x91)
+
+    # 设备ID寄存器（ID）地址
+    AS7341_ID = const(0x92)
+
+    # 状态寄存器（STATUS）地址及位域
+    AS7341_STATUS = const(0x93)  # 状态寄存器地址
+    AS7341_STATUS_ASAT = const(0x80)  # 光谱饱和标志位
+    AS7341_STATUS_AINT = const(0x08)  # 光谱中断标志位
+    AS7341_STATUS_FINT = const(0x04)  # 闪烁检测中断标志位
+    AS7341_STATUS_C_INT = const(0x02)  # 清除中断标志位
+    AS7341_STATUS_SINT = const(0x01)  # 同步中断标志位
+
+    # ASTATUS寄存器地址及位域
+    AS7341_ASTATUS = const(0x94)  # ASTATUS寄存器起始地址（包含6个通道计数）
+    AS7341_ASTATUS_ASAT_STATUS = const(0x80)  # 光谱饱和状态位
+    AS7341_ASTATUS_AGAIN_STATUS = const(0x0F)  # 增益状态位
+
+    # 通道数据寄存器（CH_DATA）地址
+    AS7341_CH_DATA = const(0x95)  # 通道数据起始地址
+    AS7341_CH0_DATA_L = const(0x95)  # CH0数据低字节地址
+    AS7341_CH0_DATA_H = const(0x96)  # CH0数据高字节地址
+    AS7341_CH1_DATA_L = const(0x97)  # CH1数据低字节地址
+    AS7341_CH1_DATA_H = const(0x98)  # CH1数据高字节地址
+    AS7341_CH2_DATA_L = const(0x99)  # CH2数据低字节地址
+    AS7341_CH2_DATA_H = const(0x9A)  # CH2数据高字节地址
+    AS7341_CH3_DATA_L = const(0x9B)  # CH3数据低字节地址
+    AS7341_CH3_DATA_H = const(0x9C)  # CH3数据高字节地址
+    AS7341_CH4_DATA_L = const(0x9D)  # CH4数据低字节地址
+    AS7341_CH4_DATA_H = const(0x9E)  # CH4数据高字节地址
+    AS7341_CH5_DATA_L = const(0x9F)  # CH5数据低字节地址
+    AS7341_CH5_DATA_H = const(0xA0)  # CH5数据高字节地址
+
+    # 状态寄存器2（STATUS_2）地址及位域
+    AS7341_STATUS_2 = const(0xA3)  # 状态寄存器2地址
+    AS7341_STATUS_2_AVALID = const(0x40)  # 数据有效标志位
+
+    # 状态寄存器3（STATUS_3）地址
+    AS7341_STATUS_3 = const(0xA4)
+
+    # 状态寄存器5（STATUS_5）地址
+    AS7341_STATUS_5 = const(0xA6)
+
+    # 状态寄存器6（STATUS_6）地址
+    AS7341_STATUS_6 = const(0xA7)
+
+    # 配置寄存器0（CFG_0）地址及位域
+    AS7341_CFG_0 = const(0xA9)  # 配置寄存器0地址
+    AS7341_CFG_0_WLONG = const(0x04)  # 长等待时间使能位
+    AS7341_CFG_0_REG_BANK = const(0x10)  # 寄存器库选择位（数据表图82）
+    AS7341_CFG_0_LOW_POWER = const(0x20)  # 低功耗模式位
+
+    # 配置寄存器1（CFG_1）地址
+    AS7341_CFG_1 = const(0xAA)
+
+    # 配置寄存器3（CFG_3）地址
+    AS7341_CFG_3 = const(0xAC)
+
+    # 配置寄存器6（CFG_6）地址及位域
+    AS7341_CFG_6 = const(0xAF)  # 配置寄存器6地址
+    AS7341_CFG_6_SMUX_CMD_ROM = const(0x00)  # SMUX ROM命令位
+    AS7341_CFG_6_SMUX_CMD_READ = const(0x08)  # SMUX读命令位
+    AS7341_CFG_6_SMUX_CMD_WRITE = const(0x10)  # SMUX写命令位
+
+    # 配置寄存器8（CFG_8）地址
+    AS7341_CFG_8 = const(0xB1)
+
+    # 配置寄存器9（CFG_9）地址
+    AS7341_CFG_9 = const(0xB2)
+
+    # 配置寄存器10（CFG_10）地址
+    AS7341_CFG_10 = const(0xB3)
+
+    # 配置寄存器12（CFG_12）地址
+
+    AS7341_CFG_12 = const(0xB5)
+
+    # 中断持续寄存器（PERS）地址
+    AS7341_PERS = const(0xBD)
+
+    # GPIO2寄存器（GPIO_2）地址及位域
+    AS7341_GPIO_2 = const(0xBE)  # GPIO2寄存器地址
+    AS7341_GPIO_2_GPIO_IN = const(0x01)  # GPIO输入状态位
+    AS7341_GPIO_2_GPIO_OUT = const(0x02)  # GPIO输出使能位
+    AS7341_GPIO_2_GPIO_IN_EN = const(0x04)  # GPIO输入使能位
+    AS7341_GPIO_2_GPIO_INV = const(0x08)  # GPIO输出反转位
+
+    # ASTEP寄存器地址
+    AS7341_ASTEP = const(0xCA)  # ASTEP低字节地址
+    AS7341_ASTEP_L = const(0xCA)  # ASTEP低字节别名
+    AS7341_ASTEP_H = const(0xCB)  # ASTEP高字节地址
+
+    # AGC最大增益寄存器（AGC_GAIN_MAX）地址
+    AS7341_AGC_GAIN_MAX = const(0xCF)
+
+    # 自动零配置寄存器（AZ_CONFIG）地址
+    AS7341_AZ_CONFIG = const(0xD6)
+
+    # 闪烁检测时间寄存器（FD_TIME）地址
+    AS7341_FD_TIME_1 = const(0xD8)
+    AS7341_FD_TIME_2 = const(0xDA)
+
+    # 闪烁检测配置寄存器0（FD_CFG0）地址
+    AS7341_FD_CFG0 = const(0xD7)
+
+    # 闪烁检测状态寄存器（FD_STATUS）地址及位域
+    AS7341_FD_STATUS = const(0xDB)  # 闪烁检测状态寄存器地址
+    AS7341_FD_STATUS_FD_100HZ = const(0x01)  # 100Hz闪烁检测标志位
+    AS7341_FD_STATUS_FD_120HZ = const(0x02)  # 120Hz闪烁检测标志位
+    AS7341_FD_STATUS_FD_100_VALID = const(0x04)  # 100Hz检测有效标志位
+    AS7341_FD_STATUS_FD_120_VALID = const(0x08)  # 120Hz检测有效标志位
+    AS7341_FD_STATUS_FD_SAT_DETECT = const(0x10)  # 饱和检测标志位
+    AS7341_FD_STATUS_FD_MEAS_VALID = const(0x20)  # 测量有效标志位
+
+    # 中断使能寄存器（INTENAB）地址及位域
+    AS7341_INTENAB = const(0xF9)  # 中断使能寄存器地址
+    AS7341_INTENAB_SP_IEN = const(0x08)  # 光谱中断使能位
+
+    # 控制寄存器（CONTROL）地址
+    AS7341_CONTROL = const(0xFA)
+
+    # FIFO映射寄存器（FIFO_MAP）地址
+    AS7341_FIFO_MAP = const(0xFC)
+
+    # FIFO级别寄存器（FIFO_LVL）地址
+    AS7341_FIFO_LVL = const(0xFD)
+
+    # FIFO数据寄存器（FDATA）地址
+    AS7341_FDATA = const(0xFE)  # FDATA低字节地址
+    AS7341_FDATA_L = const(0xFE)  # FDATA低字节别名
+    AS7341_FDATA_H = const(0xFF)  # FDATA高字节地址
+
     def __init__(self, i2c, addr=AS7341_I2C_ADDRESS):
         """
         初始化AS7341传感器对象
@@ -354,7 +356,7 @@ class AS7341:
         self._buffer1 = bytearray(1)  # 1字节I2C读写缓冲区
         self._buffer2 = bytearray(2)  # 2字节I2C读写缓冲区
         self._buffer13 = bytearray(13)  # 13字节I2C读写缓冲区
-        self._measuremode = AS7341_MODE_SPM  # 默认测量模式为SPM
+        self._measuremode = self.AS7341_MODE_SPM  # 默认测量模式为SPM
         self._connected = self.reset()  # 重启传感器并检查连接状态
 
     """ --------- 'private' methods ----------- """
@@ -421,10 +423,10 @@ class AS7341:
             Reading ASTATUS register latches channel count values to ensure data consistency
         """
         try:
-            self._bus.readfrom_mem_into(self._address, AS7341_ASTATUS, self._buffer13)
+            self._bus.readfrom_mem_into(self._address, self.AS7341_ASTATUS, self._buffer13)
             return unpack_from("<HHHHHH", self._buffer13, 1)  # 跳过状态位，返回6个无符号短整型值
         except Exception as err:
-            print("I2C read_all_channels at 0x{:02X}, error: {}".format(AS7341_ASTATUS, err))
+            print("I2C read_all_channels at 0x{:02X}, error: {}".format(self.AS7341_ASTATUS, err))
             return []  # 读取失败返回空列表
 
     def _write_byte(self, reg, value):
@@ -550,7 +552,7 @@ class AS7341:
             CFG_0寄存器（0xA9）在选择寄存器库1时仍可访问，否则无法重置REG_BANK位
             CFG_0 register (0xA9) is still accessible when register bank 1 is selected, otherwise REG_BANK bit cannot be reset
         """
-        self._modify_reg(AS7341_CFG_0, AS7341_CFG_0_REG_BANK, bank != 0)
+        self._modify_reg(self.AS7341_CFG_0, self.AS7341_CFG_0_REG_BANK, bank != 0)
 
     """ ----------- 'public' methods ----------- """
 
@@ -563,7 +565,7 @@ class AS7341:
             仅设置PON位上电，不启用其他功能
             Only set PON bit to power on, do not enable other functions
         """
-        self._write_byte(AS7341_ENABLE, AS7341_ENABLE_PON)
+        self._write_byte(self.AS7341_ENABLE, self.AS7341_ENABLE_PON)
 
     def disable(self):
         """
@@ -575,9 +577,9 @@ class AS7341:
             Disable measurement mode and LED first, then power off
         """
         self._set_bank(1)  # CONFIG寄存器在库1
-        self._write_byte(AS7341_CONFIG, 0x00)  # 关闭中断、LED，设置SPM模式
+        self._write_byte(self.AS7341_CONFIG, 0x00)  # 关闭中断、LED，设置SPM模式
         self._set_bank(0)
-        self._write_byte(AS7341_ENABLE, 0x00)  # 断电
+        self._write_byte(self.AS7341_ENABLE, 0x00)  # 断电
 
     def reset(self):
         """
@@ -596,13 +598,13 @@ class AS7341:
         sleep_ms(50)  # 等待稳定
         self.enable()  # 仅上电
         sleep_ms(50)  # 等待稳定
-        id = self._read_byte(AS7341_ID)  # 读取设备ID
+        id = self._read_byte(self.AS7341_ID)  # 读取设备ID
         if id < 0:  # 读取失败
             print("Failed to contact AS7341 at I2C address 0x{:02X}".format(self._address))
             return False
         else:
-            if not (id & (~0x03)) == AS7341_ID_VALUE:  # 验证ID（高6位）
-                print("No AS7341: found 0x{:02X}, expected 0x{:02X}".format(id, AS7341_ID_VALUE))
+            if not (id & (~0x03)) == self.AS7341_ID_VALUE:  # 验证ID（高6位）
+                print("No AS7341: found 0x{:02X}, expected 0x{:02X}".format(id, self.AS7341_ID_VALUE))
                 return False
         self.set_measure_mode(self._measuremode)  # 配置测量模式
         return True
@@ -627,7 +629,7 @@ class AS7341:
             bool: 测量完成返回True，未完成返回False
                   Return True if measurement completed, False if not completed
         """
-        return bool(self._read_byte(AS7341_STATUS_2) & AS7341_STATUS_2_AVALID)
+        return bool(self._read_byte(self.AS7341_STATUS_2) & self.AS7341_STATUS_2_AVALID)
 
     def set_spectral_measurement(self, flag=True):
         """
@@ -638,7 +640,7 @@ class AS7341:
             flag (bool): True-启用，False-禁用
                          True - enable, False - disable
         """
-        self._modify_reg(AS7341_ENABLE, AS7341_ENABLE_SP_EN, flag)
+        self._modify_reg(self.AS7341_ENABLE, self.AS7341_ENABLE_SP_EN, flag)
 
     def set_smux(self, flag=True):
         """
@@ -649,7 +651,7 @@ class AS7341:
             flag (bool): True-启用，False-禁用
                          True - enable, False - disable
         """
-        self._modify_reg(AS7341_ENABLE, AS7341_ENABLE_SMUXEN, flag)
+        self._modify_reg(self.AS7341_ENABLE, self.AS7341_ENABLE_SMUXEN, flag)
 
     def set_measure_mode(self, mode=AS7341_CONFIG_INT_MODE_SPM):
         """
@@ -665,15 +667,15 @@ class AS7341:
             Interrupt function needs to be configured separately
         """
         if mode in (
-            AS7341_CONFIG_INT_MODE_SPM,  # SPM单脉冲模式（SP_EN触发）
-            AS7341_CONFIG_INT_MODE_SYNS,  # SYNS同步模式（GPIO触发）
-            AS7341_CONFIG_INT_MODE_SYND,
+            self.AS7341_CONFIG_INT_MODE_SPM,  # SPM单脉冲模式（SP_EN触发）
+            self.AS7341_CONFIG_INT_MODE_SYNS,  # SYNS同步模式（GPIO触发）
+            self.AS7341_CONFIG_INT_MODE_SYND,
         ):  # SYND同步模式（GPIO+EDGE触发）
             self._measuremode = mode  # 保存新测量模式
             self._set_bank(1)  # CONFIG寄存器在库1
-            data = self._read_byte(AS7341_CONFIG) & (~0x03)  # 复位低2位（模式位）
+            data = self._read_byte(self.AS7341_CONFIG) & (~0x03)  # 复位低2位（模式位）
             data |= mode  # 设置新模式
-            self._write_byte(AS7341_CONFIG, data)  # 写入新模式
+            self._write_byte(self.AS7341_CONFIG, data)  # 写入新模式
             self._set_bank(0)  # 退出库1
 
     def channel_select(self, selection):
@@ -682,17 +684,17 @@ class AS7341:
         Select preset SMUX channel configuration
 
         Args:
-            selection (str): 配置名称，必须是AS7341_SMUX_SELECT的键
-                             Configuration name, must be a key of AS7341_SMUX_SELECT
+            selection (str): 配置名称，必须是self.AS7341_SMUX_SELECT的键
+                             Configuration name, must be a key of self.AS7341_SMUX_SELECT
 
         Notes:
             会覆盖从0x00开始的20个寄存器值
             Will overwrite 20 register values starting from 0x00
         """
-        if selection in AS7341_SMUX_SELECT:
-            self._write_burst(0x00, AS7341_SMUX_SELECT[selection])
+        if selection in self.AS7341_SMUX_SELECT:
+            self._write_burst(0x00, self.AS7341_SMUX_SELECT[selection])
         else:
-            print("{} is unknown in AS7341_SMUX_SELECT".format(selection))
+            print("{} is unknown in self.AS7341_SMUX_SELECT".format(selection))
 
     def start_measure(self, selection=None):
         """
@@ -707,18 +709,18 @@ class AS7341:
             连续测量相同通道配置时，只需调用一次channel_select，后续可省略selection参数
             When continuously measuring with the same channel configuration, call channel_select once, and omit the selection parameter later
         """
-        self._modify_reg(AS7341_CFG_0, AS7341_CFG_0_LOW_POWER, False)  # 禁用低功耗模式
+        self._modify_reg(self.AS7341_CFG_0, self.AS7341_CFG_0_LOW_POWER, False)  # 禁用低功耗模式
         self.set_spectral_measurement(False)  # 暂停测量
-        self._write_byte(AS7341_CFG_6, AS7341_CFG_6_SMUX_CMD_WRITE)  # 设置SMUX写模式
+        self._write_byte(self.AS7341_CFG_6, self.AS7341_CFG_6_SMUX_CMD_WRITE)  # 设置SMUX写模式
         if not selection == None:
             self.channel_select(selection)
-        if self._measuremode == AS7341_CONFIG_INT_MODE_SPM:
+        if self._measuremode == self.AS7341_CONFIG_INT_MODE_SPM:
             self.set_smux(True)
-        elif self._measuremode == AS7341_CONFIG_INT_MODE_SYNS:
+        elif self._measuremode == self.AS7341_CONFIG_INT_MODE_SYNS:
             self.set_smux(True)
             self.set_gpio_input(True)
         self.set_spectral_measurement(True)
-        if self._measuremode == AS7341_CONFIG_INT_MODE_SPM:
+        if self._measuremode == self.AS7341_CONFIG_INT_MODE_SPM:
             while not self.measurement_completed():
                 sleep_ms(50)
 
@@ -741,8 +743,8 @@ class AS7341:
         """
         data = 0  # 默认值
         if 0 <= channel <= 5:
-            data = self._read_word(AS7341_CH_DATA + channel * 2)
-            print("ch={:d}, addr={:02X}, buf2=0x{:02X}{:02X}".format(channel, AS7341_CH_DATA + channel * 2, self._buffer2[0], self._buffer2[1]))
+            data = self._read_word(self.AS7341_CH_DATA + channel * 2)
+            print("ch={:d}, addr={:02X}, buf2=0x{:02X}{:02X}".format(channel, self.AS7341_CH_DATA + channel * 2, self._buffer2[0], self._buffer2[1]))
         return data  # 返回计数值
 
     def get_spectral_data(self):
@@ -769,7 +771,7 @@ class AS7341:
             flag (bool): True-启用，False-禁用
                          True - enable, False - disable
         """
-        self._modify_reg(AS7341_ENABLE, AS7341_ENABLE_FDEN, flag)
+        self._modify_reg(self.AS7341_ENABLE, self.AS7341_ENABLE_FDEN, flag)
 
     def get_flicker_frequency(self):
         """
@@ -784,34 +786,34 @@ class AS7341:
             闪烁检测的积分时间和增益与其他通道相同，不支持专用的FD_TIME和FD_GAIN
             Integration time and gain for flicker detection are the same as other channels, dedicated FD_TIME and FD_GAIN are not supported
         """
-        self._modify_reg(AS7341_CFG_0, AS7341_CFG_0_LOW_POWER, False)  # 禁用低功耗模式
+        self._modify_reg(self.AS7341_CFG_0, self.AS7341_CFG_0_LOW_POWER, False)  # 禁用低功耗模式
         self.set_spectral_measurement(False)
-        self._write_byte(AS7341_CFG_6, AS7341_CFG_6_SMUX_CMD_WRITE)
+        self._write_byte(self.AS7341_CFG_6, self.AS7341_CFG_6_SMUX_CMD_WRITE)
         self.channel_select("FD")  # 选择仅闪烁检测配置
         self.set_smux(True)
         self.set_spectral_measurement(True)
         self.set_flicker_detection(True)
         for _ in range(10):  # 最多等待500ms测量完成
-            fd_status = self._read_byte(AS7341_FD_STATUS)
-            if fd_status & AS7341_FD_STATUS_FD_MEAS_VALID:
+            fd_status = self._read_byte(self.AS7341_FD_STATUS)
+            if fd_status & self.AS7341_FD_STATUS_FD_MEAS_VALID:
                 break
             sleep_ms(50)
         else:  # 超时
             print("Flicker measurement timed out")
             return 0
         for _ in range(10):  # 最多等待500ms计算完成
-            fd_status = self._read_byte(AS7341_FD_STATUS)
-            if (fd_status & AS7341_FD_STATUS_FD_100_VALID) or (fd_status & AS7341_FD_STATUS_FD_120_VALID):
+            fd_status = self._read_byte(self.AS7341_FD_STATUS)
+            if (fd_status & self.AS7341_FD_STATUS_FD_100_VALID) or (fd_status & self.AS7341_FD_STATUS_FD_120_VALID):
                 break
             sleep_ms(50)
         else:  # 超时
             print("Flicker frequency calculation timed out")
             return 0
         self.set_flicker_detection(False)  # 禁用闪烁检测
-        self._write_byte(AS7341_FD_STATUS, 0x3C)  # 复位FD_STATUS可清除位
-        if (fd_status & AS7341_FD_STATUS_FD_100_VALID) and (fd_status & AS7341_FD_STATUS_FD_100HZ):
+        self._write_byte(self.AS7341_FD_STATUS, 0x3C)  # 复位FD_STATUS可清除位
+        if (fd_status & self.AS7341_FD_STATUS_FD_100_VALID) and (fd_status & self.AS7341_FD_STATUS_FD_100HZ):
             return 100
-        elif (fd_status & AS7341_FD_STATUS_FD_120_VALID) and (fd_status & AS7341_FD_STATUS_FD_120HZ):
+        elif (fd_status & self.AS7341_FD_STATUS_FD_120_VALID) and (fd_status & self.AS7341_FD_STATUS_FD_120HZ):
             return 120
         return 0
 
@@ -828,10 +830,10 @@ class AS7341:
             GPIO引脚为开漏输出，需要上拉电阻
             GPIO pin is open drain output, pull-up resistor is required
         """
-        mask = AS7341_GPIO_2_GPIO_OUT  # 激活GPIO引脚
+        mask = self.AS7341_GPIO_2_GPIO_OUT  # 激活GPIO引脚
         if enable:
-            mask |= AS7341_GPIO_2_GPIO_IN_EN  # 启用输入灵敏度
-        self._write_byte(AS7341_GPIO_2, mask)
+            mask |= self.AS7341_GPIO_2_GPIO_IN_EN  # 启用输入灵敏度
+        self._write_byte(self.AS7341_GPIO_2, mask)
 
     def get_gpio_value(self):
         """
@@ -846,7 +848,7 @@ class AS7341:
             仅在输入模式且输入灵敏度启用时有效
             Only valid in input mode and input sensitivity enabled
         """
-        return bool(self._read_byte(AS7341_GPIO_2) & AS7341_GPIO_2_GPIO_IN)
+        return bool(self._read_byte(self.AS7341_GPIO_2) & self.AS7341_GPIO_2_GPIO_IN)
 
     def set_gpio_output(self, inverted=False):
         """
@@ -863,8 +865,8 @@ class AS7341:
         """
         mask = 0x00  # 复位所有位→输出模式
         if inverted:
-            mask |= AS7341_GPIO_2_GPIO_INV
-        self._write_byte(AS7341_GPIO_2, mask)
+            mask |= self.AS7341_GPIO_2_GPIO_INV
+        self._write_byte(self.AS7341_GPIO_2, mask)
 
     def set_gpio_inverted(self, flag=True):
         """
@@ -879,7 +881,7 @@ class AS7341:
             控制LED时：True-LED灭，False-LED亮
             When controlling LED: True - LED off, False - LED on
         """
-        self._modify_reg(AS7341_GPIO_2, AS7341_GPIO_2_GPIO_INV, flag)
+        self._modify_reg(self.AS7341_GPIO_2, self.AS7341_GPIO_2_GPIO_INV, flag)
 
     def set_gpio_mask(self, mask=0x00):
         """
@@ -900,8 +902,8 @@ class AS7341:
             0x08 - GPIO output mode, LED off
             0x06 - GPIO input mode, input sensitivity enabled
         """
-        self._write_byte(AS7341_GPIO_2, mask)
-        print("GPIO_2 = 0x{:02X}".format(self._read_byte(AS7341_GPIO_2)))
+        self._write_byte(self.AS7341_GPIO_2, mask)
+        print("GPIO_2 = 0x{:02X}".format(self._read_byte(self.AS7341_GPIO_2)))
 
     def set_astep(self, value=599):
         """
@@ -913,7 +915,7 @@ class AS7341:
                          Step value (0-65534), corresponding to 2.78μs-182ms
         """
         if 0 <= value <= 65534:
-            self._write_word(AS7341_ASTEP, value)
+            self._write_word(self.AS7341_ASTEP, value)
 
     def get_astep_time(self):
         """
@@ -924,7 +926,7 @@ class AS7341:
             float: 步长时间（毫秒）
                    Step time (milliseconds)
         """
-        return (self._read_word(AS7341_ASTEP) + 1) * 2.78 / 1000
+        return (self._read_word(self.AS7341_ASTEP) + 1) * 2.78 / 1000
 
     def set_atime(self, value=29):
         """
@@ -936,7 +938,7 @@ class AS7341:
                          Integration steps (0-255)
         """
         if 0 <= value <= 255:
-            self._write_byte(AS7341_ATIME, value)
+            self._write_byte(self.AS7341_ATIME, value)
 
     def get_overflow_count(self):
         """
@@ -947,7 +949,7 @@ class AS7341:
             int: (ASTEP+1)*(ATIME+1)计算的最大计数值
                  Maximum count value calculated by (ASTEP+1)*(ATIME+1)
         """
-        return (self._read_word(AS7341_ASTEP) + 1) * (self._read_byte(AS7341_ATIME) + 1)
+        return (self._read_word(self.AS7341_ASTEP) + 1) * (self._read_byte(self.AS7341_ATIME) + 1)
 
     def get_integration_time(self):
         """
@@ -978,7 +980,7 @@ class AS7341:
             Gain factor = 2^(code-1)
         """
         if 0 <= code <= 10:
-            self._write_byte(AS7341_CFG_1, code)
+            self._write_byte(self.AS7341_CFG_1, code)
 
     def get_again(self):
         """
@@ -989,7 +991,7 @@ class AS7341:
             int: 增益码（0-10）
                  Gain code (0-10)
         """
-        return self._read_byte(AS7341_CFG_1)
+        return self._read_byte(self.AS7341_CFG_1)
 
     def set_again_factor(self, factor):
         """
@@ -1003,7 +1005,7 @@ class AS7341:
         for code in range(10, -1, -1):  # 从高到低遍历增益码
             if 2 ** (code - 1) <= factor:
                 break
-        self._write_byte(AS7341_CFG_1, code)
+        self._write_byte(self.AS7341_CFG_1, code)
 
     def get_again_factor(self):
         """
@@ -1025,7 +1027,7 @@ class AS7341:
             flag (bool): True-启用，False-禁用
                          True - enable, False - disable
         """
-        self._modify_reg(AS7341_ENABLE, AS7341_ENABLE_WEN, flag)
+        self._modify_reg(self.AS7341_ENABLE, self.AS7341_ENABLE_WEN, flag)
 
     def set_wtime(self, code):
         """
@@ -1040,7 +1042,7 @@ class AS7341:
             需同时调用set_wen(True)启用自动重启
             Need to call set_wen(True) to enable auto restart
         """
-        self._write_byte(AS7341_WTIME, code)
+        self._write_byte(self.AS7341_WTIME, code)
 
     def set_led_current(self, current):
         """
@@ -1057,12 +1059,12 @@ class AS7341:
         """
         self._set_bank(1)  # CONFIG和LED寄存器在库1
         if 4 <= current <= 20:  # 电流在有效范围
-            self._modify_reg(AS7341_CONFIG, AS7341_CONFIG_LED_SEL, True)
-            data = AS7341_LED_LED_ACT + ((current - 4) // 2)  # LED激活并设置电流
+            self._modify_reg(self.AS7341_CONFIG, self.AS7341_CONFIG_LED_SEL, True)
+            data = self.AS7341_LED_LED_ACT + ((current - 4) // 2)  # LED激活并设置电流
         else:
-            self._modify_reg(AS7341_CONFIG, AS7341_CONFIG_LED_SEL, False)
+            self._modify_reg(self.AS7341_CONFIG, self.AS7341_CONFIG_LED_SEL, False)
             data = 0  # LED关闭
-        self._write_byte(AS7341_LED, data)
+        self._write_byte(self.AS7341_LED, data)
         self._set_bank(0)
         sleep_ms(100)
 
@@ -1075,8 +1077,8 @@ class AS7341:
             bool: 有中断返回True，无中断返回False
                   Return True if interrupt exists, False if not
         """
-        data = self._read_byte(AS7341_STATUS)
-        if data & AS7341_STATUS_ASAT:
+        data = self._read_byte(self.AS7341_STATUS)
+        if data & self.AS7341_STATUS_ASAT:
             print("Spectral interrupt generation!")
             return True
         return False
@@ -1086,7 +1088,7 @@ class AS7341:
         清除所有中断信号
         Clear all interrupt signals
         """
-        self._write_byte(AS7341_STATUS, 0xFF)
+        self._write_byte(self.AS7341_STATUS, 0xFF)
 
     def set_spectral_interrupt(self, flag=True):
         """
@@ -1097,7 +1099,7 @@ class AS7341:
             flag (bool): True-启用，False-禁用
                          True - enable, False - disable
         """
-        self._modify_reg(AS7341_INTENAB, AS7341_INTENAB_SP_IEN, flag)
+        self._modify_reg(self.AS7341_INTENAB, self.AS7341_INTENAB_SP_IEN, flag)
 
     def set_interrupt_persistence(self, value):
         """
@@ -1109,7 +1111,7 @@ class AS7341:
                          Persistence count (0-15)
         """
         if 0 <= value <= 15:
-            self._write_byte(AS7341_PERS, value)
+            self._write_byte(self.AS7341_PERS, value)
 
     def set_spectral_threshold_channel(self, value):
         """
@@ -1121,7 +1123,7 @@ class AS7341:
                          Channel number (0-4)
         """
         if 0 <= value <= 4:
-            self._write_byte(AS7341_CFG_12, value)
+            self._write_byte(self.AS7341_CFG_12, value)
 
     def set_thresholds(self, lo, hi):
         """
@@ -1135,8 +1137,8 @@ class AS7341:
                       High threshold (must be greater than low threshold)
         """
         if lo < hi:
-            self._write_word(AS7341_SP_TH_LOW, lo)
-            self._write_word(AS7341_SP_TH_HIGH, hi)
+            self._write_word(self.AS7341_SP_TH_LOW, lo)
+            self._write_word(self.AS7341_SP_TH_HIGH, hi)
             sleep_ms(20)
 
     def get_thresholds(self):
@@ -1148,8 +1150,8 @@ class AS7341:
             tuple: (低阈值, 高阈值)
                    (Low threshold, High threshold)
         """
-        lo = self._read_word(AS7341_SP_TH_LOW)
-        hi = self._read_word(AS7341_SP_TH_HIGH)
+        lo = self._read_word(self.AS7341_SP_TH_LOW)
+        hi = self._read_word(self.AS7341_SP_TH_HIGH)
         return (lo, hi)
 
     def set_syns_int(self):
@@ -1162,7 +1164,7 @@ class AS7341:
             INT pin is open drain output, pull-up resistor is required to send signals to external devices
         """
         self._set_bank(1)  # CONFIG寄存器在库1
-        self._write_byte(AS7341_CONFIG, AS7341_CONFIG_INT_SEL | AS7341_CONFIG_INT_MODE_SYNS)
+        self._write_byte(self.AS7341_CONFIG, self.AS7341_CONFIG_INT_SEL | self.AS7341_CONFIG_INT_MODE_SYNS)
         self._set_bank(0)
 
 

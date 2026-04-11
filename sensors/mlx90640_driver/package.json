@@ -1,5 +1,5 @@
 {
-  "name": "mlx_90640_driver",
+  "name": "mlx90640_driver",
   "version": "1.0.0",
   "description": "A MicroPython library to control MLX90640 sensors",
   "author": "michael-sulyak",

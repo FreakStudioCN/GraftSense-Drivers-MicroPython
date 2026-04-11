@@ -1,6 +1,6 @@
 {
   "name": "lcm1602a_driver",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A MicroPython library to control lcm1602a_driver ",
   "author": "leeqingshui",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "mma8452q_driver",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A MicroPython library to control mma8452q_driver ",
   "author": "leeqingshui",
   "license": "MIT",
