@@ -1,0 +1,33 @@
+{
+  "default_provider": "modelscope",
+  "providers": {
+    "modelscope": {
+      "api_key": "YOUR_MODELSCOPE_API_KEY",
+      "endpoint": "https://api.modelscope.cn/v1",
+      "model": "qwen-turbo",
+      "models": {
+        "text_generation": "qwen-turbo",
+        "image_classification": "damo/cv_resnet50_image-classification",
+        "speech_recognition": "damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+      }
+    },
+    "claude": {
+      "api_key": "sk-ant-YOUR_KEY",
+      "endpoint": "https://api.anthropic.com",
+      "proxy": "http://192.168.1.100:8080",
+      "model": "claude-3-haiku-20240307"
+    },
+    "openai": {
+      "api_key": "sk-YOUR_KEY",
+      "endpoint": "https://api.openai.com/v1",
+      "model": "gpt-3.5-turbo"
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "max_size_kb": 100,
+    "ttl_seconds": 3600
+  },
+  "timeout_seconds": 30,
+  "retry_times": 2
+}
