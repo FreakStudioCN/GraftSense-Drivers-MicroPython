@@ -1,211 +1,437 @@
-"""
-MicroPython SPG4X sensor 'driver'
-"""
-# micropython
-# MIT license
-# Copyright (c) 2025 Roman Shevchik   kolbasilyvasily@yandex.ru
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2026/05/06 07:00
+# @Author  : Roman Shevchik
+# @File    : sgp4Xmod.py
+# @Description : SGP40/SGP41 VOC/NOx 空气质量传感器驱动，基于 sensor_pack_2 框架
+# @License : MIT
 
-# from micropython import const
+__version__ = "1.0.0"
+__author__ = "Roman Shevchik"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.23"
+
+# ======================================== 导入相关模块 =========================================
+
+import time
 from collections import namedtuple
 from sensor_pack_2 import bus_service
 from sensor_pack_2.base_sensor import DeviceEx, IDentifier, Iterator, check_value
 from sensor_pack_2.crc_mod import crc8
-import time
 
-# номер датчика от производителя
+# ======================================== 全局变量 ============================================
+
+# 传感器序列号（三个 16 位字）
 serial_number_sgp4x = namedtuple("serial_number_sgp4x", "word_0 word_1 word_2")
-# данные, полученные от датчика:
-# VOC - индекс летучих органических соединений;
-# NOx - индекс оксидов азота;
-# raw - если Истина, то поля VOX (летучие органические вещества) и NOx (оксиды азота (NO и NO2), образующиеся при горении) содержат сырые(!) данные,
-# которые требуется обработать c помощью Sensirion’s Gas Index Algorithm (https://pypi.org/project/sensirion-gas-index-algorithm/);
+# 测量结果：VOC 原始信号（SGP40/SGP41），NOx 原始信号（仅 SGP41，SGP40 为 None）
 measured_values_sgp4x = namedtuple("measured_values_sgp4x", "VOC NOx")
 
+# ======================================== 功能函数 ============================================
 
-# IBaseSensorEx
+# ======================================== 自定义类 ============================================
+
 class SGP4X(IDentifier, Iterator):
-    """Программное представление SGP4X - цифровых датчиков качества воздуха.
-     Измеряет летучие органические соединения (ЛОС) и оксиды азота (NOx, только SGP41)."""
-    # для SGP41!; Эта команда запускает кондиционирование, то есть пиксель VOC будет работать при той же температуре,
-    # что и при вызове команды sgp41_measure_raw_signals, в то время как пиксель NOx будет работать при другой температуре
-    # для кондиционирования. Ответ от датчика 3 байта. Время ожидания x/50 мс.
-    _cmd_execute_conditioning = 0x2612
-    # Эта команда запускает/продолжает режим измерения VOC, и возвращает измеренный необработанный сигнал RAW_VOC
-    # в виде 2 байтов (+ 1 байт CRC). Ответ от датчика 3 байта. Время ожидания 30/50 мс.
-    _cmd_measure_raw_signal = 0x260F
-    # Эта команда запускает встроенную самопроверку целостности как нагревателя, так и MOX-материала.
-    # Ответ от датчика 3 (для SGP40) или 6 (для SGP41) байт. Время ожидания 320 мс.
-    _cmd_execute_self_test = 0x280E
-    # Эта команда выключает нагреватель и останавливает измерение. Датчик переходит в режим ожидания.
-    # Ответ от датчика 0 байт. Время ожидания 1 мс.
-    _cmd_turn_heater_off = 0x3615
-    # Эта команда выдает десятичный серийный номер датчика.
-    # Ответ от датчика 9 байт. Время ожидания 1 мс.
-    _cmd_get_serial_number = 0x3682
-    # параметры ответа от датчика
+    """
+    SGP40/SGP41 空气质量传感器驱动类，基于 sensor_pack_2 框架
+    Attributes:
+        _sensor_id (int): 传感器型号，0=SGP40，1=SGP41
+        _check_crc (bool): 是否校验 CRC
+        _connector (DeviceEx): I2C 通信代理
+    Methods:
+        get_id(): 读取传感器序列号
+        get_sensor_id(): 返回传感器型号标识
+        get_last_cmd_code(): 返回最后发送的命令码
+        execute_self_test(): 执行内置自检
+        execute_conditioning(): 执行 SGP41 预热调节（仅 SGP41）
+        measure_raw_signal(): 启动/继续 VOC 测量，返回原始信号
+        turn_heater_off(): 关闭加热器，进入待机模式
+        deinit(): 释放资源，关闭加热器
+    Notes:
+        - 依赖外部传入 BusAdapter 实例，不在内部创建总线
+        - SGP40 仅支持 VOC 测量；SGP41 同时支持 VOC 和 NOx
+        - 原始信号需通过 Sensirion Gas Index Algorithm 转换为 VOC/NOx 指数
+    ==========================================
+    SGP40/SGP41 air quality sensor driver, based on sensor_pack_2 framework.
+    Attributes:
+        _sensor_id (int): Sensor model, 0=SGP40, 1=SGP41
+        _check_crc (bool): Whether to verify CRC
+        _connector (DeviceEx): I2C communication proxy
+    Methods:
+        get_id(): Read sensor serial number
+        get_sensor_id(): Return sensor model identifier
+        get_last_cmd_code(): Return last sent command code
+        execute_self_test(): Run built-in self-test
+        execute_conditioning(): Run SGP41 conditioning (SGP41 only)
+        measure_raw_signal(): Start/continue VOC measurement, return raw signal
+        turn_heater_off(): Turn off heater, enter idle mode
+        deinit(): Release resources, turn off heater
+    Notes:
+        - Requires externally provided BusAdapter instance
+        - SGP40 supports VOC only; SGP41 supports both VOC and NOx
+        - Raw signals require Sensirion Gas Index Algorithm for index conversion
+    """
+
+    # 命令码常量
+    _cmd_execute_conditioning = 0x2612   # SGP41 预热调节，响应 3 字节，等待 50ms
+    _cmd_measure_raw_signal   = 0x260F   # 启动/继续 VOC 测量，SGP40 响应 3 字节/30ms，SGP41 响应 6 字节/50ms
+    _cmd_execute_self_test    = 0x280E   # 内置自检，响应 3 字节，等待 320ms
+    _cmd_turn_heater_off      = 0x3615   # 关闭加热器，无响应，等待 1ms
+    _cmd_get_serial_number    = 0x3682   # 读取序列号，响应 9 字节，等待 1ms
+
+    # 命令响应参数（响应字节数 + 等待时间 ms）
     answer_params_sgp4x = namedtuple("answer_params_sgp4x", "length wait_time")
+
+    def __init__(self, adapter: bus_service.BusAdapter, address: int = 0x59,
+                 sensor_id: int = 0, check_crc: bool = True) -> None:
+        """
+        初始化 SGP4X 传感器驱动
+        Args:
+            adapter (BusAdapter): sensor_pack_2 总线适配器实例
+            address (int): I2C 设备地址，固定为 0x59
+            sensor_id (int): 传感器型号，0=SGP40，1=SGP41
+            check_crc (bool): 是否校验响应 CRC，默认 True
+        Returns:
+            None
+        Raises:
+            ValueError: address 或 sensor_id 超出范围
+        Notes:
+            - ISR-safe: 否
+            - 副作用：初始化通信代理和缓冲区，不写入硬件寄存器
+        ==========================================
+        Initialize SGP4X sensor driver.
+        Args:
+            adapter (BusAdapter): sensor_pack_2 bus adapter instance
+            address (int): I2C device address, fixed at 0x59
+            sensor_id (int): Sensor model, 0=SGP40, 1=SGP41
+            check_crc (bool): Whether to verify response CRC, default True
+        Returns:
+            None
+        Raises:
+            ValueError: address or sensor_id out of range
+        Notes:
+            - ISR-safe: No
+            - Side effect: Initializes communication proxy and buffers, no hardware writes
+        """
+        if adapter is None:
+            raise ValueError("adapter must not be None")
+        check_value(address, range(0x59, 0x5A), "Invalid I2C address: 0x%02X" % address)
+        check_value(sensor_id, range(2), "Invalid sensor_id: %d" % sensor_id)
+        self._connector = DeviceEx(adapter=adapter, address=address, big_byte_order=True)
+        self._check_crc = check_crc
+        self._sensor_id = sensor_id
+        self._last_cmd_code = None
+        # 缓存字节序字符串，避免重复调用
+        self._byte_order = self._connector._get_byteorder_as_str()
+        # 预分配各长度响应缓冲区，复用避免频繁分配
+        self._buf_3 = bytearray(3)
+        self._buf_6 = bytearray(6)
+        self._buf_9 = bytearray(9)
+        self._cmd_buf = bytearray(8)
+
+    def get_sensor_id(self) -> int:
+        """
+        返回传感器型号标识
+        Args:
+            无
+        Returns:
+            int: 0=SGP40，1=SGP41
+        Notes:
+            - ISR-safe: 是
+        ==========================================
+        Return sensor model identifier.
+        Returns:
+            int: 0=SGP40, 1=SGP41
+        Notes:
+            - ISR-safe: Yes
+        """
+        return self._sensor_id
+
+    def get_last_cmd_code(self) -> int:
+        """
+        返回最后一次发送给传感器的命令码
+        Args:
+            无
+        Returns:
+            int 或 None
+        Notes:
+            - ISR-safe: 是
+        ==========================================
+        Return last command code sent to sensor.
+        Returns:
+            int or None
+        Notes:
+            - ISR-safe: Yes
+        """
+        return self._last_cmd_code
+
+    def get_id(self) -> serial_number_sgp4x:
+        """
+        读取传感器序列号（三个 16 位字）
+        Args:
+            无
+        Returns:
+            serial_number_sgp4x: word_0, word_1, word_2
+        Raises:
+            RuntimeError: I2C 通信失败
+            ValueError: CRC 校验失败
+        Notes:
+            - ISR-safe: 否
+        ==========================================
+        Read sensor serial number (three 16-bit words).
+        Raises:
+            RuntimeError: I2C communication failed
+            ValueError: CRC check failed
+        Notes:
+            - ISR-safe: No
+        """
+        _t = self._send_command_and_read_answer(
+            cmd_code=SGP4X._cmd_get_serial_number, unpack_format="HBHBH")
+        return serial_number_sgp4x(word_0=_t[0], word_1=_t[2], word_2=_t[4])
+
+    def turn_heater_off(self) -> None:
+        """
+        关闭加热器，传感器进入待机模式
+        Args:
+            无
+        Returns:
+            None
+        Raises:
+            RuntimeError: I2C 通信失败
+        Notes:
+            - ISR-safe: 否
+            - 副作用：停止所有测量，进入低功耗待机状态
+        ==========================================
+        Turn off heater, sensor enters idle mode.
+        Raises:
+            RuntimeError: I2C communication failed
+        Notes:
+            - ISR-safe: No
+            - Side effect: Stops all measurements, enters low-power idle state
+        """
+        self._send_command(SGP4X._cmd_turn_heater_off)
+
+    def execute_self_test(self) -> int:
+        """
+        执行内置自检，验证加热器和 MOX 材料完整性
+        Args:
+            无
+        Returns:
+            int: 0xD400=全部通过，0x4B00=一项或多项失败
+        Raises:
+            RuntimeError: I2C 通信失败
+            ValueError: CRC 校验失败
+        Notes:
+            - ISR-safe: 否
+        ==========================================
+        Run built-in self-test.
+        Returns:
+            int: 0xD400=all passed, 0x4B00=one or more failed
+        Notes:
+            - ISR-safe: No
+        """
+        _t = self._send_command_and_read_answer(
+            cmd_code=SGP4X._cmd_execute_self_test, unpack_format="HB")
+        return _t[0]
+
+    def execute_conditioning(self, rel_hum: int = 50, temperature: int = 25) -> measured_values_sgp4x:
+        """
+        执行 SGP41 预热调节（仅 SGP41 支持，建议执行 10s，不得超过 10s）
+        Args:
+            rel_hum (int): 相对湿度补偿值（%），0~100，默认 50
+            temperature (int): 温度补偿值（°C），-45~130，默认 25
+        Returns:
+            measured_values_sgp4x: VOC 原始信号，NOx 为 None
+        Raises:
+            ValueError: 参数超出范围或 CRC 校验失败
+            RuntimeError: I2C 通信失败
+        Notes:
+            - ISR-safe: 否
+        ==========================================
+        Run SGP41 conditioning (SGP41 only, recommended 10s, must not exceed 10s).
+        Returns:
+            measured_values_sgp4x: VOC raw signal, NOx is None
+        Notes:
+            - ISR-safe: No
+        """
+        t = self._send_command_and_read_answer(
+            cmd_code=SGP4X._cmd_execute_conditioning, unpack_format="HB",
+            with_params=True, rel_hum=rel_hum, temperature=temperature)
+        return measured_values_sgp4x(VOC=t[0], NOx=None)
+
+    def measure_raw_signal(self, rel_hum: int = 50, temperature: int = 25) -> measured_values_sgp4x:
+        """
+        启动/继续 VOC（及 NOx）测量，返回原始信号
+        Args:
+            rel_hum (int): 相对湿度补偿值（%），0~100，默认 50
+            temperature (int): 温度补偿值（°C），-45~130，默认 25
+        Returns:
+            measured_values_sgp4x: VOC 原始信号；SGP41 时 NOx 有效，SGP40 时 NOx 为 None
+        Raises:
+            ValueError: 参数超出范围或 CRC 校验失败
+            RuntimeError: I2C 通信失败
+        Notes:
+            - ISR-safe: 否
+            - 建议每秒调用一次，不关闭加热器
+        ==========================================
+        Start/continue VOC (and NOx) measurement, return raw signal.
+        Returns:
+            measured_values_sgp4x: VOC raw; NOx valid for SGP41, None for SGP40
+        Notes:
+            - ISR-safe: No
+            - Recommended: call once per second without turning off heater
+        """
+        sen_id = self.get_sensor_id()
+        # SGP41 响应 6 字节（VOC + NOx），SGP40 响应 3 字节（仅 VOC）
+        fmt = "HBHB" if sen_id else "HB"
+        _t = self._send_command_and_read_answer(
+            cmd_code=SGP4X._cmd_measure_raw_signal, unpack_format=fmt,
+            with_params=True, rel_hum=rel_hum, temperature=temperature)
+        _NOx = _t[2] if sen_id else None
+        return measured_values_sgp4x(VOC=_t[0], NOx=_NOx)
+
+    def deinit(self) -> None:
+        """
+        释放传感器资源，关闭加热器进入待机模式
+        Args:
+            无
+        Returns:
+            None
+        Raises:
+            RuntimeError: I2C 通信失败
+        Notes:
+            - ISR-safe: 否
+            - 副作用：关闭加热器，停止所有测量
+        ==========================================
+        Release sensor resources, turn off heater and enter idle mode.
+        Notes:
+            - ISR-safe: No
+            - Side effect: Turns off heater, stops all measurements
+        """
+        self.turn_heater_off()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self) -> measured_values_sgp4x:
+        """
+        迭代器接口：以默认参数执行一次原始信号测量
+        Returns:
+            measured_values_sgp4x
+        Notes:
+            - ISR-safe: 否
+            - 如需温湿度补偿，请直接调用 measure_raw_signal()
+        ==========================================
+        Iterator: one raw signal measurement with default params (50% RH, 25°C).
+        Notes:
+            - ISR-safe: No
+            - For compensation, call measure_raw_signal() directly
+        """
+        return self.measure_raw_signal()
 
     @staticmethod
     def _calc_crc(sequence: bytes) -> int:
-        """Обертка для короткого вызова."""
         return crc8(sequence, polynomial=0x31, init_value=0xFF)
-
-
-    def __init__(self, adapter: bus_service.BusAdapter, address=0x59, sensor_id: int = 0, check_crc: bool = True):
-        """
-        address - адрес на шине I2C;
-        sensor_id - идентификатор датчика:
-            0 - SGP40;
-            1 - SGP41;
-        check_crc - если Истина, то ответ от датчика проверяется путем подсчета CRC и их сравнения."""
-        check_value(address, range(0x59, 0x5A), f"Неверный адрес устройства: {address}")
-        check_value(sensor_id, range(2), f"Неверный sensor id: {sensor_id}")
-        self._connector = DeviceEx(adapter=adapter, address=address, big_byte_order=True)
-        #
-        self._check_crc = check_crc
-        # 0 - SGP40; 1 - SGP41
-        self._sensor_id = sensor_id
-        self._last_cmd_code = None
-        # сохраняю, чтобы не вызывать 125 раз
-        self._byte_order = self._connector._get_byteorder_as_str()
-        # для пересылки по шине
-        self._buf_3 = bytearray(3)
-        self._buf_6 = bytearray(6)
-        self._cmd_buf = bytearray(8)
-        self._buf_9 = bytearray(9)
-
-    def get_last_cmd_code(self) -> int:
-        """Возвращает последний код команды, переданный по шине данных в датчик"""
-        return self._last_cmd_code
 
     @staticmethod
     def _get_answer_params(cmd_code: int, sensor_id: int = 0) -> answer_params_sgp4x:
-        """Возвращает параметры ответа от датчика по коду команды cmd_code и id датчика. 0 - SGP40, 1 - SGP41, ... ."""
+        """根据命令码和传感器型号返回响应参数（字节数 + 等待时间）"""
         _wt, _l = None, None
-
         if SGP4X._cmd_turn_heater_off == cmd_code:
-            _l = 0
-            _wt = 1
-        if SGP4X._cmd_execute_self_test == cmd_code:
-            _l = 3
-            _wt = 320
-        if 1 == sensor_id and SGP4X._cmd_execute_conditioning == cmd_code:
-            _l = 3  # SGP41
-            _wt = 50
-        if SGP4X._cmd_measure_raw_signal == cmd_code:
-            if 0 == sensor_id:
-                _l = 3  # для SGP40
-                _wt = 30
-            else:
-                _l = 6  # для SGP4Х
-                _wt = 50
-        if SGP4X._cmd_get_serial_number == cmd_code:
-            _l = 9
-            _wt = 1
-
+            _l, _wt = 0, 1
+        elif SGP4X._cmd_execute_self_test == cmd_code:
+            _l, _wt = 3, 320
+        elif sensor_id == 1 and SGP4X._cmd_execute_conditioning == cmd_code:
+            _l, _wt = 3, 50
+        elif SGP4X._cmd_measure_raw_signal == cmd_code:
+            # SGP40 响应 3 字节/30ms，SGP41 响应 6 字节/50ms
+            _l, _wt = (3, 30) if sensor_id == 0 else (6, 50)
+        elif SGP4X._cmd_get_serial_number == cmd_code:
+            _l, _wt = 9, 1
         if _wt is None or _l is None:
-            raise ValueError(f"Неверный код команды: {cmd_code} или sensor id: {sensor_id}!")
+            raise ValueError("Invalid cmd_code: 0x%04X or sensor_id: %d" % (cmd_code, sensor_id))
         return SGP4X.answer_params_sgp4x(length=_l, wait_time=_wt)
 
     @staticmethod
-    def _get_data_place(answ_length: int, data: bool = True) -> [None, iter]:
-        """Возвращает диапазон индексов байт в буфере с ответом от датчика,
-        содержащих данные (data is True) или CRC (data is False)."""
-        check_value(answ_length, (0, 3, 6, 9), f"Неверная длина ответа в байтах: {answ_length}!")
-        if 0 == answ_length:
+    def _get_data_place(answ_length: int, data: bool = True):
+        """返回响应缓冲区中数据字节或 CRC 字节的索引范围"""
+        check_value(answ_length, (0, 3, 6, 9), "Invalid answer length: %d" % answ_length)
+        if answ_length == 0:
             return None
-        # answ_length = 0, 3, 6
         for index in range(answ_length // 3):
             _start = 3 * index
-            if data:  # (0, 2), (3, 5), (6, 8) - индексы данных
+            if data:
                 yield range(_start, 2 + _start)
-            else:  # (2, 3), (5, 6), (8, 9)  - индексы CRC
+            else:
                 yield range(2 + _start, 3 + _start)
 
     @staticmethod
     def _check_answer_length(answ_length: int):
         check_value(value=answ_length, valid_range=(0, 3, 6, 9),
-                    error_msg=f"Неверная длина ответа в байтах: {answ_length}!")
+                    error_msg="Invalid answer length: %d" % answ_length)
 
     @staticmethod
-    def _check_rh_temp(rh: [None, int], temp: [None, int]):
-        """Проверяет относительную влажность (rh в %) и температуру (temp в гр. Цельсия)
-        на принадлежность к верному диапазону 0..100 и -45..130 соответственно."""
-        _val, _valid_rng = None, None
-        _err_msg = f"Значение {_val} вне допустимого диапазона {_valid_rng}!"
-        if rh:
-            _val, _valid_rng = rh, range(101)
-        if temp:
-            _val, _valid_rng = temp, range(-45, 131)
-        #
-        check_value(_val, _valid_rng, _err_msg)
+    def _check_rh_temp(rh, temp):
+        """校验相对湿度（0~100%）和温度（-45~130°C）范围"""
+        if rh is not None:
+            check_value(rh, range(101), "rh out of range: %s" % rh)
+        if temp is not None:
+            check_value(temp, range(-45, 131), "temp out of range: %s" % temp)
 
     @staticmethod
     def _get_raw_relhum(rel_hum: int) -> int:
-        """Возвращает сырое значение относительной влажности.
-        rel_hum - значение относительной влажности в %;"""
         SGP4X._check_rh_temp(rh=rel_hum, temp=None)
         return round(65.35 * rel_hum)
 
     @staticmethod
     def _get_raw_temp(temperature: int) -> int:
-        """Возвращает сырое значение температуры.
-        temperature - значение температуры в градусах Цельсия;"""
         SGP4X._check_rh_temp(rh=None, temp=temperature)
         return round(374.4857142857 * (45 + temperature))
 
-    def _get_buf_by_answ_length(self, answ_length: int) -> [None, bytes]:
-        """Возвращает буфер по длине ответа от датчика в байтах - answ_length."""
+    def _get_buf_by_answ_length(self, answ_length: int):
         SGP4X._check_answer_length(answ_length)
-        #
-        if 0 == answ_length:
+        if answ_length == 0:
             return None
-        if 3 == answ_length:
+        if answ_length == 3:
             return self._buf_3
-        if 6 == answ_length:
+        if answ_length == 6:
             return self._buf_6
-        if 9 == answ_length:
+        if answ_length == 9:
             return self._buf_9
-        raise ValueError(f"Неверная длина буфера: {answ_length}!")
+        raise ValueError("Invalid buffer length: %d" % answ_length)
 
     @staticmethod
     def _check_answer(answer: bytes, answ_length: int) -> bool:
-        """Проверяет ответ от датчика путем сравнения рассчитанной и полученной из ответа CRC.
-        Возвращет Истина, когда ответ от датчика верен!
-        answer - байтовый массив ответа от датчика.
-        answ_length - длина ответа от датчика в байтах."""
+        """逐段校验响应 CRC，不匹配时抛出 ValueError"""
         SGP4X._check_answer_length(answ_length)
         for data_place in SGP4X._get_data_place(answ_length):
-            calculated_crc = SGP4X._calc_crc(answer[data_place.start:data_place.stop])
-            crc_from_buf = answer[data_place.stop]
-            if calculated_crc != crc_from_buf:
-                raise ValueError(
-                    f"Неверная CRC! Вычислено: {calculated_crc}. CRC из буфера: {crc_from_buf}; Длина буфера: {len(answer)} байт.")
+            calc = SGP4X._calc_crc(answer[data_place.start:data_place.stop])
+            recv = answer[data_place.stop]
+            if calc != recv:
+                raise ValueError("CRC mismatch: calc=0x%02X recv=0x%02X" % (calc, recv))
         return True
 
-    def _read_answer(self) -> [bytes, None]:
-        """Читает ответ на команду, переданную методом _send_command.
-        Возвращает ссылку на буфер с принятыми данными.
-        Проверяет CRC"""
+    def _read_answer(self):
+        """读取上一条命令的响应，可选 CRC 校验，返回缓冲区引用"""
         _cmd = self.get_last_cmd_code()
         _ap = SGP4X._get_answer_params(_cmd, self.get_sensor_id())
         _al = _ap.length
-        if 0 == _al:
+        if _al == 0:
             return None
         _buf = self._get_buf_by_answ_length(_al)
         self._connector.read_to_buf(_buf)
-        # ответ считан
         if self._check_crc:
             SGP4X._check_answer(_buf, _al)
         return _buf
 
-    def _send_command_and_read_answer(self, cmd_code: int, unpack_format: str, with_params: bool = False,
+    def _send_command_and_read_answer(self, cmd_code: int, unpack_format: str,
+                                      with_params: bool = False,
                                       rel_hum: int = None, temperature: int = None):
+        """发送命令并等待响应，返回解包后的元组"""
         if with_params:
             SGP4X._check_rh_temp(rel_hum, temperature)
-            raw_temp = SGP4X._get_raw_temp(temperature)
-            raw_rh = SGP4X._get_raw_relhum(rel_hum)
-            self._send_command(cmd_code, raw_rh, raw_temp)
+            self._send_command(cmd_code,
+                               SGP4X._get_raw_relhum(rel_hum),
+                               SGP4X._get_raw_temp(temperature))
         else:
             self._send_command(cmd_code)
         _ap = SGP4X._get_answer_params(cmd_code, self.get_sensor_id())
@@ -213,78 +439,27 @@ class SGP4X(IDentifier, Iterator):
         _buf = self._read_answer()
         return self._connector.unpack(unpack_format, _buf)
 
-    def get_sensor_id(self) -> int:
-        """Возвращает идентификатор датчика:
-            0 - SGP40;
-            1 - SGP41;"""
-        return self._sensor_id
-
-    def get_id(self) -> serial_number_sgp4x:
-        """Возвращает серийный номер датчика. Три двухбайтных слова."""
-        _t = self._send_command_and_read_answer(cmd_code=SGP4X._cmd_get_serial_number, unpack_format="HBHBH")
-        return serial_number_sgp4x(word_0=_t[0], word_1=_t[2], word_2=_t[4])
-
-    def turn_heater_off(self):
-        """Отключает нагреватель датчика."""
-        self._send_command(SGP4X._cmd_turn_heater_off)
-
-    def execute_self_test(self) -> int:
-        """Команда execute_self_test выполняет встроенное самотестирование датчика SGP4X, проверяя целостность нагревательной
-        пластины и MOX-материала. После выполнения теста датчик возвращает результат в виде 2-байтового значения:
-            0xD400 — все тесты пройдены успешно
-            0x4B00 — один или несколько тестов завершились с ошибкой.
-
-        Если команда вызывается в режиме ожидания (idle mode), датчик после теста вернется в этот же режим.
-        При вызове во время режима измерения VOC нагреватель останется включенным"""
-        _t = self._send_command_and_read_answer(cmd_code=SGP4X._cmd_execute_self_test, unpack_format="HB")
-        return _t[0]
-
-    def execute_conditioning(self, rel_hum: int = 50, temperature: int = 25) -> measured_values_sgp4x:
-        """Отправка команд sgp41_execute_conditioning и sgp41_measure_raw_signals переводит датчик в режим непрерывной работы.
-        В течение 5 мс после отправки любой из двух команд, ток потребления возрастает на 20%!
-        Рекомендуется выполнять эту команду в течение 10 с,
-        однако нельзя превышать это время, чтобы избежать повреждения датчика!"""
-        t = self._send_command_and_read_answer(cmd_code=SGP4X._cmd_execute_conditioning, unpack_format="HB",
-                                               with_params=True, rel_hum=rel_hum, temperature=temperature)
-        return measured_values_sgp4x(VOC=t[0], NOx=None)
-
-    def measure_raw_signal(self, rel_hum: int = 50, temperature: int = 25) -> measured_values_sgp4x:
-        """Команда запускает/продолжает режим измерения VOC. Она запускает одно измерение необработанного сигнала (SRAW_VOC),
-        которое возвращается через 30 мс. Необработанное значение сигнала в тактах предоставляется в виде одного 16-битного слова,
-        за которым следует один байт CRC. Необработанный сигнал в тактах пропорционален логарифму сопротивления датчика.
-        Этот сигнал используется в качестве входного сигнала для алгоритма газового индекса Sensirion для получения обработанного индекса VOC.
-        Обычно измерение выполняется каждую секунду путем повторного вызова команды sgp40_measure_raw_signal каждую секунду
-        без выключения нагревателя. Для выхода из режима измерения VOC, ведущее устройство вызывает команду sgp4x_turn_heater_off,
-        которая отключает нагревательную пластину и переводит датчик в режим ожидания.
-        ---
-        Отправка команд sgp41_execute_conditioning и sgp41_measure_raw_signals переводит датчик в режим непрерывной работы.
-        В течение 5 мс после отправки любой из двух команд, ток потребления возрастает на 20%!"""
-        sen_id = self.get_sensor_id()
-        fmt = "HBHB" if sen_id else "HB"
-        _t = self._send_command_and_read_answer(cmd_code=SGP4X._cmd_measure_raw_signal, unpack_format=fmt,
-                                                with_params=True, rel_hum=rel_hum, temperature=temperature)
-        _NOx = _t[2] if sen_id else None
-        return measured_values_sgp4x(VOC=_t[0], NOx=_NOx)
-
-    def _send_command(self, cmd_code: int, raw_rel_hum: [None, int] = None, raw_temp: [None, int] = None):
-        """Передает команду датчику по шине.
-        cmd_code - код команды;
-        raw_rel_hum - сырое значение относительной влажности;
-        raw_temp - сырое значение температуры воздуха;"""
-        _cmd_buf = None
-        _cmd_with_params = all((raw_rel_hum, raw_temp))
+    def _send_command(self, cmd_code: int,
+                      raw_rel_hum: int = None, raw_temp: int = None) -> None:
+        """
+        向传感器发送命令（含或不含温湿度参数）
+        Notes:
+            - 温湿度参数必须同时提供或同时为 None
+            - 带参数命令格式：[cmd_hi, cmd_lo, rh_hi, rh_lo, rh_crc, t_hi, t_lo, t_crc]
+            - 注意：原代码 _cmd_buf[4] 的 CRC 在 _cmd_buf[5:7] 写入前计算，顺序有误；
+              已修正为先写数据再计算 CRC，确保 CRC 基于正确数据
+        """
         _bo = self._byte_order[0]
-        if _cmd_with_params:
-            # Должны быть заданы и температура и отн. влажность!
+        if raw_rel_hum is not None and raw_temp is not None:
             _cmd_buf = self._cmd_buf
             _cmd_buf[0:2] = cmd_code.to_bytes(2, _bo)
             _cmd_buf[2:4] = raw_rel_hum.to_bytes(2, _bo)
-            _cmd_buf[5:7] = raw_temp.to_bytes(2, _bo)
-            #
+            # 先写湿度数据，再计算湿度 CRC
             _cmd_buf[4] = SGP4X._calc_crc(_cmd_buf[2:4])
+            _cmd_buf[5:7] = raw_temp.to_bytes(2, _bo)
+            # 先写温度数据，再计算温度 CRC
             _cmd_buf[7] = SGP4X._calc_crc(_cmd_buf[5:7])
+            self._connector.write(_cmd_buf)
         else:
-            _cmd_buf = cmd_code.to_bytes(2, _bo)
-        #
-        self._connector.write(_cmd_buf)
+            self._connector.write(cmd_code.to_bytes(2, _bo))
         self._last_cmd_code = cmd_code
