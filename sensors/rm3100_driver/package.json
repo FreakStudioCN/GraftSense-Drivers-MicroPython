@@ -1,24 +1,19 @@
 {
   "name": "rm3100_driver",
-  "urls": [
-    ["rm3100mod.py",                    "code/rm3100mod.py"],
-    ["sensor_pack/bus_service.py",      "code/sensor_pack/bus_service.py"],
-    ["sensor_pack/base_sensor.py",      "code/sensor_pack/base_sensor.py"],
-    ["sensor_pack/geosensmod.py",       "code/sensor_pack/geosensmod.py"],
-    ["sensor_pack/bitfield.py",         "code/sensor_pack/bitfield.py"],
-    ["sensor_pack/averager.py",         "code/sensor_pack/averager.py"],
-    ["sensor_pack/converter.py",        "code/sensor_pack/converter.py"],
-    ["sensor_pack/crc_mod.py",          "code/sensor_pack/crc_mod.py"],
-    ["sensor_pack/__init__.py",         "code/sensor_pack/__init__.py"]
-  ],
   "version": "1.0.0",
+  "description": "A MicroPython library to control RM3100 3-axis geomagnetic sensor from PNI Sensor",
+  "author": "FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
   "_comments": {
     "chips": "该包支持运行的芯片型号，all表示无芯片限制",
     "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
   },
-  "description": "A MicroPython driver for the RM3100 3-axis geomagnetic sensor, supporting single/continuous measurement, self-test, and cycle count configuration",
-  "author": "Roman Shevchik",
-  "license": "MIT",
-  "chips": "all",
-  "fw": "all"
+  "urls": [
+    [
+      "rm3100mod.py",
+      "code/rm3100mod.py"
+    ]
+  ]
 }
