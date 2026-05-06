@@ -688,8 +688,8 @@ class MLX90393:
 
     @oversampling.setter
     def oversampling(self, value: int) -> None:
-        if value not in range(0, 4):
-            raise ValueError("oversampling must be in range 0~3, got %s" % value)
+        if value not in range(0, 8):
+            raise ValueError("oversampling must be in range 0~7, got %s" % value)
         self._oversampling = value
 
     @property
@@ -724,14 +724,16 @@ class MLX90393:
         # 发送 SM 命令触发全轴单次测量
         payload = bytes([_CMD_SM | _CMD_AXIS_ALL])
         self._i2c.writeto(self._address, payload)
-        data = self._i2c.readfrom(self._address, 1)
+        data = self._i2c.readfrom(self._address, len(data))
         self._status_last = data[0]
         # 等待转换完成
         time.sleep(delay)
-        # 发送 RM 命令读取测量结果（7字节：1状态+2X+2Y+2Z）
+
+        data2 = bytearray(7)
         payload = bytes([_CMD_RM | _CMD_AXIS_ALL])
         self._i2c.writeto(self._address, payload)
-        data2 = self._i2c.readfrom(self._address, 7)
+        data2 = self._i2c.readfrom(self._address, len(data2))
+
         self._status_last = data2[0]
         # 解包各轴原始值
         x = self._unpack_axis_data(self._res_x, data2[1:3])
