@@ -1,6 +1,6 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2026/4/22 下午2:15
+# @Time    : 2026/04/22 14:15
 # @Author  : hogeiha
 # @File    : main.py
 # @Description : AGS02MA气体传感器读取示例
@@ -8,13 +8,8 @@
 
 # ======================================== 导入相关模块 =========================================
 
-# 导入MicroPython硬件控制模块
 import machine
-
-# 导入时间控制模块
 import time
-
-# 导入AGS02MA传感器驱动类
 from ags02ma import AGS02MA
 
 
@@ -29,10 +24,10 @@ I2C_SCL_PIN = 5
 # AGS02MA需要低速I2C通信
 I2C_FREQ = 20000
 
-# 传感器读取间隔时间
+# 传感器读取间隔时间（秒）
 READ_INTERVAL = 10
 
-# 传感器上电预热等待时间
+# 传感器上电预热等待时间（秒）
 WARMUP_SECONDS = 120
 
 
@@ -74,8 +69,6 @@ print("Firmware version: {}".format(firmware_version))
 
 # 打印传感器预热提示
 print("Warmup for {} seconds".format(WARMUP_SECONDS))
-
-
 
 
 # ========================================  主程序  ============================================
