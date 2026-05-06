@@ -1,0 +1,18 @@
+{
+  "name": "vl53l5cx_driver",
+  "urls": [
+    ["vl53l5cx/__init__.py", "code/vl53l5cx/__init__.py"],
+    ["vl53l5cx/mp.py", "code/vl53l5cx/mp.py"],
+    ["vl53l5cx/_config_file.py", "code/vl53l5cx/_config_file.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library to control VL53L5CX 8x8 multi-zone ToF distance sensor from ST",
+  "author": "Mark Grosen",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
