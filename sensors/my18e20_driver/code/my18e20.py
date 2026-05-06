@@ -1,8 +1,8 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2024/7/22 下午3:01
+# @Time    : 2024/7/22 15:01
 # @Author  : 李清水
-# @File    : MY18E20.py
+# @File    : my18e20.py
 # @Description : MY18E20温度传感器类，参考代码:https://github.com/robert-hh/Onewire_DS18X20/blob/master/ds18x20.py
 # @License : MIT
 
@@ -11,13 +11,10 @@ __author__ = "李清水"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
-# ======================================== 导入相关模块 ========================================
+# ======================================== 导入相关模块 =========================================
 
-# 导入硬件相关的模块
 from machine import Pin
 from micropython import const
-
-# 导入单总线通信相关的模块
 from onewire import OneWire
 
 # ======================================== 全局变量 ============================================
@@ -29,75 +26,84 @@ from onewire import OneWire
 
 class MY18E20:
     """
-    MY18E20 温度传感器类，用于与 MY18E20、DS18S20 等单总线温度传感器通信。
-
+    MY18E20温度传感器驱动类，用于与MY18E20、DS18S20等单总线温度传感器通信
     Attributes:
-        ow (OneWire): 单总线通信类实例。
-        buf (bytearray): 暂存器数据缓冲区（9 字节）。
-        config (bytearray): 用户配置数据缓冲区（3 字节）。
-        power (int): 电源模式，1 表示独立供电，0 表示寄生供电。
-        powerpin (Pin): 供电引脚对象（用于寄生供电模式）。
-
+        ow (OneWire): 单总线通信类实例
+        buf (bytearray): 暂存器数据缓冲区（9字节）
+        config (bytearray): 用户配置数据缓冲区（3字节）
+        power (int): 电源模式，1=独立供电，0=寄生供电
+        powerpin (Pin): 供电引脚对象（用于寄生供电模式）
     Methods:
-        __init__(onewire: OneWire) -> None: 初始化传感器。
-        powermode(powerpin: Pin = None) -> int: 设置并返回电源模式。
-        scan() -> list[bytearray]: 扫描并返回 ROM 地址列表。
-        convert_temp(rom: bytearray = None) -> None: 启动温度转换。
-        read_scratch(rom: bytearray) -> bytearray: 读取暂存器数据。
-        write_scratch(rom: bytearray, buf: bytearray) -> None: 写入暂存器数据。
-        read_temp(rom: bytearray) -> float: 读取温度（摄氏度）。
-        resolution(rom: bytearray, bits: int = None) -> int: 设置或获取分辨率。
-        fahrenheit(celsius: float) -> float: 摄氏度转华氏度。
-        kelvin(celsius: float) -> float: 摄氏度转开氏度。
-
+        powermode(): 设置并返回电源模式
+        scan(): 扫描并返回ROM地址列表
+        convert_temp(): 启动温度转换
+        read_scratch(): 读取暂存器数据
+        write_scratch(): 写入暂存器数据
+        read_temp(): 读取温度（摄氏度）
+        resolution(): 设置或获取分辨率
+        fahrenheit(): 摄氏度转华氏度
+        kelvin(): 摄氏度转开氏度
+    Notes:
+        - 依赖外部传入OneWire实例
+        - 支持ROM地址为0x10、0x22、0x28的传感器型号
     ==========================================
-
-    MY18E20 temperature sensor class for MY18E20, DS18S20, etc.
-
+    MY18E20 temperature sensor driver for MY18E20, DS18S20, etc.
     Attributes:
-        ow (OneWire): OneWire communication instance.
-        buf (bytearray): Scratchpad data buffer (9 bytes).
-        config (bytearray): User configuration buffer (3 bytes).
-        power (int): Power mode (1=external, 0=parasitic).
-        powerpin (Pin): Power supply pin for parasitic mode.
-
+        ow (OneWire): OneWire communication instance
+        buf (bytearray): Scratchpad data buffer (9 bytes)
+        config (bytearray): User configuration buffer (3 bytes)
+        power (int): Power mode (1=external, 0=parasitic)
+        powerpin (Pin): Power supply pin for parasitic mode
     Methods:
-        __init__(onewire: OneWire) -> None: Initialize sensor.
-        powermode(powerpin: Pin = None) -> int: Set and return power mode.
-        scan() -> list[bytearray]: Scan bus and return ROM list.
-        convert_temp(rom: bytearray = None) -> None: Start temperature conversion.
-        read_scratch(rom: bytearray) -> bytearray: Read scratchpad data.
-        write_scratch(rom: bytearray, buf: bytearray) -> None: Write scratchpad data.
-        read_temp(rom: bytearray) -> float: Read temperature (°C).
-        resolution(rom: bytearray, bits: int = None) -> int: Set or get resolution.
-        fahrenheit(celsius: float) -> float: Convert Celsius to Fahrenheit.
-        kelvin(celsius: float) -> float: Convert Celsius to Kelvin.
+        powermode(): Set and return power mode
+        scan(): Scan bus and return ROM list
+        convert_temp(): Start temperature conversion
+        read_scratch(): Read scratchpad data
+        write_scratch(): Write scratchpad data
+        read_temp(): Read temperature in Celsius
+        resolution(): Set or get resolution
+        fahrenheit(): Convert Celsius to Fahrenheit
+        kelvin(): Convert Celsius to Kelvin
+    Notes:
+        - Requires externally provided OneWire instance
+        - Supports sensor ROM family codes 0x10, 0x22, 0x28
     """
 
-    # MY18E20 功能命令
-    CMD_CONVERT = const(0x44)  # 转换温度命令
-    CMD_RDSCRATCH = const(0xBE)  # 读暂存器命令
-    CMD_WRSCRATCH = const(0x4E)  # 写暂存器命令
-    CMD_RDPOWER = const(0xB4)  # 读电源命令
-    CMD_COPYSCRATCH = const(0x48)  # 拷贝暂存器命令
+    # 转换温度命令
+    CMD_CONVERT = const(0x44)
+    # 读暂存器命令
+    CMD_RDSCRATCH = const(0xBE)
+    # 写暂存器命令
+    CMD_WRSCRATCH = const(0x4E)
+    # 读电源命令
+    CMD_RDPOWER = const(0xB4)
+    # 拷贝暂存器命令
+    CMD_COPYSCRATCH = const(0x48)
 
-    # 上拉电阻控制
+    # 上拉电阻开启
     PULLUP_ON = const(1)
+    # 上拉电阻关闭
     PULLUP_OFF = const(0)
 
     def __init__(self, onewire: OneWire) -> None:
         """
-        初始化 MY18E20。
-
+        初始化MY18E20传感器
         Args:
-            onewire (OneWire): 单总线通信类实例。
-
+            onewire (OneWire): 单总线通信类实例
+        Returns:
+            None
+        Notes:
+            - ISR-safe: 否
+            - 副作用：初始化buf/config缓冲区，默认独立供电模式
         ==========================================
-
-        Initialize MY18E20.
-
+        Initialize MY18E20 sensor.
         Args:
-            onewire (OneWire): OneWire communication instance.
+            onewire (OneWire): OneWire communication instance
+        Returns:
+            None
+        Notes:
+            - ISR-safe: No
+            - Side effects: Initializes buf/config buffers, defaults to external power mode
         """
         self.ow = onewire
         # 存储暂存器的9个字节数据
@@ -110,25 +116,25 @@ class MY18E20:
 
     def powermode(self, powerpin: Pin = None) -> int:
         """
-        设置并返回电源模式。
-
+        设置并返回电源模式
         Args:
-            powerpin (Pin): 寄生供电模式下的供电引脚。默认为 None。
-
+            powerpin (Pin): 寄生供电模式下的供电引脚，默认None
         Returns:
-            int: 电源模式，1=独立供电，0=寄生供电。
-
+            int: 电源模式，1=独立供电，0=寄生供电
+        Notes:
+            - ISR-safe: 否
+            - 副作用：若传入powerpin，将其初始化为推挽输出并拉低
         ==========================================
-
         Set and return power mode.
-
         Args:
-            powerpin (Pin): Pin for parasitic power. Defaults to None.
-
+            powerpin (Pin): Pin for parasitic power, default None
         Returns:
-            int: Power mode (1=external, 0=parasitic).
+            int: Power mode (1=external, 0=parasitic)
+        Notes:
+            - ISR-safe: No
+            - Side effects: If powerpin provided, initializes it as push-pull output and pulls low
         """
-        # 如果已经设置了 powerpin,则将其拉低,关闭上拉电阻
+        # 若已设置powerpin，则将其拉低，关闭上拉电阻
         if self.powerpin is not None:
             self.powerpin(MY18E20.PULLUP_OFF)
 
@@ -145,49 +151,57 @@ class MY18E20:
             self.powerpin = powerpin
             self.powerpin.init(mode=Pin.OUT, value=0)
 
-        # 返回电源模式
         return self.power
 
-    def scan(self) -> list[bytearray]:
+    def scan(self) -> list:
         """
-        扫描总线并返回 ROM 地址列表。
-
+        扫描总线并返回ROM地址列表
+        Args:
+            无
         Returns:
-            list[bytearray]: ROM 地址列表（每个 8 字节）。
-
+            list: ROM地址列表（每个元素为8字节bytearray），仅包含0x10/0x22/0x28家族码
+        Notes:
+            - ISR-safe: 否
         ==========================================
-
         Scan bus and return ROM list.
-
+        Args:
+            None
         Returns:
-            list[bytearray]: List of ROM addresses (8 bytes each).
+            list: ROM address list (each element is 8-byte bytearray), family codes 0x10/0x22/0x28 only
+        Notes:
+            - ISR-safe: No
         """
         if self.powerpin is not None:
             self.powerpin(MY18E20.PULLUP_OFF)
 
-        # 通过单总线扫描得到的ROM列表中筛选出那些以0x10、0x22或0x28开头的ROM
+        # 从单总线扫描结果中筛选家族码为0x10、0x22或0x28的ROM
         return [rom for rom in self.ow.scan() if rom[0] in (0x10, 0x22, 0x28)]
 
     def convert_temp(self, rom: bytearray = None) -> None:
         """
-        启动温度转换。
-
+        启动温度转换
         Args:
-            rom (bytearray): 目标传感器的 ROM 地址。若为 None，则广播给所有传感器。
-
+            rom (bytearray): 目标传感器的ROM地址，None时广播给所有传感器
+        Returns:
+            None
+        Notes:
+            - ISR-safe: 否
+            - 副作用：向总线发送转换命令，转换完成前需等待（12位分辨率约750ms）
         ==========================================
-
         Start temperature conversion.
-
         Args:
-            rom (bytearray): ROM address of target sensor. If None, broadcast to all.
+            rom (bytearray): ROM address of target sensor, None to broadcast to all
+        Returns:
+            None
+        Notes:
+            - ISR-safe: No
+            - Side effects: Sends conversion command to bus; wait required before reading (up to 750ms for 12-bit)
         """
         if self.powerpin is not None:
             self.powerpin(MY18E20.PULLUP_OFF)
         # 主机重启总线
         self.ow.reset()
-        # 当rom不为空时,则发送CMD_SKIPROM命令
-        # 在总线上只有一个温度传感器时,可以发送CMD_SKIPROM命令
+        # 总线上只有一个传感器时可发送CMD_SKIPROM命令
         if rom is None:
             self.ow.writebyte(OneWire.CMD_SKIPROM)
         else:
@@ -198,41 +212,27 @@ class MY18E20:
 
     def read_scratch(self, rom: bytearray) -> bytearray:
         """
-        启动温度转换。
-
+        读取暂存器数据
         Args:
-            rom (bytearray): 目标传感器的 ROM 地址。若为 None，则广播给所有传感器。
-
-        ==========================================
-
-        Start temperature conversion.
-
-        Args:
-            rom (bytearray): ROM address of target sensor. If None, broadcast to all.
-        """ """
-        读取暂存器数据。
-
-        Args:
-            rom (bytearray): ROM 地址。
-
+            rom (bytearray): 目标传感器的ROM地址
         Returns:
-            bytearray: 暂存器数据（9 字节）。
-
+            bytearray: 暂存器数据（9字节）
         Raises:
-            AssertionError: CRC 校验失败。
-
+            AssertionError: CRC校验失败
+        Notes:
+            - ISR-safe: 否
+            - 副作用：将读取结果写入self.buf并返回其引用
         ==========================================
-
         Read scratchpad data.
-
         Args:
-            rom (bytearray): ROM address.
-
+            rom (bytearray): ROM address of target sensor
         Returns:
-            bytearray: Scratchpad data (9 bytes).
-
+            bytearray: Scratchpad data (9 bytes)
         Raises:
-            AssertionError: CRC validation failed.
+            AssertionError: CRC validation failed
+        Notes:
+            - ISR-safe: No
+            - Side effects: Writes result into self.buf and returns its reference
         """
         if self.powerpin is not None:
             self.powerpin(MY18E20.PULLUP_OFF)
@@ -250,19 +250,23 @@ class MY18E20:
 
     def write_scratch(self, rom: bytearray, buf: bytearray) -> None:
         """
-        写入暂存器数据。
-
+        写入暂存器数据
         Args:
-            rom (bytearray): ROM 地址。
-            buf (bytearray): 要写入的数据（9 字节）。
-
+            rom (bytearray): ROM地址
+            buf (bytearray): 要写入的数据（9字节）
+        Returns:
+            None
+        Notes:
+            - ISR-safe: 否
         ==========================================
-
         Write scratchpad data.
-
         Args:
-            rom (bytearray): ROM address.
-            buf (bytearray): Data to write (9 bytes).
+            rom (bytearray): ROM address
+            buf (bytearray): Data to write (9 bytes)
+        Returns:
+            None
+        Notes:
+            - ISR-safe: No
         """
         if self.powerpin is not None:
             self.powerpin(MY18E20.PULLUP_OFF)
@@ -277,79 +281,78 @@ class MY18E20:
 
     def read_temp(self, rom: bytearray) -> float:
         """
-        读取温度（摄氏度）。
-
+        读取温度（摄氏度）
         Args:
-            rom (bytearray): ROM 地址。
-
+            rom (bytearray): ROM地址
         Returns:
-            float: 温度值（℃）。读取失败返回 None。
-
+            float or None: 温度值（℃），读取失败返回None
+        Notes:
+            - ISR-safe: 否
+            - 家族码0x10使用不同的温度解析公式
         ==========================================
-
-        Read temperature (°C).
-
+        Read temperature in Celsius.
         Args:
-            rom (bytearray): ROM address.
-
+            rom (bytearray): ROM address
         Returns:
-            float: Temperature in Celsius, or None if failed.
+            float or None: Temperature in Celsius, None if failed
+        Notes:
+            - ISR-safe: No
+            - Family code 0x10 uses a different temperature parsing formula
         """
         try:
             # 读取暂存器数据
             buf = self.read_scratch(rom)
-            # 当rom中第一个数据为0x10时，为另一个型号的MY18E20传感器
+            # 家族码0x10为另一型号传感器，使用不同解析方式
             if rom[0] == 0x10:
-                # 如果温度为负值
+                # 温度为负值时的处理
                 if buf[1]:
                     t = buf[0] >> 1 | 0x80
                     t = -((~t + 1) & 0xFF)
-                # 如果温度为正数
+                # 温度为正数时的处理
                 else:
                     t = buf[0] >> 1
-                # 计算温度值,包括小数部分
+                # 计算温度值，包括小数部分
                 return t - 0.25 + (buf[7] - buf[6]) / buf[7]
-            # 当rom中第一个数据为0x22、0x28时，为MY18E20传感器
+            # 家族码0x22、0x28为MY18E20传感器
             elif rom[0] in (0x22, 0x28):
-                # 从缓冲区中读取两个字节，将它们组合成一个16位的无符号整数
+                # 从缓冲区读取两字节，组合为16位无符号整数
                 t = buf[1] << 8 | buf[0]
-                # 检查这个整数是否大于0x7fff，如果是，那么就将其转换为负数
+                # 大于0x7fff时转换为负数（二进制补码）
                 if t & 0x8000:
-                    # 先将后面的11位二进制补码变为原码(符号位不变，数值位取反后加1)，再计算十进制值
+                    # 符号位不变，数值位取反后加1，再计算十进制值
                     t = -((t ^ 0xFFFF) + 1)
                 # 除以16，即乘以系数0.0625
                 return t / 16
             else:
                 return None
-        # 抛出断言异常
+        # CRC校验失败时返回None
         except AssertionError:
             return None
 
     def resolution(self, rom: bytearray, bits: int = None) -> int:
         """
-        设置或读取分辨率。
-
+        设置或读取分辨率
         Args:
-            rom (bytearray): ROM 地址。
-            bits (int): 分辨率（9~12 位）。为 None 时读取当前值。
-
+            rom (bytearray): ROM地址
+            bits (int): 分辨率（9~12位），None时读取当前值
         Returns:
-            int: 分辨率位数。
-
+            int: 分辨率位数
+        Notes:
+            - ISR-safe: 否
+            - 副作用：bits不为None时写入暂存器
         ==========================================
-
         Set or get resolution.
-
         Args:
-            rom (bytearray): ROM address.
-            bits (int): Resolution (9–12 bits). If None, read current.
-
+            rom (bytearray): ROM address
+            bits (int): Resolution (9-12 bits), None to read current
         Returns:
-            int: Resolution bits.
+            int: Resolution bits
+        Notes:
+            - ISR-safe: No
+            - Side effects: Writes to scratchpad when bits is not None
         """
         if bits is not None and 9 <= bits <= 12:
-            # 将分辨率信息设置为bits变量的值
-            # self.config的第3位用于设置分辨率
+            # 将分辨率写入config第3字节的bit6:5
             self.config[2] = ((bits - 9) << 5) | 0x1F
             self.write_scratch(rom, self.config)
             return bits
@@ -359,45 +362,41 @@ class MY18E20:
 
     def fahrenheit(self, celsius: float) -> float:
         """
-        摄氏度转华氏度。
-
+        摄氏度转华氏度
         Args:
-            celsius (float): 摄氏度。
-
+            celsius (float): 摄氏度
         Returns:
-            float: 华氏度。如果输入 None，返回 None。
-
+            float or None: 华氏度，输入None时返回None
+        Notes:
+            - ISR-safe: 是
         ==========================================
-
         Convert Celsius to Fahrenheit.
-
         Args:
-            celsius (float): Celsius value.
-
+            celsius (float): Celsius value
         Returns:
-            float: Fahrenheit value, or None if input is None.
+            float or None: Fahrenheit value, None if input is None
+        Notes:
+            - ISR-safe: Yes
         """
         return celsius * 1.8 + 32 if celsius is not None else None
 
     def kelvin(self, celsius: float) -> float:
         """
-        摄氏度转开氏度。
-
+        摄氏度转开氏度
         Args:
-            celsius (float): 摄氏度。
-
+            celsius (float): 摄氏度
         Returns:
-            float: 开氏度。如果输入 None，返回 None。
-
+            float or None: 开氏度，输入None时返回None
+        Notes:
+            - ISR-safe: 是
         ==========================================
-
         Convert Celsius to Kelvin.
-
         Args:
-            celsius (float): Celsius value.
-
+            celsius (float): Celsius value
         Returns:
-            float: Kelvin value, or None if input is None.
+            float or None: Kelvin value, None if input is None
+        Notes:
+            - ISR-safe: Yes
         """
         return celsius + 273.15 if celsius is not None else None
 

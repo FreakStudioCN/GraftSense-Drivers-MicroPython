@@ -1,6 +1,7 @@
-# micropython
-# MIT license
-# Copyright (c) 2022 Roman Shevchik   goctaprog@gmail.com
+# MicroPython
+# MIT license; Copyright (c) 2022 Roman Shevchik
+# 传感器基类与接口定义
+
 import struct
 import micropython
 from sensor_pack_2 import bus_service
@@ -8,7 +9,7 @@ from machine import Pin
 
 
 @micropython.native
-def check_value(value: [int, None], valid_range: [range, tuple], error_msg: str) -> [int, None]:
+def check_value(value, valid_range, error_msg):
     if value is None:
         return value
     if value not in valid_range:
@@ -16,20 +17,13 @@ def check_value(value: [int, None], valid_range: [range, tuple], error_msg: str)
     return value
 
 
-def get_error_str(val_name: str, val: int, rng: [range, tuple]) -> str:
-    """Возвращает подробное сообщение об ошибке.
-    val_name - имя переменной в коде;
-    val - значение переменной val_name;
-    rng - допустимый диапазон переменной"""
+def get_error_str(val_name: str, val: int, rng) -> str:
     if isinstance(rng, range):
-        return f"Значение {val} параметра {val_name} вне диапазона [{rng.start}..{rng.stop - 1}]!"
-    # tuple
-    return f"Значение {val} параметра {val_name} вне диапазона: {rng}!"
+        return f"参数 {val_name} 值 {val} 超出范围 [{rng.start}..{rng.stop - 1}]!"
+    return f"参数 {val_name} 值 {val} 超出范围: {rng}!"
 
 
 def all_none(*args):
-    """возвращает Истина, если все входные параметры в None.
-    Добавил 25.01.2024"""
     for element in args:
         if element is not None:
             return False
@@ -37,29 +31,15 @@ def all_none(*args):
 
 
 class Device:
-    """Класс - основа датчика"""
+    """传感器基类。big_byte_order=True 表示寄存器字节序为大端，否则为小端。"""
 
-    def __init__(self, adapter: bus_service.BusAdapter, address: [int, Pin], big_byte_order: bool):
-        """Базовый класс Устройство.
-        Если big_byte_order равен True -> порядок байтов в регистрах устройства «big»
-        (Порядок от старшего к младшему), в противном случае порядок байтов в регистрах "little"
-        (Порядок от младшего к старшему)
-        address - адрес устройства на шине.
-
-        Base device class. if big_byte_order is True -> register values byteorder is 'big'
-        else register values byteorder is 'little'
-        address - address of the device on the bus."""
+    def __init__(self, adapter: bus_service.BusAdapter, address, big_byte_order: bool):
         self.adapter = adapter
         self.address = address
-        # for I2C. byte order in register of device
         self.big_byte_order = big_byte_order
-        # for SPI ONLY. При передаче данных по SPI: SPI.firstbit can be SPI.MSB or SPI.LSB
-        # передавать первым битом старший или младший
-        # для каждого устройства!
         self.msb_first = True
 
     def _get_byteorder_as_str(self) -> tuple:
-        """Return byteorder as string"""
         if self.is_big_byteorder():
             return 'big', '>'
         return 'little', '<'
@@ -71,9 +51,7 @@ class Device:
         return struct.pack(bo + fmt_char, values)
 
     def unpack(self, fmt_char: str, source: bytes, redefine_byte_order: str = None) -> tuple:
-        """распаковка массива, считанного из датчика.
-        Если redefine_byte_order != None, то bo (смотри ниже) = redefine_byte_order
-        fmt_char: c, b, B, h, H, i, I, l, L, q, Q. pls see: https://docs.python.org/3/library/struct.html"""
+        """解包从传感器读取的字节数组。fmt_char 参见 struct 文档。"""
         if not fmt_char:
             raise ValueError("Invalid fmt_char parameter!")
         bo = self._get_byteorder_as_str()[1]
@@ -87,59 +65,38 @@ class Device:
 
 
 class DeviceEx(Device):
-    """Класс - основа датчика. Добавил общие методы доступа к шине. 30.01.2024"""
+    """传感器扩展基类，封装寄存器读写方法。"""
 
     def read_reg(self, reg_addr: int, bytes_count=2) -> bytes:
-        """считывает из регистра датчика значение.
-        bytes_count - размер значения в байтах.
-        Должна быть реализована во всех классах - адаптерах шин, наследников BusAdapter.
-        Добавил 25.01.2024"""
         return self.adapter.read_register(self.address, reg_addr, bytes_count)
 
-    # BaseSensor
-    def write_reg(self, reg_addr: int, value: [int, bytes, bytearray], bytes_count) -> int:
-        """записывает данные value в датчик, по адресу reg_addr.
-        bytes_count - кол-во записываемых данных.
-        Добавил 25.01.2024"""
+    def write_reg(self, reg_addr: int, value, bytes_count) -> int:
         byte_order = self._get_byteorder_as_str()[0]
         return self.adapter.write_register(self.address, reg_addr, value, bytes_count, byte_order)
 
     def read_reg_16(self, address: int, signed: bool = False) -> int:
-        """Чтение регистра разрядностью 16 бит"""
-        _raw = self.read_reg(address, 2)
-        return self.unpack("h" if signed else "H", _raw)[0]
+        return self.unpack("h" if signed else "H", self.read_reg(address, 2))[0]
 
     def write_reg_16(self, address: int, value: int):
-        """Запись регистра разрядностью 16 бит"""
         self.write_reg(address, value, 2)
 
     def read(self, n_bytes: int) -> bytes:
-        """Читает из устройства n_bytes байт. Добавил 25.01.2024"""
         return self.adapter.read(self.address, n_bytes)
 
     def read_to_buf(self, buf) -> bytes:
-        """Чтение из устройства в буфер"""
         return self.adapter.read_to_buf(self.address, buf)
 
     def write(self, buf: bytes):
-        """Записывает в устройство информацию из buf. Добавил 25.01.2024"""
         return self.adapter.write(self.address, buf)
 
     def read_buf_from_mem(self, address: int, buf, address_size: int = 1):
-        """Читает из устройства, начиная с адреса address в буфер.
-        Кол-во читаемых байт равно "длине" буфера в байтах!
-        address_size - определяет размер адреса в байтах."""
         return self.adapter.read_buf_from_memory(self.address, address, buf, address_size)
 
     def write_buf_to_mem(self, mem_addr, buf):
-        """Записывает в устройство все байты из буфера buf.
-        Запись начинается с адреса в устройстве: mem_addr."""
         return self.adapter.write_buf_to_memory(self.address, mem_addr, buf)
 
 
 class BaseSensor(Device):
-    """Класс - основа датчика с дополнительными методами"""
-
     def get_id(self):
         raise NotImplementedError
 
@@ -148,8 +105,6 @@ class BaseSensor(Device):
 
 
 class BaseSensorEx(DeviceEx):
-    """Класс - основа датчика"""
-
     def get_id(self):
         raise NotImplementedError
 
@@ -166,81 +121,49 @@ class Iterator:
 
 
 class ITemperatureSensor:
-    """Вспомогательный или основной датчик температуры"""
+    """温度传感器接口。"""
 
     def enable_temp_meas(self, enable: bool = True):
-        """Включает измерение температуры при enable в Истина
-        Для переопределения программистом!!!"""
         raise NotImplementedError
 
-    def get_temperature(self) -> [int, float]:
-        """Возвращает температуру корпуса датчика в градусах Цельсия!
-        Для переопределения программистом!!!"""
+    def get_temperature(self):
         raise NotImplementedError
 
 
-# 0 - устройство выполняет все свои функции (максимальное энергопотребление)
-# maximum (на ваш выбор) - устройство выполняет минимум своих функций (минимальное энергопотребление)
-#
 class IPower:
-    """интерфейс управления мощностью потребления устройства"""
+    """功耗管理接口。level=0 为最大功耗，level=max 为最低功耗。"""
 
-    def set_power_level(self, level: [int, None] = 0) -> int:
-        """level >=0 or None
-        Устанавливает режим мощности.
-        level равен 0 - устройство выполняет все свои функции (максимальное энергопотребление)
-        level равен maximum (на ваш выбор) - устройство выполняет минимум своих функций (минимальное энергопотребление)
-        Возвращает текущий уровень потребления устройства.
-        Если level в None, то метод должен возвратить текущий уровень потребления устройства!
-        Если значение из регистра устройства не совпадет со шкалой 0-все включено...максимум-все выключено, то
-        преобразуйте его!
-        """
+    def set_power_level(self, level=0) -> int:
         raise NotImplemented
 
 
 class IDentifier:
-    """Интерфейс идентификации"""
+    """设备标识接口。"""
 
     def get_id(self):
         raise NotImplementedError
 
     def soft_reset(self):
-        """Програмный сброс устройства"""
         raise NotImplementedError
 
 
 class IBaseSensorEx:
-    """интерфейсы, обязательные для большинства датчиков"""
+    """大多数传感器必须实现的通用接口。"""
 
     def get_conversion_cycle_time(self) -> int:
-        """Возвращает время в мс или мкс преобразования сигнала в цифровой код и готовности его для чтения по шине!
-        Для текущих настроек датчика. При изменении настроек следует заново вызвать этот метод!"""
         raise NotImplemented
 
     def start_measurement(self):
-        """Настраивает параметры датчика и запускает процесс измерения"""
         raise NotImplemented
 
-    def get_measurement_value(self, value_index: [int, None]):
-        """Возвращает измеренное датчиком значение(значения) по его индексу/номеру."""
+    def get_measurement_value(self, value_index):
         raise NotImplemented
 
     def get_data_status(self, raw: bool = True):
-        """Возвращает состояние готовности данных для считывания?
-        Тип возвращаемого значения выбирайте сами!
-        Если raw в Истина, то возвращается сырое/не обработанное значение состояния!"""
         raise NotImplemented
 
-    #def get_config(self, raw: bool = True):
-    #    """Возвращает текущие настройки датчика. Если raw - в Истина, то возвращается int, иначе произвольный тип."""
-    #    raise NotImplemented
-
     def is_single_shot_mode(self) -> bool:
-        """Возвращает Истина, когда датчик находится в режиме однократных измерений,
-        каждое из которых запускается методом start_measurement"""
         raise NotImplemented
 
     def is_continuously_mode(self) -> bool:
-        """Возвращает Истина, когда датчик находится в режиме многократных измерений,
-        производимых автоматически. Процесс запускается методом start_measurement"""
         raise NotImplemented

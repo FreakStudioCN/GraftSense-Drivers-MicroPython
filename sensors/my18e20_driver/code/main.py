@@ -1,11 +1,12 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2024/7/22 下午3:01
+# @Time    : 2024/7/22 15:01
 # @Author  : 李清水
 # @File    : main.py
-# @Description : DS18B20温度类实验，使用单总线通信完成数据交互
+# @Description : 测试MY18E20温度传感器驱动类的代码
+# @License : MIT
 
-# ======================================== 导入相关模块 ========================================
+# ======================================== 导入相关模块 =========================================
 
 # 导入硬件相关的模块
 from machine import Pin
@@ -21,39 +22,53 @@ from my18e20 import MY18E20
 
 # ======================================== 全局变量 ============================================
 
+# 打印间隔（毫秒）
+PRINT_INTERVAL_MS = 500
+
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
 
-# 延时等待设备初始化
+# 等待设备上电稳定
 time.sleep(3)
-# 打印调试信息
-print("FreakStudio : Using OneWire to read DS18B20 temperature")
+print("FreakStudio: Using MY18E20 OneWire temperature sensor ...")
 
-# 定义单总线通信引脚
+# 初始化单总线引脚和传感器对象
 ow_pin = OneWire(Pin(6))
-# 定义温度传感器
-MY18E20 = MY18E20(ow_pin)
+sensor = MY18E20(ow_pin)
+
+# 扫描总线上的设备，获取ROM地址列表
+roms_list = sensor.scan()
+# 打印所有设备的ROM地址
+for rom in roms_list:
+    print("Detected sensor ROM ID: %s" % str(rom))
+
+# 启动首次温度转换
+sensor.convert_temp()
 
 # ========================================  主程序  ===========================================
 
-# 扫描总线上的DS18B20，获取设备地址列表
-roms_list = MY18E20.scan()
-# 打印设备地址列表
-for rom in roms_list:
-    print("ds18b20 sensor devices rom id:", rom)
-# 让所有挂载在总线上的DS18B20转换温度
-MY18E20.convert_temp()
+try:
+    while True:
+        # 等待转换完成（12位分辨率最长750ms）
+        time.sleep_ms(PRINT_INTERVAL_MS)
+        # 读取并打印每个传感器的温度
+        for rom in roms_list:
+            temp = sensor.read_temp(rom)
+            print("Sensor %s temperature: %s C" % (str(rom), str(temp)))
+        # 启动下一次温度转换
+        sensor.convert_temp()
 
-# 循环读取温度
-while True:
-    time.sleep_ms(500)
-    for rom in roms_list:
-        # 转换并打印温度
-        temp = MY18E20.read_temp(rom)
-        # 打印温度
-        print("ds18b20 sensor {} devices temp {}".format(rom, temp))
-    # 启动温度转换
-    MY18E20.convert_temp()
+except KeyboardInterrupt:
+    print("Program interrupted by user")
+except OSError as e:
+    print("Hardware communication error: %s" % str(e))
+except Exception as e:
+    print("Unknown error: %s" % str(e))
+finally:
+    print("Cleaning up resources...")
+    del sensor
+    del ow_pin
+    print("Program exited")

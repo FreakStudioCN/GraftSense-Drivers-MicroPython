@@ -1,272 +1,219 @@
-# GraftSense-基于 MY18E20 的温度传感器模块（MicroPython）
-
-# GraftSense-基于 MY18E20 的温度传感器模块（MicroPython）
-
-# GraftSense 基于 MY18E20 的温度传感器模块
+# MY18E20 单总线温度传感器驱动 - MicroPython版本
 
 ## 目录
 
 - [简介](#简介)
 - [主要功能](#主要功能)
 - [硬件要求](#硬件要求)
+- [软件环境](#软件环境)
+- [文件结构](#文件结构)
 - [文件说明](#文件说明)
-- [软件设计核心思想](#软件设计核心思想)
-- [使用说明](#使用说明)
-- [示例程序](#示例程序)
+- [快速开始](#快速开始)
 - [注意事项](#注意事项)
+- [版本记录](#版本记录)
 - [联系方式](#联系方式)
 - [许可协议](#许可协议)
 
+---
+
 ## 简介
 
-本模块是 FreakStudio GraftSense 基于 MY18E20 的温度传感器模块，通过 MY18E20 芯片实现高精度环境温度测量，采用 Maxim（原 Dallas）定义的单总线通信协议，具备高精度、单总线通信、抗干扰能力强等核心优势，兼容 Grove 接口标准。适用于电子 DIY 温度监测实验、智能家居温控演示、多点测温等场景，为系统提供可靠的温度感知能力。
+本驱动为 MY18E20、DS18B20、DS18S20 等单总线温度传感器的 MicroPython 实现，通过单根数据线完成温度采集。驱动封装了完整的 1-Wire 协议栈（`OneWire` 类）及传感器应用层（`MY18E20` 类），支持多传感器挂载、寄生供电模式、分辨率配置及摄氏/华氏/开氏温度输出，适用于环境监测、农业传感、工业测温等嵌入式场景。
+
+---
 
 ## 主要功能
 
-1. 高精度温度测量:支持-55~125℃ 工作温度范围，9~12 位可配置分辨率（12 位精度达 0.0625℃）；
-2. 单总线通信:仅需 1 根数据线实现双向数据传输，简化硬件接线；
-3. 多设备共线:每个传感器拥有唯一 64 位 ROM 地址，支持单总线上挂载多个传感器实现多点测温；
-4. 多温度单位转换:支持摄氏度、华氏度、开氏度之间的转换；
-5. 电源模式灵活:支持独立供电（3.3V/5V）和寄生供电两种模式；
-6. 数据校验:内置 CRC8 校验机制，保障数据传输的完整性。
+- 支持 MY18E20（家族码 0x28/0x22）及 DS18S20（家族码 0x10）温度解析
+- 支持单总线多设备挂载，通过 ROM 地址独立寻址
+- 支持独立供电与寄生供电两种电源模式
+- 支持 9~12 位分辨率配置（精度 0.5℃ ~ 0.0625℃）
+- 提供摄氏度、华氏度、开氏度三种温度单位转换
+- 内置 CRC-8 校验，保障数据完整性
+- 封装完整 1-Wire 协议：复位、ROM 搜索、读写位/字节
+
+---
 
 ## 硬件要求
 
-### 核心接口
+**推荐测试硬件：**
+- 主控：Raspberry Pi Pico / ESP32 / 任意支持 MicroPython 的开发板
+- 传感器：MY18E20 / DS18B20 单总线温度传感器
 
-- 单总线通信接口（DIO）:
+**引脚说明：**
 
-  - 仅需 1 根数据线（DIO）实现双向数据传输，DIO 为开漏输出结构，需外接 4.7kΩ 左右的上拉电阻到电源（如 VCC），使总线空闲时保持高电平
-  - 每个设备拥有唯一 64 位 ROM 地址，可区分总线上的多个传感器，支持多设备共线挂载
-- 电源与引脚:
+| 引脚 | 功能描述 |
+|------|----------|
+| VCC  | 电源正极（3.3V 或 5V） |
+| GND  | 电源负极 |
+| DQ   | 单总线数据线（示例：GPIO6），需外接 4.7kΩ 上拉电阻至 VCC |
 
-  - VCC:模块供电（支持 3.3V/5V）
-  - GND:接地
-  - NC:未连接引脚
-  - DIO:单总线数据引脚（与 MCU 的 GPIO 引脚直接连接）
-- 电源指示灯:LED1 常亮表示模块供电正常
+> 寄生供电模式下 VCC 接 GND，由数据线供电；独立供电模式下 VCC 接电源正极。
 
-### 电路设计
+---
 
-- MY18E20 核心电路:MY18E20 芯片负责高精度温度采集，通过单总线输出 9 字节暂存器数据（包含温度值、配置寄存器、校验和）
-- 传感器接口电路:提供 DIO、VCC、GND 引脚，兼容 Grove 接口标准，便于与主控板快速连接
-- 输入供电滤波和指示灯:C1/C2 滤波电容抑制电源噪声，提升测量稳定性；R2 限流电阻保护电源指示灯
+## 软件环境
 
-### 模块布局
+| 项目 | 版本 |
+|------|------|
+| MicroPython 固件 | v1.23.0 及以上 |
+| 驱动版本 | 0.1.0 |
+| 依赖库 | 无（仅依赖 MicroPython 内置模块） |
 
-- 正面:MY18E20 芯片、DIO 单总线接口、电源接口（GND/VCC）、电源指示灯（LED1），接口清晰标注，便于接线调试与多点测温部署
+---
+
+## 文件结构
+
+```
+my18e20_driver/
+├── code/
+│   ├── my18e20.py     # MY18E20 传感器驱动
+│   ├── onewire.py     # 单总线协议底层驱动
+│   └── main.py        # 测试示例
+├── package.json       # mip 包配置
+├── README.md          # 本文档
+└── LICENSE            # 许可协议
+```
+
+---
 
 ## 文件说明
 
-| 文件名       | 功能说明                                                                                               |
-| ------------ | ------------------------------------------------------------------------------------------------------ |
-| `onewire.py` | 封装单总线通信的基础操作，包含复位、读写位/字节、ROM 地址扫描、CRC 校验等核心方法                      |
-| `ds18x20.py` | 基于 OneWire 类封装 MY18E20/DS18S20 温度传感器操作，实现温度转换、读取、分辨率配置、温度单位转换等功能 |
-| `main.py`    | 多点温度采集示例程序，演示单总线上多个 MY18E20 传感器的扫描和温度循环读取                              |
+| 文件 | 说明 |
+|------|------|
+| `code/my18e20.py` | MY18E20 传感器应用层驱动，封装温度转换、暂存器读写、分辨率配置及单位转换 |
+| `code/onewire.py` | 1-Wire 协议底层实现，封装总线复位、ROM 搜索、位/字节读写及 CRC-8 校验 |
+| `code/main.py` | 完整测试示例，覆盖多设备扫描、循环温度读取 |
 
-## 软件设计核心思想
+---
 
-### 核心类:OneWire（单总线通信）
+## 快速开始
 
-基于 MicroPython 实现，封装单总线通信的基础操作，核心功能如下:
+### 第一步：复制文件
 
-#### 1. 核心常量
+将以下文件复制到 MicroPython 设备根目录：
 
-| 常量                   | 说明                     |
-| ---------------------- | ------------------------ |
-| `CMD_SEARCHROM = 0xf0` | 搜索 ROM 命令            |
-| `CMD_READROM = 0x33`   | 读取 ROM ID 命令         |
-| `CMD_MATCHROM = 0x55`  | 匹配 ROM ID 命令         |
-| `CMD_SKIPROM = 0xcc`   | 同时寻址所有器件命令     |
-| `PULLUP_ON = 1`        | 寄生供电模式下的上拉控制 |
+```
+my18e20.py
+onewire.py
+```
 
-#### 2. 核心方法
+### 第二步：接线
 
-| 方法                                                                                                               | 功能                                    | 参数说明                                               | 返回值                                      |
-| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ------------------------------------------------------ | ------------------------------------------- |
-| `__init__(pin: Pin)`                                                                                               | 初始化单总线通信引脚                    | pin: GPIO 引脚对象（配置为开漏上拉）                   | 无                                          |
-| `reset(required: bool = False)`                                                                                    | 复位单总线，检测设备响应                | required: 是否强制断言未响应情况                       | bool，有设备响应返回 True                   |
-| `readbit() / readbyte() / readbytes(count: int)`                                                                   | 读取单总线上的位/字节/多字节            | 无 / 无 / count: 读取字节数                            | int / int / bytearray                       |
-| `writebit(value: int, powerpin: Pin = None) / writebyte(value: int, powerpin: Pin = None) / write(buf: bytearray)` | 向单总线写入位/字节/多字节              | value: 写入值；powerpin: 寄生供电引脚；buf: 写入缓冲区 | 无                                          |
-| `select_rom(rom: bytearray)`                                                                                       | 发送匹配 ROM 命令，选择目标设备         | rom: 8 字节 ROM 地址                                   | 无                                          |
-| `crc8(data: bytearray)`                                                                                            | 执行 CRC 校验，验证数据完整性           | data: 待校验数据                                       | int，0 表示校验通过                         |
-| `scan()`                                                                                                           | 扫描总线上的所有设备，返回 ROM 地址列表 | 无                                                     | list[bytearray]，每个元素为 8 字节 ROM 地址 |
+| 传感器引脚 | 开发板引脚（示例） |
+|-----------|------------------|
+| VCC       | 3.3V             |
+| GND       | GND              |
+| DQ        | GPIO6（需 4.7kΩ 上拉至 VCC） |
 
-### 核心类:DS18X20（温度传感器）
+### 第三步：最小示例
 
-基于 OneWire 类实现，封装 MY18E20/DS18S20 等温度传感器的操作，核心功能如下:
+```python
+from machine import Pin
+from onewire import OneWire
+from my18e20 import MY18E20
+import time
 
-#### 1. 核心常量
+ow = OneWire(Pin(6))
+sensor = MY18E20(ow)
 
-| 常量                             | 说明                     |
-| -------------------------------- | ------------------------ |
-| `CMD_CONVERT = 0x44`             | 转换温度命令             |
-| `CMD_RDSCRATCH = 0xbe`           | 读暂存器命令             |
-| `CMD_WRSCRATCH = 0x4e`           | 写暂存器命令             |
-| `CMD_RDPOWER = 0xb4`             | 读电源命令               |
-| `CMD_COPYSCRATCH = 0x48`         | 拷贝暂存器命令           |
-| `PULLUP_ON = 1 / PULLUP_OFF = 0` | 寄生供电模式下的上拉控制 |
+roms = sensor.scan()
+sensor.convert_temp()
+time.sleep_ms(750)
 
-#### 2. 核心方法
+for rom in roms:
+    print("Temperature:", sensor.read_temp(rom), "C")
+```
 
-| 方法                                                  | 功能                                         | 参数说明                                                      | 返回值                                          |
-| ----------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------- |
-| `__init__(onewire: OneWire)`                          | 初始化 DS18X20 传感器                        | onewire: OneWire 实例                                         | 无                                              |
-| `powermode(powerpin: Pin = None)`                     | 设置并返回电源模式                           | powerpin: 寄生供电引脚                                        | int，1=独立供电，0=寄生供电                     |
-| `scan()`                                              | 扫描总线上的 DS18X20 设备，返回 ROM 地址列表 | 无                                                            | list[bytearray]，仅包含 DS18X20 设备的 ROM 地址 |
-| `convert_temp(rom: bytearray = None)`                 | 启动温度转换                                 | rom: 目标设备 ROM 地址，None 表示广播给所有设备               | 无                                              |
-| `read_scratch(rom: bytearray)`                        | 读取暂存器数据（9 字节）                     | rom: 目标设备 ROM 地址                                        | bytearray，暂存器数据                           |
-| `write_scratch(rom: bytearray, buf: bytearray)`       | 写入暂存器数据                               | rom: 目标设备 ROM 地址；buf: 写入数据（9 字节）               | 无                                              |
-| `read_temp(rom: bytearray)`                           | 读取温度值（℃）                             | rom: 目标设备 ROM 地址                                        | float，温度值，读取失败返回 None                |
-| `resolution(rom: bytearray, bits: int = None)`        | 设置或获取分辨率（9~12 位）                  | rom: 目标设备 ROM 地址；bits: 分辨率位数，None 表示读取当前值 | int，分辨率位数                                 |
-| `fahrenheit(celsius: float) / kelvin(celsius: float)` | 摄氏度转华氏度/开氏度                        | celsius: 摄氏度值                                             | float，转换后温度值                             |
-
-## 使用说明
-
-### 1. 环境准备
-
-- 硬件:支持 MicroPython 的 MCU（如 ESP32/ESP8266）、GraftSense MY18E20 模块、4.7kΩ 上拉电阻、杜邦线；
-- 软件:MicroPython 固件、串口工具（如 Thonny/VSCode+PyMakr）。
-
-### 2. 硬件接线
-
-| MY18E20 模块 | MCU               | 其他                       |
-| ------------ | ----------------- | -------------------------- |
-| VCC          | 3.3V/5V           | -                          |
-| GND          | GND               | -                          |
-| DIO          | GPIO6（可自定义） | 串联 4.7kΩ 上拉电阻到 VCC |
-
-### 3. 代码部署
-
-- 将 `onewire.py`、`ds18x20.py` 上传到 MCU 文件系统；
-- 将示例程序（main.py）上传到 MCU，或直接在串口工具中逐行执行。
-
-### 4. 运行程序
-
-- 重启 MCU 或直接运行 main.py；
-- 通过串口工具查看输出的传感器 ROM 地址和实时温度值。
-
-## 示例程序
-
-以下是 main.py 中的核心示例代码，实现单总线上多点 MY18E20 温度采集:
+### 完整测试示例（main.py）
 
 ```python
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2024/7/22 下午3:01
+# @Time    : 2024/7/22 15:01
 # @Author  : 李清水
 # @File    : main.py
-# @Description : DS18B20温度类实验，使用单总线通信完成数据交互
+# @Description : 测试MY18E20温度传感器驱动类的代码
+# @License : MIT
 
-# ======================================== 导入相关模块 ========================================
-
-# 导入硬件相关的模块
 from machine import Pin
-
-# 导入时间相关的模块
 import time
-
-# 导入单总线通信相关的模块
 from onewire import OneWire
-
-# 导入温度传感器类
 from my18e20 import MY18E20
 
-# ======================================== 全局变量 ============================================
+PRINT_INTERVAL_MS = 500
 
-# ======================================== 功能函数 ============================================
-
-# ======================================== 自定义类 ============================================
-
-# ======================================== 初始化配置 ==========================================
-
-# 延时等待设备初始化
 time.sleep(3)
-# 打印调试信息
-print("FreakStudio : Using OneWire to read DS18B20 temperature")
+print("FreakStudio: Using MY18E20 OneWire temperature sensor ...")
 
-# 定义单总线通信引脚
 ow_pin = OneWire(Pin(6))
-# 定义温度传感器
-MY18E20 = MY18E20(ow_pin)
+sensor = MY18E20(ow_pin)
 
-# ========================================  主程序  ===========================================
-
-# 扫描总线上的DS18B20，获取设备地址列表
-roms_list = MY18E20.scan()
-# 打印设备地址列表
+roms_list = sensor.scan()
 for rom in roms_list:
-    print("ds18b20 sensor devices rom id:", rom)
-# 让所有挂载在总线上的DS18B20转换温度
-MY18E20.convert_temp()
+    print("Detected sensor ROM ID: %s" % str(rom))
 
-# 循环读取温度
-while True:
-    time.sleep_ms(500)
-    for rom in roms_list:
-        # 转换并打印温度
-        temp = MY18E20.read_temp(rom)
-        # 打印温度
-        print("ds18b20 sensor {} devices temp {}".format(rom, temp))
-    # 启动温度转换
-    MY18E20.convert_temp()
+sensor.convert_temp()
 
+try:
+    while True:
+        time.sleep_ms(PRINT_INTERVAL_MS)
+        for rom in roms_list:
+            temp = sensor.read_temp(rom)
+            print("Sensor %s temperature: %s C" % (str(rom), str(temp)))
+        sensor.convert_temp()
+
+except KeyboardInterrupt:
+    print("Program interrupted by user")
+except OSError as e:
+    print("Hardware communication error: %s" % str(e))
+except Exception as e:
+    print("Unknown error: %s" % str(e))
+finally:
+    print("Cleaning up resources...")
+    del sensor
+    del ow_pin
+    print("Program exited")
 ```
 
-### 示例说明
-
-1. 单总线初始化:使用 GPIO6 作为单总线通信引脚，创建 OneWire 实例；
-2. 设备扫描:通过 scan()方法获取总线上所有 MY18E20 设备的 ROM 地址；
-3. 温度转换:调用 convert_temp()启动所有设备的温度转换；
-4. 多点读取:循环遍历 ROM 地址列表，通过 read_temp()读取每个设备的温度值并打印。
+---
 
 ## 注意事项
 
-1. 单总线接线规范:
+| 类别 | 说明 |
+|------|------|
+| 上拉电阻 | DQ 数据线必须外接 4.7kΩ 上拉电阻至 VCC，否则通信失败 |
+| 转换等待 | `convert_temp()` 后须等待转换完成再调用 `read_temp()`；12 位分辨率最长需 750ms |
+| 多设备挂载 | 总线上挂载多个传感器时，必须通过 ROM 地址逐一读取，不可使用 SKIPROM 广播读温度 |
+| 寄生供电 | 寄生供电模式下需传入 `powerpin` 参数，转换期间由主机强上拉供电 |
+| CRC 校验 | `read_temp()` 内部执行 CRC-8 校验，校验失败返回 `None`，调用方需判断返回值 |
+| 家族码支持 | `scan()` 仅返回家族码为 0x10、0x22、0x28 的设备；其他型号不在支持范围内 |
+| 工作电压 | 独立供电模式支持 3.0V~5.5V；寄生供电模式支持 3.0V~5.5V |
 
-- DIO 引脚需直接连接 MCU 的 GPIO 引脚，确保 4.7kΩ 上拉电阻正常焊接，使总线空闲时保持高电平；
-- 多设备共线时，每个设备的 ROM 地址唯一，通过 scan()方法区分不同设备。
+---
 
-1. 电源模式选择:
+## 版本记录
 
-- 独立供电:模块直接连接 VCC 和 GND，稳定性高，推荐使用；
-- 寄生供电:通过单总线供电，需通过 powermode()方法设置 powerpin，适用于布线受限场景。
+| 版本号 | 日期 | 作者 | 修改说明 |
+|--------|------|------|----------|
+| 0.1.0 | 2024-07-22 | 李清水 | 初始版本，完成全流程规范化 |
 
-1. 分辨率设置:MY18E20 支持 9~12 位分辨率，分辨率越高，温度精度越高（12 位分辨率精度为 0.0625℃），但转换时间越长（12 位转换时间约 750ms）。
-2. CRC 校验:读取暂存器数据时会自动进行 CRC 校验，若校验失败会抛出 AssertionError，需检查通信干扰或模块故障。
-3. 温度转换间隔:两次温度转换间隔需足够长，确保转换完成（12 位分辨率建议间隔 ≥750ms），否则读取的温度值可能为上一次转换的结果。
-4. 环境适应性:MY18E20 的工作温度范围为-55~125℃，适用于严苛的工业与户外场景。
+---
 
 ## 联系方式
 
-如有任何问题或需要帮助，请通过以下方式联系开发者:
+- GitHub：https://github.com/FreakStudioCN
 
-📧 **邮箱**:liqinghsui@freakstudio.cn
-
-💻 **GitHub**:[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
+---
 
 ## 许可协议
 
-```
 MIT License
 
-Copyright (c) 2026 FreakStudio
+Copyright (c) 2026 leezisheng
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

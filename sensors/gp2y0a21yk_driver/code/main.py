@@ -1,17 +1,15 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2026/4/22 下午2:15
+# @Time    : 2026/04/22 14:15
 # @Author  : hogeiha
 # @File    : main.py
 # @Description : GP2Y0A21YK0F红外测距传感器读取示例
+# @License : MIT
 
 
 # ======================================== 导入相关模块 =========================================
 
-# 导入时间控制模块
 import time
-
-# 导入GP2Y0A21YK0F传感器驱动类
 from gp2y0a21yk import GP2Y0A21YK
 
 
@@ -26,13 +24,13 @@ ADC_REF_VOLTAGE = 3.3
 # 采样平均次数
 AVERAGE_COUNT = 5
 
-# 数据读取间隔时间
-READ_INTERVAL = 0.5
+# 数据读取间隔时间（毫秒）
+PRINT_INTERVAL = 500
 
-# 近距离判断阈值
+# 近距离判断阈值（厘米）
 CLOSE_THRESHOLD_CM = 20
 
-# 远距离判断阈值
+# 远距离判断阈值（厘米）
 FAR_THRESHOLD_CM = 40
 
 
@@ -62,37 +60,61 @@ sensor.set_averaging(AVERAGE_COUNT)
 # 启用传感器读取
 sensor.set_enabled(True)
 
+# 初始化上次打印时间戳
+last_print_time = time.ticks_ms()
+
 
 # ========================================  主程序  ============================================
 
-# 持续读取传感器测距数据
-while True:
+try:
+    while True:
 
-    # 读取ADC原始值
-    raw = sensor.get_distance_raw()
+        # 获取当前时间戳
+        current_time = time.ticks_ms()
 
-    # 读取传感器输出电压
-    voltage = sensor.get_distance_volt()
+        # 按间隔时间读取并打印传感器数据
+        if time.ticks_diff(current_time, last_print_time) >= PRINT_INTERVAL:
 
-    # 读取估算距离
-    distance = sensor.get_distance_centimeter()
+            # 读取ADC原始值
+            raw = sensor.get_distance_raw()
 
-    # 打印测量结果
-    print(
-        "Raw: {}, Voltage: {:.1f} mV, Distance: {} cm".format(
-            raw,
-            voltage,
-            distance,
-        )
-    )
+            # 读取传感器输出电压
+            voltage = sensor.get_distance_volt()
 
-    # 判断物体是否小于近距离阈值
-    if sensor.is_closer(CLOSE_THRESHOLD_CM):
-        print("Object is close")
+            # 读取估算距离
+            distance = sensor.get_distance_centimeter()
 
-    # 判断物体是否大于远距离阈值
-    if sensor.is_farther(FAR_THRESHOLD_CM):
-        print("Object is far")
+            # 打印测量结果
+            print(
+                "Raw: {}, Voltage: {:.1f} mV, Distance: {} cm".format(
+                    raw,
+                    voltage,
+                    distance,
+                )
+            )
 
-    # 等待下一次读取
-    time.sleep(READ_INTERVAL)
+            # 判断物体是否小于近距离阈值
+            if sensor.is_closer(CLOSE_THRESHOLD_CM):
+                print("Object is close")
+
+            # 判断物体是否大于远距离阈值
+            if sensor.is_farther(FAR_THRESHOLD_CM):
+                print("Object is far")
+
+            # 更新上次打印时间戳
+            last_print_time = current_time
+
+        # 短暂休眠降低CPU占用
+        time.sleep_ms(10)
+
+except KeyboardInterrupt:
+    print("Program interrupted by user")
+except OSError as e:
+    print("Hardware communication error: %s" % str(e))
+except Exception as e:
+    print("Unknown error: %s" % str(e))
+finally:
+    print("Cleaning up resources...")
+    sensor.deinit()
+    del sensor
+    print("Program exited")

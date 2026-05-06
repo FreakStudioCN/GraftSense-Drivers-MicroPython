@@ -1,0 +1,16 @@
+{
+  "name": "scd41_driver",
+  "urls": [
+    ["scd4x.py", "code/scd4x.py"]
+  ],
+  "version": "v103",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython driver for the Sensirion SCD4X CO2/temperature/humidity sensor, supporting periodic measurement, low-power mode, forced calibration, self-test and EEPROM persistence",
+  "author": "ladyada, peter-l5",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
