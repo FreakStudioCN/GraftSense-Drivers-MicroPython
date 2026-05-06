@@ -654,6 +654,7 @@ class RM3100(geosensmod.GeoMagneticSensor, Iterator):
             - ISR-safe: No
         """
         addr = _axis_name_to_ccr_addr(axis_name)
+        #bts = self._read_reg(addr, 2)
         bts = self._buf_2
         # 复用缓冲区读取2字节CCR寄存器
         self.read_buf_from_mem(addr, bts)
@@ -684,6 +685,7 @@ class RM3100(geosensmod.GeoMagneticSensor, Iterator):
             - ISR-safe: No
         """
         addr = _axis_name_to_mxyz_addr(_int_to_axis_name(axis_name))
+        #bts = self._read_reg(reg_addr=addr, bytes_count=3)  # 24 bit value (int24)
         bts = self._buf_3
         # 复用缓冲区读取3字节测量结果
         self.read_buf_from_mem(addr, bts)
@@ -745,6 +747,7 @@ class RM3100(geosensmod.GeoMagneticSensor, Iterator):
         """
         # DRC0=0, DRC1=1，配置数据就绪控制
         self._write_reg(reg_addr=0x35, value=0x0A)
+        pass
 
     def __iter__(self):
         return self
