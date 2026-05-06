@@ -1,17 +1,18 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2026/4/22 下午2:15
+# @Time    : 2026/04/22 14:15
 # @Author  : FreakStudio
 # @File    : main.py
-# @Description : GP2Y0E03数字红外测距传感器读取示例
+# @Description : 测试 GP2Y0E03 数字红外测距传感器驱动的代码
+# @License : MIT
 
 
 # ======================================== 导入相关模块 =========================================
 
-# 导入MicroPython硬件I2C与引脚控制模块
+# 导入 MicroPython 硬件 I2C 与引脚控制模块
 from machine import I2C, Pin
 
-# 导入GP2Y0E03传感器驱动类
+# 导入 GP2Y0E03 传感器驱动类
 from gp2y0e03 import GP2Y0E03
 
 # 导入时间控制模块
@@ -20,23 +21,26 @@ import time
 
 # ======================================== 全局变量 ============================================
 
-# I2C总线编号
-I2C_ID = 0
+# I2C 总线编号
+i2c_id = 0
 
-# I2C数据引脚编号
-I2C_SDA_PIN = 4
+# I2C 数据引脚编号
+i2c_sda_pin = 4
 
-# I2C时钟引脚编号
-I2C_SCL_PIN = 5
+# I2C 时钟引脚编号
+i2c_scl_pin = 5
 
-# I2C通信频率
-I2C_FREQ = 100000
+# I2C 通信频率（Hz）
+i2c_freq = 100000
 
-# GP2Y0E03默认I2C地址
-GP2Y0E03_ADDR = 0x40
+# GP2Y0E03 默认 I2C 地址
+gp2y0e03_addr = 0x40
 
-# 数据读取间隔时间
-READ_INTERVAL = 0.5
+# 数据打印间隔时间（毫秒）
+print_interval = 500
+
+# 上次打印时间戳（毫秒）
+last_print_time = 0
 
 
 # ======================================== 功能函数 ============================================
@@ -45,52 +49,80 @@ READ_INTERVAL = 0.5
 # ======================================== 自定义类 ============================================
 
 
-# ======================================== 初始化配置 ===========================================
+# ======================================== 初始化配置 ==========================================
 
 # 等待系统和传感器上电稳定
 time.sleep(3)
 
 # 打印程序功能提示
-print("FreakStudio: GP2Y0E03 distance sensor")
+print("FreakStudio: Testing GP2Y0E03 distance sensor driver")
 
-# 初始化Pico硬件I2C总线
+# 初始化硬件 I2C 总线
 i2c = I2C(
-    I2C_ID,
-    sda=Pin(I2C_SDA_PIN),
-    scl=Pin(I2C_SCL_PIN),
-    freq=I2C_FREQ,
+    i2c_id,
+    sda=Pin(i2c_sda_pin),
+    scl=Pin(i2c_scl_pin),
+    freq=i2c_freq,
 )
 
-# 扫描I2C总线设备
+# 扫描 I2C 总线设备
 devices = i2c.scan()
 
-# 打印I2C设备扫描结果
-print("Devices: {}".format([hex(device) for device in devices]))
+# 检查扫描结果是否为空
+if not devices:
+    raise RuntimeError("No I2C devices found on bus")
 
-# 判断GP2Y0E03是否存在
-if GP2Y0E03_ADDR not in devices:
-    raise RuntimeError("GP2Y0E03 not found")
+# 打印 I2C 设备扫描结果
+print("I2C devices found: %s" % [hex(addr) for addr in devices])
 
-# 创建GP2Y0E03传感器对象
-sensor = GP2Y0E03(i2c, address=GP2Y0E03_ADDR)
+# 检查 GP2Y0E03 是否在 I2C 总线上
+if gp2y0e03_addr not in devices:
+    raise RuntimeError("GP2Y0E03 not found at address 0x%02X" % gp2y0e03_addr)
+
+# 打印 GP2Y0E03 地址确认
+print("GP2Y0E03 found at address: 0x%02X" % gp2y0e03_addr)
+
+# 创建 GP2Y0E03 传感器对象
+sensor = GP2Y0E03(i2c, address=gp2y0e03_addr)
 
 # 打印当前距离量程移位值
-print("Shift: {}".format(sensor._shift))
+print("Shift: %d" % sensor._shift)
 
 
-# ========================================  主程序  ============================================
+# ========================================  主程序  ===========================================
 
-# 持续读取距离数据
-while True:
+try:
+    while True:
+        # 获取当前时间戳
+        current_time = time.ticks_ms()
 
-    # 读取原始距离值
-    raw = sensor.read(raw=True)
+        # 检查是否到达打印间隔
+        if time.ticks_diff(current_time, last_print_time) >= print_interval:
+            # 读取原始距离值
+            raw = sensor.read(raw=True)
 
-    # 读取厘米距离值
-    distance = sensor.read()
+            # 读取厘米距离值
+            distance = sensor.read()
 
-    # 打印测量结果
-    print("Raw: {}, Distance: {:.2f} cm".format(raw, distance))
+            # 打印测量结果
+            print("Raw: %d, Distance: %.2f cm" % (raw, distance))
 
-    # 等待下一次读取
-    time.sleep(READ_INTERVAL)
+            # 更新上次打印时间
+            last_print_time = current_time
+
+        # 短暂延时避免 CPU 占用过高
+        time.sleep_ms(10)
+
+except KeyboardInterrupt:
+    print("Program interrupted by user")
+except OSError as e:
+    print("Hardware communication error: %s" % str(e))
+except Exception as e:
+    print("Unknown error: %s" % str(e))
+finally:
+    print("Cleaning up resources...")
+    # 释放传感器对象
+    del sensor
+    # 释放 I2C 对象
+    del i2c
+    print("Program exited")
