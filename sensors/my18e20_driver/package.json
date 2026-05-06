@@ -1,0 +1,17 @@
+{
+  "name": "my18e20_driver",
+  "urls": [
+    ["my18e20.py", "code/my18e20.py"],
+    ["onewire.py", "code/onewire.py"]
+  ],
+  "version": "0.1.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython driver for MY18E20/DS18B20 OneWire temperature sensors, supporting multi-device scanning, parasitic power mode, resolution configuration, and CRC-8 validation",
+  "author": "李清水",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

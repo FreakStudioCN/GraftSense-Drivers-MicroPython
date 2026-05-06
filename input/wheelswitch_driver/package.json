@@ -1,6 +1,6 @@
 {
   "name": "wheelswitch_driver",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A MicroPython library to control wheelswitch_driver ",
   "author": "leeqingshui",
   "license": "MIT",

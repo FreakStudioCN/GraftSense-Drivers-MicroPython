@@ -1,0 +1,55 @@
+{
+  "name": "fde_frost_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control fde_frost_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "fde_frost_sensor.py",
+      "code/fde_frost_sensor.py"
+    ],
+    [
+      "umodbus/__init__.py",
+      "code/umodbus/__init__.py"
+    ],
+    [
+      "umodbus/common.py",
+      "code/umodbus/common.py"
+    ],
+    [
+      "umodbus/const.py",
+      "code/umodbus/const.py"
+    ],
+    [
+      "umodbus/functions.py",
+      "code/umodbus/functions.py"
+    ],
+    [
+      "umodbus/modbus.py",
+      "code/umodbus/modbus.py"
+    ],
+    [
+      "umodbus/serial.py",
+      "code/umodbus/serial.py"
+    ],
+    [
+      "umodbus/tcp.py",
+      "code/umodbus/tcp.py"
+    ],
+    [
+      "umodbus/typing.py",
+      "code/umodbus/typing.py"
+    ],
+    [
+      "umodbus/version.py",
+      "code/umodbus/version.py"
+    ]
+  ]
+}

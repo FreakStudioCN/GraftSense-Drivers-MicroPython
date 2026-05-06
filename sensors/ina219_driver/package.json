@@ -1,0 +1,19 @@
+{
+  "name": "ina219_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library for INA219/INA226 current voltage power monitor sensors",
+  "author": "FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "deps": [
+    ["github:FreakStudioCN/sensor_pack_2", "main"]
+  ],
+  "urls": [
+    ["ina_ti.py", "code/ina_ti.py"]
+  ]
+}

@@ -96,10 +96,10 @@ try:
     # -------------------------- 示例3：DAC输出指定电压 --------------------------
     # 打印示例3标题，标识DAC电压输出功能
     print("\n=== Example 3: DAC output specified voltage ===")
-    # 设置目标输出电压为1.65V（5V参考电压的一半）
+    # 设置目标输出电压为1.65V（3.3V参考电压的一半）
     target_voltage = 1.65
-    # 重置参考电压为5V，确保与DAC计算的参考电压一致
-    REF_VOLTAGE = 5
+    # 重置参考电压为3.3V，确保与DAC计算的参考电压一致
+    REF_VOLTAGE = 3.3
 
     # 手动计算对应电压的模拟值（0-255），四舍五入后转为整数避免浮点数问题
     analog_value = int(round(target_voltage * 255 / REF_VOLTAGE))

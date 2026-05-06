@@ -1,0 +1,18 @@
+{
+  "name": "isl29125_driver",
+  "urls": [
+    ["micropython_isl29125/isl29125.py",    "code/micropython_isl29125/isl29125.py"],
+    ["micropython_isl29125/i2c_helpers.py", "code/micropython_isl29125/i2c_helpers.py"],
+    ["micropython_isl29125/__init__.py",    "code/micropython_isl29125/__init__.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython driver for the ISL29125 RGB color sensor, supporting operation modes, sensing range, ADC resolution, IR compensation and interrupt control",
+  "author": "Jose D. Montoya",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

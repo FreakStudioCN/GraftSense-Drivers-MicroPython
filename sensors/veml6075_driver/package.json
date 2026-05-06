@@ -1,0 +1,17 @@
+{
+  "name": "veml6075_driver",
+  "urls": [
+    ["veml6075.py", "code/veml6075.py"],
+    ["veml6075_lowmem.py", "code/veml6075_lowmem.py"]
+  ],
+  "version": "0.0.1",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library to control VEML6075 UVA/UVB sensor from Vishay",
+  "author": "Nelio Goncalves Godoi",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
