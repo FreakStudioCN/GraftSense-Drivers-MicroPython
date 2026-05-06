@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"/g/GraftSense-Drivers-MicroPython#\" diff HEAD)",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(mkdir -p \"G:/MicroPython_Skills/upy-norm-driver\" \"G:/MicroPython_Skills/upy-norm-main\" \"G:/MicroPython_Skills/upy-gen-main\" \"G:/MicroPython_Skills/upy-gen-readme\" \"G:/MicroPython_Skills/upy-gen-pkg\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-norm-driver/SKILL.md\" \"G:/MicroPython_Skills/upy-norm-driver/\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-norm-main/SKILL.md\" \"G:/MicroPython_Skills/upy-norm-main/\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-gen-main/SKILL.md\" \"G:/MicroPython_Skills/upy-gen-main/\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-gen-readme/SKILL.md\" \"G:/MicroPython_Skills/upy-gen-readme/\")",
+      "Bash(sed -i 's|https://github.com/leezisheng/MicroPython_Skills/blob/main/upy_driver_dev_spec_summary.md|https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython/blob/main/upy_driver_dev_spec_summary.md|g' C:/Users/Administrator/.claude/skills/__TRACKED_VAR__/SKILL.md)",
+      "Bash(sed -i 's|https://github.com/leezisheng/MicroPython_Skills/blob/main/upy_driver_dev_spec_summary.md|https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython/blob/main/upy_driver_dev_spec_summary.md|g' G:/MicroPython_Skills/__TRACKED_VAR__/SKILL.md)",
+      "Bash(sed -i 's|https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython/blob/main/upy_driver_dev_spec_summary.md|https://github.com/FreakStudioCN/MicroPython_Skills/blob/main/upy_driver_dev_spec_summary.md|g' C:/Users/Administrator/.claude/skills/__TRACKED_VAR__/SKILL.md)",
+      "Bash(sed -i 's|https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython/blob/main/upy_driver_dev_spec_summary.md|https://github.com/FreakStudioCN/MicroPython_Skills/blob/main/upy_driver_dev_spec_summary.md|g' G:/MicroPython_Skills/__TRACKED_VAR__/SKILL.md)",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-norm-pkg/SKILL.md\" \"G:/MicroPython_Skills/upy-norm-pkg/SKILL.md\")",
+      "Bash(mkdir -p \"G:/MicroPython_Skills/upy-norm-pkg\")",
+      "Bash(mkdir -p ~/.claude/skills/upy-slim-driver)",
+      "Bash(mkdir -p /g/MicroPython_Skills/upy-slim-driver)",
+      "Bash(cp ~/.claude/skills/upy-slim-driver/SKILL.md /g/MicroPython_Skills/upy-slim-driver/SKILL.md)",
+      "Read(//c/Users/Administrator/.claude/skills/upy-slim-driver/**)",
+      "Bash(cp /c/Users/Administrator/.claude/skills/upy-slim-driver/SKILL.md /g/MicroPython_Skills/upy-slim-driver/SKILL.md)",
+      "Bash(cp /c/Users/Administrator/.claude/skills/upy-opt-driver/SKILL.md /g/MicroPython_Skills/upy-opt-driver/SKILL.md)",
+      "Bash(mkdir -p \"G:/MicroPython_Skills/upy-pkg-guide\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-pkg-guide/SKILL.md\" \"G:/MicroPython_Skills/upy-pkg-guide/SKILL.md\")",
+      "Bash(mkdir -p \"C:/Users/Administrator/.claude/skills/fetch-doc/scripts\")",
+      "Bash(cp \"G:/MicroPython_Skills/fetch_github.py\" \"C:/Users/Administrator/.claude/skills/fetch-doc/scripts/fetch_github.py\")",
+      "Bash(cp -r C:/Users/Administrator/.claude/skills/__TRACKED_VAR__/. G:/MicroPython_Skills/__TRACKED_VAR__/)",
+      "Bash(mkdir -p \"G:/MicroPython_Skills/fetch-doc/scripts\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/fetch-doc/SKILL.md\" \"G:/MicroPython_Skills/fetch-doc/SKILL.md\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/fetch-doc/scripts/fetch_github.py\" \"G:/MicroPython_Skills/fetch-doc/scripts/fetch_github.py\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-project/SKILL.md\" \"G:/MicroPython_Skills/upy-project/SKILL.md\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-pkg-guide/.skillfish.json\" \"G:/MicroPython_Skills/upy-pkg-guide/.skillfish.json\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/fetch-doc/.skillfish.json\" \"G:/MicroPython_Skills/fetch-doc/.skillfish.json\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/skills/upy-project/.skillfish.json\" \"G:/MicroPython_Skills/upy-project/.skillfish.json\")"
+    ]
+  }
+}
