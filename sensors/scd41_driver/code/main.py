@@ -43,13 +43,9 @@ sensor = None
 for device in devices_list:
     if device in TARGET_SENSOR_ADDRS:
         print("I2C address: %s" % hex(device))
-        try:
-            sensor = SCD4X(i2c_bus=i2c_bus, address=device)
-            print("Sensor initialization successful")
-            break
-        except Exception as e:
-            print("Sensor initialization failed: %s" % str(e))
-            continue
+        sensor = SCD4X(i2c_bus=i2c_bus, address=device)
+        print("Sensor initialization successful")
+        break
 
 if sensor is None:
     raise RuntimeError("No target sensor found on I2C bus")
