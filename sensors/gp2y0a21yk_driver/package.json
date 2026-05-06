@@ -1,7 +1,7 @@
 {
   "name": "gp2y0a21yk_driver",
   "urls": [
-    ["code/gp2y0a21yk.py", "gp2y0a21yk.py"]
+    ["gp2y0a21yk.py", "code/gp2y0a21yk.py"]
   ],
   "version": "1.0.0",
   "_comments": {

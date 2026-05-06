@@ -12,7 +12,7 @@
   },
   "deps": [],
   "urls": [
-    ["code/micropython_mlx90393/mlx90393.py", "micropython_mlx90393/mlx90393.py"],
-    ["code/micropython_mlx90393/__init__.py", "micropython_mlx90393/__init__.py"]
+    ["micropython_mlx90393/mlx90393.py", "code/micropython_mlx90393/mlx90393.py"],
+    ["micropython_mlx90393/__init__.py", "code/micropython_mlx90393/__init__.py"]
   ]
 }

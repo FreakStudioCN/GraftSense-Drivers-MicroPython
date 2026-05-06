@@ -1,7 +1,7 @@
 {
   "name": "max44009_driver",
   "urls": [
-    ["code/max44009.py", "max44009.py"]
+    ["max44009.py", "code/max44009.py"]
   ],
   "version": "0.0.6",
   "_comments": {

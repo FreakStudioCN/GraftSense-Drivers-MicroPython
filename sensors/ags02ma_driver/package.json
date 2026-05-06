@@ -1,7 +1,7 @@
 {
   "name": "ags02ma_driver",
   "urls": [
-    ["code/ags02ma.py", "ags02ma.py"]
+    ["ags02ma.py", "code/ags02ma.py"]
   ],
   "version": "1.0.0",
   "_comments": {

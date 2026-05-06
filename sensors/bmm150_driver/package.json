@@ -11,8 +11,8 @@
     "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
   },
   "urls": [
-    ["code/micropython_bmm150/__init__.py", "micropython_bmm150/__init__.py"],
-    ["code/micropython_bmm150/bmm150.py", "micropython_bmm150/bmm150.py"],
-    ["code/micropython_bmm150/i2c_helpers.py", "micropython_bmm150/i2c_helpers.py"]
+    ["micropython_bmm150/__init__.py", "code/micropython_bmm150/__init__.py"],
+    ["micropython_bmm150/bmm150.py", "code/micropython_bmm150/bmm150.py"],
+    ["micropython_bmm150/i2c_helpers.py", "code/micropython_bmm150/i2c_helpers.py"]
   ]
 }
