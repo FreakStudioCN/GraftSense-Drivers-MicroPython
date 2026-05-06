@@ -1,0 +1,16 @@
+{
+  "name": "mcp39f521_driver",
+  "urls": [
+    ["MCP39F521.py", "code/MCP39F521.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library for MCP39F521 single-phase power and energy monitor",
+  "author": "Piotr Oniszczuk",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

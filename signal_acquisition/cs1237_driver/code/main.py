@@ -12,17 +12,16 @@ from machine import Pin
 from cs1237 import CS1237
 
 
-# ======================================== 电压换算函数（自动算电压，新增！） ============================================
+# ======================================== 功能函数 ============================================
 def adc_to_voltage(adc_value):
     # 增益=1时，满量程8388607 = 1.25V
     return (adc_value / 8388607) * 1.25
 
 
-# ======================================== 功能函数 ============================================
 def demo_cs1237_basic():
     print("\n=== CS1237 Basic Read Example ===")
     try:
-        # ✅ 固定增益1
+        # 固定增益1
         adc = CS1237(clock=CLK_PIN, data=DATA_PIN, gain=1, rate=10, channel=0)
         print(f"Chip initialization configuration: {adc}")
 
@@ -39,7 +38,7 @@ def demo_cs1237_basic():
             except OSError as e:
                 print(f"Read failed: {e}")
 
-        # ✅ 修改配置也保持增益1
+        # 修改配置也保持增益1
         print("\nModify configuration (Gain 1, Sample rate 40Hz)...")
         adc.config(gain=1, rate=40)
         gain, rate, channel = adc.get_config()
@@ -56,7 +55,7 @@ def demo_cs1237_basic():
 def demo_buffered_read():
     print("\n=== Buffered Batch Read Example ===")
     try:
-        # ✅ 这里必须加 gain=1
+        # 这里必须加 gain=1
         adc = CS1237(CLK_PIN, DATA_PIN, gain=1)
         buffer = array.array("i", [0] * 10)
 
@@ -78,7 +77,7 @@ def demo_buffered_read():
 def demo_temperature_calibration():
     print("\n=== Temperature Calibration and Read Example ===")
     try:
-        # ✅ 这里必须加 gain=1
+        # 这里必须加 gain=1
         adc = CS1237(CLK_PIN, DATA_PIN, gain=1)
 
         print("Start temperature calibration (Current temperature 25℃)...")
@@ -101,7 +100,7 @@ def demo_temperature_calibration():
 def demo_power_management():
     print("\n=== Power Management Example ===")
     try:
-        # ✅ 这里必须加 gain=1
+        # 这里必须加 gain=1
         adc = CS1237(CLK_PIN, DATA_PIN, gain=1)
 
         value = adc.read()

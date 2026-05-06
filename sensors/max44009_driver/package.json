@@ -1,0 +1,16 @@
+{
+  "name": "max44009_driver",
+  "urls": [
+    ["max44009.py", "code/max44009.py"]
+  ],
+  "version": "0.0.6",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython driver for the Maxim MAX44009 ambient light sensor, supporting continuous/manual mode, interrupt thresholds and integration time configuration",
+  "author": "Mike Causer",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

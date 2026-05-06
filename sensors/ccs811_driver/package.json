@@ -1,6 +1,6 @@
 {
   "name": "ccs811_driver",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A MicroPython library to control ccs811_driver ",
   "author": "leeqingshui",
   "license": "MIT",

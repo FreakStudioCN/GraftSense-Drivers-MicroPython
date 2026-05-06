@@ -1,8 +1,8 @@
 {
-  "name": "mlx_90614_driver",
+  "name": "vl53l1x_driver",
   "version": "1.0.0",
-  "description": "A MicroPython library to control MLX90614 sensors",
-  "author": "mcauser",
+  "description": "A MicroPython library to control VL53L1X ToF distance sensor from ST",
+  "author": "FreakStudio",
   "license": "MIT",
   "chips": "all",
   "fw": "all",
@@ -12,8 +12,8 @@
   },
   "urls": [
     [
-      "mlx90614.py",
-      "code/mlx90614.py"
+      "vl53l1x.py",
+      "code/vl53l1x.py"
     ]
   ]
 }

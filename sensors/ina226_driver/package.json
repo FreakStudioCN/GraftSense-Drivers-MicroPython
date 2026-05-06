@@ -1,0 +1,43 @@
+{
+  "name": "ina226_driver",
+  "version": "1.0.2",
+  "description": "A MicroPython library to control ina226_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "ina_ti.py",
+      "code/ina_ti.py"
+    ],
+    [
+      "sensor_pack_2/__init__.py",
+      "code/sensor_pack_2/__init__.py"
+    ],
+    [
+      "sensor_pack_2/adcmod.py",
+      "code/sensor_pack_2/adcmod.py"
+    ],
+    [
+      "sensor_pack_2/base_sensor.py",
+      "code/sensor_pack_2/base_sensor.py"
+    ],
+    [
+      "sensor_pack_2/bitfield.py",
+      "code/sensor_pack_2/bitfield.py"
+    ],
+    [
+      "sensor_pack_2/bus_service.py",
+      "code/sensor_pack_2/bus_service.py"
+    ],
+    [
+      "sensor_pack_2/regmod.py",
+      "code/sensor_pack_2/regmod.py"
+    ]
+  ]
+}
