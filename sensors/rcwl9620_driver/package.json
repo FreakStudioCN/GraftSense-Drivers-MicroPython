@@ -1,0 +1,16 @@
+{
+  "name": "rcwl9620_driver",
+  "urls": [
+    ["ultrasonic_i2c.py", "code/ultrasonic_i2c.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython driver for the DFRobot RCWL9620 ultrasonic distance sensor via I2C",
+  "author": "DFRobot",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
