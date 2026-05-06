@@ -1,7 +1,7 @@
 {
   "name": "scd41_driver",
   "urls": [
-    ["scd4x.py", "code/scd4x.py"]
+    ["code/scd4x.py"]
   ],
   "version": "v103",
   "_comments": {

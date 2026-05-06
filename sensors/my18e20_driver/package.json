@@ -1,8 +1,8 @@
 {
   "name": "my18e20_driver",
   "urls": [
-    ["my18e20.py", "code/my18e20.py"],
-    ["onewire.py", "code/onewire.py"]
+    ["code/my18e20.py", "my18e20.py"],
+    ["code/onewire.py", "onewire.py"]
   ],
   "version": "0.1.0",
   "_comments": {

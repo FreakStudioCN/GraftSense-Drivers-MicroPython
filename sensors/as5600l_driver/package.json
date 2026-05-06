@@ -1,7 +1,7 @@
 {
   "name": "as5600l_driver",
   "urls": [
-    ["AS5600L.py", "code/AS5600L.py"]
+    ["code/AS5600L.py", "AS5600L.py"]
   ],
   "version": "1.0.0",
   "_comments": {

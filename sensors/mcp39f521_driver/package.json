@@ -1,7 +1,7 @@
 {
   "name": "mcp39f521_driver",
   "urls": [
-    ["MCP39F521.py", "code/MCP39F521.py"]
+    ["code/MCP39F521.py", "MCP39F521.py"]
   ],
   "version": "1.0.0",
   "_comments": {

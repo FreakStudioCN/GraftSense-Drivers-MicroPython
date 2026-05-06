@@ -1,9 +1,9 @@
 {
   "name": "vl53l5cx_driver",
   "urls": [
-    ["vl53l5cx/__init__.py", "code/vl53l5cx/__init__.py"],
-    ["vl53l5cx/mp.py", "code/vl53l5cx/mp.py"],
-    ["vl53l5cx/_config_file.py", "code/vl53l5cx/_config_file.py"]
+    ["code/vl53l5cx/__init__.py", "vl53l5cx/__init__.py"],
+    ["code/vl53l5cx/mp.py", "vl53l5cx/mp.py"],
+    ["code/vl53l5cx/_config_file.py", "vl53l5cx/_config_file.py"]
   ],
   "version": "1.0.0",
   "_comments": {

@@ -1,7 +1,7 @@
 {
   "name": "rcwl9620_driver",
   "urls": [
-    ["ultrasonic_i2c.py", "code/ultrasonic_i2c.py"]
+    ["code/ultrasonic_i2c.py", "ultrasonic_i2c.py"]
   ],
   "version": "1.0.0",
   "_comments": {

@@ -1,7 +1,7 @@
 {
   "name": "veml7700_driver",
   "urls": [
-    ["veml7700.py", "code/veml7700.py"]
+    ["code/veml7700.py", "veml7700.py"]
   ],
   "version": "1.0.0",
   "_comments": {

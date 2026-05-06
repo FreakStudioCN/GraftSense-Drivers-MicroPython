@@ -1,10 +1,10 @@
 {
   "name": "si1145_driver",
   "urls": [
-    ["si1145.py", "code/si1145.py"],
-    ["si1145_lowmem.py", "code/si1145_lowmem.py"],
-    ["si1145_microbit.py", "code/si1145_microbit.py"],
-    ["si1145_microbit_lowmem.py", "code/si1145_microbit_lowmem.py"]
+    ["code/si1145.py", "si1145.py"],
+    ["code/si1145_lowmem.py", "si1145_lowmem.py"],
+    ["code/si1145_microbit.py", "si1145_microbit.py"],
+    ["code/si1145_microbit_lowmem.py", "si1145_microbit_lowmem.py"]
   ],
   "version": "0.3.0",
   "_comments": {

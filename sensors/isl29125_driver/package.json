@@ -1,9 +1,9 @@
 {
   "name": "isl29125_driver",
   "urls": [
-    ["micropython_isl29125/isl29125.py",    "code/micropython_isl29125/isl29125.py"],
-    ["micropython_isl29125/i2c_helpers.py", "code/micropython_isl29125/i2c_helpers.py"],
-    ["micropython_isl29125/__init__.py",    "code/micropython_isl29125/__init__.py"]
+    ["code/micropython_isl29125/isl29125.py", "micropython_isl29125/isl29125.py"],
+    ["code/micropython_isl29125/i2c_helpers.py", "micropython_isl29125/i2c_helpers.py"],
+    ["code/micropython_isl29125/__init__.py", "micropython_isl29125/__init__.py"]
   ],
   "version": "1.0.0",
   "_comments": {
