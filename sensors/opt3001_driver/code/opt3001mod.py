@@ -1,6 +1,6 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2026/05/06 07:00
+# @Time    : 2026/05/07 00:00
 # @Author  : goctaprog
 # @File    : opt3001mod.py
 # @Description : OPT3001 环境光传感器（ALS）驱动，基于 sensor_pack_2 框架
@@ -13,6 +13,7 @@ __platform__ = "MicroPython v1.23"
 
 # ======================================== 导入相关模块 =========================================
 
+import micropython
 from collections import namedtuple
 from sensor_pack_2 import bus_service
 from sensor_pack_2.base_sensor import DeviceEx, IBaseSensorEx, Iterator, check_value
@@ -20,13 +21,13 @@ from sensor_pack_2.bitfield import bit_field_info, BitFields
 
 # ======================================== 全局变量 ============================================
 
-_REG_RESULT = 0x00
-_REG_CONFIG = 0x01
-_REG_MAN_ID = 0x7E
-_REG_DEV_ID = 0x7F
+_REG_RESULT = micropython.const(0x00)
+_REG_CONFIG = micropython.const(0x01)
+_REG_MAN_ID = micropython.const(0x7E)
+_REG_DEV_ID = micropython.const(0x7F)
 
-_ADDR_MIN = 0x44
-_ADDR_MAX = 0x48
+_ADDR_MIN = micropython.const(0x44)
+_ADDR_MAX = micropython.const(0x48)
 
 opt3001_id = namedtuple("opt3001_id", "manufacturer_id device_id")
 opt3001_config = namedtuple("config_opt3001", "RN CT M OVF CRF FH FL L POL ME FC")
@@ -38,6 +39,7 @@ OPT3001_data_status = namedtuple("OPT3001_data_status", "conversion_ready overfl
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
     """
@@ -84,21 +86,24 @@ class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
         - Multiple inheritance is required by sensor_pack_2 framework
     """
 
+    # 默认 I2C 地址
+    I2C_DEFAULT_ADDR = micropython.const(0x44)
+
     _CONFIG_FIELDS = (
-        bit_field_info(name='RN',  position=range(12, 16), valid_values=range(13), description="Range number field."),
-        bit_field_info(name='CT',  position=range(11, 12), valid_values=None,      description="Conversion time field."),
-        bit_field_info(name='M',   position=range(9,  11), valid_values=range(4),  description="Mode of conversion operation field."),
-        bit_field_info(name='OVF', position=range(8,  9),  valid_values=None,      description="Overflow flag."),
-        bit_field_info(name='CRF', position=range(7,  8),  valid_values=None,      description="Conversion ready."),
-        bit_field_info(name='FH',  position=range(6,  7),  valid_values=None,      description="Flag high."),
-        bit_field_info(name='FL',  position=range(5,  6),  valid_values=None,      description="Flag low."),
-        bit_field_info(name='L',   position=range(4,  5),  valid_values=None,      description="Latch field."),
-        bit_field_info(name='POL', position=range(3,  4),  valid_values=None,      description="Polarity."),
-        bit_field_info(name='ME',  position=range(2,  3),  valid_values=None,      description="Mask exponent."),
-        bit_field_info(name='FC',  position=range(2),      valid_values=None,      description="Fault count."),
+        bit_field_info(name="RN", position=range(12, 16), valid_values=range(13), description="Range number field."),
+        bit_field_info(name="CT", position=range(11, 12), valid_values=None, description="Conversion time field."),
+        bit_field_info(name="M", position=range(9, 11), valid_values=range(4), description="Mode of conversion operation field."),
+        bit_field_info(name="OVF", position=range(8, 9), valid_values=None, description="Overflow flag."),
+        bit_field_info(name="CRF", position=range(7, 8), valid_values=None, description="Conversion ready."),
+        bit_field_info(name="FH", position=range(6, 7), valid_values=None, description="Flag high."),
+        bit_field_info(name="FL", position=range(5, 6), valid_values=None, description="Flag low."),
+        bit_field_info(name="L", position=range(4, 5), valid_values=None, description="Latch field."),
+        bit_field_info(name="POL", position=range(3, 4), valid_values=None, description="Polarity."),
+        bit_field_info(name="ME", position=range(2, 3), valid_values=None, description="Mask exponent."),
+        bit_field_info(name="FC", position=range(2), valid_values=None, description="Fault count."),
     )
 
-    def __init__(self, adapter: bus_service.BusAdapter, address: int = 0x44) -> None:
+    def __init__(self, adapter: bus_service.BusAdapter, address: int = I2C_DEFAULT_ADDR) -> None:
         """
         初始化 OPT3001 传感器驱动
         Args:
@@ -107,7 +112,7 @@ class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
         Returns:
             None
         Raises:
-            ValueError: adapter 为 None 或 address 超出范围
+            ValueError: adapter 为 None 或类型错误、address 超出范围
         Notes:
             - ISR-safe: 否
             - 副作用：初始化位域缓存，不写入硬件寄存器
@@ -119,55 +124,18 @@ class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
         Returns:
             None
         Raises:
-            ValueError: adapter is None or address out of range
+            ValueError: adapter is None or wrong type, address out of range
         Notes:
             - ISR-safe: No
             - Side effect: Initializes bit-field cache, does not write hardware registers
         """
         if adapter is None:
             raise ValueError("adapter must not be None")
-        check_value(address, range(_ADDR_MIN, _ADDR_MAX),
-                    "Invalid I2C address: 0x%02X" % address)
+        if not hasattr(adapter, "read_reg"):
+            raise ValueError("adapter must be a BusAdapter instance")
+        check_value(address, range(_ADDR_MIN, _ADDR_MAX), "Invalid I2C address: 0x%02X" % address)
         DeviceEx.__init__(self, adapter, address, True)
         self._bit_fields = BitFields(fields_info=OPT3001._CONFIG_FIELDS)
-
-    def _get_config_field(self, field_name=None):
-        bf = self._bit_fields
-        if field_name is None:
-            return bf.source
-        return bf[field_name]
-
-    def _set_config_field(self, value: int, field_name=None) -> None:
-        bf = self._bit_fields
-        if field_name is None:
-            bf.source = value
-            return
-        bf[field_name] = value
-
-    @staticmethod
-    def _get_lsb_fsr(exp_raw: int) -> _opt3001_lsb_fsr:
-        """
-        根据指数字段计算 LSB 精度和满量程范围
-        Args:
-            exp_raw (int): 原始指数值，范围 0~11
-        Returns:
-            _opt3001_lsb_fsr: LSB 和 FSR 值（单位 Lux）；exp_raw 超范围时两者均为 None
-        Notes:
-            - ISR-safe: 是
-        ==========================================
-        Calculate LSB and FSR from exponent field.
-        Args:
-            exp_raw (int): Raw exponent, range 0~11
-        Returns:
-            _opt3001_lsb_fsr: LSB and FSR in Lux; both None if out of range
-        Notes:
-            - ISR-safe: Yes
-        """
-        if exp_raw < 0 or exp_raw > 11:
-            return _opt3001_lsb_fsr(None, None)
-        _lsb = 0.01 * (1 << exp_raw)
-        _fsr = 40.95 * (1 << exp_raw)
-        return _opt3001_lsb_fsr(_lsb, _fsr)
 
     def get_cfg_reg(self) -> int:
         """
@@ -254,10 +222,17 @@ class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
             - Returns cached value; call read_config_from_sensor() first for live value
         """
         return opt3001_config(
-            RN=self.lux_range_index, CT=self.long_conversion_time,
-            M=self.mode, OVF=self.overflow, CRF=self.conversion_ready,
-            FH=self.flag_high, FL=self.flag_low, L=self.latch,
-            POL=self.polarity, ME=self.mask_exponent, FC=self.fault_count
+            RN=self.lux_range_index,
+            CT=self.long_conversion_time,
+            M=self.mode,
+            OVF=self.overflow,
+            CRF=self.conversion_ready,
+            FH=self.flag_high,
+            FL=self.flag_low,
+            L=self.latch,
+            POL=self.polarity,
+            ME=self.mask_exponent,
+            FC=self.fault_count,
         )
 
     def read_config_from_sensor(self, return_value: bool = False) -> opt3001_config:
@@ -374,9 +349,7 @@ class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
             return 800
         return 100
 
-    def start_measurement(self, continuously: bool = True,
-                          lx_range_index: int = 12,
-                          refresh: bool = False) -> None:
+    def start_measurement(self, continuously: bool = True, lx_range_index: int = 12, refresh: bool = False) -> None:
         """
         配置测量参数并启动测量
         Args:
@@ -479,8 +452,7 @@ class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
             - Side effect: Refreshes internal config cache
         """
         self.read_config_from_sensor(return_value=False)
-        return OPT3001_data_status(conversion_ready=self.conversion_ready,
-                                   overflow=self.overflow)
+        return OPT3001_data_status(conversion_ready=self.conversion_ready, overflow=self.overflow)
 
     def is_single_shot_mode(self) -> bool:
         """
@@ -530,161 +502,20 @@ class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
         """
         return self.mode == 2 or self.mode == 3
 
-    def deinit(self) -> None:
-        """
-        释放传感器资源，将传感器置于省电模式
-        Args:
-            无
-        Returns:
-            None
-        Raises:
-            RuntimeError: I2C 通信失败
-        Notes:
-            - ISR-safe: 否
-            - 副作用：将传感器 mode 设为 0（省电模式）并写入寄存器
-        ==========================================
-        Release sensor resources, set sensor to power-save mode.
-        Args:
-            None
-        Returns:
-            None
-        Raises:
-            RuntimeError: I2C communication failed
-        Notes:
-            - ISR-safe: No
-            - Side effect: Sets sensor mode to 0 (power-save) and writes register
-        """
-        self.mode = 0
-        self.write_config_to_sensor()
-
-    @property
-    def lux_range_index(self) -> int:
-        """
-        照度量程索引（RN 字段）。0~11 固定量程，12 自动量程
-        ==========================================
-        Lux range index (RN field). 0~11 fixed, 12 auto full-scale.
-        """
-        return self._get_config_field('RN')
-
-    @lux_range_index.setter
-    def lux_range_index(self, value: int) -> None:
-        self._set_config_field(value, 'RN')
-
-    @property
-    def long_conversion_time(self) -> bool:
-        """
-        转换时间（CT 字段）。False=100ms，True=800ms
-        ==========================================
-        Conversion time (CT field). False=100ms, True=800ms.
-        """
-        return self._get_config_field('CT')
-
-    @long_conversion_time.setter
-    def long_conversion_time(self, value: bool) -> None:
-        self._set_config_field(value, 'CT')
-
-    @property
-    def mode(self) -> int:
-        """
-        工作模式（M 字段）。0=省电，1=单次，2/3=连续
-        ==========================================
-        Operation mode (M field). 0=power-save, 1=single-shot, 2/3=continuous.
-        """
-        return self._get_config_field('M')
-
-    @mode.setter
-    def mode(self, value: int) -> None:
-        self._set_config_field(value, 'M')
-
-    @property
-    def overflow(self) -> bool:
-        """
-        溢出标志（OVF 字段）。True 表示测量值超出当前量程
-        ==========================================
-        Overflow flag (OVF field). True if measurement exceeds current range.
-        """
-        return self._get_config_field('OVF')
-
-    @property
-    def conversion_ready(self) -> bool:
-        """
-        转换就绪标志（CRF 字段）。True 表示转换完成，数据可读
-        ==========================================
-        Conversion ready flag (CRF field). True when conversion is complete.
-        """
-        return self._get_config_field('CRF')
-
-    @property
-    def flag_high(self) -> bool:
-        """
-        高阈值比较标志（FH 字段）。True 表示测量值超过高阈值
-        ==========================================
-        High flag (FH field). True if result exceeds high-limit register.
-        """
-        return self._get_config_field('FH')
-
-    @property
-    def flag_low(self) -> bool:
-        """
-        低阈值比较标志（FL 字段）。True 表示测量值低于低阈值
-        ==========================================
-        Low flag (FL field). True if result is below low-limit register.
-        """
-        return self._get_config_field('FL')
-
-    @property
-    def latch(self) -> bool:
-        """
-        锁存模式（L 字段）。控制 INT 引脚和 FH/FL 标志的报告方式
-        ==========================================
-        Latch field (L). Controls INT pin and FH/FL reporting style.
-        """
-        return self._get_config_field('L')
-
-    @latch.setter
-    def latch(self, value: bool) -> None:
-        self._set_config_field(value, 'L')
-
-    @property
-    def polarity(self) -> bool:
-        """
-        INT 引脚极性（POL 字段）。False=低有效，True=高有效
-        ==========================================
-        INT pin polarity (POL field). False=active-low, True=active-high.
-        """
-        return self._get_config_field('POL')
-
-    @polarity.setter
-    def polarity(self, value: bool) -> None:
-        self._set_config_field(value, 'POL')
-
-    @property
-    def mask_exponent(self) -> bool:
-        """
-        指数屏蔽位（ME 字段）。True 时结果寄存器指数字段被屏蔽为 0
-        ==========================================
-        Mask exponent (ME field). True masks exponent field in result register.
-        """
-        return self._get_config_field('ME')
-
-    @mask_exponent.setter
-    def mask_exponent(self, value: bool) -> None:
-        self._set_config_field(value, 'ME')
-
-    @property
-    def fault_count(self) -> int:
-        """
-        故障计数（FC 字段）。触发 INT 引脚所需的连续超限次数
-        ==========================================
-        Fault count (FC field). Consecutive out-of-range results needed to trigger INT.
-        """
-        return self._get_config_field('FC')
-
-    @fault_count.setter
-    def fault_count(self, value: int) -> None:
-        self._set_config_field(value, 'FC')
-
     def __iter__(self):
+        """
+        返回迭代器自身（Iterator 协议）
+        Returns:
+            self
+        Notes:
+            - ISR-safe: 是
+        ==========================================
+        Return iterator self (Iterator protocol).
+        Returns:
+            self
+        Notes:
+            - ISR-safe: Yes
+        """
         return self
 
     def __next__(self) -> opt3001_meas_data:
@@ -714,3 +545,202 @@ class OPT3001(DeviceEx, IBaseSensorEx, Iterator):
         ds = self.get_data_status()
         if self.is_continuously_mode() and ds.conversion_ready:
             return self.get_measurement_value(0)
+
+    @property
+    def lux_range_index(self) -> int:
+        """
+        照度量程索引（RN 字段）。0~11 固定量程，12 自动量程
+        ==========================================
+        Lux range index (RN field). 0~11 fixed, 12 auto full-scale.
+        """
+        return self._get_config_field("RN")
+
+    @lux_range_index.setter
+    def lux_range_index(self, value: int) -> None:
+        self._set_config_field(value, "RN")
+
+    @property
+    def long_conversion_time(self) -> bool:
+        """
+        转换时间（CT 字段）。False=100ms，True=800ms
+        ==========================================
+        Conversion time (CT field). False=100ms, True=800ms.
+        """
+        return self._get_config_field("CT")
+
+    @long_conversion_time.setter
+    def long_conversion_time(self, value: bool) -> None:
+        self._set_config_field(value, "CT")
+
+    @property
+    def mode(self) -> int:
+        """
+        工作模式（M 字段）。0=省电，1=单次，2/3=连续
+        ==========================================
+        Operation mode (M field). 0=power-save, 1=single-shot, 2/3=continuous.
+        """
+        return self._get_config_field("M")
+
+    @mode.setter
+    def mode(self, value: int) -> None:
+        self._set_config_field(value, "M")
+
+    @property
+    def overflow(self) -> bool:
+        """
+        溢出标志（OVF 字段）。True 表示测量值超出当前量程
+        ==========================================
+        Overflow flag (OVF field). True if measurement exceeds current range.
+        """
+        return self._get_config_field("OVF")
+
+    @property
+    def conversion_ready(self) -> bool:
+        """
+        转换就绪标志（CRF 字段）。True 表示转换完成，数据可读
+        ==========================================
+        Conversion ready flag (CRF field). True when conversion is complete.
+        """
+        return self._get_config_field("CRF")
+
+    @property
+    def flag_high(self) -> bool:
+        """
+        高阈值比较标志（FH 字段）。True 表示测量值超过高阈值
+        ==========================================
+        High flag (FH field). True if result exceeds high-limit register.
+        """
+        return self._get_config_field("FH")
+
+    @property
+    def flag_low(self) -> bool:
+        """
+        低阈值比较标志（FL 字段）。True 表示测量值低于低阈值
+        ==========================================
+        Low flag (FL field). True if result is below low-limit register.
+        """
+        return self._get_config_field("FL")
+
+    @property
+    def latch(self) -> bool:
+        """
+        锁存模式（L 字段）。控制 INT 引脚和 FH/FL 标志的报告方式
+        ==========================================
+        Latch field (L). Controls INT pin and FH/FL reporting style.
+        """
+        return self._get_config_field("L")
+
+    @latch.setter
+    def latch(self, value: bool) -> None:
+        self._set_config_field(value, "L")
+
+    @property
+    def polarity(self) -> bool:
+        """
+        INT 引脚极性（POL 字段）。False=低有效，True=高有效
+        ==========================================
+        INT pin polarity (POL field). False=active-low, True=active-high.
+        """
+        return self._get_config_field("POL")
+
+    @polarity.setter
+    def polarity(self, value: bool) -> None:
+        self._set_config_field(value, "POL")
+
+    @property
+    def mask_exponent(self) -> bool:
+        """
+        指数屏蔽位（ME 字段）。True 时结果寄存器指数字段被屏蔽为 0
+        ==========================================
+        Mask exponent (ME field). True masks exponent field in result register.
+        """
+        return self._get_config_field("ME")
+
+    @mask_exponent.setter
+    def mask_exponent(self, value: bool) -> None:
+        self._set_config_field(value, "ME")
+
+    @property
+    def fault_count(self) -> int:
+        """
+        故障计数（FC 字段）。触发 INT 引脚所需的连续超限次数
+        ==========================================
+        Fault count (FC field). Consecutive out-of-range results needed to trigger INT.
+        """
+        return self._get_config_field("FC")
+
+    @fault_count.setter
+    def fault_count(self, value: int) -> None:
+        self._set_config_field(value, "FC")
+
+    def _get_config_field(self, field_name=None):
+        """从位域缓存读取指定字段值，field_name 为 None 时返回完整源值"""
+        bf = self._bit_fields
+        if field_name is None:
+            return bf.source
+        return bf[field_name]
+
+    def _set_config_field(self, value: int, field_name=None) -> None:
+        """向位域缓存写入指定字段值，field_name 为 None 时写入完整源值"""
+        bf = self._bit_fields
+        if field_name is None:
+            bf.source = value
+            return
+        bf[field_name] = value
+
+    @staticmethod
+    def _get_lsb_fsr(exp_raw: int) -> _opt3001_lsb_fsr:
+        """
+        根据指数字段计算 LSB 精度和满量程范围
+        Args:
+            exp_raw (int): 原始指数值，范围 0~11
+        Returns:
+            _opt3001_lsb_fsr: LSB 和 FSR 值（单位 Lux）；exp_raw 超范围时两者均为 None
+        Notes:
+            - ISR-safe: 是
+        ==========================================
+        Calculate LSB and FSR from exponent field.
+        Args:
+            exp_raw (int): Raw exponent, range 0~11
+        Returns:
+            _opt3001_lsb_fsr: LSB and FSR in Lux; both None if out of range
+        Notes:
+            - ISR-safe: Yes
+        """
+        if exp_raw < 0 or exp_raw > 11:
+            return _opt3001_lsb_fsr(None, None)
+        _lsb = 0.01 * (1 << exp_raw)
+        _fsr = 40.95 * (1 << exp_raw)
+        return _opt3001_lsb_fsr(_lsb, _fsr)
+
+    def deinit(self) -> None:
+        """
+        释放传感器资源，将传感器置于省电模式
+        Args:
+            无
+        Returns:
+            None
+        Raises:
+            RuntimeError: I2C 通信失败
+        Notes:
+            - ISR-safe: 否
+            - 副作用：将传感器 mode 设为 0（省电模式）并写入寄存器
+        ==========================================
+        Release sensor resources, set sensor to power-save mode.
+        Args:
+            None
+        Returns:
+            None
+        Raises:
+            RuntimeError: I2C communication failed
+        Notes:
+            - ISR-safe: No
+            - Side effect: Sets sensor mode to 0 (power-save) and writes register
+        """
+        self.mode = 0
+        self.write_config_to_sensor()
+
+
+# ======================================== 初始化配置 ==========================================
+
+# ========================================  主程序  ===========================================

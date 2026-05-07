@@ -5,7 +5,7 @@
 # @File    : ens160sciosense.py
 # @Description : ENS160 数字金属氧化物多气体传感器驱动
 # @License : MIT
-s
+
 __version__ = "1.0.0"
 __author__ = "FreakStudio"
 __license__ = "MIT"
@@ -35,6 +35,7 @@ ens160_firmware_version = namedtuple("ens160_firmware_version", "major minor rel
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 ============================================
+
 
 class Ens160(IBaseSensorEx, IDentifier, Iterator):
     """
@@ -73,28 +74,28 @@ class Ens160(IBaseSensorEx, IDentifier, Iterator):
 
     # 寄存器地址常量
     _REG_PART_ID = micropython.const(0x00)
-    _REG_OPMODE  = micropython.const(0x10)
-    _REG_CONFIG  = micropython.const(0x11)
+    _REG_OPMODE = micropython.const(0x10)
+    _REG_CONFIG = micropython.const(0x11)
     _REG_COMMAND = micropython.const(0x12)
     _REG_TEMP_IN = micropython.const(0x13)
-    _REG_RH_IN   = micropython.const(0x15)
-    _REG_STATUS  = micropython.const(0x20)
-    _REG_AQI     = micropython.const(0x21)
-    _REG_TVOC    = micropython.const(0x22)
-    _REG_ECO2    = micropython.const(0x24)
-    _REG_MISR    = micropython.const(0x38)
-    _REG_GPR_RD  = micropython.const(0x48)
+    _REG_RH_IN = micropython.const(0x15)
+    _REG_STATUS = micropython.const(0x20)
+    _REG_AQI = micropython.const(0x21)
+    _REG_TVOC = micropython.const(0x22)
+    _REG_ECO2 = micropython.const(0x24)
+    _REG_MISR = micropython.const(0x38)
+    _REG_GPR_RD = micropython.const(0x48)
 
     # 工作模式常量
     _MODE_DEEP_SLEEP = micropython.const(0x00)
-    _MODE_IDLE       = micropython.const(0x01)
-    _MODE_STANDARD   = micropython.const(0x02)
-    _MODE_RESET      = micropython.const(0xF0)
+    _MODE_IDLE = micropython.const(0x01)
+    _MODE_STANDARD = micropython.const(0x02)
+    _MODE_RESET = micropython.const(0xF0)
 
     # 内部命令常量
-    _CMD_NOP        = micropython.const(0x00)
+    _CMD_NOP = micropython.const(0x00)
     _CMD_GET_APPVER = micropython.const(0x0E)
-    _CMD_CLRGPR     = micropython.const(0xCC)
+    _CMD_CLRGPR = micropython.const(0xCC)
 
     # CRC 多项式
     _CRC_POLY = micropython.const(0x1D)
@@ -102,8 +103,7 @@ class Ens160(IBaseSensorEx, IDentifier, Iterator):
     # 默认 I2C 地址
     I2C_DEFAULT_ADDR = micropython.const(0x52)
 
-    def __init__(self, adapter: bus_service.I2cAdapter, address: int = I2C_DEFAULT_ADDR,
-                 check_crc: bool = True) -> None:
+    def __init__(self, adapter: bus_service.I2cAdapter, address: int = I2C_DEFAULT_ADDR, check_crc: bool = True) -> None:
         """
         初始化 ENS160 驱动
         Args:
@@ -599,6 +599,7 @@ class Ens160(IBaseSensorEx, IDentifier, Iterator):
     def _get_last_checksum(self) -> int:
         # 直接读取 CRC 寄存器，不经过 _read_register 避免递归
         return self._connector.read_reg(self._REG_MISR, 1)[0]
+
 
 # ======================================== 初始化配置 ==========================================
 
