@@ -11,9 +11,11 @@
     "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
   },
   "urls": [
-    [
-      "ens160sciosense.py",
-      "code/ens160sciosense.py"
-    ]
+    ["ens160sciosense.py", "code/ens160sciosense.py"],
+    ["sensor_pack_2/__init__.py", "code/sensor_pack_2/__init__.py"],
+    ["sensor_pack_2/base_sensor.py", "code/sensor_pack_2/base_sensor.py"],
+    ["sensor_pack_2/bitfield.py", "code/sensor_pack_2/bitfield.py"],
+    ["sensor_pack_2/bus_service.py", "code/sensor_pack_2/bus_service.py"],
+    ["sensor_pack_2/crc_mod.py", "code/sensor_pack_2/crc_mod.py"]
   ]
 }
