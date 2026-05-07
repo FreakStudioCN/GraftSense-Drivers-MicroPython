@@ -1,8 +1,8 @@
 {
-  "name": "ens160_driver",
-  "version": "1.0.0",
-  "description": "A MicroPython library to control ENS160 digital metal-oxide multi-gas sensor",
-  "author": "FreakStudio",
+  "name": "ltr390uv_driver",
+  "version": "0.1.0",
+  "description": "A MicroPython library to control LTR-390UV-01 ambient light and UV sensor",
+  "author": "octaprog7",
   "license": "MIT",
   "chips": "all",
   "fw": "all",
@@ -11,11 +11,11 @@
     "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
   },
   "urls": [
-    ["ens160sciosense.py", "code/ens160sciosense.py"],
+    ["ltr390uv.py", "code/ltr390uv.py"],
     ["sensor_pack_2/__init__.py", "code/sensor_pack_2/__init__.py"],
     ["sensor_pack_2/base_sensor.py", "code/sensor_pack_2/base_sensor.py"],
     ["sensor_pack_2/bitfield.py", "code/sensor_pack_2/bitfield.py"],
     ["sensor_pack_2/bus_service.py", "code/sensor_pack_2/bus_service.py"],
-    ["sensor_pack_2/crc_mod.py", "code/sensor_pack_2/crc_mod.py"]
+    ["sensor_pack_2/regmod.py", "code/sensor_pack_2/regmod.py"]
   ]
 }

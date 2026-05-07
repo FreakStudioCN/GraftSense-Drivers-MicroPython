@@ -11,9 +11,14 @@
     "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
   },
   "urls": [
-    [
-      "rm3100mod.py",
-      "code/rm3100mod.py"
-    ]
+    ["rm3100mod.py", "code/rm3100mod.py"],
+    ["sensor_pack/__init__.py", "code/sensor_pack/__init__.py"],
+    ["sensor_pack/averager.py", "code/sensor_pack/averager.py"],
+    ["sensor_pack/base_sensor.py", "code/sensor_pack/base_sensor.py"],
+    ["sensor_pack/bitfield.py", "code/sensor_pack/bitfield.py"],
+    ["sensor_pack/bus_service.py", "code/sensor_pack/bus_service.py"],
+    ["sensor_pack/converter.py", "code/sensor_pack/converter.py"],
+    ["sensor_pack/crc_mod.py", "code/sensor_pack/crc_mod.py"],
+    ["sensor_pack/geosensmod.py", "code/sensor_pack/geosensmod.py"]
   ]
 }
