@@ -1,0 +1,27 @@
+{
+  "name": "lis2mdl_driver",
+  "version": "0.1.0",
+  "description": "A MicroPython library to control lis2mdl_driver ",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "micropython_lis2mdl/__init__.py",
+      "code/micropython_lis2mdl/__init__.py"
+    ],
+    [
+      "micropython_lis2mdl/i2c_helpers.py",
+      "code/micropython_lis2mdl/i2c_helpers.py"
+    ],
+    [
+      "micropython_lis2mdl/lis2mdl.py",
+      "code/micropython_lis2mdl/lis2mdl.py"
+    ]
+  ]
+}
