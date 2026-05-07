@@ -1,6 +1,6 @@
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
-# @Time    : 2022/01/01 00:00
+# @Time    : 2026/05/07 00:00
 # @Author  : Roman Shevchik (goctaprog@gmail.com)
 # @File    : veml6040mod.py
 # @Description : VEML6040 RGBW颜色传感器驱动，支持自动/单次测量、积分时间配置、迭代器接口
@@ -94,7 +94,7 @@ class VEML6040(DeviceEx, Iterator):
         shutdown: 传感器关断状态（可读写属性）
         deinit(): 关断传感器并释放资源
     Notes:
-        - 依赖外部传入I2C适配器实例
+        - 依赖外部传入I2C适配器实例（sensor_pack_2框架，多重继承DeviceEx+Iterator）
         - 初始化时自动从传感器读取当前配置
         - I2C地址固定为0x10，不可更改
     ==========================================
@@ -114,12 +114,14 @@ class VEML6040(DeviceEx, Iterator):
         shutdown: Sensor shutdown state (read/write property)
         deinit(): Shut down sensor and release resources
     Notes:
-        - Requires externally provided I2C adapter instance
+        - Requires externally provided I2C adapter instance (sensor_pack_2 framework, multiple inheritance DeviceEx+Iterator)
         - Automatically reads current config from sensor on init
         - I2C address fixed at 0x10, cannot be changed
     """
 
-    def __init__(self, adapter: bus_service.BusAdapter, address=0x10):
+    I2C_DEFAULT_ADDR = micropython.const(0x10)
+
+    def __init__(self, adapter: bus_service.BusAdapter, address: int = I2C_DEFAULT_ADDR) -> None:
         """
         初始化VEML6040传感器
         Args:
@@ -128,6 +130,7 @@ class VEML6040(DeviceEx, Iterator):
         Returns:
             None
         Raises:
+            ValueError: adapter为None或类型错误，address类型错误
             RuntimeError: I2C通信失败
         Notes:
             - ISR-safe: 否
@@ -140,19 +143,28 @@ class VEML6040(DeviceEx, Iterator):
         Returns:
             None
         Raises:
+            ValueError: adapter is None or wrong type, address wrong type
             RuntimeError: I2C communication failed
         Notes:
             - ISR-safe: No
             - Side effects: Reads current config from sensor and caches to instance attributes
         """
+        if adapter is None:
+            raise ValueError("adapter must not be None")
+        if not hasattr(adapter, "read_reg"):
+            raise ValueError("adapter must be a BusAdapter instance")
+        if address is None:
+            raise ValueError("address must not be None")
+        if not isinstance(address, int):
+            raise ValueError("address must be int, got %s" % type(address))
         super().__init__(adapter, address, False)
         self._integration_time = self._trig = self._auto = self._shutdown = None
         # 4通道16位无符号整数缓冲区（R/G/B/W）
-        self._buf_4 = array.array("H", [0 for _ in range(4)])
+        self._buf_4 = array.array("H", (0,) * 4)
         # 从传感器读取当前配置
         self._get_settings()
 
-    def _get_settings(self):
+    def _get_settings(self) -> None:
         """
         从传感器读取当前配置并缓存到实例属性
         Notes:
@@ -192,12 +204,13 @@ class VEML6040(DeviceEx, Iterator):
         _check_integration_time(self._integration_time)
         return 40 * (1 << self._integration_time)
 
-    def _settings(self,
-                  it=None,
-                  trig=None,
-                  af=None,
-                  sd=None,
-                  ):
+    def _settings(
+        self,
+        it=None,
+        trig=None,
+        af=None,
+        sd=None,
+    ) -> int:
         """
         读取或写入CONF配置寄存器
         Args:
@@ -207,6 +220,8 @@ class VEML6040(DeviceEx, Iterator):
             sd (bool or None): 关断(bit0)，None=不修改
         Returns:
             int or None: 所有参数为None时返回寄存器当前值，否则返回None
+        Raises:
+            RuntimeError: I2C读写失败
         Notes:
             - ISR-safe: 否
             - 副作用：写入时修改CONF寄存器
@@ -219,11 +234,16 @@ class VEML6040(DeviceEx, Iterator):
             sd (bool or None): Shutdown (bit0), None=no change
         Returns:
             int or None: Register value if all params None, else None
+        Raises:
+            RuntimeError: I2C read/write failed
         Notes:
             - ISR-safe: No
             - Side effects: Writes CONF register when modifying
         """
-        val = self.read_reg(0x00, 2)[0]
+        try:
+            val = self.read_reg(0x00, 2)[0]
+        except OSError as e:
+            raise RuntimeError("I2C read CONF register failed") from e
         if all_none(it, trig, af, sd):
             return val
         if it is not None:
@@ -238,7 +258,10 @@ class VEML6040(DeviceEx, Iterator):
         if sd is not None:
             val &= 0xFE
             val |= sd
-        self.write_reg(0x00, val, 2)
+        try:
+            self.write_reg(0x00, val, 2)
+        except OSError as e:
+            raise RuntimeError("I2C write CONF register failed") from e
 
     def get_colors(self) -> tuple:
         """
@@ -264,10 +287,13 @@ class VEML6040(DeviceEx, Iterator):
         """
         buf = self._buf_4
         for index in range(len(buf)):
-            buf[index] = self.unpack(fmt_char="H", source=self.read_reg(0x08 + index, 2))[0]
+            try:
+                buf[index] = self.unpack(fmt_char="H", source=self.read_reg(0x08 + index, 2))[0]
+            except OSError as e:
+                raise RuntimeError("I2C read color channel %d failed" % index) from e
         return tuple(buf)
 
-    def start_measurement(self, integr_time: int, auto_mode: bool):
+    def start_measurement(self, integr_time: int, auto_mode: bool) -> None:
         """
         启动自动或单次测量
         Args:
@@ -277,7 +303,7 @@ class VEML6040(DeviceEx, Iterator):
         Returns:
             None
         Raises:
-            ValueError: integr_time超出范围
+            ValueError: integr_time超出范围或auto_mode类型错误
         Notes:
             - ISR-safe: 否
             - 副作用：写入CONF寄存器，更新缓存配置
@@ -290,12 +316,14 @@ class VEML6040(DeviceEx, Iterator):
         Returns:
             None
         Raises:
-            ValueError: integr_time out of range
+            ValueError: integr_time out of range or auto_mode wrong type
         Notes:
             - ISR-safe: No
             - Side effects: Writes CONF register, updates cached config
         """
         _check_integration_time(integr_time)
+        if not isinstance(auto_mode, bool):
+            raise ValueError("auto_mode must be bool, got %s" % type(auto_mode))
         self._settings(it=integr_time, trig=not auto_mode, af=not auto_mode)
         # 更新缓存配置
         self._get_settings()
@@ -352,11 +380,13 @@ class VEML6040(DeviceEx, Iterator):
         return 0 != self._shutdown
 
     @shutdown.setter
-    def shutdown(self, value: bool = True):
+    def shutdown(self, value: bool = True) -> None:
         """
         设置传感器关断状态
         Args:
             value (bool): True=关断传感器，False=启动传感器
+        Returns:
+            None
         Notes:
             - ISR-safe: 否
             - 副作用：写入CONF寄存器sd位，更新_shutdown缓存
@@ -364,6 +394,8 @@ class VEML6040(DeviceEx, Iterator):
         Set sensor shutdown state.
         Args:
             value (bool): True=shutdown sensor, False=enable sensor
+        Returns:
+            None
         Notes:
             - ISR-safe: No
             - Side effects: Writes CONF register sd bit, updates _shutdown cache
@@ -389,7 +421,7 @@ class VEML6040(DeviceEx, Iterator):
             return None
         return self.get_colors()
 
-    def deinit(self):
+    def deinit(self) -> None:
         """
         关断传感器并释放资源
         Args:

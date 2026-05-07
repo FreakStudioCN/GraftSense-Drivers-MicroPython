@@ -1,0 +1,19 @@
+{
+  "name": "veml6040_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control VEML6040 RGBW color sensor",
+  "author": "Roman Shevchik",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    ["veml6040mod.py", "code/veml6040mod.py"],
+    ["sensor_pack_2/__init__.py", "code/sensor_pack_2/__init__.py"],
+    ["sensor_pack_2/base_sensor.py", "code/sensor_pack_2/base_sensor.py"],
+    ["sensor_pack_2/bus_service.py", "code/sensor_pack_2/bus_service.py"]
+  ]
+}
