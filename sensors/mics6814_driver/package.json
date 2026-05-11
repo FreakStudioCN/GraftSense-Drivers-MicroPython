@@ -1,0 +1,16 @@
+{
+  "name": "mics6814_driver",
+  "urls": [
+    ["mics6814.py", "code/mics6814.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython driver for MiCS6814 CO, NH3 and NO2 three-channel ADC gas sensor",
+  "author": "FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
