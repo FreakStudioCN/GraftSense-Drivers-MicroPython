@@ -1,197 +1,217 @@
-# AS5600L 磁旋转位置传感器驱动 - MicroPython版本
+# AS5600 / AS5600L 12位磁性旋转编码器驱动 | 12-bit Magnetic Rotary Encoder Driver
 
-## 目录
-
-- [简介](#简介)
-- [主要功能](#主要功能)
-- [硬件要求](#硬件要求)
-- [软件环境](#软件环境)
-- [文件结构](#文件结构)
-- [文件说明](#文件说明)
-- [快速开始](#快速开始)
-- [注意事项](#注意事项)
-- [版本记录](#版本记录)
-- [联系方式](#联系方式)
-- [许可协议](#许可协议)
+[中文](#中文) | [English](#english)
 
 ---
 
-## 简介
+## 中文
 
-本驱动为 ams AS5600L 磁旋转位置传感器的 MicroPython 实现，支持通过 I2C 总线读取 12 位原始角度值和角度（度）。驱动提供磁铁状态检测、自动增益控制（AGC）读取及 CONF 寄存器完整配置，适用于电机位置反馈、旋钮控制、机械臂关节角度检测等嵌入式应用场景。
+### 简介
 
----
+适用于 AS5600 / AS5600L 12位磁性旋转编码器的 MicroPython 驱动，通过 I2C 接口读取角度、磁铁状态、AGC 及磁场强度，并支持起始/终止角度与最大角度的配置写入。AS5600L 为 AS5600 的低电压变体，I2C 地址不同（0x40 vs 0x36），两者共用同一驱动文件 `as5600.py`。
 
-## 主要功能
+### 特性
 
-- 支持读取 12 位原始角度值（0~4095）和角度（0~359°）
-- 提供 `getAngleDegrees()` 安全读取（内部检查磁铁状态，异常返回 None）
-- 提供 `getAngleDegreesFast()` 快速读取（跳过状态检查，适合高频采样）
-- 支持磁铁状态查询（`isOk()`、`getStatus()`），包含磁场过强/过弱/已检测标志及 AGC 值
-- 支持 CONF 寄存器完整配置：磁滞、电源模式、看门狗、快速/慢速滤波、PWM 频率、输出模式
-- I2C 地址固定为 `0x40`，无需额外配置
+- 12 位角度分辨率（0~4095 对应 0~360°）
+- I2C 接口，AS5600 默认地址 0x36，AS5600L 默认地址 0x40
+- 支持原始角度与映射角度读取
+- 支持 ZPOS / MPOS / MANG 角度范围配置
+- 支持 CONF 寄存器全位域读写（PM / HYST / OUTS / PWMF / SF / FTH / WD）
+- 磁铁检测状态（MD / ML / MH）、AGC 与 CORDIC 磁场强度读取
+- 支持 OTP 烧录（不可逆，谨慎使用）
+- 兼容 MicroPython v1.23
 
----
+### 硬件连接
 
-## 硬件要求
+| 传感器引脚 | 说明          | 典型 MCU 引脚（示例）     |
+|-----------|--------------|--------------------------|
+| VDD       | 电源 3.3V     | 3.3V                     |
+| GND       | 地            | GND                      |
+| SDA       | I2C 数据线    | Pin(4)（示例，按板卡调整）|
+| SCL       | I2C 时钟线    | Pin(5)（示例，按板卡调整）|
+| DIR       | 旋转方向选择  | GND（顺时针）/ VDD（逆时针）|
 
-**推荐测试硬件：**
-- 主控：Raspberry Pi Pico / ESP32 / 任意支持 MicroPython 的开发板
-- 传感器：ams AS5600L 磁旋转位置传感器模块
+> 具体引脚请参考所用开发板的 I2C 引脚定义。
 
-**引脚说明：**
+### 安装方法
 
-| 引脚 | 功能描述 |
-|------|----------|
-| VCC  | 电源正极（3.3V） |
-| GND  | 电源负极 |
-| SCL  | I2C 时钟线（示例：GPIO5） |
-| SDA  | I2C 数据线（示例：GPIO4） |
-
-> I2C 地址固定为 `0x40`，无法通过硬件引脚更改。
-
----
-
-## 软件环境
-
-| 项目 | 版本 |
-|------|------|
-| MicroPython 固件 | v1.23.0 及以上 |
-| 驱动版本 | 1.0.0 |
-| 依赖库 | 无（仅依赖 MicroPython 内置模块） |
-
----
-
-## 文件结构
-
-```
-as5600l_driver/
-├── code/
-│   ├── AS5600L.py     # 核心驱动
-│   └── main.py        # 测试示例
-├── package.json       # mip 包配置
-├── README.md          # 本文档
-└── LICENSE            # 许可协议
-```
-
----
-
-## 文件说明
-
-| 文件 | 说明 |
-|------|------|
-| `code/AS5600L.py` | AS5600L 核心驱动，包含 CONF 寄存器配置、角度读取、磁铁状态查询等功能 |
-| `code/main.py` | 完整测试示例，覆盖传感器初始化、状态打印、循环角度读取 |
-
----
-
-## 快速开始
-
-### 第一步：复制文件
-
-将以下文件复制到 MicroPython 设备根目录：
-
-```
-AS5600L.py
-```
-
-### 第二步：接线
-
-| 传感器引脚 | 开发板引脚（示例） |
-|-----------|------------------|
-| VCC       | 3.3V             |
-| GND       | GND              |
-| SCL       | GPIO5            |
-| SDA       | GPIO4            |
-
-### 第三步：最小示例
+**方式一：mip 在线安装（需联网）**
 
 ```python
-from AS5600L import AS5600L
-from time import sleep_ms
+import mip
+mip.install("github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/as5600l_driver")
+```
 
-sensor = AS5600L(hyst=1)
-print(sensor.getStatus())
+**方式二：手动复制**
+
+将 `as5600.py` 复制到设备根目录或 `lib/` 目录：
+
+```bash
+mpremote cp as5600.py :as5600.py
+```
+
+### 快速开始
+
+```python
+from machine import I2C, Pin
+import time
+from as5600 import AS5600
+
+# AS5600L 地址为 0x40，标准 AS5600 使用 0x36
+i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=400000)
+sensor = AS5600(i2c, device=0x40)
 
 while True:
-    print("Degrees:", sensor.getAngleDegrees())
-    sleep_ms(333)
+    mapped = sensor.angle()
+    print("Angle: %d (%.2f deg)  magnet=%d" % (mapped, mapped * 360.0 / 4096.0, sensor.md()))
+    time.sleep_ms(1000)
 ```
 
-### 完整测试示例（main.py）
+### API 参考
+
+| 接口 | 类型 | 说明 |
+|------|------|------|
+| `AS5600(i2c, device=0x36, debug=False)` | 构造函数 | 初始化驱动，校验参数，不发起 I2C 通信 |
+| `sensor.rawangle()` | `int` 方法 | 读取原始角度（0~4095，未经映射） |
+| `sensor.angle()` | `int` 方法 | 读取映射角度（0~4095，经 ZPOS/MPOS/MANG 映射） |
+| `sensor.md()` | `int` 方法 | 磁铁检测状态（1=检测到） |
+| `sensor.ml()` | `int` 方法 | 磁铁过弱标志（1=过弱） |
+| `sensor.mh()` | `int` 方法 | 磁铁过强标志（1=过强） |
+| `sensor.agc()` | `int` 方法 | 读取 AGC 值（0~255） |
+| `sensor.magnitude()` | `int` 方法 | 读取 CORDIC 磁场强度（12 位） |
+| `sensor.zmco(*args)` | `int` 方法 | 读取 OTP 烧录次数（0~3，只读） |
+| `sensor.zpos(*args)` | `int` 方法 | 读写起始角度 ZPOS（0~4095） |
+| `sensor.mpos(*args)` | `int` 方法 | 读写终止角度 MPOS（0~4095） |
+| `sensor.mang(*args)` | `int` 方法 | 读写最大角度 MANG（0~4095） |
+| `sensor.pm(*args)` | `int` 方法 | 电源模式 PM[1:0]（0=NOM，1~3=LPM） |
+| `sensor.hyst(*args)` | `int` 方法 | 滞回 HYST[1:0] |
+| `sensor.outs(*args)` | `int` 方法 | 输出阶段 OUTS[1:0] |
+| `sensor.pwmf(*args)` | `int` 方法 | PWM 频率 PWMF[1:0] |
+| `sensor.sf(*args)` | `int` 方法 | 慢滤波器 SF[1:0] |
+| `sensor.fth(*args)` | `int` 方法 | 快滤波阈值 FTH[2:0] |
+| `sensor.watchdog(*args)` | `int` 方法 | 看门狗使能 WD |
+| `sensor.burn_angle()` | 方法 | 烧录 ZPOS/MPOS 到 OTP（**不可逆**） |
+| `sensor.burn_setting()` | 方法 | 烧录 MANG/CONF 到 OTP（**不可逆**） |
+| `sensor.readwrite(reg, firstbit, lastbit, *args)` | `int` 方法 | 通用寄存器位域读写（底层接口） |
+| `sensor.deinit()` | 方法 | 释放驱动资源（不释放外部 I2C 总线） |
+
+> 所有读写方法：无参数 = 读取，传入 1 个 `int` 参数 = 写入并返回写入值。
+
+### 注意事项
+
+- AS5600L 的 I2C 地址为 `0x40`，标准 AS5600 为 `0x36`，构造时请按实际芯片传入 `device` 参数。
+- `burn_angle()` 和 `burn_setting()` 写入 OTP，**操作不可逆**，调用前请确认 ZPOS/MPOS/MANG/CONF 已正确配置。
+- burn 命令值（0x08/0x04）沿用原驱动，与部分数据手册标注（0x80/0x40）存在差异，烧录前请自行核对所用芯片版本的数据手册。
+- `deinit()` 不释放外部传入的 I2C 总线，需由调用方自行管理。
+- `debug=True` 时通过 `print` 输出寄存器读写日志，生产环境建议关闭。
+
+### License
+
+MIT License — Copyright (c) hogeiha
+
+---
+
+## English
+
+### Introduction
+
+MicroPython driver for AS5600 / AS5600L 12-bit magnetic rotary encoders. Reads angle, magnet status, AGC, and magnitude over I2C, and supports writing start/stop angle and max angle configuration. AS5600L is a low-voltage variant of AS5600 with a different I2C address (0x40 vs 0x36); both share the same driver file `as5600.py`.
+
+### Features
+
+- 12-bit angle resolution (0~4095 maps to 0~360°)
+- I2C interface; AS5600 default address 0x36, AS5600L default address 0x40
+- Raw and mapped angle reading
+- ZPOS / MPOS / MANG angle range configuration
+- Full CONF register bit-field R/W (PM / HYST / OUTS / PWMF / SF / FTH / WD)
+- Magnet detection (MD / ML / MH), AGC, and CORDIC magnitude reading
+- OTP burn support (irreversible — use with caution)
+- Compatible with MicroPython v1.23
+
+### Hardware Connection
+
+| Sensor Pin | Description        | Typical MCU Pin (example)       |
+|-----------|--------------------|---------------------------------|
+| VDD       | Power 3.3V         | 3.3V                            |
+| GND       | Ground             | GND                             |
+| SDA       | I2C Data           | Pin(4) (adjust per board)       |
+| SCL       | I2C Clock          | Pin(5) (adjust per board)       |
+| DIR       | Rotation direction | GND (CW) / VDD (CCW)            |
+
+> Refer to your board's pinout for the correct I2C pins.
+
+### Installation
+
+**Option 1: mip (requires network)**
 
 ```python
-from time import sleep_ms
-from AS5600L import AS5600L
-import time
-
-I2C_ID = 0
-I2C_FREQ = 1000000
-PRINT_INTERVAL_MS = 333
-
-time.sleep(3)
-print("FreakStudio: Using AS5600L magnetic rotary position sensor ...")
-
-sensor = AS5600L(i2cId=I2C_ID, i2cFreq=I2C_FREQ, hyst=1)
-print("Sensor initialization successful")
-print("Initial status: %s" % str(sensor.getStatus()))
-
-try:
-    while True:
-        degrees = sensor.getAngleDegrees()
-        print("Degrees: %s" % str(degrees))
-        sleep_ms(PRINT_INTERVAL_MS)
-
-except KeyboardInterrupt:
-    print("Program interrupted by user")
-except OSError as e:
-    print("Hardware communication error: %s" % str(e))
-except Exception as e:
-    print("Unknown error: %s" % str(e))
-finally:
-    print("Cleaning up resources...")
-    del sensor
-    print("Program exited")
+import mip
+mip.install("github:FreakStudioCN/GraftSense-Drivers-MicroPython/sensors/as5600l_driver")
 ```
 
----
+**Option 2: Manual copy**
 
-## 注意事项
+Copy `as5600.py` to the device root or `lib/` directory:
 
-| 类别 | 说明 |
-|------|------|
-| 工作电压 | 3.3V，请勿超压供电 |
-| I2C 地址 | 固定为 `0x40`，无法通过硬件更改 |
-| 磁铁状态 | 使用前建议调用 `isOk()` 或 `getStatus()` 确认磁铁位置正常 |
-| 安全读取 | `getAngleDegrees()` 内部调用 `isOk()`，磁场异常时返回 None；高频场景建议用 `getAngleDegreesFast()` |
-| CONF 配置 | 所有配置参数在 `__init__` 中一次性写入，运行中不支持动态修改 |
-| I2C 频率 | 默认 1 MHz（最大值），可根据硬件降低 |
-| 资源释放 | 驱动无 `deinit()` 方法，使用完毕后 `del sensor` 即可 |
+```bash
+mpremote cp as5600.py :as5600.py
+```
 
----
+### Quick Start
 
-## 版本记录
+```python
+from machine import I2C, Pin
+import time
+from as5600 import AS5600
 
-| 版本号 | 日期 | 作者 | 修改说明 |
-|--------|------|------|----------|
-| 1.0.0 | 2026-05-06 | Alan Yorinks / FreakStudio | 初始版本，完成全流程规范化 |
+# AS5600L address is 0x40; standard AS5600 uses 0x36
+i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=400000)
+sensor = AS5600(i2c, device=0x40)
 
----
+while True:
+    mapped = sensor.angle()
+    print("Angle: %d (%.2f deg)  magnet=%d" % (mapped, mapped * 360.0 / 4096.0, sensor.md()))
+    time.sleep_ms(1000)
+```
 
-## 联系方式
+### API Reference
 
-- GitHub：https://github.com/FreakStudioCN
+| Interface | Type | Description |
+|-----------|------|-------------|
+| `AS5600(i2c, device=0x36, debug=False)` | Constructor | Initialize driver, validate params, no I2C I/O |
+| `sensor.rawangle()` | `int` method | Read raw angle (0~4095, unmapped) |
+| `sensor.angle()` | `int` method | Read mapped angle (0~4095, via ZPOS/MPOS/MANG) |
+| `sensor.md()` | `int` method | Magnet detected flag (1=present) |
+| `sensor.ml()` | `int` method | Magnet too weak flag |
+| `sensor.mh()` | `int` method | Magnet too strong flag |
+| `sensor.agc()` | `int` method | Read AGC value (0~255) |
+| `sensor.magnitude()` | `int` method | Read CORDIC magnitude (12-bit) |
+| `sensor.zmco(*args)` | `int` method | Read OTP burn counter (0~3, read-only) |
+| `sensor.zpos(*args)` | `int` method | Read/write start position ZPOS (0~4095) |
+| `sensor.mpos(*args)` | `int` method | Read/write stop position MPOS (0~4095) |
+| `sensor.mang(*args)` | `int` method | Read/write max angle MANG (0~4095) |
+| `sensor.pm(*args)` | `int` method | Power mode PM[1:0] (0=NOM, 1~3=LPM) |
+| `sensor.hyst(*args)` | `int` method | Hysteresis HYST[1:0] |
+| `sensor.outs(*args)` | `int` method | Output stage OUTS[1:0] |
+| `sensor.pwmf(*args)` | `int` method | PWM frequency PWMF[1:0] |
+| `sensor.sf(*args)` | `int` method | Slow filter SF[1:0] |
+| `sensor.fth(*args)` | `int` method | Fast filter threshold FTH[2:0] |
+| `sensor.watchdog(*args)` | `int` method | Watchdog enable WD |
+| `sensor.burn_angle()` | method | Burn ZPOS/MPOS to OTP (**irreversible**) |
+| `sensor.burn_setting()` | method | Burn MANG/CONF to OTP (**irreversible**) |
+| `sensor.readwrite(reg, firstbit, lastbit, *args)` | `int` method | Generic bit-field R/W (low-level) |
+| `sensor.deinit()` | method | Release driver resources (does not close I2C bus) |
 
----
+> All R/W methods: no args = read; one `int` arg = write and return written value.
 
-## 许可协议
+### Notes
 
-MIT License
+- AS5600L I2C address is `0x40`; standard AS5600 is `0x36`. Pass the correct `device` value to the constructor.
+- `burn_angle()` and `burn_setting()` write to OTP and are **irreversible**. Verify ZPOS/MPOS/MANG/CONF before calling.
+- Burn command values (0x08/0x04) follow the original driver; some datasheets specify 0x80/0x40. Verify against your chip's datasheet before burning.
+- `deinit()` does not release the externally provided I2C bus; the caller is responsible for managing it.
+- Set `debug=True` to enable register R/W logging via `print`; disable in production.
 
-Copyright (c) 2026 leezisheng
+### License
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+MIT License — Copyright (c) hogeiha

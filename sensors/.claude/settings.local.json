@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(upy-norm-driver)",
+      "Skill(upy-gen-main)",
+      "Skill(upy-gen-readme)",
+      "Skill(upy-gen-pkg)"
+    ]
+  }
+}

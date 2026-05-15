@@ -180,7 +180,7 @@ class INABase(BaseSensorEx):
         """
         if adapter is None:
             raise ValueError("adapter must not be None")
-        if not hasattr(adapter, "read_reg"):
+        if not hasattr(adapter, "read_register"):
             raise ValueError("adapter must be a BusAdapter instance")
         super().__init__(adapter, address, True)
 
