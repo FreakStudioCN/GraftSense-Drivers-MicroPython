@@ -148,7 +148,7 @@ class LTR390UV(BaseSensorEx, Iterator):
         """
         if adapter is None:
             raise ValueError("adapter must not be None")
-        if not hasattr(adapter, "read_reg"):
+        if not isinstance(adapter, bus_service.BusAdapter):
             raise ValueError("adapter must be a BusAdapter instance")
         super().__init__(adapter, address, False)
         self._id_reg = RegistryRO(device=self, address=0x06, fields=BitFields(_id_reg), byte_len=None)
