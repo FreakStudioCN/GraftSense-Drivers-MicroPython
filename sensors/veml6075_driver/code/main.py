@@ -55,7 +55,6 @@ if sensor is None:
 try:
     while True:
         print("UVA: %.2f" % sensor.uva)
-        print("UVB: %.2f" % sensor.uvb)
         print("UV Index: %.2f" % sensor.uv_index)
         print("Integration time: %d ms" % sensor.integration_time)
         print("---")
@@ -72,3 +71,4 @@ finally:
     sensor.deinit()
     del sensor
     print("Program exited")
+  
