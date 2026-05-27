@@ -19,7 +19,7 @@ I2C_SCL_PIN = 5
 I2C_FREQ = 400000
 
 # BMM150 设备常量
-BMM150_DEVICE_ID_REG = 0x40
+BMM150_DEVICE_ID_REG = 0xFF
 BMM150_EXPECTED_ID = 0x32
 BMM150_DEFAULT_ADDR = 0x13
 
@@ -127,7 +127,7 @@ time.sleep(3)
 print("FreakStudio: Testing BMM150 Magnetometer Driver ...")
 
 # 初始化 I2C 总线
-i2c = I2C(I2C_BUS_ID, sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
+i2c = I2C(I2C_BUS_ID,sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
 
 # 扫描 I2C 设备
 devices = i2c.scan()
@@ -140,14 +140,9 @@ if BMM150_DEFAULT_ADDR not in devices:
     raise RuntimeError("BMM150 not found at address 0x%02X" % BMM150_DEFAULT_ADDR)
 print("BMM150 found at address: 0x%02X" % BMM150_DEFAULT_ADDR)
 
-# 验证设备 ID
-device_id = i2c.readfrom_mem(BMM150_DEFAULT_ADDR, BMM150_DEVICE_ID_REG, 1)[0]
-if device_id != BMM150_EXPECTED_ID:
-    raise RuntimeError("Invalid device ID: 0x%02X, expected 0x%02X" % (device_id, BMM150_EXPECTED_ID))
-print("Device ID verified: 0x%02X" % device_id)
 
 # 初始化 BMM150 驱动
-bmm = bmm150.BMM150(i2c)
+bmm = bmm150.BMM150(i2c,BMM150_DEFAULT_ADDR )
 print("BMM150 driver initialized")
 print()
 

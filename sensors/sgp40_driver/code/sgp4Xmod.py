@@ -123,7 +123,7 @@ class SGP4X(IDentifier, Iterator):
         """
         if adapter is None:
             raise ValueError("adapter must not be None")
-        if not hasattr(adapter, "read_reg"):
+        if not hasattr(adapter, "read_register"):
             raise ValueError("adapter must be a BusAdapter instance")
         if not isinstance(check_crc, bool):
             raise ValueError("check_crc must be bool, got %s" % type(check_crc))

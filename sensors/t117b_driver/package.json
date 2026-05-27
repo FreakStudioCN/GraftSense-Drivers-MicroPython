@@ -1,14 +1,14 @@
 {
-  "name": "as5600l_driver",
+  "name": "t117b_driver",
   "urls": [
-    ["as5600.py", "code/as5600.py"]
+    ["t117b.py", "code/t117b.py"]
   ],
   "version": "1.0.0",
   "_comments": {
     "chips": "该包支持运行的芯片型号，all表示无芯片限制",
     "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
   },
-  "description": "A MicroPython library to control AS5600 / AS5600L 12-bit magnetic rotary encoder over I2C",
+  "description": "A MicroPython driver for T117B I2C temperature sensor with continuous/single measurement and alert threshold configuration",
   "author": "hogeiha",
   "license": "MIT",
   "chips": "all",

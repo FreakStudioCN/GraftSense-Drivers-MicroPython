@@ -66,7 +66,7 @@
 ```
 rcwl9620_driver/
 ├── code/
-│   ├── ultrasonic_i2c.py    # 核心驱动
+│   ├── rcwl9620.py          # 核心驱动
 │   └── main.py              # 测试示例
 ├── package.json             # mip 包配置
 ├── README.md                # 本文档
@@ -79,7 +79,7 @@ rcwl9620_driver/
 
 | 文件 | 说明 |
 |------|------|
-| `code/ultrasonic_i2c.py` | RCWL9620 核心驱动，包含 UltrasonicI2C 主驱动类，提供 I2C 触发测量和距离读取接口 |
+| `code/rcwl9620.py` | RCWL9620 核心驱动，包含 RCWL9620 主驱动类，提供 I2C 触发测量和距离读取接口，支持重试机制和调试日志 |
 | `code/main.py` | 完整测试示例，覆盖 I2C 扫描、传感器初始化、循环读取距离值 |
 
 ---
@@ -91,7 +91,7 @@ rcwl9620_driver/
 将以下文件复制到 MicroPython 设备根目录：
 
 ```
-ultrasonic_i2c.py
+rcwl9620.py
 ```
 
 ### 第二步：接线
@@ -107,10 +107,10 @@ ultrasonic_i2c.py
 
 ```python
 from machine import I2C, Pin
-from ultrasonic_i2c import UltrasonicI2C
+from rcwl9620 import RCWL9620
 
 i2c = I2C(0, sda=Pin(4), scl=Pin(5), freq=100000)
-sensor = UltrasonicI2C(i2c)
+sensor = RCWL9620(i2c)
 print("Distance: %.2f mm" % sensor.read())
 sensor.deinit()
 ```
@@ -130,7 +130,7 @@ sensor.deinit()
 
 import time
 from machine import I2C, Pin
-from ultrasonic_i2c import UltrasonicI2C
+from rcwl9620 import RCWL9620
 
 # ======================================== 全局变量 ============================================
 
@@ -165,7 +165,7 @@ sensor = None
 for device in devices_list:
     if device in TARGET_SENSOR_ADDRS:
         print("I2C address: %s" % hex(device))
-        sensor = UltrasonicI2C(i2c=i2c_bus, address=device)
+        sensor = RCWL9620(i2c=i2c_bus, address=device)
         print("Sensor initialization successful")
         break
 
@@ -209,7 +209,7 @@ finally:
 
 ## 设计思路
 
-UltrasonicI2C 驱动通过 `writeto` 发送单字节触发命令 `0x01`，等待 120ms 后用 `readfrom` 读取 3 字节原始数据。距离值采用大端 24 位整数编码，除以 1000 转换为毫米浮点值，并通过 `min()` 限制上限为 MAX_DISTANCE（4500mm）。所有 I2C 操作均包裹在 `try/except OSError` 中，捕获后重抛为 `RuntimeError`。
+RCWL9620 驱动通过 `writeto` 发送单字节触发命令 `0x01`，等待 120ms 后用 `readfrom_into` 将 3 字节原始数据读入全局复用缓冲区 `_BUF3`（避免频繁内存分配）。距离值采用大端 24 位整数编码，除以 1000 转换为毫米浮点值，并通过 `min()` 限制上限为 MAX_DISTANCE（4500mm）。所有 I2C 操作均包裹在重试循环中（默认 `retries=2, delay_ms=5`），超出重试次数后捕获 `OSError` 重抛为 `RuntimeError`。支持 `debug` 参数开启调试日志，通过 `_log()` 方法统一输出，默认静默。
 
 ---
 

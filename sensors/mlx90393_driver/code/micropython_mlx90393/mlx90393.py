@@ -508,11 +508,16 @@ class MLX90393:
         self._i2c = i2c
         self._address = address
         self._status_last = None
-        # 写入默认配置
-        self._res_x = self._res_y = self._res_z = RESOLUTION_3
-        self._digfilt = FILTER_7
-        self._oversampling = OSR_3
-        self._gain = GAIN_1X
+        # 默认配置缓存（普通变量，不触发 I2C）
+        self._c_rx = self._c_ry = self._c_rz = RESOLUTION_3
+        self._c_df = FILTER_7
+        self._c_osr = OSR_3
+        self._c_gain = GAIN_1X
+        # reg0: GAIN_1X(0x07)<<4 | HALL(0x0C) = 0x7C
+        # reg2: RES_Z(3)<<9 | RES_Y(3)<<7 | RES_X(3)<<5 | DIGFILT_7<<2 | OSR_3 = 0x07E3
+        self._reg_0 = (GAIN_1X << 4) | 0x0C
+        self._reg_2 = (RESOLUTION_3 << 9) | (RESOLUTION_3 << 7) | (RESOLUTION_3 << 5) | (FILTER_7 << 2) | OSR_3
+        self._hallconf_index = 0
 
     @property
     def gain(self) -> str:
@@ -537,13 +542,14 @@ class MLX90393:
             "GAIN_5X", "GAIN_4X", "GAIN_3X", "GAIN_2_5X",
             "GAIN_2X", "GAIN_1_67X", "GAIN_1_33X", "GAIN_1X",
         )
-        return gain_values[self._gain]
+        return gain_values[self._c_gain]
 
     @gain.setter
     def gain(self, value: int) -> None:
         if value not in range(0, 8):
             raise ValueError("gain must be in range 0~7, got %s" % value)
         self._gain = value
+        self._c_gain = value
 
     @property
     def resolution_x(self) -> str:
@@ -565,13 +571,14 @@ class MLX90393:
             - ISR-safe: No
         """
         res_values = ("RESOLUTION_0", "RESOLUTION_1", "RESOLUTION_2", "RESOLUTION_3")
-        return res_values[self._res_x]
+        return res_values[self._c_rx]
 
     @resolution_x.setter
     def resolution_x(self, value: int) -> None:
         if value not in range(0, 4):
             raise ValueError("resolution_x must be in range 0~3, got %s" % value)
         self._res_x = value
+        self._c_rx = value
 
     @property
     def resolution_y(self) -> str:
@@ -593,13 +600,14 @@ class MLX90393:
             - ISR-safe: No
         """
         res_values = ("RESOLUTION_0", "RESOLUTION_1", "RESOLUTION_2", "RESOLUTION_3")
-        return res_values[self._res_y]
+        return res_values[self._c_ry]
 
     @resolution_y.setter
     def resolution_y(self, value: int) -> None:
         if value not in range(0, 4):
             raise ValueError("resolution_y must be in range 0~3, got %s" % value)
         self._res_y = value
+        self._c_ry = value
 
     @property
     def resolution_z(self) -> str:
@@ -621,13 +629,14 @@ class MLX90393:
             - ISR-safe: No
         """
         res_values = ("RESOLUTION_0", "RESOLUTION_1", "RESOLUTION_2", "RESOLUTION_3")
-        return res_values[self._res_z]
+        return res_values[self._c_rz]
 
     @resolution_z.setter
     def resolution_z(self, value: int) -> None:
         if value not in range(0, 4):
             raise ValueError("resolution_z must be in range 0~3, got %s" % value)
         self._res_z = value
+        self._c_rz = value
 
     @property
     def digital_filter(self) -> str:
@@ -654,13 +663,14 @@ class MLX90393:
             "FILTER_0", "FILTER_1", "FILTER_2", "FILTER_3",
             "FILTER_4", "FILTER_5", "FILTER_6", "FILTER_7",
         )
-        return digfilt_values[self._digfilt]
+        return digfilt_values[self._c_df]
 
     @digital_filter.setter
     def digital_filter(self, value: int) -> None:
         if value not in range(0, 8):
             raise ValueError("digital_filter must be in range 0~7, got %s" % value)
         self._digfilt = value
+        self._c_df = value
 
     @property
     def oversampling(self) -> str:
@@ -684,13 +694,14 @@ class MLX90393:
             - Oversampling and digital filter together determine conversion time
         """
         oversampling_values = ("OSR_0", "OSR_1", "OSR_2", "OSR_3")
-        return oversampling_values[self._oversampling]
+        return oversampling_values[self._c_osr]
 
     @oversampling.setter
     def oversampling(self, value: int) -> None:
         if value not in range(0, 8):
             raise ValueError("oversampling must be in range 0~7, got %s" % value)
         self._oversampling = value
+        self._c_osr = value
 
     @property
     def magnetic(self) -> tuple:
@@ -719,32 +730,20 @@ class MLX90393:
             - Side effects: Blocks for conversion time (TCONV[DIGFILT][OSR], up to ~200ms)
             - Each call sends SM command to trigger a single measurement
         """
-        # 根据当前 DIGFILT 和 OSR 计算转换等待时间（加 10% 余量），单位秒
-        delay = self._TCONV[self._digfilt][self._oversampling] / 1000 * 1.1
+        delay = self._TCONV[self._c_df][self._c_osr] / 1000 * 1.1
         # 发送 SM 命令触发全轴单次测量
         payload = bytes([_CMD_SM | _CMD_AXIS_ALL])
         self._i2c.writeto(self._address, payload)
-        data = self._i2c.readfrom(self._address, len(data))
-        self._status_last = data[0]
-        # 等待转换完成
+        self._status_last = self._i2c.readfrom(self._address, 1)[0]
         time.sleep(delay)
 
-        data2 = bytearray(7)
-        payload = bytes([_CMD_RM | _CMD_AXIS_ALL])
-        self._i2c.writeto(self._address, payload)
-        data2 = self._i2c.readfrom(self._address, len(data2))
-
+        self._i2c.writeto(self._address, bytes([_CMD_RM | _CMD_AXIS_ALL]))
+        data2 = self._i2c.readfrom(self._address, 7)
         self._status_last = data2[0]
-        # 解包各轴原始值
-        x = self._unpack_axis_data(self._res_x, data2[1:3])
-        y = self._unpack_axis_data(self._res_y, data2[3:5])
-        z = self._unpack_axis_data(self._res_z, data2[5:7])
-        # 根据 HALLCONF 选择灵敏度表索引（0x0C=12 对应 index 0，其他对应 index 1）
-        hallconf_index = 0 if self._hall == 12 else 1
-        # 乘以对应灵敏度系数转换为 µT
-        x = x * self._resolutionsxy[self._res_x][hallconf_index][self._gain]
-        y = y * self._resolutionsxy[self._res_y][hallconf_index][self._gain]
-        z = z * self._resolutionsz[self._res_z][hallconf_index][self._gain]
+        hi = self._hallconf_index
+        x = self._unpack_axis_data(self._c_rx, data2[1:3]) * self._resolutionsxy[self._c_rx][hi][self._c_gain]
+        y = self._unpack_axis_data(self._c_ry, data2[3:5]) * self._resolutionsxy[self._c_ry][hi][self._c_gain]
+        z = self._unpack_axis_data(self._c_rz, data2[5:7]) * self._resolutionsz[self._c_rz][hi][self._c_gain]
         return x, y, z
 
     @staticmethod

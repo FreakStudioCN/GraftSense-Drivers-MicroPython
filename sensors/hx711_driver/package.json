@@ -1,6 +1,6 @@
 {
   "name": "hx711_driver",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A MicroPython library to control hx711_driver ",
   "author": "leeqingshui",
   "license": "MIT",

@@ -151,7 +151,7 @@ class VEML6040(DeviceEx, Iterator):
         """
         if adapter is None:
             raise ValueError("adapter must not be None")
-        if not hasattr(adapter, "read_reg"):
+        if not hasattr(adapter, "read_register"):
             raise ValueError("adapter must be a BusAdapter instance")
         if address is None:
             raise ValueError("address must not be None")

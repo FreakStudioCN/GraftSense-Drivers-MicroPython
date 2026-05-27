@@ -9,7 +9,7 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from machine import Pin, I2C
+from machine import Pin, SoftI2C
 from micropython_mlx90393 import mlx90393
 
 # ======================================== 全局变量 ============================================
@@ -34,7 +34,7 @@ time.sleep(3)
 print("FreakStudio: MLX90393 magnetometer test starting ...")
 
 # 初始化 I2C 总线
-i2c_bus = I2C(0, sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN))
+i2c_bus = SoftI2C(sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN))
 
 # 扫描 I2C 总线
 devices_list = i2c_bus.scan()
@@ -57,22 +57,8 @@ if sensor is None:
 print("Sensor initialization successful")
 
 # ========================================  主程序  ===========================================
-
-try:
-    while True:
+while True:
         # 读取 X/Y/Z 三轴磁场值（微特斯拉）
         magx, magy, magz = sensor.magnetic
         print("X: %.2f uT | Y: %.2f uT | Z: %.2f uT" % (magx, magy, magz))
         time.sleep(MEAS_DELAY_S)
-
-except KeyboardInterrupt:
-    print("Program interrupted by user")
-except OSError as e:
-    print("Hardware communication error: %s" % str(e))
-except Exception as e:
-    print("Unknown error: %s" % str(e))
-finally:
-    print("Cleaning up resources...")
-    sensor.deinit()
-    del sensor
-    print("Program exited")

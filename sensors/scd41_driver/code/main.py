@@ -85,3 +85,4 @@ finally:
     sensor.deinit()
     del sensor
     print("Program exited")
+
