@@ -1,6 +1,6 @@
 {
   "name": "mlx90393_driver",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A MicroPython library to control MLX90393 three-axis magnetometer sensor from Melexis",
   "author": "Jose D. Montoya",
   "license": "MIT",

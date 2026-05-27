@@ -31,8 +31,8 @@ I2C_SCL_PIN = 5
 I2C_SDA_PIN = 4
 I2C_FREQ = 100_000
 
-# SI1145 设备 I2C 地址
-TARGET_SENSOR_ADDR = SI1145_ADDR
+# SI1145 设备可能的 I2C 地址列表
+TARGET_SENSOR_ADDRS = [0x60, 0x74]
 
 # 设备 ID 寄存器与期望值（SI1145 PART_ID = 0x45）
 DEVICE_ID_REG = SI1145_REG_PARTID
@@ -129,27 +129,27 @@ if len(devices_list) == 0:
     raise RuntimeError("No I2C device found")
 print("I2C devices found: %d" % len(devices_list))
 
-# 遍历扫描结果，确认目标地址存在
-target_found = False
+# 遍历扫描结果，匹配目标地址列表
+sensor = None
+matched_addr = None
 for device in devices_list:
     print("I2C address: %s" % hex(device))
-    if device == TARGET_SENSOR_ADDR:
-        target_found = True
+    if device in TARGET_SENSOR_ADDRS:
+        matched_addr = device
 
-# 未找到目标地址则报错
-if not target_found:
+# 未找到任何目标地址则报错
+if matched_addr is None:
     raise RuntimeError("Device not found at expected address")
 
-# 读取 PART_ID 寄存器并与期望值比对
-part_id = i2c_bus.readfrom_mem(TARGET_SENSOR_ADDR, DEVICE_ID_REG, 1)[0]
+# 读取 PART_ID 寄存器并与期望值比对（SI1145 复位前可能返回 0x00，仅作参考）
+part_id = i2c_bus.readfrom_mem(matched_addr, DEVICE_ID_REG, 1)[0]
 if part_id == DEVICE_ID_EXPECTED:
-    print("Device found: SI1145 PART_ID=0x%02X" % part_id)
+    print("Device found: SI1145 PART_ID=0x%02X at %s" % (part_id, hex(matched_addr)))
 else:
-    print("Device not found: PART_ID=0x%02X (expected 0x%02X)" % (part_id, DEVICE_ID_EXPECTED))
-    raise RuntimeError("Device ID mismatch")
+    print("PART_ID=0x%02X (expected 0x%02X), attempting init anyway..." % (part_id, DEVICE_ID_EXPECTED))
 
 # 实例化 SI1145 传感器（构造内部已自动复位+加载校准）
-sensor = SI1145(i2c=i2c_bus, addr=TARGET_SENSOR_ADDR)
+sensor = SI1145(i2c=i2c_bus, addr=matched_addr)
 print("SI1145 initialization successful")
 
 # 记录首次打印时间

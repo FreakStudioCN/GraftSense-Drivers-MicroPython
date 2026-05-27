@@ -24,7 +24,7 @@ time.sleep(3)
 print("FreakStudio: HX711 sensor initialization starting")
 
 # 定义数据引脚和时钟引脚
-# 6 = DATA, 7 = SCK
+# 7 = DATA, 6 = SCK
 pin_DATA = Pin(7, Pin.IN, pull=Pin.PULL_DOWN)
 pin_SCK = Pin(6
               , Pin.OUT)
