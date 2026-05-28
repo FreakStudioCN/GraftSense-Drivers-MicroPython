@@ -1,6 +1,6 @@
 {
   "name": "lis2mdl_driver",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "A MicroPython library to control lis2mdl_driver ",
   "author": "leeqingshui",
   "license": "MIT",
