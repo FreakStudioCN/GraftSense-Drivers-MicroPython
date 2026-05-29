@@ -1,8 +1,7 @@
 {
   "name": "veml6075_driver",
   "urls": [
-    ["veml6075.py", "code/veml6075.py"],
-    ["veml6075_lowmem.py", "code/veml6075_lowmem.py"]
+    ["veml6075.py", "code/veml6075.py"]
   ],
   "version": "1.0.0",
   "_comments": {
