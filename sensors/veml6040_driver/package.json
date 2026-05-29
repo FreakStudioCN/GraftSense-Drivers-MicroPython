@@ -1,6 +1,6 @@
 {
   "name": "veml6040_driver",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A MicroPython library to control VEML6040 RGBW color sensor",
   "author": "Roman Shevchik",
   "license": "MIT",
