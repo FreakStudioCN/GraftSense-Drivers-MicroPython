@@ -1,6 +1,6 @@
 {
   "name": "sgp40_driver",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A MicroPython library to control SGP40/SGP41 VOC/NOx air quality sensor from Sensirion",
   "author": "FreakStudio",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "bmm150_driver",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A MicroPython library to control Bosch BMM150 3-axis magnetometer",
   "author": "Jose D. Montoya",
   "license": "MIT",

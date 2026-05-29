@@ -1,6 +1,6 @@
 {
   "name": "ltr390uv_driver",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A MicroPython library to control LTR-390UV-01 ambient light and UV sensor",
   "author": "octaprog7",
   "license": "MIT",
