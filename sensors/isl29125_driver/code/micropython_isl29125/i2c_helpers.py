@@ -254,15 +254,15 @@ class RegisterStruct:
             - ISR-safe: No
         """
         if self.lenght <= 2:
-            # 单值：直接返回解包后的标量
+            # 单值：直接返回解包后的标量（大端字节序）
             value = struct.unpack(
-                self.format,
+                ">" + self.format,
                 memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)),
             )[0]
         else:
-            # 多值：返回完整tuple
+            # 多值：返回完整tuple（大端字节序）
             value = struct.unpack(
-                self.format,
+                ">" + self.format,
                 memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)),
             )
         return value

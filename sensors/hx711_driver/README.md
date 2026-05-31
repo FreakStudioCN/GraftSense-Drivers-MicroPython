@@ -36,8 +36,8 @@
 |------|----------|
 | VCC  | 电源正极（2.6V–5.5V） |
 | GND  | 电源负极 |
-| DT（DATA） | 串行数据输出，连接 MCU GPIO（Pin 6，输入，下拉） |
-| SCK（CLK） | 串行时钟输入，连接 MCU GPIO（Pin 7，输出） |
+| DT（DATA） | 串行数据输出，连接 MCU GPIO（Pin 7，输入，下拉） |
+| SCK（CLK） | 串行时钟输入，连接 MCU GPIO（Pin 6，输出） |
 
 > 引脚号基于 `main.py` 示例配置，实际使用时请根据硬件连接修改。
 
@@ -78,8 +78,8 @@ hx711_driver/
 
 | MCU 引脚 | HX711 引脚 |
 |----------|-----------|
-| Pin 6（输入，下拉） | DT（DATA） |
-| Pin 7（输出） | SCK（CLK） |
+| Pin 7（输入，下拉） | DT（DATA） |
+| Pin 6（输出） | SCK（CLK） |
 | 3.3V / 5V | VCC |
 | GND | GND |
 
@@ -115,8 +115,8 @@ print("FreakStudio: HX711 sensor initialization starting")
 
 # 定义数据引脚和时钟引脚
 # 6 = DATA, 7 = SCK
-pin_DATA = Pin(6, Pin.IN, pull=Pin.PULL_DOWN)
-pin_SCK = Pin(7, Pin.OUT)
+pin_DATA = Pin(7, Pin.IN, pull=Pin.PULL_DOWN)
+pin_SCK = Pin(6, Pin.OUT)
 
 # 初始化HX711传感器
 try:

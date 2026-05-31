@@ -10,7 +10,7 @@
 
 import time
 from machine import I2C, Pin
-from ultrasonic_i2c import UltrasonicI2C
+from rcwl9620 import RCWL9620
 
 # ======================================== 全局变量 ============================================
 
@@ -45,7 +45,7 @@ sensor = None
 for device in devices_list:
     if device in TARGET_SENSOR_ADDRS:
         print("I2C address: %s" % hex(device))
-        sensor = UltrasonicI2C(i2c=i2c_bus, address=device)
+        sensor = RCWL9620(i2c=i2c_bus, address=device)
         print("Sensor initialization successful")
         break
 

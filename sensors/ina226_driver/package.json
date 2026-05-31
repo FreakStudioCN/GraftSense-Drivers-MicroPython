@@ -1,6 +1,6 @@
 {
   "name": "ina226_driver",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "A MicroPython library to control ina226_driver ",
   "author": "leeqingshui",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "mmc5983_driver",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "A MicroPython library to control mmc5983_driver ",
   "author": "leeqingshui",
   "license": "MIT",
