@@ -185,7 +185,7 @@ class IR_GET(IR_RX):
 
             print()
         self.data = burst
-        self.do_callback(0, 0, 0)
+        self.do_callback(0, 0)
 
     def acquire(self) -> list:
         """

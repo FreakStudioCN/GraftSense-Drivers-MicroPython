@@ -73,7 +73,7 @@ class NEC_ABC(IR_RX):
             pin (Pin): 接收 IR 信号的引脚。
             extended (bool): 是否使用扩展地址模式。
             samsung (bool): 是否为 Samsung 协议模式。
-            callback (function): 用户回调函数，接收 cmd, addr, ext。
+            callback (function): 用户回调函数，接收 addr, cmd, repeat。
             *args: 可选附加参数传递给回调函数。
 
         Notes:
@@ -88,7 +88,7 @@ class NEC_ABC(IR_RX):
             pin (Pin): Input pin for IR signal.
             extended (bool): Enable extended address mode.
             samsung (bool): Samsung protocol mode.
-            callback (function): User callback accepting cmd, addr, ext.
+            callback (function): User callback accepting addr, cmd, repeat.
             *args: Optional extra arguments passed to callback.
 
         Notes:
@@ -163,7 +163,8 @@ class NEC_ABC(IR_RX):
         except RuntimeError as e:
             cmd = e.args[0]
             addr = self._addr if cmd == self.REPEAT else 0
-        self.do_callback(cmd, addr, 0, self.REPEAT)
+        # thresh=REPEAT: repeat codes (cmd == -1) still reach the callback; errors (<= -2) go to _errf
+        self.do_callback(cmd, addr, self.REPEAT)
 
 
 class NEC_16(NEC_ABC):
@@ -295,13 +296,13 @@ class NEC_8(NEC_ABC):
             初始化 NEC_8 对象，设置固定模式和回调函数。
         decode(_) -> None:
             解析接收到的脉冲数据（继承自 NEC_ABC）。
-        do_callback(cmd: int, addr: int, data: int, repeat: int) -> None:
+        do_callback(cmd: int, addr: int, thresh: int = 0) -> None:
             调用用户回调（继承自 NEC_ABC）。
 
     Notes:
         NEC_8 始终为 8-bit 地址模式。
         decode 方法会对收到的数据进行校验，错误时通过回调返回错误码。
-        回调函数签名: func(cmd: int, addr: int, data: int, repeat: int)
+        回调函数签名: func(addr: int, cmd: int, repeat: bool)
 
     ==========================================
 
@@ -322,13 +323,13 @@ class NEC_8(NEC_ABC):
             Initialize NEC_8 object with fixed mode and user callback.
         decode(_) -> None:
             Decode received pulse data (from NEC_ABC).
-        do_callback(cmd: int, addr: int, data: int, repeat: int) -> None:
+        do_callback(cmd: int, addr: int, thresh: int = 0) -> None:
             Call user callback (from NEC_ABC).
 
     Notes:
         NEC_8 always uses 8-bit address mode.
         decode method validates received data and reports errors via callback.
-        Callback signature: func(cmd: int, addr: int, data: int, repeat: int)
+        Callback signature: func(addr: int, cmd: int, repeat: bool)
     """
 
     def __init__(self, pin, callback, *args):
@@ -342,7 +343,7 @@ class NEC_8(NEC_ABC):
 
         Notes:
             NEC_8 固定为 8-bit 地址模式，非扩展模式，非 Samsung 模式
-            回调函数签名一般为 func(cmd:int, addr:int, data:int, repeat:int)
+            回调函数签名一般为 func(addr:int, cmd:int, repeat:bool)
             初始化会设置内部捕获缓冲、模式标志等
             继承自 NEC_ABC，所以 *args 会传给父类处理
 
@@ -357,7 +358,7 @@ class NEC_8(NEC_ABC):
 
         Notes:
             NEC_8 uses fixed 8-bit address mode, non-extended, non-Samsung
-            Callback signature typically: func(cmd:int, addr:int, data:int, repeat:int)
+            Callback signature typically: func(addr:int, cmd:int, repeat:bool)
             Initializes internal buffers and mode flags
             *args are forwarded to NEC_ABC parent initialization
         """

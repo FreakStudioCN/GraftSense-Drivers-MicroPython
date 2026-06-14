@@ -43,7 +43,7 @@ class IR_RX:
             初始化红外接收对象，设置引脚、中断和回调函数。
         _cb_pin(line) -> None:
             引脚中断回调，记录信号沿的时间戳。
-        do_callback(cmd: int, addr: int, ext: int, thresh: int = 0) -> None:
+        do_callback(cmd: int, addr: int, thresh: int = 0) -> None:
             执行用户回调或错误回调。
         error_function(func) -> None:
             设置错误处理回调函数。
@@ -73,7 +73,7 @@ class IR_RX:
             Initialize IR receiver, configure pin, IRQ, and callback.
         _cb_pin(line) -> None:
             Pin IRQ callback. Store edge timestamps.
-        do_callback(cmd: int, addr: int, ext: int, thresh: int = 0) -> None:
+        do_callback(cmd: int, addr: int, thresh: int = 0) -> None:
             Run user callback or error handler.
         error_function(func) -> None:
             Set error handler function.
@@ -103,7 +103,7 @@ class IR_RX:
             pin (Pin): 用于接收红外信号的输入引脚。
             nedges (int): 需要捕获的边沿数量。
             tblock (int): 定时器超时周期（ms）。
-            callback (function): 用户定义的回调函数，参数为 (cmd, addr, ext, *args)。
+            callback (function): 用户定义的回调函数，参数为 (addr, cmd, repeat, *args)。
             *args: 传递给回调函数的额外参数。
 
         Notes:
@@ -118,7 +118,7 @@ class IR_RX:
             pin (Pin): Input pin for IR signal.
             nedges (int): Number of edges to capture.
             tblock (int): Timer timeout in ms.
-            callback (function): User callback function (cmd, addr, ext, *args).
+            callback (function): User callback function (addr, cmd, repeat, *args).
             *args: Extra arguments passed to callback.
 
         Notes:
@@ -169,20 +169,20 @@ class IR_RX:
             self._times[self.edge] = t
             self.edge += 1
 
-    def do_callback(self, cmd: int, addr: int, ext: int, thresh: int = 0) -> None:
+    def do_callback(self, cmd: int, addr: int, thresh: int = 0) -> None:
         """
         执行用户回调函数或错误处理函数。
 
         Args:
             cmd (int): 接收到的命令码或错误码。
             addr (int): 地址字段。
-            ext (int): 扩展字段。
             thresh (int): 最小阈值，cmd 小于该值时视为错误。
 
-
         Notes:
-            当 cmd >= thresh 时调用用户回调。
-            否则调用错误处理函数。
+            当 cmd >= thresh 时调用用户回调，否则调用错误处理函数。
+            用户回调函数签名为 callback(addr, cmd, repeat, *args)，参数顺序与
+            发射端 transmit(addr, data) 保持一致（addr 在前、cmd 在后）；
+            repeat 为 True 表示该帧为重复码（长按）。
 
         ==========================================
 
@@ -191,15 +191,18 @@ class IR_RX:
         Args:
             cmd (int): Command or error code.
             addr (int): Address field.
-            ext (int): Extension field.
             thresh (int): Threshold. If cmd < thresh => error.
 
         Notes:
             Calls user callback if cmd valid, else error function.
+            User callback signature is callback(addr, cmd, repeat, *args); the
+            argument order matches the transmitter's transmit(addr, data) so RX
+            and TX stay consistent (addr first, cmd second). repeat is True when
+            the frame is an NEC repeat (long-press) code.
         """
         self.edge = 0
         if cmd >= thresh:
-            self.callback(cmd, addr, ext, *self.args)
+            self.callback(addr, cmd, cmd == self.REPEAT, *self.args)
         else:
             self._errf(cmd)
 
