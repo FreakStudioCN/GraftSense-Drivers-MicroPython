@@ -6,7 +6,7 @@
 # @Description : ST7789/ST7789V 8-bit parallel/I8080接口LCD屏幕驱动
 # @License : MIT
 
-__version__ = "1.0.0"
+__version__ = "0.1.1"
 __author__ = "Russ Hughes, FreakStudio"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
@@ -390,7 +390,8 @@ class ST7789:
         self._rotation = rotation % 4
 
         # 设置控制引脚初始电平
-        self.cs.on()
+        if self.cs:
+            self.cs.on()
         self.dc.on()
         self.wr.on()
         self.rd.on()
@@ -502,7 +503,8 @@ class ST7789:
             - ISR-safe: No
         """
         # 选中设备
-        self.cs.off()
+        if self.cs:
+            self.cs.off()
 
         # 发送命令字节
         if command is not None:
@@ -516,7 +518,8 @@ class ST7789:
                 self._write_byte(b)
 
         # 释放设备选择
-        self.cs.on()
+        if self.cs:
+            self.cs.on()
 
     def hard_reset(self):
         """
@@ -961,7 +964,8 @@ class ST7789:
         chunks, rest = divmod(width * height, _BUFFER_SIZE)
         pixel = _encode_pixel(color)
         # 手动控制 CS 和 DC 以避免每次 _write 切换
-        self.cs.off()
+        if self.cs:
+            self.cs.off()
         self.dc.on()
         # 按块写入像素数据
         if chunks:
@@ -972,7 +976,8 @@ class ST7789:
         if rest:
             self._write(None, pixel * rest)
 
-        self.cs.on()
+        if self.cs:
+            self.cs.on()
 
     def fill(self, color):
         """
