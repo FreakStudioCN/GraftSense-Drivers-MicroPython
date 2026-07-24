@@ -12,7 +12,7 @@ from machine import I2C
 import time
 
 # ======================================== 全局变量 ============================================
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "Andre Peeters"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
@@ -198,17 +198,17 @@ class MAX17048:
         """
         复位 MAX1704X 设备
         Notes:
-            - 向 COMMAND 寄存器写入复位命令（0x0054）
+            - 向 COMMAND 寄存器写入复位命令（0x5400）
             - ISR-safe: 否
         ==========================================
         Reset MAX1704X device.
         Notes:
-            - Writes reset command (0x0054) to COMMAND register
+            - Writes reset command (0x5400) to COMMAND register
             - ISR-safe: No
         """
         self._log("resetting device")
         # 写入复位命令到 COMMAND 寄存器
-        self._write_register(_REG_COMMAND, b"\x00\x54")
+        self._write_register(_REG_COMMAND, b"\x54\x00")
 
     def getVCell(self) -> float:
         """
@@ -233,7 +233,7 @@ class MAX17048:
         # 读取 VCELL 寄存器原始数据
         buf = self._read_register(_REG_VCELL)
         # 高 12 位为电压值（单位 1.25mV），转换为 V
-        return (buf[0] << 4 | buf[1] >> 4) / 1000.0
+        return (buf[0] << 4 | buf[1] >> 4) * 0.00125
 
     def getSoc(self) -> float:
         """
@@ -394,16 +394,18 @@ class MAX17048:
         """
         清除报警状态
         Notes:
-            - 读取 CONFIG 寄存器即可清除 ALRT 位（硬件自动清除）
+            - 将 CONFIG 寄存器 ALRT 位写 0 以清除报警状态
             - ISR-safe: 否
         ==========================================
         Clear alert state.
         Notes:
-            - Reading CONFIG register clears ALRT bit (hardware auto-clear)
+            - Writes CONFIG.ALRT bit to 0 to clear alert state
             - ISR-safe: No
         """
-        # 读取 CONFIG 寄存器以清除报警位（硬件特性）
-        self._read_config_register()
+        # 清除 CONFIG.ALRT(bit 5)，保留其他配置位
+        buf = self._read_config_register()
+        buf[1] &= ~0x20
+        self._write_config_register(buf)
         self._log("alert cleared")
 
     def quickStart(self) -> None:

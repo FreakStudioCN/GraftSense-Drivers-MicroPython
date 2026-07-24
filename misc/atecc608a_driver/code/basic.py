@@ -374,8 +374,11 @@ class ATECCBasic(object):
     def atcab_is_slot_locked(self, slot):
         # 读取 SlotLock 域（config block=2, word offset=6）
         # Read the word with the lock bytes (SlotLock[2], RFU[2])
+        if slot < 0 or slot > 15:
+            raise ATCA_EXCEPTIONS.BadArgumentError("slot must be in range 0..15")
         packet = self.atcab_read_zone(ATCA_CONSTANTS.ATCA_ZONE_CONFIG, slot=0, block=2, offset=6, length=ATCA_CONSTANTS.ATCA_WORD_SIZE)
-        return bool((packet[0 + 1] | (packet[1 + 1] << 8) & (1 << slot)) == 0)
+        slot_locked = packet[1] | (packet[2] << 8)
+        return bool((slot_locked & (1 << slot)) == 0)
 
     def atcab_is_locked(self, zone):
         # 校验 zone 参数

@@ -1534,7 +1534,7 @@ class SX126X:
         data = bytearray(2)
         data_mv = memoryview(data)
         self.SPIreadCommand([SX126X_CMD_GET_DEVICE_ERRORS], 1, data_mv, 2)
-        opError = ((data[0] & 0xFF) << 8) & data[1]
+        opError = (data[0] << 8) | data[1]
         return opError
 
     def clearDeviceErrors(self):
