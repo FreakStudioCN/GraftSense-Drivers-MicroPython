@@ -245,16 +245,39 @@ class HDC1080:
             - ISR-safe: No
             - Side effects: Writes config register, affects subsequent measurements
         """
-        if isinstance(config, int) is False:
-            raise ValueError("config must be int")
-        if isinstance(humid_res, int) is False:
-            raise ValueError("humid_res must be int")
-        if isinstance(temp_res, int) is False:
-            raise ValueError("temp_res must be int")
-        if isinstance(mode, int) is False:
-            raise ValueError("mode must be int")
-        if isinstance(heater, bool) is False:
-            raise ValueError("heater must be bool")
+        if config is None:
+            pass
+        else:
+            if isinstance(config, int) is False:
+                raise ValueError("config must be int")
+
+        # humid_res 可以是 None，也可以是 int
+        if humid_res is None:
+            pass
+        else:
+            if isinstance(humid_res, int) is False:
+                raise ValueError("humid_res must be int")
+
+        # temp_res 可以是 None，也可以是 int
+        if temp_res is None:
+            pass
+        else:
+            if isinstance(temp_res, int) is False:
+                raise ValueError("temp_res must be int")
+
+        # mode 可以是 None，也可以是 int
+        if mode is None:
+            pass
+        else:
+            if isinstance(mode, int) is False:
+                raise ValueError("mode must be int")
+
+        # heater 可以是 None，也可以是 bool
+        if heater is None:
+            pass
+        else:
+            if isinstance(heater, bool) is False:
+                raise ValueError("heater must be bool")
         if config is not None:
             self._config = config
             self._write_config()

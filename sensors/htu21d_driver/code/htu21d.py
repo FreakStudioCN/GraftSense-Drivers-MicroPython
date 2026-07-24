@@ -15,7 +15,6 @@ __platform__ = "MicroPython v1.23"
 # ======================================== 导入相关模块 =========================================
 
 import time
-from micropython import const
 from machine import I2C
 
 
@@ -101,13 +100,13 @@ class HTU21D:
     """
 
     # 类级常量：I2C地址和测量命令
-    ADDRESS = const(0x40)
-    ISSUE_TEMP_ADDRESS = const(0xE3)
-    ISSUE_HU_ADDRESS = const(0xE5)
+    ADDRESS = 0x40
+    ISSUE_TEMP_ADDRESS = 0xF3
+    ISSUE_HU_ADDRESS = 0xF5
 
-    # 测量延时（毫秒），根据HTU21D数据手册：温度最大50ms，湿度最大16ms（12位分辨率）
-    _TEMP_DELAY_MS = const(50)
-    _HUMI_DELAY_MS = const(16)
+    # 测量延时（毫秒），根据HTU21D数据手册
+    _TEMP_DELAY_MS = 60
+    _HUMI_DELAY_MS = 30
 
     def __init__(self, i2c: I2C, addr: int = ADDRESS, debug: bool = False) -> None:
         """
@@ -132,7 +131,9 @@ class HTU21D:
             - Side effects: Stores I2C instance reference, does not modify I2C bus state
         """
         # 参数校验：i2c必须具有标准I2C方法（鸭子类型检查）
-        if hasattr(i2c, "readfrom_into") or not hasattr(i2c, "writeto") is False:
+        if hasattr(i2c, "readfrom_into") and hasattr(i2c, "writeto"):
+            pass
+        else:
             raise ValueError("i2c must be an I2C instance with readfrom_into and writeto methods")
 
         # 参数校验：addr类型检查
@@ -258,28 +259,38 @@ class HTU21D:
             raise ValueError("cmd must be an integer command value")
         # 根据命令类型确定测量延时
         if cmd in (0xE3, 0xF3):
-            delay_ms = 50
+            delay_ms = 60
         elif cmd in (0xE5, 0xF5):
-            delay_ms = 16
+            delay_ms = 30
         else:
-            delay_ms = 50
+            delay_ms = 60
 
         self._log("measuring cmd=0x%02X delay=%dms" % (cmd, delay_ms))
 
-        # 发送测量命令
-        try:
-            self._i2c.writeto(self._addr, bytes([cmd]))
-        except OSError as e:
-            raise RuntimeError("HTU21D I2C write failed for cmd 0x%02X" % cmd) from e
+        # 发送测量命令，偶发 NACK 时自动重试
+        for attempt in range(3):
+            try:
+                self._i2c.writeto(self._addr, bytes([cmd]))
+                break
+            except OSError as e:
+                if attempt == 2:
+                    raise RuntimeError("HTU21D I2C write failed for cmd 0x%02X" % cmd) from e
+
+                time.sleep_ms(5)
 
         # 等待测量完成（根据传感器数据手册，温度最长50ms，湿度最长16ms）
         time.sleep_ms(delay_ms)
 
         # 读取3字节测量结果（高字节、低字节、CRC校验值）
-        try:
-            self._i2c.readfrom_into(self._addr, _BUF3)
-        except OSError as e:
-            raise RuntimeError("HTU21D I2C read failed for cmd 0x%02X" % cmd) from e
+        for attempt in range(5):
+            try:
+                self._i2c.readfrom_into(self._addr, _BUF3)
+                break
+            except OSError as e:
+                if attempt == 4:
+                    raise RuntimeError("HTU21D I2C read failed for cmd 0x%02X" % cmd) from e
+
+                time.sleep_ms(5)
 
         # CRC校验
         if not _crc_check(_BUF3):

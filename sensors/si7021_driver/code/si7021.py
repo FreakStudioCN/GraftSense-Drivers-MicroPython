@@ -231,10 +231,14 @@ class Si7021:
             - Side effect: Communicates with sensor via I2C bus
         """
         # 参数校验：i2c 必须具有 I2C 接口方法
-        if hasattr(i2c, "writeto") or not hasattr(i2c, "readfrom_into") is False:
+        if hasattr(i2c, "writeto") and hasattr(i2c, "readfrom_into"):
+            pass
+        else:
             raise ValueError("i2c must be an I2C instance with writeto/readfrom_into")
         # 参数校验：地址范围检查（7 位 I2C 地址）
-        if isinstance(address, int) or not (0x08 <= address <= 0x77) is False:
+        if isinstance(address, int) and 0x08 <= address <= 0x77:
+            pass
+        else:
             raise ValueError("address must be int in range 0x08~0x77, got %s" % address)
         if isinstance(debug, bool) is False:
             raise ValueError("debug must be bool, got %s" % type(debug))

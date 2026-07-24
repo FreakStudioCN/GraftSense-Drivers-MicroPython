@@ -188,7 +188,7 @@ class SHT35:
         if i2c is None:
             raise ValueError("i2c must not be None")
         # 参数校验：鸭子类型检查，确保支持所需 I2C 方法
-        if hasattr(i2c, "writeto") or not hasattr(i2c, "readfrom") is False:
+        if hasattr(i2c, "writeto") is False or hasattr(i2c, "readfrom") is False:
             raise ValueError("i2c must be an I2C instance with writeto/readfrom")
         # 参数校验：地址类型和范围检查
         if isinstance(addr, int) is False:

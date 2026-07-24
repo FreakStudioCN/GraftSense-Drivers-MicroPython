@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2026/07/23
 # @Author  : Limor 'Ladyada' Fried, Jeff Raber
-# @File    : bme680_driver.py
+# @File    : bme680.py
 # @Description : BME680 temperature, humidity, pressure & gas sensor driver (I2C/SPI)
 # @License : MIT
 
@@ -787,8 +787,10 @@ class BME680_SPI(BME680):
         Notes:
             - Must set _spi and _cs before calling super().__init__()
         """
-        if hasattr(spi, "read") or not hasattr(spi, "write") is False:
-            raise ValueError("spi must provide read and write")
+        if hasattr(spi, "write") and hasattr(spi, "readinto"):
+            pass
+        else:
+            raise ValueError("spi must provide write and readinto")
         if hasattr(cs, "value") is False:
             raise ValueError("cs must provide value")
         if isinstance(debug, bool) is False:
@@ -796,9 +798,6 @@ class BME680_SPI(BME680):
         # 参数校验 — SPI 实例
         if hasattr(spi, "readinto") is False:
             raise ValueError("spi must be an SPI instance")
-        # 参数校验 — CS 引脚
-        if hasattr(cs, "__call__") is False:
-            raise ValueError("cs must be a Pin instance")
 
         self._spi = spi
         self._cs = cs

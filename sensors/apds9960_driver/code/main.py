@@ -3,14 +3,14 @@
 # @Time    : 2026/07/23
 # @Author  : Rune Langøy
 # @File    : main.py
-# @Description : 测试 APDS9960LITE 驱动类 —— 环境光、颜色（RGBC）、接近检测
+# @Description : 测试 APDS9960 驱动类 —— 环境光、颜色（RGBC）、接近检测
 # @License : MIT
 
 # ======================================== 导入相关模块 =========================================
 
 import machine
 import time
-from apds9960LITE import APDS9960LITE
+from apds9960 import APDS9960
 
 # ======================================== 全局变量 ============================================
 
@@ -211,7 +211,7 @@ def enable_interrupts():
 
 # 上电稳定延时
 time.sleep(3)
-print("FreakStudio: Testing APDS9960LITE driver module")
+print("FreakStudio: Testing APDS9960 driver module")
 
 # 创建硬件 I2C 实例（I2C0: SCL=GP5, SDA=GP4）
 print("Initializing I2C0 (SCL=GP%d, SDA=GP%d, 100kHz)..." % (SCL_PIN, SDA_PIN))
@@ -244,11 +244,11 @@ try:
 except OSError as e:
     raise RuntimeError("Failed to read chip ID register") from e
 
-# 实例化 APDS9960LITE 驱动
-print("Initializing APDS9960LITE driver (debug=False)...")
-apds9960 = APDS9960LITE(i2c, debug=False)
+# 实例化 APDS9960 驱动
+print("Initializing APDS9960 driver (debug=False)...")
+apds9960 = APDS9960(i2c, debug=False)
 last_print_time = time.ticks_ms()
-print("APDS9960LITE driver initialized successfully")
+print("APDS9960 driver initialized successfully")
 
 # 正常参数场景：启用所有传感器
 print("Enabling proximity sensor...")

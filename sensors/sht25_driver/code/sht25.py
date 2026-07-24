@@ -399,8 +399,11 @@ class SHT25:
             - ISR-safe: No
             - Blocks until measurement completes
         """
-        if isinstance(command, (bytes, bytearray, list, tuple)) is False:
-            raise ValueError("command must be a buffer or sequence")
+        if isinstance(command, int) is False:
+            raise ValueError("command must be int")
+
+        if command < 0 or command > 0xFF:
+            raise ValueError("command must be 0~255")
         if isinstance(delay_ms, int) is False:
             raise ValueError("delay_ms must be int")
         # 发送测量命令（不保持主机模式）

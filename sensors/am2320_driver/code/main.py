@@ -21,8 +21,8 @@ from am2320 import AM2320
 _PRINT_INTERVAL_MS = 2000
 
 # I2C 引脚配置（请根据实际接线修改）
-_I2C_SCL_PIN = 22
-_I2C_SDA_PIN = 21
+_I2C_SCL_PIN = 5
+_I2C_SDA_PIN = 4
 _I2C_FREQ = 100000
 
 # AM2320 固定 I2C 地址

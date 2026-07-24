@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2026/07/23 00:00
 # @Author  : Rune Langøy
-# @File    : apds9960LITE.py
+# @File    : APDS9960.py
 # @Description : APDS9960 low-memory driver: ambient light, color (RGBC), and proximity sensing
 # @License : MIT
 
@@ -14,7 +14,6 @@ __platform__ = "MicroPython v1.23"
 # ======================================== 导入相关模块 =========================================
 
 from time import sleep
-from micropython import const
 
 # ======================================== 全局变量 ============================================
 
@@ -380,32 +379,32 @@ class ALS(I2CEX):
     """
 
     # 类级常量 - I2C 地址
-    _ADDR = const(0x39)
+    _ADDR = 0x39
 
     # 类级常量 - 寄存器地址
-    _REG_ENABLE = const(0x80)
-    _REG_ATIME = const(0x81)
-    _REG_AILTL = const(0x84)
-    _REG_AILTH = const(0x85)
-    _REG_AIHTL = const(0x86)
-    _REG_AIHTH = const(0x87)
-    _REG_PERS = const(0x8C)
-    _REG_CONTROL = const(0x8F)
-    _REG_CDATAL = const(0x94)
-    _REG_RDATAL = const(0x96)
-    _REG_GDATAL = const(0x98)
-    _REG_BDATAL = const(0x9A)
-    _REG_AICLEAR = const(0xE6)
+    _REG_ENABLE = 0x80
+    _REG_ATIME = 0x81
+    _REG_AILTL = 0x84
+    _REG_AILTH = 0x85
+    _REG_AIHTL = 0x86
+    _REG_AIHTH = 0x87
+    _REG_PERS = 0x8C
+    _REG_CONTROL = 0x8F
+    _REG_CDATAL = 0x94
+    _REG_RDATAL = 0x96
+    _REG_GDATAL = 0x98
+    _REG_BDATAL = 0x9A
+    _REG_AICLEAR = 0xE6
 
     # 类级常量 - 位定义
-    _BIT_AEN = const(1)
-    _BIT_AIEN = const(4)
+    _BIT_AEN = 1
+    _BIT_AIEN = 4
 
     # 类级常量 - ALS 增益选项
-    GAIN_1X = const(0)
-    GAIN_2X = const(1)
-    GAIN_16X = const(2)
-    GAIN_64X = const(3)
+    GAIN_1X = 0
+    GAIN_2X = 1
+    GAIN_16X = 2
+    GAIN_64X = 3
 
     def __init__(self, i2c, debug: bool = False) -> None:
         """
@@ -777,33 +776,33 @@ class PROX(I2CEX):
     """
 
     # 类级常量 - I2C 地址
-    _ADDR = const(0x39)
+    _ADDR = 0x39
 
     # 类级常量 - 寄存器地址
-    _REG_ENABLE = const(0x80)
-    _REG_PILT = const(0x89)
-    _REG_PIHT = const(0x8B)
-    _REG_PERS = const(0x8C)
-    _REG_CONTROL = const(0x8F)
-    _REG_PDATA = const(0x9C)
-    _REG_PICLEAR = const(0xE5)
-    _REG_AICLEAR = const(0xE7)
+    _REG_ENABLE = 0x80
+    _REG_PILT = 0x89
+    _REG_PIHT = 0x8B
+    _REG_PERS = 0x8C
+    _REG_CONTROL = 0x8F
+    _REG_PDATA = 0x9C
+    _REG_PICLEAR = 0xE5
+    _REG_AICLEAR = 0xE7
 
     # 类级常量 - 位定义
-    _BIT_PEN = const(2)
-    _BIT_PIEN = const(5)
+    _BIT_PEN = 2
+    _BIT_PIEN = 5
 
     # 类级常量 - 接近增益选项
-    PGAIN_1X = const(0)
-    PGAIN_2X = const(1)
-    PGAIN_4X = const(2)
-    PGAIN_8X = const(3)
+    PGAIN_1X = 0
+    PGAIN_2X = 1
+    PGAIN_4X = 2
+    PGAIN_8X = 3
 
     # 类级常量 - LED 电流选项
-    LED_100MA = const(0)
-    LED_50MA = const(1)
-    LED_25MA = const(2)
-    LED_12_5MA = const(3)
+    LED_100MA = 0
+    LED_50MA = 1
+    LED_25MA = 2
+    LED_12_5MA = 3
 
     def __init__(self, i2c, debug: bool = False) -> None:
         """
@@ -1122,9 +1121,9 @@ class PROX(I2CEX):
         self.enableSensor(False)
 
 
-class APDS9960LITE(I2CEX):
+class APDS9960(I2CEX):
     """
-    APDS9960LITE 低内存占用驱动类，整合环境光、颜色和接近检测功能
+    APDS9960 低内存占用驱动类，整合环境光、颜色和接近检测功能
     Attributes:
         prox (PROX): 接近检测功能实例
         als (ALS): 环境光/颜色检测功能实例
@@ -1139,7 +1138,7 @@ class APDS9960LITE(I2CEX):
         - 依赖外部传入的 I2C 实例
         - ISR-safe: 否
     ==========================================
-    APDS9960LITE low-memory driver combining ALS, color, and proximity.
+    APDS9960 low-memory driver combining ALS, color, and proximity.
 
     Attributes:
         prox (PROX): Proximity sensor instance
@@ -1157,21 +1156,21 @@ class APDS9960LITE(I2CEX):
     """
 
     # 类级常量 - I2C 地址
-    _ADDR = const(0x39)
+    _ADDR = 0x39
 
     # 类级常量 - 寄存器地址
-    _REG_ENABLE = const(0x80)
-    _REG_STATUS = const(0x93)
+    _REG_ENABLE = 0x80
+    _REG_STATUS = 0x93
 
     # 类级常量 - 位定义
-    _BIT_PON = const(0)
+    _BIT_PON = 0
 
     # 类级常量 - 上电时序延时（秒）
-    _POWER_ON_DELAY = const(0.05)
+    _POWER_ON_DELAY = 0.05
 
     def __init__(self, i2c, debug: bool = False) -> None:
         """
-        初始化 APDS9960LITE 驱动
+        初始化 APDS9960 驱动
         Args:
             i2c (I2C): I2C 总线实例（须具备 readfrom_mem / writeto_mem 方法）
             debug (bool): 是否输出调试日志，默认 False
@@ -1184,7 +1183,7 @@ class APDS9960LITE(I2CEX):
             - 设备 I2C 地址固定为 0x39
             - ISR-safe: 否
         ==========================================
-        Initialize APDS9960LITE driver.
+        Initialize APDS9960 driver.
 
         Args:
             i2c (I2C): I2C bus instance (must support readfrom_mem / writeto_mem)

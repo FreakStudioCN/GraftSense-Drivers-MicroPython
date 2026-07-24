@@ -10,12 +10,12 @@
 
 import time
 from machine import I2C, Pin
-from bme680_driver import BME680_I2C
+from bme680 import BME680_I2C
 
 # ======================================== 全局变量 ============================================
 
 # --- I2C 引脚配置（Raspberry Pi Pico / RP2040） ---
-# 也可使用 SPI 模式：from bme680_driver import BME680_SPI
+# 也可使用 SPI 模式：from bme680 import BME680_SPI
 I2C_ID = 0
 SDA_PIN = 0
 SCL_PIN = 1

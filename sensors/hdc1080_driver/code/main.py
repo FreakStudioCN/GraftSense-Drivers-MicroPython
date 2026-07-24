@@ -55,7 +55,7 @@ else:
     print("Device not found: unexpected ID 0x%04X" % device_id)
 
 # 配置传感器参数
-hdc.config(humid_res=14, temp_res=14, mode=0, heater=0)
+hdc.config(humid_res=14, temp_res=14, mode=0, heater=False)
 
 # 检查设备就绪并打印序列号
 if hdc.check():

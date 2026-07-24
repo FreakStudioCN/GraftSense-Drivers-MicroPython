@@ -72,8 +72,8 @@ BME680 是 Bosch Sensortec 推出的四合一 MEMS 环境传感器，集成温�
 ## 文件结构
 
 ```
-bme680_driver/
-├── bme680_driver.py   # BME680 核心驱动（I2C + SPI）
+bme680/
+├── bme680.py   # BME680 核心驱动（I2C + SPI）
 ├── main.py            # 测试示例代码
 ├── test_i2c.py        # I2C 接口快速验证脚本
 ├── test_spi.py        # SPI 接口快速验证脚本
@@ -84,7 +84,7 @@ bme680_driver/
 
 | 文件 | 说明 |
 |------|------|
-| `bme680_driver.py` | BME680 核心驱动文件，包含 `BME680` 基类、`BME680_I2C`（I2C 子类）和 `BME680_SPI`（SPI 子类），提供温度/湿度/气压/气体/海拔五项数据的读取与采样参数配置 |
+| `bme680.py` | BME680 核心驱动文件，包含 `BME680` 基类、`BME680_I2C`（I2C 子类）和 `BME680_SPI`（SPI 子类），提供温度/湿度/气压/气体/海拔五项数据的读取与采样参数配置 |
 | `main.py` | 完整测试示例，包含 I2C 总线扫描、芯片 ID 预检、默认参数采样循环、边界参数测试和异常参数测试，适用于首次验证硬件 |
 | `test_i2c.py` | 极简 I2C 模式验证脚本，快速确认传感器通信 |
 | `test_spi.py` | 极简 SPI 模式验证脚本，快速确认传感器通信 |
@@ -93,7 +93,7 @@ bme680_driver/
 
 ### 1. 复制文件
 
-将 `bme680_driver.py` 上传到 MicroPython 设备的根目录（或 `lib/` 目录）。
+将 `bme680.py` 上传到 MicroPython 设备的根目录（或 `lib/` 目录）。
 
 ### 2. 硬件接线
 
@@ -116,12 +116,12 @@ bme680_driver/
 
 import time
 from machine import I2C, Pin
-from bme680_driver import BME680_I2C
+from bme680 import BME680_I2C
 
 # ======================================== 全局变量 ============================================
 
 # --- I2C 引脚配置（Raspberry Pi Pico / RP2040） ---
-# 也可使用 SPI 模式：from bme680_driver import BME680_SPI
+# 也可使用 SPI 模式：from bme680 import BME680_SPI
 I2C_ID = 0
 SDA_PIN = 0
 SCL_PIN = 1
@@ -301,7 +301,7 @@ finally:
 
 ```python
 from machine import Pin, SPI
-from bme680_driver import BME680_SPI
+from bme680 import BME680_SPI
 
 cs = Pin(17, Pin.OUT, value=1)
 spi = SPI(0, baudrate=1000000, polarity=0, phase=0, bits=8, firstbit=SPI.MSB,

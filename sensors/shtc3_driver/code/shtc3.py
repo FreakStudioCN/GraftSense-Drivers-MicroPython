@@ -476,8 +476,12 @@ class SHTC3:
         Raises:
             SHTC3Error: I2C bus communication failure
         """
-        if not isinstance(cmd, int) or not 0 <= cmd <= 0xFFFF:
-            raise ValueError("cmd must be an integer command value")
+        if isinstance(cmd, (bytes, bytearray)) is False:
+            raise ValueError("cmd must be bytes or bytearray")
+
+        if len(cmd) != 2:
+            raise ValueError("cmd must contain exactly 2 bytes")
+
         try:
             self._i2c.writeto(self._addr, cmd)
         except OSError as e:

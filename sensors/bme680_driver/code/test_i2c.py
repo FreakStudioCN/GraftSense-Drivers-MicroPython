@@ -6,15 +6,15 @@ __license__ = "MIT"
 __platform__ = "MicroPython"
 
 from machine import I2C, Pin
-from bme680_driver import BME680_I2C
+from bme680 import BME680_I2C
 import time
 
 
 # Raspberry Pi Pico / RP2040 default example wiring:
 # SDA -> GP0, SCL -> GP1, VCC -> 3V3, GND -> GND
 I2C_ID = 0
-SDA_PIN = 0
-SCL_PIN = 1
+SDA_PIN = 4
+SCL_PIN = 5
 I2C_FREQ = 400000
 
 

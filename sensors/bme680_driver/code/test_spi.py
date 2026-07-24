@@ -6,7 +6,7 @@ __license__ = "MIT"
 __platform__ = "MicroPython"
 
 from machine import Pin, SPI
-from bme680_driver import BME680_SPI
+from bme680 import BME680_SPI
 import time
 
 

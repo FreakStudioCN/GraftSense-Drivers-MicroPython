@@ -125,8 +125,8 @@ class AM2320:
         if i2c is None:
             raise ValueError("i2c must not be None")
         # i2c 参数校验：鸭子类型检查，确保传入对象具备 I2C 总线方法
-        if hasattr(i2c, "writeto") or not hasattr(i2c, "readfrom_mem_into") is False:
-            raise ValueError("i2c must be an I2C instance with writeto/readfrom_mem_into")
+        if hasattr(i2c, "writeto") is False or hasattr(i2c, "readfrom_into") is False:
+            raise ValueError("i2c must provide writeto/readfrom_into")
         self._i2c = i2c
         self._addr = self.I2C_ADDRESS
         # 复用模块级缓冲区，避免每次测量分配新内存
@@ -210,7 +210,7 @@ class AM2320:
                 # 等待传感器完成数据采集（至少 1.5ms，取 2ms 留有余量）
                 sleep_ms(2)
                 # 读取 8 字节原始数据到缓冲区
-                self._i2c.readfrom_mem_into(self._addr, 0, buf)
+                self._i2c.readfrom_into(self._addr, buf)
                 break
             except OSError as e:
                 if attempt == retries:
