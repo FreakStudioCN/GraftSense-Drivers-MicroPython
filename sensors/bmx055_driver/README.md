@@ -46,6 +46,10 @@ BMX055 是 Bosch Sensortec 推出的九轴惯性测量单元 (IMU)，内部集�
 | GND  | 电源负极 |
 | SCL  | I2C 时钟线（示例接 GPIO5） |
 | SDA  | I2C 数据线（示例接 GPIO4） |
+| PS | 接 `3.3V`，选择 I²C 。接 `GND`，选择 SPI |
+| SDO1 | 加速度计和磁力计地址选择                 |
+| SDO2 | 陀螺仪数据地址选择 |
+| CSB3 | 磁力计片选/地址选择 |
 
 ### BMX055 内部 I2C 地址
 
@@ -99,12 +103,16 @@ bmx055_driver/
 
 ### 2. 硬件接线
 
-| BMX055 模块 | 开发板 |
-|-------------|--------|
-| VCC         | 3.3V   |
-| GND         | GND    |
-| SCL         | GPIO5  |
-| SDA         | GPIO4  |
+| BMX055 模块 | 开发板              |
+| ----------- | ------------------- |
+| VCC         | 3.3V                |
+| GND         | GND                 |
+| SCL         | GPIO5               |
+| SDA         | GPIO4               |
+| PS          | 3.3V（选择I2C模式） |
+| SDO1        | GND                 |
+| SDO2        | GND                 |
+| CSB3        | GND                 |
 
 ### 3. 最小可运行示例
 

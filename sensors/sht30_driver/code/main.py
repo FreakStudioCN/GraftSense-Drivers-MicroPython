@@ -17,8 +17,8 @@ from sht30 import SHT30
 
 # User configuration: change these pins for your RP2040 board wiring.
 I2C_BUS_ID = 0
-I2C_SCL_PIN = 4
-I2C_SDA_PIN = 5
+I2C_SCL_PIN = 5
+I2C_SDA_PIN = 4
 I2C_FREQ = 100000
 SHT30_ADDR = 0x44
 PRINT_INTERVAL_MS = 2000
