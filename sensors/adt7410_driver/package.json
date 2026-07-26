@@ -1,0 +1,18 @@
+{
+  "name": "micropython_adt7410",
+  "urls": [
+    ["__init__.py", "code/__init__.py"],
+    ["adt7410.py", "code/adt7410.py"],
+    ["i2c_helpers.py", "code/i2c_helpers.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "MicroPython driver for the Analog Devices ADT7410 high-accuracy digital temperature sensor",
+  "author": "Jose D. Montoya",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

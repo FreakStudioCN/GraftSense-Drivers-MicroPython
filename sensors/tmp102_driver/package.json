@@ -1,0 +1,23 @@
+{
+  "name": "tmp102_driver",
+  "urls": [
+    ["__init__.py", "code/__init__.py"],
+    ["_tmp102.py", "code/_tmp102.py"],
+    ["alert.py", "code/alert.py"],
+    ["conversionrate.py", "code/conversionrate.py"],
+    ["convertors.py", "code/convertors.py"],
+    ["extendedmode.py", "code/extendedmode.py"],
+    ["oneshot.py", "code/oneshot.py"],
+    ["shutdown.py", "code/shutdown.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library to control TMP102 digital temperature sensor via I2C",
+  "author": "Kevin Houlihan",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
