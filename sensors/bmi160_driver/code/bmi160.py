@@ -466,6 +466,14 @@ class BMI160:
 
     @acceleration_undersample.setter
     def acceleration_undersample(self, value: int) -> None:
+        """设置加速度计欠采样模式 / Set the accelerometer undersampling mode.
+
+        Args:
+            value (int): 支持的配置值 / A supported configuration value.
+
+        Raises:
+            ValueError: 当配置值无效时 / If the value is invalid.
+        """
         if value not in acc_sample_values:
             raise ValueError("Value must be a valid acceleration undersample value")
         self._acc_us = value
@@ -494,6 +502,14 @@ class BMI160:
 
     @acceleration_bandwidth_parameter.setter
     def acceleration_bandwidth_parameter(self, value: int) -> None:
+        """设置加速度计带宽参数 / Set the accelerometer bandwidth parameter.
+
+        Args:
+            value (int): 支持的配置值 / A supported configuration value.
+
+        Raises:
+            ValueError: 当配置值无效时 / If the value is invalid.
+        """
         if value not in acc_bandwidth_values:
             raise ValueError("Value must a be a valid Acceleration bandwidth setting")
         self._acc_bwp = value
@@ -540,6 +556,14 @@ class BMI160:
 
     @acceleration_output_data_rate.setter
     def acceleration_output_data_rate(self, value: int) -> None:
+        """设置加速度计输出数据率 / Set the accelerometer output data rate.
+
+        Args:
+            value (int): 支持的配置值 / A supported configuration value.
+
+        Raises:
+            ValueError: 当配置值无效时 / If the value is invalid.
+        """
         if value not in bandwidth_values:
             raise ValueError("Value must be a valid Acceleration Data Rate setting")
         self._acc_odr = value
@@ -575,6 +599,14 @@ class BMI160:
 
     @acceleration_range.setter
     def acceleration_range(self, value: int) -> None:
+        """设置加速度计量程 / Set the accelerometer measurement range.
+
+        Args:
+            value (int): 支持的配置值 / A supported configuration value.
+
+        Raises:
+            ValueError: 当配置值无效时 / If the value is invalid.
+        """
         if value not in acc_range_values:
             raise ValueError("Value must be a valid Acceleration Range setting")
         self._acc_range = value
@@ -783,6 +815,14 @@ class BMI160:
 
     @gyro_output_data_rate.setter
     def gyro_output_data_rate(self, value: int) -> None:
+        """设置陀螺仪输出数据率 / Set the gyroscope output data rate.
+
+        Args:
+            value (int): 支持的配置值 / A supported configuration value.
+
+        Raises:
+            ValueError: 当配置值无效时 / If the value is invalid.
+        """
         if value not in gyro_bandwidth_values:
             raise ValueError("Value must be a valid Gyro Data Rate setting")
         self._gyro_odr = value
@@ -817,6 +857,14 @@ class BMI160:
 
     @gyro_bandwidth_parameter.setter
     def gyro_bandwidth_parameter(self, value: int) -> None:
+        """设置陀螺仪带宽参数 / Set the gyroscope bandwidth parameter.
+
+        Args:
+            value (int): 支持的配置值 / A supported configuration value.
+
+        Raises:
+            ValueError: 当配置值无效时 / If the value is invalid.
+        """
         if value not in gyro_cutoffs_values:
             raise ValueError("Value must be a valid Gyro Bandwidth setting")
         self._gyro_bwp = value
@@ -851,6 +899,14 @@ class BMI160:
 
     @gyro_power_mode.setter
     def gyro_power_mode(self, value: int) -> None:
+        """设置陀螺仪电源模式 / Set the gyroscope power mode.
+
+        Args:
+            value (int): 支持的配置值 / A supported configuration value.
+
+        Raises:
+            ValueError: 当配置值无效时 / If the value is invalid.
+        """
         if value not in gyro_power_modes:
             raise ValueError("Value must be a valid Gyro Power Mode")
         # 通过 CMD 寄存器写入电源模式命令
@@ -889,6 +945,14 @@ class BMI160:
 
     @gyro_range.setter
     def gyro_range(self, value: int) -> None:
+        """设置陀螺仪量程 / Set the gyroscope measurement range.
+
+        Args:
+            value (int): 支持的配置值 / A supported configuration value.
+
+        Raises:
+            ValueError: 当配置值无效时 / If the value is invalid.
+        """
         if value not in gyro_values:
             raise ValueError("Value must be a valid Gyro range")
         self._gyro_range = value

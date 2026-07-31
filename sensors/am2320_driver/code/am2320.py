@@ -29,7 +29,7 @@ _BUF = bytearray(8)
 # ======================================== 功能函数 ============================================
 
 
-def _crc16(buf):
+def _crc16(buf: bytearray) -> int:
     """
     计算 Modbus CRC-16 校验值
     Args:
@@ -101,7 +101,7 @@ class AM2320:
     # 实例属性槽位声明，节省 MicroPython 内存
     __slots__ = ("_i2c", "_addr", "_buf", "_debug")
 
-    def __init__(self, i2c, debug: bool = False) -> None:
+    def __init__(self, i2c: object, debug: bool = False) -> None:
         """
         初始化 AM2320 传感器驱动实例
         Args:
@@ -144,7 +144,7 @@ class AM2320:
         if self._debug:
             print("[AM2320] %s" % msg)
 
-    def check(self):
+    def check(self) -> bool:
         """
         检测传感器是否在 I2C 总线上存在
         Returns:
@@ -173,7 +173,7 @@ class AM2320:
         self._log("sensor found at 0x%02X" % self._addr)
         return True
 
-    def measure(self, retries=1, delay_ms=5):
+    def measure(self, retries: int = 1, delay_ms: int = 5) -> None:
         """
         触发一次温湿度测量，结果存入内部缓冲区
         Args:
@@ -223,7 +223,7 @@ class AM2320:
             raise ValueError("AM2320 CRC checksum error")
         self._log("measure OK: raw=%s" % buf.hex())
 
-    def temperature(self):
+    def temperature(self) -> float:
         """
         获取最近一次测量的温度值
         Returns:
@@ -248,7 +248,7 @@ class AM2320:
             t = -t
         return t
 
-    def humidity(self):
+    def humidity(self) -> float:
         """
         获取最近一次测量的相对湿度值
         Returns:
@@ -291,7 +291,7 @@ class AM2320:
         # 等待传感器完全唤醒（至少 0.8ms，取 10ms 确保稳定）
         sleep_ms(10)
 
-    def deinit(self):
+    def deinit(self) -> None:
         """
         释放传感器驱动资源
         Notes:

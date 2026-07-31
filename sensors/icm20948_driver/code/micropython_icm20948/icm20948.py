@@ -165,6 +165,16 @@ class ICM20948:
     _gyro_dplcfg = CBits(3, _GYRO_CONFIG_1, 3)
 
     def __init__(self, i2c, address: int = 0x69, debug: bool = False) -> None:
+        """??? ICM20948 ?? / Initialize the ICM20948 driver.
+
+        Args:
+            i2c (object): ?????? / Existing configuration input.
+            address (object): ?????? / Existing configuration input.
+            debug (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if not hasattr(i2c, "readfrom_mem"):
             raise ValueError("i2c must provide readfrom_mem")
         if not hasattr(i2c, "writeto_mem"):
@@ -196,21 +206,53 @@ class ICM20948:
 
     @property
     def clock_select(self) -> str:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            str: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         values = {0: "CLK_SELECT_INTERNAL", 1: "CLK_SELECT_BEST", 7: "CLK_SELECT_STOP"}
         return values[self._clock_select]
 
     @clock_select.setter
     def clock_select(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in CLK_VALUES:
             raise ValueError("Select a valid Clock Select setting")
         self._clock_select = value
 
     @property
     def reset(self) -> int:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            int: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         return self._reset
 
     @reset.setter
     def reset(self, value: int = 1) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in (0, 1, False, True):
             raise ValueError("reset must be 0 or 1")
         self._reset = int(value)
@@ -218,39 +260,95 @@ class ICM20948:
 
     @property
     def gyro_enabled(self) -> str:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            str: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         values = {GYRO_DISABLED: "GYRO_DISABLED", GYRO_ENABLED: "GYRO_ENABLED"}
         return values[self._gyro_enable]
 
     @gyro_enabled.setter
     def gyro_enabled(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in GYRO_EN_VALUES:
             raise ValueError("Value must be a valid Gyro Enabled setting")
         self._gyro_enable = value
 
     @property
     def acc_enabled(self) -> str:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            str: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         values = {ACC_DISABLED: "ACC_DISABLED", ACC_ENABLED: "ACC_ENABLED"}
         return values[self._acc_enable]
 
     @acc_enabled.setter
     def acc_enabled(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in ACC_EN_VALUES:
             raise ValueError("Value must be a valid Accelerometer Enabled setting")
         self._acc_enable = value
 
     @property
     def temperature_enabled(self) -> str:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            str: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         values = {TEMP_DISABLED: "TEMP_DISABLED", TEMP_ENABLED: "TEMP_ENABLED"}
         return values[self._temp_enabled]
 
     @temperature_enabled.setter
     def temperature_enabled(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in TEMP_EN_VALUES:
             raise ValueError("Value must be a valid Temperature Enabled setting")
         self._temp_enabled = value
 
     @property
     def acceleration(self) -> tuple:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            tuple: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         raw_measurement = self._raw_accel_data
         sensitivity = ACC_RANGE_SENSITIVITY[self._memory_accel_range]
         x = raw_measurement[0] / sensitivity * 9.80665
@@ -260,6 +358,14 @@ class ICM20948:
 
     @property
     def gyro(self) -> tuple:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            tuple: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         raw_measurement = self._raw_gyro_data
         sensitivity = GYRO_FULL_SCALE_SENSITIVITY[self._memory_gyro_fs]
         x = raw_measurement[0] / sensitivity * 0.017453293
@@ -269,10 +375,26 @@ class ICM20948:
 
     @property
     def power_bank(self) -> int:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            int: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         return self._user_bank
 
     @power_bank.setter
     def power_bank(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in USER_BANK_VALUES:
             raise ValueError("Value must be a valid user bank")
         self._user_bank = value
@@ -280,11 +402,27 @@ class ICM20948:
 
     @property
     def accelerometer_range(self) -> str:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            str: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         values = ("RANGE_2G", "RANGE_4G", "RANGE_8G", "RANGE_16G")
         return values[self._memory_accel_range]
 
     @accelerometer_range.setter
     def accelerometer_range(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in ACC_RANGE_VALUES:
             raise ValueError("Value must be a valid Accelerometer Range Setting")
         self._user_bank = USER_BANK_2
@@ -294,11 +432,27 @@ class ICM20948:
 
     @property
     def gyro_full_scale(self) -> str:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            str: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         values = ("FS_250_DPS", "FS_500_DPS", "FS_1000_DPS", "FS_2000_DPS")
         return values[self._memory_gyro_fs]
 
     @gyro_full_scale.setter
     def gyro_full_scale(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in GYRO_FULL_SCALE_VALUES:
             raise ValueError("Value must be a valid gyro_full_scale setting")
         self._user_bank = USER_BANK_2
@@ -308,20 +462,52 @@ class ICM20948:
 
     @property
     def temperature(self) -> float:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            float: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         return (self._raw_temp_data[3] / 333.87) + 21
 
     @property
     def gyro_data_rate(self) -> float:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            float: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         return list(GYRO_RATE_VALUES.keys())[list(GYRO_RATE_VALUES.values()).index(self.gyro_data_rate_divisor)]
 
     @gyro_data_rate.setter
     def gyro_data_rate(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in GYRO_DATA_RATE_VALUES:
             raise ValueError("Gyro data rate must be a valid setting")
         self.gyro_data_rate_divisor = GYRO_RATE_VALUES[value]
 
     @property
     def gyro_data_rate_divisor(self) -> int:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            int: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         self._user_bank = USER_BANK_2
         raw_rate_divisor = self._gyro_rate_divisor
         self._user_bank = USER_BANK_0
@@ -329,6 +515,14 @@ class ICM20948:
 
     @gyro_data_rate_divisor.setter
     def gyro_data_rate_divisor(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in GYRO_RATE_DIVISOR_VALUES:
             raise ValueError("Value must be a valid gyro data rate divisor setting")
         self._user_bank = USER_BANK_2
@@ -337,16 +531,40 @@ class ICM20948:
 
     @property
     def acc_data_rate(self) -> float:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            float: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         return list(ACC_RATE_VALUES.keys())[list(ACC_RATE_VALUES.values()).index(self.acc_data_rate_divisor)]
 
     @acc_data_rate.setter
     def acc_data_rate(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in ACC_DATA_RATE_VALUES:
             raise ValueError("Accelerometer data rate must be a valid setting")
         self.acc_data_rate_divisor = ACC_RATE_VALUES[value]
 
     @property
     def acc_data_rate_divisor(self) -> int:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            int: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         self._user_bank = USER_BANK_2
         raw_rate_divisor = self._acc_rate_divisor
         self._user_bank = USER_BANK_0
@@ -354,6 +572,14 @@ class ICM20948:
 
     @acc_data_rate_divisor.setter
     def acc_data_rate_divisor(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in ACC_RATE_DIVISOR_VALUES:
             raise ValueError("Value must be a valid acceleration data rate divisor setting")
         self._user_bank = USER_BANK_2
@@ -362,6 +588,14 @@ class ICM20948:
 
     @property
     def acc_dlpf_cutoff(self) -> str:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            str: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         values = ("FREQ_246_0", "FREQ_111_4", "FREQ_50_4", "FREQ_23_9", "FREQ_11_5", "FREQ_5_7", "FREQ_473")
         self._user_bank = USER_BANK_2
         raw_value = self._acc_dplcfg
@@ -370,6 +604,14 @@ class ICM20948:
 
     @acc_dlpf_cutoff.setter
     def acc_dlpf_cutoff(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in ACC_FILTER_VALUES:
             raise ValueError("Value must be a valid dlpf setting")
         self._user_bank = USER_BANK_2
@@ -378,6 +620,14 @@ class ICM20948:
 
     @property
     def acc_filter_choice(self) -> int:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            int: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         self._user_bank = USER_BANK_2
         raw_value = self._acc_choice
         self._user_bank = USER_BANK_0
@@ -385,6 +635,14 @@ class ICM20948:
 
     @acc_filter_choice.setter
     def acc_filter_choice(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in (0, 1):
             raise ValueError("Value must be a valid accelerometer filter choice")
         self._user_bank = USER_BANK_2
@@ -393,6 +651,14 @@ class ICM20948:
 
     @property
     def gyro_dlpf_cutoff(self) -> str:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            str: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         values = ("G_FREQ_196_6", "G_FREQ_151_8", "G_FREQ_119_5", "G_FREQ_51_2", "G_FREQ_23_9", "G_FREQ_11_6", "G_FREQ_5_7", "G_FREQ_361_4")
         self._user_bank = USER_BANK_2
         raw_value = self._gyro_dplcfg
@@ -401,6 +667,14 @@ class ICM20948:
 
     @gyro_dlpf_cutoff.setter
     def gyro_dlpf_cutoff(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in GYRO_FILTER_VALUES:
             raise ValueError("Value must be a valid dlpf setting")
         self._user_bank = USER_BANK_2
@@ -409,6 +683,14 @@ class ICM20948:
 
     @property
     def gyro_filter_choice(self) -> int:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Returns:
+            int: ??????????? / Current register or sensor data.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         self._user_bank = USER_BANK_2
         raw_value = self._gyro_choice
         self._user_bank = USER_BANK_0
@@ -416,6 +698,14 @@ class ICM20948:
 
     @gyro_filter_choice.setter
     def gyro_filter_choice(self, value: int) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Args:
+            value (object): ?????? / Existing configuration input.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         if value not in (0,):
             raise ValueError("Value must be a valid gyroscope filter choice")
         self._user_bank = USER_BANK_2
@@ -429,6 +719,11 @@ class ICM20948:
             print("[ICM20948] %s" % msg)
 
     def deinit(self) -> None:
+        """????? ICM20948 ?? / Read or configure an ICM20948 property.
+
+        Notes:
+            ???? Bank ??? I2C ???? / Preserves existing bank selection and I2C access order.
+        """
         self._sleep = 1
 
 

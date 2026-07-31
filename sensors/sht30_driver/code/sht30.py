@@ -5,12 +5,11 @@
 # @File    : sht30.py
 # @Description : SHT30 temperature and humidity sensor I2C driver
 # @License : MIT
-# Original license: Apache License 2.0
 # Original source: Claude Skill normalized Project1 driver
 
 __version__ = "0.2.1"
 __author__ = "Roberto Sanchez"
-__license__ = "Apache License 2.0"
+__license__ = "MIT"
 __platform__ = "MicroPython v1.23 / RP2040"
 
 # ======================================== 导入相关模块 =========================================
@@ -56,6 +55,11 @@ class SHT30Error(Exception):
     CRC_ERROR = micropython.const(0x03)
 
     def __init__(self, error_code: int = None) -> None:
+        """创建 SHT30 异常实例。Create an SHT30 error instance.
+
+        Args: error_code (int): 可选错误码。Optional error code.
+        Raises: ValueError: 错误码不是 int 或 None。Raised when error_code is neither int nor None.
+        """
         if error_code is not None:
             if isinstance(error_code, int) is False:
                 raise ValueError("error_code must be int")

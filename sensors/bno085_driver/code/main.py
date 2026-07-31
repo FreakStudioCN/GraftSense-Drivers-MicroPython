@@ -9,18 +9,12 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from machine import I2C, Pin, UART
+from machine import Pin, UART
 
 import bno085
 from bno085 import BNO085, BNO085TimeoutError
 
 # ======================================== 全局变量 ============================================
-
-I2C_ID = 0
-I2C_SCL_PIN = 1
-I2C_SDA_PIN = 0
-I2C_FREQ = 100000
-BNO085_I2C_ADDRESS = 0x4A
 
 UART_ID = 1
 UART_TX_PIN = 4
@@ -59,22 +53,10 @@ time.sleep(3)
 print("FreakStudio: Testing BNO085 9-DOF IMU sensor on RP2040")
 print("Driver version: %s" % bno085.__version__)
 
-i2c = I2C(I2C_ID, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQ)
 uart = UART(UART_ID, UART_BAUDRATE, tx=Pin(UART_TX_PIN), rx=Pin(UART_RX_PIN))
 sensor = BNO085(uart, timeout=DRIVER_TIMEOUT_S)
 
-print("I2C%d SCL=GP%d SDA=GP%d freq=%d" % (I2C_ID, I2C_SCL_PIN, I2C_SDA_PIN, I2C_FREQ))
 print("UART%d TX=GP%d RX=GP%d baud=%d" % (UART_ID, UART_TX_PIN, UART_RX_PIN, UART_BAUDRATE))
-
-try:
-    i2c_addresses = i2c.scan()
-    print("I2C scan found: %s" % format_addresses(i2c_addresses))
-    if BNO085_I2C_ADDRESS in i2c_addresses:
-        print("BNO085 default I2C address 0x%02X found" % BNO085_I2C_ADDRESS)
-    else:
-        print("BNO085 default I2C address 0x%02X not found" % BNO085_I2C_ADDRESS)
-except OSError as error:
-    print("I2C scan failed: %s" % error)
 
 print("UART-RVC mode outputs heading automatically; no report enable command is used")
 last_print_time = time.ticks_ms()

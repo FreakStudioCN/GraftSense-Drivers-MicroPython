@@ -1,5 +1,5 @@
 {
-  "name": "adps9960_driver",
+  "name": "apds9960_driver",
   "urls": [
     ["apds9960.py", "code/apds9960.py"]
   ],

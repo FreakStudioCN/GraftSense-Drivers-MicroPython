@@ -4,7 +4,7 @@
 # @Author  : Roberto Sanchez
 # @File    : main.py
 # @Description : Test code for the SHT30 temperature and humidity sensor driver
-# @License : Apache License 2.0
+# @License : MIT
 
 # ======================================== 导入相关模块 =========================================
 

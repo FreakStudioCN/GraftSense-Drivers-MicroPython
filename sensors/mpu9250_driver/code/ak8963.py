@@ -92,6 +92,7 @@ class AK8963:
         scale: tuple = (1, 1, 1),
         debug: bool = False,
     ) -> None:
+        """初始化 AK8963 磁力计 / Initialize the AK8963 magnetometer."""
         if not hasattr(i2c, "readfrom_mem_into"):
             raise ValueError("i2c must provide readfrom_mem_into")
         if not hasattr(i2c, "writeto_mem"):
@@ -144,6 +145,11 @@ class AK8963:
             raise
 
     def calibrate(self, count: int = CALIBRATE_COUNT, delay: int = CALIBRATE_DELAY_MS) -> tuple:
+        """校准磁力计 / Calibrate the magnetometer.
+
+        Returns:
+            tuple: 偏移量与比例 / Offset and scale tuples.
+        """
         if not isinstance(count, int) or count <= 0:
             raise ValueError("count must be a positive int")
         if not isinstance(delay, int) or delay < 0:
@@ -194,13 +200,16 @@ class AK8963:
             raise
 
     def get_offset(self) -> tuple:
+        """获取磁力计偏移量 / Get magnetometer offsets."""
         return self._offset
 
     def get_scale(self) -> tuple:
+        """获取磁力计比例 / Get magnetometer scale values."""
         return self._scale
 
     @property
     def magnetic(self) -> tuple:
+        """读取磁场三轴数据 / Read three-axis magnetic data."""
         status = self._register_char(_ST1)
         if not status & _DRDY_BIT:
             raise RuntimeError("AK8963 data is not ready")
@@ -222,10 +231,12 @@ class AK8963:
 
     @property
     def adjustement(self) -> tuple:
+        """获取灵敏度调整值 / Get sensitivity adjustment values."""
         return self._adjustement
 
     @property
     def whoami(self) -> int:
+        """读取设备标识 / Read the device identifier."""
         return self._register_char(_WIA)
 
     def _register_three_shorts(self, register: int, buf: bytearray = _BUF6, retries: int = 2, delay_ms: int = 5) -> tuple:
@@ -272,6 +283,7 @@ class AK8963:
             print("[AK8963] %s" % msg)
 
     def deinit(self) -> None:
+        """释放驱动资源 / Release driver resources."""
         try:
             self._register_char(_CNTL1, _MODE_POWER_DOWN)
             time.sleep_ms(10)

@@ -2,8 +2,7 @@
   "name": "bno055_driver",
   "urls": [
     ["bno055.py", "code/bno055.py"],
-    ["bno055_base.py", "code/bno055_base.py"],
-    ["bno055_test.py", "code/bno055_test.py"]
+    ["bno055_base.py", "code/bno055_base.py"]
   ],
   "version": "1.0.0",
   "_comments": {

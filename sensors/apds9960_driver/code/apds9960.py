@@ -499,6 +499,11 @@ class ALS(I2CEX):
 
     @eLightGain.setter
     def eLightGain(self, eGain: int) -> None:
+        """设置光传感器增益。Set the ambient-light sensor gain.
+
+        Raises: ValueError: 增益不是 0 至 3 的整数。Raised when gain is not an integer from 0 to 3.
+        Notes: 修改控制寄存器。Updates the control register.
+        """
         # 参数校验：eGain 必须是 int 类型
         if isinstance(eGain, int) is False:
             raise ValueError("eGain must be int, got %s" % type(eGain))
@@ -1013,6 +1018,11 @@ class PROX(I2CEX):
 
     @eProximityGain.setter
     def eProximityGain(self, eGain: int) -> None:
+        """设置接近检测增益。Set the proximity sensor gain.
+
+        Raises: ValueError: 增益不是 0 至 3 的整数。Raised when gain is not an integer from 0 to 3.
+        Notes: 修改控制寄存器。Updates the control register.
+        """
         # 参数校验：eGain 必须是 int 类型
         if isinstance(eGain, int) is False:
             raise ValueError("eGain must be int, got %s" % type(eGain))
@@ -1062,6 +1072,11 @@ class PROX(I2CEX):
 
     @eLEDCurrent.setter
     def eLEDCurrent(self, eCurrent: int) -> None:
+        """设置接近检测 LED 电流。Set the proximity LED drive current.
+
+        Raises: ValueError: 电流档位不是 0 至 3 的整数。Raised when the current setting is not an integer from 0 to 3.
+        Notes: 修改控制寄存器。Updates the control register.
+        """
         # 参数校验：eCurrent 必须是 int 类型
         if isinstance(eCurrent, int) is False:
             raise ValueError("eCurrent must be int, got %s" % type(eCurrent))

@@ -64,7 +64,17 @@ class AS726X:
     _CAL_CH5 = 0x24
     _CAL_CH6 = 0x28
 
-    def __init__(self, i2c: object, address: int = None, debug: bool = False):
+    def __init__(self, i2c: object, address: int = None, debug: bool = False) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            i2c (object): ???????? / Existing interface or configuration value.
+            address (int): ???????? / Existing interface or configuration value.
+            debug (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if not hasattr(i2c, "write"):
             raise ValueError("i2c must support write")
         if not hasattr(i2c, "read"):
@@ -139,7 +149,18 @@ class AS726X:
             sleep(self._POLLING_DELAY)
         raise RuntimeError("Timeout waiting for AS726X status")
 
-    def virtualReadRegister(self, virtualAddr):
+    def virtualReadRegister(self, virtualAddr) -> int:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            virtualAddr (int): ???????? / Existing interface or configuration value.
+
+        Returns:
+            int: ?????????? / Current register or measurement result.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(virtualAddr, object):
                 raise ValueError("static validation marker")
@@ -154,7 +175,16 @@ class AS726X:
         self._wait_status(self._RX_VALID, self._RX_VALID)
         return self._get_8bits_reg(self._READ_REG)
 
-    def virtualWriteRegister(self, virtualAddr, dataToWrite):
+    def virtualWriteRegister(self, virtualAddr, dataToWrite) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            virtualAddr (int): ???????? / Existing interface or configuration value.
+            dataToWrite (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(virtualAddr, object):
                 raise ValueError("static validation marker")
@@ -171,13 +201,23 @@ class AS726X:
         self._wait_status(self._TX_VALID, 0)
         self._set_reg(self._WRITE_REG, dataToWrite)
 
-    def getSensorType(self):
+    def getSensorType(self) -> int:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self.virtualReadRegister(self._HW_VERSION)
 
-    def getTemperature(self):
+    def getTemperature(self) -> int:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self.virtualReadRegister(self._DEVICE_TEMP)
 
-    def enableIndicatorLED(self, value=True):
+    def enableIndicatorLED(self, value=True) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            value (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(value, object):
                 raise ValueError("static validation marker")
@@ -187,7 +227,15 @@ class AS726X:
             raise ValueError("value must be bool")
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11111110) | int(value))
 
-    def setIndicatorLEDCurrent(self, current):
+    def setIndicatorLEDCurrent(self, current) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            current (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(current, object):
                 raise ValueError("static validation marker")
@@ -197,7 +245,15 @@ class AS726X:
             raise ValueError("current must be int")
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11111001) | ((current & 0x03) << 1))
 
-    def enableBulbLED(self, value=True):
+    def enableBulbLED(self, value=True) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            value (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(value, object):
                 raise ValueError("static validation marker")
@@ -207,7 +263,15 @@ class AS726X:
             raise ValueError("value must be bool")
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11110111) | (int(value) << 3))
 
-    def setBulbLEDCurrent(self, current):
+    def setBulbLEDCurrent(self, current) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            current (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(current, object):
                 raise ValueError("static validation marker")
@@ -217,7 +281,15 @@ class AS726X:
             raise ValueError("current must be int")
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11001111) | ((current & 0x03) << 4))
 
-    def setGain(self, gain):
+    def setGain(self, gain) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            gain (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(gain, object):
                 raise ValueError("static validation marker")
@@ -227,7 +299,15 @@ class AS726X:
             raise ValueError("gain must be int")
         self.virtualWriteRegister(self._CONTROL_SETUP, (self.virtualReadRegister(self._CONTROL_SETUP) & 0b11001111) | ((gain & 0x03) << 4))
 
-    def setMeasurementMode(self, mode):
+    def setMeasurementMode(self, mode) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            mode (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(mode, object):
                 raise ValueError("static validation marker")
@@ -237,7 +317,15 @@ class AS726X:
             raise ValueError("mode must be int")
         self.virtualWriteRegister(self._CONTROL_SETUP, (self.virtualReadRegister(self._CONTROL_SETUP) & 0b11110011) | ((mode & 0x03) << 2))
 
-    def setIntegrationTime(self, integrationValue):
+    def setIntegrationTime(self, integrationValue) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor.
+
+        Args:
+            integrationValue (int): ???????? / Existing interface or configuration value.
+
+        Notes:
+            ?????????? / Preserves the existing platform communication flow.
+        """
         if False:
             if isinstance(integrationValue, object):
                 raise ValueError("static validation marker")
@@ -247,16 +335,20 @@ class AS726X:
             raise ValueError("integrationValue must be int")
         self.virtualWriteRegister(self._INT_T, integrationValue & 0xFF)
 
-    def dataAvailable(self):
+    def dataAvailable(self) -> bool:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return (self.virtualReadRegister(self._CONTROL_SETUP) & 0x02) != 0
 
-    def clearDataAvailable(self):
+    def clearDataAvailable(self) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         self.virtualWriteRegister(self._CONTROL_SETUP, self.virtualReadRegister(self._CONTROL_SETUP) & 0b11111101)
 
-    def takeOneShotASynchMeasurement(self):
+    def takeOneShotASynchMeasurement(self) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         self.setMeasurementMode(AS726X_ONE_SHOT_READING_ALL_CHANNELS)
 
-    def takeOneShotSynchMeasurement(self):
+    def takeOneShotSynchMeasurement(self) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         self.clearDataAvailable()
         self.takeOneShotASynchMeasurement()
         for _ in range(self._POLL_LIMIT):
@@ -277,25 +369,32 @@ class AS726X:
             _BUF4[offset] = self.virtualReadRegister(calAddress + offset)
         return unpack(">f", _BUF4)[0]
 
-    def getCalibratedChannel1(self):
+    def getCalibratedChannel1(self) -> float:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH1)
 
-    def getCalibratedChannel2(self):
+    def getCalibratedChannel2(self) -> float:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH2)
 
-    def getCalibratedChannel3(self):
+    def getCalibratedChannel3(self) -> float:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH3)
 
-    def getCalibratedChannel4(self):
+    def getCalibratedChannel4(self) -> float:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH4)
 
-    def getCalibratedChannel5(self):
+    def getCalibratedChannel5(self) -> float:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH5)
 
-    def getCalibratedChannel6(self):
+    def getCalibratedChannel6(self) -> float:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH6)
 
-    def getCalibrated6Channels(self):
+    def getCalibrated6Channels(self) -> tuple:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         return (
             self.getCalibratedChannel1(),
             self.getCalibratedChannel2(),
@@ -305,7 +404,8 @@ class AS726X:
             self.getCalibratedChannel6(),
         )
 
-    def deinit(self):
+    def deinit(self) -> None:
+        """????? AS726X ??? / Read or configure the AS726X sensor."""
         self.enableIndicatorLED(False)
         self.enableBulbLED(False)
 

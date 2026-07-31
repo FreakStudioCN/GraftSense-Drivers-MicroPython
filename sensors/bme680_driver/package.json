@@ -1,9 +1,7 @@
 {
   "name": "bme680",
   "urls": [
-    ["bme680.py", "code/bme680.py"],
-    ["test_i2c.py", "code/test_i2c.py"],
-    ["test_spi.py", "code/test_spi.py"]
+    ["bme680.py", "code/bme680.py"]
   ],
   "version": "1.0.0",
   "_comments": {

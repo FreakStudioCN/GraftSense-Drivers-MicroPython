@@ -1,8 +1,7 @@
 {
   "name": "sht11_driver",
   "urls": [
-    ["sht11.py", "code/sht11.py"],
-    ["main.py", "code/main.py"]
+    ["sht11.py", "code/sht11.py"]
   ],
   "version": "1.0.0",
   "_comments": {

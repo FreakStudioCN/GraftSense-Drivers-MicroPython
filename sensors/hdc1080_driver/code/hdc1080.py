@@ -143,7 +143,7 @@ class HDC1080:
         self._buf1 = bytearray(1)
         self._buf2 = bytearray(2)
 
-    def __enter__(self):
+    def __enter__(self) -> object:
         """
         上下文管理器入口
         Returns:

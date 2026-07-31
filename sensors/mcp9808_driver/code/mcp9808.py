@@ -554,76 +554,75 @@ class MCP9808(object):
 
     # ======================================== 私有方法 =========================================
 
+    def _send(self, buf) -> None:
+        """
+        通过 I2C 向传感器发送数据。
 
-def _send(self, buf) -> None:
-    """
-    通过 I2C 向传感器发送数据。
+        支持传入整数（单个寄存器地址）或 bytes/bytearray/list/tuple。
 
-    支持传入整数（单个寄存器地址）或 bytes/bytearray/list/tuple。
+        Args:
+            buf:
+                - int: 单个字节，范围为 0~255
+                - bytes/bytearray: 要发送的字节数据
+                - list/tuple: 由 0~255 整数组成的序列
 
-    Args:
-        buf:
-            - int: 单个字节，范围为 0~255
-            - bytes/bytearray: 要发送的字节数据
-            - list/tuple: 由 0~255 整数组成的序列
+        Raises:
+            TypeError: buf 类型或序列元素类型不正确
+            ValueError: 整数或序列元素超出单字节范围
+            RuntimeError: I2C 通信失败或不支持的平台
 
-    Raises:
-        TypeError: buf 类型或序列元素类型不正确
-        ValueError: 整数或序列元素超出单字节范围
-        RuntimeError: I2C 通信失败或不支持的平台
+        ==========================================
+        Send data to the sensor via I2C.
 
-    ==========================================
-    Send data to the sensor via I2C.
+        Args:
+            buf:
+                - int: Single byte in the range 0~255
+                - bytes/bytearray: Byte data to send
+                - list/tuple: Sequence of integers in the range 0~255
 
-    Args:
-        buf:
-            - int: Single byte in the range 0~255
-            - bytes/bytearray: Byte data to send
-            - list/tuple: Sequence of integers in the range 0~255
+        Raises:
+            TypeError: Invalid buf type or sequence item type
+            ValueError: Integer value is outside the byte range
+            RuntimeError: I2C communication failed or unsupported platform
+        """
 
-    Raises:
-        TypeError: Invalid buf type or sequence item type
-        ValueError: Integer value is outside the byte range
-        RuntimeError: I2C communication failed or unsupported platform
-    """
+        # 单独保存判断结果，并使用比较条件，
+        # 这样可以被仓库的 code_checker.py 正确识别
+        is_supported = isinstance(buf, (int, bytes, bytearray, list, tuple))
 
-    # 单独保存判断结果，并使用比较条件，
-    # 这样可以被仓库的 code_checker.py 正确识别
-    is_supported = isinstance(buf, (int, bytes, bytearray, list, tuple))
+        if is_supported is False:
+            raise TypeError("buf must be an int, bytes, bytearray, list, or tuple")
 
-    if is_supported is False:
-        raise TypeError("buf must be an int, bytes, bytearray, list, or tuple")
+        if isinstance(buf, int):
+            if not 0 <= buf <= 0xFF:
+                raise ValueError("Integer buf must be between 0 and 255")
 
-    if isinstance(buf, int):
-        if not 0 <= buf <= 0xFF:
-            raise ValueError("Integer buf must be between 0 and 255")
+            buf = bytes([buf])
 
-        buf = bytes([buf])
+        elif isinstance(buf, (list, tuple)):
+            for item in buf:
+                if not isinstance(item, int):
+                    raise TypeError("All buf items must be integers")
 
-    elif isinstance(buf, (list, tuple)):
-        for item in buf:
-            if not isinstance(item, int):
-                raise TypeError("All buf items must be integers")
+                if not 0 <= item <= 0xFF:
+                    raise ValueError("All buf items must be between 0 and 255")
 
-            if not 0 <= item <= 0xFF:
-                raise ValueError("All buf items must be between 0 and 255")
+            buf = bytes(buf)
 
-        buf = bytes(buf)
+        try:
+            # 标准 MicroPython I2C 接口
+            if hasattr(self._i2c, "writeto"):
+                self._i2c.writeto(self._addr, buf)
 
-    try:
-        # 标准 MicroPython I2C 接口
-        if hasattr(self._i2c, "writeto"):
-            self._i2c.writeto(self._addr, buf)
+            # PyBoard 兼容接口
+            elif hasattr(self._i2c, "send"):
+                self._i2c.send(buf, self._addr)
 
-        # PyBoard 兼容接口
-        elif hasattr(self._i2c, "send"):
-            self._i2c.send(buf, self._addr)
+            else:
+                raise RuntimeError("Invalid I2C object. Unknown MicroPython/platform?")
 
-        else:
-            raise RuntimeError("Invalid I2C object. Unknown MicroPython/platform?")
-
-    except OSError as e:
-        raise RuntimeError("I2C write failed") from e
+        except OSError as e:
+            raise RuntimeError("I2C write failed") from e
 
     def _recv(self, n: int) -> bytearray:
         """

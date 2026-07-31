@@ -88,6 +88,7 @@ class BNO055_BASE:
         sign=(0, 0, 0),
         debug=False,
     ) -> None:
+        """初始化 BNO055 基础驱动 / Initialize the BNO055 base driver."""
         if not hasattr(i2c, "readfrom_mem") or not hasattr(i2c, "writeto_mem"):
             raise ValueError("i2c must support readfrom_mem and writeto_mem")
         if not isinstance(address, int) or address < 0x00 or address > 0x7F:
@@ -127,6 +128,7 @@ class BNO055_BASE:
         self.reset()
 
     def reset(self) -> None:
+        """复位设备 / Reset the device."""
         self.mode(_CONFIG_MODE)
         try:
             self._write(_TRIGGER_REGISTER, 0x20)
@@ -141,7 +143,8 @@ class BNO055_BASE:
             self.orient()
         self.mode(_NDOF_MODE)
 
-    def scaled_tuple(self, addr, scale, buf=None, fmt="<hhh"):
+    def scaled_tuple(self, addr, scale, buf=None, fmt="<hhh") -> tuple:
+        """读取并缩放寄存器元组 / Read and scale a register tuple."""
         if not isinstance(addr, int) or addr < 0x00 or addr > 0xFF:
             raise ValueError("addr must be an 8-bit register address")
         if not isinstance(scale, (int, float)):
@@ -155,10 +158,12 @@ class BNO055_BASE:
         return tuple(value * scale for value in ustruct.unpack(fmt, self._readn(buf, addr)))
 
     def temperature(self) -> int:
+        """读取芯片温度 / Read the chip temperature."""
         value = self._read(_TEMP_REGISTER)
         return value if value < 128 else value - 256
 
     def cal_status(self, s=None) -> bytearray:
+        """读取校准状态 / Read the calibration status."""
         if s is not None and (not isinstance(s, bytearray) or len(s) < 4):
             raise ValueError("s must be a bytearray of length >= 4")
         if s is None:
@@ -171,10 +176,12 @@ class BNO055_BASE:
         return s
 
     def calibrated(self) -> bool:
+        """判断是否已校准 / Return whether the device is calibrated."""
         status = self.cal_status()
         return min(status[1:]) == 3 and status[0] > 0
 
     def sensor_offsets(self) -> bytearray:
+        """读取传感器偏移量 / Read sensor offsets."""
         last_mode = self._mode
         self.mode(_CONFIG_MODE)
         offsets = self._readn(bytearray(22), ACCEL_OFFSET_X_LSB_ADDR)
@@ -182,6 +189,7 @@ class BNO055_BASE:
         return offsets
 
     def set_offsets(self, buf) -> None:
+        """写入传感器偏移量 / Write sensor offsets."""
         if not isinstance(buf, (bytes, bytearray)) or len(buf) < 22:
             raise ValueError("buf must be bytes or bytearray of length >= 22")
         last_mode = self._mode
@@ -211,7 +219,8 @@ class BNO055_BASE:
         self._write(MAG_RADIUS_MSB_ADDR, buf[21])
         self.mode(last_mode)
 
-    def mode(self, new_mode=None):
+    def mode(self, new_mode=None) -> int:
+        """读取或设置运行模式 / Read or set the operating mode."""
         if new_mode is not None and (not isinstance(new_mode, int) or new_mode < 0x00 or new_mode > 0x0C):
             raise ValueError("new_mode must be a BNO055 mode value or None")
         old_mode = self._read(_MODE_REGISTER)
@@ -225,9 +234,11 @@ class BNO055_BASE:
         return old_mode
 
     def external_crystal(self) -> bool:
+        """读取外部晶体状态 / Read external-crystal status."""
         return bool(self._read(_TRIGGER_REGISTER) & 0x80)
 
     def deinit(self) -> None:
+        """释放驱动资源 / Release driver resources."""
         try:
             self._write(_POWER_REGISTER, _POWER_SUSPEND)
         except RuntimeError:

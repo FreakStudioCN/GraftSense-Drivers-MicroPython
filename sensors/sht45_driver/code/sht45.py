@@ -11,7 +11,7 @@ __author__ = "Jose D. Montoya"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
-# 导入相关模块
+# ======================================== 导入相关模块 =========================================
 
 import struct
 import time
@@ -24,7 +24,7 @@ except ImportError:
         return value
 
 
-# 全局变量
+# ======================================== 全局变量 ============================================
 
 _BUF6 = bytearray(6)
 
@@ -60,7 +60,7 @@ wat_config = {
 }
 
 
-# 功能函数
+# ======================================== 功能函数 ============================================
 
 
 def _crc8(buffer) -> int:
@@ -78,12 +78,30 @@ def _crc8(buffer) -> int:
     return crc & 0xFF
 
 
-# 自定义类
+# ======================================== 自定义类 ============================================
 
 
 class SHT45:
     """
+    SHT45 温湿度传感器驱动类。
+    Attributes:
+        _i2c (object): 外部传入的 I2C 总线实例。
+        _addr (int): 设备 I2C 地址。
+    Methods:
+        reset(): 发送软复位命令。
+        deinit(): 释放驱动持有的总线引用。
+    Notes:
+        - 使用外部传入的 I2C 总线，不在类内创建总线实例。
+    ==========================================
     SHT45 temperature and humidity sensor driver.
+    Attributes:
+        _i2c (object): Externally provided I2C bus instance.
+        _addr (int): Device I2C address.
+    Methods:
+        reset(): Send the soft-reset command.
+        deinit(): Release the held bus reference.
+    Notes:
+        - Requires an externally provided I2C bus instance.
     """
 
     DEFAULT_ADDR = const(0x44)
@@ -93,7 +111,34 @@ class SHT45:
         i2c: object,
         address: int = DEFAULT_ADDR,
         debug: bool = False,
-    ):
+    ) -> None:
+        """
+        初始化 SHT45 驱动。
+        Args:
+            i2c (object): 支持 writeto 和 readfrom_into 的 I2C 总线实例。
+            address (int): 设备 I2C 地址。
+            debug (bool): 是否启用调试标志。
+        Returns:
+            None。
+        Raises:
+            ValueError: 参数无效时抛出。
+        Notes:
+            - ISR-safe: 否。
+            - 不执行硬件通信。
+        ==========================================
+        Initialize the SHT45 driver.
+        Args:
+            i2c (object): I2C bus providing writeto and readfrom_into.
+            address (int): Device I2C address.
+            debug (bool): Whether to enable the debug flag.
+        Returns:
+            None.
+        Raises:
+            ValueError: Raised when a parameter is invalid.
+        Notes:
+            - ISR-safe: No.
+            - Does not perform hardware communication.
+        """
         if not hasattr(i2c, "writeto") or not hasattr(i2c, "readfrom_into"):
             raise ValueError("i2c must provide writeto and readfrom_into")
         if not isinstance(address, int):
@@ -112,18 +157,31 @@ class SHT45:
         self._heater_power = HEATER20mW
         self._heat_time = TEMP_0_1
 
-    def reset(self):
+    def reset(self) -> None:
+        """发送 SHT45 软复位命令。Send the SHT45 soft-reset command.
+
+        Notes: ISR-safe: No. 修改传感器硬件状态并保持既有延时。
+        """
         try:
             self._i2c.writeto(self._addr, bytes([_RESET]), False)
         except OSError as exc:
             raise RuntimeError("I2C write reset command failed") from exc
         time.sleep(0.1)
 
-    def deinit(self):
+    def deinit(self) -> None:
+        """释放驱动持有的 I2C 总线引用。Release the held I2C bus reference.
+
+        Notes: ISR-safe: No. 不释放调用方拥有的总线。
+        """
         self._i2c = None
 
     @property
-    def measurements(self):
+    def measurements(self) -> tuple:
+        """读取温湿度。Read temperature and relative humidity.
+
+        Returns: tuple: 温度（摄氏度）和相对湿度（%RH）。
+        Notes: ISR-safe: No. 发送测量命令并保持既有测量延时。
+        """
         try:
             self._i2c.writeto(self._addr, bytes([self._command]), False)
         except OSError as exc:
@@ -154,44 +212,87 @@ class SHT45:
         return temperature, humidity
 
     @property
-    def temperature(self):
+    def temperature(self) -> float:
+        """读取温度值。Read the temperature value.
+
+        Returns: float: 温度，单位为摄氏度。Temperature in Celsius.
+        Notes: ISR-safe: No. 读取新的传感器测量值。
+        """
         return self.measurements[0]
 
     @property
-    def relative_humidity(self):
+    def relative_humidity(self) -> float:
+        """读取相对湿度。Read the relative humidity.
+
+        Returns: float: 相对湿度，单位为 %RH。Relative humidity in %RH.
+        Notes: ISR-safe: No. 读取新的传感器测量值。
+        """
         return self.measurements[1]
 
     @property
-    def temperature_precision(self):
+    def temperature_precision(self) -> str:
+        """获取温度测量精度设置。Get the temperature measurement precision.
+
+        Returns: str: 当前精度名称。The current precision name.
+        Notes: ISR-safe: No. 不访问硬件。
+        """
         values = ("HIGH_PRECISION", "MEDIUM_PRECISION", "LOW_PRECISION")
         return values[self._temperature_precision]
 
     @temperature_precision.setter
-    def temperature_precision(self, value: int):
+    def temperature_precision(self, value: int) -> None:
+        """设置温度测量精度。Set the temperature measurement precision.
+
+        Args: value (int): 精度常量。Precision constant.
+        Raises: ValueError: 精度值无效。Raised when the precision value is invalid.
+        Notes: ISR-safe: No. 修改下一次测量使用的命令。
+        """
         if value not in temperature_precision_values:
             raise ValueError("invalid temperature_precision")
         self._temperature_precision = value
         self._command = temperature_precision_values[value]
 
     @property
-    def heater_power(self):
+    def heater_power(self) -> str:
+        """获取加热器功率设置。Get the heater power setting.
+
+        Returns: str: 当前功率名称。The current power name.
+        Notes: ISR-safe: No. 不访问硬件。
+        """
         values = ("HEATER200mW", "HEATER110mW", "HEATER20mW")
         return values[self._heater_power]
 
     @heater_power.setter
-    def heater_power(self, value: int):
+    def heater_power(self, value: int) -> None:
+        """设置加热器功率。Set the heater power.
+
+        Args: value (int): 功率常量。Power constant.
+        Raises: ValueError: 功率值无效。Raised when the power value is invalid.
+        Notes: ISR-safe: No. 修改下一次加热测量使用的命令。
+        """
         if value not in heater_power_values:
             raise ValueError("invalid heater_power")
         self._heater_power = value
         self._command = wat_config[value][self._heat_time]
 
     @property
-    def heat_time(self):
+    def heat_time(self) -> str:
+        """获取加热持续时间设置。Get the heater duration setting.
+
+        Returns: str: 当前持续时间名称。The current duration name.
+        Notes: ISR-safe: No. 不访问硬件。
+        """
         values = ("TEMP_1", "TEMP_0_1")
         return values[self._heat_time]
 
     @heat_time.setter
-    def heat_time(self, value: int):
+    def heat_time(self, value: int) -> None:
+        """设置加热持续时间。Set the heater duration.
+
+        Args: value (int): 持续时间常量。Duration constant.
+        Raises: ValueError: 持续时间值无效。Raised when the duration value is invalid.
+        Notes: ISR-safe: No. 修改下一次加热测量使用的命令。
+        """
         if value not in heat_time_values:
             raise ValueError("invalid heat_time")
         self._heat_time = value
@@ -200,6 +301,6 @@ class SHT45:
 
 SHT4X = SHT45
 
-# 初始化配置
+# ======================================== 初始化配置 ==========================================
 
-# 主程序
+# ========================================  主程序  ===========================================

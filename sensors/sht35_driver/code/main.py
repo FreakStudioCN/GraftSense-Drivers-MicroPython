@@ -139,6 +139,8 @@ def test_clock_stretch(sensor):
     print("  Clock stretch: T=%.2f C, H=%.2f %%RH" % (temp, humi))
 
 
+# ======================================== 自定义类 ============================================
+
 # ======================================== 初始化配置 ==========================================
 
 print("FreakStudio: Testing SHT35 temperature and humidity sensor driver")

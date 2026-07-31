@@ -50,6 +50,19 @@ class BMA2X2:
     _BW_MAP = {8: 0x08, 16: 0x09, 32: 0x0A, 64: 0x0B, 128: 0x0C, 256: 0x0D, 512: 0x0E, 1024: 0x0F}
 
     def __init__(self, i2c: object, addr: int, debug: bool = False) -> None:
+        """初始化 BMA2X2 加速度计 / Initialize the BMA2X2 accelerometer.
+
+        Args:
+            i2c (object): 提供寄存器读写的 I2C 总线 / I2C bus providing register access.
+            addr (int): 设备 I2C 地址 / Device I2C address.
+            debug (bool): 是否启用调试输出 / Whether to enable debug output.
+
+        Raises:
+            ValueError: 当总线或地址参数无效时 / If the bus or address is invalid.
+
+        Notes:
+            初始化期间会读取设备标识并写入默认配置 / Initialization reads the device ID and writes default configuration.
+        """
         if i2c is None:
             raise ValueError("i2c must not be None")
         if hasattr(i2c, "readfrom_mem") is False or hasattr(i2c, "writeto_mem") is False:
@@ -113,31 +126,37 @@ class BMA2X2:
         return raw * self._resolution / 1000
 
     def temperature(self) -> float:
+        """读取芯片温度 / Read the chip temperature."""
         raw = _twos_comp(self._read_reg(self._REG_TEMP, 1)[0], 8)
         return raw / 2.0 + 23.0
 
     def set_range(self, accel_range: int) -> None:
+        """设置加速度量程 / Set the acceleration range."""
         if accel_range not in self._RANGE_MAP:
             raise ValueError("invalid range, use 2, 4, 8 or 16")
         self._write_reg(self._REG_RANGE, bytes([self._RANGE_MAP[accel_range]]))
         self._resolution = self._RESOLUTION_MAP[accel_range]
 
     def get_range(self) -> int:
+        """获取加速度量程 / Get the acceleration range."""
         raw = self._read_reg(self._REG_RANGE, 1)[0] & 0x0F
         if raw not in self._RANGE_REVERSE:
             raise RuntimeError("invalid range register value 0x%02X" % raw)
         return self._RANGE_REVERSE[raw]
 
     def set_filter_bw(self, freq: int) -> None:
+        """设置滤波带宽 / Set the filter bandwidth."""
         if freq not in self._BW_MAP:
             raise ValueError("invalid filter bandwidth")
         self._write_reg(self._REG_BW, bytes([self._BW_MAP[freq]]))
 
     def get_filter_bw(self) -> int:
+        """获取滤波带宽 / Get the filter bandwidth."""
         raw = self._read_reg(self._REG_BW, 1)[0] & 0x0F
         return 2 ** (raw - 5)
 
     def compensation(self, active: bool = None) -> bool:
+        """启用或禁用补偿 / Enable or disable compensation."""
         if active is not None and not isinstance(active, bool):
             raise TypeError("active must be bool or None")
         saved_range = self.get_range()
@@ -161,18 +180,23 @@ class BMA2X2:
         return active
 
     def x(self) -> float:
+        """读取 X 轴加速度 / Read X-axis acceleration."""
         return self._read_accel(self._REG_X_LSB)
 
     def y(self) -> float:
+        """读取 Y 轴加速度 / Read Y-axis acceleration."""
         return self._read_accel(self._REG_Y_LSB)
 
     def z(self) -> float:
+        """读取 Z 轴加速度 / Read Z-axis acceleration."""
         return self._read_accel(self._REG_Z_LSB)
 
     def xyz(self) -> tuple:
+        """读取三轴加速度 / Read three-axis acceleration."""
         return (self.x(), self.y(), self.z())
 
     def deinit(self) -> None:
+        """释放驱动资源 / Release driver resources."""
         self._i2c = None
 
 

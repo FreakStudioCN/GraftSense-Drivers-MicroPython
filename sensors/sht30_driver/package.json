@@ -10,7 +10,7 @@
   },
   "description": "SHT30 temperature and humidity sensor I2C driver for MicroPython",
   "author": "Roberto Sánchez",
-  "license": "Apache License 2.0",
+  "license": "MIT",
   "chips": "all",
   "fw": "all"
 }

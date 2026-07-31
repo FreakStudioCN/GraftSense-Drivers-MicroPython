@@ -11,17 +11,17 @@ __author__ = "Jose D. Montoya"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
-# ======================================== Imports =========================================
+# ======================================== 导入相关模块 =========================================
 
 import struct
 import time
 
-# ======================================== Global variables =========================================
+# ======================================== 全局变量 ============================================
 
 _BUF4 = bytearray(4)
 _BUF6 = bytearray(6)
 
-# ======================================== Functions =========================================
+# ======================================== 功能函数 ============================================
 
 
 def _crc8(value: int) -> int:
@@ -41,7 +41,7 @@ def _crc8(value: int) -> int:
     return crc
 
 
-# ======================================== Custom classes =========================================
+# ======================================== 自定义类 ============================================
 
 
 class HTU31D:
@@ -60,6 +60,11 @@ class HTU31D:
     __slots__ = ("_i2c", "_addr", "_conversion_cmd", "_heater", "_debug")
 
     def __init__(self, i2c, address: int = I2C_DEFAULT_ADDR, debug: bool = False) -> None:
+        """初始化 HTU31D。Initialize HTU31D with an externally supplied I2C bus.
+
+        Raises: ValueError: I2C 对象、地址或 debug 参数无效。Raised when I2C, address, or debug is invalid.
+        Notes: 发送既有复位命令。Sends the existing reset command.
+        """
         if hasattr(i2c, "readfrom_into") is False:
             raise ValueError("i2c must provide readfrom_into")
         if hasattr(i2c, "writeto") is False:
@@ -115,6 +120,11 @@ class HTU31D:
 
     @heater.setter
     def heater(self, new_mode: bool) -> None:
+        """设置加热器状态。Set the heater state.
+
+        Raises: ValueError: 参数不是 bool。Raised when the value is not bool.
+        Notes: 向设备发送既有加热器命令。Sends the existing heater command.
+        """
         if isinstance(new_mode, bool) is False:
             raise ValueError("heater mode must be bool")
         self._send_cmd(self._CMD_HEATER_ON if new_mode else self._CMD_HEATER_OFF)
@@ -154,6 +164,11 @@ class HTU31D:
 
     @humidity_resolution.setter
     def humidity_resolution(self, value: str) -> None:
+        """设置湿度分辨率。Set the humidity resolution.
+
+        Raises: ValueError: 分辨率不受支持。Raised when the resolution is unsupported.
+        Notes: 更新下一次测量的命令配置。Updates the next measurement command configuration.
+        """
         if value not in self._HUMIDITY_RES:
             raise ValueError("humidity resolution must be a supported resolution")
         self._conversion_cmd = (self._conversion_cmd & 0xE7) | (self._HUMIDITY_RES.index(value) << 3)
@@ -165,6 +180,11 @@ class HTU31D:
 
     @temp_resolution.setter
     def temp_resolution(self, value: str) -> None:
+        """设置温度分辨率。Set the temperature resolution.
+
+        Raises: ValueError: 分辨率不受支持。Raised when the resolution is unsupported.
+        Notes: 更新下一次测量的命令配置。Updates the next measurement command configuration.
+        """
         if value not in self._TEMP_RES:
             raise ValueError("temperature resolution must be a supported resolution")
         self._conversion_cmd = (self._conversion_cmd & 0xF9) | (self._TEMP_RES.index(value) << 1)
@@ -196,6 +216,6 @@ class HTU31D:
             print("[HTU31D] %s" % msg)
 
 
-# ======================================== Initialization configuration =========================================
+# ======================================== 初始化配置 ==========================================
 
-# ======================================== Main program ===========================================
+# ========================================  主程序  ===========================================

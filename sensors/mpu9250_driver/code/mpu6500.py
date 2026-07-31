@@ -104,6 +104,7 @@ class MPU6500:
         gyro_offset: tuple = (0, 0, 0),
         debug: bool = False,
     ) -> None:
+        """初始化 MPU6500 传感器 / Initialize the MPU6500 sensor."""
         if not hasattr(i2c, "readfrom_mem_into"):
             raise ValueError("i2c must provide readfrom_mem_into")
         if not hasattr(i2c, "writeto_mem"):
@@ -143,6 +144,11 @@ class MPU6500:
             raise
 
     def calibrate(self, count: int = CALIBRATE_COUNT, delay: int = CALIBRATE_DELAY_MS) -> tuple:
+        """校准陀螺仪 / Calibrate the gyroscope.
+
+        Returns:
+            tuple: 陀螺仪偏移量 / Gyroscope offsets.
+        """
         if not isinstance(count, int) or count <= 0:
             raise ValueError("count must be a positive int")
         if not isinstance(delay, int) or delay < 0:
@@ -167,11 +173,13 @@ class MPU6500:
 
     @property
     def acceleration(self) -> tuple:
+        """读取加速度三轴数据 / Read three-axis acceleration."""
         xyz = self._register_three_shorts(_ACCEL_XOUT_H)
         return tuple(value / self._accel_so * self._accel_sf for value in xyz)
 
     @property
     def gyro(self) -> tuple:
+        """读取陀螺仪三轴数据 / Read three-axis gyroscope data."""
         ox, oy, oz = self._gyro_offset
         xyz = [value / self._gyro_so * self._gyro_sf for value in self._register_three_shorts(_GYRO_XOUT_H)]
         xyz[0] -= ox
@@ -181,11 +189,13 @@ class MPU6500:
 
     @property
     def temperature(self) -> float:
+        """读取温度 / Read the temperature."""
         temp = self._register_short(_TEMP_OUT_H)
         return ((temp - _TEMP_OFFSET) / _TEMP_SO) + _TEMP_OFFSET
 
     @property
     def whoami(self) -> int:
+        """读取设备标识 / Read the device identifier."""
         return self._register_char(_WHO_AM_I)
 
     def _register_short(self, register: int, value=None, buf: bytearray = _BUF2, retries: int = 2, delay_ms: int = 5):
@@ -271,6 +281,7 @@ class MPU6500:
             print("[MPU6500] %s" % msg)
 
     def deinit(self) -> None:
+        """释放驱动资源 / Release driver resources."""
         try:
             self._register_char(_PWR_MGMT_1, 0x40)
             self._log("deinit: sleep mode")

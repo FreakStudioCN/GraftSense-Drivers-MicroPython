@@ -41,6 +41,15 @@ class CBits:
         register_width: int = 1,
         lsb_first: bool = True,
     ) -> None:
+        """创建寄存器位域描述符 / Create a register bit-field descriptor.
+
+        Args:
+            num_bits (int): 位域宽度 / Bit-field width.
+            register_address (int): 寄存器地址 / Register address.
+            start_bit (int): 起始位 / Starting bit.
+            register_width (int): 寄存器宽度 / Register width.
+            lsb_first (bool): 是否低位优先 / Whether bits are LSB-first.
+        """
         if not isinstance(num_bits, int):
             raise ValueError("num_bits must be int, got %s" % type(num_bits))
         if not isinstance(register_address, int):
@@ -121,6 +130,15 @@ class RegisterStruct:
     """I2C register descriptor using struct format strings."""
 
     def __init__(self, register_address: int, form: str) -> None:
+        """创建寄存器结构描述符 / Create a structured-register descriptor.
+
+        Args:
+            register_address (int): 寄存器地址 / Register address.
+            form (str): ``ustruct`` 格式字符串 / ``ustruct`` format string.
+
+        Raises:
+            ValueError: 当地址或格式类型无效时 / If an argument type is invalid.
+        """
         if not isinstance(register_address, int):
             raise ValueError("register_address must be int, got %s" % type(register_address))
         if not isinstance(form, str):

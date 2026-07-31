@@ -62,6 +62,19 @@ class BMM050:
     _OVERFLOW_R = micropython.const(0)
 
     def __init__(self, i2c: object, addr: int, debug: bool = False) -> None:
+        """初始化 BMM050 磁力计 / Initialize the BMM050 magnetometer.
+
+        Args:
+            i2c (object): 提供寄存器读写的 I2C 总线 / I2C bus providing register access.
+            addr (int): 设备 I2C 地址 / Device I2C address.
+            debug (bool): 是否启用调试输出 / Whether to enable debug output.
+
+        Raises:
+            ValueError: 当总线或地址参数无效时 / If the bus or address is invalid.
+
+        Notes:
+            初始化期间会读取校准数据并配置设备 / Initialization reads calibration data and configures the device.
+        """
         if i2c is None:
             raise ValueError("i2c must not be None")
         if hasattr(i2c, "readfrom_mem") is False or hasattr(i2c, "writeto_mem") is False:
@@ -170,15 +183,19 @@ class BMM050:
         return self._compensate_z(raw_z, raw_r)
 
     def x(self) -> float:
+        """读取 X 轴磁场 / Read X-axis magnetic field."""
         return self._read_mag(0)
 
     def y(self) -> float:
+        """读取 Y 轴磁场 / Read Y-axis magnetic field."""
         return self._read_mag(1)
 
     def z(self) -> float:
+        """读取 Z 轴磁场 / Read Z-axis magnetic field."""
         return self._read_mag(2)
 
     def xyz(self) -> tuple:
+        """读取三轴磁场 / Read three-axis magnetic field."""
         raw_x, raw_y, raw_z, raw_r = self._read_raw_xyzr()
         return (
             self._compensate_xy(raw_x, raw_r, self._dig_x1, self._dig_x2),
@@ -187,9 +204,11 @@ class BMM050:
         )
 
     def hall(self) -> float:
+        """读取霍尔电阻数据 / Read Hall-resistance data."""
         return self._read_raw_xyzr()[3]
 
     def deinit(self) -> None:
+        """释放驱动资源 / Release driver resources."""
         try:
             self._write_reg(self._REG_POWER_CTRL, b"\x00")
         except Exception:

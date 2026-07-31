@@ -133,7 +133,7 @@ class SHT25:
 
     # ---------- 公共方法 ----------
 
-    def temperature_c(self):
+    def temperature_c(self) -> float:
         """
         读取摄氏温度。
         Args:
@@ -162,7 +162,7 @@ class SHT25:
         # 根据 SHT25 数据手册公式转换为摄氏温度
         return -46.85 + 175.72 * raw / 65536.0
 
-    def temperature_f(self):
+    def temperature_f(self) -> float:
         """
         读取华氏温度。
         Args:
@@ -189,7 +189,7 @@ class SHT25:
         # 调用模块级温度转换函数
         return _celsius_to_fahrenheit(self.temperature_c())
 
-    def humidity(self):
+    def humidity(self) -> float:
         """
         读取相对湿度。
         Args:
@@ -222,7 +222,7 @@ class SHT25:
         # 钳位至物理有效范围
         return _clamp_rh(rh)
 
-    def read_user_register(self):
+    def read_user_register(self) -> int:
         """
         读取用户寄存器。
         Args:
@@ -252,7 +252,7 @@ class SHT25:
         except OSError as e:
             raise RuntimeError("I2C read user register failed") from e
 
-    def write_user_register(self, value):
+    def write_user_register(self, value: int) -> None:
         """
         写入用户寄存器。
         Args:
@@ -289,7 +289,7 @@ class SHT25:
         except OSError as e:
             raise RuntimeError("I2C write user register failed") from e
 
-    def reset(self):
+    def reset(self) -> None:
         """
         软复位传感器。
         Args:
@@ -323,7 +323,7 @@ class SHT25:
 
     # ---------- 兼容旧接口 ----------
 
-    def getTemperature(self):
+    def getTemperature(self) -> float:
         """
         兼容旧接口，读取摄氏温度。
         ==========================================
@@ -331,7 +331,7 @@ class SHT25:
         """
         return self.temperature_c()
 
-    def getHumidity(self):
+    def getHumidity(self) -> float:
         """
         兼容旧接口，读取相对湿度。
         ==========================================
@@ -341,7 +341,7 @@ class SHT25:
 
     # ---------- 资源释放 ----------
 
-    def deinit(self):
+    def deinit(self) -> None:
         """
         释放传感器资源。
         Args:

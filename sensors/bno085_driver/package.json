@@ -1,9 +1,7 @@
 {
   "name": "bno085_driver",
   "urls": [
-    ["bno085.py", "code/bno085.py"],
-    ["demo_compass.py", "code/demo_compass.py"],
-    ["demo_heading.py", "code/demo_heading.py"]
+    ["bno085.py", "code/bno085.py"]
   ],
   "version": "1.0.0",
   "_comments": {

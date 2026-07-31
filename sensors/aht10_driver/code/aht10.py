@@ -72,7 +72,7 @@ class AHT10:
 
     __slots__ = ("_i2c", "_address", "_debug")
 
-    def __init__(self, i2c, address: int = AHT10_I2CADDR_DEFAULT, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = AHT10_I2CADDR_DEFAULT, debug: bool = False) -> None:
         """
         初始化 AHT10 传感器
         Args:
@@ -126,7 +126,7 @@ class AHT10:
         if not self.initialize():
             raise RuntimeError("Could not initialize AHT10")
 
-    def reset(self):
+    def reset(self) -> None:
         """
         软复位传感器
         Returns:
@@ -155,7 +155,7 @@ class AHT10:
         # 等待复位完成
         utime.sleep_ms(20)
 
-    def initialize(self):
+    def initialize(self) -> bool:
         """
         初始化传感器并返回校准状态
         Returns:
@@ -189,7 +189,7 @@ class AHT10:
         return bool(self.status & self.AHT10_STATUS_CALIBRATED)
 
     @property
-    def status(self):
+    def status(self) -> int:
         """
         读取传感器状态字节
         Returns:
@@ -213,7 +213,7 @@ class AHT10:
         return _BUF6[0]
 
     @property
-    def relative_humidity(self):
+    def relative_humidity(self) -> float:
         """
         读取相对湿度
         Returns:
@@ -241,7 +241,7 @@ class AHT10:
         return (raw_humidity * 100) / 0x100000
 
     @property
-    def temperature(self):
+    def temperature(self) -> float:
         """
         读取温度值
         Returns:
@@ -268,7 +268,7 @@ class AHT10:
         # 转换为摄氏度
         return ((raw_temperature * 200.0) / 0x100000) - 50
 
-    def deinit(self):
+    def deinit(self) -> None:
         """
         释放硬件资源
         Returns:

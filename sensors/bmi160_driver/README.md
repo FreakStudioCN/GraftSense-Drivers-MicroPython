@@ -66,8 +66,8 @@
 ## 文件结构
 
 ```
-micropython_bmi160/
-├── __init__.py       # 包初始化文件
+code/
+├── __init__.py       # 可选包初始化文件
 ├── bmi160.py         # BMI160 核心驱动
 ├── i2c_helpers.py    # I2C 通信辅助类（CBits / RegisterStruct）
 ├── main.py           # 测试示例代码
@@ -78,7 +78,7 @@ micropython_bmi160/
 
 | 文件 | 说明 |
 |------|------|
-| `__init__.py` | 包初始化文件，标识 `micropython_bmi160` 为 Python 包 |
+| `__init__.py` | 可选包初始化文件，保留发布文件集完整性 |
 | `bmi160.py` | BMI160 核心驱动类，包含 `BMI160` 类及全部寄存器常量、属性与方法 |
 | `i2c_helpers.py` | I2C 通信辅助类，提供 `CBits`（位域描述符）和 `RegisterStruct`（寄存器结构描述符），基于 Adafruit_CircuitPython_Register 适配 MicroPython |
 | `main.py` | 完整测试示例，含 I2C 扫描、WHO_AM_I 验证、定时数据打印、配置遍历及异常场景测试 |
@@ -87,10 +87,10 @@ micropython_bmi160/
 
 ### 1. 复制文件
 
-将 `micropython_bmi160/` 目录整体上传至 MicroPython 设备的 `/lib/` 目录：
+将 `code/` 目录中的驱动文件上传至 MicroPython 设备的 `/lib/` 目录：
 
 ```
-/lib/micropython_bmi160/
+/lib/
 ├── __init__.py
 ├── bmi160.py
 └── i2c_helpers.py
@@ -110,7 +110,7 @@ micropython_bmi160/
 
 ```python
 from machine import Pin, I2C
-from micropython_bmi160.bmi160 import BMI160
+from bmi160 import BMI160
 
 # 初始化 I2C 总线
 i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
@@ -143,8 +143,8 @@ print("Temp (°C): %.2f" % temp)
 
 import time
 from machine import Pin, I2C
-from micropython_bmi160.bmi160 import BMI160
-from micropython_bmi160.bmi160 import (
+from bmi160 import BMI160
+from bmi160 import (
     ACCEL_RANGE_2G, ACCEL_RANGE_4G, ACCEL_RANGE_8G, ACCEL_RANGE_16G,
     BANDWIDTH_25, BANDWIDTH_50, BANDWIDTH_100, BANDWIDTH_200,
     BANDWIDTH_400, BANDWIDTH_800, BANDWIDTH_1600, BANDWIDTH_3200,

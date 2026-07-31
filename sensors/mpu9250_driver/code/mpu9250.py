@@ -48,6 +48,7 @@ class MPU9250:
     __slots__ = ("mpu6500", "ak8963")
 
     def __init__(self, i2c: object, mpu6500: object = None, ak8963: object = None) -> None:
+        """初始化组合 MPU9250 驱动 / Initialize the combined MPU9250 driver."""
         if not hasattr(i2c, "readfrom_mem_into"):
             raise ValueError("i2c must provide readfrom_mem_into")
         if not hasattr(i2c, "writeto_mem"):
@@ -67,25 +68,31 @@ class MPU9250:
 
     @property
     def acceleration(self) -> tuple:
+        """读取加速度三轴数据 / Read three-axis acceleration."""
         return self.mpu6500.acceleration
 
     @property
     def gyro(self) -> tuple:
+        """读取陀螺仪三轴数据 / Read three-axis gyroscope data."""
         return self.mpu6500.gyro
 
     @property
     def temperature(self) -> float:
+        """读取温度 / Read the temperature."""
         return self.mpu6500.temperature
 
     @property
     def magnetic(self) -> tuple:
+        """读取磁场三轴数据 / Read three-axis magnetic data."""
         return self.ak8963.magnetic
 
     @property
     def whoami(self) -> int:
+        """读取设备标识 / Read the device identifier."""
         return self.mpu6500.whoami
 
     def deinit(self) -> None:
+        """释放组合驱动资源 / Release combined-driver resources."""
         try:
             if hasattr(self, "ak8963") and hasattr(self.ak8963, "deinit"):
                 self.ak8963.deinit()

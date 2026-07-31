@@ -241,6 +241,14 @@ class BME680:
 
     @pressure_oversample.setter
     def pressure_oversample(self, sample_rate: int) -> None:
+        """设置压力过采样率 / Set the pressure oversampling rate.
+
+        Args:
+            sample_rate (int): 支持的过采样率 / A supported oversampling rate.
+
+        Raises:
+            ValueError: 当采样率不受支持时 / If the rate is unsupported.
+        """
         if sample_rate not in _BME680_SAMPLERATES:
             raise ValueError("Invalid sample_rate: %s" % sample_rate)
         if sample_rate in _BME680_SAMPLERATES:
@@ -255,6 +263,14 @@ class BME680:
 
     @humidity_oversample.setter
     def humidity_oversample(self, sample_rate: int) -> None:
+        """设置湿度过采样率 / Set the humidity oversampling rate.
+
+        Args:
+            sample_rate (int): 支持的过采样率 / A supported oversampling rate.
+
+        Raises:
+            ValueError: 当采样率不受支持时 / If the rate is unsupported.
+        """
         if sample_rate not in _BME680_SAMPLERATES:
             raise ValueError("Invalid sample_rate: %s" % sample_rate)
         if sample_rate in _BME680_SAMPLERATES:
@@ -269,6 +285,14 @@ class BME680:
 
     @temperature_oversample.setter
     def temperature_oversample(self, sample_rate: int) -> None:
+        """设置温度过采样率 / Set the temperature oversampling rate.
+
+        Args:
+            sample_rate (int): 支持的过采样率 / A supported oversampling rate.
+
+        Raises:
+            ValueError: 当采样率不受支持时 / If the rate is unsupported.
+        """
         if sample_rate not in _BME680_SAMPLERATES:
             raise ValueError("Invalid sample_rate: %s" % sample_rate)
         if sample_rate in _BME680_SAMPLERATES:
@@ -283,6 +307,14 @@ class BME680:
 
     @filter_size.setter
     def filter_size(self, size: int) -> None:
+        """设置 IIR 滤波器大小 / Set the IIR filter size.
+
+        Args:
+            size (int): 支持的滤波器大小 / A supported filter size.
+
+        Raises:
+            ValueError: 当大小不受支持时 / If the size is unsupported.
+        """
         if size not in _BME680_FILTERSIZES:
             raise ValueError("Invalid size: %s" % size)
         if size in _BME680_FILTERSIZES:

@@ -77,6 +77,7 @@ class BNO055(BNO055_BASE):
         sign=(0, 0, 0),
         debug=False,
     ) -> None:
+        """初始化 BNO055 驱动 / Initialize the BNO055 driver."""
         self._argcheck(sign, "Sign")
         if [value for value in sign if value not in (0, 1)]:
             raise ValueError("Sign values must be 0 or 1")
@@ -94,6 +95,7 @@ class BNO055(BNO055_BASE):
         self.z = 0
 
     def orient(self) -> None:
+        """应用轴方向配置 / Apply the axis orientation configuration."""
         if self.transpose != (0, 1, 2):
             axes = self.transpose
             self._write(_AXIS_MAP_CONFIG, (axes[2] << 4) + (axes[1] << 2) + axes[0])
@@ -101,7 +103,19 @@ class BNO055(BNO055_BASE):
             signs = self.sign
             self._write(_AXIS_MAP_SIGN, signs[2] + (signs[1] << 1) + (signs[0] << 2))
 
-    def config(self, dev, value=None):
+    def config(self, dev, value=None) -> tuple:
+        """读写传感器配置 / Read or update a sensor configuration.
+
+        Args:
+            dev (int): 配置目标 / Configuration target.
+            value: 可选的新配置值 / Optional replacement value.
+
+        Returns:
+            tuple: 修改前的配置 / The previous configuration.
+
+        Raises:
+            ValueError: 当目标或配置值无效时 / If an argument is invalid.
+        """
         if dev not in (ACC, MAG, GYRO):
             raise ValueError("Unknown device")
         if isinstance(value, tuple):
@@ -118,6 +132,7 @@ class BNO055(BNO055_BASE):
         return self._int_to_tuple(dev, old_value)
 
     def iget(self, reg) -> None:
+        """读取内部寄存器值 / Read an internal register value."""
         if not isinstance(reg, int) or reg < 0x00 or reg > 0xFF:
             raise ValueError("reg must be an 8-bit register address")
         if reg == QUAT_DATA:
@@ -138,6 +153,7 @@ class BNO055(BNO055_BASE):
         self.z = self._bytes_toint(buf[index + 4], buf[index + 5])
 
     def deinit(self) -> None:
+        """释放驱动资源 / Release driver resources."""
         super().deinit()
 
     @classmethod
