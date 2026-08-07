@@ -46,7 +46,7 @@ LED_50MA = 1
 LED_25MA = 2
 LED_12_5MA = 3
 
-# I2C 总线实例（在初始化配置区实例化）
+# I2C 总线实例（稍后创建）
 i2c = None
 apds9960 = None
 

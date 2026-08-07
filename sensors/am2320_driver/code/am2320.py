@@ -11,6 +11,7 @@ __author__ = "Mike Causer"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
+# ======================================== 导入相关模块 =========================================
 import micropython
 from time import sleep_ms
 from micropython import const
@@ -18,7 +19,6 @@ from micropython import const
 # 预留 ISR 调试异常缓冲区
 micropython.alloc_emergency_exception_buf(100)
 
-# ======================================== 导入相关模块 =========================================
 # （模块导入已在文件头部完成，此处保留分区标注）
 
 # ======================================== 全局变量 ============================================

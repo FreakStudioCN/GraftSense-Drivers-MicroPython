@@ -6,6 +6,7 @@
 # @Description : 测试 ADT7410 高精度数字温度传感器驱动类
 # @License : MIT
 
+# ======================================== 导入相关模块 =========================================
 import time
 from machine import Pin, I2C
 from adt7410 import (
@@ -20,9 +21,22 @@ from adt7410 import (
     COMP_ENABLED,
 )
 
-# ======================================== 导入相关模块 =========================================
 
-# ======================================== 功能函数 ============================================
+# ======================================== 全局变量 ============================================
+
+# I2C 引脚配置（请根据实际接线修改）
+I2C_SCL_PIN = 5
+I2C_SDA_PIN = 4
+
+# ADT7410 参数
+I2C_ADDR = 0x48
+WHOAMI_REG = 0x0B
+EXPECTED_DEVICE_ID = 0xCB
+
+# 打印间隔（毫秒）
+PRINT_INTERVAL = 2000
+
+# ======================================== 初始化配置 ==========================================
 
 
 def print_temperature_detail(adt):
@@ -98,7 +112,12 @@ def test_comparator_mode(adt):
     adt.hysteresis_temperature = 2
     print(
         "Thresholds set: High=%d C, Low=%d C, Critical=%d C, Hysteresis=%d C"
-        % (adt.high_temperature, adt.low_temperature, adt.critical_temperature, adt.hysteresis_temperature)
+        % (
+            adt.high_temperature,
+            adt.low_temperature,
+            adt.critical_temperature,
+            adt.hysteresis_temperature,
+        )
     )
 
     # 启用比较器模式
@@ -268,21 +287,7 @@ def i2c_scan_and_verify(i2c, expected_addr):
 
 # ======================================== 自定义类 ============================================
 
-# ======================================== 全局变量 ============================================
-
-# I2C 引脚配置（请根据实际接线修改）
-I2C_SCL_PIN = 5
-I2C_SDA_PIN = 4
-
-# ADT7410 参数
-I2C_ADDR = 0x48
-WHOAMI_REG = 0x0B
-EXPECTED_DEVICE_ID = 0xCB
-
-# 打印间隔（毫秒）
-PRINT_INTERVAL = 2000
-
-# ======================================== 初始化配置 ==========================================
+# ======================================== 功能函数 ============================================
 
 # 上电稳定等待
 time.sleep(3)

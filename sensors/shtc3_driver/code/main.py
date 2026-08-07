@@ -26,7 +26,7 @@ I2C_FREQ = 100000
 SENSOR_ADDR = 0x70
 EXPECTED_SENSOR_ID = 0x0807  # SHTC3 产品 ID（Sensirion 数据手册）
 
-# 传感器实例（初始化配置区中赋值）
+# 传感器实例（稍后赋值）
 sensor = None
 
 # 主循环采样间隔（毫秒）

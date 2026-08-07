@@ -11,9 +11,9 @@ __author__ = "Kevin Houlihan"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"
 
+# ======================================== 导入相关模块 =========================================
 import micropython
 
-# ======================================== 导入相关模块 =========================================
 from _tmp102 import Tmp102
 from _tmp102 import _set_bit_for_boolean
 from shutdown import _SHUTDOWN_BIT
