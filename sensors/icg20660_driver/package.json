@@ -1,0 +1,17 @@
+{
+  "name": "icg20660_driver",
+  "urls": [
+    ["icg20660.py", "code/icg20660.py"],
+    ["i2c_helpers.py", "code/i2c_helpers.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library to control the TDK ICG20660 6-axis gyroscope/accelerometer sensor via I2C",
+  "author": "Jose D. Montoya",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

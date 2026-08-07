@@ -1,0 +1,16 @@
+{
+  "name": "lm75a_driver",
+  "urls": [
+    ["lm75a.py", "code/lm75a.py"]
+  ],
+  "version": "0.0.3",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library for the NXP LM75A I2C digital temperature sensor and thermal watchdog",
+  "author": "Mike Causer",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
