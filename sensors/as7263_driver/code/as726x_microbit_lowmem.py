@@ -65,14 +65,14 @@ class AS726X:
     _CAL_CH6 = 0x28
 
     def __init__(self, i2c: object, address: int = None) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            i2c (object): ???????? / Existing interface or configuration value.
-            address (int): ???????? / Existing interface or configuration value.
+            i2c (object): 现有接口或配置值 / Existing interface or configuration value.
+            address (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if not hasattr(i2c, "write"):
             raise ValueError("i2c must support write")
@@ -145,16 +145,16 @@ class AS726X:
         raise RuntimeError("Timeout waiting for AS726X status")
 
     def virtualReadRegister(self, virtualAddr) -> int:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            virtualAddr (int): ???????? / Existing interface or configuration value.
+            virtualAddr (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Returns:
-            int: ?????????? / Current register or measurement result.
+            int: 当前寄存器或测量结果 / Current register or measurement result.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(virtualAddr, object):
@@ -171,14 +171,14 @@ class AS726X:
         return self._get_8bits_reg(self._READ_REG)
 
     def virtualWriteRegister(self, virtualAddr, dataToWrite) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            virtualAddr (int): ???????? / Existing interface or configuration value.
-            dataToWrite (int): ???????? / Existing interface or configuration value.
+            virtualAddr (int): 现有接口或配置值 / Existing interface or configuration value.
+            dataToWrite (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(virtualAddr, object):
@@ -197,16 +197,16 @@ class AS726X:
         self._set_reg(self._WRITE_REG, dataToWrite)
 
     def readVReg(self, vAddr) -> int:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            vAddr (int): ???????? / Existing interface or configuration value.
+            vAddr (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Returns:
-            int: ?????????? / Current register or measurement result.
+            int: 当前寄存器或测量结果 / Current register or measurement result.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(vAddr, object):
@@ -218,14 +218,14 @@ class AS726X:
         return self.virtualReadRegister(vAddr)
 
     def writeVReg(self, vAddr, data) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            vAddr (int): ???????? / Existing interface or configuration value.
-            data (int): ???????? / Existing interface or configuration value.
+            vAddr (int): 现有接口或配置值 / Existing interface or configuration value.
+            data (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(vAddr, object):
@@ -241,21 +241,21 @@ class AS726X:
         self.virtualWriteRegister(vAddr, data)
 
     def getSensorType(self) -> int:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self.virtualReadRegister(self._HW_VERSION)
 
     def getTemperature(self) -> int:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self.virtualReadRegister(self._DEVICE_TEMP)
 
     def enableIndicatorLED(self, value=True) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            value (int): ???????? / Existing interface or configuration value.
+            value (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(value, object):
@@ -267,13 +267,13 @@ class AS726X:
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11111110) | int(value))
 
     def setIndicatorLEDCurrent(self, current) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            current (int): ???????? / Existing interface or configuration value.
+            current (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(current, object):
@@ -285,13 +285,13 @@ class AS726X:
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11111001) | ((current & 0x03) << 1))
 
     def enableBulbLED(self, value=True) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            value (int): ???????? / Existing interface or configuration value.
+            value (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(value, object):
@@ -303,13 +303,13 @@ class AS726X:
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11110111) | (int(value) << 3))
 
     def setBulbLEDCurrent(self, current) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            current (int): ???????? / Existing interface or configuration value.
+            current (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(current, object):
@@ -321,13 +321,13 @@ class AS726X:
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11001111) | ((current & 0x03) << 4))
 
     def setGain(self, gain) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            gain (int): ???????? / Existing interface or configuration value.
+            gain (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(gain, object):
@@ -339,13 +339,13 @@ class AS726X:
         self.virtualWriteRegister(self._CONTROL_SETUP, (self.virtualReadRegister(self._CONTROL_SETUP) & 0b11001111) | ((gain & 0x03) << 4))
 
     def setMeasurementMode(self, mode) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            mode (int): ???????? / Existing interface or configuration value.
+            mode (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(mode, object):
@@ -357,13 +357,13 @@ class AS726X:
         self.virtualWriteRegister(self._CONTROL_SETUP, (self.virtualReadRegister(self._CONTROL_SETUP) & 0b11110011) | ((mode & 0x03) << 2))
 
     def setIntegrationTime(self, integrationValue) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor.
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
-            integrationValue (int): ???????? / Existing interface or configuration value.
+            integrationValue (int): 现有接口或配置值 / Existing interface or configuration value.
 
         Notes:
-            ?????????? / Preserves the existing platform communication flow.
+            保持现有平台通信流程 / Preserves the existing platform communication flow.
         """
         if False:
             if isinstance(integrationValue, object):
@@ -375,19 +375,19 @@ class AS726X:
         self.virtualWriteRegister(self._INT_T, integrationValue & 0xFF)
 
     def dataAvailable(self) -> bool:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return (self.virtualReadRegister(self._CONTROL_SETUP) & 0x02) != 0
 
     def clearDataAvailable(self) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         self.virtualWriteRegister(self._CONTROL_SETUP, self.virtualReadRegister(self._CONTROL_SETUP) & 0b11111101)
 
     def takeOneShotASynchMeasurement(self) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         self.setMeasurementMode(AS726X_ONE_SHOT_READING_ALL_CHANNELS)
 
     def takeOneShotSynchMeasurement(self) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         self.clearDataAvailable()
         self.takeOneShotASynchMeasurement()
         for _ in range(self._POLL_LIMIT):
@@ -409,31 +409,31 @@ class AS726X:
         return unpack(">f", _BUF4)[0]
 
     def getCalibratedChannel1(self) -> float:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH1)
 
     def getCalibratedChannel2(self) -> float:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH2)
 
     def getCalibratedChannel3(self) -> float:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH3)
 
     def getCalibratedChannel4(self) -> float:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH4)
 
     def getCalibratedChannel5(self) -> float:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH5)
 
     def getCalibratedChannel6(self) -> float:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self._getCalibratedValue(self._CAL_CH6)
 
     def getCalibrated6Channels(self) -> tuple:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return (
             self.getCalibratedChannel1(),
             self.getCalibratedChannel2(),
@@ -444,7 +444,7 @@ class AS726X:
         )
 
     def deinit(self) -> None:
-        """????? AS726X ??? / Read or configure the AS726X sensor."""
+        """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         self.enableIndicatorLED(False)
         self.enableBulbLED(False)
 
