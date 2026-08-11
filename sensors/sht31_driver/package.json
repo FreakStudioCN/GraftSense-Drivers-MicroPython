@@ -1,0 +1,16 @@
+{
+  "name": "sht31_driver",
+  "urls": [
+    ["sht31.py", "code/sht31.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "SHT31 temperature and humidity sensor driver for MicroPython via I2C",
+  "author": "Kai Fricke",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
