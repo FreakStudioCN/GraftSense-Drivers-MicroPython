@@ -130,6 +130,10 @@ class TMP1075:
         # 参数校验：address 范围检查
         if address < 0x08 or address > 0x77:
             raise ValueError("address out of I2C range: 0x%02X" % address)
+        if not isinstance(check, bool):
+            raise ValueError("check must be bool")
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool")
 
         self._i2c = i2c
         self._address = address

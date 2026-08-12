@@ -78,6 +78,20 @@ class BNO055(BNO055_BASE):
         debug: object = False,
     ) -> None:
         """初始化 BNO055 驱动 / Initialize the BNO055 driver."""
+        if not hasattr(i2c, "readfrom_mem"):
+            raise ValueError("i2c must provide readfrom_mem")
+        if not hasattr(i2c, "readfrom_mem_into"):
+            raise ValueError("i2c must provide readfrom_mem_into")
+        if not hasattr(i2c, "writeto_mem"):
+            raise ValueError("i2c must provide writeto_mem")
+        if not isinstance(address, int):
+            raise ValueError("address must be int")
+        if address < 0x00 or address > 0x7F:
+            raise ValueError("address must be a 7-bit I2C address")
+        if not isinstance(crystal, bool):
+            raise ValueError("crystal must be bool")
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool")
         self._argcheck(sign, "Sign")
         if [value for value in sign if value not in (0, 1)]:
             raise ValueError("Sign values must be 0 or 1")

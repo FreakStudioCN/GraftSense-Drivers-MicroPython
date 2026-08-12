@@ -195,6 +195,8 @@ class SHT35:
             raise ValueError("addr must be int, got %s" % type(addr))
         if addr < 0 or addr > 127:
             raise ValueError("addr must be 0~127, got %d" % addr)
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool")
 
         self._i2c = i2c
         self._addr = addr

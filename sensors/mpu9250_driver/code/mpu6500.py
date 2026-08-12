@@ -115,6 +115,14 @@ class MPU6500:
             raise ValueError("accel_fs must be int")
         if not isinstance(gyro_fs, int):
             raise ValueError("gyro_fs must be int")
+        if isinstance(accel_sf, bool) or not isinstance(accel_sf, (int, float)):
+            raise ValueError("accel_sf must be int or float")
+        if accel_sf <= 0:
+            raise ValueError("accel_sf must be greater than 0")
+        if isinstance(gyro_sf, bool) or not isinstance(gyro_sf, (int, float)):
+            raise ValueError("gyro_sf must be int or float")
+        if gyro_sf <= 0:
+            raise ValueError("gyro_sf must be greater than 0")
         if not isinstance(gyro_offset, tuple) or len(gyro_offset) != 3:
             raise ValueError("gyro_offset must be a tuple of three numbers")
         if not isinstance(debug, bool):

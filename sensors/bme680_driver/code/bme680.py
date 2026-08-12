@@ -680,6 +680,10 @@ class BME680_I2C(BME680):
             raise ValueError("address must be an I2C address from 0x00 to 0x7F")
         if isinstance(debug, bool) is False:
             raise ValueError("debug must be bool")
+        if isinstance(refresh_rate, bool) or not isinstance(refresh_rate, int):
+            raise ValueError("refresh_rate must be int, got %s" % type(refresh_rate))
+        if refresh_rate <= 0:
+            raise ValueError("refresh_rate must be > 0, got %d" % refresh_rate)
         # 参数校验 — I2C 实例
         if hasattr(i2c, "readfrom_mem_into") is False:
             raise ValueError("i2c must be an I2C instance")
@@ -827,6 +831,10 @@ class BME680_SPI(BME680):
             raise ValueError("cs must provide value")
         if isinstance(debug, bool) is False:
             raise ValueError("debug must be bool")
+        if isinstance(refresh_rate, bool) or not isinstance(refresh_rate, int):
+            raise ValueError("refresh_rate must be int, got %s" % type(refresh_rate))
+        if refresh_rate <= 0:
+            raise ValueError("refresh_rate must be > 0, got %d" % refresh_rate)
         # 参数校验 — SPI 实例
         if hasattr(spi, "readinto") is False:
             raise ValueError("spi must be an SPI instance")

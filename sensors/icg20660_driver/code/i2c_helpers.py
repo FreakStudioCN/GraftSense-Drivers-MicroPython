@@ -85,6 +85,8 @@ class CBits:
             raise ValueError("start_bit must be a non-negative int")
         if not isinstance(register_width, int) or register_width < 1:
             raise ValueError("register_width must be a positive int")
+        if not isinstance(lsb_first, bool):
+            raise ValueError("lsb_first must be bool")
 
         self._bit_mask = ((1 << num_bits) - 1) << start_bit
         self._register = register_address

@@ -375,6 +375,8 @@ class VCNL4010:
             raise ValueError("i2c must have writeto_mem method")
         if not isinstance(address, int):
             raise ValueError("address must be int, got %s" % type(address))
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool")
 
         self._i2c = i2c
         self._address = address

@@ -156,6 +156,12 @@ class MCP9808(object):
             raise ValueError("I2C object needed as argument!")
         if isinstance(i2c, I2C) is False:
             raise ValueError("i2c must be an I2C instance, got %s" % type(i2c))
+        if not isinstance(addr, int):
+            raise ValueError("addr must be int")
+        if addr < 0x00 or addr > 0x7F:
+            raise ValueError("addr must be in range 0x00 to 0x7F")
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool")
 
         self._i2c = i2c
         self._addr = addr

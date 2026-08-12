@@ -177,6 +177,8 @@ class ICG20660:
             raise ValueError("address must be int, got %s" % type(address))
         if address < 0 or address > 0x7F:
             raise ValueError("address must be 0~0x7F, got 0x%02X" % address)
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool")
 
         self._i2c = i2c
         self._address = address

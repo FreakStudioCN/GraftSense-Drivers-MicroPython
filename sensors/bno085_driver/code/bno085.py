@@ -79,9 +79,11 @@ class BNO085:
             raise ValueError("timeout must be int or float")
         if timeout <= 0:
             raise ValueError("timeout must be greater than zero")
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool")
         self._uart = uart
         self._timeout = float(timeout)
-        self._debug = bool(debug)
+        self._debug = debug
 
     def set_timeout(self, timeout: float) -> None:
         """
