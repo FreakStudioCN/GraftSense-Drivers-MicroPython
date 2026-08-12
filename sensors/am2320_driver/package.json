@@ -1,0 +1,16 @@
+{
+  "name": "am2320_driver",
+  "urls": [
+    ["am2320.py", "code/am2320.py"]
+  ],
+  "version": "1.1.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "Aosong AM2320 temperature and humidity sensor I2C driver for MicroPython",
+  "author": "Mike Causer",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

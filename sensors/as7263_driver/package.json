@@ -1,0 +1,18 @@
+{
+    "name": "as7263_driver",
+    "urls": [
+        ["as726x.py", "code/as726x.py"],
+        ["as726x_microbit.py", "code/as726x_microbit.py"],
+        ["as726x_microbit_lowmem.py", "code/as726x_microbit_lowmem.py"]
+    ],
+    "version": "0.7.0",
+    "_comments": {
+        "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+        "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+    },
+    "description": "AS726X (AS7262/AS7263) 6-channel nano spectrometer I2C driver for MicroPython",
+    "author": "Roberto Colistete Jr.",
+    "license": "MIT",
+    "chips": "all",
+    "fw": "all"
+}

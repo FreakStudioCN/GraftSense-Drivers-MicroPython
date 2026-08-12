@@ -1,0 +1,16 @@
+{
+  "name": "hdc1080_driver",
+  "urls": [
+    ["hdc1080.py", "code/hdc1080.py"]
+  ],
+  "version": "1.0.1",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library to control HDC1080 temperature and humidity sensor via I2C",
+  "author": "Mike Causer",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

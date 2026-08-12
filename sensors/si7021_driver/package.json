@@ -1,0 +1,16 @@
+{
+  "name": "si7021_driver",
+  "urls": [
+    ["si7021.py", "code/si7021.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "MicroPython I2C driver for Si7021 humidity and temperature sensor",
+  "author": "Chris Balmer",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

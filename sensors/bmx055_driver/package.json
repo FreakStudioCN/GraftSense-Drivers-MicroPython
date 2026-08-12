@@ -1,0 +1,20 @@
+{
+  "name": "bmx055_driver",
+  "urls": [
+    ["bmx055.py", "code/bmx055.py"],
+    ["bma2x2.py", "code/bma2x2.py"],
+    ["bmg160.py", "code/bmg160.py"],
+    ["bmm050.py", "code/bmm050.py"],
+    ["attitude.py", "code/attitude.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library for Bosch BMX055 9-axis IMU (BMA2X2 + BMG160 + BMM050)",
+  "author": "Sebastian Plamauer",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
