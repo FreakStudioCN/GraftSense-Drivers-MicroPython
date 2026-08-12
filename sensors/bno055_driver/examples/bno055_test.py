@@ -28,7 +28,7 @@ DEFAULT_INTERVAL = 1
 # ======================================== 功能函数 ============================================
 
 
-def create_i2c(i2c_id=DEFAULT_I2C_ID, sda_pin=DEFAULT_SDA_PIN, scl_pin=DEFAULT_SCL_PIN, soft=False):
+def create_i2c(i2c_id: object = DEFAULT_I2C_ID, sda_pin: object = DEFAULT_SDA_PIN, scl_pin: object = DEFAULT_SCL_PIN, soft: object = False) -> object:
     if not isinstance(i2c_id, int) or i2c_id < 0:
         raise ValueError("i2c_id must be a non-negative integer")
     if not isinstance(sda_pin, int) or not isinstance(scl_pin, int):
@@ -40,7 +40,7 @@ def create_i2c(i2c_id=DEFAULT_I2C_ID, sda_pin=DEFAULT_SDA_PIN, scl_pin=DEFAULT_S
     return machine.I2C(i2c_id, sda=machine.Pin(sda_pin), scl=machine.Pin(scl_pin), freq=100000)
 
 
-def print_sample(imu):
+def print_sample(imu: object) -> None:
     if not hasattr(imu, "euler") or not hasattr(imu, "quaternion"):
         raise ValueError("imu must be a BNO055 instance")
     print("Calibration required: sys %d gyro %d accel %d mag %d" % tuple(imu.cal_status()))
@@ -54,7 +54,7 @@ def print_sample(imu):
     print("Quat      w %5.3f    x %5.3f     y %5.3f     z %5.3f" % imu.quaternion())
 
 
-def run_test(sample_count=10, interval=DEFAULT_INTERVAL, soft=False):
+def run_test(sample_count: object = 10, interval: object = DEFAULT_INTERVAL, soft: object = False) -> None:
     if not isinstance(sample_count, int) or sample_count < 1:
         raise ValueError("sample_count must be a positive integer")
     if not isinstance(interval, (int, float)) or interval <= 0:

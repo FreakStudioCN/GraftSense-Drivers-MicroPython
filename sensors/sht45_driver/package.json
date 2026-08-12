@@ -1,5 +1,5 @@
 {
-  "name": "micropython_sht4x",
+  "name": "sht45_driver",
   "urls": [
     ["__init__.py", "code/__init__.py"],
     ["sht45.py", "code/sht45.py"]

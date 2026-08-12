@@ -82,11 +82,11 @@ class BNO055_BASE:
     def __init__(
         self,
         i2c: object,
-        address=0x28,
-        crystal=True,
-        transpose=(0, 1, 2),
-        sign=(0, 0, 0),
-        debug=False,
+        address: int = 0x28,
+        crystal: object = True,
+        transpose: object = (0, 1, 2),
+        sign: object = (0, 0, 0),
+        debug: object = False,
     ) -> None:
         """初始化 BNO055 基础驱动 / Initialize the BNO055 base driver."""
         if not hasattr(i2c, "readfrom_mem") or not hasattr(i2c, "writeto_mem"):
@@ -143,7 +143,7 @@ class BNO055_BASE:
             self.orient()
         self.mode(_NDOF_MODE)
 
-    def scaled_tuple(self, addr, scale, buf=None, fmt="<hhh") -> tuple:
+    def scaled_tuple(self, addr: int, scale: object, buf: object = None, fmt: object = "<hhh") -> tuple:
         """读取并缩放寄存器元组 / Read and scale a register tuple."""
         if not isinstance(addr, int) or addr < 0x00 or addr > 0xFF:
             raise ValueError("addr must be an 8-bit register address")
@@ -162,7 +162,7 @@ class BNO055_BASE:
         value = self._read(_TEMP_REGISTER)
         return value if value < 128 else value - 256
 
-    def cal_status(self, s=None) -> bytearray:
+    def cal_status(self, s: object = None) -> bytearray:
         """读取校准状态 / Read the calibration status."""
         if s is not None and (not isinstance(s, bytearray) or len(s) < 4):
             raise ValueError("s must be a bytearray of length >= 4")
@@ -188,7 +188,7 @@ class BNO055_BASE:
         self.mode(last_mode)
         return offsets
 
-    def set_offsets(self, buf) -> None:
+    def set_offsets(self, buf: object) -> None:
         """写入传感器偏移量 / Write sensor offsets."""
         if not isinstance(buf, (bytes, bytearray)) or len(buf) < 22:
             raise ValueError("buf must be bytes or bytearray of length >= 22")
@@ -219,7 +219,7 @@ class BNO055_BASE:
         self._write(MAG_RADIUS_MSB_ADDR, buf[21])
         self.mode(last_mode)
 
-    def mode(self, new_mode=None) -> int:
+    def mode(self, new_mode: object = None) -> int:
         """读取或设置运行模式 / Read or set the operating mode."""
         if new_mode is not None and (not isinstance(new_mode, int) or new_mode < 0x00 or new_mode > 0x0C):
             raise ValueError("new_mode must be a BNO055 mode value or None")
@@ -244,7 +244,7 @@ class BNO055_BASE:
         except RuntimeError:
             pass
 
-    def _read(self, memaddr, buf=None) -> int:
+    def _read(self, memaddr: object, buf: object = None) -> int:
         if not isinstance(memaddr, int) or memaddr < 0x00 or memaddr > 0xFF:
             raise ValueError("memaddr must be an 8-bit register address")
         if buf is not None and (not isinstance(buf, bytearray) or len(buf) < 1):
@@ -260,7 +260,7 @@ class BNO055_BASE:
             raise RuntimeError("I2C read failed at reg 0x%02X" % memaddr)
         return buf[0]
 
-    def _write(self, memaddr, data, buf=None) -> None:
+    def _write(self, memaddr: object, data: object, buf: object = None) -> None:
         if not isinstance(memaddr, int) or memaddr < 0x00 or memaddr > 0xFF:
             raise ValueError("memaddr must be an 8-bit register address")
         if not isinstance(data, int) or data < 0x00 or data > 0xFF:
@@ -275,7 +275,7 @@ class BNO055_BASE:
         except OSError:
             raise RuntimeError("I2C write failed at reg 0x%02X" % memaddr)
 
-    def _readn(self, buf, memaddr) -> bytearray:
+    def _readn(self, buf: object, memaddr: object) -> bytearray:
         if not isinstance(buf, bytearray) or len(buf) < 1:
             raise ValueError("buf must be a non-empty bytearray")
         if not isinstance(memaddr, int) or memaddr < 0x00 or memaddr > 0xFF:
@@ -290,7 +290,7 @@ class BNO055_BASE:
             raise RuntimeError("I2C read failed at reg 0x%02X, len=%d" % (memaddr, len(buf)))
         return buf
 
-    def _log(self, msg) -> None:
+    def _log(self, msg: str) -> None:
         if msg is None or not isinstance(msg, str):
             raise ValueError("msg must be str")
         if self._debug:

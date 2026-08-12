@@ -65,8 +65,8 @@ BNO085 是 BOSCH 出品的九轴 IMU 传感器，集成加速度计、陀螺仪�
 bno085_driver/
 ├── bno085.py          # 核心驱动
 ├── main.py            # 测试示例
-├── demo_compass.py    # 指南针演示脚本
-├── demo_heading.py    # 航向数据演示脚本
+├── examples/demo_compass.py    # 指南针演示脚本
+├── examples/demo_heading.py    # 航向数据演示脚本
 ├── LICENSE            # MIT 许可证
 └── README.md          # 说明文档
 ```
@@ -77,8 +77,8 @@ bno085_driver/
 |------|------|
 | `bno085.py` | BNO085 传感器 UART-RVC 模式核心驱动，提供 `BNO085` 类和 `BNO085TimeoutError` 异常 |
 | `main.py` | 规范化测试脚本，含三类场景覆盖（正常参数 / 边界参数 / 异常参数） |
-| `demo_compass.py` | 指南针方向演示，将偏航角转换为 8 方位（N/NE/E/SE/S/SW/W/NW）并显示偏移量 |
-| `demo_heading.py` | 航向角原始数据演示，实时打印三轴角度和加速度值 |
+| `examples/demo_compass.py` | 指南针方向演示，将偏航角转换为 8 方位（N/NE/E/SE/S/SW/W/NW）并显示偏移量 |
+| `examples/demo_heading.py` | 航向角原始数据演示，实时打印三轴角度和加速度值 |
 
 ## 快速开始
 

@@ -40,7 +40,7 @@ bme = None
 # ======================================== 功能函数 ============================================
 
 
-def test_boundary_params():
+def test_boundary_params() -> None:
     """
     测试边界参数：最大/最小过采样率和滤波器
     注释自动调用，可 REPL 手动执行
@@ -75,7 +75,7 @@ def test_boundary_params():
     print("--- Boundary test done, defaults restored ---")
 
 
-def test_exception_params():
+def test_exception_params() -> None:
     """
     测试异常参数：非法过采样率/滤波器值应正确抛出 ValueError
     注释自动调用，可 REPL 手动执行

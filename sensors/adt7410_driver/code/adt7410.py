@@ -170,7 +170,7 @@ class ADT7410:
     # 内存优化：预声明实例属性槽位
     __slots__ = ("_i2c", "_address", "_debug")
 
-    def __init__(self, i2c, address: int = I2C_DEFAULT_ADDR, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = I2C_DEFAULT_ADDR, debug: bool = False) -> None:
         """
         初始化 ADT7410 传感器驱动实例
 
@@ -275,11 +275,11 @@ class ADT7410:
         self._i2c = None
         self._debug = False
 
-    def __enter__(self):
+    def __enter__(self) -> object:
         """上下文管理器入口"""
         return self
 
-    def __exit__(self, *args) -> None:
+    def __exit__(self, *args: object) -> None:
         """上下文管理器出口：自动释放资源"""
         self.deinit()
 

@@ -33,7 +33,7 @@ _ALERT_BIT = micropython.const(0x20)
 # ======================================== 功能函数 ============================================
 
 
-def _extend_class():
+def _extend_class() -> object:
     """
     向 Tmp102 类注入温控器/告警相关常量、方法与属性
     Notes:

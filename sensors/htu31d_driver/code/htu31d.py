@@ -59,7 +59,7 @@ class HTU31D:
     _TEMP_RES = ("0.040", "0.025", "0.016", "0.012")
     __slots__ = ("_i2c", "_addr", "_conversion_cmd", "_heater", "_debug")
 
-    def __init__(self, i2c, address: int = I2C_DEFAULT_ADDR, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = I2C_DEFAULT_ADDR, debug: bool = False) -> None:
         """初始化 HTU31D。Initialize HTU31D with an externally supplied I2C bus.
 
         Raises: ValueError: I2C 对象、地址或 debug 参数无效。Raised when I2C, address, or debug is invalid.
@@ -81,10 +81,10 @@ class HTU31D:
         self._debug = debug
         self.reset()
 
-    def __enter__(self):
+    def __enter__(self) -> object:
         return self
 
-    def __exit__(self, *args) -> None:
+    def __exit__(self, *args: object) -> None:
         self.deinit()
 
     def reset(self) -> None:

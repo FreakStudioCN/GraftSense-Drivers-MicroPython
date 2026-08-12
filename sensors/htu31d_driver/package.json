@@ -1,8 +1,8 @@
 {
   "name": "htu31d_driver",
   "urls": [
-    ["/__init__.py", "code/__init__.py"],
-    ["/htu31d.py", "code/htu31d.py"]
+    ["__init__.py", "code/__init__.py"],
+    ["htu31d.py", "code/htu31d.py"]
   ],
   "version": "1.0.0",
   "_comments": {

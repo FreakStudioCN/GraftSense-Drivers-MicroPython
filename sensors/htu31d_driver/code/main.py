@@ -24,49 +24,43 @@ SAMPLE_INTERVAL_MS = 2000
 
 # ======================================== 自定义类 ============================================
 
-# 初始化配置
+# ======================================== 初始化配置 ==========================================
 
+sensor = None
 
-def main() -> None:
-    """Run the RP2040 HTU31D hardware test until interrupted."""
-    sensor = None
-    try:
-        # Hardware setup
+# Hardware setup
 
-        time.sleep(3)
-        print("FreakStudio: HTU31D temperature and humidity sensor driver test")
-        i2c = I2C(I2C_ID, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQUENCY)
-        print("Scanning I2C bus...")
-        devices = i2c.scan()
-        print("Found devices: %s" % [hex(device) for device in devices])
-        if I2C_ADDRESS not in devices:
-            raise RuntimeError("HTU31D not found at 0x%02X" % I2C_ADDRESS)
-        sensor = HTU31D(i2c, address=I2C_ADDRESS, debug=False)
-        print("Serial number: %s" % sensor.serial_number[0])
-        print("Humidity resolution: %s" % sensor.humidity_resolution)
-        print("Temperature resolution: %s" % sensor.temp_resolution)
-        last_print_time = time.ticks_ms()
+time.sleep(3)
+print("FreakStudio: HTU31D temperature and humidity sensor driver test")
+i2c = I2C(I2C_ID, scl=Pin(I2C_SCL_PIN), sda=Pin(I2C_SDA_PIN), freq=I2C_FREQUENCY)
+print("Scanning I2C bus...")
+devices = i2c.scan()
+print("Found devices: %s" % [hex(device) for device in devices])
+if I2C_ADDRESS not in devices:
+    raise RuntimeError("HTU31D not found at 0x%02X" % I2C_ADDRESS)
+sensor = HTU31D(i2c, address=I2C_ADDRESS, debug=False)
+print("Serial number: %s" % sensor.serial_number[0])
+print("Humidity resolution: %s" % sensor.humidity_resolution)
+print("Temperature resolution: %s" % sensor.temp_resolution)
+last_print_time = time.ticks_ms()
 
-        # ========================================  主程序 ===========================================
+# ========================================  主程序 ===========================================
 
-        while True:
-            current_time = time.ticks_ms()
-            if time.ticks_diff(current_time, last_print_time) >= SAMPLE_INTERVAL_MS:
-                temperature, humidity = sensor.measurements
-                print("Temperature: %.2f C | Humidity: %.2f %%RH" % (temperature, humidity))
-                last_print_time = current_time
-            time.sleep_ms(100)
-    except KeyboardInterrupt:
-        print("Program interrupted by user")
-    except OSError as error:
-        print("Hardware communication error: %s" % error)
-    except RuntimeError as error:
-        print("Runtime error: %s" % error)
-    finally:
-        if sensor is not None:
-            sensor.deinit()
-        print("Program exited")
-
-
-if __name__ == "__main__":
-    main()
+try:
+    while True:
+        current_time = time.ticks_ms()
+        if time.ticks_diff(current_time, last_print_time) >= SAMPLE_INTERVAL_MS:
+            temperature, humidity = sensor.measurements
+            print("Temperature: %.2f C | Humidity: %.2f %%RH" % (temperature, humidity))
+            last_print_time = current_time
+        time.sleep_ms(100)
+except KeyboardInterrupt:
+    print("Program interrupted by user")
+except OSError as error:
+    print("Hardware communication error: %s" % error)
+except RuntimeError as error:
+    print("Runtime error: %s" % error)
+finally:
+    if sensor is not None:
+        sensor.deinit()
+    print("Program exited")

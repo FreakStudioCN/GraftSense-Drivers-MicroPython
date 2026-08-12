@@ -1,5 +1,5 @@
 {
-  "name": "micropython_adt7410",
+  "name": "adt7410_driver",
   "urls": [
     ["__init__.py", "code/__init__.py"],
     ["adt7410.py", "code/adt7410.py"],

@@ -19,7 +19,7 @@ try:
     from micropython import const
 except ImportError:
 
-    def const(x):
+    def const(x: object) -> object:
         return x
 
 

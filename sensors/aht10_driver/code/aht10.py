@@ -291,7 +291,7 @@ class AHT10:
     # 私有方法
     # -------------------------------------------------------------------
 
-    def _read_to_buffer(self):
+    def _read_to_buffer(self) -> None:
         """
         从传感器读取 6 字节数据到全局缓冲区 _BUF6
         Raises:
@@ -310,7 +310,7 @@ class AHT10:
         except OSError as e:
             raise RuntimeError("I2C read failed") from e
 
-    def _trigger_measurement(self):
+    def _trigger_measurement(self) -> None:
         """
         发送测量触发命令
         Raises:
@@ -333,7 +333,7 @@ class AHT10:
         except OSError as e:
             raise RuntimeError("I2C write failed during trigger") from e
 
-    def _wait_for_idle(self):
+    def _wait_for_idle(self) -> None:
         """
         轮询等待传感器空闲（忙碌位清零）
         Notes:
@@ -349,7 +349,7 @@ class AHT10:
         while self.status & self.AHT10_STATUS_BUSY:
             utime.sleep_ms(5)
 
-    def _perform_measurement(self):
+    def _perform_measurement(self) -> None:
         """
         执行完整测量流程：触发 → 等待空闲 → 读取数据
         Notes:
@@ -363,7 +363,7 @@ class AHT10:
         self._wait_for_idle()
         self._read_to_buffer()
 
-    def _log(self, msg):
+    def _log(self, msg: str) -> None:
         """
         调试日志输出
         Args:

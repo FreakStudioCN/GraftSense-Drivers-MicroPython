@@ -33,7 +33,7 @@ ICG20660_EXPECTED_ID = 0x91
 
 
 # ======================================== 功能函数 ============================================
-def print_device_status(icg):
+def print_device_status(icg: object) -> None:
     """打印设备当前配置状态（低频，默认注释调用，可 REPL 手动查看）"""
     print("--- Device Status ---")
     print("Gyro DLPF mode: %s" % icg.gyro_dlpf_mode)
@@ -44,7 +44,7 @@ def print_device_status(icg):
     print("---------------------")
 
 
-def test_gyro_full_scale_boundary(icg):
+def test_gyro_full_scale_boundary(icg: object) -> None:
     """测试陀螺仪满量程边界值（边界参数场景，默认注释，可 REPL 手动调用）"""
     print("=== Boundary: Gyro Full Scale ===")
     # 最小满量程 125 DPS
@@ -57,7 +57,7 @@ def test_gyro_full_scale_boundary(icg):
     icg.gyro_full_scale = FS_125_DPS
 
 
-def test_accel_range_boundary(icg):
+def test_accel_range_boundary(icg: object) -> None:
     """测试加速度计量程边界值（边界参数场景，默认注释，可 REPL 手动调用）"""
     print("=== Boundary: Accel Range ===")
     # 最小量程 2G
@@ -70,7 +70,7 @@ def test_accel_range_boundary(icg):
     icg.acceleration_range = RANGE_2G
 
 
-def test_data_rate_boundary(icg):
+def test_data_rate_boundary(icg: object) -> None:
     """测试采样率边界值（边界参数场景，默认注释，可 REPL 手动调用）"""
     print("=== Boundary: Data Rate ===")
     # 最高采样率 500 Hz
@@ -83,7 +83,7 @@ def test_data_rate_boundary(icg):
     icg.data_rate = 100.0
 
 
-def test_exception_params(icg):
+def test_exception_params(icg: object) -> None:
     """测试异常参数处理（异常参数场景，默认注释，可 REPL 手动调用）"""
     print("=== Exception: Invalid Parameters ===")
 
@@ -112,7 +112,7 @@ def test_exception_params(icg):
         print("Caught expected: %s" % e)
 
 
-def test_dlpf_modes(icg):
+def test_dlpf_modes(icg: object) -> None:
     """测试 DLPF 模式切换（模式切换，默认注释，可 REPL 手动调用）"""
     print("=== DLPF Mode Switch ===")
     # 禁用 DLPF

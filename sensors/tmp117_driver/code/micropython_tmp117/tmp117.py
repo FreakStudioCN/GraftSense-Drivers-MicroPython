@@ -145,7 +145,7 @@ class TMP117:
 
     __slots__ = ("_i2c", "_address", "_valid_range", "_debug")
 
-    def __init__(self, i2c, address: int = I2C_DEFAULT_ADDR, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = I2C_DEFAULT_ADDR, debug: bool = False) -> None:
         """
         初始化 TMP117 传感器
 

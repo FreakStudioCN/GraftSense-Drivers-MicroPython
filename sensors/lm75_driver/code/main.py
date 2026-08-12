@@ -27,7 +27,7 @@ last_print_time = 0
 # ======================================== 功能函数 ============================================
 
 
-def format_i2c_addresses(addresses):
+def format_i2c_addresses(addresses: object) -> object:
     """Return a printable list of I2C addresses."""
     return ["0x%02X" % address for address in addresses]
 

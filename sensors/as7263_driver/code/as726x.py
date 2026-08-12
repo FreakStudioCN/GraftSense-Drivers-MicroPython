@@ -17,7 +17,7 @@ try:
     from micropython import const
 except ImportError:
 
-    def const(value):
+    def const(value: object) -> object:
         return value
 
 
@@ -102,14 +102,14 @@ _BUF4 = bytearray(4)
 # ======================================== 功能函数 ============================================
 
 
-def _check_byte(value, name):
+def _check_byte(value: object, name: str) -> None:
     if not isinstance(value, int):
         raise ValueError("%s must be int" % name)
     if value < 0 or value > 255:
         raise ValueError("%s must be 0~255" % name)
 
 
-def _read_physical_register(i2c, addr, register):
+def _read_physical_register(i2c: object, addr: int, register: int) -> object:
     try:
         i2c.readfrom_mem_into(addr, register, _BUF1)
         return _BUF1[0]
@@ -117,7 +117,7 @@ def _read_physical_register(i2c, addr, register):
         raise RuntimeError("I2C read failed at reg 0x%02X" % register)
 
 
-def _write_physical_register(i2c, addr, register, value):
+def _write_physical_register(i2c: object, addr: int, register: int, value: object) -> None:
     try:
         _BUF1[0] = value & 0xFF
         i2c.writeto_mem(addr, register, _BUF1)
@@ -125,7 +125,7 @@ def _write_physical_register(i2c, addr, register, value):
         raise RuntimeError("I2C write failed at reg 0x%02X" % register)
 
 
-def _wait_for_status(i2c, addr, mask, value, message):
+def _wait_for_status(i2c: object, addr: int, mask: int, value: object, message: str) -> object:
     start = ticks_ms()
     while True:
         status = _read_physical_register(i2c, addr, AS726X_SLAVE_STATUS_REG)
@@ -136,7 +136,7 @@ def _wait_for_status(i2c, addr, mask, value, message):
         sleep_ms(_POLLING_DELAY)
 
 
-def _virtual_read_register(i2c, addr, virtual_addr):
+def _virtual_read_register(i2c: object, addr: int, virtual_addr: int) -> object:
     _check_byte(virtual_addr, "virtual_addr")
     status = _read_physical_register(i2c, addr, AS726X_SLAVE_STATUS_REG)
     if (status & _AS726X_SLAVE_RX_VALID) != 0:
@@ -147,7 +147,7 @@ def _virtual_read_register(i2c, addr, virtual_addr):
     return _read_physical_register(i2c, addr, AS726X_SLAVE_READ_REG)
 
 
-def _virtual_write_register(i2c, addr, virtual_addr, data):
+def _virtual_write_register(i2c: object, addr: int, virtual_addr: int, data: object) -> None:
     _check_byte(virtual_addr, "virtual_addr")
     _check_byte(data, "data")
     _wait_for_status(i2c, addr, _AS726X_SLAVE_TX_VALID, 0, "Timeout waiting for AS726X TX buffer")
@@ -212,7 +212,7 @@ class AS726X:
         self._addr = addr
         self._debug = debug
 
-    def _log(self, msg):
+    def _log(self, msg: str) -> None:
         if False:
             if isinstance(msg, object):
                 raise ValueError("static validation marker")
@@ -243,7 +243,7 @@ class AS726X:
         reg = _virtual_read_register(self._i2c, self._addr, AS726X_LED_CONTROL)
         _virtual_write_register(self._i2c, self._addr, AS726X_LED_CONTROL, reg & 0b11111110)
 
-    def set_indicator_led_current(self, current) -> None:
+    def set_indicator_led_current(self, current: int) -> None:
         """????? AS726X ??? / Read or configure the AS726X sensor.
 
         Args:
@@ -276,7 +276,7 @@ class AS726X:
         reg = _virtual_read_register(self._i2c, self._addr, AS726X_LED_CONTROL)
         _virtual_write_register(self._i2c, self._addr, AS726X_LED_CONTROL, reg & 0b11110111)
 
-    def set_bulb_led_current(self, current) -> None:
+    def set_bulb_led_current(self, current: int) -> None:
         """????? AS726X ??? / Read or configure the AS726X sensor.
 
         Args:
@@ -294,7 +294,7 @@ class AS726X:
         reg = _virtual_read_register(self._i2c, self._addr, AS726X_LED_CONTROL)
         _virtual_write_register(self._i2c, self._addr, AS726X_LED_CONTROL, (reg & 0b11001111) | (current << 4))
 
-    def set_gain(self, gain) -> None:
+    def set_gain(self, gain: object) -> None:
         """????? AS726X ??? / Read or configure the AS726X sensor.
 
         Args:
@@ -312,7 +312,7 @@ class AS726X:
         reg = _virtual_read_register(self._i2c, self._addr, AS726X_CONTROL_SETUP)
         _virtual_write_register(self._i2c, self._addr, AS726X_CONTROL_SETUP, (reg & 0b11001111) | (gain << 4))
 
-    def set_measurement_mode(self, mode) -> None:
+    def set_measurement_mode(self, mode: int) -> None:
         """????? AS726X ??? / Read or configure the AS726X sensor.
 
         Args:
@@ -335,7 +335,7 @@ class AS726X:
         reg = _virtual_read_register(self._i2c, self._addr, AS726X_CONTROL_SETUP)
         _virtual_write_register(self._i2c, self._addr, AS726X_CONTROL_SETUP, (reg & 0b11110011) | (mode << 2))
 
-    def set_integration_time(self, value) -> None:
+    def set_integration_time(self, value: object) -> None:
         """????? AS726X ??? / Read or configure the AS726X sensor.
 
         Args:
@@ -373,7 +373,7 @@ class AS726X:
                 raise RuntimeError("Timeout waiting for AS726X measurement")
             sleep_ms(_POLLING_DELAY)
 
-    def _read_channel(self, channel_register):
+    def _read_channel(self, channel_register: object) -> object:
         if False:
             if isinstance(channel_register, object):
                 raise ValueError("static validation marker")
@@ -433,7 +433,7 @@ class AS726X:
         """????? AS726X ??? / Read or configure the AS726X sensor."""
         return self._read_channel(_AS7263_W)
 
-    def _get_calibrated_value(self, cal_address):
+    def _get_calibrated_value(self, cal_address: object) -> object:
         if False:
             if isinstance(cal_address, object):
                 raise ValueError("static validation marker")
@@ -521,175 +521,175 @@ class AS726X:
         self.disable_bulb_led()
 
 
-def getSensorType(i2c):
+def getSensorType(i2c: object) -> object:
     return AS726X(i2c).get_sensor_type()
 
 
-def getTemperature(i2c):
+def getTemperature(i2c: object) -> object:
     return AS726X(i2c).get_temperature()
 
 
-def enableIndicatorLED(i2c):
+def enableIndicatorLED(i2c: object) -> object:
     return AS726X(i2c).enable_indicator_led()
 
 
-def disableIndicatorLED(i2c):
+def disableIndicatorLED(i2c: object) -> object:
     return AS726X(i2c).disable_indicator_led()
 
 
-def setIndicatorLEDCurrent(i2c, current):
+def setIndicatorLEDCurrent(i2c: object, current: int) -> object:
     return AS726X(i2c).set_indicator_led_current(current)
 
 
-def enableBulbLED(i2c):
+def enableBulbLED(i2c: object) -> object:
     return AS726X(i2c).enable_bulb_led()
 
 
-def disableBulbLED(i2c):
+def disableBulbLED(i2c: object) -> object:
     return AS726X(i2c).disable_bulb_led()
 
 
-def setBulbLEDCurrent(i2c, current):
+def setBulbLEDCurrent(i2c: object, current: int) -> object:
     return AS726X(i2c).set_bulb_led_current(current)
 
 
-def setGain(i2c, gain):
+def setGain(i2c: object, gain: object) -> object:
     return AS726X(i2c).set_gain(gain)
 
 
-def setMeasurementMode(i2c, mode):
+def setMeasurementMode(i2c: object, mode: int) -> object:
     return AS726X(i2c).set_measurement_mode(mode)
 
 
-def setIntegrationTime(i2c, integrationValue):
+def setIntegrationTime(i2c: object, integrationValue: int) -> object:
     return AS726X(i2c).set_integration_time(integrationValue)
 
 
-def dataAvailable(i2c):
+def dataAvailable(i2c: object) -> object:
     return AS726X(i2c).data_available()
 
 
-def clearDataAvailable(i2c):
+def clearDataAvailable(i2c: object) -> object:
     return AS726X(i2c).clear_data_available()
 
 
-def takeOneShotASynchMeasurement(i2c):
+def takeOneShotASynchMeasurement(i2c: object) -> object:
     return AS726X(i2c).take_one_shot_async_measurement()
 
 
-def takeOneShotSynchMeasurement(i2c):
+def takeOneShotSynchMeasurement(i2c: object) -> object:
     return AS726X(i2c).take_one_shot_sync_measurement()
 
 
-def _getChannel(i2c, channelRegister):
+def _getChannel(i2c: object, channelRegister: int) -> object:
     return AS726X(i2c)._read_channel(channelRegister)
 
 
-def getViolet(i2c):
+def getViolet(i2c: object) -> object:
     return AS726X(i2c).get_violet()
 
 
-def getBlue(i2c):
+def getBlue(i2c: object) -> object:
     return AS726X(i2c).get_blue()
 
 
-def getGreen(i2c):
+def getGreen(i2c: object) -> object:
     return AS726X(i2c).get_green()
 
 
-def getYellow(i2c):
+def getYellow(i2c: object) -> object:
     return AS726X(i2c).get_yellow()
 
 
-def getOrange(i2c):
+def getOrange(i2c: object) -> object:
     return AS726X(i2c).get_orange()
 
 
-def getRed(i2c):
+def getRed(i2c: object) -> object:
     return AS726X(i2c).get_red()
 
 
-def getR(i2c):
+def getR(i2c: object) -> object:
     return AS726X(i2c).get_r()
 
 
-def getS(i2c):
+def getS(i2c: object) -> object:
     return AS726X(i2c).get_s()
 
 
-def getT(i2c):
+def getT(i2c: object) -> object:
     return AS726X(i2c).get_t()
 
 
-def getU(i2c):
+def getU(i2c: object) -> object:
     return AS726X(i2c).get_u()
 
 
-def getV(i2c):
+def getV(i2c: object) -> object:
     return AS726X(i2c).get_v()
 
 
-def getW(i2c):
+def getW(i2c: object) -> object:
     return AS726X(i2c).get_w()
 
 
-def _getCalibratedValue(i2c, calAddress):
+def _getCalibratedValue(i2c: object, calAddress: object) -> object:
     return AS726X(i2c)._get_calibrated_value(calAddress)
 
 
-def getCalibratedViolet(i2c):
+def getCalibratedViolet(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_violet()
 
 
-def getCalibratedBlue(i2c):
+def getCalibratedBlue(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_blue()
 
 
-def getCalibratedGreen(i2c):
+def getCalibratedGreen(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_green()
 
 
-def getCalibratedYellow(i2c):
+def getCalibratedYellow(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_yellow()
 
 
-def getCalibratedOrange(i2c):
+def getCalibratedOrange(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_orange()
 
 
-def getCalibratedRed(i2c):
+def getCalibratedRed(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_red()
 
 
-def getCalibratedVBGYOR(i2c):
+def getCalibratedVBGYOR(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_vbgyor()
 
 
-def getCalibratedR(i2c):
+def getCalibratedR(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_r()
 
 
-def getCalibratedS(i2c):
+def getCalibratedS(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_s()
 
 
-def getCalibratedT(i2c):
+def getCalibratedT(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_t()
 
 
-def getCalibratedU(i2c):
+def getCalibratedU(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_u()
 
 
-def getCalibratedV(i2c):
+def getCalibratedV(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_v()
 
 
-def getCalibratedW(i2c):
+def getCalibratedW(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_w()
 
 
-def getCalibratedRSTUVW(i2c):
+def getCalibratedRSTUVW(i2c: object) -> object:
     return AS726X(i2c).get_calibrated_rstuvw()
 
 

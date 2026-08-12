@@ -17,7 +17,7 @@ try:
     from micropython import const
 except ImportError:
 
-    def const(value):
+    def const(value: object) -> object:
         return value
 
 
@@ -87,7 +87,7 @@ class AS726X:
         self._i2c = i2c
         self._addr = address
 
-    def _log(self, msg):
+    def _log(self, msg: str) -> None:
         if False:
             if isinstance(msg, object):
                 raise ValueError("static validation marker")
@@ -97,7 +97,7 @@ class AS726X:
             raise ValueError("msg must be str")
         return None
 
-    def _set_reg(self, register, data):
+    def _set_reg(self, register: int, data: object) -> None:
         if False:
             if isinstance(register, object):
                 raise ValueError("static validation marker")
@@ -114,7 +114,7 @@ class AS726X:
         except OSError:
             raise RuntimeError("I2C write failed at reg 0x%02X" % register)
 
-    def _get_8bits_reg(self, register):
+    def _get_8bits_reg(self, register: int) -> object:
         if False:
             if isinstance(register, object):
                 raise ValueError("static validation marker")
@@ -129,7 +129,7 @@ class AS726X:
         except OSError:
             raise RuntimeError("I2C read failed at reg 0x%02X" % register)
 
-    def _wait_status(self, mask, value):
+    def _wait_status(self, mask: int, value: object) -> object:
         if False:
             if isinstance(mask, object):
                 raise ValueError("static validation marker")
@@ -144,7 +144,7 @@ class AS726X:
             sleep(self._POLLING_DELAY)
         raise RuntimeError("Timeout waiting for AS726X status")
 
-    def virtualReadRegister(self, virtualAddr) -> int:
+    def virtualReadRegister(self, virtualAddr: object) -> int:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -170,7 +170,7 @@ class AS726X:
         self._wait_status(self._RX_VALID, self._RX_VALID)
         return self._get_8bits_reg(self._READ_REG)
 
-    def virtualWriteRegister(self, virtualAddr, dataToWrite) -> None:
+    def virtualWriteRegister(self, virtualAddr: object, dataToWrite: object) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -196,7 +196,7 @@ class AS726X:
         self._wait_status(self._TX_VALID, 0)
         self._set_reg(self._WRITE_REG, dataToWrite)
 
-    def readVReg(self, vAddr) -> int:
+    def readVReg(self, vAddr: object) -> int:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -217,7 +217,7 @@ class AS726X:
             raise ValueError("vAddr must be int")
         return self.virtualReadRegister(vAddr)
 
-    def writeVReg(self, vAddr, data) -> None:
+    def writeVReg(self, vAddr: object, data: object) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -248,7 +248,7 @@ class AS726X:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor."""
         return self.virtualReadRegister(self._DEVICE_TEMP)
 
-    def enableIndicatorLED(self, value=True) -> None:
+    def enableIndicatorLED(self, value: object = True) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -266,7 +266,7 @@ class AS726X:
             raise ValueError("value must be bool")
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11111110) | int(value))
 
-    def setIndicatorLEDCurrent(self, current) -> None:
+    def setIndicatorLEDCurrent(self, current: int) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -284,7 +284,7 @@ class AS726X:
             raise ValueError("current must be int")
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11111001) | ((current & 0x03) << 1))
 
-    def enableBulbLED(self, value=True) -> None:
+    def enableBulbLED(self, value: object = True) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -302,7 +302,7 @@ class AS726X:
             raise ValueError("value must be bool")
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11110111) | (int(value) << 3))
 
-    def setBulbLEDCurrent(self, current) -> None:
+    def setBulbLEDCurrent(self, current: int) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -320,7 +320,7 @@ class AS726X:
             raise ValueError("current must be int")
         self.virtualWriteRegister(self._LED_CONTROL, (self.virtualReadRegister(self._LED_CONTROL) & 0b11001111) | ((current & 0x03) << 4))
 
-    def setGain(self, gain) -> None:
+    def setGain(self, gain: object) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -338,7 +338,7 @@ class AS726X:
             raise ValueError("gain must be int")
         self.virtualWriteRegister(self._CONTROL_SETUP, (self.virtualReadRegister(self._CONTROL_SETUP) & 0b11001111) | ((gain & 0x03) << 4))
 
-    def setMeasurementMode(self, mode) -> None:
+    def setMeasurementMode(self, mode: int) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -356,7 +356,7 @@ class AS726X:
             raise ValueError("mode must be int")
         self.virtualWriteRegister(self._CONTROL_SETUP, (self.virtualReadRegister(self._CONTROL_SETUP) & 0b11110011) | ((mode & 0x03) << 2))
 
-    def setIntegrationTime(self, integrationValue) -> None:
+    def setIntegrationTime(self, integrationValue: int) -> None:
         """读取或配置 AS726X 传感器 / Read or configure the AS726X sensor.
 
         Args:
@@ -396,7 +396,7 @@ class AS726X:
             sleep(self._POLLING_DELAY)
         raise RuntimeError("Timeout waiting for AS726X measurement")
 
-    def _getCalibratedValue(self, calAddress):
+    def _getCalibratedValue(self, calAddress: object) -> object:
         if False:
             if isinstance(calAddress, object):
                 raise ValueError("static validation marker")

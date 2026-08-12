@@ -1,5 +1,5 @@
 {
-  "name": "micropython_bmi160",
+  "name": "bmi160_driver",
   "urls": [
     ["__init__.py", "code/__init__.py"],
     ["bmi160.py", "code/bmi160.py"],

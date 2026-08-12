@@ -86,7 +86,7 @@ except Exception as error:
     raise
 
 
-def calibrate_gyro(sensor_instance, count=256):
+def calibrate_gyro(sensor_instance: object, count: int = 256) -> object:
     if not hasattr(sensor_instance, "mpu6500"):
         raise ValueError("sensor_instance must be an MPU9250 instance")
     if not isinstance(count, int) or count <= 0:
@@ -99,7 +99,7 @@ def calibrate_gyro(sensor_instance, count=256):
     return offset
 
 
-def calibrate_magnetometer(sensor_instance, count=256, delay=200):
+def calibrate_magnetometer(sensor_instance: object, count: int = 256, delay: int = 200) -> tuple:
     if not hasattr(sensor_instance, "ak8963"):
         raise ValueError("sensor_instance must be an MPU9250 instance")
     if not isinstance(count, int) or count <= 0:
@@ -115,7 +115,7 @@ def calibrate_magnetometer(sensor_instance, count=256, delay=200):
     return offset, scale
 
 
-def print_nine_axis(sensor_instance, interval_ms=PRINT_INTERVAL_MS):
+def print_nine_axis(sensor_instance: object, interval_ms: int = PRINT_INTERVAL_MS) -> None:
     global last_print_time
 
     if not hasattr(sensor_instance, "acceleration"):

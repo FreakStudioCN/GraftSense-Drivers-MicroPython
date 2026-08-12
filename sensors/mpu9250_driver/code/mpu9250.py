@@ -17,7 +17,7 @@ try:
     from micropython import const
 except ImportError:
 
-    def const(value):
+    def const(value: object) -> object:
         return value
 
 
@@ -117,10 +117,10 @@ class MPU9250:
             char |= _I2C_BYPASS_DIS
         self.mpu6500._register_char(_INT_PIN_CFG, char)
 
-    def __enter__(self):
+    def __enter__(self) -> object:
         return self
 
-    def __exit__(self, exception_type, exception_value, traceback) -> None:
+    def __exit__(self, exception_type: object, exception_value: object, traceback: object) -> None:
         if exception_type is not None and not hasattr(exception_type, "__name__"):
             raise ValueError("exception_type must be an exception type")
         self.deinit()

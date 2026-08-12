@@ -75,8 +75,8 @@ BME680 是 Bosch Sensortec 推出的四合一 MEMS 环境传感器，集成温�
 bme680/
 ├── bme680.py   # BME680 核心驱动（I2C + SPI）
 ├── main.py            # 测试示例代码
-├── test_i2c.py        # I2C 接口快速验证脚本
-├── test_spi.py        # SPI 接口快速验证脚本
+├── examples/test_i2c.py        # I2C 接口快速验证脚本
+├── examples/test_spi.py        # SPI 接口快速验证脚本
 └── README.md          # 说明文档
 ```
 
@@ -86,8 +86,8 @@ bme680/
 |------|------|
 | `bme680.py` | BME680 核心驱动文件，包含 `BME680` 基类、`BME680_I2C`（I2C 子类）和 `BME680_SPI`（SPI 子类），提供温度/湿度/气压/气体/海拔五项数据的读取与采样参数配置 |
 | `main.py` | 完整测试示例，包含 I2C 总线扫描、芯片 ID 预检、默认参数采样循环、边界参数测试和异常参数测试，适用于首次验证硬件 |
-| `test_i2c.py` | 极简 I2C 模式验证脚本，快速确认传感器通信 |
-| `test_spi.py` | 极简 SPI 模式验证脚本，快速确认传感器通信 |
+| `examples/test_i2c.py` | 极简 I2C 模式验证脚本，快速确认传感器通信 |
+| `examples/test_spi.py` | 极简 SPI 模式验证脚本，快速确认传感器通信 |
 
 ## 快速开始
 

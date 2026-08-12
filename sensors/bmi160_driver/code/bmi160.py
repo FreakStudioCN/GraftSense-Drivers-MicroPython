@@ -260,7 +260,7 @@ class BMI160:
     # GYRO_RANGE 寄存器 (0x43) — 陀螺仪量程
     _gyro_range = CBits(3, _GYRO_RANGE, 0)
 
-    def __init__(self, i2c, address: int = 0x69, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = 0x69, debug: bool = False) -> None:
         """
         初始化 BMI160 传感器驱动实例。
 

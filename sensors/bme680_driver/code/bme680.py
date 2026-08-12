@@ -97,7 +97,7 @@ _BUF2 = bytearray(2)
 # ======================================== 功能函数 ============================================
 
 
-def _read24(arr):
+def _read24(arr: object) -> object:
     """将 3 字节无符号整数解析为浮点数并返回"""
     ret = 0.0
     for b in arr:
@@ -610,11 +610,11 @@ class BME680:
         """
         pass
 
-    def __enter__(self):
+    def __enter__(self) -> object:
         """上下文管理器入口"""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> bool:
         """上下文管理器出口，自动调用 deinit()"""
         if exc_type is not None and not hasattr(exc_type, "__name__"):
             raise ValueError("exc_type must be an exception type or None")
@@ -648,7 +648,7 @@ class BME680_I2C(BME680):
     # 默认 I2C 地址
     I2C_DEFAULT_ADDR = const(0x77)
 
-    def __init__(self, i2c, address: int = 0x77, debug: bool = False, *, refresh_rate: int = 10) -> None:
+    def __init__(self, i2c: object, address: int = 0x77, debug: bool = False, *, refresh_rate: int = 10) -> None:
         """
         初始化 I2C 接口的 BME680 传感器
         Args:
@@ -793,7 +793,7 @@ class BME680_SPI(BME680):
         - Auto-handles memory page switching for register access
     """
 
-    def __init__(self, spi, cs, debug: bool = False, *, refresh_rate: int = 10) -> None:
+    def __init__(self, spi: object, cs: object, debug: bool = False, *, refresh_rate: int = 10) -> None:
         """
         初始化 SPI 接口的 BME680 传感器
         Args:

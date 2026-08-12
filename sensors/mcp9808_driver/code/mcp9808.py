@@ -119,7 +119,7 @@ class MCP9808(object):
 
     __slots__ = ("_i2c", "_addr", "_m_id", "_d_id", "_debug")
 
-    def __init__(self, i2c=None, addr: int = DEFAULT_ADDR, debug: bool = False) -> None:
+    def __init__(self, i2c: object = None, addr: int = DEFAULT_ADDR, debug: bool = False) -> None:
         """
         初始化 MCP9808 传感器对象。
 
@@ -554,7 +554,7 @@ class MCP9808(object):
 
     # ======================================== 私有方法 =========================================
 
-    def _send(self, buf) -> None:
+    def _send(self, buf: object) -> None:
         """
         通过 I2C 向传感器发送数据。
 
@@ -711,7 +711,7 @@ class MCP9808(object):
         if self._debug:
             print("[MCP9808] %s" % msg)
 
-    def _debug_config(self, cfg=None) -> None:
+    def _debug_config(self, cfg: object = None) -> None:
         """
         输出配置寄存器各位的可读描述。
 

@@ -34,10 +34,13 @@ _PRINT_INTERVAL_MS = 2000
 # 上次打印时间戳
 _last_print_time = 0
 
-# ======================================== 初始化配置 ===========================================
+_sleep = time.sleep
+_sleep_ms = time.sleep_ms
+
+# ======================================== 功能函数 ============================================
 
 
-def demo_conversion_rates():
+def demo_conversion_rates(sensor: object) -> None:
     """
     演示四档转换速率切换（模式切换，可 REPL 手动调用）
     ==========================================
@@ -47,21 +50,21 @@ def demo_conversion_rates():
     # 0.25 Hz
     sensor.conversion_rate = Tmp102.CONVERSION_RATE_QUARTER_HZ
     print("Rate: 0.25 Hz (CR=00)")
-    time.sleep(0.5)
+    _sleep(0.5)
     # 1 Hz
     sensor.conversion_rate = Tmp102.CONVERSION_RATE_1HZ
     print("Rate: 1 Hz (CR=01)")
-    time.sleep(0.5)
+    _sleep(0.5)
     # 4 Hz (default)
     sensor.conversion_rate = Tmp102.CONVERSION_RATE_4HZ
     print("Rate: 4 Hz (CR=10, default)")
-    time.sleep(0.5)
+    _sleep(0.5)
     # 8 Hz
     sensor.conversion_rate = Tmp102.CONVERSION_RATE_8HZ
     print("Rate: 8 Hz (CR=11)")
 
 
-def demo_extended_mode():
+def demo_extended_mode(sensor: object) -> None:
     """
     演示扩展模式切换（模式切换，可 REPL 手动调用）
     ==========================================
@@ -71,7 +74,7 @@ def demo_extended_mode():
     # 启用 13-bit 扩展模式
     sensor.extended_mode = True
     print("Extended mode: ON (13-bit, max 150C)")
-    time.sleep(0.3)
+    _sleep(0.3)
     # 读取扩展模式下的温度
     print("Temperature (extended): %.4f C" % sensor.temperature)
     # 恢复 12-bit 正常模式
@@ -79,7 +82,7 @@ def demo_extended_mode():
     print("Extended mode: OFF (12-bit, max 128C)")
 
 
-def demo_alert_config():
+def demo_alert_config(sensor: object) -> None:
     """
     演示告警/温控器配置（模式切换，可 REPL 手动调用）
     ==========================================
@@ -105,7 +108,7 @@ def demo_alert_config():
     print("Alert flag: %s" % ("HIGH" if sensor.alert else "LOW"))
 
 
-def demo_threshold_config():
+def demo_threshold_config(sensor: object) -> None:
     """
     演示温度阈值配置（模式切换，可 REPL 手动调用）
     ==========================================
@@ -123,7 +126,7 @@ def demo_threshold_config():
     print("Read back low: %.2f C" % sensor.thermostat_low_temperature)
 
 
-def demo_shutdown_oneshot():
+def demo_shutdown_oneshot(sensor: object) -> None:
     """
     演示关断模式与单次转换（模式切换，可 REPL 手动调用）
     ==========================================
@@ -133,15 +136,16 @@ def demo_shutdown_oneshot():
     # 进入关断模式
     sensor.shutdown = True
     print("Shutdown: ON (low power)")
-    time.sleep(0.5)
+    _sleep(0.5)
     # 触发单次转换
-    sensor.initiate_conversion()
+    initiate_conversion = sensor.initiate_conversion
+    initiate_conversion()
     print("One-shot conversion initiated...")
     # 等待转换完成
     for _ in range(100):
         if sensor.conversion_ready:
             break
-        time.sleep_ms(10)
+        _sleep_ms(10)
     else:
         raise RuntimeError("Timed out waiting for one-shot conversion")
     print("Conversion ready!")
@@ -152,7 +156,7 @@ def demo_shutdown_oneshot():
     print("Shutdown: OFF (awake)")
 
 
-def demo_temperature_convertors():
+def demo_temperature_convertors(sensor: object) -> None:
     """
     演示温度单位转换器（工具类，可 REPL 手动调用）
     ==========================================
@@ -161,14 +165,14 @@ def demo_temperature_convertors():
     print("--- Temperature Converter Demo ---")
     temp_c = sensor.temperature
     # 华氏度
-    temp_f = Fahrenheit().convert_to(temp_c)
-    print("Celsius: %.2f C  →  Fahrenheit: %.2f F" % (temp_c, temp_f))
+    convert_to_fahrenheit = (Fahrenheit()).convert_to
+    print("Celsius: %.2f C  →  Fahrenheit: %.2f F" % (temp_c, convert_to_fahrenheit(temp_c)))
     # 开尔文
-    temp_k = Kelvin().convert_to(temp_c)
-    print("Celsius: %.2f C  →  Kelvin: %.2f K" % (temp_c, temp_k))
+    convert_to_kelvin = (Kelvin()).convert_to
+    print("Celsius: %.2f C  →  Kelvin: %.2f K" % (temp_c, convert_to_kelvin(temp_c)))
 
 
-def demo_exception_handling():
+def demo_exception_handling() -> None:
     """
     演示异常参数处理（异常验证，可 REPL 手动调用）
     ==========================================
@@ -189,71 +193,71 @@ def demo_exception_handling():
 
 # ======================================== 自定义类 ============================================
 
-# ======================================== 功能函数 ============================================
+# ======================================== 初始化配置 ===========================================
 
-if __name__ == "__main__":
-    # 上电稳定延时
-    time.sleep(3)
+# 上电稳定延时
+time.sleep(3)
 
-    print("FreakStudio: TMP102 I2C Temperature Sensor Test")
-    print("Platform: MicroPython v1.23")
+print("FreakStudio: TMP102 I2C Temperature Sensor Test")
+print("Platform: MicroPython v1.23")
 
-    # ---- I2C 初始化 ----
-    # RP2040: I2C(0, scl=Pin(1), sda=Pin(0), freq=400000)
-    i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=400000)
-    print("I2C bus initialized (freq=400kHz)")
+# ---- I2C 初始化 ----
+# RP2040: I2C(0, scl=Pin(1), sda=Pin(0), freq=400000)
+i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=400000)
+print("I2C bus initialized (freq=400kHz)")
 
-    # ---- I2C 设备扫描 ----
-    print("Scanning I2C bus...")
-    devices = i2c.scan()
-    if not devices:
-        raise RuntimeError("No I2C device found on bus")
-    print("Found %d device(s): %s" % (len(devices), [hex(d) for d in devices]))
-    # 验证 TMP102 是否在期望地址上
-    if _TMP102_ADDR not in devices:
-        raise RuntimeError("TMP102 not found at expected address 0x%02X" % _TMP102_ADDR)
-    print("TMP102 found at 0x%02X" % _TMP102_ADDR)
+# ---- I2C 设备扫描 ----
+print("Scanning I2C bus...")
+devices = i2c.scan()
+if not devices:
+    raise RuntimeError("No I2C device found on bus")
+print("Found %d device(s): %s" % (len(devices), [hex(d) for d in devices]))
+# 验证 TMP102 是否在期望地址上
+if _TMP102_ADDR not in devices:
+    raise RuntimeError("TMP102 not found at expected address 0x%02X" % _TMP102_ADDR)
+print("TMP102 found at 0x%02X" % _TMP102_ADDR)
 
-    # ---- TMP102 实例化 ----
-    sensor = Tmp102(i2c, _TMP102_ADDR)
-    print("TMP102 initialized (default: 4Hz, 12-bit, Celsius)")
-    print("Device config register OK (basic verification passed)")
+# ---- TMP102 实例化 ----
+sensor = Tmp102(i2c, _TMP102_ADDR)
+print("TMP102 initialized (default: 4Hz, 12-bit, Celsius)")
+print("Device config register OK (basic verification passed)")
 
-    initial_temp = sensor.temperature
-    print("Initial temperature: %.4f C" % initial_temp)
-    _last_print_time = time.ticks_ms()
+initial_temp = sensor.temperature
+print("Initial temperature: %.4f C" % initial_temp)
+_last_print_time = time.ticks_ms()
 
-    # ========================================  主程序  ===========================================
-    try:
-        while True:
-            current_time = time.ticks_ms()
+# ========================================  主程序  ===========================================
 
-            # 定时打印温度值（低频核心 API，自动执行）
-            if time.ticks_diff(current_time, _last_print_time) >= _PRINT_INTERVAL_MS:
-                temp = sensor.temperature
-                print("[%d ms] Temperature: %.4f C" % (current_time, temp))
-                _last_print_time = current_time
+try:
+    while True:
+        current_time = time.ticks_ms()
 
-            # ---- 以下功能默认注释，可在 REPL 中手动调用 ----
-            # demo_conversion_rates()       # 转换速率切换演示
-            # demo_extended_mode()          # 扩展模式切换演示
-            # demo_alert_config()           # 告警/温控器配置演示
-            # demo_threshold_config()       # 温度阈值配置演示
-            # demo_shutdown_oneshot()       # 关断模式与单次转换演示
-            # demo_temperature_convertors() # 温度单位转换演示
-            # demo_exception_handling()     # 异常参数验证演示
+        # 定时打印温度值（低频核心 API，自动执行）
+        if time.ticks_diff(current_time, _last_print_time) >= _PRINT_INTERVAL_MS:
+            temp = sensor.temperature
+            print("[%d ms] Temperature: %.4f C" % (current_time, temp))
+            _last_print_time = current_time
 
-            # 短延时避免 CPU 满载
-            time.sleep_ms(100)
+        # ---- 以下功能默认注释，可在 REPL 中手动调用 ----
+        # demo_conversion_rates(sensor)       # 转换速率切换演示
+        # demo_extended_mode(sensor)          # 扩展模式切换演示
+        # demo_alert_config(sensor)           # 告警/温控器配置演示
+        # demo_threshold_config(sensor)       # 温度阈值配置演示
+        # demo_shutdown_oneshot(sensor)       # 关断模式与单次转换演示
+        # demo_temperature_convertors(sensor) # 温度单位转换演示
+        # demo_exception_handling()     # 异常参数验证演示
 
-    except KeyboardInterrupt:
-        print("Program interrupted by user")
-    except OSError as e:
-        print("Hardware communication error: %s" % str(e))
-    except Exception as e:
-        print("Unknown error: %s" % str(e))
-    finally:
-        print("Cleaning up resources...")
-        sensor.deinit()
-        del sensor
-        print("Program exited")
+        # 短延时避免 CPU 满载
+        time.sleep_ms(100)
+
+except KeyboardInterrupt:
+    print("Program interrupted by user")
+except OSError as e:
+    print("Hardware communication error: %s" % str(e))
+except Exception as e:
+    print("Unknown error: %s" % str(e))
+finally:
+    print("Cleaning up resources...")
+    sensor.deinit()
+    del sensor
+    print("Program exited")

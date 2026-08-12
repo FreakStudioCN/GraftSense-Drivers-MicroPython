@@ -90,7 +90,7 @@ print("-----------------------------")
 # ========================================  主程序  ============================================
 
 
-def print_realtime_data(sensor) -> None:
+def print_realtime_data(sensor: object) -> None:
     acc = sensor.acceleration
     gyr = sensor.gyro
     tmp = sensor.temperature
@@ -99,38 +99,38 @@ def print_realtime_data(sensor) -> None:
     print("  Temp (C): %.2f" % tmp)
 
 
-def change_acc_range(sensor, range_val) -> None:
+def change_acc_range(sensor: object, range_val: object) -> None:
     print("Setting acceleration range to %s ..." % str(range_val))
     sensor.acceleration_range = range_val
     print("  Current range: %s" % sensor.acceleration_range)
 
 
-def change_gyro_range(sensor, range_val) -> None:
+def change_gyro_range(sensor: object, range_val: object) -> None:
     print("Setting gyro range to %s ..." % str(range_val))
     sensor.gyro_range = range_val
     print("  Current range: %s" % sensor.gyro_range)
 
 
-def change_acc_odr(sensor, odr_val) -> None:
+def change_acc_odr(sensor: object, odr_val: object) -> None:
     print("Setting acceleration ODR to %s ..." % str(odr_val))
     sensor.acceleration_output_data_rate = odr_val
     print("  Current ODR: %s" % sensor.acceleration_output_data_rate)
 
 
-def change_gyro_odr(sensor, odr_val) -> None:
+def change_gyro_odr(sensor: object, odr_val: object) -> None:
     print("Setting gyro ODR to %s ..." % str(odr_val))
     sensor.gyro_output_data_rate = odr_val
     print("  Current ODR: %s" % sensor.gyro_output_data_rate)
 
 
-def debug_error_codes(sensor) -> None:
+def debug_error_codes(sensor: object) -> None:
     print("--- Error Code Register ---")
     sensor.error_code()
     print("--- Power Mode Status ---")
     sensor.power_mode_status()
 
 
-def test_config_walkthrough(sensor) -> None:
+def test_config_walkthrough(sensor: object) -> None:
     print("=== Configuration Walkthrough ===")
 
     for range_value in (ACCEL_RANGE_2G, ACCEL_RANGE_4G, ACCEL_RANGE_8G, ACCEL_RANGE_16G):
@@ -172,7 +172,7 @@ def test_config_walkthrough(sensor) -> None:
     print("=== Walkthrough Done ===")
 
 
-def test_exception_scenarios(sensor) -> None:
+def test_exception_scenarios(sensor: object) -> None:
     print("=== Exception Scenario Tests ===")
 
     checks = (

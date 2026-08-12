@@ -127,7 +127,7 @@ class CBits:
         self._length = register_width
         self._lsb_first = lsb_first
 
-    def __get__(self, obj, objtype=None) -> int:
+    def __get__(self, obj: object, objtype: object = None) -> int:
         """
         读取寄存器位域值（描述符协议 __get__）
 
@@ -181,7 +181,7 @@ class CBits:
         reg = (reg & self._bit_mask) >> self._start_bit
         return reg
 
-    def __set__(self, obj, value: int) -> None:
+    def __set__(self, obj: object, value: int) -> None:
         """
         写入寄存器位域值（描述符协议 __set__）
 
@@ -308,7 +308,7 @@ class RegisterStruct:
         # 根据格式化字符串计算寄存器字节宽度
         self._length = struct.calcsize(form)
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj: object, objtype: object = None) -> object:
         """
         读取整个寄存器值（描述符协议 __get__）
 
@@ -363,7 +363,7 @@ class RegisterStruct:
                 raise RuntimeError("I2C read failed at reg 0x%02X" % self._register) from e
         return value
 
-    def __set__(self, obj, value) -> None:
+    def __set__(self, obj: object, value: object) -> None:
         """
         写入整个寄存器值（描述符协议 __set__）
 

@@ -71,11 +71,11 @@ class BNO055(BNO055_BASE):
     def __init__(
         self,
         i2c: object,
-        address=0x28,
-        crystal=True,
-        transpose=(0, 1, 2),
-        sign=(0, 0, 0),
-        debug=False,
+        address: int = 0x28,
+        crystal: object = True,
+        transpose: object = (0, 1, 2),
+        sign: object = (0, 0, 0),
+        debug: object = False,
     ) -> None:
         """初始化 BNO055 驱动 / Initialize the BNO055 driver."""
         self._argcheck(sign, "Sign")
@@ -103,7 +103,7 @@ class BNO055(BNO055_BASE):
             signs = self.sign
             self._write(_AXIS_MAP_SIGN, signs[2] + (signs[1] << 1) + (signs[0] << 2))
 
-    def config(self, dev, value=None) -> tuple:
+    def config(self, dev: object, value: object = None) -> tuple:
         """读写传感器配置 / Read or update a sensor configuration.
 
         Args:
@@ -131,7 +131,7 @@ class BNO055(BNO055_BASE):
         self.mode(last_mode)
         return self._int_to_tuple(dev, old_value)
 
-    def iget(self, reg) -> None:
+    def iget(self, reg: int) -> None:
         """读取内部寄存器值 / Read an internal register value."""
         if not isinstance(reg, int) or reg < 0x00 or reg > 0xFF:
             raise ValueError("reg must be an 8-bit register address")
@@ -157,7 +157,7 @@ class BNO055(BNO055_BASE):
         super().deinit()
 
     @classmethod
-    def _tuple_to_int(cls, dev, value):
+    def _tuple_to_int(cls: object, dev: object, value: object) -> object:
         if dev not in (ACC, MAG, GYRO):
             raise ValueError("Unknown device")
         if not isinstance(value, tuple) or len(value) < 1:
@@ -172,7 +172,7 @@ class BNO055(BNO055_BASE):
             raise ValueError("Illegal sensor configuration")
 
     @classmethod
-    def _int_to_tuple(cls, dev, value):
+    def _int_to_tuple(cls: object, dev: object, value: object) -> tuple:
         if dev not in (ACC, MAG, GYRO):
             raise ValueError("Unknown device")
         if not isinstance(value, int) or value < 0:
@@ -187,7 +187,7 @@ class BNO055(BNO055_BASE):
             return False
 
     @staticmethod
-    def _bytes_toint(lsb, msb) -> int:
+    def _bytes_toint(lsb: object, msb: object) -> int:
         if not isinstance(lsb, int) or not isinstance(msb, int):
             raise ValueError("lsb and msb must be int")
         if lsb < 0 or lsb > 0xFF or msb < 0 or msb > 0xFF:
@@ -196,7 +196,7 @@ class BNO055(BNO055_BASE):
         return value if value < 0x8000 else value - 0x10000
 
     @staticmethod
-    def _argcheck(arg, name) -> None:
+    def _argcheck(arg: object, name: str) -> None:
         if len(arg) != 3 or not isinstance(arg, (list, tuple)):
             raise ValueError(name + " must be a 3 element list or tuple")
 

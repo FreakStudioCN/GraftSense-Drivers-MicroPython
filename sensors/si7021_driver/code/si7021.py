@@ -204,7 +204,7 @@ class Si7021:
     # I2C 通信延时（数据手册要求最大转换时间约 10-12ms，25ms 含安全余量）
     _I2C_DELAY_MS = micropython.const(25)
 
-    def __init__(self, i2c, address: int = _DEFAULT_ADDR, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = _DEFAULT_ADDR, debug: bool = False) -> None:
         """
         初始化 Si7021 传感器实例
         Args:
@@ -313,7 +313,7 @@ class Si7021:
         return raw * 175.72 / 65536.0 - 46.85
 
     @temperature.setter
-    def temperature(self, value) -> None:
+    def temperature(self, value: object) -> None:
         """
         温度属性为只读，禁止直接赋值
         Raises:
@@ -357,7 +357,7 @@ class Si7021:
         return raw * 125.0 / 65536.0 - 6.0
 
     @relative_humidity.setter
-    def relative_humidity(self, value) -> None:
+    def relative_humidity(self, value: object) -> None:
         """
         湿度属性为只读，禁止直接赋值
         Raises:

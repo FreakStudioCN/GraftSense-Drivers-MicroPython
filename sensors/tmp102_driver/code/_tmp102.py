@@ -133,7 +133,7 @@ class Tmp102:
     # 默认 I2C 地址（7-bit，ADDR0 引脚接 GND）
     TMP102_DEFAULT_ADDR = micropython.const(0x48)
 
-    def __init__(self, bus: object, address: int = TMP102_DEFAULT_ADDR, temperature_convertor: object = None, **kwargs) -> None:
+    def __init__(self, bus: object, address: int = TMP102_DEFAULT_ADDR, temperature_convertor: object = None, **kwargs: object) -> None:
         """
         初始化 TMP102 传感器驱动实例
         Args:
@@ -243,7 +243,7 @@ class Tmp102:
             raise RuntimeError("I2C read failed at register 0x%02X" % register) from e
         return val
 
-    def _write_register(self, register: int, value=None) -> None:
+    def _write_register(self, register: int, value: object = None) -> None:
         """
         向指定寄存器写入数据
         Args:
@@ -301,7 +301,7 @@ class Tmp102:
         """
         return self._read_register(REGISTER_CONFIG)
 
-    def _set_config(self, config) -> None:
+    def _set_config(self, config: object) -> None:
         """
         写入配置寄存器并更新扩展模式标志
         Args:

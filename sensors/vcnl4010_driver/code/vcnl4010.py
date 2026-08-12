@@ -80,7 +80,7 @@ class CBits:
         self.length = register_width
         self.lsb_first = lsb_first
 
-    def __get__(self, obj, objtype=None) -> int:
+    def __get__(self, obj: object, objtype: object = None) -> int:
         if obj is None:
             return self
         if objtype is not None and not isinstance(objtype, type):
@@ -104,7 +104,7 @@ class CBits:
         reg = (reg & self.bit_mask) >> self.start_bit
         return reg
 
-    def __set__(self, obj, value: int) -> None:
+    def __set__(self, obj: object, value: int) -> None:
         if obj is None:
             raise ValueError("obj must not be None")
         if isinstance(value, bool):
@@ -167,7 +167,7 @@ class RegisterStruct:
         self.register = register_address
         self.length = struct.calcsize(form)
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj: object, objtype: object = None) -> object:
         if obj is None:
             return self
         if objtype is not None and not isinstance(objtype, type):
@@ -189,7 +189,7 @@ class RegisterStruct:
             )
         return value
 
-    def __set__(self, obj, value) -> None:
+    def __set__(self, obj: object, value: object) -> None:
         if obj is None:
             raise ValueError("obj must not be None")
         if not hasattr(obj, "_i2c") or not hasattr(obj, "_address"):
@@ -344,7 +344,7 @@ class VCNL4010:
 
     _irl_led_current_bits = CBits(6, _IR_LED_CURRENT_REGISTER, 0)
 
-    def __init__(self, i2c, address: int = DEFAULT_ADDRESS, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = DEFAULT_ADDRESS, debug: bool = False) -> None:
         """
         初始化 VCNL4010 传感器，验证设备 ID。
 

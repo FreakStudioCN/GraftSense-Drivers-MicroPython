@@ -1,5 +1,5 @@
 {
-  "name": "bme680",
+  "name": "bme680_driver",
   "urls": [
     ["bme680.py", "code/bme680.py"]
   ],

@@ -26,7 +26,7 @@ _CR_BIT_1 = micropython.const(0x80)
 # ======================================== 功能函数 ============================================
 
 
-def _extend_class():
+def _extend_class() -> object:
     """
     向 Tmp102 类注入转换速率常量与属性
     Notes:

@@ -68,7 +68,7 @@ class I2CEX:
         - ISR-safe: No
     """
 
-    def __init__(self, i2c, address: int, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int, debug: bool = False) -> None:
         """
         初始化 I2C 辅助基类
         Args:
@@ -406,7 +406,7 @@ class ALS(I2CEX):
     GAIN_16X = 2
     GAIN_64X = 3
 
-    def __init__(self, i2c, debug: bool = False) -> None:
+    def __init__(self, i2c: object, debug: bool = False) -> None:
         """
         初始化 ALS 光传感器功能类
         Args:
@@ -809,7 +809,7 @@ class PROX(I2CEX):
     LED_25MA = 2
     LED_12_5MA = 3
 
-    def __init__(self, i2c, debug: bool = False) -> None:
+    def __init__(self, i2c: object, debug: bool = False) -> None:
         """
         初始化接近传感器功能类
         Args:
@@ -1183,7 +1183,7 @@ class APDS9960(I2CEX):
     # 类级常量 - 上电时序延时（秒）
     _POWER_ON_DELAY = 0.05
 
-    def __init__(self, i2c, debug: bool = False) -> None:
+    def __init__(self, i2c: object, debug: bool = False) -> None:
         """
         初始化 APDS9960 驱动
         Args:

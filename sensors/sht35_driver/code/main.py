@@ -36,7 +36,7 @@ PRINT_INTERVAL_MS = 2000
 # ======================================== 功能函数 ============================================
 
 
-def print_raw_data(sensor):
+def print_raw_data(sensor: object) -> None:
     """
     打印原始计数值
     高频数据读取，默认注释调用，可在 REPL 中手动调用：
@@ -47,7 +47,7 @@ def print_raw_data(sensor):
     print("Raw ticks - Temperature: %d, Humidity: %d" % (temp_ticks, humi_ticks))
 
 
-def test_boundary_params(sensor):
+def test_boundary_params(sensor: object) -> None:
     """
     测试边界参数：不同重复性等级
     验证三种重复性模式下的数据输出差异，可在 REPL 中手动调用：
@@ -66,7 +66,7 @@ def test_boundary_params(sensor):
         sleep_ms(100)
 
 
-def test_fahrenheit(sensor):
+def test_fahrenheit(sensor: object) -> None:
     """
     测试华氏度输出
     验证 celsius=False 时的温度转换，可在 REPL 中手动调用：
@@ -77,7 +77,7 @@ def test_fahrenheit(sensor):
     print("Fahrenheit: T=%.2f F, H=%.2f %%RH" % (temp_f, humi))
 
 
-def test_exception_params(sensor):
+def test_exception_params(sensor: object) -> None:
     """
     测试异常参数处理
     验证非法参数是否正确抛出 ValueError，可在 REPL 中手动调用：
@@ -98,7 +98,7 @@ def test_exception_params(sensor):
         print("  PASS: Caught expected ValueError: %s" % str(e))
 
 
-def test_status_functions(sensor):
+def test_status_functions(sensor: object) -> None:
     """
     测试状态管理和加热器功能
     模式切换类操作，可在 REPL 中手动调用：
@@ -127,7 +127,7 @@ def test_status_functions(sensor):
     print("  Sensor reset complete")
 
 
-def test_clock_stretch(sensor):
+def test_clock_stretch(sensor: object) -> None:
     """
     测试时钟拉伸模式
     验证 clock_stretch=True 下的测量，可在 REPL 中手动调用：

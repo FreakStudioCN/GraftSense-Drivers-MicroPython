@@ -36,10 +36,12 @@ EXPECTED_DEVICE_ID = 0xCB
 # 打印间隔（毫秒）
 PRINT_INTERVAL = 2000
 
-# ======================================== 初始化配置 ==========================================
+_sleep = time.sleep
+
+# ======================================== 功能函数 ============================================
 
 
-def print_temperature_detail(adt):
+def print_temperature_detail(adt: object) -> None:
     """
     打印详细的温度信息（低频，自动执行）
     """
@@ -49,7 +51,7 @@ def print_temperature_detail(adt):
     print("Temperature: %.4f C | Mode: %s | Resolution: %s" % (temp, mode, resolution))
 
 
-def test_operation_modes(adt):
+def test_operation_modes(adt: object) -> None:
     """
     遍历所有工作模式并打印当前温度（模式切换，默认注释调用，可 REPL 手动触发）
 
@@ -67,17 +69,17 @@ def test_operation_modes(adt):
         print("Mode: %s" % mode_name)
         # SPS 模式需等待 1s 获取第一次转换结果
         if mode_val == SPS:
-            time.sleep(1.5)
+            _sleep(1.5)
         else:
-            time.sleep(0.3)
+            _sleep(0.3)
         print("  Temperature: %.4f C" % adt.temperature)
     # 恢复到连续模式
     adt.operation_mode = CONTINUOUS
-    time.sleep(0.3)
+    _sleep(0.3)
     print("=== Operation Mode Test Complete ===\n")
 
 
-def test_resolution_modes(adt):
+def test_resolution_modes(adt: object) -> None:
     """
     测试分辨率切换对温度读数的影响（模式切换，默认注释调用，可 REPL 手动触发）
 
@@ -85,19 +87,19 @@ def test_resolution_modes(adt):
     """
     print("=== Testing Resolution Modes ===")
     adt.resolution_mode = LOW_RESOLUTION
-    time.sleep(0.3)
+    _sleep(0.3)
     temp_low = adt.temperature
     print("LOW_RESOLUTION  (13-bit): %.4f C" % temp_low)
 
     adt.resolution_mode = HIGH_RESOLUTION
-    time.sleep(0.3)
+    _sleep(0.3)
     temp_high = adt.temperature
     print("HIGH_RESOLUTION (16-bit): %.4f C" % temp_high)
     print("Difference: %.4f C" % abs(temp_high - temp_low))
     print("=== Resolution Mode Test Complete ===\n")
 
 
-def test_comparator_mode(adt):
+def test_comparator_mode(adt: object) -> None:
     """
     测试比较器模式开关（模式切换，默认注释调用，可 REPL 手动触发）
 
@@ -106,9 +108,10 @@ def test_comparator_mode(adt):
     print("=== Testing Comparator Mode ===")
     current_temp = adt.temperature
     # 设置阈值：以当前温度为基准 ±5°C
-    adt.high_temperature = int(current_temp) + 5
-    adt.low_temperature = int(current_temp) - 5
-    adt.critical_temperature = int(current_temp) + 20
+    high_threshold, low_threshold, critical_threshold = (int(current_temp) + 5, int(current_temp) - 5, int(current_temp) + 20)
+    adt.high_temperature = high_threshold
+    adt.low_temperature = low_threshold
+    adt.critical_temperature = critical_threshold
     adt.hysteresis_temperature = 2
     print(
         "Thresholds set: High=%d C, Low=%d C, Critical=%d C, Hysteresis=%d C"
@@ -132,7 +135,7 @@ def test_comparator_mode(adt):
     print("=== Comparator Mode Test Complete ===\n")
 
 
-def test_boundary_thresholds(adt):
+def test_boundary_thresholds(adt: object) -> None:
     """
     测试温度阈值的边界值设置（边界参数，默认注释调用，可 REPL 手动触发）
 
@@ -169,7 +172,7 @@ def test_boundary_thresholds(adt):
     print("=== Boundary Threshold Test Complete ===\n")
 
 
-def test_invalid_operation_mode(adt):
+def test_invalid_operation_mode(adt: object) -> None:
     """
     测试无效操作模式的异常处理（异常参数，默认注释调用，可 REPL 手动触发）
     """
@@ -182,7 +185,7 @@ def test_invalid_operation_mode(adt):
     print("=== Invalid Operation Mode Test Complete ===\n")
 
 
-def test_invalid_temperature_threshold(adt):
+def test_invalid_temperature_threshold(adt: object) -> None:
     """
     测试超出范围的温度阈值的异常处理（异常参数，默认注释调用，可 REPL 手动触发）
     """
@@ -200,7 +203,7 @@ def test_invalid_temperature_threshold(adt):
     print("=== Invalid Temperature Threshold Test Complete ===\n")
 
 
-def test_invalid_hysteresis(adt):
+def test_invalid_hysteresis(adt: object) -> None:
     """
     测试超出范围的迟滞值的异常处理（异常参数，默认注释调用，可 REPL 手动触发）
     """
@@ -218,7 +221,7 @@ def test_invalid_hysteresis(adt):
     print("=== Invalid Hysteresis Test Complete ===\n")
 
 
-def test_reset(adt):
+def test_reset(adt: object) -> None:
     """
     测试传感器复位功能（模式切换，默认注释调用，可 REPL 手动触发）
 
@@ -227,14 +230,15 @@ def test_reset(adt):
     print("=== Testing Sensor Reset ===")
     print("Before reset - Temperature: %.4f C" % adt.temperature)
     print("Before reset - Operation mode: %s" % adt.operation_mode)
-    adt.reset()
-    time.sleep(0.3)
+    reset = adt.reset
+    reset()
+    _sleep(0.3)
     print("After reset  - Temperature: %.4f C" % adt.temperature)
     print("After reset  - Operation mode: %s" % adt.operation_mode)
     print("=== Sensor Reset Test Complete ===\n")
 
 
-def test_context_manager(i2c):
+def test_context_manager(i2c: object) -> None:
     """
     测试上下文管理器（with 语句）自动资源释放（批量操作，默认注释调用，可 REPL 一键执行）
     """
@@ -246,7 +250,7 @@ def test_context_manager(i2c):
     print("=== Context Manager Test Complete ===\n")
 
 
-def i2c_scan_and_verify(i2c, expected_addr):
+def i2c_scan_and_verify(i2c: object, expected_addr: int) -> bool:
     """
     扫描 I2C 总线并验证目标设备是否存在
 
@@ -261,7 +265,8 @@ def i2c_scan_and_verify(i2c, expected_addr):
         RuntimeError: 总线上无设备或目标设备未找到
     """
     print("Scanning I2C bus...")
-    devices = i2c.scan()
+    scan = i2c.scan
+    devices = (scan)()
     if not devices:
         raise RuntimeError("No I2C device found on bus")
     print("Found %d device(s): %s" % (len(devices), str([hex(d) for d in devices])))
@@ -273,7 +278,8 @@ def i2c_scan_and_verify(i2c, expected_addr):
 
     # 读取芯片 ID 寄存器进行验证
     try:
-        whoami = i2c.readfrom_mem(expected_addr, WHOAMI_REG, 1)[0]
+        readfrom_mem = i2c.readfrom_mem
+        whoami = (readfrom_mem)(expected_addr, WHOAMI_REG, 1)[0]
     except OSError as e:
         raise RuntimeError("Failed to read WHOAMI register at 0x%02X" % WHOAMI_REG) from e
 
@@ -287,7 +293,7 @@ def i2c_scan_and_verify(i2c, expected_addr):
 
 # ======================================== 自定义类 ============================================
 
-# ======================================== 功能函数 ============================================
+# ======================================== 初始化配置 ==========================================
 
 # 上电稳定等待
 time.sleep(3)

@@ -20,7 +20,7 @@ from _tmp102 import _set_bit_for_boolean, EXTENDED_MODE_BIT
 # ======================================== 功能函数 ============================================
 
 
-def _extend_class():
+def _extend_class() -> bool:
     """
     向 Tmp102 类注入扩展模式属性
     Notes:

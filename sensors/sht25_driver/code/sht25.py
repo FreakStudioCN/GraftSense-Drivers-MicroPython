@@ -22,12 +22,12 @@ from time import sleep_ms
 # ======================================== 功能函数 ============================================
 
 
-def _celsius_to_fahrenheit(celsius):
+def _celsius_to_fahrenheit(celsius: object) -> object:
     """摄氏温度转华氏温度。"""
     return celsius * 9.0 / 5.0 + 32.0
 
 
-def _clamp_rh(value):
+def _clamp_rh(value: object) -> float:
     """相对湿度值钳位至 [0.0, 100.0] 范围。"""
     if value < 0.0:
         return 0.0
@@ -88,7 +88,7 @@ class SHT25:
     CMD_WRITE_USER_REGISTER = micropython.const(0xE6)
     CMD_SOFT_RESET = micropython.const(0xFE)
 
-    def __init__(self, i2c, address: int = DEFAULT_ADDR, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = DEFAULT_ADDR, debug: bool = False) -> None:
         """
         初始化 SHT25 传感器驱动。
         Args:
@@ -373,7 +373,7 @@ class SHT25:
 
     # ---------- 私有方法 ----------
 
-    def _read_measurement(self, command, delay_ms):
+    def _read_measurement(self, command: int, delay_ms: int) -> object:
         """
         发送无保持测量命令并读取原始数据。
         Args:
@@ -423,7 +423,7 @@ class SHT25:
 
     # ---------- 调试日志 ----------
 
-    def _log(self, msg):
+    def _log(self, msg: str) -> None:
         """
         调试日志输出。
         Args:

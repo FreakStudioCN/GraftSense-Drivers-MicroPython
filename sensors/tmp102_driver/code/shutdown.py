@@ -25,7 +25,7 @@ _SHUTDOWN_BIT = micropython.const(0x01)
 # ======================================== 功能函数 ============================================
 
 
-def _extend_class():
+def _extend_class() -> object:
     """
     向 Tmp102 类注入关断模式属性与方法
     Notes:

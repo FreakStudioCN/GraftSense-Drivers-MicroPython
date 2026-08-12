@@ -27,7 +27,7 @@ _BUF2 = bytearray(2)  # I2C 读取复用缓冲区
 # ======================================== 功能函数 ============================================
 
 
-def _celsius_to_fahrenheit(celsius):
+def _celsius_to_fahrenheit(celsius: object) -> object:
     """摄氏度转华氏度"""
     return celsius * 9.0 / 5.0 + 32.0
 
@@ -317,7 +317,7 @@ class TMP1075:
         """进入上下文管理器，返回自身"""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> bool:
         """退出上下文管理器，自动释放资源"""
         if exc_type is not None and not hasattr(exc_type, "__name__"):
             raise ValueError("exc_type must be an exception type or None")

@@ -128,7 +128,7 @@ class CBits:
         self._length = register_width
         self._lsb_first = lsb_first
 
-    def __get__(self, obj, objtype=None) -> int:
+    def __get__(self, obj: object, objtype: object = None) -> int:
         """
         读取寄存器位域值
 
@@ -188,7 +188,7 @@ class CBits:
         reg = (reg & self._bit_mask) >> self._start_bit
         return reg
 
-    def __set__(self, obj, value: int) -> None:
+    def __set__(self, obj: object, value: int) -> None:
         """
         写入寄存器位域值
 
@@ -326,7 +326,7 @@ class RegisterStruct:
         self._register = register_address
         self._length = struct.calcsize(form)
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj: object, objtype: object = None) -> object:
         """
         读取完整寄存器值
 
@@ -388,7 +388,7 @@ class RegisterStruct:
 
         return value
 
-    def __set__(self, obj, value: int) -> None:
+    def __set__(self, obj: object, value: int) -> None:
         """
         写入完整寄存器值
 

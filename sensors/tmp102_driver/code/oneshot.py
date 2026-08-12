@@ -26,7 +26,7 @@ _ONE_SHOT_BIT = micropython.const(0x80)
 # ======================================== 功能函数 ============================================
 
 
-def _extend_class():
+def _extend_class() -> object:
     """
     向 Tmp102 类注入单次转换方法与就绪状态属性
     Notes:

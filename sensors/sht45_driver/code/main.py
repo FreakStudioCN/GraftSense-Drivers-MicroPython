@@ -31,10 +31,12 @@ I2C_FREQ = 100000
 _PRINT_INTERVAL_MS = 2000
 _last_print_time = 0
 
-# ======================================== 初始化配置 ==========================================
+_sleep = time.sleep
+
+# ======================================== 功能函数 ============================================
 
 
-def test_all_precision_modes(sht):
+def test_all_precision_modes(sht: object) -> None:
     """
     Test all precision commands.
     """
@@ -47,14 +49,14 @@ def test_all_precision_modes(sht):
     for mode_value, mode_name in modes:
         sht.temperature_precision = mode_value
         print("Precision set to: %s" % mode_name)
-        time.sleep(0.5)
+        _sleep(0.5)
         temp, hum = sht.measurements
         print("  Temperature: %.2f C, Humidity: %.2f %%RH" % (temp, hum))
     sht.temperature_precision = sht45.HIGH_PRECISION
     print("Precision restored to: %s" % sht.temperature_precision)
 
 
-def test_all_heater_settings(sht):
+def test_all_heater_settings(sht: object) -> None:
     """
     Test all heater command combinations.
     """
@@ -75,14 +77,14 @@ def test_all_heater_settings(sht):
             print("Heater: %s, Duration: %s" % (power_name, time_name))
             temp, hum = sht.measurements
             print("  Temperature: %.2f C, Humidity: %.2f %%RH" % (temp, hum))
-            time.sleep(0.5)
+            _sleep(0.5)
     sht.heater_power = sht45.HEATER20mW
     sht.heat_time = sht45.TEMP_0_1
     sht.temperature_precision = sht45.HIGH_PRECISION
     print("Heater settings restored to default")
 
 
-def test_invalid_params(sht):
+def test_invalid_params(sht: object) -> None:
     """
     Test parameter validation.
     """
@@ -107,7 +109,7 @@ def test_invalid_params(sht):
 
 # ======================================== 自定义类 ============================================
 
-# ======================================== 功能函数 ============================================
+# ======================================== 初始化配置 ==========================================
 
 # Startup
 

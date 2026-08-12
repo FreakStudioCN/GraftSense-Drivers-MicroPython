@@ -53,7 +53,7 @@ apds9960 = None
 # ======================================== 功能函数 ============================================
 
 
-def test_boundary_params():
+def test_boundary_params() -> None:
     """
     边界参数场景：测试增益和中断阈值的极限值
     此函数演示硬件极限参数的设置，可 REPL 手动调用
@@ -117,7 +117,7 @@ def test_boundary_params():
     print("--- Boundary parameter test complete ---")
 
 
-def test_exception_params():
+def test_exception_params() -> None:
     """
     异常参数场景：测试非法参数是否触发正确的异常
     此函数演示异常处理，可 REPL 手动调用
@@ -175,7 +175,7 @@ def test_exception_params():
     print("--- Exception parameter test complete ---")
 
 
-def switch_to_high_gain_mode():
+def switch_to_high_gain_mode() -> None:
     """
     切换到高增益模式（模式切换，默认注释调用，可 REPL 手动触发）
     适用于暗光环境下的检测
@@ -185,7 +185,7 @@ def switch_to_high_gain_mode():
     print("Switched to high-gain mode (ALS: 64x, Proximity: 8x)")
 
 
-def switch_to_low_gain_mode():
+def switch_to_low_gain_mode() -> None:
     """
     切换到低增益模式（模式切换，默认注释调用，可 REPL 手动触发）
     适用于强光环境下的检测
@@ -195,7 +195,7 @@ def switch_to_low_gain_mode():
     print("Switched to low-gain mode (ALS: 1x, Proximity: 1x)")
 
 
-def enable_interrupts():
+def enable_interrupts() -> None:
     """
     启用硬件中断功能（模式切换，默认注释调用，可 REPL 手动触发）
     """

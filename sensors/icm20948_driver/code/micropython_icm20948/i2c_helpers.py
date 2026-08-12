@@ -54,7 +54,7 @@ class CBits:
         self.length = register_width
         self.lsb_first = lsb_first
 
-    def __get__(self, obj, objtype=None) -> int:
+    def __get__(self, obj: object, objtype: object = None) -> int:
         if obj is None:
             return self
         if not hasattr(obj, "_i2c") or not hasattr(obj, "_address"):
@@ -74,7 +74,7 @@ class CBits:
             reg = (reg << 8) | mem_value[index]
         return (reg & self.bit_mask) >> self.start_bit
 
-    def __set__(self, obj, value: int) -> None:
+    def __set__(self, obj: object, value: int) -> None:
         if not isinstance(value, int):
             raise ValueError("value must be int")
         if not hasattr(obj, "_i2c") or not hasattr(obj, "_address"):
@@ -123,7 +123,7 @@ class RegisterStruct:
         self.register = register_address
         self.length = struct.calcsize(form)
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj: object, objtype: object = None) -> object:
         if obj is None:
             return self
         if not hasattr(obj, "_i2c") or not hasattr(obj, "_address"):
@@ -139,7 +139,7 @@ class RegisterStruct:
             return value[0]
         return value
 
-    def __set__(self, obj, value) -> None:
+    def __set__(self, obj: object, value: object) -> None:
         if not hasattr(obj, "_i2c") or not hasattr(obj, "_address"):
             raise ValueError("descriptor host must provide _i2c and _address")
         if isinstance(value, tuple):

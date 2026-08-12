@@ -31,7 +31,7 @@ print_interval = 2000  # 打印间隔（ms）
 # ======================================== 功能函数 ============================================
 
 
-def print_device_info(sensor):
+def print_device_info(sensor: object) -> None:
     """
     打印设备基本信息（低频，自动执行）
     ==========================================
@@ -41,7 +41,7 @@ def print_device_info(sensor):
     print("Identifier: %s" % sensor.identifier)
 
 
-def print_temperature_fahrenheit(sensor):
+def print_temperature_fahrenheit(sensor: object) -> None:
     """
     打印华氏温度（扩展功能，默认注释调用，可 REPL 手动调用）
     ==========================================
@@ -51,7 +51,7 @@ def print_temperature_fahrenheit(sensor):
     print("Fahrenheit: %.2f F" % f)
 
 
-def do_reset(sensor):
+def do_reset(sensor: object) -> None:
     """
     软复位传感器（模式切换，默认注释调用，可 REPL 手动触发）
     ==========================================
@@ -61,7 +61,7 @@ def do_reset(sensor):
     print("Sensor reset complete")
 
 
-def test_debug_mode(i2c):
+def test_debug_mode(i2c: object) -> None:
     """
     边界参数测试：启用调试日志模式创建传感器实例
     打印初始化日志后立即释放，避免占用 I2C 总线
@@ -78,7 +78,7 @@ def test_debug_mode(i2c):
     print("--- Debug mode test done ---")
 
 
-def test_invalid_params(i2c):
+def test_invalid_params(i2c: object) -> None:
     """
     异常参数测试：验证非法参数是否正确抛出异常
     ==========================================

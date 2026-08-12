@@ -30,7 +30,7 @@ def format_addresses(addresses: list) -> list:
     return ["0x%02X" % address for address in addresses]
 
 
-def print_sensor_data(sensor) -> None:
+def print_sensor_data(sensor: object) -> None:
     if not hasattr(sensor, "acceleration"):
         raise ValueError("sensor must provide acceleration")
     if not hasattr(sensor, "gyro"):

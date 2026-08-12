@@ -94,7 +94,7 @@ lm75_driver/
 
 ### 2. 复制文件
 
-将 `LM75.py` 上传到 MicroPython 设备的 `/lib/` 目录或项目根目录。
+将 `lm75.py` 上传到 MicroPython 设备的 `/lib/` 目录或项目根目录。
 
 ### 3. 运行测试
 

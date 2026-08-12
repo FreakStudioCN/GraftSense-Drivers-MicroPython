@@ -20,7 +20,7 @@ try:
     from micropython import const
 except ImportError:
 
-    def const(value):
+    def const(value: object) -> object:
         return value
 
 
@@ -245,7 +245,7 @@ class AK8963:
         self._readfrom_mem_into(register, buf, retries, delay_ms)
         return struct.unpack("<hhh", buf)
 
-    def _register_char(self, register: int, value=None, buf: bytearray = _BUF1, retries: int = 2, delay_ms: int = 5):
+    def _register_char(self, register: int, value: object = None, buf: bytearray = _BUF1, retries: int = 2, delay_ms: int = 5) -> None:
         if register < 0:
             raise ValueError("register must be non-negative")
         if value is None:
@@ -291,10 +291,10 @@ class AK8963:
         except Exception:
             pass
 
-    def __enter__(self):
+    def __enter__(self) -> object:
         return self
 
-    def __exit__(self, exception_type, exception_value, traceback) -> None:
+    def __exit__(self, exception_type: object, exception_value: object, traceback: object) -> None:
         if exception_type is not None and not hasattr(exception_type, "__name__"):
             raise ValueError("exception_type must be an exception type")
         pass

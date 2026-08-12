@@ -127,13 +127,15 @@ class AM2320:
         # i2c 参数校验：鸭子类型检查，确保传入对象具备 I2C 总线方法
         if hasattr(i2c, "writeto") is False or hasattr(i2c, "readfrom_into") is False:
             raise ValueError("i2c must provide writeto/readfrom_into")
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool")
         self._i2c = i2c
         self._addr = self.I2C_ADDRESS
         # 复用模块级缓冲区，避免每次测量分配新内存
         self._buf = _BUF
         self._debug = debug
 
-    def _log(self, msg):
+    def _log(self, msg: str) -> None:
         """
         调试日志输出（受 _debug 开关控制）
         ==========================================
@@ -200,6 +202,14 @@ class AM2320:
             - Side effects: Wakes sensor, reads 8 bytes via I2C, updates internal buffer
             - Access results via temperature() and humidity()
         """
+        if not isinstance(retries, int):
+            raise ValueError("retries must be int")
+        if retries < 0:
+            raise ValueError("retries must be >= 0")
+        if not isinstance(delay_ms, int):
+            raise ValueError("delay_ms must be int")
+        if delay_ms < 0:
+            raise ValueError("delay_ms must be >= 0")
         buf = self._buf
         # 唤醒处于休眠状态的传感器
         self._wake()
@@ -270,7 +280,7 @@ class AM2320:
         # 解析湿度：高字节 + 低字节组合，分辨率 0.1%
         return (buf[2] << 8 | buf[3]) * 0.1
 
-    def _wake(self):
+    def _wake(self) -> None:
         """
         唤醒处于休眠状态的传感器
         Notes:

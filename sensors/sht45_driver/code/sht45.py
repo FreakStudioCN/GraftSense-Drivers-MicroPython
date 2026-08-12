@@ -20,7 +20,7 @@ try:
     from micropython import const
 except ImportError:
 
-    def const(value):
+    def const(value: object) -> object:
         return value
 
 
@@ -63,7 +63,7 @@ wat_config = {
 # ======================================== 功能函数 ============================================
 
 
-def _crc8(buffer) -> int:
+def _crc8(buffer: object) -> int:
     """
     Calculate CRC-8 checksum with polynomial 0x31 and initial value 0xFF.
     """

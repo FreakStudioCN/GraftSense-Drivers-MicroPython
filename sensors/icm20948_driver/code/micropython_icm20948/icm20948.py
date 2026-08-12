@@ -164,7 +164,7 @@ class ICM20948:
     _gyro_full_scale = CBits(2, _GYRO_CONFIG_1, 1)
     _gyro_dplcfg = CBits(3, _GYRO_CONFIG_1, 3)
 
-    def __init__(self, i2c, address: int = 0x69, debug: bool = False) -> None:
+    def __init__(self, i2c: object, address: int = 0x69, debug: bool = False) -> None:
         """??? ICM20948 ?? / Initialize the ICM20948 driver.
 
         Args:

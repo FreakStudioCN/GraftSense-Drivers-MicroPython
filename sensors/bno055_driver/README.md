@@ -68,7 +68,7 @@ bno055_driver/
 ├── bno055_base.py    # BNO055 基类驱动（轻量版，可独立使用）
 ├── bno055.py         # BNO055 完整驱动（包含轴映射、配置、ISR）
 ├── main.py           # 测试示例程序
-├── bno055_test.py    # 原始简单测试程序
+├── examples/bno055_test.py    # 原始简单测试程序
 ├── package.json      # mip 包配置文件
 ├── README.md         # 说明文档
 └── LICENSE           # MIT 许可证
@@ -81,7 +81,7 @@ bno055_driver/
 | `bno055_base.py` | BNO055 基类驱动。提供 I2C 通信、芯片检测、工作模式切换、传感器数据读取（mag/accel/gyro/euler/quaternion 等）、校准状态查询和偏移读写。可独立用于 RAM 受限设备。 |
 | `bno055.py` | BNO055 完整驱动。继承基类，增加轴重映射（`orient()`）、传感器配置（`config()`）、ISR 安全数据读取（`iget()`）、模式常量定义。**推荐使用此文件。** |
 | `main.py` | 完整测试程序。包含 I2C 总线扫描+芯片 ID 验证、全部公共 API 调用示例（自动执行+注释手动调用）、校准保存/恢复、异常测试场景。 |
-| `bno055_test.py` | 原始简单测试程序。保留作为最小化参考示例。 |
+| `examples/bno055_test.py` | 原始简单测试程序。保留作为最小化参考示例。 |
 
 ## 快速开始
 

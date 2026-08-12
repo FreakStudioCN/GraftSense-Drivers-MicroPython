@@ -146,7 +146,7 @@ class CBits:
         self._retries = retries
         self._delay_ms = delay_ms
 
-    def __get__(self, obj, objtype=None) -> int:
+    def __get__(self, obj: object, objtype: object = None) -> int:
         """
         从 I2C 设备读取寄存器位域值
 
@@ -194,7 +194,7 @@ class CBits:
         reg = (reg & self._bit_mask) >> self._start_bit
         return reg
 
-    def __set__(self, obj, value: int) -> None:
+    def __set__(self, obj: object, value: int) -> None:
         """
         向 I2C 设备寄存器写入位域值（读-修改-写）
 
@@ -346,7 +346,7 @@ class RegisterStruct:
         self._retries = retries
         self._delay_ms = delay_ms
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj: object, objtype: object = None) -> object:
         """
         从 I2C 设备读取寄存器值并按格式解包
 
@@ -392,7 +392,7 @@ class RegisterStruct:
             value = struct.unpack(self._format, memoryview(raw))
         return value
 
-    def __set__(self, obj, value) -> None:
+    def __set__(self, obj: object, value: object) -> None:
         """
         向 I2C 设备寄存器写入值（打包后写入）
 

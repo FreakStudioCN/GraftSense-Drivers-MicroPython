@@ -548,10 +548,10 @@ class SHTC3:
         crc = _crc8(data[:2], SHTC3.POLYNOMIAL)
         return crc == data[2]
 
-    def __enter__(self):
+    def __enter__(self) -> object:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> bool:
         if exc_type is not None and not hasattr(exc_type, "__name__"):
             raise ValueError("exc_type must be an exception type or None")
         self.deinit()
