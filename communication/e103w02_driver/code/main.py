@@ -160,6 +160,7 @@ except Exception as exc:
 finally:
     # 驱动不拥有外部UART对象，仅清理内部模式状态
     wifi.deinit()
+    uart.deinit()
     del wifi
     del uart
     print("E103-W02 example finished")
