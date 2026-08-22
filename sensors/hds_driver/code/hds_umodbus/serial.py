@@ -736,6 +736,32 @@ class Serial(CommonModbusFunctions):
 
         return request
 
+    def deinit(self) -> None:
+        """
+        释放 Serial 实例创建的 UART 资源。
+
+        Returns:
+            None: 无返回值。
+        Raises:
+            无。
+        Notes:
+            此方法可重复调用；调用后不应继续进行 Modbus 通信。
+
+        ==========================================
+        Release the UART resource created by this Serial instance.
+
+        Returns:
+            None: No return value.
+        Raises:
+            None.
+        Notes:
+            This method is idempotent; do not use the instance afterward.
+        """
+        uart = self._uart
+        if uart is not None and hasattr(uart, "deinit"):
+            uart.deinit()
+        self._uart = None
+
 
 # ======================================== 初始化配置 ============================================
 

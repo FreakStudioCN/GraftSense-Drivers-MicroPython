@@ -726,6 +726,68 @@ class Serial(CommonModbusFunctions):
 
         return request
 
+    def write_raw(self, data: object) -> int:
+        """
+        直接写入设备专用的非 Modbus 数据。
+
+        Args:
+            data (object): bytes、bytearray 或 memoryview 数据。
+        Returns:
+            int: UART 写入的字节数。
+        Raises:
+            ValueError: data 类型无效。
+            RuntimeError: Serial 已释放或 UART 写入失败。
+        Notes:
+            仅用于 MCP1081 唤醒字节；非 ISR-safe。
+
+        ==========================================
+        Write device-specific non-Modbus data directly.
+
+        Args:
+            data (object): bytes, bytearray, or memoryview data.
+        Returns:
+            int: Number of bytes written by UART.
+        Raises:
+            ValueError: Invalid data type.
+            RuntimeError: Serial is deinitialized or UART write fails.
+        Notes:
+            Only used for the MCP1081 wake byte; not ISR-safe.
+        """
+        if data is None or not isinstance(data, (bytes, bytearray, memoryview)):
+            raise ValueError("data must be bytes-like")
+        if self._uart is None:
+            raise RuntimeError("Serial is deinitialized")
+        try:
+            return self._uart.write(data)
+        except OSError as error:
+            raise RuntimeError("UART write failed") from error
+
+    def deinit(self) -> None:
+        """
+        释放 Serial 实例创建的 UART 资源。
+
+        Returns:
+            None: 无返回值。
+        Raises:
+            无。
+        Notes:
+            此方法可重复调用；调用后不应继续进行 Modbus 通信。
+
+        ==========================================
+        Release the UART resource created by this Serial instance.
+
+        Returns:
+            None: No return value.
+        Raises:
+            None.
+        Notes:
+            This method is idempotent; do not use the instance afterward.
+        """
+        uart = self._uart
+        if uart is not None and hasattr(uart, "deinit"):
+            uart.deinit()
+        self._uart = None
+
 
 # ======================================== 初始化配置 ============================================
 

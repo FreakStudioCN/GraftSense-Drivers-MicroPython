@@ -11,7 +11,7 @@ __platform__ = "MicroPython v1.23.0"
 
 import time
 from mer import MER
-from umodbus.serial import Serial as ModbusRTUMaster
+from mcp1081_umodbus.serial import Serial as ModbusRTUMaster
 
 host = ModbusRTUMaster(pins=(16, 17), baudrate=9600, data_bits=8, stop_bits=1, parity=None, uart_id=0)
 sensor = MER(host, slave_addr=1)
@@ -29,5 +29,4 @@ try:
         time.sleep_ms(20)
 finally:
     sensor.deinit()
-    if hasattr(host._uart, "deinit"):
-        host._uart.deinit()
+    host.deinit()

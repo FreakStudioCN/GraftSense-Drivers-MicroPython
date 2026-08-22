@@ -42,7 +42,7 @@ class MER:
     MER-MCP1081-260-26电子水尺Modbus RTU驱动。
 
     Attributes:
-        _host (object): 已初始化的umodbus主站。
+        _host (object): 已初始化的 mcp1081_umodbus 主站。
         _slave_addr (int): Modbus节点地址。
     Methods:
         read_measurements(): 读取实时测量数据。
@@ -55,7 +55,7 @@ class MER:
     MER-MCP1081-260-26 water-level sensor Modbus RTU driver.
 
     Attributes:
-        _host (object): Initialized umodbus master.
+        _host (object): Initialized mcp1081_umodbus master.
         _slave_addr (int): Modbus node address.
     Methods:
         read_measurements(): Read real-time measurements.
@@ -108,7 +108,7 @@ class MER:
         初始化驱动。Initialize the driver.
 
         Args:
-            host (object): 提供寄存器读写和_uart.write的umodbus主站。
+            host (object): 提供寄存器读写和 write_raw 的 Modbus 主站。
             slave_addr (int): 节点地址，范围1~252。
             wake_delay_ms (int): 唤醒等待时间，不小于30ms。
             retries (int): 每次读取的最大尝试次数，范围1~10。
@@ -124,8 +124,8 @@ class MER:
             raise ValueError("host cannot be None")
         if not hasattr(host, "read_holding_registers") or not hasattr(host, "write_single_register"):
             raise ValueError("host must provide Modbus register methods")
-        if not hasattr(host, "_uart") or not hasattr(host._uart, "write"):
-            raise ValueError("host must provide a writable UART")
+        if not hasattr(host, "write_raw"):
+            raise ValueError("host must provide write_raw")
         self._validate_int_range("slave_addr", slave_addr, 1, 252)
         self._validate_int_range("wake_delay_ms", wake_delay_ms, 30, 1000)
         self._validate_int_range("retries", retries, 1, 10)
@@ -145,8 +145,8 @@ class MER:
         """发送唤醒字节并等待。Send the wake byte and wait; not ISR-safe."""
         self._require_active()
         try:
-            self._host._uart.write(b"\x8f")
-        except OSError as error:
+            self._host.write_raw(b"\x8f")
+        except RuntimeError as error:
             raise RuntimeError("Sensor wake-up failed") from error
         time.sleep_ms(self._wake_delay_ms)
 

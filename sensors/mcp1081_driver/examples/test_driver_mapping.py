@@ -55,6 +55,11 @@ class FakeHost:
             raise ValueError("unit must not be None")
         self.last_write = unit, address, value
 
+    def write_raw(self, value):
+        if value is None:
+            raise ValueError("value must not be None")
+        return self._uart.write(value)
+
 
 registers = {
     0x01: 1,

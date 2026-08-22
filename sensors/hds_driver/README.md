@@ -25,7 +25,7 @@ HDS 使用电容变化表征材料含水变化，其结果不是环境相对湿�
 ## 主要功能
 
 - 支持 UART Modbus-RTU 通信，默认地址为 `0x01`。
-- 使用与 GraftSense 其他 Modbus 驱动一致的 `umodbus` 通信库。
+- 内置独立命名的 `hds_umodbus` 通信库，避免与其他驱动包互相覆盖。
 - 支持读取温度、C1/C2 电容及全部实时测量寄存器。
 - 支持读取设备地址、平均次数、ID 和软硬件版本。
 - 支持设置平均次数、修改设备地址及触发校准命令。
@@ -62,7 +62,7 @@ RP2040 GPIO 不耐受 5 V。若 HDS 使用 5 V 供电，应确认其 UART TX 输
 | 驱动版本 | v1.0.0 |
 | 测试平台 | Raspberry Pi Pico / RP2040 |
 | 通信协议 | UART Modbus-RTU，9600 bps，8N1 |
-| 依赖库 | 包内附带的 `umodbus` |
+| 依赖库 | 包内附带的 `hds_umodbus` |
 | 外部固件依赖 | 无 |
 
 ## 文件结构
@@ -72,7 +72,7 @@ hds_driver/
 ├── code/
 │   ├── hds.py
 │   ├── main.py
-│   └── umodbus/
+│   └── hds_umodbus/
 │       ├── __init__.py
 │       ├── common.py
 │       ├── const.py
@@ -93,15 +93,15 @@ hds_driver/
 |---|---|
 | `code/hds.py` | HDS 寄存器、单位换算、重试及设备异常封装 |
 | `code/main.py` | RP2040 GP16/GP17 数据采集示例 |
-| `code/umodbus/__init__.py` | `umodbus` 包初始化与版本导出 |
-| `code/umodbus/common.py` | Modbus 通用主从功能接口 |
-| `code/umodbus/const.py` | Modbus 功能码、异常码和 CRC 常量 |
-| `code/umodbus/functions.py` | Modbus PDU 生成、解析和数据转换函数 |
-| `code/umodbus/modbus.py` | Modbus 基础类及寄存器处理逻辑 |
-| `code/umodbus/serial.py` | UART Modbus-RTU 主机与从机实现 |
-| `code/umodbus/tcp.py` | Modbus-TCP 实现，本驱动运行时不直接使用 |
-| `code/umodbus/typing.py` | MicroPython 类型标注兼容辅助模块 |
-| `code/umodbus/version.py` | `umodbus` 版本信息 |
+| `code/hds_umodbus/__init__.py` | `hds_umodbus` 包初始化与版本导出 |
+| `code/hds_umodbus/common.py` | Modbus 通用主从功能接口 |
+| `code/hds_umodbus/const.py` | Modbus 功能码、异常码和 CRC 常量 |
+| `code/hds_umodbus/functions.py` | Modbus PDU 生成、解析和数据转换函数 |
+| `code/hds_umodbus/modbus.py` | Modbus 基础类及寄存器处理逻辑 |
+| `code/hds_umodbus/serial.py` | UART Modbus-RTU 主机与从机实现 |
+| `code/hds_umodbus/tcp.py` | Modbus-TCP 实现，本驱动运行时不直接使用 |
+| `code/hds_umodbus/typing.py` | MicroPython 类型标注兼容辅助模块 |
+| `code/hds_umodbus/version.py` | `hds_umodbus` 版本信息 |
 | `package.json` | GraftSense/mip 文件安装映射和包元数据 |
 | `README.md` | 驱动使用说明 |
 | `LICENSE` | MIT 许可协议 |
@@ -120,7 +120,7 @@ hds_driver/
 /
 ├── hds.py
 ├── main.py
-└── umodbus/
+└── hds_umodbus/
     ├── __init__.py
     ├── common.py
     ├── const.py
@@ -132,7 +132,7 @@ hds_driver/
     └── version.py
 ```
 
-使用 `package.json` 安装时会安装 `hds.py` 和 `umodbus`。测试文件 `code/main.py` 不在安装映射中，如需开机运行示例，应单独上传为开发板根目录的 `main.py`。
+使用 `package.json` 安装时会安装 `hds.py` 和 `hds_umodbus`。独立命名可避免安装其他 Modbus 驱动时覆盖本驱动依赖。测试文件 `code/main.py` 不在安装映射中，如需开机运行示例，应单独上传为开发板根目录的 `main.py`。
 
 ### 3. 完成接线
 
@@ -147,7 +147,7 @@ hds_driver/
 
 ```python
 from machine import Pin
-from umodbus.serial import Serial as ModbusRTUMaster
+from hds_umodbus.serial import Serial as ModbusRTUMaster
 from hds import HDS
 
 modbus = ModbusRTUMaster(
@@ -197,7 +197,7 @@ sensor = HDS(
 
 | 参数 | 类型 | 默认值 | 说明 |
 |---|---|---:|---|
-| `host` | `object` | 无 | 提供寄存器读写方法的 `umodbus` RTU 主机 |
+| `host` | `object` | 无 | 提供寄存器读写方法的 `hds_umodbus` RTU 主机 |
 | `address` | `int` | `0x01` | Modbus 从机地址，范围 1～247 |
 | `retries` | `int` | `2` | 读取失败后的重试次数 |
 | `retry_delay_ms` | `int` | `50` | 重试间隔，单位 ms |

@@ -12,40 +12,40 @@
   },
   "urls": [
     [
-      "umodbus/__init__.py",
-      "code/umodbus/__init__.py"
+      "hds_umodbus/__init__.py",
+      "code/hds_umodbus/__init__.py"
     ],
     [
-      "umodbus/common.py",
-      "code/umodbus/common.py"
+      "hds_umodbus/common.py",
+      "code/hds_umodbus/common.py"
     ],
     [
-      "umodbus/const.py",
-      "code/umodbus/const.py"
+      "hds_umodbus/const.py",
+      "code/hds_umodbus/const.py"
     ],
     [
-      "umodbus/functions.py",
-      "code/umodbus/functions.py"
+      "hds_umodbus/functions.py",
+      "code/hds_umodbus/functions.py"
     ],
     [
-      "umodbus/modbus.py",
-      "code/umodbus/modbus.py"
+      "hds_umodbus/modbus.py",
+      "code/hds_umodbus/modbus.py"
     ],
     [
-      "umodbus/serial.py",
-      "code/umodbus/serial.py"
+      "hds_umodbus/serial.py",
+      "code/hds_umodbus/serial.py"
     ],
     [
-      "umodbus/tcp.py",
-      "code/umodbus/tcp.py"
+      "hds_umodbus/tcp.py",
+      "code/hds_umodbus/tcp.py"
     ],
     [
-      "umodbus/typing.py",
-      "code/umodbus/typing.py"
+      "hds_umodbus/typing.py",
+      "code/hds_umodbus/typing.py"
     ],
     [
-      "umodbus/version.py",
-      "code/umodbus/version.py"
+      "hds_umodbus/version.py",
+      "code/hds_umodbus/version.py"
     ],
     [
       "hds.py",

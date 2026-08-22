@@ -37,7 +37,7 @@ def calculate_crc8(data: object, start: int = 0, length: int = -1) -> int:
     Returns:
         int: CRC-8 校验值
     Raises:
-        无
+        ValueError: data、start 或 length 的类型或范围无效
     Notes:
         - 多项式为 0x31，初始值为 0xFF
         - ISR-safe: 是
@@ -50,13 +50,27 @@ def calculate_crc8(data: object, start: int = 0, length: int = -1) -> int:
     Returns:
         int: CRC-8 checksum
     Raises:
-        None
+        ValueError: Invalid data, start, or length type or range
     Notes:
         - Polynomial is 0x31 and initial value is 0xFF
         - ISR-safe: Yes
     """
-    if length < 0:
-        length = len(data) - start
+    if data is None or not isinstance(data, (bytes, bytearray, memoryview)):
+        raise ValueError("data must be bytes-like")
+    if not isinstance(start, int):
+        raise ValueError("start must be int")
+    if not isinstance(length, int):
+        raise ValueError("length must be int")
+
+    data_length = len(data)
+    if start < 0 or start > data_length:
+        raise ValueError("start is out of range")
+    if length < -1:
+        raise ValueError("length must be -1 or greater")
+    if length == -1:
+        length = data_length - start
+    if start + length > data_length:
+        raise ValueError("start and length exceed data size")
 
     crc = 0xFF
     for index in range(start, start + length):

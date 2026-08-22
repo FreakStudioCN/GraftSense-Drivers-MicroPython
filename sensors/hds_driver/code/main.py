@@ -10,7 +10,7 @@
 
 import time
 from machine import Pin
-from umodbus.serial import Serial as ModbusRTUMaster
+from hds_umodbus.serial import Serial as ModbusRTUMaster
 from hds import HDS
 
 # ======================================== 全局变量 ============================================
@@ -72,8 +72,7 @@ except Exception as error:
 finally:
     print("Cleaning up resources...")
     sensor.deinit()
-    if hasattr(modbus, "_uart") and hasattr(modbus._uart, "deinit"):
-        modbus._uart.deinit()
+    modbus.deinit()
     del sensor
     del modbus
     print("Program exited")

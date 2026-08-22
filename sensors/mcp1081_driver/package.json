@@ -12,14 +12,14 @@
   },
   "urls": [
     ["mer.py", "code/mer.py"],
-    ["umodbus/__init__.py", "code/umodbus/__init__.py"],
-    ["umodbus/common.py", "code/umodbus/common.py"],
-    ["umodbus/const.py", "code/umodbus/const.py"],
-    ["umodbus/functions.py", "code/umodbus/functions.py"],
-    ["umodbus/modbus.py", "code/umodbus/modbus.py"],
-    ["umodbus/serial.py", "code/umodbus/serial.py"],
-    ["umodbus/tcp.py", "code/umodbus/tcp.py"],
-    ["umodbus/typing.py", "code/umodbus/typing.py"],
-    ["umodbus/version.py", "code/umodbus/version.py"]
+    ["mcp1081_umodbus/__init__.py", "code/mcp1081_umodbus/__init__.py"],
+    ["mcp1081_umodbus/common.py", "code/mcp1081_umodbus/common.py"],
+    ["mcp1081_umodbus/const.py", "code/mcp1081_umodbus/const.py"],
+    ["mcp1081_umodbus/functions.py", "code/mcp1081_umodbus/functions.py"],
+    ["mcp1081_umodbus/modbus.py", "code/mcp1081_umodbus/modbus.py"],
+    ["mcp1081_umodbus/serial.py", "code/mcp1081_umodbus/serial.py"],
+    ["mcp1081_umodbus/tcp.py", "code/mcp1081_umodbus/tcp.py"],
+    ["mcp1081_umodbus/typing.py", "code/mcp1081_umodbus/typing.py"],
+    ["mcp1081_umodbus/version.py", "code/mcp1081_umodbus/version.py"]
   ]
 }

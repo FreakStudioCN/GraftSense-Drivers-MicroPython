@@ -10,7 +10,7 @@
 
 import time
 from mer import MER
-from umodbus.serial import Serial as ModbusRTUMaster
+from mcp1081_umodbus.serial import Serial as ModbusRTUMaster
 
 # ======================================== 全局变量 ============================================
 
@@ -45,26 +45,26 @@ sensor = MER(host, slave_addr=SLAVE_ADDR)
 
 # ========================================  主程序  ============================================
 
-while True:
-    try:
-        node_address = sensor.read_node_address()
-        break
-    except RuntimeError as error:
-        print("Sensor not responding: %s" % error)
-        print("Retrying sensor startup...")
-        time.sleep_ms(STARTUP_RETRY_DELAY_MS)
-
-print("Node address: %d" % node_address)
-print("Hardware version: %s" % sensor.read_hw_version())
-print("Firmware version (raw): %d" % sensor.read_fw_version())
-print("Device UID: %s" % sensor.read_device_uid())
-print("Filter window: %d" % sensor.read_filter_count())
-print("Fit mode: %d" % sensor.read_fit_mode())
-print("Alarm levels (low, overflow): %s" % (sensor.read_alarm_levels(),))
-print("Full level: %d mm" % sensor.read_full_level())
-last_print_time = time.ticks_ms()
-
 try:
+    while True:
+        try:
+            node_address = sensor.read_node_address()
+            break
+        except RuntimeError as error:
+            print("Sensor not responding: %s" % error)
+            print("Retrying sensor startup...")
+            time.sleep_ms(STARTUP_RETRY_DELAY_MS)
+
+    print("Node address: %d" % node_address)
+    print("Hardware version: %s" % sensor.read_hw_version())
+    print("Firmware version (raw): %d" % sensor.read_fw_version())
+    print("Device UID: %s" % sensor.read_device_uid())
+    print("Filter window: %d" % sensor.read_filter_count())
+    print("Fit mode: %d" % sensor.read_fit_mode())
+    print("Alarm levels (low, overflow): %s" % (sensor.read_alarm_levels(),))
+    print("Full level: %d mm" % sensor.read_full_level())
+    last_print_time = time.ticks_ms()
+
     while True:
         current_time = time.ticks_ms()
         if time.ticks_diff(current_time, last_print_time) >= PRINT_INTERVAL_MS:
@@ -93,8 +93,7 @@ except Exception as error:
 finally:
     print("Cleaning up resources...")
     sensor.deinit()
-    if hasattr(host._uart, "deinit"):
-        host._uart.deinit()
+    host.deinit()
     del sensor
     del host
     print("Program exited")

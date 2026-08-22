@@ -7,7 +7,7 @@
 - [硬件要求](#硬件要求)
 - [软件环境](#软件环境)
 - [文件结构](#文件结构)
-- [umodbus 说明](#umodbus-说明)
+- [mcp1081_umodbus 说明](#mcp1081_umodbus-说明)
 - [快速开始](#快速开始)
 - [API 概览](#api-概览)
 - [注意事项](#注意事项)
@@ -49,7 +49,7 @@
 
 - MicroPython v1.23.0
 - 驱动版本 2.1.0
-- 内置依赖：`umodbus` 2.3.7
+- 内置依赖：`mcp1081_umodbus` 2.3.7
 
 ## 文件结构
 
@@ -58,7 +58,7 @@ mcp1081_driver/
 ├── code/
 │   ├── mer.py
 │   ├── main.py
-│   └── umodbus/
+│   └── mcp1081_umodbus/
 ├── examples/
 │   └── diagnose_registers.py
 ├── package.json
@@ -66,23 +66,23 @@ mcp1081_driver/
 └── LICENSE
 ```
 
-## umodbus 说明
+## mcp1081_umodbus 说明
 
-`code/umodbus/` 是 WS61 示例同版的通用 MicroPython Modbus 2.3.7 实现，不是 MER 传感器寄存器驱动。它负责 UART 收发、Modbus RTU/TCP 帧、功能码、CRC、超时和响应校验；`mer.py` 才负责 MER-MCP1081-260-26 的寄存器地址、缩放和业务含义。
+`code/mcp1081_umodbus/` 是 WS61 示例同版的通用 MicroPython Modbus 2.3.7 实现，不是 MER 传感器寄存器驱动。独立命名可避免安装其他 Modbus 驱动时互相覆盖。它负责 UART 收发、Modbus RTU/TCP 帧、功能码、CRC、超时和响应校验；`mer.py` 才负责 MER-MCP1081-260-26 的寄存器地址、缩放和业务含义。
 
-该目录必须随当前离线包安装，因为 upypi 未发现独立的 `umodbus` 包，且 WS61 官方示例的 `package.json` 也逐文件发布该目录。本项目基于 WS61 版本，仅补充项目规范要求的参数校验和静态检查标记，不改变 Modbus 协议处理逻辑，并排除 `__pycache__`。
+该目录必须随当前离线包安装，因为 upypi 未发现独立的 `umodbus` 包，且 WS61 官方示例的 `package.json` 也逐文件发布该目录。本项目基于 WS61 版本，仅补充项目规范要求的参数校验、资源释放接口和静态检查标记，不改变 Modbus 协议处理逻辑，并排除 `__pycache__`。
 
 ## 快速开始
 
-1. 将 `code/mer.py`、`code/main.py` 和 `code/umodbus/` 上传到 MicroPython 设备根目录。
+1. 将 `code/mer.py`、`code/main.py` 和 `code/mcp1081_umodbus/` 上传到 MicroPython 设备根目录。
 2. 按上表连接 TX、RX、电源和地。
 3. 运行 `main.py`。
 
-规范化版本采用依赖注入：由应用创建 Modbus 主机，再传给驱动。
+规范化版本采用依赖注入：由应用创建 Modbus 主机，再传给驱动。该主机需提供寄存器读写和 `write_raw()`，后者仅用于发送传感器规定的 `0x8F` 唤醒字节。
 
 ```python
 from mer import MER
-from umodbus.serial import Serial as ModbusRTUMaster
+from mcp1081_umodbus.serial import Serial as ModbusRTUMaster
 
 host = ModbusRTUMaster(
     pins=(16, 17), baudrate=9600, data_bits=8,
