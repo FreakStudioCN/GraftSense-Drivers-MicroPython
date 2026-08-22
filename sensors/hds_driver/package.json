@@ -1,0 +1,55 @@
+{
+  "name": "hds_driver",
+  "version": "1.0.0",
+  "description": "MicroPython Modbus RTU driver for the Mysentech HDS humidity detection sensor",
+  "author": "December",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl，all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "hds_umodbus/__init__.py",
+      "code/hds_umodbus/__init__.py"
+    ],
+    [
+      "hds_umodbus/common.py",
+      "code/hds_umodbus/common.py"
+    ],
+    [
+      "hds_umodbus/const.py",
+      "code/hds_umodbus/const.py"
+    ],
+    [
+      "hds_umodbus/functions.py",
+      "code/hds_umodbus/functions.py"
+    ],
+    [
+      "hds_umodbus/modbus.py",
+      "code/hds_umodbus/modbus.py"
+    ],
+    [
+      "hds_umodbus/serial.py",
+      "code/hds_umodbus/serial.py"
+    ],
+    [
+      "hds_umodbus/tcp.py",
+      "code/hds_umodbus/tcp.py"
+    ],
+    [
+      "hds_umodbus/typing.py",
+      "code/hds_umodbus/typing.py"
+    ],
+    [
+      "hds_umodbus/version.py",
+      "code/hds_umodbus/version.py"
+    ],
+    [
+      "hds.py",
+      "code/hds.py"
+    ]
+  ]
+}
