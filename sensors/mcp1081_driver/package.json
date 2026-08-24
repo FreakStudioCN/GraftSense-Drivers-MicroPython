@@ -1,0 +1,25 @@
+{
+  "name": "mcp1081_driver",
+  "version": "2.1.0",
+  "description": "MicroPython Modbus RTU driver for the MER-MCP1081-260-26 water-level sensor",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件，all表示无固件依赖"
+  },
+  "urls": [
+    ["mer.py", "code/mer.py"],
+    ["mcp1081_umodbus/__init__.py", "code/mcp1081_umodbus/__init__.py"],
+    ["mcp1081_umodbus/common.py", "code/mcp1081_umodbus/common.py"],
+    ["mcp1081_umodbus/const.py", "code/mcp1081_umodbus/const.py"],
+    ["mcp1081_umodbus/functions.py", "code/mcp1081_umodbus/functions.py"],
+    ["mcp1081_umodbus/modbus.py", "code/mcp1081_umodbus/modbus.py"],
+    ["mcp1081_umodbus/serial.py", "code/mcp1081_umodbus/serial.py"],
+    ["mcp1081_umodbus/tcp.py", "code/mcp1081_umodbus/tcp.py"],
+    ["mcp1081_umodbus/typing.py", "code/mcp1081_umodbus/typing.py"],
+    ["mcp1081_umodbus/version.py", "code/mcp1081_umodbus/version.py"]
+  ]
+}

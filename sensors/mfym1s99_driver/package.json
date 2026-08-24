@@ -1,0 +1,19 @@
+{
+  "name": "mfym1s99_driver",
+  "urls": [
+    [
+      "mfym1s99.py",
+      "code/mfym1s99.py"
+    ]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython UART driver for the MYSENTECH MFYM-1S-9-9 flexible pressure sensor",
+  "author": "December",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}
