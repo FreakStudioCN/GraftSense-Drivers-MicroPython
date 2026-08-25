@@ -195,9 +195,9 @@ SX126X/SX1262 结构主要参考 MIT 许可的 FreakStudioCN/GraftSense-Drivers-
 
 MIT License
 
-Copyright (c) 2018 Jan Gromes  
-Copyright (c) 2020 E H Ong  
-Copyright (c) 2026 GraftSense  
+Copyright (c) 2018 Jan Gromes
+Copyright (c) 2020 E H Ong
+Copyright (c) 2026 GraftSense
 Copyright (c) 2026 FreakStudio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

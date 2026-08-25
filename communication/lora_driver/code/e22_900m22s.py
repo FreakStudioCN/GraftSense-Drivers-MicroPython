@@ -106,6 +106,20 @@ class E22_900M22S:
         """
         if spi is None:
             raise ValueError("spi must not be None")
+        if cs is None:
+            raise ValueError("cs must not be None")
+        if reset is None:
+            raise ValueError("reset must not be None")
+        if busy is None:
+            raise ValueError("busy must not be None")
+        if dio1 is None:
+            raise ValueError("dio1 must not be None")
+        if not isinstance(busy_timeout_ms, int):
+            raise TypeError("busy_timeout_ms must be int")
+        if busy_timeout_ms <= 0:
+            raise ValueError("busy_timeout_ms must be greater than zero")
+        if not isinstance(debug, bool):
+            raise TypeError("debug must be bool")
         self._radio = SX1262(
             spi,
             cs,
@@ -237,6 +251,28 @@ class E22_900M22S:
         """
         if frequency_mhz is None:
             raise ValueError("frequency_mhz must not be None")
+        if not isinstance(bandwidth_khz, (int, float)):
+            raise TypeError("bandwidth_khz must be int or float")
+        if abs(float(bandwidth_khz) - 125.0) > 0.001:
+            raise ValueError("bandwidth_khz must be 125.0")
+        if not isinstance(spreading_factor, int):
+            raise TypeError("spreading_factor must be int")
+        if not 5 <= spreading_factor <= 12:
+            raise ValueError("spreading_factor must be between 5 and 12")
+        if not isinstance(coding_rate, int):
+            raise TypeError("coding_rate must be int")
+        if not 5 <= coding_rate <= 8:
+            raise ValueError("coding_rate must be between 5 and 8")
+        if not isinstance(output_power_dbm, int):
+            raise TypeError("output_power_dbm must be int")
+        if not -9 <= output_power_dbm <= 22:
+            raise ValueError("output_power_dbm must be between -9 and 22")
+        if not isinstance(preamble_length, int):
+            raise TypeError("preamble_length must be int")
+        if not 1 <= preamble_length <= 0xFFFF:
+            raise ValueError("preamble_length must be between 1 and 65535")
+        if not isinstance(use_regulator_ldo, bool):
+            raise TypeError("use_regulator_ldo must be bool")
         self._validate_e22_frequency(frequency_mhz)
         return self._radio.build_lora_initialization_plan(
             frequency_mhz,
@@ -295,6 +331,28 @@ class E22_900M22S:
         """
         if frequency_mhz is None:
             raise ValueError("frequency_mhz must not be None")
+        if not isinstance(bandwidth_khz, (int, float)):
+            raise TypeError("bandwidth_khz must be int or float")
+        if abs(float(bandwidth_khz) - 125.0) > 0.001:
+            raise ValueError("bandwidth_khz must be 125.0")
+        if not isinstance(spreading_factor, int):
+            raise TypeError("spreading_factor must be int")
+        if not 5 <= spreading_factor <= 12:
+            raise ValueError("spreading_factor must be between 5 and 12")
+        if not isinstance(coding_rate, int):
+            raise TypeError("coding_rate must be int")
+        if not 5 <= coding_rate <= 8:
+            raise ValueError("coding_rate must be between 5 and 8")
+        if not isinstance(output_power_dbm, int):
+            raise TypeError("output_power_dbm must be int")
+        if not -9 <= output_power_dbm <= 22:
+            raise ValueError("output_power_dbm must be between -9 and 22")
+        if not isinstance(preamble_length, int):
+            raise TypeError("preamble_length must be int")
+        if not 1 <= preamble_length <= 0xFFFF:
+            raise ValueError("preamble_length must be between 1 and 65535")
+        if not isinstance(use_regulator_ldo, bool):
+            raise TypeError("use_regulator_ldo must be bool")
         self._validate_e22_frequency(frequency_mhz)
         self._initialized = False
         self._radio.initialize_lora(
@@ -338,6 +396,10 @@ class E22_900M22S:
         """
         if data is None:
             raise ValueError("data must not be None")
+        if not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int")
+        if timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         self._validate_payload(data)
         self._validate_timeout(timeout_ms)
         if not self._initialized:
@@ -378,6 +440,10 @@ class E22_900M22S:
             raise TypeError("max_length must be int")
         if not 1 <= max_length <= SX126X_MAX_PACKET_LENGTH:
             raise ValueError("max_length must be between 1 and 255")
+        if not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int")
+        if timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         self._validate_timeout(timeout_ms)
         if not self._initialized:
             raise RuntimeError("device must be initialized before receive")

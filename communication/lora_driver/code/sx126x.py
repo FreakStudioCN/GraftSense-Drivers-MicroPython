@@ -344,6 +344,18 @@ class SX126X:
         """
         if spi is None:
             raise ValueError("spi must not be None")
+        if cs is None:
+            raise ValueError("cs must not be None")
+        if reset is None:
+            raise ValueError("reset must not be None")
+        if busy is None:
+            raise ValueError("busy must not be None")
+        if dio1 is None:
+            raise ValueError("dio1 must not be None")
+        if not isinstance(busy_timeout_ms, int):
+            raise TypeError("busy_timeout_ms must be int")
+        if busy_timeout_ms <= 0:
+            raise ValueError("busy_timeout_ms must be greater than zero")
         self._validate_spi(spi)
         self._validate_pin(cs, "cs")
         self._validate_pin(reset, "reset")
@@ -443,6 +455,10 @@ class SX126X:
         """
         if timeout_ms is None:
             timeout_ms = self._busy_timeout_ms
+        if not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int")
+        if timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         self._validate_timeout(timeout_ms, "timeout_ms")
         if not isinstance(operation, str):
             raise TypeError("operation must be str")
@@ -587,6 +603,10 @@ class SX126X:
             raise TypeError("delay_us must be int")
         if delay_us <= 0:
             raise ValueError("delay_us must be greater than zero")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         if timeout_ms is None:
             timeout_ms = self._busy_timeout_ms
         self._validate_timeout(timeout_ms, "timeout_ms")
@@ -635,6 +655,10 @@ class SX126X:
             raise ValueError("enable must not be None")
         if not isinstance(enable, bool):
             raise TypeError("enable must be bool")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         if timeout_ms is None:
             timeout_ms = self._busy_timeout_ms
         self._validate_timeout(timeout_ms, "timeout_ms")
@@ -672,6 +696,10 @@ class SX126X:
             raise ValueError("use_ldo must not be None")
         if not isinstance(use_ldo, bool):
             raise TypeError("use_ldo must be bool")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         mode = SX126X_REGULATOR_LDO if use_ldo else SX126X_REGULATOR_DCDC
         self._write_command(SX126X_CMD_SET_REGULATOR_MODE, bytes((mode,)), timeout_ms)
@@ -769,6 +797,10 @@ class SX126X:
             raise TypeError("frequency_mhz must be int or float")
         if not 850.0 <= frequency_mhz <= 930.0:
             raise ValueError("frequency_mhz must be between 850.0 and 930.0")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         calibration = (0xE1, 0xE9) if frequency_mhz > 900.0 else (0xD7, 0xDB)
         self._write_command(SX126X_CMD_CALIBRATE_IMAGE, bytes(calibration), timeout_ms)
@@ -920,6 +952,10 @@ class SX126X:
             raise TypeError("frequency_mhz must be int or float")
         if not 150.0 <= frequency_mhz <= 960.0:
             raise ValueError("frequency_mhz must be between 150.0 and 960.0")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         raw = int((frequency_mhz * (1 << 25)) / 32.0)
         payload = bytes(((raw >> 24) & 0xFF, (raw >> 16) & 0xFF, (raw >> 8) & 0xFF, raw & 0xFF))
@@ -976,6 +1012,10 @@ class SX126X:
             raise TypeError("coding_rate must be int")
         if not 5 <= coding_rate <= 8:
             raise ValueError("coding_rate must be between 5 and 8")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         coding_rate_raw = coding_rate - 4
         symbol_time_ms = float(1 << spreading_factor) / 125.0
@@ -1027,6 +1067,10 @@ class SX126X:
             raise TypeError("payload_length must be int")
         if not 0 <= payload_length <= 255:
             raise ValueError("payload_length must be between 0 and 255")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         payload = bytes(
             (
@@ -1120,6 +1164,10 @@ class SX126X:
             raise TypeError("ramp_time must be int")
         if not 0x00 <= ramp_time <= 0x07:
             raise ValueError("ramp_time must be a valid SX126X ramp code")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         payload = bytes((output_power_dbm & 0xFF, ramp_time))
         self._write_command(SX126X_CMD_SET_TX_PARAMS, payload, timeout_ms)
@@ -1163,6 +1211,10 @@ class SX126X:
             raise TypeError("length must be int")
         if not 1 <= length <= 255:
             raise ValueError("length must be between 1 and 255")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         parameters = bytes(((address >> 8) & 0xFF, address & 0xFF))
         return self._read_command(SX126X_CMD_READ_REGISTER, length, timeout_ms, parameters)
@@ -1205,6 +1257,10 @@ class SX126X:
             raise TypeError("data must be bytes-like")
         if not 1 <= len(data) <= 255:
             raise ValueError("data length must be between 1 and 255")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         payload = bytes(((address >> 8) & 0xFF, address & 0xFF)) + bytes(data)
         self._write_command(SX126X_CMD_WRITE_REGISTER, payload, timeout_ms)
@@ -1393,6 +1449,10 @@ class SX126X:
             raise TypeError("buffer base addresses must be int")
         if not 0 <= tx_base <= 255 or not 0 <= rx_base <= 255:
             raise ValueError("buffer base addresses must be between 0 and 255")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         self._write_command(
             SX126X_CMD_SET_BUFFER_BASE_ADDRESS,
@@ -1461,6 +1521,10 @@ class SX126X:
             raise TypeError("irq_mask must be int")
         if not 0 <= irq_mask <= SX126X_IRQ_ALL:
             raise ValueError("irq_mask must be between 0 and 0x03FF")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         self._write_command(
             SX126X_CMD_CLEAR_IRQ_STATUS,
@@ -1507,6 +1571,10 @@ class SX126X:
             raise ValueError("offset must be between 0 and 255")
         if not 1 <= len(data) <= 255 or offset + len(data) > 256:
             raise ValueError("data must fit inside the 256-byte FIFO")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         self._write_command(SX126X_CMD_WRITE_BUFFER, bytes((offset,)) + bytes(data), timeout_ms)
         return self._validated_status(timeout_ms, "WriteBuffer")
@@ -1569,6 +1637,10 @@ class SX126X:
             raise ValueError("offset must be an int between 0 and 255")
         if not isinstance(length, int) or not 1 <= length <= 255:
             raise ValueError("length must be an int between 1 and 255")
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         timeout_ms = self._resolve_timeout(timeout_ms)
         return self._read_command(
             SX126X_CMD_READ_BUFFER,
@@ -1630,6 +1702,10 @@ class SX126X:
         """
         if timeout_ms is None:
             raise ValueError("timeout_ms must not be None")
+        if not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int")
+        if timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         self._validate_timeout(timeout_ms, "timeout_ms")
         timeout_raw = timeout_ms * 64
         if timeout_raw > 0xFFFFFF:
@@ -1660,6 +1736,10 @@ class SX126X:
         Notes:
             - May access or modify driver state; ISR-safe: No.
         """
+        if not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int")
+        if timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         self._validate_timeout(timeout_ms, "timeout_ms")
         timeout_raw = timeout_ms * 64
         if timeout_raw > 0xFFFFFF:

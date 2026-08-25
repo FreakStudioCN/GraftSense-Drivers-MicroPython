@@ -124,7 +124,7 @@ class E22UARTBridge:
             try:
                 chunk = self._uart.read(available)
             except OSError as error:
-                raise RuntimeError("UART read failed: %s" % str(error)) from error
+                raise RuntimeError("UART read failed: %s" % str(error))
             if chunk:
                 self._rx_buffer.extend(chunk)
         if len(self._rx_buffer) > MAX_LINE_LENGTH:
@@ -302,7 +302,7 @@ class E22UARTBridge:
                 )
             )
         except OSError as error:
-            raise RuntimeError("UART write failed: %s" % str(error)) from error
+            raise RuntimeError("UART write failed: %s" % str(error))
 
 
 # ======================================== 初始化配置 ==========================================

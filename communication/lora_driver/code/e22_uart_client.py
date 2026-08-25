@@ -385,7 +385,7 @@ class E22UARTClient:
         try:
             self._uart.write(encode_frame(request))
         except OSError as error:
-            raise E22UARTError("UART write failed: %s" % str(error)) from error
+            raise E22UARTError("UART write failed: %s" % str(error))
         response = self._read_response(timeout_ms or self._timeout_ms, request_id)
         if response.get("id") != request_id:
             raise E22UARTError("response id mismatch")
@@ -408,7 +408,7 @@ class E22UARTClient:
                 try:
                     chunk = self._uart.read(available)
                 except OSError as error:
-                    raise E22UARTError("UART read failed: %s" % str(error)) from error
+                    raise E22UARTError("UART read failed: %s" % str(error))
                 if chunk:
                     self._rx_buffer.extend(chunk)
                     while True:
