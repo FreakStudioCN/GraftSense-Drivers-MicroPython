@@ -549,6 +549,8 @@ class SX126X:
         Returns:
             int: 方法返回值。
         Raises:
+            TypeError: timeout_ms 不是 int 或 None。
+            ValueError: timeout_ms 不是正整数。
             SX126XSPIError: 参数、状态或通信异常。
         Notes:
             - 可能访问或修改驱动状态；ISR-safe: 否。
@@ -559,10 +561,16 @@ class SX126X:
         Returns:
             int: Method return value.
         Raises:
+            TypeError: timeout_ms is not int or None.
+            ValueError: timeout_ms is not positive.
             SX126XSPIError: Parameter, state, or communication error.
         Notes:
             - May access or modify driver state; ISR-safe: No.
         """
+        if timeout_ms is not None and not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int or None")
+        if timeout_ms is not None and timeout_ms <= 0:
+            raise ValueError("timeout_ms must be greater than zero")
         if timeout_ms is None:
             timeout_ms = self._busy_timeout_ms
         self._validate_timeout(timeout_ms, "timeout_ms")
