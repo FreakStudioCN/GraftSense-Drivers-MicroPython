@@ -1,0 +1,10 @@
+{
+  "name": "passive_buzzer_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative async PWM passive buzzer driver for MicroPython",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["buzzer.py", "code/buzzer.py"], ["buzzer_async.py", "code/buzzer_async.py"]]
+}

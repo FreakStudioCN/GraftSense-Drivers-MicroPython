@@ -1,0 +1,15 @@
+{
+    "name":  "si7021_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of si7021_driver",
+    "urls":  [
+                 [
+                     "si7021.py",
+                     "code/si7021.py"
+                 ],
+                 [
+                     "si7021_async.py",
+                     "code/si7021_async.py"
+                 ]
+             ]
+}

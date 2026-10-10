@@ -1,0 +1,23 @@
+{
+    "name":  "snr9816_tts_async_driver",
+    "version":  "1.0.0",
+    "description":  "A MicroPython library controlling the SNR9816 TTS synthesis chip via UART interface",
+    "author":  "leeqingshui",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "urls":  [
+                 [
+                     "snr9816_tts.py",
+                     "code/snr9816_tts.py"
+                 ],
+                 [
+                     "snr9816_tts_async.py",
+                     "code/snr9816_tts_async.py"
+                 ]
+             ]
+}

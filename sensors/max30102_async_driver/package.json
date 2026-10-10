@@ -1,0 +1,10 @@
+{
+  "name": "max30102_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython MAX30102 PPG and heart-rate driver",
+  "author": "n-elia",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["max30102.py", "code/max30102.py"], ["max30102_async.py", "code/max30102_async.py"], ["circular_buffer.py", "code/circular_buffer.py"], ["heart_rate_monitor.py", "code/heart_rate_monitor.py"]]
+}

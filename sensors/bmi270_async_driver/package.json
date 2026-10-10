@@ -1,0 +1,31 @@
+{
+    "name":  "bmi270_async_driver",
+    "urls":  [
+                 [
+                     "bmi270.py",
+                     "code/bmi270.py"
+                 ],
+                 [
+                     "config_file.py",
+                     "code/config_file.py"
+                 ],
+                 [
+                     "i2c_helpers.py",
+                     "code/i2c_helpers.py"
+                 ],
+                 [
+                     "bmi270_async.py",
+                     "code/bmi270_async.py"
+                 ]
+             ],
+    "version":  "1.0.0",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "description":  "MicroPython driver for the Bosch BMI270 6-axis IMU (accelerometer + gyroscope) over I2C",
+    "author":  "Jose D. Montoya",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all"
+}

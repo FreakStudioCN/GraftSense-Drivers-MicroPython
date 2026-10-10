@@ -1,0 +1,1 @@
+{"name":"hc14_async_driver","version":"1.0.0","description":"Cooperative asynchronous MicroPython driver for HC-14 LoRa UART modules","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["hc14_lora.py","code/hc14_lora.py"],["hc14_lora_async.py","code/hc14_lora_async.py"]]}

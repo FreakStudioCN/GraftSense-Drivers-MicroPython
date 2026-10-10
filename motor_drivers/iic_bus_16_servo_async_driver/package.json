@@ -1,0 +1,1 @@
+{"name":"iic_bus_16_servo_async_driver","version":"1.0.0","description":"Async MicroPython driver package for PCA9685 bus servos","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["bus_servo_async.py","code/bus_servo_async.py"],["bus_servo.py","code/bus_servo.py"],["pca9685.py","code/pca9685.py"]]}

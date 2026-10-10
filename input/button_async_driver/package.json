@@ -1,0 +1,1 @@
+{"name":"button_async_driver","version":"1.0.0","description":"Async event bridge for GraftSense TTP223 touch button","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["touchkey.py","code/touchkey.py"],["touchkey_async.py","code/touchkey_async.py"]]}

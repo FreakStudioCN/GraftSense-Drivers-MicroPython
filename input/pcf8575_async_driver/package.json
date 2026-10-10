@@ -1,0 +1,15 @@
+{
+  "name": "pcf8575_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython PCF8575 I2C expander driver",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    ["pcf8575.py", "code/pcf8575.py"],
+    ["SSD1306.py", "code/SSD1306.py"],
+    ["menu.py", "code/menu.py"],
+    ["pcf8575_async.py", "code/pcf8575_async.py"]
+  ]
+}

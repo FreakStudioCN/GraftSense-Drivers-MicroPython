@@ -1,0 +1,1 @@
+{"name":"opto_mos_async_driver","version":"1.0.0","description":"Async adapter MicroPython driver for optocoupler MOS PWM control","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["opto_mos_simple_async.py","code/opto_mos_simple_async.py"]]}

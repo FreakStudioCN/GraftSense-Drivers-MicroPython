@@ -1,0 +1,1 @@
+{"name":"mqx_async_driver","version":"1.0.0","description":"Cooperative asynchronous MicroPython driver for MQ gas sensors","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["mqx.py","code/mqx.py"],["mqx_async.py","code/mqx_async.py"]]}

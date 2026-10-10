@@ -1,0 +1,1 @@
+{"name":"ad9833_async_driver","version":"1.0.0","description":"Async MicroPython AD9833 waveform-generator driver","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["ad9833_async.py","code/ad9833_async.py"],["ad9833.py","code/ad9833.py"],["mcp41010.py","code/mcp41010.py"]]}

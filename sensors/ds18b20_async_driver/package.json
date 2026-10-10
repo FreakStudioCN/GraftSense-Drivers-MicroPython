@@ -1,0 +1,1 @@
+{"name":"ds18b20_async_driver","version":"1.0.0","description":"Cooperative DS18B20 conversion driver","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["onewire.py","code/onewire.py"],["ds18x20.py","code/ds18x20.py"],["ds18x20_async.py","code/ds18x20_async.py"]]}

@@ -1,0 +1,13 @@
+{
+  "name": "ls3hd_async_driver",
+  "version": "1.0.1",
+  "description": "Async-facing MicroPython LIS3DH I2C driver with bounded synchronous bus operations.",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    ["lis3dh.py", "code/lis3dh.py"],
+    ["lis3dh_async.py", "code/lis3dh_async.py"]
+  ]
+}

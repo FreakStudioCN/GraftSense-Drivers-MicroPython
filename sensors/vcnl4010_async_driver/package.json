@@ -1,0 +1,23 @@
+{
+    "name":  "vcnl4010_async_driver",
+    "urls":  [
+                 [
+                     "vcnl4010.py",
+                     "code/vcnl4010.py"
+                 ],
+                 [
+                     "vcnl4010_async.py",
+                     "code/vcnl4010_async.py"
+                 ]
+             ],
+    "version":  "1.0.0",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "description":  "VCNL4010 proximity and ambient light sensor driver for MicroPython",
+    "author":  "Jose D. Montoya",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all"
+}

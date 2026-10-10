@@ -1,0 +1,1 @@
+{"name":"pn532_async_driver","version":"1.0.0","description":"Async MicroPython PN532 UART NFC driver","author":"luiz-brandao","license":"MIT","chips":"all","fw":"all","urls":[["pn532_uart_async.py","code/pn532_uart_async.py"],["pn532.py","code/pn532.py"],["pn532_uart.py","code/pn532_uart.py"]]}

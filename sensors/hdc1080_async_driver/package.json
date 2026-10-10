@@ -1,0 +1,19 @@
+{
+    "name":  "hdc1080_async_driver",
+    "version":  "1.0.1",
+    "description":  "Cooperative HDC1080 async driver",
+    "author":  "Mike Causer",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all",
+    "urls":  [
+                 [
+                     "hdc1080.py",
+                     "code/hdc1080.py"
+                 ],
+                 [
+                     "hdc1080_async.py",
+                     "code/hdc1080_async.py"
+                 ]
+             ]
+}

@@ -1,0 +1,103 @@
+try:
+    import uasyncio as asyncio
+except ImportError:
+    import asyncio
+import time
+from pn532 import MIFARE_CMD_AUTH_A
+
+class PN532_UARTAsync:
+    def __init__(self, uart, reset=None, debug=False):
+        if not hasattr(uart, "any") or not hasattr(uart, "read") or not hasattr(uart, "write"):
+            raise ValueError("uart must provide any, read and write")
+        self._uart, self._reset, self._debug = uart, reset, debug
+        self._lock = asyncio.Lock()
+        self._rx = bytearray()
+
+    def _read_uart_once(self):
+        """The command lock makes this the sole UART receive primitive."""
+        return self._uart.read()
+
+    async def _read_frame_async(self, timeout_ms):
+        deadline = time.ticks_add(time.ticks_ms(), timeout_ms)
+        while time.ticks_diff(deadline, time.ticks_ms()) > 0:
+            if self._uart.any():
+                chunk = self._read_uart_once()
+                if chunk:
+                    self._rx.extend(chunk)
+                    start = self._rx.find(b"\x00\x00\xff")
+                    if start >= 0:
+                        if start:
+                            del self._rx[:start]
+                        if len(self._rx) >= 6 and self._rx[:6] == b"\x00\x00\xff\x00\xff\x00":
+                            del self._rx[:6]
+                            return b""
+                        if len(self._rx) >= 6:
+                            length = self._rx[3]
+                            total = 7 + length
+                            if len(self._rx) >= total:
+                                payload = bytes(self._rx[5:5 + length])
+                                del self._rx[:total]
+                                return payload
+            await asyncio.sleep_ms(5)
+        raise RuntimeError("PN532 response timeout")
+
+    async def _command_async(self, command, params=b"", timeout_ms=1000):
+        async with self._lock:
+            while self._uart.any():
+                self._read_uart_once()
+            self._rx = bytearray()
+            payload = bytes([0xD4, command]) + bytes(params)
+            frame = b"\x00\x00\xff" + bytes([len(payload), (-len(payload)) & 0xff]) + payload
+            frame += bytes([(-sum(payload)) & 0xff, 0x00])
+            self._uart.write(frame)
+            ack = await self._read_frame_async(timeout_ms)
+            if ack:
+                raise RuntimeError("PN532 ACK frame is invalid")
+            response = await self._read_frame_async(timeout_ms)
+            if len(response) < 2 or response[0] != 0xD5 or response[1] != ((command + 1) & 0xff):
+                raise RuntimeError("PN532 response command mismatch")
+            return response[2:]
+
+    async def firmware_version_async(self, timeout_ms=500):
+        return await self._command_async(0x02, timeout_ms=timeout_ms)
+
+    async def SAM_configuration_async(self, timeout_ms=1000):
+        return await self._command_async(0x14, b"\x01\x14\x01", timeout_ms)
+
+    async def read_passive_target_async(self, timeout_ms=1000):
+        response = await self._command_async(0x4A, b"\x01\x00", timeout_ms)
+        if not response or response[0] != 1:
+            return None
+        if len(response) < 7 or response[5] > 7:
+            raise RuntimeError("PN532 target response is invalid")
+        return response[6:6 + response[5]]
+
+    async def mifare_classic_authenticate_block_async(self, uid, block_num, key_type, key, timeout_ms=1000):
+        response = await self._command_async(0x40, bytes([1, key_type, block_num]) + bytes(key) + bytes(uid), timeout_ms)
+        return bool(response and response[0] == 0)
+
+    async def mifare_classic_read_block_async(self, block_num, timeout_ms=1000):
+        response = await self._command_async(0x40, bytes([1, 0x30, block_num]), timeout_ms)
+        return response[1:] if response and response[0] == 0 else None
+
+    async def mifare_classic_write_block_async(self, block_num, data, timeout_ms=1000):
+        if len(data) != 16:
+            raise ValueError("Mifare block data must be 16 bytes")
+        response = await self._command_async(0x40, bytes([1, 0xA0, block_num]) + bytes(data), timeout_ms)
+        return bool(response and response[0] == 0)
+
+    async def power_down_async(self, timeout_ms=1000):
+        response = await self._command_async(0x16, b"\xb0\x00", timeout_ms)
+        return bool(response and response[0] == 0)
+
+    async def reset_async(self):
+        if self._reset is not None:
+            self._reset.value(0)
+            await asyncio.sleep_ms(100)
+            self._reset.value(1)
+            await asyncio.sleep_ms(100)
+        self._uart.write(b"\x55" * 17)
+        await asyncio.sleep_ms(10)
+
+    async def aclose(self):
+        self._uart = None

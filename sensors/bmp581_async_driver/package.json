@@ -1,0 +1,39 @@
+{
+    "name":  "bmp581_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of bmp581_driver",
+    "urls":  [
+                 [
+                     "bmp581mod.py",
+                     "code/bmp581mod.py"
+                 ],
+                 [
+                     "bmp581mod_async.py",
+                     "code/bmp581mod_async.py"
+                 ],
+                 [
+                     "sensor_pack/base_sensor.py",
+                     "code/sensor_pack/base_sensor.py"
+                 ],
+                 [
+                     "sensor_pack/bus_service.py",
+                     "code/sensor_pack/bus_service.py"
+                 ],
+                 [
+                     "sensor_pack/converter.py",
+                     "code/sensor_pack/converter.py"
+                 ],
+                 [
+                     "sensor_pack/crc_mod.py",
+                     "code/sensor_pack/crc_mod.py"
+                 ],
+                 [
+                     "sensor_pack/geosensmod.py",
+                     "code/sensor_pack/geosensmod.py"
+                 ],
+                 [
+                     "sensor_pack/__init__.py",
+                     "code/sensor_pack/__init__.py"
+                 ]
+             ]
+}

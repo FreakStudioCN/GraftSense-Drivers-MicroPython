@@ -1,0 +1,48 @@
+{
+    "source_package":  "communication/cc2530_driver",
+    "default_example":  "code/coord_to_node.py",
+    "examples":  [
+                     {
+                         "source":  "code/coord_to_node.py",
+                         "sync_baseline":  "examples/coord_to_node_sync.py",
+                         "async_example":  "code/main.py",
+                         "role":  "coordinator_to_node"
+                     },
+                     {
+                         "source":  "code/node_to_coord.py",
+                         "sync_baseline":  "examples/node_to_coord_sync.py",
+                         "async_example":  "code/main.py",
+                         "role":  "node_to_coordinator"
+                     },
+                     {
+                         "source":  "code/node_to_node.py",
+                         "sync_baseline":  "examples/node_to_node_sync.py",
+                         "async_example":  "code/main.py",
+                         "role":  "node_to_node"
+                     },
+                     {
+                         "source":  "code/transparent.py",
+                         "sync_baseline":  "examples/transparent_sync.py",
+                         "async_example":  "code/main.py",
+                         "role":  "transparent"
+                     }
+                 ],
+    "source_example_inventory":  [
+                                     {
+                                         "disposition":  "mapped",
+                                         "source":  "code/coord_to_node.py"
+                                     },
+                                     {
+                                         "disposition":  "mapped",
+                                         "source":  "code/node_to_coord.py"
+                                     },
+                                     {
+                                         "disposition":  "mapped",
+                                         "source":  "code/node_to_node.py"
+                                     },
+                                     {
+                                         "disposition":  "mapped",
+                                         "source":  "code/transparent.py"
+                                     }
+                                 ]
+}

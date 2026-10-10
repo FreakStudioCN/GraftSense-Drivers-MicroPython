@@ -1,0 +1,15 @@
+{
+    "name":  "mma8452q_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of mma8452q_driver",
+    "urls":  [
+                 [
+                     "mma8452q.py",
+                     "code/mma8452q.py"
+                 ],
+                 [
+                     "mma8452q_async.py",
+                     "code/mma8452q_async.py"
+                 ]
+             ]
+}

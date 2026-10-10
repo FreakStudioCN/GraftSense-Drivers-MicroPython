@@ -1,0 +1,15 @@
+{
+    "name":  "tcs3472_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of tcs3472_driver",
+    "urls":  [
+                 [
+                     "tcs3472.py",
+                     "code/tcs3472.py"
+                 ],
+                 [
+                     "tcs3472_async.py",
+                     "code/tcs3472_async.py"
+                 ]
+             ]
+}

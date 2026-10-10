@@ -1,0 +1,23 @@
+{
+    "name":  "stts22h_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of stts22h_driver",
+    "urls":  [
+                 [
+                     "micropython_stts22h/i2c_helpers.py",
+                     "code/micropython_stts22h/i2c_helpers.py"
+                 ],
+                 [
+                     "micropython_stts22h/stts22h.py",
+                     "code/micropython_stts22h/stts22h.py"
+                 ],
+                 [
+                     "micropython_stts22h/__init__.py",
+                     "code/micropython_stts22h/__init__.py"
+                 ],
+                 [
+                     "code/stts22h_async.py",
+                     "code/stts22h_async.py"
+                 ]
+             ]
+}

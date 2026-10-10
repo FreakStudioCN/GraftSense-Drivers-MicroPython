@@ -1,0 +1,1 @@
+{"name":"lcm1602a_async_driver","version":"1.0.0","license":"MIT","urls":[["LCD_I2C.py","code/LCD_I2C.py"],["LCD_I2C_async.py","code/LCD_I2C_async.py"]]}

@@ -1,0 +1,1 @@
+{"name":"fan_pwm_async_driver","version":"1.0.0","description":"Async adapter MicroPython driver for PWM cooling fan","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["fan_pwm_async.py","code/fan_pwm_async.py"]]}

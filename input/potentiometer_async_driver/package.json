@@ -1,0 +1,10 @@
+{
+  "name": "potentiometer_async_driver",
+  "version": "1.0.0",
+  "description": "Async adapter MicroPython driver for GraftSense potentiometer",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["potentiometer_async.py", "code/potentiometer_async.py"]]
+}

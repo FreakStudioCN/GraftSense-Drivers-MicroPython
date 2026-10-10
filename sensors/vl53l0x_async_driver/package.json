@@ -1,0 +1,13 @@
+{
+  "name": "vl53l0x_async_driver",
+  "version": "1.0.1",
+  "description": "Cooperative MicroPython VL53L0X time-of-flight ranging driver.",
+  "author": "缪贵成",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    ["vl53l0x.py", "code/vl53l0x.py"],
+    ["vl53l0x_async.py", "code/vl53l0x_async.py"]
+  ]
+}

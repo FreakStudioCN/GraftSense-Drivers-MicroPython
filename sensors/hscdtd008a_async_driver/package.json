@@ -1,0 +1,10 @@
+{
+  "name": "hscdtd008a_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython driver package for HSCDTD008A",
+  "author": "goctaprog@gmail.com",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["hscdtd008a_async.py", "code/hscdtd008a_async.py"], ["hscdtd008a.py", "code/hscdtd008a.py"], ["sensor_pack/__init__.py", "code/sensor_pack/__init__.py"], ["sensor_pack/averager.py", "code/sensor_pack/averager.py"], ["sensor_pack/base_sensor.py", "code/sensor_pack/base_sensor.py"], ["sensor_pack/bitfield.py", "code/sensor_pack/bitfield.py"], ["sensor_pack/bus_service.py", "code/sensor_pack/bus_service.py"], ["sensor_pack/converter.py", "code/sensor_pack/converter.py"], ["sensor_pack/crc_mod.py", "code/sensor_pack/crc_mod.py"], ["sensor_pack/geosensmod.py", "code/sensor_pack/geosensmod.py"]]
+}

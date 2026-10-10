@@ -1,0 +1,31 @@
+{
+  "name": "r60afd1_async_driver",
+  "version": "1.0.1",
+  "description": "Async MicroPython driver package for r60afd1",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "data_flow_processor.py",
+      "code/data_flow_processor.py"
+    ],
+    [
+      "hc08.py",
+      "code/hc08.py"
+    ],
+    [
+      "r60afd1.py",
+      "code/r60afd1.py"
+    ],
+    [
+      "r60afd1_async.py",
+      "code/r60afd1_async.py"
+    ]
+  ]
+}

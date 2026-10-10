@@ -1,0 +1,1 @@
+{"name":"lm386_speaker_async_driver","version":"1.0.0","description":"Cooperative async LM386 PWM speaker driver for MicroPython","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["lm386_speaker.py","code/lm386_speaker.py"],["lm386_speaker_sync.py","code/lm386_speaker_sync.py"],["lm386_speaker_async.py","code/lm386_speaker_async.py"]]}

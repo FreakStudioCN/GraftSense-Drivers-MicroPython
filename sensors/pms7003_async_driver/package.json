@@ -1,0 +1,1 @@
+{"name":"pms7003_async_driver","version":"1.0.2","description":"Cooperative asynchronous MicroPython driver for PMS7003","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["aqi.py","code/aqi.py"],["pms7003.py","code/pms7003.py"],["pms7003_async.py","code/pms7003_async.py"]]}

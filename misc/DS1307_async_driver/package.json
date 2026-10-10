@@ -1,0 +1,23 @@
+{
+    "name":  "DS1307_async_driver",
+    "version":  "1.0.0",
+    "description":  "A MicroPython library to control DS1307 driver",
+    "author":  "leeqingshui",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "urls":  [
+                 [
+                     "ds1307.py",
+                     "code/ds1307.py"
+                 ],
+                 [
+                     "ds1307_async.py",
+                     "code/ds1307_async.py"
+                 ]
+             ]
+}

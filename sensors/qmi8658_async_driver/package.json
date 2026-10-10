@@ -1,0 +1,23 @@
+{
+    "name":  "qmi8658_async_driver",
+    "urls":  [
+                 [
+                     "qmi8658.py",
+                     "code/qmi8658.py"
+                 ],
+                 [
+                     "qmi8658_async.py",
+                     "code/qmi8658_async.py"
+                 ]
+             ],
+    "version":  "0.1.0",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "description":  "QMI8658/QMI8658C 6-axis IMU driver for MicroPython",
+    "author":  "FreakStudio",
+    "license":  "Apache-2.0",
+    "chips":  "all",
+    "fw":  "all"
+}

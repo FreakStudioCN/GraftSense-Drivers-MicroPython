@@ -1,0 +1,1 @@
+{"name":"sht35_async_driver","version":"1.0.0","description":"Cooperative MicroPython SHT35 driver","author":"mimingxuan","license":"MIT","chips":"all","fw":"all","urls":[["sht35.py","code/sht35.py"],["sht35_async.py","code/sht35_async.py"]]}

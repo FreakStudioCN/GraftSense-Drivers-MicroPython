@@ -1,0 +1,16 @@
+{
+  "name": "lsm6dsox_async_driver",
+  "urls": [
+    ["i2c_helpers.py", "code/i2c_helpers.py"],
+    ["lsm6dsox.py", "code/lsm6dsox.py"],
+    ["i2c_helpers_async.py", "code/i2c_helpers_async.py"],
+    ["lsm6dsox_async.py", "code/lsm6dsox_async.py"]
+  ],
+  "version": "1.0.0",
+  "_comments": {"chips": "该包支持运行的芯片型号，all表示无芯片限制", "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"},
+  "description": "MicroPython driver for the ST LSM6DSOX 6-axis IMU (accelerometer + gyroscope + temperature) over I2C",
+  "author": "Jose D. Montoya",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

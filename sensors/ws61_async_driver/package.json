@@ -1,0 +1,22 @@
+{
+  "name": "ws61_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative MicroPython driver for the WS61 water sensor",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    ["umodbus/__init__.py", "code/umodbus/__init__.py"],
+    ["umodbus/common.py", "code/umodbus/common.py"],
+    ["umodbus/const.py", "code/umodbus/const.py"],
+    ["umodbus/functions.py", "code/umodbus/functions.py"],
+    ["umodbus/modbus.py", "code/umodbus/modbus.py"],
+    ["umodbus/serial.py", "code/umodbus/serial.py"],
+    ["umodbus/tcp.py", "code/umodbus/tcp.py"],
+    ["umodbus/typing.py", "code/umodbus/typing.py"],
+    ["umodbus/version.py", "code/umodbus/version.py"],
+    ["wd61.py", "code/wd61.py"],
+    ["ws61_async.py", "code/ws61_async.py"]
+  ]
+}

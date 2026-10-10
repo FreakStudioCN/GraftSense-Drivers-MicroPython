@@ -1,0 +1,13 @@
+{
+  "name": "bno055_async_driver",
+  "urls": [
+    ["bno055_async.py", "code/bno055_async.py"],
+    ["bno055_base.py", "code/bno055_base.py"]
+  ],
+  "version": "1.0.0",
+  "description": "Cooperative async MicroPython driver for the BNO055 9-axis IMU",
+  "author": "Peter Hinch",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

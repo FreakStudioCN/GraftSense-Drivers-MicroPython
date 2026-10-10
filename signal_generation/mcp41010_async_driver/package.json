@@ -1,0 +1,10 @@
+{
+  "name": "mcp41010_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython driver package for MCP41010 DDS control",
+  "author": "李清水",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["dds_async.py", "code/dds_async.py"], ["mcp41010.py", "code/mcp41010.py"], ["ad9833.py", "code/ad9833.py"]]
+}

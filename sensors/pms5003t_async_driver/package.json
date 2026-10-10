@@ -1,0 +1,1 @@
+{"name":"pms5003t_async_driver","version":"1.0.2","description":"Normalized async PMS5003T driver","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["pms5003.py","code/pms5003.py"]]}

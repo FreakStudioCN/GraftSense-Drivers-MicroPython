@@ -1,0 +1,20 @@
+{
+    "name":  "bmm150_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of bmm150_driver",
+    "urls":  [
+                 [
+                     "micropython_bmm150/bmm150.py",
+                     "code/micropython_bmm150/bmm150.py"
+                 ],
+                 [
+                     "micropython_bmm150/i2c_helpers.py",
+                     "code/micropython_bmm150/i2c_helpers.py"
+                 ],
+                 [
+                     "micropython_bmm150/__init__.py",
+                     "code/micropython_bmm150/__init__.py"
+                 ],
+                 ["bmm150_async.py", "code/bmm150_async.py"]
+             ]
+}
