@@ -4,7 +4,9 @@ try:
 except ImportError:
     import asyncio
 
-from mpu6886 import MPU6886, _PWR_MGMT_1, ACCEL_FS_SEL_2G, GYRO_FS_SEL_250DPS, SF_M_S2, SF_RAD_S
+from mpu6886 import MPU6886, ACCEL_FS_SEL_2G, GYRO_FS_SEL_250DPS, SF_M_S2, SF_RAD_S
+
+PWR_MGMT_1_REG = 0x6B
 
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
@@ -21,14 +23,14 @@ class MPU6886Async(MPU6886):
         chip_id = self.whoami
         if chip_id != 0x19:
             raise RuntimeError("MPU6886 not found at I2C address 0x%02X, device ID: 0x%02X" % (address, chip_id))
-        self._register_char(_PWR_MGMT_1, 0b10000000)
+        self._register_char(PWR_MGMT_1_REG, 0b10000000)
         self._pending_start = (accel_fs, gyro_fs, accel_sf, gyro_sf, gyro_offset)
         self._started = False
 
     async def start_async(self):
         if not self._started:
             await asyncio.sleep_ms(100)
-            self._register_char(_PWR_MGMT_1, 0b00000001)
+            self._register_char(PWR_MGMT_1_REG, 0b00000001)
             accel_fs, gyro_fs, accel_sf, gyro_sf, gyro_offset = self._pending_start
             self._accel_so = self._accel_fs(accel_fs)
             self._gyro_so = self._gyro_fs(gyro_fs)

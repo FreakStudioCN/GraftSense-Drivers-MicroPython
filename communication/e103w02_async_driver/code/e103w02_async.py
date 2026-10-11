@@ -100,11 +100,13 @@ class E103W02Async(E103W02):
         timeout=self._timeout_ms if timeout_ms is None else timeout_ms
         deadline=time.ticks_add(time.ticks_ms(),timeout); result=bytearray()
         async with self._uart_lock:
-            while time.ticks_diff(deadline,time.ticks_ms())>0:
+            while True:
                 n=self._uart_any()
                 if n:
                     result.extend(await self._read_bytes_async(deadline, 0 if size is None else size-len(result)))
                     if size is None or len(result)>=size:break
+                if time.ticks_diff(deadline,time.ticks_ms())<=0:
+                    break
                 await asyncio.sleep_ms(2)
         return bytes(result)
     async def readline_async(self,timeout_ms=0,max_bytes=1024):

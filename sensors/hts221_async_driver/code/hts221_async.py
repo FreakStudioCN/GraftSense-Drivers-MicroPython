@@ -13,22 +13,25 @@ try:
 except ImportError:
     import asyncio
 
-try:
-    from time import ticks_diff, ticks_ms
-except ImportError:
-    from utime import ticks_diff, ticks_ms
+import time
 
 from hts221 import (
     BDU_ENABLED,
     HTS221,
     RATE_12_5_HZ,
-    _HTS221_CHIP_ID,
-    _WAIT_POLL_MS,
-    _WAIT_TIMEOUT_MS,
 )
 
 
 # ======================================== 全局变量 ============================================
+HTS221_CHIP_ID = 0xBC
+WAIT_TIMEOUT_MS = 1000
+WAIT_POLL_MS = 2
+
+def _ticks_ms():
+    return time.ticks_ms() if hasattr(time, "ticks_ms") else int(time.monotonic() * 1000)
+
+def _ticks_diff(end, start):
+    return time.ticks_diff(end, start) if hasattr(time, "ticks_diff") else end - start
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
 class HTS221Async(HTS221):
@@ -48,20 +51,20 @@ class HTS221Async(HTS221):
         self._address = address
         self._debug = debug
 
-    async def initialize_async(self, timeout_ms=_WAIT_TIMEOUT_MS):
+    async def initialize_async(self, timeout_ms=WAIT_TIMEOUT_MS):
         """Run the source startup, calibration and default-register sequence cooperatively."""
         try:
             chip_id = self._device_id
         except OSError as error:
             raise RuntimeError("Failed to communicate with HTS221 at 0x%02X" % self._address) from error
-        if chip_id != _HTS221_CHIP_ID:
-            raise RuntimeError("Failed to find HTS221: expected 0x%02X, got 0x%02X" % (_HTS221_CHIP_ID, chip_id))
+        if chip_id != HTS221_CHIP_ID:
+            raise RuntimeError("Failed to find HTS221: expected 0x%02X, got 0x%02X" % (HTS221_CHIP_ID, chip_id))
         self._boot_bit = True
-        started = ticks_ms()
+        started = _ticks_ms()
         while self._boot_bit:
-            if ticks_diff(ticks_ms(), started) >= timeout_ms:
+            if _ticks_diff(_ticks_ms(), started) >= timeout_ms:
                 raise RuntimeError("HTS221 boot timeout")
-            await asyncio.sleep_ms(_WAIT_POLL_MS)
+            await asyncio.sleep_ms(WAIT_POLL_MS)
         self.enabled = True
         self.data_rate = RATE_12_5_HZ
         self._block_data_update = BDU_ENABLED
@@ -100,14 +103,14 @@ class HTS221Async(HTS221):
         """Set the source data-rate register field."""
         self.data_rate = value
 
-    async def take_measurements_async(self, timeout_ms=_WAIT_TIMEOUT_MS):
+    async def take_measurements_async(self, timeout_ms=WAIT_TIMEOUT_MS):
         """Trigger one-shot conversion using the source timeout and poll period."""
         self._one_shot_bit = True
-        started = ticks_ms()
+        started = _ticks_ms()
         while self._one_shot_bit:
-            if ticks_diff(ticks_ms(), started) >= timeout_ms:
+            if _ticks_diff(_ticks_ms(), started) >= timeout_ms:
                 raise RuntimeError("HTS221 one-shot measurement timeout")
-            await asyncio.sleep_ms(_WAIT_POLL_MS)
+            await asyncio.sleep_ms(WAIT_POLL_MS)
 
     async def get_block_data_update_async(self):
         """Return the source block-data-update setting name."""

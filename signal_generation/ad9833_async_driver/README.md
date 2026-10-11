@@ -77,16 +77,21 @@ try:
 except ImportError:
     import asyncio
 from ad9833_async import AD9833Async
+from machine import Pin, SPI
 
 async def main():
     print("FreakStudio: starting async driver demo")
-    dds = AD9833Async(sdo=19, clk=18, cs=20, fmclk=25, spi_id=0)
+    clk = Pin(18, Pin.OUT)
+    cs = Pin(20, Pin.OUT)
+    spi = SPI(0, baudrate=1000000, polarity=0, phase=1, sck=clk, mosi=Pin(19))
+    dds = AD9833Async(spi, cs, clk, fmclk=25)
     try:
         await dds.set_mode_async("SIN")
         await dds.set_frequency_async(1000, 0)
         await dds.set_phase_async(0, 0)
     finally:
         await dds.aclose()
+        spi.deinit()
 
 asyncio.run(main())
 ```

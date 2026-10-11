@@ -20,6 +20,7 @@ GATEWAY = (192, 168, 2, 254)
 TARGET_IP = (192, 168, 2, 217)
 TARGET_PORT = 2000
 UART_BAUDRATE = 9600
+TCP_CLIENT = 1
 
 # ======================================== 功能函数 ============================================
 async def main() -> None:
@@ -27,7 +28,7 @@ async def main() -> None:
     await asyncio.sleep_ms(3000)
     eth = ch9121.CH9121Async(UART(0, baudrate=UART_BAUDRATE, tx=Pin(16), rx=Pin(17)), Pin(19, Pin.OUT))
     try:
-        await eth.set_mode(ch9121.TCP_CLIENT)
+        await eth.set_mode(TCP_CLIENT)
         await eth.set_gateway(GATEWAY)
         await eth.set_target_ip(TARGET_IP)
         await eth.set_target_port(TARGET_PORT)

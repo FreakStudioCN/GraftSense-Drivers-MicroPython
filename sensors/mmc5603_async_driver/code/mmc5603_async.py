@@ -6,7 +6,9 @@ try:
 except ImportError:
     import asyncio
 
-from micropython_mmc5603.mmc5603 import MMC5603, _DATA
+from micropython_mmc5603.mmc5603 import MMC5603
+
+DATA_REG = 0x00
 
 
 # ======================================== 全局变量 ============================================
@@ -70,7 +72,7 @@ class MMC5603Async(MMC5603):
         if not self.continuous_mode:
             self._ctrl0_reg = 0x01
             await self._wait_done_async(lambda: self._meas_m_done, "magnetic measurement", timeout_ms)
-        self._i2c.readfrom_mem_into(self._address, _DATA, self._buffer)
+        self._i2c.readfrom_mem_into(self._address, DATA_REG, self._buffer)
         x = self._buffer[0] << 12 | self._buffer[1] << 4 | self._buffer[6] >> 4
         y = self._buffer[2] << 12 | self._buffer[3] << 4 | self._buffer[7] >> 4
         z = self._buffer[4] << 12 | self._buffer[5] << 4 | self._buffer[8] >> 4

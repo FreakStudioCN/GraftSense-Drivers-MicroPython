@@ -17,6 +17,10 @@ from machine import UART
 from machine import Pin
 import struct
 import time
+try:
+    import uasyncio as asyncio
+except ImportError:
+    import asyncio
 
 # custom packages
 from . import const as Const

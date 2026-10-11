@@ -60,13 +60,11 @@ class MLX90640Async(MLX90640):
         """Read a frame in bounded I2C chunks, yielding between transactions."""
         chunk_words = min(self.i2c_read_len, 64)
         chunk = [0] * chunk_words
-        offset = 0
-        while offset < word_count:
+        for offset in range(0, word_count, chunk_words):
             count = min(chunk_words, word_count - offset)
             self._i2c_read_words(address + offset, chunk, end=count)
             for index in range(count):
                 buffer[offset + index] = chunk[index]
-            offset += count
             await asyncio.sleep_ms(0)
     async def _calculate_to_async(self, emissivity: float, tr: float, result: list) -> None:
             """

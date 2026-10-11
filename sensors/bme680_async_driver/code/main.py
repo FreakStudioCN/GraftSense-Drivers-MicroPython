@@ -30,8 +30,8 @@ async def main():
         await bme.initialize_async()
         print("BME680 initialized successfully at 0x%02x" % sensor_addr)
         while True:
-            await bme.read_async()
-            print("T: %.2f C  H: %.2f %%  P: %.2f hPa  Gas: %d ohm  Alt: %.2f m" % (bme.temperature, bme.humidity, bme.pressure, bme.gas, bme.altitude))
+            temperature, humidity, pressure, gas, altitude = await bme.measurements_async()
+            print("T: %.2f C  H: %.2f %%  P: %.2f hPa  Gas: %d ohm  Alt: %.2f m" % (temperature, humidity, pressure, gas, altitude))
             await asyncio.sleep_ms(2000)
     finally:
         if bme is not None:

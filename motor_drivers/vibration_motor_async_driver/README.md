@@ -76,6 +76,7 @@ except ImportError:
     import asyncio
 
 from vibration_motor_async import VibrationMotorAsync
+from machine import Pin, PWM
 
 
 async def demo_full(motor):
@@ -105,13 +106,19 @@ async def demo_low(motor):
 async def main():
     print("FreakStudio: starting async driver demo")
     await asyncio.sleep_ms(3000)
-    motor = VibrationMotorAsync(pin=6, pwm_freq=1000)
+    pwm = PWM(Pin(6, Pin.OUT))
+    pwm.freq(1000)
+    pwm.duty_u16(0)
+    motor = VibrationMotorAsync(pwm)
     try:
         await demo_full(motor)
         await demo_half(motor)
         await demo_low(motor)
     finally:
-        await motor.aclose()
+        try:
+            await motor.aclose()
+        finally:
+            pwm.deinit()
 
 
 asyncio.run(main())

@@ -6,6 +6,20 @@ except ImportError:
 
 import ads1015 as _source
 
+REGISTER_CONVERT = 0x00
+REGISTER_CONFIG = 0x01
+OS_SINGLE = 0x8000
+OS_NOTBUSY = 0x8000
+MODE_SINGLE = 0x0100
+DR_1600SPS = 0x0080
+CMODE_TRAD = 0x0000
+CPOL_ACTVLOW = 0x0000
+CLAT_NONLAT = 0x0000
+CQUE_NONE = 0x0003
+GAINS = (0x0000, 0x0200, 0x0400, 0x0600, 0x0800, 0x0A00)
+CHANNELS = (0x4000, 0x5000, 0x6000, 0x7000)
+DIFFS = {(0, 1): 0x0000, (0, 3): 0x1000, (1, 3): 0x2000, (2, 3): 0x3000}
+
 
 class _ADSBaseAsync:
     def __init__(self, driver):
@@ -15,10 +29,10 @@ class _ADSBaseAsync:
 
     async def _convert_async(self, config):
         async with self._lock:
-            self._driver._write_register(_source._REGISTER_CONFIG, config)
+            self._driver._write_register(REGISTER_CONFIG, config)
             for _ in range(10):
-                if self._driver._read_register(_source._REGISTER_CONFIG) & _source._OS_NOTBUSY:
-                    return self._driver._read_register(_source._REGISTER_CONVERT)
+                if self._driver._read_register(REGISTER_CONFIG) & OS_NOTBUSY:
+                    return self._driver._read_register(REGISTER_CONVERT)
                 await asyncio.sleep_ms(1)
         raise TimeoutError("ADS1115 conversion timeout")
 
@@ -26,7 +40,7 @@ class _ADSBaseAsync:
         return self._driver.gain
 
     async def set_gain_async(self, gain):
-        if gain not in _source._GAINS:
+        if gain not in GAINS:
             raise ValueError("Invalid gain")
         async with self._lock:
             self._driver.gain = gain
@@ -46,11 +60,9 @@ class ADS1115Async(_ADSBaseAsync):
             raise TypeError("Channel must be int")
         if not 0 <= channel <= 3:
             raise ValueError("Channel number must be 0-3")
-        config = (_source._CQUE_NONE | _source._CLAT_NONLAT |
-                  _source._CPOL_ACTVLOW | _source._CMODE_TRAD |
-                  _source._DR_1600SPS | _source._MODE_SINGLE |
-                  _source._OS_SINGLE | _source._GAINS[self._driver.gain] |
-                  _source._CHANNELS[channel])
+        config = (CQUE_NONE | CLAT_NONLAT | CPOL_ACTVLOW | CMODE_TRAD |
+                  DR_1600SPS | MODE_SINGLE | OS_SINGLE |
+                  GAINS[self._driver.gain] | CHANNELS[channel])
         return await self._convert_async(config)
 
     async def diff_async(self, channel1, channel2):
@@ -61,13 +73,11 @@ class ADS1115Async(_ADSBaseAsync):
         if not 0 <= channel1 <= 3 or not 0 <= channel2 <= 3:
             raise ValueError("channels must be 0-3")
         key = (channel1, channel2)
-        if key not in _source._DIFFS:
+        if key not in DIFFS:
             raise ValueError("Unsupported differential channel combination: {}".format(key))
-        config = (_source._CQUE_NONE | _source._CLAT_NONLAT |
-                  _source._CPOL_ACTVLOW | _source._CMODE_TRAD |
-                  _source._DR_1600SPS | _source._MODE_SINGLE |
-                  _source._OS_SINGLE | _source._GAINS[self._driver.gain] |
-                  _source._DIFFS[key])
+        config = (CQUE_NONE | CLAT_NONLAT | CPOL_ACTVLOW | CMODE_TRAD |
+                  DR_1600SPS | MODE_SINGLE | OS_SINGLE |
+                  GAINS[self._driver.gain] | DIFFS[key])
         return await self._convert_async(config)
 
     async def alert_start_async(self, channel, threshold):

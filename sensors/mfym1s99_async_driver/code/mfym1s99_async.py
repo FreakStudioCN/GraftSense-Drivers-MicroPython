@@ -12,9 +12,11 @@ try:
 except ImportError:
     import asyncio
 import time
-from mfym1s99 import MFYM1S99, _MAX_LINE_BYTES, _TRIMMED_BUFFER_BYTES, _validate_positive_int, _validate_non_negative_int, _validate_number
+from mfym1s99 import MFYM1S99, _validate_positive_int, _validate_non_negative_int, _validate_number
 
 # ======================================== 全局变量 ============================================
+MAX_LINE_BYTES = 1024
+TRIMMED_BUFFER_BYTES = 512
 
 # ======================================== 功能函数 ============================================
 
@@ -58,8 +60,8 @@ class MFYM1S99Async(MFYM1S99):
                     chunk = self._uart.read(available)
                     if chunk:
                         self._rx_buffer += chunk
-                        if len(self._rx_buffer) > _MAX_LINE_BYTES:
-                            self._rx_buffer = self._rx_buffer[-_TRIMMED_BUFFER_BYTES:]
+                        if len(self._rx_buffer) > MAX_LINE_BYTES:
+                            self._rx_buffer = self._rx_buffer[-TRIMMED_BUFFER_BYTES:]
                 await asyncio.sleep_ms(1)
         return None
     async def read_sample_async(self, timeout_ms=None):

@@ -102,7 +102,9 @@ async def main():
         print(f"pwr mode: {await ps.get_power_mode_async()}")
         
         # 读取校准系数
-        calibration_data = [await ps.get_calibration_coefficient_async(index) for index in range(14)]
+        calibration_data = []
+        for index in range(14):
+            calibration_data.append(await ps.get_calibration_coefficient_async(index))
         print(f"Calibration data: {calibration_data}")
         
         # 获取事件、中断状态和 FIFO 长度

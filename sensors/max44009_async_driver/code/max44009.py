@@ -368,7 +368,6 @@ class MAX44009:
         self._read8(_MAX44009_THRES_TIMER)
         return self._buf[0] * 100
 
-    @threshold_timer.setter
     def _set_threshold_delay(self, ms: int) -> None:
         if not (0 <= ms <= 25500):
             raise ValueError("threshold_timer must be 0~25500 ms, got %s" % ms)

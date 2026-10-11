@@ -14,9 +14,11 @@ except ImportError:
     import asyncio
 
 from machine import I2C, Pin
-from lis3dh import LIS3DH_I2C, _REG_CTRL5, _REG_WHOAMI
+from lis3dh import LIS3DH_I2C
 
 # ======================================== globals =============================================
+REG_WHOAMI = 0x0F
+REG_CTRL5 = 0x24
 
 # ======================================== functions ===========================================
 
@@ -24,6 +26,34 @@ from lis3dh import LIS3DH_I2C, _REG_CTRL5, _REG_WHOAMI
 
 class LIS3DH_I2CAsync(LIS3DH_I2C):
     """LIS3DH I2C adapter with an awaitable reset-completion constructor."""
+
+    def __init__(self, i2c, *, address=0x18, int1=None, int2=None):
+        if not isinstance(i2c, I2C):
+            raise TypeError("i2c must be an I2C object")
+        if not isinstance(address, int):
+            raise TypeError("address must be an integer")
+        if int1 is not None and not isinstance(int1, Pin):
+            raise TypeError("int1 must be a Pin object or None")
+        if int2 is not None and not isinstance(int2, Pin):
+            raise TypeError("int2 must be a Pin object or None")
+        if address < 0 or address > 127:
+            raise ValueError("address must be between 0 and 127")
+        self._i2c = i2c
+        self._address = address
+        self._async_int1 = int1
+        self._async_int2 = int2
+        self._initialized = False
+
+    async def initialize_async(self):
+        if self._initialized:
+            return self
+        if self._read_register_byte(REG_WHOAMI) != 0x33:
+            raise RuntimeError("Failed to find LIS3DH!")
+        self._write_register_byte(REG_CTRL5, 0x80)
+        await asyncio.sleep_ms(10)
+        self._finish_initialization(self._async_int1, self._async_int2)
+        self._initialized = True
+        return self
 
     @classmethod
     async def create_async(cls, i2c, *, address=0x18, int1=None, int2=None):
@@ -39,15 +69,8 @@ class LIS3DH_I2CAsync(LIS3DH_I2C):
         if address < 0 or address > 127:
             raise ValueError("address must be between 0 and 127")
 
-        sensor = cls.__new__(cls)
-        sensor._i2c = i2c
-        sensor._address = address
-        if sensor._read_register_byte(_REG_WHOAMI) != 0x33:
-            raise RuntimeError("Failed to find LIS3DH!")
-        sensor._write_register_byte(_REG_CTRL5, 0x80)
-        await asyncio.sleep_ms(10)
-        sensor._finish_initialization(int1, int2)
-        return sensor
+        sensor = cls(i2c, address=address, int1=int1, int2=int2)
+        return await sensor.initialize_async()
 
     async def acceleration_async(self):
         """Return acceleration using the source driver's calculation and units."""

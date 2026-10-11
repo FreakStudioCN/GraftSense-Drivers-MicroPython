@@ -15,6 +15,15 @@ except ImportError:
 import time
 import hdc1080
 
+REG_TEMPERATURE = 0x00
+REG_HUMIDITY = 0x01
+REG_CONFIG = 0x02
+REG_SERIAL_ID0 = 0xFB
+REG_SERIAL_ID1 = 0xFC
+REG_SERIAL_ID2 = 0xFD
+REG_MANUFACTURER_ID = 0xFE
+REG_DEVICE_ID = 0xFF
+
 
 # ======================================== 全局变量 ============================================
 _ASYNC_FACADE_P0 = True
@@ -41,18 +50,18 @@ class HDC1080Async(hdc1080.HDC1080):
         return (self._buf2[0] << 8) | self._buf2[1]
 
     async def temperature_async(self, timeout_ms=50):
-        return (await self._read16_async(hdc1080._REG_TEMPERATURE, timeout_ms)) / 65536 * 165 - 40
+        return (await self._read16_async(REG_TEMPERATURE, timeout_ms)) / 65536 * 165 - 40
 
     async def humidity_async(self, timeout_ms=50):
-        return (await self._read16_async(hdc1080._REG_HUMIDITY, timeout_ms)) / 65536 * 100
+        return (await self._read16_async(REG_HUMIDITY, timeout_ms)) / 65536 * 100
 
     async def device_id_async(self, timeout_ms=50):
-        return await self._read16_async(hdc1080._REG_DEVICE_ID, timeout_ms)
+        return await self._read16_async(REG_DEVICE_ID, timeout_ms)
 
     async def serial_number_async(self, timeout_ms=50):
-        first = await self._read16_async(hdc1080._REG_SERIAL_ID0, timeout_ms)
-        second = await self._read16_async(hdc1080._REG_SERIAL_ID1, timeout_ms)
-        third = await self._read16_async(hdc1080._REG_SERIAL_ID2, timeout_ms)
+        first = await self._read16_async(REG_SERIAL_ID0, timeout_ms)
+        second = await self._read16_async(REG_SERIAL_ID1, timeout_ms)
+        third = await self._read16_async(REG_SERIAL_ID2, timeout_ms)
         return (first << 24) | (second << 8) | (third >> 8)
 
     async def check_async(self):
@@ -73,7 +82,7 @@ class HDC1080Async(hdc1080.HDC1080):
             self._config = config
             self._write_config()
             return
-        self._config = (await self._read16_async(hdc1080._REG_CONFIG)) >> 8
+        self._config = (await self._read16_async(REG_CONFIG)) >> 8
         if humid_res is not None:
             if humid_res == 8:
                 self._config |= 2
@@ -103,14 +112,14 @@ class HDC1080Async(hdc1080.HDC1080):
     async def reset_async(self, timeout_ms=50):
         self._config = 128
         self._write_config()
-        self._config = (await self._read16_async(hdc1080._REG_CONFIG, timeout_ms)) >> 8
+        self._config = (await self._read16_async(REG_CONFIG, timeout_ms)) >> 8
 
     async def battery_status_async(self, timeout_ms=50):
-        self._config = (await self._read16_async(hdc1080._REG_CONFIG, timeout_ms)) >> 8
+        self._config = (await self._read16_async(REG_CONFIG, timeout_ms)) >> 8
         return (self._config >> 3) & 1
 
     async def manufacturer_id_async(self, timeout_ms=50):
-        return await self._read16_async(hdc1080._REG_MANUFACTURER_ID, timeout_ms)
+        return await self._read16_async(REG_MANUFACTURER_ID, timeout_ms)
 
     async def aclose(self):
         self.deinit()

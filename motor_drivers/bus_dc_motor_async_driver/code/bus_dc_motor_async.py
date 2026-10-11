@@ -17,8 +17,8 @@ class SyncAdapterMixin:
 class BusDCMotorAsync(SyncAdapterMixin, BusDCMotor):
     """Async facade; each delegated call remains a short sync transaction."""
 
-    async def set_motor_speed_async(self, motor, speed):
-        return super().set_motor_speed(motor, speed)
+    async def set_motor_speed_async(self, motor, speed, direction=0):
+        return super().set_motor_speed(motor, speed, direction)
 
     async def stop_motor_async(self, motor):
         return super().stop_motor(motor)

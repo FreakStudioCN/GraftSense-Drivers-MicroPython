@@ -39,7 +39,7 @@ class AT24CXXAsync:
 
     async def write_page_async(self, address, data):
         self._check_address(address)
-        if address + len(data) > self.max_address: raise ValueError("data exceeds maximum limit")
+        if address + len(data) > self.chip_size: raise ValueError("data exceeds maximum limit")
         if any(value < 0 or value > 255 for value in data): raise ValueError("data must be 0-255")
         async with self._lock:
             pending = data

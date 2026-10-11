@@ -81,7 +81,6 @@ class FT6336Async(FT6336):
         """Consume one IRQ notification and invoke the callback outside ISR."""
         if not self._triggered:
             return None
-        self._triggered = False
         point = FT6336.read_point(self)
         if point is not None and self._callback is not None:
             self._callback(point)

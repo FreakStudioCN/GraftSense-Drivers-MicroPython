@@ -4,13 +4,13 @@ try:
 except ImportError:
     import asyncio
 
-from cst816 import CST816
+from cst816 import CST816, DEFAULT_ADDRESS
 
 
 class CST816Async(CST816):
     """CST816 event bridge; each register operation is one bounded I2C call."""
 
-    def __init__(self, i2c, address=CST816.DEFAULT_ADDRESS, reset_pin=None,
+    def __init__(self, i2c, address=DEFAULT_ADDRESS, reset_pin=None,
                  irq_pin=None, callback=None, trigger=None, width=240,
                  height=240, debug=False):
         if not hasattr(i2c, "readfrom_mem"):
@@ -76,7 +76,6 @@ class CST816Async(CST816):
     async def service_irq_async(self):
         if not self._triggered:
             return None
-        self._triggered = False
         point = CST816.read_point(self)
         if point is not None and self._callback is not None:
             self._callback(point)

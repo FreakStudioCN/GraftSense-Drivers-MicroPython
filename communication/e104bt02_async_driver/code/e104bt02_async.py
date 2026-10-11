@@ -10,14 +10,15 @@ from e104bt02 import E104BT02, E104BT02Error, E104BT02TimeoutError, E104BT02Fram
 class E104BT02Async(E104BT02):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs); self._uart_lock=asyncio.Lock(); self._closed=False
-    async def _read_chunk_async(self,deadline,drain=False):
+    async def _read_chunk_async(self,deadline,drain=False,max_bytes=0):
         if drain:
             while self._uart.any(): self._uart.read()
             return b""
         while not self._uart.any():
             if time.ticks_diff(deadline,time.ticks_ms())<=0:return None
             await asyncio.sleep_ms(self._poll_interval_ms)
-        return self._uart.read(self._uart.any())
+        available=self._uart.any()
+        return self._uart.read(min(available,max_bytes) if max_bytes else available)
     async def _flush_input_async(self,quiet_ms=80):
         deadline=time.ticks_add(time.ticks_ms(),self._timeout_ms); quiet=time.ticks_ms()
         while time.ticks_diff(deadline,time.ticks_ms())>0:
@@ -83,8 +84,8 @@ class E104BT02Async(E104BT02):
     async def read_async(self,max_bytes=0,timeout_ms=0):
         deadline=time.ticks_add(time.ticks_ms(),self._resolve_timeout(timeout_ms))
         async with self._uart_lock:
-            data=await self._read_chunk_async(deadline)
-            return bytes(data[:max_bytes]) if data and max_bytes else bytes(data or b'')
+            data=await self._read_chunk_async(deadline,max_bytes=max_bytes)
+            return bytes(data or b'')
     async def read_available_async(self):
         async with self._uart_lock:
             return bytes(await self._read_chunk_async(time.ticks_ms()) or b'') if self._uart.any() else b''

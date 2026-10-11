@@ -6,7 +6,17 @@ except ImportError:
     import asyncio
 
 import time
-from scd4x import SCD4X, SCD4X_DEFAULT_ADDR, _SCD4X_STOPPERIODICMEASUREMENT, _SCD4X_STARTPERIODICMEASUREMENT, _SCD4X_DATAREADY, _SCD4X_PERSISTSETTINGS, _SCD4X_READMEASUREMENT, _SCD4X_SERIALNUMBER, _SCD4X_SETALTITUDE, _SCD4X_SETTEMPOFFSET, _SCD4X_SETASCE
+from scd4x import SCD4X, SCD4X_DEFAULT_ADDR
+
+CMD_DATA_READY = 0xE4B8
+CMD_STOP_PERIODIC_MEASUREMENT = 0x3F86
+CMD_START_PERIODIC_MEASUREMENT = 0x21B1
+CMD_PERSIST_SETTINGS = 0x3615
+CMD_READ_MEASUREMENT = 0xEC05
+CMD_SERIAL_NUMBER = 0x3682
+CMD_SET_ALTITUDE = 0x2427
+CMD_SET_TEMPERATURE_OFFSET = 0x241D
+CMD_SET_AUTOMATIC_SELF_CALIBRATION = 0x2416
 
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
@@ -40,20 +50,20 @@ class SCD4XAsync(SCD4X):
             raise RuntimeError("SCD4X command timeout")
 
     async def initialize_async(self, timeout_ms=2000):
-        await self._send_command_async(_SCD4X_STOPPERIODICMEASUREMENT, 500, timeout_ms)
+        await self._send_command_async(CMD_STOP_PERIODIC_MEASUREMENT, 500, timeout_ms)
 
     async def start_periodic_measurement_async(self, timeout_ms=2000):
-        await self._send_command_async(_SCD4X_STARTPERIODICMEASUREMENT, 0, timeout_ms)
+        await self._send_command_async(CMD_START_PERIODIC_MEASUREMENT, 0, timeout_ms)
 
     async def data_ready_async(self, timeout_ms=200):
-        await self._send_command_async(_SCD4X_DATAREADY, 1, timeout_ms)
+        await self._send_command_async(CMD_DATA_READY, 1, timeout_ms)
         self._read_reply(self._buffer, 3)
         return not ((self._buffer[0] & 0x07 == 0) and (self._buffer[1] == 0))
 
     async def read_measurement_async(self, timeout_ms=200):
         if not await self.data_ready_async(timeout_ms):
             return None
-        await self._send_command_async(_SCD4X_READMEASUREMENT, 1, timeout_ms)
+        await self._send_command_async(CMD_READ_MEASUREMENT, 1, timeout_ms)
         self._read_reply(self._buffer, 9)
         self._co2 = (self._buffer[0] << 8) | self._buffer[1]
         temp = (self._buffer[3] << 8) | self._buffer[4]
@@ -75,28 +85,28 @@ class SCD4XAsync(SCD4X):
             await asyncio.sleep_ms(delay_ms)
 
     async def serial_number_async(self):
-        await self._send_command_async(_SCD4X_SERIALNUMBER, 1)
+        await self._send_command_async(CMD_SERIAL_NUMBER, 1)
         self._read_reply(self._buffer, 9)
         return (self._buffer[0], self._buffer[1], self._buffer[3], self._buffer[4], self._buffer[6], self._buffer[7])
 
     async def set_altitude_async(self, height):
         if height > 65535:
             raise AttributeError("Height must be less than or equal to 65535 metres")
-        await self._set_command_value_async(_SCD4X_SETALTITUDE, height)
+        await self._set_command_value_async(CMD_SET_ALTITUDE, height)
 
     async def set_temperature_offset_async(self, offset):
         if offset > 374:
             raise AttributeError("Offset value must be less than or equal to 374 degrees Celsius")
-        await self._set_command_value_async(_SCD4X_SETTEMPOFFSET, int(offset * 2**16 / 175))
+        await self._set_command_value_async(CMD_SET_TEMPERATURE_OFFSET, int(offset * 2**16 / 175))
 
     async def set_self_calibration_enabled_async(self, enabled):
-        await self._set_command_value_async(_SCD4X_SETASCE, bool(enabled))
+        await self._set_command_value_async(CMD_SET_AUTOMATIC_SELF_CALIBRATION, bool(enabled))
     async def persist_settings_async(self, timeout_ms=2000):
-        await self._send_command_async(_SCD4X_PERSISTSETTINGS, 800, timeout_ms)
+        await self._send_command_async(CMD_PERSIST_SETTINGS, 800, timeout_ms)
 
     async def aclose(self):
         if self.i2c_device is not None:
-            await self._send_command_async(_SCD4X_STOPPERIODICMEASUREMENT, 500, 2000)
+            await self._send_command_async(CMD_STOP_PERIODIC_MEASUREMENT, 500, 2000)
         self.i2c_device = None
 
 # ======================================== 初始化配置 ===========================================

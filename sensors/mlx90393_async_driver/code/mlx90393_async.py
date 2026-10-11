@@ -11,9 +11,12 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from micropython_mlx90393.mlx90393 import MLX90393, _CMD_SM, _CMD_RM, _CMD_AXIS_ALL
+from micropython_mlx90393.mlx90393 import MLX90393
 
 # ======================================== 全局变量 ============================================
+CMD_SM = 0b00110000
+CMD_RM = 0b01000000
+CMD_AXIS_ALL = 0x0E
 
 # ======================================== 功能函数 ============================================
 
@@ -23,10 +26,10 @@ class MLX90393Async(MLX90393):
     async def read_magnetic_async(self):
         # Keep the source conversion margin, but never round it down.
         delay_ms = max(1, int(self._TCONV[self._c_df][self._c_osr] * 1.1 + 0.999))
-        self._i2c.writeto(self._address, bytes([_CMD_SM | _CMD_AXIS_ALL]))
+        self._i2c.writeto(self._address, bytes([CMD_SM | CMD_AXIS_ALL]))
         self._status_last = self._i2c.readfrom(self._address, 1)[0]
         await asyncio.sleep_ms(delay_ms)
-        self._i2c.writeto(self._address, bytes([_CMD_RM | _CMD_AXIS_ALL]))
+        self._i2c.writeto(self._address, bytes([CMD_RM | CMD_AXIS_ALL]))
         data = self._i2c.readfrom(self._address, 7)
         self._status_last = data[0]
         hall = self._hallconf_index

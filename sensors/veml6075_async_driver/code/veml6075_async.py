@@ -4,7 +4,12 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from veml6075 import VEML6075, _REG_UVA, _REG_UVB, _REG_UVCOMP1, _REG_UVCOMP2
+from veml6075 import VEML6075
+
+REG_UVA = 0x07
+REG_UVB = 0x09
+REG_UVCOMP1 = 0x0A
+REG_UVCOMP2 = 0x0B
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
@@ -16,10 +21,10 @@ class VEML6075Async(VEML6075):
 
     async def _take_reading_async(self):
         await asyncio.sleep_ms(100)
-        uva = self._read_register(_REG_UVA)
-        uvb = self._read_register(_REG_UVB)
-        comp1 = self._read_register(_REG_UVCOMP1)
-        comp2 = self._read_register(_REG_UVCOMP2)
+        uva = self._read_register(REG_UVA)
+        uvb = self._read_register(REG_UVB)
+        comp1 = self._read_register(REG_UVCOMP1)
+        comp2 = self._read_register(REG_UVCOMP2)
         self._uvacalc = uva - self._a * comp1 - self._b * comp2
         self._uvbcalc = uvb - self._c * comp1 - self._d * comp2
     async def uva_async(self):

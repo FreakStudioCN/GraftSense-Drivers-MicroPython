@@ -91,7 +91,7 @@ class BNO055Async:
         return old_mode
 
     async def external_crystal_async(self) -> bool:
-        return bool(await self._read_async(REG_TRIGGER, 1)[0] & 0x80)
+        return bool((await self._read_async(REG_TRIGGER, 1))[0] & 0x80)
 
     async def cal_status_async(self) -> tuple:
         value = (await self._read_async(REG_CALIBRATION, 1))[0]

@@ -30,8 +30,6 @@ async def main():
             print("Measure Gas Concentration:", await sensor.read_concentration_async())
             await asyncio.sleep_ms(1000)
     finally:
-        if sensor is not None:
-            await sensor.aclose()
         if i2c is not None:
             deinit = getattr(i2c, "deinit", None)
             if deinit is not None:

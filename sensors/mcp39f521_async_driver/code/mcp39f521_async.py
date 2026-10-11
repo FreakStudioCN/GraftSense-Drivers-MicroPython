@@ -7,7 +7,10 @@
 # @License : MIT
 
 # ======================================== 导入相关模块 =========================================
-import uasyncio as asyncio
+try:
+    import uasyncio as asyncio
+except ImportError:
+    import asyncio
 import uctypes
 
 # ======================================== 全局变量 ============================================

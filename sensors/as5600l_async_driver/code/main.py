@@ -176,6 +176,7 @@ async def main():
         # 启动时打印一次配置与状态
         await print_config()
         await print_status()
+        last_print_time = time.ticks_ms()
         while True:
             await asyncio.sleep_ms(0)
             current_time = time.ticks_ms()

@@ -58,7 +58,7 @@ class HC08Async(HC08):
         return ok, response or "params redefault complete"
     async def reset_async(self):
         ok, response = await self._command_async(b"AT+RESET")
-        return True, response or "reset complete" if ok else response
+        return ok, response or ("reset complete" if ok else "no response")
     async def get_version_async(self):
         ok, response = await self._command_async(b"AT+VERSION")
         if ok: self.version = response; return True, response
@@ -110,7 +110,7 @@ class HC08Async(HC08):
         except Exception:return False,"parse error"
     async def clear_async(self):
         ok,response=await self._command_async(b"AT+CLEAR")
-        return True,response or "cleared" if ok else response
+        return ok, response or ("cleared" if ok else "no response")
 
     async def send_data_async(self, data):
         if isinstance(data,str):data=data.encode()

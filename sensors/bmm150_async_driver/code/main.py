@@ -153,6 +153,7 @@ async def main():
         await test_thresholds()
         await test_interrupt_mode()
         print("=== Initialization tests completed ===")
+        last_print_time = time.ticks_ms()
         while True:
             current_time = time.ticks_ms()
             if time.ticks_diff(current_time, last_print_time) >= print_interval:

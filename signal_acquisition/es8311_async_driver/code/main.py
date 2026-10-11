@@ -19,6 +19,11 @@ ES8311_I2C_ADDR = const(0x18)
 ES8311_CHIP_ID_REG = const(0xFD)
 ES8311_CHIP_ID_EXPECTED = const(0x83)
 SAMPLE_RATE = const(48000)
+I2S_BCK_PIN = const(5)
+I2S_WS_PIN = const(25)
+I2S_DOUT_PIN = const(26)
+I2S_DIN_PIN = const(35)
+PRINT_INTERVAL = const(3000)
 
 
 async def init_i2c_bus():
@@ -45,9 +50,9 @@ def create_dac_i2s():
     """Create the source-example DAC I2S endpoint; the caller owns deinit()."""
     return I2S(
         0,
-        sck=Pin(5),
-        ws=Pin(25),
-        sd=Pin(26),
+        sck=Pin(I2S_BCK_PIN),
+        ws=Pin(I2S_WS_PIN),
+        sd=Pin(I2S_DOUT_PIN),
         mode=I2S.TX,
         bits=16,
         format=I2S.STEREO,
@@ -60,9 +65,9 @@ def create_adc_i2s():
     """Create the source-example ADC I2S endpoint; the caller owns deinit()."""
     return I2S(
         0,
-        sck=Pin(5),
-        ws=Pin(25),
-        sd=Pin(35),
+        sck=Pin(I2S_BCK_PIN),
+        ws=Pin(I2S_WS_PIN),
+        sd=Pin(I2S_DIN_PIN),
         mode=I2S.RX,
         bits=16,
         format=I2S.STEREO,
@@ -90,30 +95,6 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     # ======================================== 全局变量 ============================================
-
-    # --- 硬件引脚配置常量（请根据实际接线修改）---
-    SCL_PIN = const(22)
-    SDA_PIN = const(21)
-    I2C_FREQ = const(400000)  # I2C 时钟频率（Hz）
-
-    # I2S 音频总线引脚
-    I2S_BCK_PIN = const(5)  # I2S 位时钟
-    I2S_WS_PIN = const(25)  # I2S 字选择（LRCK）
-    I2S_DOUT_PIN = const(26)  # I2S 数据输出（DAC 播放）
-    I2S_DIN_PIN = const(35)  # I2S 数据输入（ADC 录音）
-
-    # ES8311 设备地址
-    ES8311_I2C_ADDR = const(0x18)
-
-    # ES8311 芯片 ID 寄存器及期望值
-    ES8311_CHIP_ID_REG = const(0xFD)
-    ES8311_CHIP_ID_EXPECTED = const(0x83)
-
-    # 采样率配置
-    SAMPLE_RATE = const(48000)
-
-    # 打印间隔（ms）
-    PRINT_INTERVAL = const(3000)
 
     last_print_time = time.ticks_ms()
     i2c = None

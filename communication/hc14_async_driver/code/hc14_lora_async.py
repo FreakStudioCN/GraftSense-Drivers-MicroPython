@@ -47,9 +47,10 @@ class HC14_LoraAsync:
             else:
                 await asyncio.sleep_ms(self._poll_ms)
 
-    async def _at_async(self, command: bytes, timeout_ms: int = 1000) -> tuple:
+    async def _at_async(self, command: bytes, timeout_ms: int = 1000, min_lines: int = 1) -> tuple:
         async with self._transaction_lock:
             self._input = bytearray()
+            response_buffer = bytearray()
             try:
                 self._uart.write(command)
             except OSError as exc:
@@ -58,12 +59,13 @@ class HC14_LoraAsync:
             deadline = time.ticks_add(time.ticks_ms(), timeout_ms)
             while time.ticks_diff(deadline, time.ticks_ms()) > 0:
                 if self._input:
-                    response = bytes(self._input)
+                    response_buffer.extend(self._input)
                     self._input = bytearray()
-                    text = response.decode("utf-8").strip()
+                    text = bytes(response_buffer).decode("utf-8").strip()
                     if text == "ORDER ERROR":
                         return False, text
-                    return True, text.split(":", 1)[1] if ":" in text else text
+                    if len([line for line in text.split("\r\n") if line]) >= min_lines:
+                        return True, text
                 await asyncio.sleep_ms(self._poll_ms)
             return False, "timeout"
 
@@ -94,7 +96,7 @@ class HC14_LoraAsync:
         return await self._at_async(b"AT+V?", timeout_ms)
 
     async def get_params_async(self, timeout_ms: int = 1000) -> tuple:
-        ok, response = await self._at_async(b"AT+RX", timeout_ms)
+        ok, response = await self._at_async(b"AT+RX", timeout_ms, min_lines=4)
         if not ok: return ok, response
         values = [item.split(":", 1)[1] for item in response.split("\r\n") if ":" in item]
         if len(values) != 4: return False, "get params error"

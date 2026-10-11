@@ -19,7 +19,7 @@ except ImportError:
 class AD9833Async:
     """Caller-owned AD9833 SPI transport with source-compatible frames."""
     def __init__(self, spi, cs, clk, fmclk=25):
-        self._spi, self._cs, self._clk, self._fmclk = spi, cs, clk, fmclk
+        self._spi, self._cs, self._clk, self._fmclk = spi, cs, clk, fmclk * 1000000
         self._lock = asyncio.Lock()
         self._bits, self._write_mode = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], "BOTH"
 

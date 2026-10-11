@@ -17,28 +17,60 @@ class PN532_UARTAsync:
         """The command lock makes this the sole UART receive primitive."""
         return self._uart.read()
 
+    def _consume_frame(self):
+        """Consume one validated frame from the persistent receive buffer."""
+        invalid_frame = False
+        while True:
+            start = self._rx.find(b"\x00\x00\xff")
+            if start < 0:
+                if len(self._rx) > 2:
+                    del self._rx[:-2]
+                return None, invalid_frame
+            if start:
+                del self._rx[:start]
+            if len(self._rx) < 5:
+                return None, invalid_frame
+            length, length_checksum = self._rx[3], self._rx[4]
+            if length == 0:
+                if len(self._rx) < 6:
+                    return None, invalid_frame
+                if self._rx[:6] == b"\x00\x00\xff\x00\xff\x00":
+                    del self._rx[:6]
+                    return b"", invalid_frame
+                invalid_frame = True
+                del self._rx[0]
+                continue
+            if (length + length_checksum) & 0xff:
+                invalid_frame = True
+                del self._rx[0]
+                continue
+            total = 7 + length
+            if len(self._rx) < total:
+                return None, invalid_frame
+            payload = bytes(self._rx[5:5 + length])
+            checksum, postamble = self._rx[5 + length], self._rx[6 + length]
+            if postamble != 0 or (sum(payload) + checksum) & 0xff:
+                invalid_frame = True
+                del self._rx[0]
+                continue
+            del self._rx[:total]
+            return payload, invalid_frame
+
     async def _read_frame_async(self, timeout_ms):
         deadline = time.ticks_add(time.ticks_ms(), timeout_ms)
+        invalid_frame = False
         while time.ticks_diff(deadline, time.ticks_ms()) > 0:
+            frame, was_invalid = self._consume_frame()
+            invalid_frame = invalid_frame or was_invalid
+            if frame is not None:
+                return frame
             if self._uart.any():
                 chunk = self._read_uart_once()
                 if chunk:
                     self._rx.extend(chunk)
-                    start = self._rx.find(b"\x00\x00\xff")
-                    if start >= 0:
-                        if start:
-                            del self._rx[:start]
-                        if len(self._rx) >= 6 and self._rx[:6] == b"\x00\x00\xff\x00\xff\x00":
-                            del self._rx[:6]
-                            return b""
-                        if len(self._rx) >= 6:
-                            length = self._rx[3]
-                            total = 7 + length
-                            if len(self._rx) >= total:
-                                payload = bytes(self._rx[5:5 + length])
-                                del self._rx[:total]
-                                return payload
             await asyncio.sleep_ms(5)
+        if invalid_frame:
+            raise RuntimeError("PN532 response frame checksum is invalid")
         raise RuntimeError("PN532 response timeout")
 
     async def _command_async(self, command, params=b"", timeout_ms=1000):

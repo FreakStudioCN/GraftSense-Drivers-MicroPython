@@ -78,18 +78,28 @@
 ```python
 import uasyncio as asyncio
 from mcp39f521_async import MCP39F521Async
+from machine import I2C, Pin
 
 async def main():
     chip_id = 0
+    i2c_bus = None
+    sensor = None
     await asyncio.sleep(3)
-    sensor = MCP39F521Async()
-    await sensor.control_energy_acc_async(chip_id, True)
-    while True:
-        data = await sensor.get_data_async(chip_id)
-        print('Voltage: {:.1f} V, Current: {:.4f} A, Frequency: {:.3f} Hz'.format(data[2], data[3], data[4]))
-        print('Active: {:.2f} W, Reactive: {:.2f} W, Apparent: {:.2f} W, PF: {:.4f}'.format(data[5], data[6], data[7], data[8]))
-        print('Import: {:.6f} kWh, Export: {:.6f} kWh'.format(data[9], data[10]))
-        await asyncio.sleep(1)
+    try:
+        i2c_bus = I2C(scl=Pin(5), sda=Pin(2), freq=100000)
+        sensor = MCP39F521Async(i2c_bus)
+        await sensor.control_energy_acc_async(chip_id, True)
+        while True:
+            data = await sensor.get_data_async(chip_id)
+            print('Voltage: {:.1f} V, Current: {:.4f} A, Frequency: {:.3f} Hz'.format(data[2], data[3], data[4]))
+            print('Active: {:.2f} W, Reactive: {:.2f} W, Apparent: {:.2f} W, PF: {:.4f}'.format(data[5], data[6], data[7], data[8]))
+            print('Import: {:.6f} kWh, Export: {:.6f} kWh'.format(data[9], data[10]))
+            await asyncio.sleep(1)
+    finally:
+        if sensor is not None:
+            await sensor.aclose()
+        if i2c_bus is not None:
+            i2c_bus.deinit()
 
 asyncio.run(main())
 ```
@@ -97,6 +107,10 @@ asyncio.run(main())
 ## 异步设计与使用
 
 源状态：`sync_source`。本包归属当前异步仓库；原始实现的作者和许可证以源包元数据及 LICENSE 为准。协程入口应以 `asyncio.run(main())` 启动。若类提供 `start()`/`stop()`、`deinit()` 或 `aclose()`，必须按其实际签名管理后台任务和资源，且在 `finally` 中清理。
+
+## Source Legacy Syntax Declaration
+
+同步来源的 `code/feed-emoncms.py` 与 `code/feed-emoncms-daemon.py` 使用当前解析器需要转换的 legacy Python 语法；两文件不属于本包的 MCP39F521 I2C 运行时或示例导入闭包。本包以 `package_fidelity_partial` 范围保留其余可解析来源行为，不把该 legacy 路径宣称为已完成形式保真。
 
 ## API Async Matrix
 

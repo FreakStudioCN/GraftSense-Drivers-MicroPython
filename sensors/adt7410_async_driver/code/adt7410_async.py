@@ -12,11 +12,13 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from adt7410 import *
+from adt7410 import ADT7410, CONTINUOUS, ONE_SHOT, SPS, SHUTDOWN
 
 # ======================================== 全局变量 ============================================
 _RESET_WAIT_MS = 1
 _MODE_WAIT_MS = 240
+RESET_REGISTER = 0x2F
+OPERATION_MODE_VALUES = (CONTINUOUS, ONE_SHOT, SPS, SHUTDOWN)
 
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
@@ -32,7 +34,7 @@ class ADT7410Async(ADT7410):
 
     async def reset_async(self) -> None:
         try:
-            self._i2c.writeto(self._address, bytes([_REG_RESET]))
+            self._i2c.writeto(self._address, bytes([RESET_REGISTER]))
         except OSError as error:
             raise RuntimeError("I2C write failed during ADT7410 reset") from error
         await asyncio.sleep_ms(_RESET_WAIT_MS)
@@ -44,7 +46,7 @@ class ADT7410Async(ADT7410):
         return ADT7410.operation_mode.fget(self)
 
     async def set_operation_mode_async(self, value: int) -> None:
-        if not isinstance(value, int) or value not in _OPERATION_MODE_VALUES:
+        if not isinstance(value, int) or value not in OPERATION_MODE_VALUES:
             raise ValueError("operation_mode must be a valid ADT7410 mode")
         self._operation_mode = value
         await asyncio.sleep_ms(_MODE_WAIT_MS)

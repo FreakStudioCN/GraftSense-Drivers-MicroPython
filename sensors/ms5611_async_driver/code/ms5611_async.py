@@ -5,14 +5,25 @@ try:
 except ImportError:
     import asyncio
 
-try:
-    from time import ticks_ms, ticks_diff
-except ImportError:
-    import time
-    ticks_ms = lambda: int(time.monotonic() * 1000)
-    ticks_diff = lambda end, start: end - start
+import time
 
 from ms5611 import *
+
+DATA_REG = 0x00
+
+
+def _ticks_ms():
+    try:
+        return time.ticks_ms()
+    except AttributeError:
+        return int(time.monotonic() * 1000)
+
+
+def _ticks_diff(end, start):
+    try:
+        return time.ticks_diff(end, start)
+    except AttributeError:
+        return end - start
 
 
 # ======================================== 全局变量 ============================================
@@ -24,20 +35,20 @@ class MS5611Async(MS5611):
     async def measurements_async(self, timeout_ms=100):
         if timeout_ms < 30:
             raise ValueError("timeout_ms must allow both source 15 ms conversions")
-        started = ticks_ms()
+        started = _ticks_ms()
         press_buf = bytearray(3)
         self._i2c.writeto(self._address, bytes([self._pressure_command]))
         await asyncio.sleep_ms(15)
-        if ticks_diff(ticks_ms(), started) > timeout_ms:
+        if _ticks_diff(_ticks_ms(), started) > timeout_ms:
             raise TimeoutError("MS5611 pressure conversion timed out")
-        self._i2c.readfrom_mem_into(self._address, _DATA, press_buf)
+        self._i2c.readfrom_mem_into(self._address, DATA_REG, press_buf)
         D1 = press_buf[0] << 16 | press_buf[1] << 8 | press_buf[0]
         temp_buf = bytearray(3)
         self._i2c.writeto(self._address, bytes([self._temp_command]))
         await asyncio.sleep_ms(15)
-        if ticks_diff(ticks_ms(), started) > timeout_ms:
+        if _ticks_diff(_ticks_ms(), started) > timeout_ms:
             raise TimeoutError("MS5611 temperature conversion timed out")
-        self._i2c.readfrom_mem_into(self._address, _DATA, temp_buf)
+        self._i2c.readfrom_mem_into(self._address, DATA_REG, temp_buf)
         D2 = temp_buf[0] << 16 | temp_buf[1] << 8 | temp_buf[0]
         dT = D2 - self.c5 * 2**8.0
         TEMP = 2000 + dT * self.c6 / 2**23.0

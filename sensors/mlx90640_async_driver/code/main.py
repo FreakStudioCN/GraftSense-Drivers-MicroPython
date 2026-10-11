@@ -35,8 +35,6 @@ async def main():
             print('Min: {:.2f} C | Max: {:.2f} C | Avg: {:.2f} C'.format(min(temperature_frame), max(temperature_frame), sum(temperature_frame) / len(temperature_frame)))
             await asyncio.sleep_ms(333)
     finally:
-        if thermal_camera is not None:
-            await thermal_camera.aclose()
         deinit = getattr(i2c, 'deinit', None)
         if deinit is not None:
             deinit()

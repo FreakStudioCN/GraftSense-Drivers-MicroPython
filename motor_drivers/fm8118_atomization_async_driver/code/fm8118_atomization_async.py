@@ -39,7 +39,12 @@ class FM8118_AtomizationAsync:
 
     async def aclose(self):
         if self._closed: return
+        completed = False
         try:
             await self.off_async()
+            completed = True
         finally:
+            self._pin.value(1)
+            self._state = False
+        if completed:
             self._closed = True

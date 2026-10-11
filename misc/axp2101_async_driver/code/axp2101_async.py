@@ -908,4 +908,4 @@ class AXP2101Async(SyncAdapterMixin, AXP2101):
         return super().compareGaugeData(data, length)
 
     async def deinit_async(self):
-        return super().deinit()
+        return await super().deinit()

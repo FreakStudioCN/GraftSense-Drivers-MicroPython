@@ -91,21 +91,27 @@
 ```python
 import uasyncio as asyncio
 from ws61_async import WS61WaterAsync as WS61Water
+from machine import Pin, UART
 
 
 async def main():
-    sensor = WS61Water(slave_addr=1, uart_id=0, tx_pin=16, rx_pin=17)
-    await sensor.write_alarm_threshold_async(7.5)
-    await sensor.write_release_threshold_async(7)
-    while True:
-        print("device:", await sensor.read_device_id_async())
-        print("node:", await sensor.read_485_node_address_async())
-        print("alarm:", await sensor.read_alarm_threshold_async())
-        print("release:", await sensor.read_release_threshold_async())
-        print("capacitance:", await sensor.read_capacitance_async())
-        print("temperature:", await sensor.read_temperature_async())
-        print("water status:", await sensor.read_water_status_async())
-        await asyncio.sleep(1)
+    uart = UART(0, baudrate=9600, bits=8, parity=None, stop=1, tx=Pin(16), rx=Pin(17))
+    sensor = WS61Water(slave_addr=1, uart=uart)
+    try:
+        await sensor.write_alarm_threshold_async(7.5)
+        await sensor.write_release_threshold_async(7)
+        while True:
+            print("device:", await sensor.read_device_id_async())
+            print("node:", await sensor.read_485_node_address_async())
+            print("alarm:", await sensor.read_alarm_threshold_async())
+            print("release:", await sensor.read_release_threshold_async())
+            print("capacitance:", await sensor.read_capacitance_async())
+            print("temperature:", await sensor.read_temperature_async())
+            print("water status:", await sensor.read_water_status_async())
+            await asyncio.sleep(1)
+    finally:
+        await sensor.aclose()
+        uart.deinit()
 
 
 asyncio.run(main())

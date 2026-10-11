@@ -4,7 +4,7 @@ except ImportError:
     import asyncio
 class AD9833Async:
     def __init__(self, spi, cs, clk, fmclk=25):
-        self._spi, self._cs, self._clk, self._fmclk = spi, cs, clk, fmclk
+        self._spi, self._cs, self._clk, self._fmclk = spi, cs, clk, fmclk * 1000000
         self._lock = asyncio.Lock()
         self._state = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self._write_mode = "BOTH"

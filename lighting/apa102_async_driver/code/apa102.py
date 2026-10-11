@@ -557,7 +557,7 @@ class DotStar:
         self._buf[offset + 3] = rgb[self.pixel_order[2]]
 
 
-BGR = DotStar.BGR
+BGR = (2, 1, 0)
 
 # ======================================== 初始化配置 ==========================================
 

@@ -15,7 +15,8 @@ except ImportError:
 # ======================================== 导入相关模块 =========================================
 
 import machine
-from apds9960 import APDS9960
+import time
+from apds9960_async import APDS9960Async as APDS9960
 
 # ======================================== 全局变量 ============================================
 
@@ -215,7 +216,7 @@ def configure_alerts() -> None:
 # ======================================== 初始化配置 ==========================================
 
 
-async def main():
+async def _main_body():
     global apds9960, i2c
     # 上电稳定延时
     await asyncio.sleep_ms(3000)
@@ -257,6 +258,7 @@ async def main():
     apds9960 = APDS9960(i2c, debug=False)
     last_print_time = time.ticks_ms()
     print("APDS9960 driver initialized successfully")
+    await apds9960.power_on_async(True)
     
     # 正常参数场景：启用所有传感器
     print("Enabling proximity sensor...")
@@ -314,10 +316,17 @@ async def main():
     except Exception as e:
         print("Unknown error: %s" % str(e))
     finally:
+        pass
+
+async def main():
+    global apds9960
+    try:
+        await _main_body()
+    finally:
         print("Cleaning up resources...")
         if apds9960 is not None:
-            apds9960.deinit()
-            del apds9960
+            await apds9960.aclose()
+            apds9960 = None
         print("Program exited")
 
 # ======================================== 主程序 ==============================================
