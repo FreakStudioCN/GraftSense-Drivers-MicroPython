@@ -5,7 +5,7 @@ try:
 except ImportError:
     import asyncio
 
-import sht45
+import _gs_sht45_sht45 as sht45
 from machine import I2C, Pin
 from sht45_async import SHT45Async
 

@@ -13,7 +13,7 @@ except ImportError:
     import asyncio
 
 import time
-import hdc1080
+import _gs_hdc1080_hdc1080 as hdc1080
 
 REG_TEMPERATURE = 0x00
 REG_HUMIDITY = 0x01

@@ -51,7 +51,7 @@
 ```text
 ├── code/__pycache__/lm75a.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/lm75a.py
+├── code/_gs_lm75a_lm75a.py
 ├── code/lm75a_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -90,7 +90,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     
     from machine import I2C, Pin
-    from lm75a import LM75A
+    from _gs_lm75a_lm75a import LM75A
     
     # ======================================== 全局变量 ============================================
     

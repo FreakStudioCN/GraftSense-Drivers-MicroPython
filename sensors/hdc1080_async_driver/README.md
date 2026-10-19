@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/hdc1080.py
+├── code/_gs_hdc1080_hdc1080.py
 ├── code/hdc1080_async.py
 ├── code/main.py
 ├── examples/main_sync.py

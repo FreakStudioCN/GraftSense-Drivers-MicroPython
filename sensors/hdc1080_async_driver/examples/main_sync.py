@@ -12,7 +12,7 @@ from machine import Pin
 from machine import I2C
 import time
 from time import sleep_ms
-from hdc1080 import HDC1080
+from _gs_hdc1080_hdc1080 import HDC1080
 
 # ======================================== 全局变量 ============================================
 

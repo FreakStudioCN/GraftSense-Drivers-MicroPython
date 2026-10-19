@@ -115,6 +115,15 @@ async def heartbeat_during(operation):
             pass
 
 class AsyncRegressions(unittest.IsolatedAsyncioTestCase):
+    async def test_pr118_updated_source_packages_keep_importable_async_entries(self):
+        for package, module, classname in [
+            ('hdc1080', 'hdc1080_async', 'HDC1080Async'),
+            ('lm75a', 'lm75a_async', 'LM75AAsync'),
+            ('sht45', 'sht45_async', 'SHT45Async'),
+        ]:
+            m = load('sensors/' + package + '_async_driver', module)
+            self.assertTrue(callable(getattr(m, classname)))
+
     async def test_ads_gain_indices_and_register_words(self):
         m = load('signal_acquisition/ads1015_async_driver', 'ads1015_async')
         class Driver:

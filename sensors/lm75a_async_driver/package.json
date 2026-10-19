@@ -1,15 +1,15 @@
 {
-    "name":  "lm75a_async_driver",
-    "version":  "1.0.0",
-    "description":  "Async conversion of lm75a_driver",
-    "urls":  [
-                 [
-                     "lm75a.py",
-                     "code/lm75a.py"
-                 ],
-                 [
-                     "lm75a_async.py",
-                     "code/lm75a_async.py"
-                 ]
-             ]
+  "name": "lm75a_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of lm75a_driver",
+  "urls": [
+    [
+      "_gs_lm75a_lm75a.py",
+      "code/_gs_lm75a_lm75a.py"
+    ],
+    [
+      "lm75a_async.py",
+      "code/lm75a_async.py"
+    ]
+  ]
 }

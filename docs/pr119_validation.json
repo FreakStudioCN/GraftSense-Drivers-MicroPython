@@ -4,19 +4,20 @@
   "passed": 1202,
   "failures": [],
   "arm_retries": 21,
-  "reused_unchanged": 1201,
+  "reused_unchanged": 1191,
   "host_unittest": {
     "command": "python -m unittest discover -s tests -v",
-    "passed": 17,
+    "passed": 18,
     "failed": 0
   },
   "scope": {
     "pr119_async_packages": 224,
     "pr119_total_packages": 225,
     "confirmed_packages_repaired": 20,
-    "isolated_dependency_packages": 86,
-    "isolated_module_roots": 146,
+    "isolated_dependency_packages": 89,
+    "isolated_module_roots": 150,
     "hardware_tested": false,
     "all_public_apis_executed": false
-  }
+  },
+  "main_integrated": "8419ae862f5062f206ff8b62214a3af0a93b3acb"
 }

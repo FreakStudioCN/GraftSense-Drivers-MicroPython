@@ -10,9 +10,9 @@
 
 import time
 
-import sht45
+import _gs_sht45_sht45 as sht45
 from machine import I2C, Pin
-from sht45 import SHT45
+from _gs_sht45_sht45 import SHT45
 
 try:
     import micropython

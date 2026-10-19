@@ -316,5 +316,15 @@
   "signal_generation/ds3502_async_driver": {
     "dac_waveformgenerator": "_gs_ds3502_dac_waveformgenerator",
     "ds3502": "_gs_ds3502_ds3502"
+  },
+  "sensors/hdc1080_async_driver": {
+    "hdc1080": "_gs_hdc1080_hdc1080"
+  },
+  "sensors/lm75a_async_driver": {
+    "lm75a": "_gs_lm75a_lm75a"
+  },
+  "sensors/sht45_async_driver": {
+    "sht45": "_gs_sht45_sht45",
+    "__init__": "_gs_sht45___init__"
   }
 }

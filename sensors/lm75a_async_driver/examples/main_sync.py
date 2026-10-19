@@ -10,7 +10,7 @@
 
 from machine import I2C, Pin
 import time
-from lm75a import LM75A
+from _gs_lm75a_lm75a import LM75A
 
 # ======================================== 全局变量 ============================================
 
