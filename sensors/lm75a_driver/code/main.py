@@ -73,7 +73,7 @@ try:
         # 低频查询：读取温度并打印
         if time.ticks_diff(current_time, last_print_time) >= PRINT_INTERVAL_MS:
             t = sensor.temp()
-            print("Temperature: %.2f C" % t)
+            print("Temperature: %.3f C" % t)
             last_print_time = current_time
 
         # Optional manual test snippets:

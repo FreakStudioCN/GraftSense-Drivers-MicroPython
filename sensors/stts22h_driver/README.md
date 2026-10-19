@@ -62,10 +62,7 @@ MicroPython I2C 的开发板。
 stts22h_driver/
 ├── code/
 │   ├── main.py
-│   └── micropython_stts22h/
-│       ├── __init__.py
-│       ├── i2c_helpers.py
-│       └── stts22h.py
+│   └── stts22h.py
 ├── package.json
 ├── README.md
 └── LICENSE
@@ -75,9 +72,7 @@ stts22h_driver/
 
 | 文件 | 说明 |
 |------|------|
-| `code/micropython_stts22h/stts22h.py` | STTS22H 核心驱动 |
-| `code/micropython_stts22h/i2c_helpers.py` | I2C 寄存器描述符辅助类 |
-| `code/micropython_stts22h/__init__.py` | 包导出入口 |
+| `code/stts22h.py` | STTS22H 核心驱动，包含 I2C 寄存器描述符辅助类 |
 | `code/main.py` | 手动测试入口 |
 | `package.json` | MIP 安装包配置 |
 | `LICENSE` | MIT 许可证 |
@@ -86,7 +81,7 @@ stts22h_driver/
 
 ### 1. 复制文件
 
-将 `code/micropython_stts22h/` 目录复制到 MicroPython 设备文件系统，
+将 `code/stts22h.py` 复制到 MicroPython 设备文件系统，
 也可以复制 `code/main.py` 作为手动测试入口。
 
 ### 2. 硬件接线
@@ -107,7 +102,7 @@ stts22h_driver/
 
 ```python
 from machine import I2C, Pin
-from micropython_stts22h.stts22h import STTS22H
+from stts22h import STTS22H
 
 i2c = I2C(1, sda=Pin(2), scl=Pin(3), freq=400000)
 sensor = STTS22H(i2c)

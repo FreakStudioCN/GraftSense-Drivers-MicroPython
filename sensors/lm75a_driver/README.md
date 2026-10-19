@@ -51,7 +51,7 @@ LM75A 是 NXP 公司推出的数字温度传感器，内置带隙温度传感器
 | 项目 | 版本/说明 |
 |------|-----------|
 | MicroPython 固件 | v1.23.0 及以上 |
-| 驱动版本 | v0.0.3 |
+| 驱动版本 | v1.0.0 |
 | 依赖库 | `micropython.const`、`machine.I2C`（均为 MicroPython 内置） |
 
 ## 文件结构
@@ -273,7 +273,7 @@ print("Temperature: %.2f C" % sensor.temp())
 
 | 版本号 | 日期 | 作者 | 修改说明 |
 |--------|------|------|----------|
-| v0.0.3 | 2026-07-31 | Mike Causer | GraftSense 规范化：补全 docstring/类型注解/参数校验/OSError 包装/debug 日志 |
+| v1.0.0 | 2026-07-31 | Mike Causer | GraftSense 规范化：补全 docstring/类型注解/参数校验/OSError 包装/debug 日志 |
 
 ## 联系方式
 

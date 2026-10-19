@@ -35,16 +35,16 @@
 
 | 硬件 | 型号 |
 |------|------|
-| 开发板 | Lolin32 Lite（ESP32）或其他 MicroPython 兼容板 |
+| 开发板 | Raspberry Pi Pico（RP2040）或其他 MicroPython 兼容板 |
 | 传感器 | Sensirion SHT11 温湿度传感器 |
 | 连接线 | 4 根杜邦线（母-母） |
 
 引脚说明：
 
-| SHT11 引脚 | 功能描述 | ESP32 示例引脚 |
+| SHT11 引脚 | 功能描述 | RP2040 示例引脚 |
 |------------|----------|----------------|
-| 1 (SCK) | 串行时钟输入 | GPIO 26 |
-| 2 (DATA) | 串行双向数据线（开漏） | GPIO 33 |
+| 1 (SCK) | 串行时钟输入 | GPIO 5 |
+| 2 (DATA) | 串行双向数据线（开漏） | GPIO 4 |
 | 3 (GND) | 电源负极 | GND |
 | 4 (VCC) | 电源正极（2.4V-5.5V，推荐 3.3V） | 3.3V |
 
@@ -84,8 +84,8 @@ sht11_driver/
 按[硬件要求](#硬件要求)中的引脚对应关系连接 SHT11 和开发板。如需修改引脚，编辑 `main.py` 中初始化配置区：
 
 ```python
-sck_pin = Pin(26, Pin.OUT, Pin.PULL_UP)
-data_pin = Pin(33, Pin.OPEN_DRAIN)
+sck_pin = Pin(5, Pin.OUT, Pin.PULL_UP)
+data_pin = Pin(4, Pin.OPEN_DRAIN, Pin.PULL_UP)
 ```
 
 ### 3. 运行测试
@@ -126,14 +126,14 @@ PRINT_INTERVAL_MS = 2000
 time.sleep(3)
 print("FreakStudio: SHT11 Temperature & Humidity Sensor Test")
 
-# 硬件引脚实例化（ESP32 / Lolin32 Lite 示例引脚，请根据实际接线修改）
-sck_pin = Pin(26, Pin.OUT, Pin.PULL_UP)
-data_pin = Pin(33, Pin.OPEN_DRAIN)
+# 硬件引脚实例化（RP2040 示例引脚，请根据实际接线修改）
+sck_pin = Pin(5, Pin.OUT, Pin.PULL_UP)
+data_pin = Pin(4, Pin.OPEN_DRAIN, Pin.PULL_UP)
 
 # 创建 SHT11 驱动实例（传入 Pin 实例）
 sht = SHT11(sck=sck_pin, data=data_pin)
 
-print("SHT11 driver initialized on SCK=26, DATA=33")
+print("SHT11 driver initialized on SCK=5, DATA=4")
 
 
 # ========================================  主程序  ===========================================
@@ -156,7 +156,7 @@ try:
 
             # 边界场景：读取状态寄存器原始值
             reg_val = sht.read_register()
-            print("Status Register: 0x%02X" % reg_val)
+            # print("Status Register: 0x%02X" % reg_val)
 
             last_print_time = current_time
 
@@ -183,8 +183,8 @@ finally:
 from machine import Pin
 from sht11 import SHT11
 
-sck = Pin(26, Pin.OUT, Pin.PULL_UP)
-data = Pin(33, Pin.OPEN_DRAIN)
+sck = Pin(5, Pin.OUT, Pin.PULL_UP)
+data = Pin(4, Pin.OPEN_DRAIN, Pin.PULL_UP)
 sht = SHT11(sck, data)
 
 print(sht.temperature())   # 输出温度（℃）
@@ -204,7 +204,7 @@ sht.deinit()
 | 引脚模式 | DATA 引脚需配置为开漏模式（`Pin.OPEN_DRAIN`），不可使用推挽输出 |
 | CRC 校验 | 每次测量后自动校验 CRC-8，失败时抛出 `SHT11CRCError` |
 | 接线长度 | 推荐杜邦线 ≤ 20cm，过长易引入噪声导致 CRC 错误 |
-| 上拉电阻 | SCK 引脚使用内部弱上拉（`Pin.PULL_UP`），DATA 引脚无需上拉 |
+| 上拉电阻 | SCK 与 DATA 引脚均使用内部弱上拉（`Pin.PULL_UP`） |
 
 ## 设计思路
 

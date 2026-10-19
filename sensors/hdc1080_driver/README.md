@@ -54,7 +54,7 @@
 | 项目 | 版本/说明 |
 |------|-----------|
 | MicroPython 固件 | v1.23 及以上 |
-| 驱动版本 | v1.0.1 |
+| 驱动版本 | v1.0.0 |
 | 依赖库 | 无（仅使用 `machine`、`micropython`、`time` 内置模块） |
 
 ## 文件结构
@@ -202,7 +202,7 @@ finally:
 
 | 版本号 | 日期 | 作者 | 修改说明 |
 |--------|------|------|----------|
-| v1.0.1 | 2026-07-23 | Mike Causer | GraftSense 规范化：添加双语 docstring、类型注解、deinit 资源管理、I2C 扫描验证 |
+| v1.0.0 | 2026-07-23 | Mike Causer | GraftSense 规范化：添加双语 docstring、类型注解、deinit 资源管理、I2C 扫描验证 |
 
 ## 联系方式
 

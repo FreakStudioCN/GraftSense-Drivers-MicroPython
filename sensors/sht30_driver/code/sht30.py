@@ -7,7 +7,7 @@
 # @License : MIT
 # Original source: Claude Skill normalized Project1 driver
 
-__version__ = "0.2.1"
+__version__ = "1.0.0"
 __author__ = "Roberto Sanchez"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23 / RP2040"
