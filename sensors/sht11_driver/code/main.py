@@ -61,7 +61,7 @@ try:
 
             # 边界场景：读取状态寄存器原始值
             reg_val = sht.read_register()
-            print("Status Register: 0x%02X" % reg_val)
+            # print("Status Register: 0x%02X" % reg_val)
 
             last_print_time = current_time
 

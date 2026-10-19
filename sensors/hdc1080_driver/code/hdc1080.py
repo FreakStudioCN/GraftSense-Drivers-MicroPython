@@ -6,7 +6,7 @@
 # @Description : HDC1080 温湿度传感器驱动
 # @License : MIT
 
-__version__ = "1.0.1"
+__version__ = "1.0.0"
 __author__ = "Mike Causer"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"

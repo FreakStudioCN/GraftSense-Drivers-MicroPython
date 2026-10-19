@@ -6,7 +6,7 @@
 # @Description : Sensirion SHT45 temperature and humidity sensor driver
 # @License : MIT
 
-__version__ = "0.0.0+auto.0"
+__version__ = "1.0.0"
 __author__ = "Jose D. Montoya"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.23"

@@ -10,16 +10,16 @@
 
 import time
 from machine import I2C, Pin
-from micropython_stts22h.stts22h import STTS22H
+from stts22h import STTS22H
 
 # ==================== 全局变量 ====================
 
-I2C_BUS_ID = 1
-I2C_SCL_PIN = 3
-I2C_SDA_PIN = 2
+I2C_BUS_ID = 0
+I2C_SCL_PIN = 5
+I2C_SDA_PIN = 4
 I2C_FREQ = 400000
 
-STTS22H_I2C_ADDR = 0x3C
+STTS22H_I2C_ADDR = 0x3F
 STTS22H_CHIP_ID = 0xA0
 STTS22H_WHOAMI_REG = 0x01
 

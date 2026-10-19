@@ -1,12 +1,7 @@
 {
   "name": "stts22h_driver",
   "urls": [
-    ["micropython_stts22h/__init__.py", "code/micropython_stts22h/__init__.py"],
-    ["micropython_stts22h/stts22h.py", "code/micropython_stts22h/stts22h.py"],
-    [
-      "micropython_stts22h/i2c_helpers.py",
-      "code/micropython_stts22h/i2c_helpers.py"
-    ]
+    ["stts22h.py", "code/stts22h.py"]
   ],
   "version": "1.0.0",
   "_comments": {
