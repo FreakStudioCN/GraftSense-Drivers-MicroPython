@@ -10,7 +10,7 @@
 
 import time
 from machine import Pin, SPI
-from sx1276 import SX1276
+from _gs_sx1276_sx1276 import SX1276
 
 # ======================================== 全局变量 ============================================
 

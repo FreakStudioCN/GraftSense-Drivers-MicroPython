@@ -52,12 +52,12 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/i2c_helpers_async.py
 ├── code/main.py
-├── code/micropython_mmc5983/__init__.py
-├── code/micropython_mmc5983/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_mmc5983/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_mmc5983/__pycache__/mmc5983.cpython-313.pyc
-├── code/micropython_mmc5983/i2c_helpers.py
-├── code/micropython_mmc5983/mmc5983.py
+├── code/_gs_mmc5983_micropython_mmc5983/__init__.py
+├── code/_gs_mmc5983_micropython_mmc5983/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_mmc5983_micropython_mmc5983/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_mmc5983_micropython_mmc5983/__pycache__/mmc5983.cpython-313.pyc
+├── code/_gs_mmc5983_micropython_mmc5983/i2c_helpers.py
+├── code/_gs_mmc5983_micropython_mmc5983/mmc5983.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -98,7 +98,7 @@ async def main():
     from machine import Pin, SoftI2C
 
     # 导入MMC5983磁力计驱动库
-    from micropython_mmc5983 import mmc5983
+    from _gs_mmc5983_micropython_mmc5983 import mmc5983
 
     # ======================================== 全局变量 ============================================
 

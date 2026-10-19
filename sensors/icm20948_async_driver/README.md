@@ -51,9 +51,9 @@
 ```text
 ├── code/icm20948_async.py
 ├── code/main.py
-├── code/micropython_icm20948/__init__.py
-├── code/micropython_icm20948/i2c_helpers.py
-├── code/micropython_icm20948/icm20948.py
+├── code/_gs_icm20948_micropython_icm20948/__init__.py
+├── code/_gs_icm20948_micropython_icm20948/i2c_helpers.py
+├── code/_gs_icm20948_micropython_icm20948/icm20948.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -78,7 +78,7 @@ try:
 except ImportError:
  import asyncio
 from machine import I2C,Pin
-from micropython_icm20948 import ICM20948
+from _gs_icm20948_micropython_icm20948 import ICM20948
 from icm20948_async import ICM20948Async
 async def main():
  await asyncio.sleep(3);i2c=I2C(0,scl=Pin(5),sda=Pin(4),freq=400000)

@@ -9,7 +9,7 @@
 
 import time
 from machine import Pin, I2C
-from micropython_mma8451 import mma8451
+from _gs_mma8451_micropython_mma8451 import mma8451
 
 # ======================================== 全局变量 ============================================
 

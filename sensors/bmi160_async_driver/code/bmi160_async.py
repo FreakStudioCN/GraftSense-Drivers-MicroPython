@@ -11,7 +11,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-import bmi160 as source
+import _gs_bmi160_bmi160 as source
 
 # ======================================== 全局变量
 ACCEL_RANGE_2G = source.ACCEL_RANGE_2G

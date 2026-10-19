@@ -10,7 +10,7 @@
 
 import time
 from machine import Pin, I2C
-from micropython_tmp117.tmp117 import TMP117
+from _gs_tmp117_micropython_tmp117.tmp117 import TMP117
 
 # ==================== 全局变量 ====================
 

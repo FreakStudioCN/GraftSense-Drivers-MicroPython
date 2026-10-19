@@ -51,21 +51,21 @@
 ```text
 ├── code/__pycache__/ina_ti.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/ina_ti.py
+├── code/_gs_ina219_ina_ti.py
 ├── code/ina_ti_async.py
 ├── code/main.py
-├── code/sensor_pack_2/__init__.py
-├── code/sensor_pack_2/__pycache__/__init__.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/adcmod.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bitfield.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/regmod.cpython-313.pyc
-├── code/sensor_pack_2/adcmod.py
-├── code/sensor_pack_2/base_sensor.py
-├── code/sensor_pack_2/bitfield.py
-├── code/sensor_pack_2/bus_service.py
-├── code/sensor_pack_2/regmod.py
+├── code/_gs_ina219_sensor_pack_2/__init__.py
+├── code/_gs_ina219_sensor_pack_2/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_ina219_sensor_pack_2/__pycache__/adcmod.cpython-313.pyc
+├── code/_gs_ina219_sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
+├── code/_gs_ina219_sensor_pack_2/__pycache__/bitfield.cpython-313.pyc
+├── code/_gs_ina219_sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
+├── code/_gs_ina219_sensor_pack_2/__pycache__/regmod.cpython-313.pyc
+├── code/_gs_ina219_sensor_pack_2/adcmod.py
+├── code/_gs_ina219_sensor_pack_2/base_sensor.py
+├── code/_gs_ina219_sensor_pack_2/bitfield.py
+├── code/_gs_ina219_sensor_pack_2/bus_service.py
+├── code/_gs_ina219_sensor_pack_2/regmod.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -106,11 +106,10 @@ async def main():
     from machine import I2C, Pin
 
     # 导入 I2C 总线适配器
-    from sensor_pack_2.bus_service import I2cAdapter
+    from _gs_ina219_sensor_pack_2.bus_service import I2cAdapter
 
     # 导入 INA219 驱动模块
-    import ina_ti
-
+    import _gs_ina219_ina_ti as ina_ti
     # 导入时间控制模块
 
 

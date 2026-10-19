@@ -5,7 +5,7 @@ try:
 except ImportError:
     import asyncio
 
-from micropython_mmc5983.mmc5983 import CONTINUOUS, ONE_SHOT, MMC5983
+from _gs_mmc5983_micropython_mmc5983.mmc5983 import CONTINUOUS, ONE_SHOT, MMC5983
 
 
 # ======================================== 全局变量 ============================================

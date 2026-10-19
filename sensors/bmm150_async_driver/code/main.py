@@ -15,7 +15,7 @@ except ImportError:
 # ======================================== 导入相关模块 =========================================
 from machine import Pin, I2C
 import time
-from micropython_bmm150 import bmm150
+from _gs_bmm150_micropython_bmm150 import bmm150
 from bmm150_async import BMM150Async
 
 # ======================================== 全局变量 ============================================

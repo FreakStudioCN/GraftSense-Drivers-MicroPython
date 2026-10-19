@@ -9,7 +9,7 @@
 
 import time
 from machine import Pin
-from vibration_sensor import VibrationSensor
+from _gs_vibration_vibration_sensor import VibrationSensor
 
 # ======================================== 全局变量 =============================================
 

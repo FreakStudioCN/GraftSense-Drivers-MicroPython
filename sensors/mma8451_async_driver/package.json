@@ -1,23 +1,23 @@
 {
-    "name":  "mma8451_async_driver",
-    "version":  "1.0.0",
-    "description":  "Async conversion of mma8451_driver",
-    "urls":  [
-                 [
-                     "micropython_mma8451/i2c_helpers.py",
-                     "code/micropython_mma8451/i2c_helpers.py"
-                 ],
-                 [
-                     "micropython_mma8451/mma8451.py",
-                     "code/micropython_mma8451/mma8451.py"
-                 ],
-                 [
-                     "micropython_mma8451/__init__.py",
-                     "code/micropython_mma8451/__init__.py"
-                 ],
-                 [
-                     "mma8451_async.py",
-                     "code/mma8451_async.py"
-                 ]
-             ]
+  "name": "mma8451_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of mma8451_driver",
+  "urls": [
+    [
+      "_gs_mma8451_micropython_mma8451/i2c_helpers.py",
+      "code/_gs_mma8451_micropython_mma8451/i2c_helpers.py"
+    ],
+    [
+      "_gs_mma8451_micropython_mma8451/mma8451.py",
+      "code/_gs_mma8451_micropython_mma8451/mma8451.py"
+    ],
+    [
+      "_gs_mma8451_micropython_mma8451/__init__.py",
+      "code/_gs_mma8451_micropython_mma8451/__init__.py"
+    ],
+    [
+      "mma8451_async.py",
+      "code/mma8451_async.py"
+    ]
+  ]
 }

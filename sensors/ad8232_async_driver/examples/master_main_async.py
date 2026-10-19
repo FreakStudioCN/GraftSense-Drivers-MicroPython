@@ -4,8 +4,8 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin, UART
-from master_data_flow_processor import DataFlowProcessor
-from ad8232_uart import AD8232_DataFlowProcessor
+from _gs_ad8232_master_data_flow_processor import DataFlowProcessor
+from _gs_ad8232_ad8232_uart import AD8232_DataFlowProcessor
 
 
 async def main():

@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/vibration_sensor.cpython-313.pyc
 ├── code/main.py
-├── code/vibration_sensor.py
+├── code/_gs_vibration_vibration_sensor.py
 ├── code/vibration_sensor_async.py
 ├── examples/main_sync.py
 ├── LICENSE

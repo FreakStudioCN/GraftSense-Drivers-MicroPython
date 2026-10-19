@@ -1,23 +1,23 @@
 {
-    "name":  "max30100_async_driver",
-    "version":  "1.0.0",
-    "description":  "A MicroPython library to control MAX30100 sensor",
-    "author":  "kontakt",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "urls":  [
-                 [
-                     "max30100.py",
-                     "code/max30100.py"
-                 ],
-                 [
-                     "max30100_async.py",
-                     "code/max30100_async.py"
-                 ]
-             ]
+  "name": "max30100_async_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control MAX30100 sensor",
+  "author": "kontakt",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "_gs_max30100_max30100.py",
+      "code/_gs_max30100_max30100.py"
+    ],
+    [
+      "max30100_async.py",
+      "code/max30100_async.py"
+    ]
+  ]
 }

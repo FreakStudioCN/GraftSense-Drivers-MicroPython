@@ -15,7 +15,7 @@ __platform__ = "MicroPython v1.23"
 
 from machine import I2C
 import utime
-import ahtx0
+import _gs_aht20_ahtx0 as ahtx0
 
 # ======================================== 全局变量 ============================================
 

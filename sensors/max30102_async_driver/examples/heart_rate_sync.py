@@ -15,13 +15,13 @@ import time
 from time import ticks_diff, ticks_us, ticks_ms
 
 # 导入MAX30102驱动模块
-from max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
+from _gs_max30102_max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
 
 # 导入心率监测器
-from heart_rate_monitor import HeartRateMonitor
+from _gs_max30102_heart_rate_monitor import HeartRateMonitor
 
 # 导入环形缓冲区模块
-from circular_buffer import CircularBuffer
+from _gs_max30102_circular_buffer import CircularBuffer
 
 # ======================================== 全局变量 ============================================
 

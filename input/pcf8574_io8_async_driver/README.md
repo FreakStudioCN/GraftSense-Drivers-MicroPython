@@ -50,9 +50,9 @@
 
 ```text
 ├── code/main.py
-├── code/pcf8574.py
+├── code/_gs_pcf8574_io8_pcf8574.py
 ├── code/pcf8574_async.py
-├── code/pcf8574_io8.py
+├── code/_gs_pcf8574_io8_pcf8574_io8.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -93,10 +93,10 @@ async def main():
     # 导入时间模块
 
     # 导入PCF8574和PCF8574IO8模块
-    from pcf8574 import PCF8574
+    from _gs_pcf8574_io8_pcf8574 import PCF8574
 
     # 导入PCF8574IO8模块
-    from pcf8574_io8 import PCF8574IO8
+    from _gs_pcf8574_io8_pcf8574_io8 import PCF8574IO8
 
     # ======================================== 全局变量 ============================================
 

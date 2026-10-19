@@ -6,5 +6,22 @@
   "license": "MIT",
   "chips": "all",
   "fw": "all",
-  "urls": [["max30102.py", "code/max30102.py"], ["max30102_async.py", "code/max30102_async.py"], ["circular_buffer.py", "code/circular_buffer.py"], ["heart_rate_monitor.py", "code/heart_rate_monitor.py"]]
+  "urls": [
+    [
+      "_gs_max30102_max30102.py",
+      "code/_gs_max30102_max30102.py"
+    ],
+    [
+      "max30102_async.py",
+      "code/max30102_async.py"
+    ],
+    [
+      "_gs_max30102_circular_buffer.py",
+      "code/_gs_max30102_circular_buffer.py"
+    ],
+    [
+      "_gs_max30102_heart_rate_monitor.py",
+      "code/_gs_max30102_heart_rate_monitor.py"
+    ]
+  ]
 }

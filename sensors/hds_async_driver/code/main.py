@@ -5,7 +5,7 @@ except ImportError:
 
 from machine import Pin
 from hds_async import HDSAsync as HDS
-from hds_umodbus.serial import SerialAsync as ModbusRTUMaster
+from _gs_hds_hds_umodbus.serial import SerialAsync as ModbusRTUMaster
 
 async def main():
     await asyncio.sleep_ms(3000)

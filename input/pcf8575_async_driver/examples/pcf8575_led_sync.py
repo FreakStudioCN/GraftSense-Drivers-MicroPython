@@ -14,7 +14,7 @@ from machine import I2C, Pin
 import time
 
 # 导入自定义的PCF8575类
-from pcf8575 import PCF8575
+from _gs_pcf8575_pcf8575 import PCF8575
 
 # ======================================== 全局变量 ============================================
 

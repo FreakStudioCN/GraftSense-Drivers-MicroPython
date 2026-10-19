@@ -8,7 +8,7 @@ import time
 
 from machine import I2C, Pin
 
-import lis3dh
+import _gs_ls3hd_lis3dh as lis3dh
 from lis3dh_async import LIS3DH_I2CAsync
 
 

@@ -10,7 +10,7 @@
 from machine import Pin, ADC
 import time
 from time import sleep
-from mgx import MGX
+from _gs_mgx_mgx import MGX
 
 # ======================================== 全局变量 ============================================
 

@@ -11,7 +11,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from micropython_bma220.bma220 import BMA220
+from _gs_bma220_micropython_bma220.bma220 import BMA220
 
 # ======================================== 全局变量 ============================================
 _ASYNC_FACADE_P0 = True

@@ -1,27 +1,27 @@
 {
-    "name":  "veml6040_async_driver",
-    "version":  "1.0.0",
-    "description":  "Async conversion of veml6040_driver",
-    "urls":  [
-                 [
-                     "veml6040mod.py",
-                     "code/veml6040mod.py"
-                 ],
-                 [
-                     "veml6040mod_async.py",
-                     "code/veml6040mod_async.py"
-                 ],
-                 [
-                     "sensor_pack_2/base_sensor.py",
-                     "code/sensor_pack_2/base_sensor.py"
-                 ],
-                 [
-                     "sensor_pack_2/bus_service.py",
-                     "code/sensor_pack_2/bus_service.py"
-                 ],
-                 [
-                     "sensor_pack_2/__init__.py",
-                     "code/sensor_pack_2/__init__.py"
-                 ]
-             ]
+  "name": "veml6040_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of veml6040_driver",
+  "urls": [
+    [
+      "_gs_veml6040_veml6040mod.py",
+      "code/_gs_veml6040_veml6040mod.py"
+    ],
+    [
+      "veml6040mod_async.py",
+      "code/veml6040mod_async.py"
+    ],
+    [
+      "_gs_veml6040_sensor_pack_2/base_sensor.py",
+      "code/_gs_veml6040_sensor_pack_2/base_sensor.py"
+    ],
+    [
+      "_gs_veml6040_sensor_pack_2/bus_service.py",
+      "code/_gs_veml6040_sensor_pack_2/bus_service.py"
+    ],
+    [
+      "_gs_veml6040_sensor_pack_2/__init__.py",
+      "code/_gs_veml6040_sensor_pack_2/__init__.py"
+    ]
+  ]
 }

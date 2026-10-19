@@ -3,8 +3,8 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin, SoftI2C
-from micropython_isl29125.isl29125 import RED_GREEN_BLUE, LUX_10K, RES_16BITS
-from micropython_isl29125.isl29125_async import ISL29125Async
+from _gs_isl29125_micropython_isl29125.isl29125 import RED_GREEN_BLUE, LUX_10K, RES_16BITS
+from _gs_isl29125_micropython_isl29125.isl29125_async import ISL29125Async
 async def main():
     i2c_bus = None; sensor = None
     try:

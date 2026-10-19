@@ -8,10 +8,10 @@
 # ======================================== 导入相关模块 =========================================
 
 # 导入SIM7600核心类
-from sim7600 import SIM7600
+from _gs_sim7600_sim7600 import SIM7600
 
 # 从sim7600模块导入短信功能类
-from sim7600.sms import SMS
+from _gs_sim7600_sim7600.sms import SMS
 
 # 从machine模块导入UART和Pin类，用于硬件引脚和串口配置
 from machine import UART, Pin

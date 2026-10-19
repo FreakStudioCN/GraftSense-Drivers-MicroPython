@@ -3,7 +3,7 @@ try:
 except ImportError:
     import asyncio
 from machine import ADC, Timer, Pin, I2C, UART
-from ds3502 import DS3502
+from _gs_ds3502_ds3502 import DS3502
 from dac_waveformgenerator_async import WaveformGeneratorAsync
 
 async def main():

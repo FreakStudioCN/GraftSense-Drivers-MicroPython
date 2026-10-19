@@ -77,11 +77,18 @@ class AD9833Async:
             self._write((int(pout * 4096 / (2 * 3.141592653589793)) | 0xc000 | (phaseSelect << 13),))
 
     async def set_mode_async(self, mode="SIN"):
-        modes = {"SIN": (0, 0, 0, 0), "TRIANGLE": (0, 0, 0, 1), "SQUARE": (0, 1, 1, 0), "SQUARE/2": (0, 1, 0, 0), "RESET": (1, 0, 0, 0), "OFF": (1, 1, 1, 0)}
+        modes = {
+            "SIN": (0, 0, 0, 0, 0, 0),
+            "TRIANGLE": (0, 0, 0, 0, 0, 1),
+            "SQUARE": (0, 0, 1, 1, 1, 0),
+            "SQUARE/2": (0, 0, 1, 1, 0, 0),
+            "RESET": (1, 0, 0, 0, 0, 0),
+            "OFF": (1, 1, 1, 0, 0, 0),
+        }
         if mode not in modes:
             raise ValueError("invalid mode")
         async with self._lock:
-            self._bits[4], self._bits[6], self._bits[7], self._bits[9] = modes[mode]
+            self._bits[4:] = modes[mode]
             self._write_control()
 
     async def set_write_mode_async(self, writeMode="BOTH"):

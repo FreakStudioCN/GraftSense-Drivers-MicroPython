@@ -10,7 +10,7 @@
 
 import time
 from machine import I2C, Pin
-from tca9554 import TCA9554, TCA9554_INPUT, TCA9554_OUTPUT, TCA9554_HIGH, TCA9554_LOW
+from _gs_tca9554_tca9554 import TCA9554, TCA9554_INPUT, TCA9554_OUTPUT, TCA9554_HIGH, TCA9554_LOW
 
 # ======================================== 全局变量 ============================================
 

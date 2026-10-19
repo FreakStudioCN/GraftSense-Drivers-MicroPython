@@ -14,7 +14,7 @@ except ImportError:
     import asyncio
 
 from machine import I2C, Pin
-from lis3dh import LIS3DH_I2C
+from _gs_ls3hd_lis3dh import LIS3DH_I2C
 
 # ======================================== globals =============================================
 REG_WHOAMI = 0x0F

@@ -1,2 +1,63 @@
-{"name":"sim7600_async_driver","version":"1.0.1","description":"Async MicroPython SIM7600 UART AT driver","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["sim7600_async_v4.py","code/sim7600_async_v4.py"],["sim7600_async_v3.py","code/sim7600_async_v3.py"],["sim7600_async.py","code/sim7600_async.py"],["sim7600_async_v2.py","code/sim7600_async_v2.py"],["sms.py","code/sms.py"],["calling.py","code/calling.py"],["sim7600/__init__.py","code/sim7600/__init__.py"],["sim7600/core.py","code/sim7600/core.py"],["sim7600/calling.py","code/sim7600/calling.py"],["sim7600/sms.py","code/sim7600/sms.py"],["sim7600/http.py","code/sim7600/http.py"],["sim7600/location.py","code/sim7600/location.py"],["sim7600/tcpip.py","code/sim7600/tcpip.py"]]}
-
+{
+  "name": "sim7600_async_driver",
+  "version": "1.0.1",
+  "description": "Async MicroPython SIM7600 UART AT driver",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "sim7600_async_v4.py",
+      "code/sim7600_async_v4.py"
+    ],
+    [
+      "sim7600_async_v3.py",
+      "code/sim7600_async_v3.py"
+    ],
+    [
+      "sim7600_async.py",
+      "code/sim7600_async.py"
+    ],
+    [
+      "sim7600_async_v2.py",
+      "code/sim7600_async_v2.py"
+    ],
+    [
+      "_gs_sim7600_sms.py",
+      "code/_gs_sim7600_sms.py"
+    ],
+    [
+      "_gs_sim7600_calling.py",
+      "code/_gs_sim7600_calling.py"
+    ],
+    [
+      "_gs_sim7600_sim7600/__init__.py",
+      "code/_gs_sim7600_sim7600/__init__.py"
+    ],
+    [
+      "_gs_sim7600_sim7600/core.py",
+      "code/_gs_sim7600_sim7600/core.py"
+    ],
+    [
+      "_gs_sim7600_sim7600/calling.py",
+      "code/_gs_sim7600_sim7600/calling.py"
+    ],
+    [
+      "_gs_sim7600_sim7600/sms.py",
+      "code/_gs_sim7600_sim7600/sms.py"
+    ],
+    [
+      "_gs_sim7600_sim7600/http.py",
+      "code/_gs_sim7600_sim7600/http.py"
+    ],
+    [
+      "_gs_sim7600_sim7600/location.py",
+      "code/_gs_sim7600_sim7600/location.py"
+    ],
+    [
+      "_gs_sim7600_sim7600/tcpip.py",
+      "code/_gs_sim7600_sim7600/tcpip.py"
+    ]
+  ]
+}

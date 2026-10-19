@@ -21,7 +21,7 @@ from bmp581mod_async import Bmp581Async
 
 # 导入时间控制模块
 # 导入I2C适配器模块
-from sensor_pack.bus_service import I2cAdapter
+from _gs_bmp581_sensor_pack.bus_service import I2cAdapter
 
 # ======================================== 全局变量 ============================================
 

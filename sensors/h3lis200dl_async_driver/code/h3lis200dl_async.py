@@ -7,7 +7,7 @@
 # @License : MIT
 
 # ======================================== 导入相关模块 =========================================
-from micropython_h3lis200dl import h3lis200dl as source
+from _gs_h3lis200dl_micropython_h3lis200dl import h3lis200dl as source
 
 # ======================================== 全局变量 ============================================
 

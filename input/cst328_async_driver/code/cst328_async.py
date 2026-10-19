@@ -1,3 +1,4 @@
+import time
 """Conservative async adapters for bounded synchronous bus calls."""
 try:
     import uasyncio as asyncio
@@ -6,6 +7,25 @@ except ImportError:
 
 from cst328 import *
 import machine
+
+
+async def _pulse_low_async(pin, delay_ms):
+    pin.value(0)
+    started = time.ticks_ms()
+    try:
+        await asyncio.sleep_ms(delay_ms)
+    finally:
+        try:
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+            while remaining > 0:
+                try:
+                    await asyncio.sleep_ms(remaining)
+                except asyncio.CancelledError:
+                    pass
+                remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        finally:
+            pin.value(1)
+
 
 class SyncAdapterMixin:
     """Expose explicit async entry points without hiding bus blocking."""
@@ -56,9 +76,7 @@ class CST328Async(SyncAdapterMixin, CST328):
             raise RuntimeError("Reset pin is not configured")
         self._rst_pin.value(1)
         await asyncio.sleep_ms(10)
-        self._rst_pin.value(0)
-        await asyncio.sleep_ms(10)
-        self._rst_pin.value(1)
+        await _pulse_low_async(self._rst_pin, 10)
         await asyncio.sleep_ms(100)
         self._triggered = True
 

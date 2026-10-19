@@ -1,8 +1,14 @@
 {
   "name": "shtc3_async_driver",
   "urls": [
-    ["shtc3.py", "code/shtc3.py"],
-    ["shtc3_async.py", "code/shtc3_async.py"]
+    [
+      "_gs_shtc3_shtc3.py",
+      "code/_gs_shtc3_shtc3.py"
+    ],
+    [
+      "shtc3_async.py",
+      "code/shtc3_async.py"
+    ]
   ],
   "version": "1.0.0",
   "description": "Cooperative async SHTC3 temperature and humidity sensor driver for MicroPython",

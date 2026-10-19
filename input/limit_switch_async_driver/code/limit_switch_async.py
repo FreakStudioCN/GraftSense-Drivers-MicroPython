@@ -1,5 +1,5 @@
 """Async limit-switch adapter for task-context debounce consumption."""
-from limit_switch import LimitSwitch
+from _gs_limit_switch_limit_switch import LimitSwitch
 
 
 class LimitSwitchAsync(LimitSwitch):

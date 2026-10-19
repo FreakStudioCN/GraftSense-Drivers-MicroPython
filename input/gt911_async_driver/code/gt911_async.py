@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-from gt911 import GT911, Pin
+from _gs_gt911_gt911 import GT911, Pin
 from array import array
 
 

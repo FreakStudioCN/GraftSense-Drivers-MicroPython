@@ -12,7 +12,7 @@ import time
 
 from machine import I2C, Pin
 
-from sht25 import SHT25
+from _gs_sht25_sht25 import SHT25
 
 # ======================================== 全局变量 ============================================
 

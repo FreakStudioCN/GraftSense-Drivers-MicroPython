@@ -52,12 +52,12 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/i2c_helpers_async.py
 ├── code/main.py
-├── code/micropython_mmc5603/__init__.py
-├── code/micropython_mmc5603/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_mmc5603/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_mmc5603/__pycache__/mmc5603.cpython-313.pyc
-├── code/micropython_mmc5603/i2c_helpers.py
-├── code/micropython_mmc5603/mmc5603.py
+├── code/_gs_mmc5603_micropython_mmc5603/__init__.py
+├── code/_gs_mmc5603_micropython_mmc5603/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_mmc5603_micropython_mmc5603/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_mmc5603_micropython_mmc5603/__pycache__/mmc5603.cpython-313.pyc
+├── code/_gs_mmc5603_micropython_mmc5603/i2c_helpers.py
+├── code/_gs_mmc5603_micropython_mmc5603/mmc5603.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -93,7 +93,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import Pin, SoftI2C
-    from micropython_mmc5603 import mmc5603
+    from _gs_mmc5603_micropython_mmc5603 import mmc5603
 
     # ======================================== 全局变量 ============================================
 

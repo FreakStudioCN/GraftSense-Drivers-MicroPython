@@ -7,7 +7,7 @@
 
 # ======================================== 导入相关模块 =========================================
 # 导入LCD1602显示屏I2C驱动相关的所有内容
-from LCD_I2C import LCD
+from _gs_lcm1602a_LCD_I2C import LCD
 
 # 从machine模块导入I2C类（用于I2C总线配置）和Pin类（用于引脚配置）
 from machine import I2C, Pin

@@ -50,10 +50,18 @@ class AD9833Async:
             self._write(((word >> 8) & 0xff, word & 0xff))
 
     async def set_mode_async(self, mode="SIN"):
+        modes = {
+            "SIN": (0, 0, 0, 0, 0, 0),
+            "TRIANGLE": (0, 0, 0, 0, 0, 1),
+            "SQUARE": (0, 0, 1, 1, 1, 0),
+            "SQUARE/2": (0, 0, 1, 1, 0, 0),
+            "RESET": (1, 0, 0, 0, 0, 0),
+            "OFF": (1, 1, 1, 0, 0, 0),
+        }
+        if mode not in modes:
+            raise ValueError("invalid mode")
         async with self._lock:
-            modes = {"SIN":(0,0,0,0),"TRIANGLE":(0,0,0,1),"SQUARE":(0,1,1,0),"SQUARE/2":(0,1,0,0),"RESET":(1,0,0,0),"OFF":(1,1,1,0)}
-            if mode not in modes: raise ValueError("invalid mode")
-            self._state[4], self._state[6], self._state[7], self._state[9] = modes[mode]
+            self._state[4:] = modes[mode]
             self._control()
 
     async def set_control_reg_async(self, B28=1, HLB=0, FS=0, PS=0, RESET=0, SLP1=0, SLP12=0, OP=0, DIV2=0, MODE=0):

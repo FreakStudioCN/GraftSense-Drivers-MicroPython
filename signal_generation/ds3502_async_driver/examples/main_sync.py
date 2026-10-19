@@ -17,10 +17,10 @@ import time
 import micropython
 
 # 导入ds3502模块用于控制数字电位器芯片
-from ds3502 import DS3502
+from _gs_ds3502_ds3502 import DS3502
 
 # 导入波形生成模块
-from dac_waveformgenerator import WaveformGenerator
+from _gs_ds3502_dac_waveformgenerator import WaveformGenerator
 
 # ======================================== 全局变量 ============================================
 

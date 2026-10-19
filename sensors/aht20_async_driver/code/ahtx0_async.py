@@ -13,7 +13,7 @@ except ImportError:
     import asyncio
 
 import time
-import ahtx0
+import _gs_aht20_ahtx0 as ahtx0
 
 
 # ======================================== 全局变量 ============================================

@@ -9,8 +9,8 @@
 
 import time
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
-import ina_ti
+from _gs_ina226_sensor_pack_2.bus_service import I2cAdapter
+import _gs_ina226_ina_ti as ina_ti
 
 # ======================================== 全局变量 ============================================
 

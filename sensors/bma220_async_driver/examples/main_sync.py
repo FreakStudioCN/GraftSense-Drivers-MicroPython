@@ -16,12 +16,12 @@ import time
 from machine import Pin, I2C
 
 # 导入BMA220传感器相关驱动模块
-from micropython_bma220 import bma220
-from micropython_bma220 import bma220_tap_sensing
-from micropython_bma220 import bma220_const as bma220_cnst
-from micropython_bma220 import bma220_lowg_detection
-from micropython_bma220 import bma220_orientation
-from micropython_bma220 import bma220_slope
+from _gs_bma220_micropython_bma220 import bma220
+from _gs_bma220_micropython_bma220 import bma220_tap_sensing
+from _gs_bma220_micropython_bma220 import bma220_const as bma220_cnst
+from _gs_bma220_micropython_bma220 import bma220_lowg_detection
+from _gs_bma220_micropython_bma220 import bma220_orientation
+from _gs_bma220_micropython_bma220 import bma220_slope
 
 
 # ======================================== 全局变量 ============================================

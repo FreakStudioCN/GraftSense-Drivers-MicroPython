@@ -4,7 +4,7 @@ except ImportError:
     import asyncio
 
 import time
-from sht25 import SHT25, _celsius_to_fahrenheit, _clamp_rh
+from _gs_sht25_sht25 import SHT25, _celsius_to_fahrenheit, _clamp_rh
 
 
 class SHT25Async(SHT25):

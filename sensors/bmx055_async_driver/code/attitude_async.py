@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-from attitude import *
+from _gs_bmx055_attitude import *
 
 class SyncAdapterMixin:
     """Expose explicit async entry points without hiding bus blocking."""

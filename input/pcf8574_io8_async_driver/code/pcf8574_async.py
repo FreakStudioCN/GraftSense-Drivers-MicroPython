@@ -1,5 +1,5 @@
 """Async PCF8574 adapter for bounded one-byte I2C operations."""
-from pcf8574 import PCF8574
+from _gs_pcf8574_io8_pcf8574 import PCF8574
 
 
 class PCF8574Async(PCF8574):

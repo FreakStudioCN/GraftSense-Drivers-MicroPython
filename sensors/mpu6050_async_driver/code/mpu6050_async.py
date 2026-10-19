@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-from mpu6050 import ComplementaryKalmanFilter, MPU6050, signedIntFromBytes, error_msg, i2c_err_str
+from _gs_mpu6050_mpu6050 import ComplementaryKalmanFilter, MPU6050, signedIntFromBytes, error_msg, i2c_err_str
 
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================

@@ -1,43 +1,43 @@
 {
-    "name":  "ltr390uv_async_driver",
-    "version":  "1.0.0",
-    "description":  "A MicroPython library to control LTR-390UV-01 ambient light and UV sensor",
-    "author":  "octaprog7",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "urls":  [
-                 [
-                     "ltr390uv.py",
-                     "code/ltr390uv.py"
-                 ],
-                 [
-                     "sensor_pack_2/base_sensor.py",
-                     "code/sensor_pack_2/base_sensor.py"
-                 ],
-                 [
-                     "sensor_pack_2/bitfield.py",
-                     "code/sensor_pack_2/bitfield.py"
-                 ],
-                 [
-                     "sensor_pack_2/bus_service.py",
-                     "code/sensor_pack_2/bus_service.py"
-                 ],
-                 [
-                     "sensor_pack_2/regmod.py",
-                     "code/sensor_pack_2/regmod.py"
-                 ],
-                 [
-                     "sensor_pack_2/__init__.py",
-                     "code/sensor_pack_2/__init__.py"
-                 ],
-                 [
-                     "ltr390uv_async.py",
-                     "code/ltr390uv_async.py"
-                 ]
-             ]
+  "name": "ltr390uv_async_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control LTR-390UV-01 ambient light and UV sensor",
+  "author": "octaprog7",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "_gs_ltr390uv_ltr390uv.py",
+      "code/_gs_ltr390uv_ltr390uv.py"
+    ],
+    [
+      "_gs_ltr390uv_sensor_pack_2/base_sensor.py",
+      "code/_gs_ltr390uv_sensor_pack_2/base_sensor.py"
+    ],
+    [
+      "_gs_ltr390uv_sensor_pack_2/bitfield.py",
+      "code/_gs_ltr390uv_sensor_pack_2/bitfield.py"
+    ],
+    [
+      "_gs_ltr390uv_sensor_pack_2/bus_service.py",
+      "code/_gs_ltr390uv_sensor_pack_2/bus_service.py"
+    ],
+    [
+      "_gs_ltr390uv_sensor_pack_2/regmod.py",
+      "code/_gs_ltr390uv_sensor_pack_2/regmod.py"
+    ],
+    [
+      "_gs_ltr390uv_sensor_pack_2/__init__.py",
+      "code/_gs_ltr390uv_sensor_pack_2/__init__.py"
+    ],
+    [
+      "ltr390uv_async.py",
+      "code/ltr390uv_async.py"
+    ]
+  ]
 }

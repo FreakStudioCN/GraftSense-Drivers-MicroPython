@@ -51,22 +51,22 @@
 ```text
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/main.py
-├── code/micropython_bma220/__init__.py
-├── code/micropython_bma220/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_bma220/__pycache__/bma220.cpython-313.pyc
-├── code/micropython_bma220/__pycache__/bma220_const.cpython-313.pyc
-├── code/micropython_bma220/__pycache__/bma220_lowg_detection.cpython-313.pyc
-├── code/micropython_bma220/__pycache__/bma220_orientation.cpython-313.pyc
-├── code/micropython_bma220/__pycache__/bma220_slope.cpython-313.pyc
-├── code/micropython_bma220/__pycache__/bma220_tap_sensing.cpython-313.pyc
-├── code/micropython_bma220/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_bma220/bma220.py
-├── code/micropython_bma220/bma220_const.py
-├── code/micropython_bma220/bma220_lowg_detection.py
-├── code/micropython_bma220/bma220_orientation.py
-├── code/micropython_bma220/bma220_slope.py
-├── code/micropython_bma220/bma220_tap_sensing.py
-├── code/micropython_bma220/i2c_helpers.py
+├── code/_gs_bma220_micropython_bma220/__init__.py
+├── code/_gs_bma220_micropython_bma220/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_bma220_micropython_bma220/__pycache__/bma220.cpython-313.pyc
+├── code/_gs_bma220_micropython_bma220/__pycache__/bma220_const.cpython-313.pyc
+├── code/_gs_bma220_micropython_bma220/__pycache__/bma220_lowg_detection.cpython-313.pyc
+├── code/_gs_bma220_micropython_bma220/__pycache__/bma220_orientation.cpython-313.pyc
+├── code/_gs_bma220_micropython_bma220/__pycache__/bma220_slope.cpython-313.pyc
+├── code/_gs_bma220_micropython_bma220/__pycache__/bma220_tap_sensing.cpython-313.pyc
+├── code/_gs_bma220_micropython_bma220/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_bma220_micropython_bma220/bma220.py
+├── code/_gs_bma220_micropython_bma220/bma220_const.py
+├── code/_gs_bma220_micropython_bma220/bma220_lowg_detection.py
+├── code/_gs_bma220_micropython_bma220/bma220_orientation.py
+├── code/_gs_bma220_micropython_bma220/bma220_slope.py
+├── code/_gs_bma220_micropython_bma220/bma220_tap_sensing.py
+├── code/_gs_bma220_micropython_bma220/i2c_helpers.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -108,12 +108,12 @@ async def main():
     from machine import Pin, I2C
     
     # 导入BMA220传感器相关驱动模块
-    from micropython_bma220 import bma220
-    from micropython_bma220 import bma220_tap_sensing
-    from micropython_bma220 import bma220_const as bma220_cnst
-    from micropython_bma220 import bma220_lowg_detection
-    from micropython_bma220 import bma220_orientation
-    from micropython_bma220 import bma220_slope
+    from _gs_bma220_micropython_bma220 import bma220
+    from _gs_bma220_micropython_bma220 import bma220_tap_sensing
+    from _gs_bma220_micropython_bma220 import bma220_const as bma220_cnst
+    from _gs_bma220_micropython_bma220 import bma220_lowg_detection
+    from _gs_bma220_micropython_bma220 import bma220_orientation
+    from _gs_bma220_micropython_bma220 import bma220_slope
     
     
     # ======================================== 全局变量 ============================================

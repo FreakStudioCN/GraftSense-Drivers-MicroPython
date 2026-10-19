@@ -51,19 +51,19 @@
 ```text
 ├── code/__pycache__/ens160sciosense.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/ens160sciosense.py
+├── code/_gs_ens160_ens160sciosense.py
 ├── code/ens160sciosense_async.py
 ├── code/main.py
-├── code/sensor_pack_2/__init__.py
-├── code/sensor_pack_2/__pycache__/__init__.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bitfield.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/crc_mod.cpython-313.pyc
-├── code/sensor_pack_2/base_sensor.py
-├── code/sensor_pack_2/bitfield.py
-├── code/sensor_pack_2/bus_service.py
-├── code/sensor_pack_2/crc_mod.py
+├── code/_gs_ens160_sensor_pack_2/__init__.py
+├── code/_gs_ens160_sensor_pack_2/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_ens160_sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
+├── code/_gs_ens160_sensor_pack_2/__pycache__/bitfield.cpython-313.pyc
+├── code/_gs_ens160_sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
+├── code/_gs_ens160_sensor_pack_2/__pycache__/crc_mod.cpython-313.pyc
+├── code/_gs_ens160_sensor_pack_2/base_sensor.py
+├── code/_gs_ens160_sensor_pack_2/bitfield.py
+├── code/_gs_ens160_sensor_pack_2/bus_service.py
+├── code/_gs_ens160_sensor_pack_2/crc_mod.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -100,8 +100,8 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import Pin, SoftI2C
-    import ens160sciosense
-    from sensor_pack_2.bus_service import I2cAdapter
+    import _gs_ens160_ens160sciosense as ens160sciosense
+    from _gs_ens160_sensor_pack_2.bus_service import I2cAdapter
 
     # ======================================== 全局变量 ============================================
 

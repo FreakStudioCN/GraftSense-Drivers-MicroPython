@@ -21,10 +21,26 @@ class CH9328Async(SyncAdapterMixin, CH9328):
         CH9328.__init__(self, uart)
         self._transaction_lock = asyncio.Lock()
 
+    def _release_hid(self):
+        if self.current_mode == 3 and self.uart is not None:
+            self.uart.write(b"\x00" * 8)
+
+    async def aclose(self):
+        async with self._transaction_lock:
+            try:
+                self._release_hid()
+            finally:
+                deinit = getattr(self, 'deinit', None)
+                if deinit is not None:
+                    deinit()
+
     async def set_keyboard_mode_async(self, mode):
         if mode not in self.KEYBOARD_MODE:
             raise ValueError("无效工作模式，仅支持:%s" % self.KEYBOARD_MODE)
-        self.current_mode = mode
+        async with self._transaction_lock:
+            if self.current_mode == 3 and mode != 3:
+                self._release_hid()
+            self.current_mode = mode
 
     async def crlf_async(self):
         async with self._transaction_lock:
@@ -81,20 +97,30 @@ class CH9328Async(SyncAdapterMixin, CH9328):
 
     async def tap_key_async(self, key_code, modifier=CH9328.MODIFIER_NONE, delay=50):
         async with self._transaction_lock:
-            await self._send_hid_packet_unlocked(bytes((modifier, 0, key_code, 0, 0, 0, 0, 0)))
-            await asyncio.sleep_ms(delay)
-            return await self._send_hid_packet_unlocked(b"\x00\x00\x00\x00\x00\x00\x00\x00")
+            try:
+                pressed = await self._send_hid_packet_unlocked(bytes((modifier, 0, key_code, 0, 0, 0, 0, 0)))
+                await asyncio.sleep_ms(delay)
+            finally:
+                self._release_hid()
+            await asyncio.sleep_ms(1)
+            return pressed
 
     async def hotkey_async(self, modifier, key_code, delay=50):
         return await self.tap_key_async(key_code, modifier, delay)
 
     async def type_text_async(self, text, delay=10):
         async with self._transaction_lock:
-            for char in text:
-                if char not in self.CHAR_TO_HID:
-                    continue
-                modifier = self.MODIFIER_LEFT_SHIFT if char.isupper() else self.MODIFIER_NONE
-                await self._send_hid_packet_unlocked(bytes((modifier, 0, self.CHAR_TO_HID[char], 0, 0, 0, 0, 0)))
-                await asyncio.sleep_ms(delay)
-                await self._send_hid_packet_unlocked(b"\x00\x00\x00\x00\x00\x00\x00\x00")
-                await asyncio.sleep_ms(delay)
+            try:
+                for char in text:
+                    if char not in self.CHAR_TO_HID:
+                        continue
+                    modifier = self.MODIFIER_LEFT_SHIFT if char.isupper() else self.MODIFIER_NONE
+                    try:
+                        await self._send_hid_packet_unlocked(bytes((modifier, 0, self.CHAR_TO_HID[char], 0, 0, 0, 0, 0)))
+                        await asyncio.sleep_ms(delay)
+                    finally:
+                        self._release_hid()
+                    await asyncio.sleep_ms(1)
+                    await asyncio.sleep_ms(delay)
+            finally:
+                self._release_hid()

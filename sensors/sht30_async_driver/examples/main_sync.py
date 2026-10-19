@@ -11,7 +11,7 @@
 import time
 from machine import I2C, Pin
 
-from sht30 import SHT30
+from _gs_sht30_sht30 import SHT30
 
 # ======================================== 全局变量 ============================================
 

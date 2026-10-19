@@ -10,8 +10,8 @@
 import time
 from machine import I2C, Pin
 
-from attitude import angles, heading
-from bmx055 import BMX055
+from _gs_bmx055_attitude import angles, heading
+from _gs_bmx055_bmx055 import BMX055
 
 # ======================================== 全局变量 ============================================
 I2C_ID = 0

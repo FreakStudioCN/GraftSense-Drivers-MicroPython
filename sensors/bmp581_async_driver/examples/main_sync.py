@@ -11,13 +11,13 @@
 from machine import SoftI2C, Pin
 
 # 导入BMP581传感器驱动模块
-import bmp581mod
+import _gs_bmp581_bmp581mod as bmp581mod
 
 # 导入时间控制模块
 import time
 
 # 导入I2C适配器模块
-from sensor_pack.bus_service import I2cAdapter
+from _gs_bmp581_sensor_pack.bus_service import I2cAdapter
 
 # ======================================== 全局变量 ============================================
 

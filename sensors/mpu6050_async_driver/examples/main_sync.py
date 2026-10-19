@@ -10,7 +10,7 @@
 from machine import UART, Pin, SoftI2C
 import time
 import gc
-from mpu6050 import MPU6050, ComplementaryKalmanFilter
+from _gs_mpu6050_mpu6050 import MPU6050, ComplementaryKalmanFilter
 from math import degrees
 
 # ======================================== 全局变量 ============================================

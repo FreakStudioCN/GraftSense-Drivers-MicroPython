@@ -8,11 +8,11 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from data_flow_processor import DataFlowProcessor
-from ad8232 import AD8232
+from _gs_ad8232_data_flow_processor import DataFlowProcessor
+from _gs_ad8232_ad8232 import AD8232
 from machine import UART, Pin, Timer
-from ecg_module_cmd import ECGModuleCMD
-from ecg_signal_processor import ECGSignalProcessor
+from _gs_ad8232_ecg_module_cmd import ECGModuleCMD
+from _gs_ad8232_ecg_signal_processor import ECGSignalProcessor
 from machine import UART, Pin, Timer
 from neopixel import NeoPixel
 

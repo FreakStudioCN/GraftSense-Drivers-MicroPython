@@ -5,6 +5,25 @@ except ImportError:
 import time
 from pn532 import MIFARE_CMD_AUTH_A
 
+
+async def _pulse_low_async(pin, delay_ms):
+    pin.value(0)
+    started = time.ticks_ms()
+    try:
+        await asyncio.sleep_ms(delay_ms)
+    finally:
+        try:
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+            while remaining > 0:
+                try:
+                    await asyncio.sleep_ms(remaining)
+                except asyncio.CancelledError:
+                    pass
+                remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        finally:
+            pin.value(1)
+
+
 class PN532_UARTAsync:
     def __init__(self, uart, reset=None, debug=False):
         if not hasattr(uart, "any") or not hasattr(uart, "read") or not hasattr(uart, "write"):
@@ -123,13 +142,13 @@ class PN532_UARTAsync:
         return bool(response and response[0] == 0)
 
     async def reset_async(self):
-        if self._reset is not None:
-            self._reset.value(0)
-            await asyncio.sleep_ms(100)
-            self._reset.value(1)
-            await asyncio.sleep_ms(100)
-        self._uart.write(b"\x55" * 17)
-        await asyncio.sleep_ms(10)
+        async with self._lock:
+            if self._reset is not None:
+                await _pulse_low_async(self._reset, 100)
+                await asyncio.sleep_ms(100)
+            self._uart.write(b"\x55" * 17)
+            await asyncio.sleep_ms(10)
 
     async def aclose(self):
-        self._uart = None
+        async with self._lock:
+            self._uart = None

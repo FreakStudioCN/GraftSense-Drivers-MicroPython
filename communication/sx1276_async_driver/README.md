@@ -50,7 +50,7 @@
 
 ```text
 ├── code/main.py
-├── code/sx1276.py
+├── code/_gs_sx1276_sx1276.py
 ├── code/sx1276_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -88,7 +88,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import Pin, SPI
-    from sx1276 import SX1276
+    from _gs_sx1276_sx1276 import SX1276
 
     # ======================================== 全局变量 ============================================
 

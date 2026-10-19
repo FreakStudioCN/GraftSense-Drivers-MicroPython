@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/apa102.py
+├── code/_gs_apa102_apa102.py
 ├── code/apa102_async.py
 ├── code/main.py
 ├── examples/main_sync.py

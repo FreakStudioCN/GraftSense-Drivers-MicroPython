@@ -52,13 +52,13 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/veml6040mod.cpython-313.pyc
 ├── code/main.py
-├── code/sensor_pack_2/__init__.py
-├── code/sensor_pack_2/__pycache__/__init__.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
-├── code/sensor_pack_2/base_sensor.py
-├── code/sensor_pack_2/bus_service.py
-├── code/veml6040mod.py
+├── code/_gs_veml6040_sensor_pack_2/__init__.py
+├── code/_gs_veml6040_sensor_pack_2/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_veml6040_sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
+├── code/_gs_veml6040_sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
+├── code/_gs_veml6040_sensor_pack_2/base_sensor.py
+├── code/_gs_veml6040_sensor_pack_2/bus_service.py
+├── code/_gs_veml6040_veml6040mod.py
 ├── code/veml6040mod_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -95,8 +95,8 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     
     from machine import I2C, Pin
-    from sensor_pack_2.bus_service import I2cAdapter
-    from veml6040mod import VEML6040, get_g_max_lux
+    from _gs_veml6040_sensor_pack_2.bus_service import I2cAdapter
+    from _gs_veml6040_veml6040mod import VEML6040, get_g_max_lux
     # ======================================== 全局变量 ============================================
     
     # VEML6040 默认 I2C 地址

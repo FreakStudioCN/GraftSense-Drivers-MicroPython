@@ -1,23 +1,21 @@
 {
-    "name":  "tdeck_keyboard_async_driver",
-    "version":  "0.1.0",
-    "description":  "LILYGO T-Deck Plus onboard T-Keyboard I2C driver (ESP32-C3 keyboard controller at address 0x55)",
-    "license":  "MIT",
-    "author":  "FreakStudio",
-    "platforms":  [
-                      "ESP32-S3"
-                  ],
-    "urls":  [
-                 [
-                     "tdeck_keyboard.py",
-                     "code/tdeck_keyboard.py"
-                 ],
-                 [
-                     "tdeck_keyboard_async.py",
-                     "code/tdeck_keyboard_async.py"
-                 ]
-             ],
-    "deps":  [
-
-             ]
+  "name": "tdeck_keyboard_async_driver",
+  "version": "0.1.0",
+  "description": "LILYGO T-Deck Plus onboard T-Keyboard I2C driver (ESP32-C3 keyboard controller at address 0x55)",
+  "license": "MIT",
+  "author": "FreakStudio",
+  "platforms": [
+    "ESP32-S3"
+  ],
+  "urls": [
+    [
+      "_gs_tdeck_keyboard_tdeck_keyboard.py",
+      "code/_gs_tdeck_keyboard_tdeck_keyboard.py"
+    ],
+    [
+      "tdeck_keyboard_async.py",
+      "code/tdeck_keyboard_async.py"
+    ]
+  ],
+  "deps": []
 }

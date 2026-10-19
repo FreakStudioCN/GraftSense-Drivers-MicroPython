@@ -10,7 +10,7 @@
 import time
 
 from machine import I2C, Pin
-from micropython_icm20948 import ICM20948
+from _gs_icm20948_micropython_icm20948 import ICM20948
 
 # ======================================== 全局变量 ============================================
 

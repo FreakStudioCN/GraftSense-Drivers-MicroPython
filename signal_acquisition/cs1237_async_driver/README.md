@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/cs1237.py
+├── code/_gs_cs1237_cs1237.py
 ├── code/cs1237_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -87,7 +87,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     import array
     from machine import Pin
-    from cs1237 import CS1237
+    from _gs_cs1237_cs1237 import CS1237
 
 
     # ======================================== 功能函数 ============================================

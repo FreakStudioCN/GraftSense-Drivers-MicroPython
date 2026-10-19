@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 ==========================================
 
 import time
-from hall_sensor_oh34n import HallSensorOH34N
+from _gs_hall_sensor_oh34n_hall_sensor_oh34n import HallSensorOH34N
 
 # ======================================== 全局变量 =============================================
 

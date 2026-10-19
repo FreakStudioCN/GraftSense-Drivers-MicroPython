@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from limit_switch import LimitSwitch
+from _gs_limit_switch_limit_switch import LimitSwitch
 
 # ======================================== 全局变量 =============================================
 

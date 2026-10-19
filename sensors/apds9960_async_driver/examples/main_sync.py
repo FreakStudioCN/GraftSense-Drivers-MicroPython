@@ -10,7 +10,7 @@
 
 import machine
 import time
-from apds9960 import APDS9960
+from _gs_apds9960_apds9960 import APDS9960
 
 # ======================================== 全局变量 ============================================
 

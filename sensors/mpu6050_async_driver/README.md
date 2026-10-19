@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/mpu6050.cpython-313.pyc
 ├── code/main.py
-├── code/mpu6050.py
+├── code/_gs_mpu6050_mpu6050.py
 ├── code/mpu6050_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -90,7 +90,7 @@ async def main():
 
     from machine import UART, Pin, SoftI2C
     import gc
-    from mpu6050 import MPU6050, ComplementaryKalmanFilter
+    from _gs_mpu6050_mpu6050 import MPU6050, ComplementaryKalmanFilter
     from math import degrees
 
     # ======================================== 全局变量 ============================================

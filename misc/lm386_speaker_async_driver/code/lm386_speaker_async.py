@@ -3,7 +3,7 @@ try:
 except ImportError:
     import asyncio
 
-from lm386_speaker_sync import LMSpeaker
+from _gs_lm386_speaker_lm386_speaker_sync import LMSpeaker
 
 
 class LMSpeakerAsync(LMSpeaker):

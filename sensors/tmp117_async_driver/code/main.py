@@ -5,7 +5,7 @@ try:
 except ImportError:
     import asyncio
 from machine import I2C, Pin
-from micropython_tmp117.tmp117 import TMP117
+from _gs_tmp117_micropython_tmp117.tmp117 import TMP117
 from tmp117_async import TMP117Async
 # ======================================== 全局变量 ============================================
 I2C_BUS_ID, I2C_SCL_PIN, I2C_SDA_PIN, I2C_FREQ = 0, 5, 4, 400000

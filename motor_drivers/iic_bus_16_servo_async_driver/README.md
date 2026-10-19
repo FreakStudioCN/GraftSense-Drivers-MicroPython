@@ -49,10 +49,10 @@
 ## 文件结构
 
 ```text
-├── code/bus_servo.py
+├── code/_gs_iic_bus_16_servo_bus_servo.py
 ├── code/bus_servo_async.py
 ├── code/main.py
-├── code/pca9685.py
+├── code/_gs_iic_bus_16_servo_pca9685.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -77,8 +77,8 @@ try:
 except ImportError:
  import asyncio
 from machine import Pin,I2C
-from pca9685 import PCA9685
-from bus_servo import BusPWMServoController
+from _gs_iic_bus_16_servo_pca9685 import PCA9685
+from _gs_iic_bus_16_servo_bus_servo import BusPWMServoController
 from bus_servo_async import BusPWMServoControllerAsync
 async def main():
  await asyncio.sleep(3);i2c=I2C(id=0,sda=Pin(4),scl=Pin(5),freq=400000);device=next((x for x in i2c.scan() if 0x40<=x<=0x4f),None)

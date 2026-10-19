@@ -51,19 +51,19 @@
 ```text
 ├── code/__pycache__/ltr390uv.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/ltr390uv.py
+├── code/_gs_ltr390uv_ltr390uv.py
 ├── code/ltr390uv_async.py
 ├── code/main.py
-├── code/sensor_pack_2/__init__.py
-├── code/sensor_pack_2/__pycache__/__init__.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bitfield.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/regmod.cpython-313.pyc
-├── code/sensor_pack_2/base_sensor.py
-├── code/sensor_pack_2/bitfield.py
-├── code/sensor_pack_2/bus_service.py
-├── code/sensor_pack_2/regmod.py
+├── code/_gs_ltr390uv_sensor_pack_2/__init__.py
+├── code/_gs_ltr390uv_sensor_pack_2/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_ltr390uv_sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
+├── code/_gs_ltr390uv_sensor_pack_2/__pycache__/bitfield.cpython-313.pyc
+├── code/_gs_ltr390uv_sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
+├── code/_gs_ltr390uv_sensor_pack_2/__pycache__/regmod.cpython-313.pyc
+├── code/_gs_ltr390uv_sensor_pack_2/base_sensor.py
+├── code/_gs_ltr390uv_sensor_pack_2/bitfield.py
+├── code/_gs_ltr390uv_sensor_pack_2/bus_service.py
+├── code/_gs_ltr390uv_sensor_pack_2/regmod.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -101,10 +101,8 @@ async def main():
 
     import sys
     from machine import Pin, SoftI2C
-    from sensor_pack_2.bus_service import I2cAdapter
-    import ltr390uv
-
-
+    from _gs_ltr390uv_sensor_pack_2.bus_service import I2cAdapter
+    import _gs_ltr390uv_ltr390uv as ltr390uv
     # ======================================== 全局变量 ============================================
 
     # 自动识别传感器地址，定义全局目标地址列表（支持多地址，单个也用[]）

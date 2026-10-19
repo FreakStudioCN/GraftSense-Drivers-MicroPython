@@ -2,7 +2,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from tca9554 import TCA9554 as _TCA9554, TCA9554_DEFAULT_ADDR
+from _gs_tca9554_tca9554 import TCA9554 as _TCA9554, TCA9554_DEFAULT_ADDR
 
 class TCA9554(_TCA9554):
     def __init__(self, i2c, address=TCA9554_DEFAULT_ADDR, config=0xFF, output=0x00, debug=False):

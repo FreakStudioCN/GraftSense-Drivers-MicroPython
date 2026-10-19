@@ -12,8 +12,8 @@
 import time
 from machine import Pin, SPI, UART
 
-from e22_900m22s import E22_900M22S
-from e22_uart_bridge import E22UARTBridge
+from _gs_lora_e22_900m22s import E22_900M22S
+from _gs_lora_e22_uart_bridge import E22UARTBridge
 
 
 # ======================================== 全局变量 ============================================

@@ -1,39 +1,39 @@
 {
-    "name":  "sim800_async_driver",
-    "version":  "1.0.0",
-    "description":  "Async MicroPython SIM800 AT-command driver",
-    "author":  "alankrantas",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all",
-    "urls":  [
-                 [
-                     "sim800_async.py",
-                     "code/sim800_async.py"
-                 ],
-                 [
-                     "sim800/__init__.py",
-                     "code/sim800/__init__.py"
-                 ],
-                 [
-                     "sim800/core.py",
-                     "code/sim800/core.py"
-                 ],
-                 [
-                     "sim800/gprs.py",
-                     "code/sim800/gprs.py"
-                 ],
-                 [
-                     "sim800/sms.py",
-                     "code/sim800/sms.py"
-                 ],
-                 [
-                     "sim800/tcpip.py",
-                     "code/sim800/tcpip.py"
-                 ],
-                 [
-                     "sim800/utils.py",
-                     "code/sim800/utils.py"
-                 ]
-             ]
+  "name": "sim800_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython SIM800 AT-command driver",
+  "author": "alankrantas",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "sim800_async.py",
+      "code/sim800_async.py"
+    ],
+    [
+      "_gs_sim800_sim800/__init__.py",
+      "code/_gs_sim800_sim800/__init__.py"
+    ],
+    [
+      "_gs_sim800_sim800/core.py",
+      "code/_gs_sim800_sim800/core.py"
+    ],
+    [
+      "_gs_sim800_sim800/gprs.py",
+      "code/_gs_sim800_sim800/gprs.py"
+    ],
+    [
+      "_gs_sim800_sim800/sms.py",
+      "code/_gs_sim800_sim800/sms.py"
+    ],
+    [
+      "_gs_sim800_sim800/tcpip.py",
+      "code/_gs_sim800_sim800/tcpip.py"
+    ],
+    [
+      "_gs_sim800_sim800/utils.py",
+      "code/_gs_sim800_sim800/utils.py"
+    ]
+  ]
 }

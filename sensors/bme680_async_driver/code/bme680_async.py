@@ -14,7 +14,7 @@ except ImportError:
 
 import struct
 import time
-import bme680 as source
+import _gs_bme680_bme680 as source
 
 # ======================================== 全局变量 ============================================
 REG_CTRL_GAS = 0x71

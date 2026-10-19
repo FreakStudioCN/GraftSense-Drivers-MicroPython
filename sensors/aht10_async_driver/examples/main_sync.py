@@ -11,7 +11,7 @@
 import utime
 from machine import I2C, Pin
 
-from aht10 import AHT10
+from _gs_aht10_aht10 import AHT10
 
 # ======================================== 全局变量 ============================================
 

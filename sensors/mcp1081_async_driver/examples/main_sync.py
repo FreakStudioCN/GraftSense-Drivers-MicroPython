@@ -9,8 +9,8 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from mer import MER
-from mcp1081_umodbus.serial import Serial as ModbusRTUMaster
+from _gs_mcp1081_mer import MER
+from _gs_mcp1081_mcp1081_umodbus.serial import Serial as ModbusRTUMaster
 
 # ======================================== 全局变量 ============================================
 

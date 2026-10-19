@@ -49,18 +49,18 @@
 ## 文件结构
 
 ```text
-├── code/hscdtd008a.py
+├── code/_gs_hscdtd008a_hscdtd008a.py
 ├── code/hscdtd008a_async.py
 ├── code/main.py
-├── code/sensor_pack/__init__.py
-├── code/sensor_pack/averager.py
-├── code/sensor_pack/base_sensor.py
-├── code/sensor_pack/bitfield.py
-├── code/sensor_pack/bus_service.py
-├── code/sensor_pack/converter.py
-├── code/sensor_pack/crc_mod.py
-├── code/sensor_pack/geosensmod.py
-├── code/sensor_pack/LICENSE
+├── code/_gs_hscdtd008a_sensor_pack/__init__.py
+├── code/_gs_hscdtd008a_sensor_pack/averager.py
+├── code/_gs_hscdtd008a_sensor_pack/base_sensor.py
+├── code/_gs_hscdtd008a_sensor_pack/bitfield.py
+├── code/_gs_hscdtd008a_sensor_pack/bus_service.py
+├── code/_gs_hscdtd008a_sensor_pack/converter.py
+├── code/_gs_hscdtd008a_sensor_pack/crc_mod.py
+├── code/_gs_hscdtd008a_sensor_pack/geosensmod.py
+├── code/_gs_hscdtd008a_sensor_pack/LICENSE
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -95,7 +95,7 @@ except ImportError:
     import asyncio
 import math
 from machine import Pin, SoftI2C
-from sensor_pack.bus_service import I2cAdapter
+from _gs_hscdtd008a_sensor_pack.bus_service import I2cAdapter
 from hscdtd008a_async import HSCDTD008AAsync
 
 # ======================================== 全局变量 ============================================

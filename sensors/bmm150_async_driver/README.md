@@ -51,12 +51,12 @@
 ```text
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/main.py
-├── code/micropython_bmm150/__init__.py
-├── code/micropython_bmm150/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_bmm150/__pycache__/bmm150.cpython-313.pyc
-├── code/micropython_bmm150/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_bmm150/bmm150.py
-├── code/micropython_bmm150/i2c_helpers.py
+├── code/_gs_bmm150_micropython_bmm150/__init__.py
+├── code/_gs_bmm150_micropython_bmm150/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_bmm150_micropython_bmm150/__pycache__/bmm150.cpython-313.pyc
+├── code/_gs_bmm150_micropython_bmm150/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_bmm150_micropython_bmm150/bmm150.py
+├── code/_gs_bmm150_micropython_bmm150/i2c_helpers.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -92,7 +92,7 @@ async def main():
     
     # ======================================== 导入相关模块 =========================================
     from machine import Pin, I2C
-    from micropython_bmm150 import bmm150
+    from _gs_bmm150_micropython_bmm150 import bmm150
     
     # ======================================== 全局变量 ============================================
     # I2C 配置常量

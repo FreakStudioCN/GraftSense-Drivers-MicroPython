@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/mpu6886.cpython-313.pyc
 ├── code/main.py
-├── code/mpu6886.py
+├── code/_gs_mpu6886_mpu6886.py
 ├── code/mpu6886_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -90,7 +90,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     from machine import I2C, Pin
     import micropython
-    from mpu6886 import MPU6886, SF_G, SF_DEG_S
+    from _gs_mpu6886_mpu6886 import MPU6886, SF_G, SF_DEG_S
 
     # ======================================== 全局变量 ============================================
     # I2C 引脚配置（ESP32 为例，可根据实际接线修改）

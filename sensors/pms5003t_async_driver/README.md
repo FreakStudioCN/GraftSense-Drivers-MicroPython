@@ -50,7 +50,7 @@
 
 ```text
 ├── code/main.py
-├── code/pms5003.py
+├── code/_gs_pms5003t_pms5003.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -75,7 +75,7 @@ try:
 except ImportError:
     import asyncio
 from machine import UART
-from pms5003 import PMS5003
+from _gs_pms5003t_pms5003 import PMS5003
 
 async def main():
     uart = UART(0, tx=16, rx=17, baudrate=9600)

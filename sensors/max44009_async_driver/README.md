@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/max44009.cpython-313.pyc
 ├── code/main.py
-├── code/max44009.py
+├── code/_gs_max44009_max44009.py
 ├── code/max44009_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -90,7 +90,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     
     from machine import I2C, Pin
-    from max44009 import MAX44009
+    from _gs_max44009_max44009 import MAX44009
     # ======================================== 全局变量 ============================================
     
     I2C_ID = 0

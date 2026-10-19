@@ -3,8 +3,8 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin, SoftI2C
-from micropython_lis2mdl.lis2mdl import RATE_100_HZ, data_rate_values
-from micropython_lis2mdl.lis2mdl_async import LIS2MDLAsync
+from _gs_lis2mdl_micropython_lis2mdl.lis2mdl import RATE_100_HZ, data_rate_values
+from _gs_lis2mdl_micropython_lis2mdl.lis2mdl_async import LIS2MDLAsync
 async def main():
     i2c_bus = None; sensor = None
     try:

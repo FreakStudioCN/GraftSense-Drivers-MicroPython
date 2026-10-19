@@ -11,7 +11,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from micropython_mlx90393.mlx90393 import MLX90393
+from _gs_mlx90393_micropython_mlx90393.mlx90393 import MLX90393
 
 # ======================================== 全局变量 ============================================
 CMD_SM = 0b00110000

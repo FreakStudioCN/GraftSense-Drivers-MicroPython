@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/joystick.py
+├── code/_gs_ps2_joystick_joystick.py
 ├── code/joystick_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -89,7 +89,7 @@ async def main():
     # 导入时间相关模块
 
     # 导入摇杆驱动模块
-    from joystick import Joystick
+    from _gs_ps2_joystick_joystick import Joystick
 
     # ======================================== 全局变量 ============================================
 

@@ -4,7 +4,7 @@ except ImportError:
     import asyncio
 import time
 from machine import I2C, Pin
-from sensor_pack_2.bus_service import I2cAdapter
+from _gs_ina219_sensor_pack_2.bus_service import I2cAdapter
 from ina_ti_async import INA219Async
 async def main():
     i2c = None; sensor = None

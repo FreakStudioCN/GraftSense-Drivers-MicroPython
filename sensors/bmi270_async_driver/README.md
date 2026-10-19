@@ -53,10 +53,10 @@
 ├── code/__pycache__/config_file.cpython-313.pyc
 ├── code/__pycache__/i2c_helpers.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/bmi270.py
+├── code/_gs_bmi270_bmi270.py
 ├── code/bmi270_async.py
-├── code/config_file.py
-├── code/i2c_helpers.py
+├── code/_gs_bmi270_config_file.py
+├── code/_gs_bmi270_i2c_helpers.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -93,7 +93,7 @@ async def main():
 
     # ======================================== 导入相关模块 =========================================
     from machine import I2C, Pin
-    from bmi270 import BMI270
+    from _gs_bmi270_bmi270 import BMI270
 
     # ======================================== 全局变量 ============================================
     # BMI270 默认 I2C 地址

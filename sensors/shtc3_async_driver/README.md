@@ -50,7 +50,7 @@
 
 ```text
 ├── code/main.py
-├── code/shtc3.py
+├── code/_gs_shtc3_shtc3.py
 ├── code/shtc3_async.py
 ├── examples/main_sync.py
 ├── LICENSE

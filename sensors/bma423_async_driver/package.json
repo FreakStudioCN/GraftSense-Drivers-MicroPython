@@ -1,23 +1,23 @@
 {
-    "name":  "bma423_async_driver",
-    "urls":  [
-                 [
-                     "bma423.py",
-                     "code/bma423.py"
-                 ],
-                 [
-                     "bma423_async.py",
-                     "code/bma423_async.py"
-                 ]
-             ],
-    "version":  "1.0.0",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "description":  "A MicroPython I2C driver for the BMA423 accelerometer and feature engine",
-    "author":  "Salvatore Sanfilippo, FreakStudio",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all"
+  "name": "bma423_async_driver",
+  "urls": [
+    [
+      "_gs_bma423_bma423.py",
+      "code/_gs_bma423_bma423.py"
+    ],
+    [
+      "bma423_async.py",
+      "code/bma423_async.py"
+    ]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython I2C driver for the BMA423 accelerometer and feature engine",
+  "author": "Salvatore Sanfilippo, FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
 }

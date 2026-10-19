@@ -9,7 +9,7 @@
 
 import time
 from machine import Pin
-from flame_sensor import FlameSensor
+from _gs_flame_flame_sensor import FlameSensor
 
 # ======================================== 全局变量 =============================================
 

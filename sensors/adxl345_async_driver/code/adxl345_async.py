@@ -20,7 +20,7 @@ except ImportError:
     ticks_diff = lambda end, start: end - start
     ticks_add = lambda base, delta: base + delta
 
-from adxl345 import adxl345, DATA_FORMAT, BW_RATE, INT_ENABLE, OFSX, OFSY, OFSZ, POWER_CTL
+from _gs_adxl345_adxl345 import adxl345, DATA_FORMAT, BW_RATE, INT_ENABLE, OFSX, OFSY, OFSZ, POWER_CTL
 
 
 # ======================================== 全局变量 ============================================

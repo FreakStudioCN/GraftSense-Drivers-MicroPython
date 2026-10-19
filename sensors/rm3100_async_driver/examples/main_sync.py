@@ -11,9 +11,9 @@
 import math
 import time
 from machine import Pin, SoftI2C
-from sensor_pack.bus_service import I2cAdapter
-import rm3100mod
-from rm3100mod import RM3100
+from _gs_rm3100_sensor_pack.bus_service import I2cAdapter
+import _gs_rm3100_rm3100mod as rm3100mod
+from _gs_rm3100_rm3100mod import RM3100
 
 # ======================================== 全局变量 ============================================
 

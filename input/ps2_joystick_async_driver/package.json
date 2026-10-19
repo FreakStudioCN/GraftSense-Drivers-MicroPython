@@ -1,23 +1,23 @@
 {
-    "name":  "ps2_joystick_async_driver",
-    "version":  "1.0.0",
-    "description":  "A MicroPython library to control PS2 joystick driver",
-    "author":  "leeqingshui",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "urls":  [
-                 [
-                     "joystick.py",
-                     "code/joystick.py"
-                 ],
-                 [
-                     "joystick_async.py",
-                     "code/joystick_async.py"
-                 ]
-             ]
+  "name": "ps2_joystick_async_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control PS2 joystick driver",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "_gs_ps2_joystick_joystick.py",
+      "code/_gs_ps2_joystick_joystick.py"
+    ],
+    [
+      "joystick_async.py",
+      "code/joystick_async.py"
+    ]
+  ]
 }

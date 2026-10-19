@@ -25,6 +25,55 @@ _ASYNC_FACADE_P0 = True
 class BH1750Async(BH1750):
     """BH1750 cooperative conversion API; I2C transactions remain short and synchronous."""
 
+    def __init__(self, address: int, i2c):
+        """
+        初始化 BH1750 传感器。
+
+        Args:
+            address (int): I2C 地址。
+            i2c (I2C): machine.I2C 实例。
+
+        Raises:
+            TypeError: 当 address 不是 int 或 i2c 不是 I2C 实例时。
+            ValueError: 当 address 不是 0x23 或 0x5C时。
+
+        Notes:
+            初始化时会写入默认测量时间和测量模式。
+
+        ==========================================
+
+        Initialize BH1750 sensor.
+
+        Args:
+            address (int): I2C address.
+            i2c (I2C): machine.I2C instance.
+
+        Raises:
+            TypeError: If address is not int or i2c is not an I2C instance.
+            ValueError: If address is not 0x23 or 0x5C.
+
+        Notes:
+            Writes default measurement time and mode during initialization.
+        """
+        if not isinstance(address, int):
+            raise TypeError("address must be an integer")
+        if not (address == 0x23 or address == 0x5C):
+            raise ValueError("address must be 0x23 or 0x5C")
+            # 避免直接导入 machine.I2C（兼容性），用 duck typing 检查
+        if not hasattr(i2c, "writeto") or not hasattr(i2c, "readfrom_into"):
+            raise TypeError("i2c must be a machine.I2C instance")
+        self._address = address
+        self._i2c = i2c
+        self._measurement_mode = BH1750.MEASUREMENT_MODE_ONE_TIME
+        self._resolution = BH1750.RESOLUTION_HIGH
+        self._measurement_time = BH1750.MEASUREMENT_TIME_DEFAULT
+
+        self._initialized = False
+
+    async def initialize_async(self):
+        if not self._initialized:
+            await self.configure_async(self._measurement_mode, self._resolution, self._measurement_time)
+
     def _conversion_ms(self):
         if self._measurement_time == BH1750.RESOLUTION_LOW:
             return 24
@@ -39,6 +88,7 @@ class BH1750Async(BH1750):
         buffer[0] = self._measurement_mode << 4 | self._resolution
         self._i2c.writeto(self._address, buffer)
         await asyncio.sleep_ms(self._conversion_ms())
+        self._initialized = True
 
     async def reset_async(self):
         return self.reset()
@@ -50,6 +100,7 @@ class BH1750Async(BH1750):
         return self.power_off()
 
     async def measurement_async(self, timeout_ms=250):
+        await self.initialize_async()
         if self._measurement_mode == BH1750.MEASUREMENT_MODE_ONE_TIME:
             buffer = bytearray(1)
             buffer[0] = self._measurement_mode << 4 | self._resolution

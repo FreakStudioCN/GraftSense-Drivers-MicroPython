@@ -7,7 +7,13 @@
   "chips": "all",
   "fw": "all",
   "urls": [
-    ["lis3dh.py", "code/lis3dh.py"],
-    ["lis3dh_async.py", "code/lis3dh_async.py"]
+    [
+      "_gs_ls3hd_lis3dh.py",
+      "code/_gs_ls3hd_lis3dh.py"
+    ],
+    [
+      "lis3dh_async.py",
+      "code/lis3dh_async.py"
+    ]
   ]
 }

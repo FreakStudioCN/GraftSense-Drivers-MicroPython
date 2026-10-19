@@ -1,1 +1,18 @@
-{"name":"bme680_async_driver","version":"1.0.0","description":"Cooperative BME680 I2C driver","license":"MIT","chips":"all","fw":"all","urls":[["bme680.py","code/bme680.py"],["bme680_async.py","code/bme680_async.py"]]}
+{
+  "name": "bme680_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative BME680 I2C driver",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_bme680_bme680.py",
+      "code/_gs_bme680_bme680.py"
+    ],
+    [
+      "bme680_async.py",
+      "code/bme680_async.py"
+    ]
+  ]
+}

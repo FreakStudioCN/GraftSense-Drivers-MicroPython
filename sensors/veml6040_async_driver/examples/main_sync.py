@@ -8,8 +8,8 @@
 # ======================================== 导入相关模块 =========================================
 
 from machine import I2C, Pin
-from sensor_pack_2.bus_service import I2cAdapter
-from veml6040mod import VEML6040, get_g_max_lux
+from _gs_veml6040_sensor_pack_2.bus_service import I2cAdapter
+from _gs_veml6040_veml6040mod import VEML6040, get_g_max_lux
 import time
 
 # ======================================== 全局变量 ============================================

@@ -12,8 +12,8 @@ import time
 import math
 import sys
 from machine import Pin, SoftI2C
-import hscdtd008a
-from sensor_pack.bus_service import I2cAdapter
+import _gs_hscdtd008a_hscdtd008a as hscdtd008a
+from _gs_hscdtd008a_sensor_pack.bus_service import I2cAdapter
 
 # ======================================== 全局变量 ============================================
 

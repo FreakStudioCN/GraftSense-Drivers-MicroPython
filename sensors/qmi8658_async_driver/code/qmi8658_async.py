@@ -1,3 +1,4 @@
+import time
 """QMI8658 async facade with cooperative hardware-reset initialization."""
 try:
     import uasyncio as asyncio
@@ -7,6 +8,25 @@ except ImportError:
 from qmi8658 import QMI8658
 
 ADDR = 0x6B
+
+
+
+async def _pulse_low_async(pin, delay_ms):
+    pin.value(0)
+    started = time.ticks_ms()
+    try:
+        await asyncio.sleep_ms(delay_ms)
+    finally:
+        try:
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+            while remaining > 0:
+                try:
+                    await asyncio.sleep_ms(remaining)
+                except asyncio.CancelledError:
+                    pass
+                remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        finally:
+            pin.value(1)
 
 
 class QMI8658Async(QMI8658):
@@ -47,9 +67,7 @@ class QMI8658Async(QMI8658):
         if self._reset_pin is None:
             raise RuntimeError("reset_pin is required for hardware reset")
         self._log("Hardware reset")
-        self._reset_pin.value(0)
-        await asyncio.sleep_ms(10)
-        self._reset_pin.value(1)
+        await _pulse_low_async(self._reset_pin, 10)
         await asyncio.sleep_ms(50)
 
     async def configure_default_async(self):

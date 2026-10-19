@@ -9,7 +9,7 @@
 import array
 import time
 from machine import Pin
-from cs1237 import CS1237
+from _gs_cs1237_cs1237 import CS1237
 
 
 # ======================================== 功能函数 ============================================

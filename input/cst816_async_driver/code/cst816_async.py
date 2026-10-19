@@ -1,3 +1,4 @@
+import time
 """Async CST816 adapter with cooperative reset delays."""
 try:
     import uasyncio as asyncio
@@ -5,6 +6,25 @@ except ImportError:
     import asyncio
 
 from cst816 import CST816, DEFAULT_ADDRESS
+
+
+
+async def _pulse_low_async(pin, delay_ms):
+    pin.value(0)
+    started = time.ticks_ms()
+    try:
+        await asyncio.sleep_ms(delay_ms)
+    finally:
+        try:
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+            while remaining > 0:
+                try:
+                    await asyncio.sleep_ms(remaining)
+                except asyncio.CancelledError:
+                    pass
+                remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        finally:
+            pin.value(1)
 
 
 class CST816Async(CST816):
@@ -49,9 +69,7 @@ class CST816Async(CST816):
     async def reset_async(self):
         if self._reset_pin is None:
             raise ValueError("No reset pin configured")
-        self._reset_pin.value(0)
-        await asyncio.sleep_ms(5)
-        self._reset_pin.value(1)
+        await _pulse_low_async(self._reset_pin, 5)
         await asyncio.sleep_ms(50)
         self._triggered = True
 

@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 import time
-from mse_soil_sensor import MSESoilSensor
+from _gs_mse_soil_sensor_mse_soil_sensor import MSESoilSensor
 
 # ======================================== 全局变量 ============================================
 

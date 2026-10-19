@@ -10,7 +10,7 @@
 
 import time
 from machine import I2C, Pin
-from shtc3 import SHTC3, SHTC3Error
+from _gs_shtc3_shtc3 import SHTC3, SHTC3Error
 
 # ======================================== 全局变量 ============================================
 

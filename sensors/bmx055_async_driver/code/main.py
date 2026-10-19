@@ -16,7 +16,7 @@ except ImportError:
 from machine import I2C, Pin
 import time
 
-from attitude import angles, heading
+from _gs_bmx055_attitude import angles, heading
 from bmx055_async import BMX055Async
 
 # ======================================== 全局变量 ============================================

@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-from mpu6886 import MPU6886, ACCEL_FS_SEL_2G, GYRO_FS_SEL_250DPS, SF_M_S2, SF_RAD_S
+from _gs_mpu6886_mpu6886 import MPU6886, ACCEL_FS_SEL_2G, GYRO_FS_SEL_250DPS, SF_M_S2, SF_RAD_S
 
 PWR_MGMT_1_REG = 0x6B
 

@@ -6,6 +6,22 @@
   "license": "MIT",
   "chips": "all",
   "fw": "all",
-  "_comments": {"chips": "该包支持运行的芯片型号，all表示无芯片限制", "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"},
-  "urls": [["pcf8574_led_async.py", "code/pcf8574_led_async.py"], ["pcf8574.py", "code/pcf8574.py"], ["led_bar.py", "code/led_bar.py"]]
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "pcf8574_led_async.py",
+      "code/pcf8574_led_async.py"
+    ],
+    [
+      "_gs_pcf8574_led_pcf8574.py",
+      "code/_gs_pcf8574_led_pcf8574.py"
+    ],
+    [
+      "_gs_pcf8574_led_led_bar.py",
+      "code/_gs_pcf8574_led_led_bar.py"
+    ]
+  ]
 }

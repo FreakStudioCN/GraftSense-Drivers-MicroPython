@@ -10,7 +10,7 @@
 import time
 from machine import I2C, Pin
 import micropython
-from mpu6886 import MPU6886, SF_G, SF_DEG_S
+from _gs_mpu6886_mpu6886 import MPU6886, SF_G, SF_DEG_S
 
 # ======================================== 全局变量 ============================================
 # I2C 引脚配置（ESP32 为例，可根据实际接线修改）

@@ -13,10 +13,10 @@
 from machine import I2C, Pin
 
 # 导入 I2C 总线适配器
-from sensor_pack_2.bus_service import I2cAdapter
+from _gs_ina219_sensor_pack_2.bus_service import I2cAdapter
 
 # 导入 INA219 驱动模块
-import ina_ti
+import _gs_ina219_ina_ti as ina_ti
 
 # 导入时间控制模块
 import time

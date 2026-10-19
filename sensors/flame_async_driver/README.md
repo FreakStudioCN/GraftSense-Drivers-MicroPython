@@ -51,7 +51,7 @@
 ```text
 ├── code/__pycache__/flame_sensor.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/flame_sensor.py
+├── code/_gs_flame_flame_sensor.py
 ├── code/flame_sensor_async.py
 ├── code/main.py
 ├── examples/main_sync.py

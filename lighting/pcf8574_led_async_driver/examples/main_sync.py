@@ -10,10 +10,10 @@
 from machine import I2C, Pin
 
 # 导入pcf8574模块
-from pcf8574 import PCF8574
+from _gs_pcf8574_led_pcf8574 import PCF8574
 
 # 导入基于PCF8574芯片的八段光条数码管模块
-from led_bar import LEDBar
+from _gs_pcf8574_led_led_bar import LEDBar
 
 # 时间相关模块
 import time

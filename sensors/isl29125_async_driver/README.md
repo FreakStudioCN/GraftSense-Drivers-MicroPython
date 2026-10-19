@@ -51,12 +51,12 @@
 ```text
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/main.py
-├── code/micropython_isl29125/__init__.py
-├── code/micropython_isl29125/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_isl29125/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_isl29125/__pycache__/isl29125.cpython-313.pyc
-├── code/micropython_isl29125/i2c_helpers.py
-├── code/micropython_isl29125/isl29125.py
+├── code/_gs_isl29125_micropython_isl29125/__init__.py
+├── code/_gs_isl29125_micropython_isl29125/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_isl29125_micropython_isl29125/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_isl29125_micropython_isl29125/__pycache__/isl29125.cpython-313.pyc
+├── code/_gs_isl29125_micropython_isl29125/i2c_helpers.py
+├── code/_gs_isl29125_micropython_isl29125/isl29125.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -93,7 +93,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     
     from machine import Pin, SoftI2C
-    from micropython_isl29125 import isl29125
+    from _gs_isl29125_micropython_isl29125 import isl29125
     # ======================================== 全局变量 ============================================
     
     # I2C 引脚与频率配置

@@ -5,8 +5,8 @@ try:
 except ImportError:
     import asyncio
 from machine import I2C, Pin
-from sensor_pack_2.bus_service import I2cAdapter
-from veml6040mod import get_g_max_lux
+from _gs_veml6040_sensor_pack_2.bus_service import I2cAdapter
+from _gs_veml6040_veml6040mod import get_g_max_lux
 from veml6040mod_async import VEML6040Async
 # ======================================== 全局变量 ============================================
 TARGET_SENSOR_ADDR, I2C_SDA_PIN, I2C_SCL_PIN, I2C_FREQ, INTEGRATION_TIME = 0x10, 4, 5, 400000, 1

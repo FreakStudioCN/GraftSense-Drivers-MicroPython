@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/pir_sensor.cpython-313.pyc
 ├── code/main.py
-├── code/pir_sensor.py
+├── code/_gs_pir_pir_sensor.py
 ├── code/pir_sensor_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -88,7 +88,7 @@ async def main():
 
     # ======================================== 导入相关模块 =========================================\
 
-    from pir_sensor import PIRSensor
+    from _gs_pir_pir_sensor import PIRSensor
 
     # ======================================== 全局变量 ============================================
 

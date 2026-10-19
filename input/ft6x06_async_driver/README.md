@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/ft6x06.py
+├── code/_gs_ft6x06_ft6x06.py
 ├── code/ft6x06_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -93,7 +93,7 @@ async def main():
     from machine import I2C, Pin
 
     # 导入 FT6x06 触摸驱动
-    from ft6x06 import FT6x06
+    from _gs_ft6x06_ft6x06 import FT6x06
 
     # ======================================== 全局变量 ============================================
 
@@ -286,5 +286,5 @@ MIT License
 
 Copyright (c) Salvatore Sanfilippo, FreakStudio
 
-See source header in code/ft6x06.py.
+See source header in code/_gs_ft6x06_ft6x06.py.
 ```

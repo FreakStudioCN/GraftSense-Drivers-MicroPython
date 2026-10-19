@@ -11,9 +11,9 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from bma2x2 import BMA2X2
-from bmg160 import BMG160
-from bmm050 import BMM050
+from _gs_bmx055_bma2x2 import BMA2X2
+from _gs_bmx055_bmg160 import BMG160
+from _gs_bmx055_bmm050 import BMM050
 
 # ======================================== 全局变量 ============================================
 

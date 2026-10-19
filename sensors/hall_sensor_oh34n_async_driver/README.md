@@ -51,7 +51,7 @@
 ```text
 ├── code/__pycache__/hall_sensor_oh34n.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/hall_sensor_oh34n.py
+├── code/_gs_hall_sensor_oh34n_hall_sensor_oh34n.py
 ├── code/hall_sensor_oh34n_async.py
 ├── code/main.py
 ├── examples/main_sync.py

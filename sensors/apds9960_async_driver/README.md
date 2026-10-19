@@ -51,7 +51,7 @@
 ```text
 ├── code/__pycache__/apds9960.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/apds9960.py
+├── code/_gs_apds9960_apds9960.py
 ├── code/apds9960_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -90,7 +90,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     import machine
-    from apds9960 import APDS9960
+    from _gs_apds9960_apds9960 import APDS9960
 
     # ======================================== 全局变量 ============================================
 

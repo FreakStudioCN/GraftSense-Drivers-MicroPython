@@ -14,13 +14,13 @@ from machine import I2C, Pin
 import time
 
 # 导入自定义的PCF8575类
-from pcf8575 import PCF8575
+from _gs_pcf8575_pcf8575 import PCF8575
 
 # 导入OLED屏幕相关模块
-from SSD1306 import SSD1306_I2C
+from _gs_pcf8575_SSD1306 import SSD1306_I2C
 
 # 导入自定义OLED菜单库
-from menu import SimpleOLEDMenu
+from _gs_pcf8575_menu import SimpleOLEDMenu
 
 # ======================================== 全局变量 ============================================
 

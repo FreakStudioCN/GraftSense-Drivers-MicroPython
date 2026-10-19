@@ -54,9 +54,9 @@
 ├── code/__pycache__/bmi160.cpython-313.pyc
 ├── code/__pycache__/i2c_helpers.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/bmi160.py
+├── code/_gs_bmi160_bmi160.py
 ├── code/bmi160_async.py
-├── code/i2c_helpers.py
+├── code/_gs_bmi160_i2c_helpers.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -95,7 +95,7 @@ async def main():
 
     from machine import I2C, Pin
 
-    from bmi160 import (
+    from _gs_bmi160_bmi160 import (
         ACCEL_RANGE_2G,
         ACCEL_RANGE_4G,
         ACCEL_RANGE_8G,

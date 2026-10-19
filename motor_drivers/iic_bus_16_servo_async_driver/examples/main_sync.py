@@ -14,10 +14,10 @@ import time
 from machine import Pin, I2C
 
 # 导入总线舵机控制器模块
-from bus_servo import BusPWMServoController
+from _gs_iic_bus_16_servo_bus_servo import BusPWMServoController
 
 # 导入PCA9685模块
-from pca9685 import PCA9685
+from _gs_iic_bus_16_servo_pca9685 import PCA9685
 
 # ======================================== 全局变量 ============================================
 

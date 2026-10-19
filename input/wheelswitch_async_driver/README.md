@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/encoder_wheel_switch.py
+├── code/_gs_wheelswitch_encoder_wheel_switch.py
 ├── code/encoder_wheel_switch_async.py
 ├── code/main.py
 ├── examples/main_sync.py

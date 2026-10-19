@@ -51,7 +51,7 @@
 ```text
 ├── code/__pycache__/adxl345.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/adxl345.py
+├── code/_gs_adxl345_adxl345.py
 ├── code/adxl345_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -99,7 +99,7 @@ async def main():
     import ustruct
 
     # 从adxl345模块导入adxl345类，这是ADXL345传感器的驱动类
-    from adxl345 import adxl345
+    from _gs_adxl345_adxl345 import adxl345
 
     # ======================================== 全局变量 ============================================
 

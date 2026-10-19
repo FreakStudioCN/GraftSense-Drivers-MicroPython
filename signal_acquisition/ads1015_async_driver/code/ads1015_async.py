@@ -40,7 +40,7 @@ class _ADSBaseAsync:
         return self._driver.gain
 
     async def set_gain_async(self, gain):
-        if gain not in GAINS:
+        if not isinstance(gain, int) or not 0 <= gain < len(GAINS):
             raise ValueError("Invalid gain")
         async with self._lock:
             self._driver.gain = gain

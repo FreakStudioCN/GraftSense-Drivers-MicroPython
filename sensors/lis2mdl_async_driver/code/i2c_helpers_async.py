@@ -11,7 +11,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from micropython_lis2mdl.i2c_helpers import CBits, RegisterStruct
+from _gs_lis2mdl_micropython_lis2mdl.i2c_helpers import CBits, RegisterStruct
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================

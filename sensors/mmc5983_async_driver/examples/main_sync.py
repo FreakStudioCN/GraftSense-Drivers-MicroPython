@@ -14,7 +14,7 @@ import time
 from machine import Pin, SoftI2C
 
 # 导入MMC5983磁力计驱动库
-from micropython_mmc5983 import mmc5983
+from _gs_mmc5983_micropython_mmc5983 import mmc5983
 
 # ======================================== 全局变量 ============================================
 

@@ -1,43 +1,43 @@
 {
-    "name":  "ens160_async_driver",
-    "version":  "1.0.0",
-    "description":  "A MicroPython library to control ENS160 digital metal-oxide multi-gas sensor",
-    "author":  "FreakStudio",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "urls":  [
-                 [
-                     "ens160sciosense.py",
-                     "code/ens160sciosense.py"
-                 ],
-                 [
-                     "sensor_pack_2/base_sensor.py",
-                     "code/sensor_pack_2/base_sensor.py"
-                 ],
-                 [
-                     "sensor_pack_2/bitfield.py",
-                     "code/sensor_pack_2/bitfield.py"
-                 ],
-                 [
-                     "sensor_pack_2/bus_service.py",
-                     "code/sensor_pack_2/bus_service.py"
-                 ],
-                 [
-                     "sensor_pack_2/crc_mod.py",
-                     "code/sensor_pack_2/crc_mod.py"
-                 ],
-                 [
-                     "sensor_pack_2/__init__.py",
-                     "code/sensor_pack_2/__init__.py"
-                 ],
-                 [
-                     "ens160sciosense_async.py",
-                     "code/ens160sciosense_async.py"
-                 ]
-             ]
+  "name": "ens160_async_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control ENS160 digital metal-oxide multi-gas sensor",
+  "author": "FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "_gs_ens160_ens160sciosense.py",
+      "code/_gs_ens160_ens160sciosense.py"
+    ],
+    [
+      "_gs_ens160_sensor_pack_2/base_sensor.py",
+      "code/_gs_ens160_sensor_pack_2/base_sensor.py"
+    ],
+    [
+      "_gs_ens160_sensor_pack_2/bitfield.py",
+      "code/_gs_ens160_sensor_pack_2/bitfield.py"
+    ],
+    [
+      "_gs_ens160_sensor_pack_2/bus_service.py",
+      "code/_gs_ens160_sensor_pack_2/bus_service.py"
+    ],
+    [
+      "_gs_ens160_sensor_pack_2/crc_mod.py",
+      "code/_gs_ens160_sensor_pack_2/crc_mod.py"
+    ],
+    [
+      "_gs_ens160_sensor_pack_2/__init__.py",
+      "code/_gs_ens160_sensor_pack_2/__init__.py"
+    ],
+    [
+      "ens160sciosense_async.py",
+      "code/ens160sciosense_async.py"
+    ]
+  ]
 }

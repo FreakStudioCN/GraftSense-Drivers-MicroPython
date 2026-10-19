@@ -17,7 +17,7 @@ import sys
 from machine import I2C, Pin
 
 # 导入AS7341驱动并创建传感器对象
-from as7341 import AS7341
+from _gs_as7341_as7341 import AS7341
 from as7341_async import AS7341Async
 
 # ======================================== 全局变量 ============================================
@@ -217,6 +217,7 @@ async def main():
             sys.exit(1)
         
         sensor = AS7341Async(i2c)
+        await sensor.initialize_async()
         
         # 检查传感器连接状态
         if not await sensor.isconnected_async():

@@ -9,8 +9,8 @@
 # ======================================== 导入相关模块 =========================================
 
 from machine import Pin, SoftI2C
-import ens160sciosense
-from sensor_pack_2.bus_service import I2cAdapter
+import _gs_ens160_ens160sciosense as ens160sciosense
+from _gs_ens160_sensor_pack_2.bus_service import I2cAdapter
 import time
 
 # ======================================== 全局变量 ============================================

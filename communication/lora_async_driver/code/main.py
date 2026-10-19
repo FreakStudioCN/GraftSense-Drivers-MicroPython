@@ -5,7 +5,7 @@ try:
 except ImportError:
     import asyncio
 from e22_900m22s_async import E22_900M22SAsync
-from e22_uart_bridge import E22UARTBridge
+from _gs_lora_e22_uart_bridge import E22UARTBridge
 
 SPI_BUS = 0
 SPI_BAUDRATE = 2_000_000

@@ -9,7 +9,7 @@
 
 from machine import I2C, Pin
 import time
-from pcf8574 import PCF8574
+from _gs_pcf8574keys_pcf8574 import PCF8574
 from pcf8574keys import PCF8574Keys, KEYS_MAP
 
 # ======================================== 全局变量 ============================================

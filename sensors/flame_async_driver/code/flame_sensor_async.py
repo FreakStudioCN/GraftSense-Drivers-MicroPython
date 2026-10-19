@@ -14,7 +14,7 @@ except ImportError:
 
 import time
 from machine import Pin
-import flame_sensor
+import _gs_flame_flame_sensor as flame_sensor
 
 # ======================================== 全局变量 ============================================
 

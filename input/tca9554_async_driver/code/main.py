@@ -5,7 +5,7 @@ except ImportError:
 import time
 from machine import I2C, Pin
 from tca9554_async import TCA9554
-from tca9554 import TCA9554_INPUT, TCA9554_OUTPUT, TCA9554_HIGH, TCA9554_LOW
+from _gs_tca9554_tca9554 import TCA9554_INPUT, TCA9554_OUTPUT, TCA9554_HIGH, TCA9554_LOW
 
 async def main():
     # Python env   : MicroPython v1.23.0

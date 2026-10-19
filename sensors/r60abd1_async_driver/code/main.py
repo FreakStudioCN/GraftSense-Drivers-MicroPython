@@ -6,7 +6,7 @@ except ImportError:
 
 from machine import Pin, UART
 from data_flow_processor_async import DataFlowProcessorAsync, R60ABD1Async
-from r60abd1 import format_time
+from _gs_r60abd1_r60abd1 import format_time
 
 # ======================================== 全局变量 ============================================
 UART_ID = 0

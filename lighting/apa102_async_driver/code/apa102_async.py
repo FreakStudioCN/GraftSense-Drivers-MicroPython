@@ -11,7 +11,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from apa102 import DotStar
+from _gs_apa102_apa102 import DotStar
 
 # ======================================== 全局变量 ============================================
 BGR = (2, 1, 0)

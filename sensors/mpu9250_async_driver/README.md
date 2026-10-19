@@ -53,11 +53,11 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/mpu6500.cpython-313.pyc
 ├── code/__pycache__/mpu9250.cpython-313.pyc
-├── code/ak8963.py
+├── code/_gs_mpu9250_ak8963.py
 ├── code/ak8963_async.py
 ├── code/main.py
-├── code/mpu6500.py
-├── code/mpu9250.py
+├── code/_gs_mpu9250_mpu6500.py
+├── code/_gs_mpu9250_mpu9250.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -102,7 +102,7 @@ async def main():
 
     from machine import I2C, Pin
 
-    from mpu9250 import MPU9250
+    from _gs_mpu9250_mpu9250 import MPU9250
 
     # ======================================== 全局变量 ============================================
 

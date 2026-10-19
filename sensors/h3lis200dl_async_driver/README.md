@@ -51,12 +51,12 @@
 ```text
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/main.py
-├── code/micropython_h3lis200dl/__init__.py
-├── code/micropython_h3lis200dl/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_h3lis200dl/__pycache__/h3lis200dl.cpython-313.pyc
-├── code/micropython_h3lis200dl/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_h3lis200dl/h3lis200dl.py
-├── code/micropython_h3lis200dl/i2c_helpers.py
+├── code/_gs_h3lis200dl_micropython_h3lis200dl/__init__.py
+├── code/_gs_h3lis200dl_micropython_h3lis200dl/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_h3lis200dl_micropython_h3lis200dl/__pycache__/h3lis200dl.cpython-313.pyc
+├── code/_gs_h3lis200dl_micropython_h3lis200dl/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_h3lis200dl_micropython_h3lis200dl/h3lis200dl.py
+├── code/_gs_h3lis200dl_micropython_h3lis200dl/i2c_helpers.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -91,7 +91,7 @@ async def main():
     
     # ======================================== 导入相关模块 =========================================
     from machine import Pin, I2C
-    from micropython_h3lis200dl import h3lis200dl
+    from _gs_h3lis200dl_micropython_h3lis200dl import h3lis200dl
     
     # ======================================== 全局变量 ============================================
     # 定义传感器目标I2C地址列表

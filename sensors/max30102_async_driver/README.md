@@ -50,10 +50,10 @@
 
 ```text
 ├── async_source_examples.json
-├── code/circular_buffer.py
-├── code/heart_rate_monitor.py
+├── code/_gs_max30102_circular_buffer.py
+├── code/_gs_max30102_heart_rate_monitor.py
 ├── code/main.py
-├── code/max30102.py
+├── code/_gs_max30102_max30102.py
 ├── code/max30102_async.py
 ├── examples/basic_usage_sync.py
 ├── examples/heart_rate_sync.py
@@ -83,9 +83,9 @@ except ImportError:
 from machine import SoftI2C, Pin
 from time import ticks_diff, ticks_us, ticks_ms
 from max30102_async import MAX30102Async as MAX30102
-from max30102 import MAX30105_PULSE_AMP_MEDIUM
-from heart_rate_monitor import HeartRateMonitor
-from circular_buffer import CircularBuffer
+from _gs_max30102_max30102 import MAX30105_PULSE_AMP_MEDIUM
+from _gs_max30102_heart_rate_monitor import HeartRateMonitor
+from _gs_max30102_circular_buffer import CircularBuffer
 
 
 async def main():

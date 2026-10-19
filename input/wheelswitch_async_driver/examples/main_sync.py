@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 ========================================
 
 import time
-from encoder_wheel_switch import EncoderWheelSwitch
+from _gs_wheelswitch_encoder_wheel_switch import EncoderWheelSwitch
 
 # ======================================== 全局变量 ============================================
 

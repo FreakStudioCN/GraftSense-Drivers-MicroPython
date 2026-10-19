@@ -51,21 +51,21 @@
 ```text
 ├── code/__pycache__/bmp581mod.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/bmp581mod.py
+├── code/_gs_bmp581_bmp581mod.py
 ├── code/bmp581mod_async.py
 ├── code/main.py
-├── code/sensor_pack/__init__.py
-├── code/sensor_pack/__pycache__/__init__.cpython-313.pyc
-├── code/sensor_pack/__pycache__/base_sensor.cpython-313.pyc
-├── code/sensor_pack/__pycache__/bus_service.cpython-313.pyc
-├── code/sensor_pack/__pycache__/converter.cpython-313.pyc
-├── code/sensor_pack/__pycache__/crc_mod.cpython-313.pyc
-├── code/sensor_pack/__pycache__/geosensmod.cpython-313.pyc
-├── code/sensor_pack/base_sensor.py
-├── code/sensor_pack/bus_service.py
-├── code/sensor_pack/converter.py
-├── code/sensor_pack/crc_mod.py
-├── code/sensor_pack/geosensmod.py
+├── code/_gs_bmp581_sensor_pack/__init__.py
+├── code/_gs_bmp581_sensor_pack/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_bmp581_sensor_pack/__pycache__/base_sensor.cpython-313.pyc
+├── code/_gs_bmp581_sensor_pack/__pycache__/bus_service.cpython-313.pyc
+├── code/_gs_bmp581_sensor_pack/__pycache__/converter.cpython-313.pyc
+├── code/_gs_bmp581_sensor_pack/__pycache__/crc_mod.cpython-313.pyc
+├── code/_gs_bmp581_sensor_pack/__pycache__/geosensmod.cpython-313.pyc
+├── code/_gs_bmp581_sensor_pack/base_sensor.py
+├── code/_gs_bmp581_sensor_pack/bus_service.py
+├── code/_gs_bmp581_sensor_pack/converter.py
+├── code/_gs_bmp581_sensor_pack/crc_mod.py
+├── code/_gs_bmp581_sensor_pack/geosensmod.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -104,11 +104,10 @@ async def main():
     from machine import SoftI2C, Pin
     
     # 导入BMP581传感器驱动模块
-    import bmp581mod
-    
+    import _gs_bmp581_bmp581mod as bmp581mod
     # 导入时间控制模块
     # 导入I2C适配器模块
-    from sensor_pack.bus_service import I2cAdapter
+    from _gs_bmp581_sensor_pack.bus_service import I2cAdapter
     
     # ======================================== 全局变量 ============================================
     

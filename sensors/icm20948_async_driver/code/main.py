@@ -5,7 +5,7 @@ except ImportError:
     import asyncio
 
 from machine import I2C, Pin
-from micropython_icm20948 import ICM20948
+from _gs_icm20948_micropython_icm20948 import ICM20948
 from icm20948_async import ICM20948Async
 
 # ======================================== 全局变量 ============================================

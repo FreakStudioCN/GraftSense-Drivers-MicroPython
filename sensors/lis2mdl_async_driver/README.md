@@ -52,12 +52,12 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/i2c_helpers_async.py
 ├── code/main.py
-├── code/micropython_lis2mdl/__init__.py
-├── code/micropython_lis2mdl/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_lis2mdl/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_lis2mdl/__pycache__/lis2mdl.cpython-313.pyc
-├── code/micropython_lis2mdl/i2c_helpers.py
-├── code/micropython_lis2mdl/lis2mdl.py
+├── code/_gs_lis2mdl_micropython_lis2mdl/__init__.py
+├── code/_gs_lis2mdl_micropython_lis2mdl/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_lis2mdl_micropython_lis2mdl/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_lis2mdl_micropython_lis2mdl/__pycache__/lis2mdl.cpython-313.pyc
+├── code/_gs_lis2mdl_micropython_lis2mdl/i2c_helpers.py
+├── code/_gs_lis2mdl_micropython_lis2mdl/lis2mdl.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -99,7 +99,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import Pin, SoftI2C
-    from micropython_lis2mdl import lis2mdl
+    from _gs_lis2mdl_micropython_lis2mdl import lis2mdl
 
 
     # ======================================== 全局变量 ============================================

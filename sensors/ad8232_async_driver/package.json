@@ -1,1 +1,39 @@
-{"name":"ad8232_async_driver","version":"1.0.0","description":"Async AD8232 ECG driver","author":"hogeiha","license":"MIT","chips":"all","fw":"all","urls":[["ad8232.py","code/ad8232.py"],["data_flow_processor.py","code/data_flow_processor.py"],["ecg_module_cmd.py","code/ecg_module_cmd.py"],["ecg_signal_processor.py","code/ecg_signal_processor.py"],["ad8232_uart.py","code/ad8232_uart.py"],["master_data_flow_processor.py","code/master_data_flow_processor.py"],["main.py","code/main.py"]]}
+{
+  "name": "ad8232_async_driver",
+  "version": "1.0.0",
+  "description": "Async AD8232 ECG driver",
+  "author": "hogeiha",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_ad8232_ad8232.py",
+      "code/_gs_ad8232_ad8232.py"
+    ],
+    [
+      "_gs_ad8232_data_flow_processor.py",
+      "code/_gs_ad8232_data_flow_processor.py"
+    ],
+    [
+      "_gs_ad8232_ecg_module_cmd.py",
+      "code/_gs_ad8232_ecg_module_cmd.py"
+    ],
+    [
+      "_gs_ad8232_ecg_signal_processor.py",
+      "code/_gs_ad8232_ecg_signal_processor.py"
+    ],
+    [
+      "_gs_ad8232_ad8232_uart.py",
+      "code/_gs_ad8232_ad8232_uart.py"
+    ],
+    [
+      "_gs_ad8232_master_data_flow_processor.py",
+      "code/_gs_ad8232_master_data_flow_processor.py"
+    ],
+    [
+      "main.py",
+      "code/main.py"
+    ]
+  ]
+}

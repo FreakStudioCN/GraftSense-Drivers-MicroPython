@@ -11,7 +11,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from apds9960 import I2CEX, ALS, PROX, APDS9960
+from _gs_apds9960_apds9960 import I2CEX, ALS, PROX, APDS9960
 
 # ======================================== 全局变量 ============================================
 _ASYNC_FACADE_P0 = True

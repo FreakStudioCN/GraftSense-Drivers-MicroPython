@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/limit_switch.py
+├── code/_gs_limit_switch_limit_switch.py
 ├── code/limit_switch_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -86,7 +86,7 @@ async def main():
 
     # ======================================== 导入相关模块 =========================================
 
-    from limit_switch import LimitSwitch
+    from _gs_limit_switch_limit_switch import LimitSwitch
 
     # ======================================== 全局变量 =============================================
 

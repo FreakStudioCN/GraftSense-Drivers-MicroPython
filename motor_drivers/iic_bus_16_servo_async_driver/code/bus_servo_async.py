@@ -39,9 +39,9 @@ class BusPWMServoControllerAsync:
         """设置角度；指定速度时按异步节拍渐变。"""
         async with self._lock:
             controller = self._controller
-            config = controller._cfg[channel]
             controller._ensure_channel(channel)
             controller._ensure_attached(channel)
+            config = controller._cfg[channel]
             if config['type'] != controller.SERVO_180:
                 raise RuntimeError('channel is not SERVO_180')
             target = controller._clip(float(angle), 0.0, 180.0)
@@ -49,19 +49,18 @@ class BusPWMServoControllerAsync:
             if current is None or speed_deg_per_s is None or speed_deg_per_s <= 0:
                 controller.set_angle(channel, target)
                 return
-        step = max(MIN_MOTION_STEP_DEGREES, float(speed_deg_per_s) * MOTION_TICK_MS / 1000)
-        direction = 1 if target > current else -1
-        position = float(current)
-        while (direction > 0 and position < target) or (direction < 0 and position > target):
-            position += direction * step
-            logical = max(0, min(180, position))
-            async with self._lock:
+            step = max(MIN_MOTION_STEP_DEGREES, float(speed_deg_per_s) * MOTION_TICK_MS / 1000)
+            direction = 1 if target > current else -1
+            position = float(current)
+            while direction > 0 and position < target or (direction < 0 and position > target):
+                position = min(target, position + step) if direction > 0 else max(target, position - step)
+                logical = max(0, min(180, position))
                 config = self._controller._cfg[channel]
                 physical = 180 - logical if config['rev'] else logical
                 pulse = int(round(config['min'] + (config['max'] - config['min']) * physical / 180))
                 self._controller._write_pulse(channel, pulse)
-            await asyncio.sleep_ms(MOTION_TICK_MS)
-        async with self._lock:
+                config['angle'] = logical
+                await asyncio.sleep_ms(MOTION_TICK_MS)
             self._controller._cfg[channel]['angle'] = target
 
     async def set_speed_async(self, channel, speed) -> None:

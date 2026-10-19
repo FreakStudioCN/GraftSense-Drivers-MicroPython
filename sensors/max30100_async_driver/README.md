@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/max30100.cpython-313.pyc
 ├── code/main.py
-├── code/max30100.py
+├── code/_gs_max30100_max30100.py
 ├── code/max30100_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -89,8 +89,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import I2C, Pin
-    import max30100
-
+    import _gs_max30100_max30100 as max30100
     # ======================================== 全局变量 ============================================
 
     # ======================================== 功能函数 ============================================

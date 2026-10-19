@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/mwfd.cpython-313.pyc
 ├── code/main.py
-├── code/mwfd.py
+├── code/_gs_mwfd_mwfd.py
 ├── code/mwfd_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -88,7 +88,7 @@ async def main():
 
     # ======================================== 导入相关模块 =========================================
     from machine import Pin
-    from mwfd import MWFD
+    from _gs_mwfd_mwfd import MWFD
 
     # ======================================== 全局变量 ============================================
 

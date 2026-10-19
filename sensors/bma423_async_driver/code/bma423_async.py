@@ -12,7 +12,7 @@ try:
 except ImportError:
     import asyncio
 
-from bma423 import *
+from _gs_bma423_bma423 import *
 
 # ======================================== 全局变量 ============================================
 _ASYNC_FACADE_P0 = True
@@ -26,6 +26,79 @@ class SyncAdapterMixin:
 
 class BMA423Async(SyncAdapterMixin, BMA423):
     """Async operations preserve the source register and cleanup order."""
+
+    def __init__(self, i2c, acc_range: int = 2, debug: bool = False) -> None:
+        """
+        初始化 BMA423 加速度传感器
+        Args:
+            i2c (I2C): MicroPython I2C 总线实例
+            acc_range (int): 加速度量程，可选 2/4/8/16，默认 2g
+            debug (bool): 是否启用调试日志输出，默认 False
+        Raises:
+            ValueError: 参数类型或值无效
+            RuntimeError: 设备未找到或芯片 ID 不匹配
+        Notes:
+            - 自动扫描 I2C 总线查找设备（地址 0x18 或 0x19）
+            - 初始化完成后加速度计处于工作状态
+        ==========================================
+        Initialize BMA423 accelerometer.
+        Args:
+            i2c (I2C): MicroPython I2C bus instance
+            acc_range (int): Acceleration range, options 2/4/8/16, default 2g
+            debug (bool): Enable debug log output, default False
+        Raises:
+            ValueError: Invalid parameter type or value
+            RuntimeError: Device not found or chip ID mismatch
+        Notes:
+            - Auto-scans I2C bus for device (address 0x18 or 0x19)
+            - Accelerometer is enabled after initialization
+        """
+        # 参数校验
+        if not hasattr(i2c, "readfrom_mem") or not hasattr(i2c, "writeto_mem"):
+            raise ValueError("i2c must be an I2C instance with readfrom_mem/writeto_mem")
+        if acc_range not in (2, 4, 8, 16):
+            raise ValueError("acc_range must be 2, 4, 8, or 16, got %s" % acc_range)
+        if not isinstance(debug, bool):
+            raise ValueError("debug must be bool, got %s" % type(debug))
+
+        self._i2c = i2c
+        self._addr = None
+        self._range = acc_range
+        self._debug = debug
+        self._callback = None
+        self._features_in = bytearray(FEATURES_IN_SIZE)
+
+        # 自动扫描 I2C 总线查找设备地址
+        self._initialized = False
+
+    async def initialize_async(self):
+        if self._initialized:
+            return
+        found_devices = self._i2c.scan()
+        self._log("I2C bus scan: %s" % [hex(x) for x in found_devices])
+        for addr in (self.DEFAULT_ADDR_LOW, self.DEFAULT_ADDR_HIGH):
+            if addr in found_devices:
+                self._addr = addr
+                break
+        if self._addr is None:
+            raise RuntimeError("BMA423 not found on I2C bus (expected 0x18 or 0x19)")
+        self._log("Device found at 0x%02X" % self._addr)
+
+        # 软复位并校验芯片 ID
+        await self.reset_async()
+        chip_id = self._read_reg(REG_CHIP_ID)[0]
+        if chip_id != self.EXPECTED_CHIP_ID:
+            raise RuntimeError("BMA423 chip ID mismatch: expected 0x%02X, got 0x%02X" % (self.EXPECTED_CHIP_ID, chip_id))
+        self._log("Chip ID verified: 0x%02X" % chip_id)
+
+        # 初始化默认参数，使加速度计进入工作状态
+        self.enable_accelerometer(acc=True, aux=False)
+        self.set_accelerometer_perf(True)
+        self.set_accelerometer_avg(2)
+        self.set_accelerometer_freq(100)
+        self.set_advanced_power_save(False, False)
+        self.set_range(self._range)
+        self._initialized = True
 
     async def reset_async(self):
         self._write_reg(REG_CMD, REG_CMD_SOFTRESET)

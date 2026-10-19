@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 import time
-from e103w02 import E103W02
+from e103w02 import E103W02, _to_bytes
 
 
 class E103W02Async(E103W02):
@@ -21,7 +21,10 @@ class E103W02Async(E103W02):
         while not self._uart_any():
             if time.ticks_diff(deadline, time.ticks_ms()) <= 0: return None
             await asyncio.sleep_ms(2)
-        return self._uart.read(self._uart_any() if count == 0 else min(self._uart_any(), count))
+        try:
+            return self._uart.read(self._uart_any() if count == 0 else min(self._uart_any(), count))
+        except OSError as exc:
+            raise RuntimeError("UART read failed") from exc
 
     async def _read_response_async(self, timeout_ms=None):
         timeout = self._timeout_ms if timeout_ms is None else timeout_ms
@@ -95,29 +98,58 @@ class E103W02Async(E103W02):
         return await self.send_command_async("AT+RESTORE",timeout_ms)
 
     async def write_async(self,data):
-        async with self._uart_lock:return self._write_bytes(data.encode() if isinstance(data,str) else data)
-    async def read_async(self,size=None,timeout_ms=0):
-        timeout=self._timeout_ms if timeout_ms is None else timeout_ms
-        deadline=time.ticks_add(time.ticks_ms(),timeout); result=bytearray()
+        payload = _to_bytes(data)
         async with self._uart_lock:
+            if self._command_mode:
+                raise RuntimeError("exit command mode before writing transparent data")
+            return self._write_bytes(payload)
+    async def read_async(self,size=None,timeout_ms=0):
+        if size is not None and (not isinstance(size, int) or size <= 0):
+            raise ValueError("size must be a positive int or None")
+        timeout=self._timeout_ms if timeout_ms is None else timeout_ms
+        if not isinstance(timeout, int):
+            raise TypeError("timeout_ms must be int")
+        if timeout < 0:
+            raise ValueError("timeout_ms cannot be negative")
+        async with self._uart_lock:
+            if self._command_mode:
+                raise RuntimeError("exit command mode before reading transparent data")
+            deadline=time.ticks_add(time.ticks_ms(),timeout)
             while True:
                 n=self._uart_any()
                 if n:
-                    result.extend(await self._read_bytes_async(deadline, 0 if size is None else size-len(result)))
-                    if size is None or len(result)>=size:break
-                if time.ticks_diff(deadline,time.ticks_ms())<=0:
-                    break
+                    data = await self._read_bytes_async(deadline, 0 if size is None else size)
+                    return data if data is not None else b""
+                if timeout == 0 or time.ticks_diff(deadline,time.ticks_ms())<=0:
+                    return b""
                 await asyncio.sleep_ms(2)
-        return bytes(result)
     async def readline_async(self,timeout_ms=0,max_bytes=1024):
-        deadline=time.ticks_add(time.ticks_ms(),timeout_ms or self._timeout_ms); result=bytearray()
+        if not isinstance(timeout_ms, int):
+            raise TypeError("timeout_ms must be int")
+        if timeout_ms < 0:
+            raise ValueError("timeout_ms cannot be negative")
+        if not isinstance(max_bytes, int):
+            raise TypeError("max_bytes must be int")
+        if max_bytes <= 0:
+            raise ValueError("max_bytes must be greater than 0")
+        result=bytearray()
         async with self._uart_lock:
-            while len(result)<max_bytes and time.ticks_diff(deadline,time.ticks_ms())>0:
+            if self._command_mode:
+                raise RuntimeError("exit command mode before reading transparent data")
+            deadline=time.ticks_add(time.ticks_ms(),timeout_ms)
+            while len(result)<max_bytes:
                 n=self._uart_any()
                 if n:
-                    item=await self._read_bytes_async(deadline, 1); result.extend(item)
-                    if item==b"\n":break
-                await asyncio.sleep_ms(2)
+                    item=await self._read_bytes_async(deadline, 1)
+                    if item:
+                        result.extend(item)
+                        if item==b"\n":break
+                        if len(result) % 32 == 0:
+                            await asyncio.sleep_ms(0)
+                elif timeout_ms == 0 or time.ticks_diff(deadline,time.ticks_ms())<=0:
+                    break
+                else:
+                    await asyncio.sleep_ms(2)
         return bytes(result)
     async def is_command_mode_async(self): return self._command_mode
     async def deinit_async(self):

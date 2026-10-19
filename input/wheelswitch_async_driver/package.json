@@ -1,1 +1,18 @@
-{"name":"wheelswitch_async_driver","version":"1.0.0","description":"Async GPIO wheel switch bridge","license":"MIT","chips":"all","fw":"all","urls":[["encoder_wheel_switch.py","code/encoder_wheel_switch.py"],["encoder_wheel_switch_async.py","code/encoder_wheel_switch_async.py"]]}
+{
+  "name": "wheelswitch_async_driver",
+  "version": "1.0.0",
+  "description": "Async GPIO wheel switch bridge",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_wheelswitch_encoder_wheel_switch.py",
+      "code/_gs_wheelswitch_encoder_wheel_switch.py"
+    ],
+    [
+      "encoder_wheel_switch_async.py",
+      "code/encoder_wheel_switch_async.py"
+    ]
+  ]
+}

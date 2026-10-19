@@ -10,7 +10,7 @@
 
 import time
 from machine import I2C, Pin
-from bme680 import BME680_I2C
+from _gs_bme680_bme680 import BME680_I2C
 
 # ======================================== 全局变量 ============================================
 

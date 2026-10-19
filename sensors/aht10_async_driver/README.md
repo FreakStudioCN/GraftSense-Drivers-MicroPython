@@ -51,7 +51,7 @@
 ```text
 ├── code/__pycache__/aht10.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/aht10.py
+├── code/_gs_aht10_aht10.py
 ├── code/aht10_async.py
 ├── code/main.py
 ├── examples/main_sync.py

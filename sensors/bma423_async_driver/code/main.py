@@ -59,6 +59,7 @@ async def main():
             raise RuntimeError("No I2C device found on bus")
         print("I2C devices found: %s" % [hex(d) for d in devices])
         device = BMA423(i2c, acc_range=4, debug=False)
+        await device.initialize_async()
         try:
             await device.load_features_config_async()
             await device.enable_features_detection_async("step-count")

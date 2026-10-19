@@ -1,0 +1,320 @@
+{
+  "communication/lora_async_driver": {
+    "e22_900m22s": "_gs_lora_e22_900m22s",
+    "e22_uart_bridge": "_gs_lora_e22_uart_bridge",
+    "e22_uart_client": "_gs_lora_e22_uart_client",
+    "e22_uart_protocol": "_gs_lora_e22_uart_protocol",
+    "sx1262": "_gs_lora_sx1262",
+    "sx126x": "_gs_lora_sx126x",
+    "_sx126x": "_gs_lora__sx126x"
+  },
+  "communication/sim7600_async_driver": {
+    "calling": "_gs_sim7600_calling",
+    "sim7600": "_gs_sim7600_sim7600",
+    "sms": "_gs_sim7600_sms"
+  },
+  "communication/sim800_async_driver": {
+    "sim800": "_gs_sim800_sim800"
+  },
+  "communication/sx1276_async_driver": {
+    "sx1276": "_gs_sx1276_sx1276"
+  },
+  "input/ft6x06_async_driver": {
+    "ft6x06": "_gs_ft6x06_ft6x06"
+  },
+  "input/gt911_async_driver": {
+    "gt911": "_gs_gt911_gt911",
+    "st7789": "_gs_gt911_st7789",
+    "vga1_16x16": "_gs_gt911_vga1_16x16",
+    "vga1_16x32": "_gs_gt911_vga1_16x32",
+    "vga1_8x8": "_gs_gt911_vga1_8x8"
+  },
+  "input/limit_switch_async_driver": {
+    "limit_switch": "_gs_limit_switch_limit_switch"
+  },
+  "input/pcf8574_io8_async_driver": {
+    "pcf8574": "_gs_pcf8574_io8_pcf8574",
+    "pcf8574_io8": "_gs_pcf8574_io8_pcf8574_io8"
+  },
+  "input/pcf8574keys_async_driver": {
+    "pcf8574": "_gs_pcf8574keys_pcf8574"
+  },
+  "input/pcf8575_async_driver": {
+    "menu": "_gs_pcf8575_menu",
+    "pcf8575": "_gs_pcf8575_pcf8575",
+    "SSD1306": "_gs_pcf8575_SSD1306"
+  },
+  "input/ps2_joystick_async_driver": {
+    "joystick": "_gs_ps2_joystick_joystick"
+  },
+  "input/tca9554_async_driver": {
+    "tca9554": "_gs_tca9554_tca9554"
+  },
+  "input/tdeck_keyboard_async_driver": {
+    "tdeck_keyboard": "_gs_tdeck_keyboard_tdeck_keyboard"
+  },
+  "input/wheelswitch_async_driver": {
+    "encoder_wheel_switch": "_gs_wheelswitch_encoder_wheel_switch"
+  },
+  "lighting/apa102_async_driver": {
+    "apa102": "_gs_apa102_apa102"
+  },
+  "lighting/lcm1602a_async_driver": {
+    "LCD_I2C": "_gs_lcm1602a_LCD_I2C"
+  },
+  "lighting/pcf8574_led_async_driver": {
+    "led_bar": "_gs_pcf8574_led_led_bar",
+    "pcf8574": "_gs_pcf8574_led_pcf8574"
+  },
+  "misc/atecc608a_async_driver": {
+    "atecc608a": "_gs_atecc608a_atecc608a",
+    "basic": "_gs_atecc608a_basic",
+    "constant": "_gs_atecc608a_constant",
+    "exceptions": "_gs_atecc608a_exceptions",
+    "host": "_gs_atecc608a_host",
+    "packet": "_gs_atecc608a_packet",
+    "status": "_gs_atecc608a_status",
+    "util": "_gs_atecc608a_util"
+  },
+  "misc/lm386_speaker_async_driver": {
+    "lm386_speaker": "_gs_lm386_speaker_lm386_speaker",
+    "lm386_speaker_sync": "_gs_lm386_speaker_lm386_speaker_sync"
+  },
+  "motor_drivers/iic_bus_16_servo_async_driver": {
+    "bus_servo": "_gs_iic_bus_16_servo_bus_servo",
+    "pca9685": "_gs_iic_bus_16_servo_pca9685"
+  },
+  "sensors/TCR5000_async_driver": {
+    "tcr5000": "_gs_tcr5000_tcr5000"
+  },
+  "sensors/ad8232_async_driver": {
+    "ad8232": "_gs_ad8232_ad8232",
+    "ad8232_uart": "_gs_ad8232_ad8232_uart",
+    "data_flow_processor": "_gs_ad8232_data_flow_processor",
+    "ecg_module_cmd": "_gs_ad8232_ecg_module_cmd",
+    "ecg_signal_processor": "_gs_ad8232_ecg_signal_processor",
+    "master_data_flow_processor": "_gs_ad8232_master_data_flow_processor"
+  },
+  "sensors/adxl345_async_driver": {
+    "adxl345": "_gs_adxl345_adxl345"
+  },
+  "sensors/aht10_async_driver": {
+    "aht10": "_gs_aht10_aht10"
+  },
+  "sensors/aht20_async_driver": {
+    "ahtx0": "_gs_aht20_ahtx0"
+  },
+  "sensors/apds9960_async_driver": {
+    "apds9960": "_gs_apds9960_apds9960"
+  },
+  "sensors/as7341_async_driver": {
+    "as7341": "_gs_as7341_as7341"
+  },
+  "sensors/bma220_async_driver": {
+    "micropython_bma220": "_gs_bma220_micropython_bma220"
+  },
+  "sensors/bma423_async_driver": {
+    "bma423": "_gs_bma423_bma423"
+  },
+  "sensors/bme680_async_driver": {
+    "bme680": "_gs_bme680_bme680"
+  },
+  "sensors/bmi160_async_driver": {
+    "bmi160": "_gs_bmi160_bmi160",
+    "i2c_helpers": "_gs_bmi160_i2c_helpers"
+  },
+  "sensors/bmi270_async_driver": {
+    "bmi270": "_gs_bmi270_bmi270",
+    "config_file": "_gs_bmi270_config_file",
+    "i2c_helpers": "_gs_bmi270_i2c_helpers"
+  },
+  "sensors/bmm150_async_driver": {
+    "micropython_bmm150": "_gs_bmm150_micropython_bmm150"
+  },
+  "sensors/bmp581_async_driver": {
+    "bmp581mod": "_gs_bmp581_bmp581mod",
+    "sensor_pack": "_gs_bmp581_sensor_pack"
+  },
+  "sensors/bmx055_async_driver": {
+    "attitude": "_gs_bmx055_attitude",
+    "bma2x2": "_gs_bmx055_bma2x2",
+    "bmg160": "_gs_bmx055_bmg160",
+    "bmm050": "_gs_bmx055_bmm050",
+    "bmx055": "_gs_bmx055_bmx055"
+  },
+  "sensors/cds1081_async_driver": {
+    "cds1081": "_gs_cds1081_cds1081",
+    "umodbus": "_gs_cds1081_umodbus"
+  },
+  "sensors/ens160_async_driver": {
+    "ens160sciosense": "_gs_ens160_ens160sciosense",
+    "sensor_pack_2": "_gs_ens160_sensor_pack_2"
+  },
+  "sensors/fde_frost_async_driver": {
+    "fde_frost_sensor": "_gs_fde_frost_fde_frost_sensor",
+    "umodbus": "_gs_fde_frost_umodbus"
+  },
+  "sensors/flame_async_driver": {
+    "flame_sensor": "_gs_flame_flame_sensor"
+  },
+  "sensors/h3lis200dl_async_driver": {
+    "micropython_h3lis200dl": "_gs_h3lis200dl_micropython_h3lis200dl"
+  },
+  "sensors/hall_sensor_oh34n_async_driver": {
+    "hall_sensor_oh34n": "_gs_hall_sensor_oh34n_hall_sensor_oh34n"
+  },
+  "sensors/hds_async_driver": {
+    "hds": "_gs_hds_hds",
+    "hds_umodbus": "_gs_hds_hds_umodbus"
+  },
+  "sensors/hscdtd008a_async_driver": {
+    "hscdtd008a": "_gs_hscdtd008a_hscdtd008a",
+    "sensor_pack": "_gs_hscdtd008a_sensor_pack"
+  },
+  "sensors/hx711_async_driver": {
+    "hx711_gpio": "_gs_hx711_hx711_gpio"
+  },
+  "sensors/icm20948_async_driver": {
+    "micropython_icm20948": "_gs_icm20948_micropython_icm20948"
+  },
+  "sensors/ina219_async_driver": {
+    "ina_ti": "_gs_ina219_ina_ti",
+    "sensor_pack_2": "_gs_ina219_sensor_pack_2"
+  },
+  "sensors/ina226_async_driver": {
+    "ina_ti": "_gs_ina226_ina_ti",
+    "sensor_pack_2": "_gs_ina226_sensor_pack_2"
+  },
+  "sensors/isl29125_async_driver": {
+    "micropython_isl29125": "_gs_isl29125_micropython_isl29125"
+  },
+  "sensors/lis2mdl_async_driver": {
+    "micropython_lis2mdl": "_gs_lis2mdl_micropython_lis2mdl"
+  },
+  "sensors/lis3mdl_async_driver": {
+    "micropython_lis3mdl": "_gs_lis3mdl_micropython_lis3mdl"
+  },
+  "sensors/ls3hd_async_driver": {
+    "lis3dh": "_gs_ls3hd_lis3dh"
+  },
+  "sensors/ltr390uv_async_driver": {
+    "ltr390uv": "_gs_ltr390uv_ltr390uv",
+    "sensor_pack_2": "_gs_ltr390uv_sensor_pack_2"
+  },
+  "sensors/max30100_async_driver": {
+    "max30100": "_gs_max30100_max30100"
+  },
+  "sensors/max30102_async_driver": {
+    "circular_buffer": "_gs_max30102_circular_buffer",
+    "heart_rate_monitor": "_gs_max30102_heart_rate_monitor",
+    "max30102": "_gs_max30102_max30102"
+  },
+  "sensors/max44009_async_driver": {
+    "max44009": "_gs_max44009_max44009"
+  },
+  "sensors/mcp1081_async_driver": {
+    "mcp1081_umodbus": "_gs_mcp1081_mcp1081_umodbus",
+    "mer": "_gs_mcp1081_mer"
+  },
+  "sensors/mcp_async_driver": {
+    "mer": "_gs_mcp_mer",
+    "umodbus": "_gs_mcp_umodbus"
+  },
+  "sensors/mgx_async_driver": {
+    "mgx": "_gs_mgx_mgx"
+  },
+  "sensors/mlx90393_async_driver": {
+    "micropython_mlx90393": "_gs_mlx90393_micropython_mlx90393"
+  },
+  "sensors/mma8451_async_driver": {
+    "micropython_mma8451": "_gs_mma8451_micropython_mma8451"
+  },
+  "sensors/mmc5603_async_driver": {
+    "micropython_mmc5603": "_gs_mmc5603_micropython_mmc5603"
+  },
+  "sensors/mmc5983_async_driver": {
+    "micropython_mmc5983": "_gs_mmc5983_micropython_mmc5983"
+  },
+  "sensors/mp34dt05_async_driver": {
+    "mp34dt05": "_gs_mp34dt05_mp34dt05"
+  },
+  "sensors/mpu6050_async_driver": {
+    "mpu6050": "_gs_mpu6050_mpu6050"
+  },
+  "sensors/mpu6886_async_driver": {
+    "mpu6886": "_gs_mpu6886_mpu6886"
+  },
+  "sensors/mpu9250_async_driver": {
+    "ak8963": "_gs_mpu9250_ak8963",
+    "mpu6500": "_gs_mpu9250_mpu6500",
+    "mpu9250": "_gs_mpu9250_mpu9250"
+  },
+  "sensors/mqx_async_driver": {
+    "mqx": "_gs_mqx_mqx"
+  },
+  "sensors/mse_soil_sensor_async_driver": {
+    "mse_soil_sensor": "_gs_mse_soil_sensor_mse_soil_sensor",
+    "umodbus": "_gs_mse_soil_sensor_umodbus"
+  },
+  "sensors/mwfd_async_driver": {
+    "mwfd": "_gs_mwfd_mwfd"
+  },
+  "sensors/pir_async_driver": {
+    "pir_sensor": "_gs_pir_pir_sensor"
+  },
+  "sensors/pms5003t_async_driver": {
+    "pms5003": "_gs_pms5003t_pms5003"
+  },
+  "sensors/r60abd1_async_driver": {
+    "data_flow_processor": "_gs_r60abd1_data_flow_processor",
+    "r60abd1": "_gs_r60abd1_r60abd1"
+  },
+  "sensors/r60afd1_async_driver": {
+    "data_flow_processor": "_gs_r60afd1_data_flow_processor",
+    "hc08": "_gs_r60afd1_hc08",
+    "r60afd1": "_gs_r60afd1_r60afd1"
+  },
+  "sensors/rm3100_async_driver": {
+    "rm3100mod": "_gs_rm3100_rm3100mod",
+    "sensor_pack": "_gs_rm3100_sensor_pack"
+  },
+  "sensors/sht25_async_driver": {
+    "sht25": "_gs_sht25_sht25"
+  },
+  "sensors/sht30_async_driver": {
+    "sht30": "_gs_sht30_sht30"
+  },
+  "sensors/shtc3_async_driver": {
+    "shtc3": "_gs_shtc3_shtc3"
+  },
+  "sensors/spring_vibration_async_driver": {
+    "vibration_sensor": "_gs_spring_vibration_vibration_sensor"
+  },
+  "sensors/stts22h_async_driver": {
+    "micropython_stts22h": "_gs_stts22h_micropython_stts22h"
+  },
+  "sensors/tmp117_async_driver": {
+    "micropython_tmp117": "_gs_tmp117_micropython_tmp117"
+  },
+  "sensors/veml6040_async_driver": {
+    "sensor_pack_2": "_gs_veml6040_sensor_pack_2",
+    "veml6040mod": "_gs_veml6040_veml6040mod"
+  },
+  "sensors/vibration_async_driver": {
+    "vibration_sensor": "_gs_vibration_vibration_sensor"
+  },
+  "sensors/ws61_async_driver": {
+    "umodbus": "_gs_ws61_umodbus",
+    "wd61": "_gs_ws61_wd61"
+  },
+  "signal_acquisition/ads1115_async_driver": {
+    "ads1115": "_gs_ads1115_ads1115"
+  },
+  "signal_acquisition/cs1237_async_driver": {
+    "cs1237": "_gs_cs1237_cs1237"
+  },
+  "signal_generation/ds3502_async_driver": {
+    "dac_waveformgenerator": "_gs_ds3502_dac_waveformgenerator",
+    "ds3502": "_gs_ds3502_ds3502"
+  }
+}

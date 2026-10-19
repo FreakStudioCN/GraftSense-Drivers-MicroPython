@@ -50,7 +50,7 @@
 
 ```text
 ├── code/main.py
-├── code/sht30.py
+├── code/_gs_sht30_sht30.py
 ├── code/sht30_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -78,7 +78,7 @@ except ImportError:
 
 import time
 from machine import I2C, Pin
-from sht30 import SHT30
+from _gs_sht30_sht30 import SHT30
 from sht30_async import SHT30Async
 
 I2C_BUS_ID = 0

@@ -1,3 +1,4 @@
+import time
 """Cooperative SI4732 command driver.
 
 The hardware protocol remains a sequence of bounded I2C transactions. CTS
@@ -18,6 +19,25 @@ except ImportError:
 from si4732 import SI4732
 
 
+
+async def _pulse_low_async(pin, delay_ms):
+    pin.value(0)
+    started = time.ticks_ms()
+    try:
+        await asyncio.sleep_ms(delay_ms)
+    finally:
+        try:
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+            while remaining > 0:
+                try:
+                    await asyncio.sleep_ms(remaining)
+                except asyncio.CancelledError:
+                    pass
+                remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        finally:
+            pin.value(1)
+
+
 class SI4732Async(SI4732):
     """SI4732 with explicit cooperative counterparts for bus operations."""
 
@@ -28,9 +48,7 @@ class SI4732Async(SI4732):
     async def reset_async(self):
         if self._reset_pin is None:
             return
-        self._reset_pin.value(0)
-        await asyncio.sleep_ms(10)
-        self._reset_pin.value(1)
+        await _pulse_low_async(self._reset_pin, 10)
         await asyncio.sleep_ms(10)
 
     async def _wait_cts_unlocked(self, timeout_ms=None):

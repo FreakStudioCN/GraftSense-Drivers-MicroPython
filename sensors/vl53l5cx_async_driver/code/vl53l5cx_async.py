@@ -16,6 +16,25 @@ from vl53l5cx.mp import VL53L5CXMP
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
+
+async def _pulse_low_async(pin, delay_ms):
+    pin.value(0)
+    started = time.ticks_ms()
+    try:
+        await asyncio.sleep_ms(delay_ms)
+    finally:
+        try:
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+            while remaining > 0:
+                try:
+                    await asyncio.sleep_ms(remaining)
+                except asyncio.CancelledError:
+                    pass
+                remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        finally:
+            pin.value(1)
+
+
 class VL53L5CXMPAsync(VL53L5CXMP):
     """Awaitable VL53L5CX protocol flow without changing source properties."""
 
@@ -27,9 +46,7 @@ class VL53L5CXMPAsync(VL53L5CXMP):
     async def reset_async(self):
         if not self._lpn:
             raise ValueError("no LPN pin provided")
-        self._lpn.value(0)
-        await asyncio.sleep_ms(100)
-        self._lpn.value(1)
+        await _pulse_low_async(self._lpn, 100)
         await asyncio.sleep_ms(100)
 
     async def _poll_for_answer_async(self, size, pos, reg16, mask, val,

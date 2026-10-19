@@ -13,9 +13,9 @@ except ImportError:
     import asyncio
 
 from machine import I2C, Pin
-from bus_servo import BusPWMServoController
+from _gs_iic_bus_16_servo_bus_servo import BusPWMServoController
 from bus_servo_async import BusPWMServoControllerAsync
-from pca9685 import PCA9685
+from _gs_iic_bus_16_servo_pca9685 import PCA9685
 
 # ======================================== 全局变量 ============================================
 I2C_ID = 0

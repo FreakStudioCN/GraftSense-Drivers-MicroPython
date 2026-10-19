@@ -4,9 +4,9 @@ except ImportError:
     import asyncio
 import time
 import ubinascii
-from packet import ATCAPacket
-from constant import C as ATCA
-import exceptions as ATCA_EXCEPTIONS
+from _gs_atecc608a_packet import ATCAPacket
+import _gs_atecc608a_constant as ATCA
+import _gs_atecc608a_exceptions as ATCA_EXCEPTIONS
 
 class ATECC608AAsync:
     def __init__(self, bus, address=0x60, retries=20, debug=False):
@@ -109,7 +109,20 @@ class ATECC608AAsync:
             return await self._execute_async(packet, timeout_ms)
 
     async def atcab_read_config_zone_async(self, timeout_ms=1000):
-        return await self.atcab_read_serial_number_async(timeout_ms)
+        # Match basic.atcab_read_config_zone(): four ordered block packets.
+        deadline = time.ticks_add(time.ticks_ms(), timeout_ms)
+        packets = []
+        async with self._lock:
+            for block in range(ATCA.ATCA_ECC_CONFIG_SIZE // ATCA.ATCA_BLOCK_SIZE):
+                remaining = time.ticks_diff(deadline, time.ticks_ms())
+                if remaining <= 0:
+                    raise ATCA_EXCEPTIONS.GenericError("command timeout")
+                packet = ATCAPacket(
+                    opcode=ATCA.ATCA_READ,
+                    param1=ATCA.ATCA_ZONE_CONFIG | ATCA.ATCA_ZONE_READWRITE_32,
+                    param2=block << 3)
+                packets.append(await self._execute_async(packet, remaining))
+        return packets
 
     def atcab_version(self):
         return "1.1.1"

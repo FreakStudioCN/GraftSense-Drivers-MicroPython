@@ -4,7 +4,7 @@ except ImportError:
     import asyncio
 import sys
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
+from _gs_ltr390uv_sensor_pack_2.bus_service import I2cAdapter
 from ltr390uv_async import LTR390UVAsync
 
 async def main():

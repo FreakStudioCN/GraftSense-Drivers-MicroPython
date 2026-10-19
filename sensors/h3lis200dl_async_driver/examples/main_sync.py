@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 import time
 from machine import Pin, I2C
-from micropython_h3lis200dl import h3lis200dl
+from _gs_h3lis200dl_micropython_h3lis200dl import h3lis200dl
 
 # ======================================== 全局变量 ============================================
 # 定义传感器目标I2C地址列表

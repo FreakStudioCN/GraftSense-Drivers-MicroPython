@@ -7,9 +7,21 @@
   "chips": "all",
   "fw": "all",
   "urls": [
-    ["pcf8575.py", "code/pcf8575.py"],
-    ["SSD1306.py", "code/SSD1306.py"],
-    ["menu.py", "code/menu.py"],
-    ["pcf8575_async.py", "code/pcf8575_async.py"]
+    [
+      "_gs_pcf8575_pcf8575.py",
+      "code/_gs_pcf8575_pcf8575.py"
+    ],
+    [
+      "_gs_pcf8575_SSD1306.py",
+      "code/_gs_pcf8575_SSD1306.py"
+    ],
+    [
+      "_gs_pcf8575_menu.py",
+      "code/_gs_pcf8575_menu.py"
+    ],
+    [
+      "pcf8575_async.py",
+      "code/pcf8575_async.py"
+    ]
   ]
 }

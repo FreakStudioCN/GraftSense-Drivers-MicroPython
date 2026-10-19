@@ -10,7 +10,7 @@
 from machine import SoftI2C, Pin
 from time import ticks_diff, ticks_us
 import time
-from max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
+from _gs_max30102_max30102 import MAX30102, MAX30105_PULSE_AMP_MEDIUM
 
 # ======================================== 全局变量 ============================================
 

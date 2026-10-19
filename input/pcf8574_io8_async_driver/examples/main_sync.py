@@ -14,10 +14,10 @@ from machine import I2C, Pin
 import time
 
 # 导入PCF8574和PCF8574IO8模块
-from pcf8574 import PCF8574
+from _gs_pcf8574_io8_pcf8574 import PCF8574
 
 # 导入PCF8574IO8模块
-from pcf8574_io8 import PCF8574IO8
+from _gs_pcf8574_io8_pcf8574_io8 import PCF8574IO8
 
 # ======================================== 全局变量 ============================================
 

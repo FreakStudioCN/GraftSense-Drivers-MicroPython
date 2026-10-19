@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-import ads1115 as _source
+import _gs_ads1115_ads1115 as _source
 from machine import Pin
 import time
 

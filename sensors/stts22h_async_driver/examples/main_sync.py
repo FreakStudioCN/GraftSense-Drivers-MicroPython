@@ -10,7 +10,7 @@
 
 import time
 from machine import I2C, Pin
-from micropython_stts22h.stts22h import STTS22H
+from _gs_stts22h_micropython_stts22h.stts22h import STTS22H
 
 # ==================== 全局变量 ====================
 

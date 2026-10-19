@@ -49,17 +49,17 @@
 ## 文件结构
 
 ```text
-├── code/hds.py
+├── code/_gs_hds_hds.py
 ├── code/hds_async.py
-├── code/hds_umodbus/__init__.py
-├── code/hds_umodbus/common.py
-├── code/hds_umodbus/const.py
-├── code/hds_umodbus/functions.py
-├── code/hds_umodbus/modbus.py
-├── code/hds_umodbus/serial.py
-├── code/hds_umodbus/tcp.py
-├── code/hds_umodbus/typing.py
-├── code/hds_umodbus/version.py
+├── code/_gs_hds_hds_umodbus/__init__.py
+├── code/_gs_hds_hds_umodbus/common.py
+├── code/_gs_hds_hds_umodbus/const.py
+├── code/_gs_hds_hds_umodbus/functions.py
+├── code/_gs_hds_hds_umodbus/modbus.py
+├── code/_gs_hds_hds_umodbus/serial.py
+├── code/_gs_hds_hds_umodbus/tcp.py
+├── code/_gs_hds_hds_umodbus/typing.py
+├── code/_gs_hds_hds_umodbus/version.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -87,7 +87,7 @@ except ImportError:
 
 from machine import Pin
 from hds_async import HDSAsync as HDS
-from hds_umodbus.serial import SerialAsync as ModbusRTUMaster
+from _gs_hds_hds_umodbus.serial import SerialAsync as ModbusRTUMaster
 
 async def main():
     print("FreakStudio: starting async driver demo")

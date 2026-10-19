@@ -10,8 +10,8 @@
 
 import time
 from machine import Pin
-from hds_umodbus.serial import Serial as ModbusRTUMaster
-from hds import HDS
+from _gs_hds_hds_umodbus.serial import Serial as ModbusRTUMaster
+from _gs_hds_hds import HDS
 
 # ======================================== 全局变量 ============================================
 

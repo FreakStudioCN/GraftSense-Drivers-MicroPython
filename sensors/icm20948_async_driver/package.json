@@ -1,1 +1,27 @@
-{"name":"icm20948_async_driver","version":"1.0.0","description":"Async MicroPython driver package for ICM20948","author":"Jose D. Montoya","license":"MIT","chips":"all","fw":"all","urls":[["icm20948_async.py","code/icm20948_async.py"],["micropython_icm20948/__init__.py","code/micropython_icm20948/__init__.py"],["micropython_icm20948/icm20948.py","code/micropython_icm20948/icm20948.py"],["micropython_icm20948/i2c_helpers.py","code/micropython_icm20948/i2c_helpers.py"]]}
+{
+  "name": "icm20948_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython driver package for ICM20948",
+  "author": "Jose D. Montoya",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "icm20948_async.py",
+      "code/icm20948_async.py"
+    ],
+    [
+      "_gs_icm20948_micropython_icm20948/__init__.py",
+      "code/_gs_icm20948_micropython_icm20948/__init__.py"
+    ],
+    [
+      "_gs_icm20948_micropython_icm20948/icm20948.py",
+      "code/_gs_icm20948_micropython_icm20948/icm20948.py"
+    ],
+    [
+      "_gs_icm20948_micropython_icm20948/i2c_helpers.py",
+      "code/_gs_icm20948_micropython_icm20948/i2c_helpers.py"
+    ]
+  ]
+}

@@ -9,7 +9,7 @@ except ImportError:
 import time
 from machine import Pin, SoftI2C
 from ens160sciosense_async import Ens160Async
-from sensor_pack_2.bus_service import I2cAdapter
+from _gs_ens160_sensor_pack_2.bus_service import I2cAdapter
 
 # ======================================== 全局变量 ============================================
 TARGET_SENSOR_ADDRS = (0x52, 0x53)

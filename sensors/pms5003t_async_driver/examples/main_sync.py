@@ -11,7 +11,7 @@ import machine
 
 # import pms5003
 import uasyncio as asyncio
-import pms5003
+import _gs_pms5003t_pms5003 as pms5003
 
 # ======================================== 全局变量 ============================================
 

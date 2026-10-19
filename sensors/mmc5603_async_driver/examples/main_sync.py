@@ -9,7 +9,7 @@
 
 import time
 from machine import Pin, SoftI2C
-from micropython_mmc5603 import mmc5603
+from _gs_mmc5603_micropython_mmc5603 import mmc5603
 
 # ======================================== 全局变量 ============================================
 

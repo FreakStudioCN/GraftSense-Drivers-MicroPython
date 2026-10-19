@@ -9,7 +9,7 @@
 # 导入相关模块
 import time
 from machine import I2C, Pin
-from tdeck_keyboard import TDeckKeyboard
+from _gs_tdeck_keyboard_tdeck_keyboard import TDeckKeyboard
 
 # 全局变量
 # I2C 硬件引脚配置（LILYGO T-Deck/T-Deck Plus）

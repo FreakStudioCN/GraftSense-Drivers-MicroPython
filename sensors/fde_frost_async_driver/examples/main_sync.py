@@ -11,7 +11,7 @@
 import time
 
 # 导入FDE传感器驱动类
-from fde_frost_sensor import FDEFrostSensor
+from _gs_fde_frost_fde_frost_sensor import FDEFrostSensor
 
 # ======================================== 全局变量 ============================================
 

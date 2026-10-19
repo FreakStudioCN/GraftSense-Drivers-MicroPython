@@ -11,7 +11,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-import bmi270 as source
+import _gs_bmi270_bmi270 as source
 
 # ======================================== 全局变量 ============================================
 _CONFIG_BLOCK_SIZE = 32

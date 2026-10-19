@@ -50,16 +50,16 @@
 
 ```text
 ├── code/main.py
-├── code/mcp1081_umodbus/__init__.py
-├── code/mcp1081_umodbus/common.py
-├── code/mcp1081_umodbus/const.py
-├── code/mcp1081_umodbus/functions.py
-├── code/mcp1081_umodbus/modbus.py
-├── code/mcp1081_umodbus/serial.py
-├── code/mcp1081_umodbus/tcp.py
-├── code/mcp1081_umodbus/typing.py
-├── code/mcp1081_umodbus/version.py
-├── code/mer.py
+├── code/_gs_mcp1081_mcp1081_umodbus/__init__.py
+├── code/_gs_mcp1081_mcp1081_umodbus/common.py
+├── code/_gs_mcp1081_mcp1081_umodbus/const.py
+├── code/_gs_mcp1081_mcp1081_umodbus/functions.py
+├── code/_gs_mcp1081_mcp1081_umodbus/modbus.py
+├── code/_gs_mcp1081_mcp1081_umodbus/serial.py
+├── code/_gs_mcp1081_mcp1081_umodbus/tcp.py
+├── code/_gs_mcp1081_mcp1081_umodbus/typing.py
+├── code/_gs_mcp1081_mcp1081_umodbus/version.py
+├── code/_gs_mcp1081_mer.py
 ├── code/mer_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -94,9 +94,9 @@ try:
 except ImportError:
     import asyncio
 from machine import UART, Pin
-from mer import MER
+from _gs_mcp1081_mer import MER
 from mer_async import MERAsync
-from mcp1081_umodbus.serial import Serial as ModbusRTUMaster
+from _gs_mcp1081_mcp1081_umodbus.serial import Serial as ModbusRTUMaster
 
 # ======================================== 全局变量 ============================================
 SLAVE_ADDR = 1

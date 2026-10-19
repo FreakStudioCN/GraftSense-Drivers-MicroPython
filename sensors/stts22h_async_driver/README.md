@@ -50,9 +50,9 @@
 
 ```text
 ├── code/main.py
-├── code/micropython_stts22h/__init__.py
-├── code/micropython_stts22h/i2c_helpers.py
-├── code/micropython_stts22h/stts22h.py
+├── code/_gs_stts22h_micropython_stts22h/__init__.py
+├── code/_gs_stts22h_micropython_stts22h/i2c_helpers.py
+├── code/_gs_stts22h_micropython_stts22h/stts22h.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -88,7 +88,7 @@ async def main():
     
     # ==================== 导入相关模块 ====================
     from machine import I2C, Pin
-    from micropython_stts22h.stts22h import STTS22H
+    from _gs_stts22h_micropython_stts22h.stts22h import STTS22H
     
     # ==================== 全局变量 ====================
     

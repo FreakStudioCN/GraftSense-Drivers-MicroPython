@@ -5,7 +5,7 @@ except ImportError:
     import asyncio
 
 import time
-from pir_sensor import PIRSensor
+from _gs_pir_pir_sensor import PIRSensor
 
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================

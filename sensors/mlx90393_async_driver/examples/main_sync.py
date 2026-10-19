@@ -10,7 +10,7 @@
 
 import time
 from machine import Pin, SoftI2C
-from micropython_mlx90393 import mlx90393
+from _gs_mlx90393_micropython_mlx90393 import mlx90393
 
 # ======================================== 全局变量 ============================================
 

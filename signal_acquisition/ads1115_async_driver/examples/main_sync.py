@@ -14,7 +14,7 @@ from machine import Pin, I2C, Timer, UART
 import time
 
 # 导入外部ADC相关模块
-from ads1115 import ADS1115
+from _gs_ads1115_ads1115 import ADS1115
 
 # 导入二进制数据和原生数据类型打包解包模块
 import struct

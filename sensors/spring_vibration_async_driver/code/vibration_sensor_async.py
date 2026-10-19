@@ -7,7 +7,7 @@ except ImportError:
 
 import time
 from machine import Pin
-import vibration_sensor
+import _gs_spring_vibration_vibration_sensor as vibration_sensor
 
 
 # ======================================== 全局变量 ============================================

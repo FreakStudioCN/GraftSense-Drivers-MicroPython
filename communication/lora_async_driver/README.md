@@ -21,7 +21,8 @@
 
 ## 异步边界（B15）
 
-E22_900M22SAsync 仅提供状态、初始化计划和关闭协程。initialize_async、send_async、eceive_async 已撤回：SX126x BUSY/DIO1 的严格时序与最长 timeout 轮询需专用 IRQ/DMA transport 才能安全异步化。同步来源 API 不应从协程调用。
+E22_900M22SAsync 仅提供状态、初始化计划和关闭协程。initialize_async、send_async、
+eceive_async 已撤回：SX126x BUSY/DIO1 的严格时序与最长 timeout 轮询需专用 IRQ/DMA transport 才能安全异步化。同步来源 API 不应从协程调用。
 
 ## 简介
 
@@ -53,15 +54,15 @@ E22_900M22SAsync 仅提供状态、初始化计划和关闭协程。initialize_a
 ## 文件结构
 
 ```text
-├── code/_sx126x.py
-├── code/e22_900m22s.py
+├── code/__gs_lora_gs_lora__sx126x.py
+├── code/_gs_lora_e22_900m22s.py
 ├── code/e22_900m22s_async.py
-├── code/e22_uart_bridge.py
-├── code/e22_uart_client.py
-├── code/e22_uart_protocol.py
+├── code/_gs_lora_e22_uart_bridge.py
+├── code/_gs_lora_e22_uart_client.py
+├── code/_gs_lora_e22_uart_protocol.py
 ├── code/main.py
-├── code/sx1262.py
-├── code/sx126x.py
+├── code/_gs_lora_sx1262.py
+├── code/_gs_lora_gs_lora__sx126x.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -100,8 +101,8 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     from machine import Pin, SPI, UART
 
-    from e22_900m22s import E22_900M22S
-    from e22_uart_bridge import E22UARTBridge
+    from _gs_lora_e22_900m22s import E22_900M22S
+    from _gs_lora_e22_uart_bridge import E22UARTBridge
 
 
     # ======================================== 全局变量 ============================================

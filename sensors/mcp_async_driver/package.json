@@ -1,1 +1,55 @@
-{"name":"mcp_async_driver","version":"1.0.0","description":"Cooperative MicroPython MER water-level driver","author":"hogeiha","license":"MIT","chips":"all","fw":"all","urls":[["mer.py","code/mer.py"],["mer_async.py","code/mer_async.py"],["umodbus/__init__.py","code/umodbus/__init__.py"],["umodbus/common.py","code/umodbus/common.py"],["umodbus/const.py","code/umodbus/const.py"],["umodbus/functions.py","code/umodbus/functions.py"],["umodbus/modbus.py","code/umodbus/modbus.py"],["umodbus/serial.py","code/umodbus/serial.py"],["umodbus/tcp.py","code/umodbus/tcp.py"],["umodbus/typing.py","code/umodbus/typing.py"],["umodbus/version.py","code/umodbus/version.py"]]}
+{
+  "name": "mcp_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative MicroPython MER water-level driver",
+  "author": "hogeiha",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_mcp_mer.py",
+      "code/_gs_mcp_mer.py"
+    ],
+    [
+      "mer_async.py",
+      "code/mer_async.py"
+    ],
+    [
+      "_gs_mcp_umodbus/__init__.py",
+      "code/_gs_mcp_umodbus/__init__.py"
+    ],
+    [
+      "_gs_mcp_umodbus/common.py",
+      "code/_gs_mcp_umodbus/common.py"
+    ],
+    [
+      "_gs_mcp_umodbus/const.py",
+      "code/_gs_mcp_umodbus/const.py"
+    ],
+    [
+      "_gs_mcp_umodbus/functions.py",
+      "code/_gs_mcp_umodbus/functions.py"
+    ],
+    [
+      "_gs_mcp_umodbus/modbus.py",
+      "code/_gs_mcp_umodbus/modbus.py"
+    ],
+    [
+      "_gs_mcp_umodbus/serial.py",
+      "code/_gs_mcp_umodbus/serial.py"
+    ],
+    [
+      "_gs_mcp_umodbus/tcp.py",
+      "code/_gs_mcp_umodbus/tcp.py"
+    ],
+    [
+      "_gs_mcp_umodbus/typing.py",
+      "code/_gs_mcp_umodbus/typing.py"
+    ],
+    [
+      "_gs_mcp_umodbus/version.py",
+      "code/_gs_mcp_umodbus/version.py"
+    ]
+  ]
+}

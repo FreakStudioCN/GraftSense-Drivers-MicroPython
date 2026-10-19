@@ -1,23 +1,23 @@
 {
-    "name":  "apds9960_async_driver",
-    "urls":  [
-                 [
-                     "apds9960.py",
-                     "code/apds9960.py"
-                 ],
-                 [
-                     "apds9960_async.py",
-                     "code/apds9960_async.py"
-                 ]
-             ],
-    "version":  "1.0.0",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "description":  "APDS9960 low-memory driver: ambient light, color (RGBC), and proximity sensing",
-    "author":  "Rune Langøy",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all"
+  "name": "apds9960_async_driver",
+  "urls": [
+    [
+      "_gs_apds9960_apds9960.py",
+      "code/_gs_apds9960_apds9960.py"
+    ],
+    [
+      "apds9960_async.py",
+      "code/apds9960_async.py"
+    ]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "APDS9960 low-memory driver: ambient light, color (RGBC), and proximity sensing",
+  "author": "Rune Langøy",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
 }

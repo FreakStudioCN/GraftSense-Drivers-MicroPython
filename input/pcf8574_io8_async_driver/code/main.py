@@ -111,7 +111,7 @@ except ImportError:
     import asyncio
 from machine import I2C, Pin
 from pcf8574_async import PCF8574Async
-from pcf8574_io8 import PCF8574IO8
+from _gs_pcf8574_io8_pcf8574_io8 import PCF8574IO8
 
 
 async def main():

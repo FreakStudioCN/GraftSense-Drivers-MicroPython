@@ -49,13 +49,13 @@
 ## 文件结构
 
 ```text
-├── code/gt911.py
+├── code/_gs_gt911_gt911.py
 ├── code/gt911_async.py
 ├── code/main.py
-├── code/st7789.py
-├── code/vga1_16x16.py
-├── code/vga1_16x32.py
-├── code/vga1_8x8.py
+├── code/_gs_gt911_st7789.py
+├── code/_gs_gt911_vga1_16x16.py
+├── code/_gs_gt911_vga1_16x32.py
+├── code/_gs_gt911_vga1_8x8.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -97,18 +97,17 @@ async def main():
     # 时间相关的模块
 
     # LCD屏幕相关的模块
-    from st7789 import ST7789
+    from _gs_gt911_st7789 import ST7789
 
     # 字库相关的模块
-    import vga1_16x32 as bigfont
-    import vga1_16x16 as mediumfont
-    import vga1_8x8 as smallfont
-
+    import _gs_gt911_vga1_16x32 as bigfont
+    import _gs_gt911_vga1_16x16 as mediumfont
+    import _gs_gt911_vga1_8x8 as smallfont
     # 垃圾回收的模块
     import gc
 
     # 导入GT911触摸芯片相关模块
-    from gt911 import GT911
+    from _gs_gt911_gt911 import GT911
 
     # ======================================== 全局变量 ============================================
 

@@ -1,43 +1,43 @@
 {
-    "name":  "bma220_async_driver",
-    "version":  "1.0.0",
-    "description":  "Async conversion of bma220_driver",
-    "urls":  [
-                 [
-                     "micropython_bma220/bma220.py",
-                     "code/micropython_bma220/bma220.py"
-                 ],
-                 [
-                     "micropython_bma220/bma220_const.py",
-                     "code/micropython_bma220/bma220_const.py"
-                 ],
-                 [
-                     "micropython_bma220/bma220_lowg_detection.py",
-                     "code/micropython_bma220/bma220_lowg_detection.py"
-                 ],
-                 [
-                     "micropython_bma220/bma220_orientation.py",
-                     "code/micropython_bma220/bma220_orientation.py"
-                 ],
-                 [
-                     "micropython_bma220/bma220_slope.py",
-                     "code/micropython_bma220/bma220_slope.py"
-                 ],
-                 [
-                     "micropython_bma220/bma220_tap_sensing.py",
-                     "code/micropython_bma220/bma220_tap_sensing.py"
-                 ],
-                 [
-                     "micropython_bma220/i2c_helpers.py",
-                     "code/micropython_bma220/i2c_helpers.py"
-                 ],
-                 [
-                     "micropython_bma220/__init__.py",
-                     "code/micropython_bma220/__init__.py"
-                 ],
-                 [
-                     "bma220_async.py",
-                     "code/bma220_async.py"
-                 ]
-             ]
+  "name": "bma220_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of bma220_driver",
+  "urls": [
+    [
+      "_gs_bma220_micropython_bma220/bma220.py",
+      "code/_gs_bma220_micropython_bma220/bma220.py"
+    ],
+    [
+      "_gs_bma220_micropython_bma220/bma220_const.py",
+      "code/_gs_bma220_micropython_bma220/bma220_const.py"
+    ],
+    [
+      "_gs_bma220_micropython_bma220/bma220_lowg_detection.py",
+      "code/_gs_bma220_micropython_bma220/bma220_lowg_detection.py"
+    ],
+    [
+      "_gs_bma220_micropython_bma220/bma220_orientation.py",
+      "code/_gs_bma220_micropython_bma220/bma220_orientation.py"
+    ],
+    [
+      "_gs_bma220_micropython_bma220/bma220_slope.py",
+      "code/_gs_bma220_micropython_bma220/bma220_slope.py"
+    ],
+    [
+      "_gs_bma220_micropython_bma220/bma220_tap_sensing.py",
+      "code/_gs_bma220_micropython_bma220/bma220_tap_sensing.py"
+    ],
+    [
+      "_gs_bma220_micropython_bma220/i2c_helpers.py",
+      "code/_gs_bma220_micropython_bma220/i2c_helpers.py"
+    ],
+    [
+      "_gs_bma220_micropython_bma220/__init__.py",
+      "code/_gs_bma220_micropython_bma220/__init__.py"
+    ],
+    [
+      "bma220_async.py",
+      "code/bma220_async.py"
+    ]
+  ]
 }

@@ -5,7 +5,7 @@ except ImportError:
     import asyncio
 
 from machine import UART
-from pms5003 import PMS5003
+from _gs_pms5003t_pms5003 import PMS5003
 
 # ======================================== 全局变量 ============================================
 UART_ID = 0

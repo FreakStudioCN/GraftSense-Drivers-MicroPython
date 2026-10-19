@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/bme680.py
+├── code/_gs_bme680_bme680.py
 ├── code/bme680_async.py
 ├── code/main.py
 ├── examples/main_sync.py

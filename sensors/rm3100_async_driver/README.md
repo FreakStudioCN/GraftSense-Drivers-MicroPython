@@ -51,16 +51,16 @@
 ```text
 ├── code/main.py
 ├── code/rm3100_async.py
-├── code/rm3100mod.py
-├── code/sensor_pack/__init__.py
-├── code/sensor_pack/averager.py
-├── code/sensor_pack/base_sensor.py
-├── code/sensor_pack/bitfield.py
-├── code/sensor_pack/bus_service.py
-├── code/sensor_pack/converter.py
-├── code/sensor_pack/crc_mod.py
-├── code/sensor_pack/geosensmod.py
-├── code/sensor_pack/LICENSE
+├── code/_gs_rm3100_rm3100mod.py
+├── code/_gs_rm3100_sensor_pack/__init__.py
+├── code/_gs_rm3100_sensor_pack/averager.py
+├── code/_gs_rm3100_sensor_pack/base_sensor.py
+├── code/_gs_rm3100_sensor_pack/bitfield.py
+├── code/_gs_rm3100_sensor_pack/bus_service.py
+├── code/_gs_rm3100_sensor_pack/converter.py
+├── code/_gs_rm3100_sensor_pack/crc_mod.py
+├── code/_gs_rm3100_sensor_pack/geosensmod.py
+├── code/_gs_rm3100_sensor_pack/LICENSE
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -85,8 +85,8 @@ try:
 except ImportError:
  import asyncio
 from machine import Pin,SoftI2C
-from sensor_pack.bus_service import I2cAdapter
-from rm3100mod import RM3100
+from _gs_rm3100_sensor_pack.bus_service import I2cAdapter
+from _gs_rm3100_rm3100mod import RM3100
 from rm3100_async import RM3100Async
 async def main():
  await asyncio.sleep(3)

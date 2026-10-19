@@ -49,9 +49,9 @@
 ## 文件结构
 
 ```text
-├── code/lm386_speaker.py
+├── code/_gs_lm386_speaker_lm386_speaker.py
 ├── code/lm386_speaker_async.py
-├── code/lm386_speaker_sync.py
+├── code/_gs_lm386_speaker_lm386_speaker_sync.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -77,7 +77,7 @@ try:
 except ImportError:
     import asyncio
 
-from lm386_speaker import LMSpeaker
+from _gs_lm386_speaker_lm386_speaker import LMSpeaker
 
 MELODY = [(440, 0.5), (494, 0.5), (523, 0.5), (587, 0.5), (659, 0.5), (698, 0.5), (784, 1.0)]
 

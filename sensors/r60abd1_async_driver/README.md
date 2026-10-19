@@ -52,10 +52,10 @@
 ├── code/__pycache__/data_flow_processor.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/r60abd1.cpython-313.pyc
-├── code/data_flow_processor.py
+├── code/_gs_r60abd1_data_flow_processor.py
 ├── code/data_flow_processor_async.py
 ├── code/main.py
-├── code/r60abd1.py
+├── code/_gs_r60abd1_r60abd1.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -92,8 +92,8 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import UART, Pin, Timer
-    from data_flow_processor import DataFlowProcessor
-    from r60abd1 import R60ABD1, format_time
+    from _gs_r60abd1_data_flow_processor import DataFlowProcessor
+    from _gs_r60abd1_r60abd1 import R60ABD1, format_time
 
     # ======================================== 全局变量 ============================================
 

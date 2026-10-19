@@ -1,3 +1,4 @@
+import time
 """Async FT6336 adapter with cooperative hardware-reset timing."""
 try:
     import uasyncio as asyncio
@@ -5,6 +6,25 @@ except ImportError:
     import asyncio
 
 from ft6336 import FT6336
+
+
+
+async def _pulse_low_async(pin, delay_ms):
+    pin.value(0)
+    started = time.ticks_ms()
+    try:
+        await asyncio.sleep_ms(delay_ms)
+    finally:
+        try:
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+            while remaining > 0:
+                try:
+                    await asyncio.sleep_ms(remaining)
+                except asyncio.CancelledError:
+                    pass
+                remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        finally:
+            pin.value(1)
 
 
 class FT6336Async(FT6336):
@@ -56,9 +76,7 @@ class FT6336Async(FT6336):
             raise RuntimeError("Reset pin not configured")
         self._reset_pin.value(1)
         await asyncio.sleep_ms(self._RESET_DELAY_MS)
-        self._reset_pin.value(0)
-        await asyncio.sleep_ms(self._RESET_DELAY_MS)
-        self._reset_pin.value(1)
+        await _pulse_low_async(self._reset_pin, self._RESET_DELAY_MS)
         await asyncio.sleep_ms(self._RESET_DELAY_MS)
         self._triggered = True
 

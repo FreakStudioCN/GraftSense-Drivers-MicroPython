@@ -51,12 +51,12 @@
 ```text
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/main.py
-├── code/micropython_mma8451/__init__.py
-├── code/micropython_mma8451/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_mma8451/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_mma8451/__pycache__/mma8451.cpython-313.pyc
-├── code/micropython_mma8451/i2c_helpers.py
-├── code/micropython_mma8451/mma8451.py
+├── code/_gs_mma8451_micropython_mma8451/__init__.py
+├── code/_gs_mma8451_micropython_mma8451/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_mma8451_micropython_mma8451/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_mma8451_micropython_mma8451/__pycache__/mma8451.cpython-313.pyc
+├── code/_gs_mma8451_micropython_mma8451/i2c_helpers.py
+├── code/_gs_mma8451_micropython_mma8451/mma8451.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -91,7 +91,7 @@ async def main():
     
     # ======================================== 导入相关模块 =========================================
     from machine import Pin, I2C
-    from micropython_mma8451 import mma8451
+    from _gs_mma8451_micropython_mma8451 import mma8451
     
     # ======================================== 全局变量 ============================================
     

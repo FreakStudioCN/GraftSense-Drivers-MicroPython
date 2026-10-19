@@ -10,9 +10,9 @@
 
 from machine import UART, Pin, Timer
 import time
-from data_flow_processor import DataFlowProcessor
-from r60afd1 import R60AFD1, format_time
-from hc08 import HC08
+from _gs_r60afd1_data_flow_processor import DataFlowProcessor
+from _gs_r60afd1_r60afd1 import R60AFD1, format_time
+from _gs_r60afd1_hc08 import HC08
 
 # ======================================== 全局变量 ============================================
 

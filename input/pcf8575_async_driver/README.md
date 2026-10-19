@@ -51,10 +51,10 @@
 ```text
 ├── async_source_examples.json
 ├── code/main.py
-├── code/menu.py
-├── code/pcf8575.py
+├── code/_gs_pcf8575_menu.py
+├── code/_gs_pcf8575_pcf8575.py
 ├── code/pcf8575_async.py
-├── code/SSD1306.py
+├── code/_gs_pcf8575_SSD1306.py
 ├── examples/pcf8575_led_sync.py
 ├── examples/pcf8575_menu_async.py
 ├── examples/pcf8575_menu_sync.py
@@ -83,8 +83,8 @@ except ImportError:
 
 from machine import I2C, Pin
 from pcf8575_async import PCF8575Async as PCF8575
-from SSD1306 import SSD1306_I2C
-from menu import SimpleOLEDMenu
+from _gs_pcf8575_SSD1306 import SSD1306_I2C
+from _gs_pcf8575_menu import SimpleOLEDMenu
 
 LED_COUNT = 8
 KEYS = {

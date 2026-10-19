@@ -12,7 +12,7 @@ import time
 from machine import I2C, Pin
 
 # 导入AS7341驱动并创建传感器对象
-from as7341 import AS7341
+from _gs_as7341_as7341 import AS7341
 
 # ======================================== 全局变量 ============================================
 

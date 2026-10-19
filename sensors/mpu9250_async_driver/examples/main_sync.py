@@ -18,7 +18,7 @@ except ImportError:
 from machine import I2C, Pin
 import time
 
-from mpu9250 import MPU9250
+from _gs_mpu9250_mpu9250 import MPU9250
 
 # ======================================== 全局变量 ============================================
 

@@ -50,13 +50,13 @@
 
 ```text
 ├── async_source_examples.json
-├── code/ad8232.py
-├── code/ad8232_uart.py
-├── code/data_flow_processor.py
-├── code/ecg_module_cmd.py
-├── code/ecg_signal_processor.py
+├── code/_gs_ad8232_ad8232.py
+├── code/_gs_ad8232_ad8232_uart.py
+├── code/_gs_ad8232_data_flow_processor.py
+├── code/_gs_ad8232_ecg_module_cmd.py
+├── code/_gs_ad8232_ecg_signal_processor.py
 ├── code/main.py
-├── code/master_data_flow_processor.py
+├── code/master__gs_ad8232_data_flow_processor.py
 ├── examples/device_main_sync.py
 ├── examples/master_main_async.py
 ├── examples/master_main_sync.py
@@ -84,10 +84,10 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin, UART
-from data_flow_processor import DataFlowProcessor
-from ad8232 import AD8232
-from ecg_module_cmd import ECGModuleCMD
-from ecg_signal_processor import ECGSignalProcessor
+from _gs_ad8232_data_flow_processor import DataFlowProcessor
+from _gs_ad8232_ad8232 import AD8232
+from _gs_ad8232_ecg_module_cmd import ECGModuleCMD
+from _gs_ad8232_ecg_signal_processor import ECGSignalProcessor
 
 
 async def main():

@@ -12,16 +12,16 @@
   },
   "urls": [
     [
-      "data_flow_processor.py",
-      "code/data_flow_processor.py"
+      "_gs_r60afd1_data_flow_processor.py",
+      "code/_gs_r60afd1_data_flow_processor.py"
     ],
     [
-      "hc08.py",
-      "code/hc08.py"
+      "_gs_r60afd1_hc08.py",
+      "code/_gs_r60afd1_hc08.py"
     ],
     [
-      "r60afd1.py",
-      "code/r60afd1.py"
+      "_gs_r60afd1_r60afd1.py",
+      "code/_gs_r60afd1_r60afd1.py"
     ],
     [
       "r60afd1_async.py",

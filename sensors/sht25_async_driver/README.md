@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/sht25.cpython-313.pyc
 ├── code/main.py
-├── code/sht25.py
+├── code/_gs_sht25_sht25.py
 ├── code/sht25_async.py
 ├── examples/main_sync.py
 ├── LICENSE

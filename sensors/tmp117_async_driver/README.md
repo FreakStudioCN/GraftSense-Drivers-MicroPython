@@ -52,12 +52,12 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/i2c_helpers_async.py
 ├── code/main.py
-├── code/micropython_tmp117/__init__.py
-├── code/micropython_tmp117/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_tmp117/__pycache__/i2c_helpers.cpython-313.pyc
-├── code/micropython_tmp117/__pycache__/tmp117.cpython-313.pyc
-├── code/micropython_tmp117/i2c_helpers.py
-├── code/micropython_tmp117/tmp117.py
+├── code/_gs_tmp117_micropython_tmp117/__init__.py
+├── code/_gs_tmp117_micropython_tmp117/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_tmp117_micropython_tmp117/__pycache__/i2c_helpers.cpython-313.pyc
+├── code/_gs_tmp117_micropython_tmp117/__pycache__/tmp117.cpython-313.pyc
+├── code/_gs_tmp117_micropython_tmp117/i2c_helpers.py
+├── code/_gs_tmp117_micropython_tmp117/tmp117.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -94,7 +94,7 @@ async def main():
     # ==================== 导入相关模块 ====================
 
     from machine import Pin, I2C
-    from micropython_tmp117.tmp117 import TMP117
+    from _gs_tmp117_micropython_tmp117.tmp117 import TMP117
 
     # ==================== 全局变量 ====================
 

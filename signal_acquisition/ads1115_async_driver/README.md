@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/ads1115.py
+├── code/_gs_ads1115_ads1115.py
 ├── code/ads1115_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -92,7 +92,7 @@ async def main():
     # 导入时间相关模块
 
     # 导入外部ADC相关模块
-    from ads1115 import ADS1115
+    from _gs_ads1115_ads1115 import ADS1115
 
     # 导入二进制数据和原生数据类型打包解包模块
     import struct

@@ -10,8 +10,8 @@
 from machine import UART, Pin, Timer
 import micropython
 import time
-from data_flow_processor import DataFlowProcessor
-from ad8232_uart import AD8232_DataFlowProcessor
+from _gs_ad8232_data_flow_processor import DataFlowProcessor
+from _gs_ad8232_ad8232_uart import AD8232_DataFlowProcessor
 
 # ======================================== 全局变量 ============================================
 

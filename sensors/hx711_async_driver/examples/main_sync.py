@@ -6,7 +6,7 @@
 # @Description : HX711称重传感器校准与测量程序，支持去皮、标定和实时重量显示
 
 # ======================================== 导入相关模块 =========================================
-from hx711_gpio import HX711
+from _gs_hx711_hx711_gpio import HX711
 from machine import Pin
 import time
 

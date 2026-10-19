@@ -10,8 +10,8 @@
 
 import sys
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
-import ltr390uv
+from _gs_ltr390uv_sensor_pack_2.bus_service import I2cAdapter
+import _gs_ltr390uv_ltr390uv as ltr390uv
 import time
 
 

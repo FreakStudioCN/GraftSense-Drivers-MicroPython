@@ -3,7 +3,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from tdeck_keyboard import TDeckKeyboard, TDECK_KEYBOARD_ADDR
+from _gs_tdeck_keyboard_tdeck_keyboard import TDeckKeyboard, TDECK_KEYBOARD_ADDR
 
 
 class TDeckKeyboardAsync(TDeckKeyboard):

@@ -3,7 +3,7 @@ try:
 except ImportError:
     import asyncio
 
-from lm386_speaker import LMSpeaker
+from _gs_lm386_speaker_lm386_speaker import LMSpeaker
 
 MELODY = [(440, 0.5), (494, 0.5), (523, 0.5), (587, 0.5), (659, 0.5), (698, 0.5), (784, 1.0)]
 

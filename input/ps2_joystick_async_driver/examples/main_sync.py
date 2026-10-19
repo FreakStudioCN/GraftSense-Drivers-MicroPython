@@ -11,7 +11,7 @@
 import time
 
 # 导入摇杆驱动模块
-from joystick import Joystick
+from _gs_ps2_joystick_joystick import Joystick
 
 # ======================================== 全局变量 ============================================
 

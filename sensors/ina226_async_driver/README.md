@@ -51,21 +51,21 @@
 ```text
 ├── code/__pycache__/ina_ti.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/ina_ti.py
+├── code/_gs_ina226_ina_ti.py
 ├── code/ina_ti_async.py
 ├── code/main.py
-├── code/sensor_pack_2/__init__.py
-├── code/sensor_pack_2/__pycache__/__init__.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/adcmod.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bitfield.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
-├── code/sensor_pack_2/__pycache__/regmod.cpython-313.pyc
-├── code/sensor_pack_2/adcmod.py
-├── code/sensor_pack_2/base_sensor.py
-├── code/sensor_pack_2/bitfield.py
-├── code/sensor_pack_2/bus_service.py
-├── code/sensor_pack_2/regmod.py
+├── code/_gs_ina226_sensor_pack_2/__init__.py
+├── code/_gs_ina226_sensor_pack_2/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_ina226_sensor_pack_2/__pycache__/adcmod.cpython-313.pyc
+├── code/_gs_ina226_sensor_pack_2/__pycache__/base_sensor.cpython-313.pyc
+├── code/_gs_ina226_sensor_pack_2/__pycache__/bitfield.cpython-313.pyc
+├── code/_gs_ina226_sensor_pack_2/__pycache__/bus_service.cpython-313.pyc
+├── code/_gs_ina226_sensor_pack_2/__pycache__/regmod.cpython-313.pyc
+├── code/_gs_ina226_sensor_pack_2/adcmod.py
+├── code/_gs_ina226_sensor_pack_2/base_sensor.py
+├── code/_gs_ina226_sensor_pack_2/bitfield.py
+├── code/_gs_ina226_sensor_pack_2/bus_service.py
+├── code/_gs_ina226_sensor_pack_2/regmod.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -91,8 +91,8 @@ except ImportError:
     import asyncio
 
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
-import ina_ti
+from _gs_ina226_sensor_pack_2.bus_service import I2cAdapter
+import _gs_ina226_ina_ti as ina_ti
 from ina_ti_async import INA226Async
 
 

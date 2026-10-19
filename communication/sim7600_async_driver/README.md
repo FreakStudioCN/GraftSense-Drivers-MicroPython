@@ -50,20 +50,20 @@
 
 ```text
 ├── async_source_examples.json
-├── code/calling.py
+├── code/_gs_sim7600_calling.py
 ├── code/main.py
-├── code/sim7600/__init__.py
-├── code/sim7600/calling.py
-├── code/sim7600/core.py
-├── code/sim7600/http.py
-├── code/sim7600/location.py
-├── code/sim7600/sms.py
-├── code/sim7600/tcpip.py
+├── code/_gs_sim7600_sim7600/__init__.py
+├── code/_gs_sim7600_sim7600/_gs_sim7600_calling.py
+├── code/_gs_sim7600_sim7600/core.py
+├── code/_gs_sim7600_sim7600/http.py
+├── code/_gs_sim7600_sim7600/location.py
+├── code/_gs_sim7600_sim7600/_gs_sim7600_sms.py
+├── code/_gs_sim7600_sim7600/tcpip.py
 ├── code/sim7600_async.py
 ├── code/sim7600_async_v2.py
 ├── code/sim7600_async_v3.py
 ├── code/sim7600_async_v4.py
-├── code/sms.py
+├── code/_gs_sim7600_sms.py
 ├── examples/calling_sync.py
 ├── examples/GPS_sync.py
 ├── examples/HTTP_sync.py

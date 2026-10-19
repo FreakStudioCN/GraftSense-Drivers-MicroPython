@@ -8,7 +8,7 @@
 
 import time
 from machine import I2C, Pin
-from bma423 import BMA423
+from _gs_bma423_bma423 import BMA423
 
 # ======================================== 导入相关模块 =========================================
 

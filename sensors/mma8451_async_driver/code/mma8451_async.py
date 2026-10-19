@@ -1,6 +1,6 @@
 """Async adapter for the MMA8451 source driver."""
 
-from micropython_mma8451.mma8451 import MMA8451
+from _gs_mma8451_micropython_mma8451.mma8451 import MMA8451
 
 
 # ======================================== 全局变量 ============================================

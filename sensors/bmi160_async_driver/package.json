@@ -1,31 +1,31 @@
 {
-    "name":  "bmi160_async_driver",
-    "urls":  [
-                 [
-                     "bmi160.py",
-                     "code/bmi160.py"
-                 ],
-                 [
-                     "i2c_helpers.py",
-                     "code/i2c_helpers.py"
-                 ],
-                 [
-                     "__init__.py",
-                     "code/__init__.py"
-                 ],
-                 [
-                     "bmi160_async.py",
-                     "code/bmi160_async.py"
-                 ]
-             ],
-    "version":  "1.0.0",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "description":  "MicroPython I2C driver for Bosch BMI160 6-axis IMU (accelerometer + gyroscope)",
-    "author":  "Jose D. Montoya",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all"
+  "name": "bmi160_async_driver",
+  "urls": [
+    [
+      "_gs_bmi160_bmi160.py",
+      "code/_gs_bmi160_bmi160.py"
+    ],
+    [
+      "_gs_bmi160_i2c_helpers.py",
+      "code/_gs_bmi160_i2c_helpers.py"
+    ],
+    [
+      "__init__.py",
+      "code/__init__.py"
+    ],
+    [
+      "bmi160_async.py",
+      "code/bmi160_async.py"
+    ]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "MicroPython I2C driver for Bosch BMI160 6-axis IMU (accelerometer + gyroscope)",
+  "author": "Jose D. Montoya",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
 }

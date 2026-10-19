@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/lis3dh.py
+├── code/_gs_ls3hd_lis3dh.py
 ├── code/lis3dh_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -81,7 +81,7 @@ import time
 
 from machine import I2C, Pin
 
-import lis3dh
+import _gs_ls3hd_lis3dh as lis3dh
 from lis3dh_async import LIS3DH_I2CAsync
 
 

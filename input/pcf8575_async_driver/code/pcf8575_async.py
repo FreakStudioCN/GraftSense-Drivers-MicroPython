@@ -5,7 +5,7 @@ try:
 except ImportError:
     import asyncio
 
-from pcf8575 import PCF8575
+from _gs_pcf8575_pcf8575 import PCF8575
 
 
 class PCF8575Async(PCF8575):

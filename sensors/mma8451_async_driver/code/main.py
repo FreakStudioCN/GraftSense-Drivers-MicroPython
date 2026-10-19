@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 from machine import I2C, Pin
-from micropython_mma8451 import mma8451
+from _gs_mma8451_micropython_mma8451 import mma8451
 from mma8451_async import MMA8451Async
 # ======================================== 全局变量 ============================================
 I2C_BUS_ID = 0

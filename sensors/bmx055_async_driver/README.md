@@ -55,12 +55,12 @@
 ├── code/__pycache__/bmm050.cpython-313.pyc
 ├── code/__pycache__/bmx055.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/attitude.py
+├── code/_gs_bmx055_attitude.py
 ├── code/attitude_async.py
-├── code/bma2x2.py
-├── code/bmg160.py
-├── code/bmm050.py
-├── code/bmx055.py
+├── code/_gs_bmx055_bma2x2.py
+├── code/_gs_bmx055_bmg160.py
+├── code/_gs_bmx055_bmm050.py
+├── code/_gs_bmx055_bmx055.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -98,8 +98,8 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     from machine import I2C, Pin
 
-    from attitude import angles, heading
-    from bmx055 import BMX055
+    from _gs_bmx055_attitude import angles, heading
+    from _gs_bmx055_bmx055 import BMX055
 
     # ======================================== 全局变量 ============================================
     I2C_ID = 0

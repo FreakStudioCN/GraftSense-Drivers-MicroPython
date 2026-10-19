@@ -6,7 +6,7 @@ except ImportError:
     import asyncio
 import time
 from machine import Pin
-import vibration_sensor
+import _gs_vibration_vibration_sensor as vibration_sensor
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================

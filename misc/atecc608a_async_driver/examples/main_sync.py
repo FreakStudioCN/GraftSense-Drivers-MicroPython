@@ -11,7 +11,7 @@
 import machine
 import time
 import ubinascii
-from atecc608a import ATECC608A
+from _gs_atecc608a_atecc608a import ATECC608A
 
 # ======================================== 全局变量 ============================================
 

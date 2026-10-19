@@ -8,7 +8,7 @@
 # ======================================== 导入相关模块 =========================================
 
 # 导入SIM800短信扩展类
-from sim800 import SIM800SMS
+from _gs_sim800_sim800 import SIM800SMS
 
 # 从machine模块导入UART和Pin类，用于硬件引脚和串口配置
 from machine import UART, Pin

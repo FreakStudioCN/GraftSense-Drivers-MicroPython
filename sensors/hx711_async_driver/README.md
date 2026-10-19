@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/hx711_gpio.py
+├── code/_gs_hx711_hx711_gpio.py
 ├── code/hx711_gpio_async.py
 ├── code/main.py
 ├── examples/main_sync.py

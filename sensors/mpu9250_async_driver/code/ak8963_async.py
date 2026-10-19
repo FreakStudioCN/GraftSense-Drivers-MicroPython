@@ -4,11 +4,11 @@ try:
 except ImportError:
     import asyncio
 
-import ak8963 as _ak
-import mpu6500 as _m6500
-from ak8963 import AK8963
-from mpu6500 import MPU6500
-from mpu9250 import MPU9250
+import _gs_mpu9250_ak8963 as _ak
+import _gs_mpu9250_mpu6500 as _m6500
+from _gs_mpu9250_ak8963 import AK8963
+from _gs_mpu9250_mpu6500 import MPU6500
+from _gs_mpu9250_mpu9250 import MPU9250
 
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================

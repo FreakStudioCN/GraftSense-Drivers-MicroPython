@@ -4,8 +4,8 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin, SoftI2C
-from sensor_pack.bus_service import I2cAdapter
-from rm3100mod import RM3100
+from _gs_rm3100_sensor_pack.bus_service import I2cAdapter
+from _gs_rm3100_rm3100mod import RM3100
 from rm3100_async import RM3100Async
 # ======================================== 全局变量 ============================================
 I2C_SCL_PIN=5

@@ -5,8 +5,8 @@ except ImportError:
     import asyncio
 
 import time
-from data_flow_processor import DataFlowProcessor
-from r60abd1 import R60ABD1
+from _gs_r60abd1_data_flow_processor import DataFlowProcessor
+from _gs_r60abd1_r60abd1 import R60ABD1
 
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================

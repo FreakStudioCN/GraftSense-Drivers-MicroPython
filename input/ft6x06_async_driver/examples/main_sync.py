@@ -15,7 +15,7 @@ import time
 from machine import I2C, Pin
 
 # 导入 FT6x06 触摸驱动
-from ft6x06 import FT6x06
+from _gs_ft6x06_ft6x06 import FT6x06
 
 # ======================================== 全局变量 ============================================
 

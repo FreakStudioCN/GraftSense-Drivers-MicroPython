@@ -49,16 +49,16 @@
 ## 文件结构
 
 ```text
-├── code/atecc608a.py
+├── code/_gs_atecc608a_atecc608a.py
 ├── code/atecc608a_async.py
-├── code/basic.py
-├── code/constant.py
-├── code/exceptions.py
-├── code/host.py
+├── code/_gs_atecc608a_basic.py
+├── code/_gs_atecc608a_constant.py
+├── code/_gs_atecc608a_exceptions.py
+├── code/_gs_atecc608a_host.py
 ├── code/main.py
-├── code/packet.py
-├── code/status.py
-├── code/util.py
+├── code/_gs_atecc608a_packet.py
+├── code/_gs_atecc608a_status.py
+├── code/_gs_atecc608a_util.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json

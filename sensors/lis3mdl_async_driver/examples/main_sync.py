@@ -14,7 +14,7 @@ __platform__ = "MicroPython v1.23.0"
 
 import time
 from machine import Pin, SoftI2C
-from micropython_lis3mdl import lis3mdl
+from _gs_lis3mdl_micropython_lis3mdl import lis3mdl
 
 # ======================================== 全局变量 ============================================
 

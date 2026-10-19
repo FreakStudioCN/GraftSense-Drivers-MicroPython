@@ -51,10 +51,10 @@
 ```text
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/main.py
-├── code/micropython_mlx90393/__init__.py
-├── code/micropython_mlx90393/__pycache__/__init__.cpython-313.pyc
-├── code/micropython_mlx90393/__pycache__/mlx90393.cpython-313.pyc
-├── code/micropython_mlx90393/mlx90393.py
+├── code/_gs_mlx90393_micropython_mlx90393/__init__.py
+├── code/_gs_mlx90393_micropython_mlx90393/__pycache__/__init__.cpython-313.pyc
+├── code/_gs_mlx90393_micropython_mlx90393/__pycache__/mlx90393.cpython-313.pyc
+├── code/_gs_mlx90393_micropython_mlx90393/mlx90393.py
 ├── code/mlx90393_async.py
 ├── examples/main_sync.py
 ├── LICENSE

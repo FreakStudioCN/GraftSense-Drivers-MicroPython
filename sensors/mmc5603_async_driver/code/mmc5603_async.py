@@ -6,7 +6,7 @@ try:
 except ImportError:
     import asyncio
 
-from micropython_mmc5603.mmc5603 import MMC5603
+from _gs_mmc5603_micropython_mmc5603.mmc5603 import MMC5603
 
 DATA_REG = 0x00
 

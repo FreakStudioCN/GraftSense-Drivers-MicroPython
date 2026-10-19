@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/mp34dt05.cpython-313.pyc
 ├── code/main.py
-├── code/mp34dt05.py
+├── code/_gs_mp34dt05_mp34dt05.py
 ├── code/mp34dt05_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -89,7 +89,7 @@ async def main():
 
     # ======================================== 导入相关模块 =========================================
     from machine import Pin
-    from mp34dt05 import MP34DT05
+    from _gs_mp34dt05_mp34dt05 import MP34DT05
 
     # ======================================== 全局变量 ============================================
     # 缓冲区处理计数

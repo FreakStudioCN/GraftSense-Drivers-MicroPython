@@ -6,7 +6,7 @@ except ImportError:
 
 import time
 from machine import I2C, Pin
-from sht30 import SHT30
+from _gs_sht30_sht30 import SHT30
 from sht30_async import SHT30Async
 
 I2C_BUS_ID = 0

@@ -13,10 +13,10 @@ except ImportError:
     import asyncio
 
 from machine import Pin, UART
-from ad8232 import AD8232
-from data_flow_processor import DataFlowProcessor
-from ecg_module_cmd import ECGModuleCMD
-from ecg_signal_processor import ECGSignalProcessor
+from _gs_ad8232_ad8232 import AD8232
+from _gs_ad8232_data_flow_processor import DataFlowProcessor
+from _gs_ad8232_ecg_module_cmd import ECGModuleCMD
+from _gs_ad8232_ecg_signal_processor import ECGSignalProcessor
 
 # ======================================== 全局变量 ============================================
 UART_ID = 1

@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/LCD_I2C.py
+├── code/_gs_lcm1602a_LCD_I2C.py
 ├── code/LCD_I2C_async.py
 ├── code/main.py
 ├── examples/main_sync.py

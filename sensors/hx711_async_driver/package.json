@@ -11,7 +11,13 @@
     "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
   },
   "urls": [
-    ["hx711_gpio.py", "code/hx711_gpio.py"],
-    ["hx711_gpio_async.py", "code/hx711_gpio_async.py"]
+    [
+      "_gs_hx711_hx711_gpio.py",
+      "code/_gs_hx711_hx711_gpio.py"
+    ],
+    [
+      "hx711_gpio_async.py",
+      "code/hx711_gpio_async.py"
+    ]
   ]
 }

@@ -11,7 +11,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-import hscdtd008a
+import _gs_hscdtd008a_hscdtd008a as hscdtd008a
 
 # ======================================== 全局变量 ============================================
 CONVERSION_TIME_MS = 5

@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin, SoftI2C
-from micropython_mmc5983 import mmc5983
+from _gs_mmc5983_micropython_mmc5983 import mmc5983
 from mmc5983_async import MMC5983Async
 # ======================================== 全局变量 ============================================
 TARGET_SENSOR_ADDRS = (0x30,)

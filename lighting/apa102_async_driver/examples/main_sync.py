@@ -14,7 +14,8 @@ from machine import Pin, SPI
 import time
 
 # 导入 APA102 驱动类
-from apa102 import DotStar, BGR
+from _gs_apa102_apa102 import DotStar
+BGR = DotStar.BGR
 
 # ======================================== 全局变量 ============================================
 

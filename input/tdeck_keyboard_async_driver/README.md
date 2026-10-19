@@ -50,7 +50,7 @@
 
 ```text
 ├── code/main.py
-├── code/tdeck_keyboard.py
+├── code/_gs_tdeck_keyboard_tdeck_keyboard.py
 ├── code/tdeck_keyboard_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -87,7 +87,7 @@ async def main():
 
     # 导入相关模块
     from machine import I2C, Pin
-    from tdeck_keyboard import TDeckKeyboard
+    from _gs_tdeck_keyboard_tdeck_keyboard import TDeckKeyboard
 
     # 全局变量
     # I2C 硬件引脚配置（LILYGO T-Deck/T-Deck Plus）
