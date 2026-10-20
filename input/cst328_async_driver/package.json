@@ -1,23 +1,23 @@
 {
-    "name":  "cst328_async_driver",
-    "urls":  [
-                 [
-                     "cst328.py",
-                     "code/cst328.py"
-                 ],
-                 [
-                     "cst328_async.py",
-                     "code/cst328_async.py"
-                 ]
-             ],
-    "version":  "1.0.0",
-    "_comments":  {
-                      "chips":  "Supported chip models, \u0027all\u0027 means no chip restriction",
-                      "fw":  "Specific firmware dependencies such as ulab or lvgl, \u0027all\u0027 means no firmware dependency"
-                  },
-    "description":  "CST328 I2C capacitive touch driver for MicroPython",
-    "author":  "FreakStudio",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all"
+  "name": "cst328_async_driver",
+  "urls": [
+    [
+      "_gs_cst328_cst328.py",
+      "code/_gs_cst328_cst328.py"
+    ],
+    [
+      "cst328_async.py",
+      "code/cst328_async.py"
+    ]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "Supported chip models, 'all' means no chip restriction",
+    "fw": "Specific firmware dependencies such as ulab or lvgl, 'all' means no firmware dependency"
+  },
+  "description": "CST328 I2C capacitive touch driver for MicroPython",
+  "author": "FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
 }

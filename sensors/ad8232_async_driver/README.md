@@ -39,12 +39,14 @@
 
 ## 软件环境
 
+设备端 ECG 示例需要带 ulab 的 MicroPython 固件。仅使用 UART 主机端接口时不需要 ulab。`main.py` 是手动运行的示例，不随驱动库安装到启动目录。
+
 | 项目 | 值 |
 |---|---|
 | 运行时 | MicroPython + `uasyncio` |
 | 包版本 | `1.0.0` |
 | 作者 | hogeiha |
-| 依赖 | `无声明的第三方依赖` |
+| 依赖 | `ulab.numpy`、`ulab.scipy`（设备端 ECG 数值处理） |
 
 ## 文件结构
 

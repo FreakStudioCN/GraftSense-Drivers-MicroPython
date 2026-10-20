@@ -12,8 +12,8 @@
       "code/_gs_mcp1081_mer.py"
     ],
     [
-      "mer_async.py",
-      "code/mer_async.py"
+      "mcp1081_mer_async.py",
+      "code/mcp1081_mer_async.py"
     ],
     [
       "_gs_mcp1081_mcp1081_umodbus/__init__.py",
@@ -52,8 +52,8 @@
       "code/_gs_mcp1081_mcp1081_umodbus/version.py"
     ],
     [
-      "modbus_rtu_async.py",
-      "code/modbus_rtu_async.py"
+      "mcp1081_modbus_rtu_async.py",
+      "code/mcp1081_modbus_rtu_async.py"
     ]
   ]
 }

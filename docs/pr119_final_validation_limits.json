@@ -1,0 +1,555 @@
+{
+  "scope": "Unmodified manifest-installed modules on the Windows v1.23 validation port; not counted as passed.",
+  "platform_limited_imports": [
+    {
+      "package": "input/gt911_async_driver",
+      "module": "_gs_gt911_st7789",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "misc/ds3231_async_driver",
+      "module": "ds3231maxim",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "misc/ds3231_async_driver",
+      "module": "ds3231maxim_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ad8232_async_driver",
+      "module": "_gs_ad8232_ecg_signal_processor",
+      "error": "ImportError: no module named 'ulab'",
+      "reason": "declared_ulab_firmware_required"
+    },
+    {
+      "package": "sensors/as7263_async_driver",
+      "module": "as726x_microbit",
+      "error": "ImportError: no module named 'microbit'",
+      "reason": "optional_microbit_adapter"
+    },
+    {
+      "package": "sensors/as7263_async_driver",
+      "module": "as726x_microbit_lowmem",
+      "error": "ImportError: no module named 'microbit'",
+      "reason": "optional_microbit_adapter"
+    },
+    {
+      "package": "sensors/bmi270_async_driver",
+      "module": "_gs_bmi270_bmi270",
+      "error": "RuntimeError: pystack exhausted",
+      "reason": "windows_port_pystack_1024_limit"
+    },
+    {
+      "package": "sensors/bmi270_async_driver",
+      "module": "_gs_bmi270_config_file",
+      "error": "RuntimeError: pystack exhausted",
+      "reason": "windows_port_pystack_1024_limit"
+    },
+    {
+      "package": "sensors/bmi270_async_driver",
+      "module": "bmi270_async",
+      "error": "RuntimeError: pystack exhausted",
+      "reason": "windows_port_pystack_1024_limit"
+    },
+    {
+      "package": "sensors/bmp390_async_driver",
+      "module": "bmp390",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp390_async_driver",
+      "module": "bmp390_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp581_async_driver",
+      "module": "_gs_bmp581_bmp581mod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp581_async_driver",
+      "module": "_gs_bmp581_sensor_pack",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp581_async_driver",
+      "module": "_gs_bmp581_sensor_pack.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp581_async_driver",
+      "module": "_gs_bmp581_sensor_pack.bus_service",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp581_async_driver",
+      "module": "_gs_bmp581_sensor_pack.converter",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp581_async_driver",
+      "module": "_gs_bmp581_sensor_pack.crc_mod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp581_async_driver",
+      "module": "_gs_bmp581_sensor_pack.geosensmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/bmp581_async_driver",
+      "module": "bmp581mod_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/cds1081_async_driver",
+      "module": "_gs_cds1081_umodbus.tcp",
+      "error": "ImportError: no module named 'socket'",
+      "reason": "windows_socket_unavailable_optional_modbus_tcp"
+    },
+    {
+      "package": "sensors/dht11_async_driver",
+      "module": "dht11",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/dht11_async_driver",
+      "module": "dht11_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ens160_async_driver",
+      "module": "_gs_ens160_ens160sciosense",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ens160_async_driver",
+      "module": "_gs_ens160_sensor_pack_2.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ens160_async_driver",
+      "module": "_gs_ens160_sensor_pack_2.bitfield",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ens160_async_driver",
+      "module": "ens160sciosense_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/fde_frost_async_driver",
+      "module": "_gs_fde_frost_umodbus.tcp",
+      "error": "ImportError: no module named 'socket'",
+      "reason": "windows_socket_unavailable_optional_modbus_tcp"
+    },
+    {
+      "package": "sensors/hds_async_driver",
+      "module": "_gs_hds_hds_umodbus.tcp",
+      "error": "ImportError: no module named 'socket'",
+      "reason": "windows_socket_unavailable_optional_modbus_tcp"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_hscdtd008a",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_sensor_pack",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_sensor_pack.averager",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_sensor_pack.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_sensor_pack.bitfield",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_sensor_pack.bus_service",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_sensor_pack.converter",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_sensor_pack.crc_mod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "_gs_hscdtd008a_sensor_pack.geosensmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/hscdtd008a_async_driver",
+      "module": "hscdtd008a_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina219_async_driver",
+      "module": "_gs_ina219_ina_ti",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina219_async_driver",
+      "module": "_gs_ina219_sensor_pack_2.adcmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina219_async_driver",
+      "module": "_gs_ina219_sensor_pack_2.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina219_async_driver",
+      "module": "_gs_ina219_sensor_pack_2.bitfield",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina219_async_driver",
+      "module": "_gs_ina219_sensor_pack_2.regmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina219_async_driver",
+      "module": "ina219_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina226_async_driver",
+      "module": "_gs_ina226_ina_ti",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina226_async_driver",
+      "module": "_gs_ina226_sensor_pack_2.adcmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina226_async_driver",
+      "module": "_gs_ina226_sensor_pack_2.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina226_async_driver",
+      "module": "_gs_ina226_sensor_pack_2.bitfield",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina226_async_driver",
+      "module": "_gs_ina226_sensor_pack_2.regmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ina226_async_driver",
+      "module": "ina226_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ltr390uv_async_driver",
+      "module": "_gs_ltr390uv_ltr390uv",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ltr390uv_async_driver",
+      "module": "_gs_ltr390uv_sensor_pack_2.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ltr390uv_async_driver",
+      "module": "_gs_ltr390uv_sensor_pack_2.bitfield",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ltr390uv_async_driver",
+      "module": "_gs_ltr390uv_sensor_pack_2.regmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/ltr390uv_async_driver",
+      "module": "ltr390uv_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/mcp1081_async_driver",
+      "module": "_gs_mcp1081_mcp1081_umodbus.tcp",
+      "error": "ImportError: no module named 'socket'",
+      "reason": "windows_socket_unavailable_optional_modbus_tcp"
+    },
+    {
+      "package": "sensors/mcp_async_driver",
+      "module": "_gs_mcp_umodbus.tcp",
+      "error": "ImportError: no module named 'socket'",
+      "reason": "windows_socket_unavailable_optional_modbus_tcp"
+    },
+    {
+      "package": "sensors/mp34dt05_async_driver",
+      "module": "_gs_mp34dt05_mp34dt05",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/mp34dt05_async_driver",
+      "module": "mp34dt05_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/mse_soil_sensor_async_driver",
+      "module": "_gs_mse_soil_sensor_umodbus.tcp",
+      "error": "ImportError: no module named 'socket'",
+      "reason": "windows_socket_unavailable_optional_modbus_tcp"
+    },
+    {
+      "package": "sensors/opt3001_async_driver",
+      "module": "_gs_opt3001_opt3001mod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/opt3001_async_driver",
+      "module": "_gs_opt3001_sensor_pack_2.adcmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/opt3001_async_driver",
+      "module": "_gs_opt3001_sensor_pack_2.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/opt3001_async_driver",
+      "module": "_gs_opt3001_sensor_pack_2.bitfield",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/opt3001_async_driver",
+      "module": "_gs_opt3001_sensor_pack_2.dacmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/opt3001_async_driver",
+      "module": "_gs_opt3001_sensor_pack_2.regmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/opt3001_async_driver",
+      "module": "opt3001mod_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_rm3100mod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_sensor_pack",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_sensor_pack.averager",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_sensor_pack.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_sensor_pack.bitfield",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_sensor_pack.bus_service",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_sensor_pack.converter",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_sensor_pack.crc_mod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/rm3100_async_driver",
+      "module": "_gs_rm3100_sensor_pack.geosensmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/sgp40_async_driver",
+      "module": "_gs_sgp40_sensor_pack_2.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/sgp40_async_driver",
+      "module": "_gs_sgp40_sensor_pack_2.bitfield",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/sgp40_async_driver",
+      "module": "_gs_sgp40_sgp4Xmod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/veml6040_async_driver",
+      "module": "_gs_veml6040_sensor_pack_2",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/veml6040_async_driver",
+      "module": "_gs_veml6040_sensor_pack_2.base_sensor",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/veml6040_async_driver",
+      "module": "_gs_veml6040_sensor_pack_2.bus_service",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/veml6040_async_driver",
+      "module": "_gs_veml6040_veml6040mod",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/veml6040_async_driver",
+      "module": "veml6040mod_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "sensors/vl53l5cx_async_driver",
+      "module": "vl53l5cx.cp",
+      "error": "ImportError: no module named 'adafruit_bus_device'",
+      "reason": "optional_circuitpython_adapter"
+    },
+    {
+      "package": "sensors/ws61_async_driver",
+      "module": "_gs_ws61_umodbus.tcp",
+      "error": "ImportError: no module named 'socket'",
+      "reason": "windows_socket_unavailable_optional_modbus_tcp"
+    },
+    {
+      "package": "signal_acquisition/mcp3421_async_driver",
+      "module": "mcp3421",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "ALL_PACKAGES_MIXED",
+      "module": "ina219_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    },
+    {
+      "package": "ALL_PACKAGES_MIXED",
+      "module": "ina226_async",
+      "error": "SyntaxError: invalid micropython decorator",
+      "reason": "windows_native_emitter_disabled"
+    }
+  ],
+  "missing_original_synchronous_manifest_targets": [
+    {
+      "manifest": "sensors/r60amp1_driver/package.json",
+      "target": "r60amd1.py",
+      "source": "code/r60amd1.py"
+    },
+    {
+      "manifest": "sensors/gl5516_driver/package.json",
+      "target": "guva_s12sd.py",
+      "source": "code/guva_s12sd.py"
+    }
+  ],
+  "baseline_note": "These two missing files already belong to unchanged synchronous packages in main. Mixed installation uses available baseline entries; all async manifest targets exist.",
+  "diagnostic_note": "Only temporary validation mirrors have native/viper/asm_thumb decorators removed. Repository decorators and protocol timing remain intact. Diagnostic imports do not certify machine code.",
+  "hardware_tested": false,
+  "all_public_apis_executed": false
+}

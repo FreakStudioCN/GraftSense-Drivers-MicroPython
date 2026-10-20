@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/cst328.py
+├── code/_gs_cst328_cst328.py
 ├── code/cst328_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -94,7 +94,7 @@ async def main():
 
 
     from machine import I2C, Pin
-    from cst328 import CST328
+    from _gs_cst328_cst328 import CST328
 
     # ======================================== 导入相关模块 =========================================
     # ======================================== 全局变量 ============================================

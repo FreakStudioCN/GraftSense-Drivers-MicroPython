@@ -9,17 +9,7 @@
 # ======================================== 导入相关模块 =========================================
 import time
 from machine import Pin, I2C
-from adt7410 import (
-    ADT7410,
-    CONTINUOUS,
-    ONE_SHOT,
-    SPS,
-    SHUTDOWN,
-    LOW_RESOLUTION,
-    HIGH_RESOLUTION,
-    COMP_DISABLED,
-    COMP_ENABLED,
-)
+from _gs_adt7410_adt7410 import ADT7410, CONTINUOUS, ONE_SHOT, SPS, SHUTDOWN, LOW_RESOLUTION, HIGH_RESOLUTION, COMP_DISABLED, COMP_ENABLED
 
 
 # ======================================== 全局变量 ============================================

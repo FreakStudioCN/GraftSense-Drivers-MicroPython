@@ -50,7 +50,7 @@
 
 ```text
 ├── code/main.py
-├── code/mcp9808.py
+├── code/_gs_mcp9808_mcp9808.py
 ├── code/mcp9808_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -88,7 +88,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     from machine import I2C, Pin
 
-    from mcp9808 import MCP9808, REG_DEVIDE_ID, REG_MANUFACTURER_ID, TEMP_RESOLUTION_MAX
+    from _gs_mcp9808_mcp9808 import MCP9808, REG_DEVIDE_ID, REG_MANUFACTURER_ID, TEMP_RESOLUTION_MAX
 
     # ======================================== 全局变量 ============================================
     # Raspberry Pi Pico / RP2040 接线示例：

@@ -8,6 +8,16 @@
 
 # ======================================== 导入相关模块 =========================================
 """ADXL345 async initialization with injected bus ownership."""
+
+# Preserve the documented exception contract on MicroPython.
+try:
+    TimeoutError
+except NameError:
+    try:
+        from uasyncio import TimeoutError
+    except ImportError:
+        from asyncio import TimeoutError
+
 try:
     import uasyncio as asyncio
 except ImportError:

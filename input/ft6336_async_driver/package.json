@@ -1,23 +1,23 @@
 {
-    "name":  "ft6336_async_driver",
-    "urls":  [
-                 [
-                     "ft6336.py",
-                     "code/ft6336.py"
-                 ],
-                 [
-                     "ft6336_async.py",
-                     "code/ft6336_async.py"
-                 ]
-             ],
-    "version":  "0.1.0",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "description":  "FT6336/FT6336U I2C capacitive touch controller driver for MicroPython",
-    "author":  "FreakStudio",
-    "license":  "Apache-2.0",
-    "chips":  "all",
-    "fw":  "all"
+  "name": "ft6336_async_driver",
+  "urls": [
+    [
+      "_gs_ft6336_ft6336.py",
+      "code/_gs_ft6336_ft6336.py"
+    ],
+    [
+      "ft6336_async.py",
+      "code/ft6336_async.py"
+    ]
+  ],
+  "version": "0.1.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "FT6336/FT6336U I2C capacitive touch controller driver for MicroPython",
+  "author": "FreakStudio",
+  "license": "Apache-2.0",
+  "chips": "all",
+  "fw": "all"
 }

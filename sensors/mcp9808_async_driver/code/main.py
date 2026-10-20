@@ -13,7 +13,7 @@ except ImportError:
     import asyncio
 
 from machine import I2C, Pin
-from mcp9808 import REG_DEVIDE_ID, REG_MANUFACTURER_ID, TEMP_RESOLUTION_MAX
+from _gs_mcp9808_mcp9808 import REG_DEVIDE_ID, REG_MANUFACTURER_ID, TEMP_RESOLUTION_MAX
 from mcp9808_async import MCP9808Async
 
 # ======================================== 全局变量 ============================================

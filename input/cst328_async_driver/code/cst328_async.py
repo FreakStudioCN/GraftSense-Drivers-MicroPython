@@ -5,7 +5,7 @@ try:
 except ImportError:
     import asyncio
 
-from cst328 import *
+from _gs_cst328_cst328 import *
 import machine
 
 

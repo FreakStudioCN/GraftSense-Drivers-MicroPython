@@ -10,10 +10,6 @@
       "code/_gs_bmi160_i2c_helpers.py"
     ],
     [
-      "__init__.py",
-      "code/__init__.py"
-    ],
-    [
       "bmi160_async.py",
       "code/bmi160_async.py"
     ]

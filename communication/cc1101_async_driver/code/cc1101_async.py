@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-from cc1101 import CC1101
+from _gs_cc1101_cc1101 import CC1101
 
 try:
     from time import sleep_us

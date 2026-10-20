@@ -13,7 +13,7 @@ __platform__ = "MicroPython v1.23+"
 
 # ======================================== 导入相关模块 =========================================
 
-from piranha_led import PiranhaLED
+from _gs_piranha_led_piranha_led import PiranhaLED
 
 # ======================================== 全局变量 ============================================
 

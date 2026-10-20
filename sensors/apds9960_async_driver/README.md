@@ -68,9 +68,9 @@
 
 ## 快速开始
 
-1. 按 `package.json.urls` 将运行时文件复制到设备；不要把 `examples/` 当作运行时依赖。
-2. 按上文硬件/运行环境配置总线、GPIO、网络或凭证。
-3. 使用包内真实 `code/main.py` 的 import 与构造方式运行。以下是当前文件逐字读取的异步入口；部署时请保留 `try/finally` 并调用对象实际提供的 `deinit()` 或 `aclose()`。
+构造 `APDS9960Async` 不执行上电等待。使用前必须 `await sensor.initialize_async()`；也可使用 `await APDS9960Async.create_async(i2c)`。保留来源关电、50 ms 稳定、上电和子功能初始化顺序，稳定阶段协作等待。结束时 `await sensor.aclose()`。底层单次 I2C 事务及其有界错误重试仍同步。
+
+以下与 `code/main.py` 一致：
 
 ```python
 try:
@@ -78,219 +78,223 @@ try:
 except ImportError:
     import asyncio
 
-async def main():
-    # Python env   : MicroPython v1.23.0
-    # -*- coding: utf-8 -*-
-    # @Time    : 2026/07/23
-    # @Author  : Rune Langøy
-    # @File    : main.py
-    # @Description : 测试 APDS9960 驱动类 —— 环境光、颜色（RGBC）、接近检测
-    # @License : MIT
 
-    # ======================================== 导入相关模块 =========================================
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2026/07/23
+# @Author  : Rune Langøy
+# @File    : main.py
+# @Description : 测试 APDS9960 驱动类 —— 环境光、颜色（RGBC）、接近检测
+# @License : MIT
 
-    import machine
-    from _gs_apds9960_apds9960 import APDS9960
+# ======================================== 导入相关模块 =========================================
 
-    # ======================================== 全局变量 ============================================
+import machine
+import time
+from apds9960_async import APDS9960Async as APDS9960
 
-    # APDS9960 I2C 地址和芯片 ID 常量
-    APDS9960_ADDR = 0x39
-    APDS9960_ID_REG = 0x92
-    # APDS9960 可能的芯片 ID 值
-    APDS9960_IDS = (0xAB, 0xA8, 0x9C, 0x9E)
+# ======================================== 全局变量 ============================================
 
-    # 引脚定义（GPIO 编号，对应 Raspberry Pi Pico / ESP32 等平台）
-    SDA_PIN = 4
-    SCL_PIN = 5
+# APDS9960 I2C 地址和芯片 ID 常量
+APDS9960_ADDR = 0x39
+APDS9960_ID_REG = 0x92
+# APDS9960 可能的芯片 ID 值
+APDS9960_IDS = (0xAB, 0xA8, 0x9C, 0x9E)
 
-    # 传感器数据打印间隔（毫秒）
-    PRINT_INTERVAL_MS = 2000
-    last_print_time = 0
+# 引脚定义（GPIO 编号，对应 Raspberry Pi Pico / ESP32 等平台）
+SDA_PIN = 4
+SCL_PIN = 5
 
-    # ALS 增益值常量引用（来自 ALS 类）
-    GAIN_1X = 0
-    GAIN_2X = 1
-    GAIN_16X = 2
-    GAIN_64X = 3
+# 传感器数据打印间隔（毫秒）
+PRINT_INTERVAL_MS = 2000
+last_print_time = 0
 
-    # 接近增益常量引用（来自 PROX 类）
-    PGAIN_1X = 0
-    PGAIN_2X = 1
-    PGAIN_4X = 2
-    PGAIN_8X = 3
+# ALS 增益值常量引用（来自 ALS 类）
+GAIN_1X = 0
+GAIN_2X = 1
+GAIN_16X = 2
+GAIN_64X = 3
 
-    # LED 电流常量引用（来自 PROX 类）
-    LED_100MA = 0
-    LED_50MA = 1
-    LED_25MA = 2
-    LED_12_5MA = 3
+# 接近增益常量引用（来自 PROX 类）
+PGAIN_1X = 0
+PGAIN_2X = 1
+PGAIN_4X = 2
+PGAIN_8X = 3
 
-    # I2C 总线实例（稍后创建）
-    i2c = None
-    apds9960 = None
+# LED 电流常量引用（来自 PROX 类）
+LED_100MA = 0
+LED_50MA = 1
+LED_25MA = 2
+LED_12_5MA = 3
 
-    # ======================================== 功能函数 ============================================
+# I2C 总线实例（稍后创建）
+i2c = None
+apds9960 = None
 
-
-    def test_boundary_params() -> None:
-        """
-        边界参数场景：测试增益和中断阈值的极限值
-        此函数演示硬件极限参数的设置，可 REPL 手动调用
-        """
-        print("--- Testing boundary parameters ---")
-
-        # 测试 ALS 增益边界值：最小值 0（1x）和最大值 3（64x）
-        print("Testing ALS gain min (0=1x)...")
-        apds9960.als.eLightGain = GAIN_1X
-        print("  ALS gain set to 1x")
-        getattr(time, "sleep_ms")(500)
-
-        print("Testing ALS gain max (3=64x)...")
-        apds9960.als.eLightGain = GAIN_64X
-        print("  ALS gain set to 64x")
-        getattr(time, "sleep_ms")(500)
-
-        # 恢复默认增益
-        apds9960.als.eLightGain = GAIN_1X
-        print("  ALS gain restored to 1x")
-
-        # 测试接近增益边界值
-        print("Testing proximity gain min (0=1x)...")
-        apds9960.prox.eProximityGain = PGAIN_1X
-        print("  Proximity gain set to 1x")
-        getattr(time, "sleep_ms")(500)
-
-        print("Testing proximity gain max (3=8x)...")
-        apds9960.prox.eProximityGain = PGAIN_8X
-        print("  Proximity gain set to 8x")
-        getattr(time, "sleep_ms")(500)
-
-        # 恢复默认增益
-        apds9960.prox.eProximityGain = PGAIN_1X
-        print("  Proximity gain restored to 1x")
-
-        # 测试 LED 电流边界值
-        print("Testing LED current min (3=12.5mA)...")
-        apds9960.prox.eLEDCurrent = LED_12_5MA
-        print("  LED current set to 12.5mA")
-        getattr(time, "sleep_ms")(500)
-
-        print("Testing LED current max (0=100mA)...")
-        apds9960.prox.eLEDCurrent = LED_100MA
-        print("  LED current set to 100mA")
-        getattr(time, "sleep_ms")(500)
-
-        # 恢复默认电流
-        apds9960.prox.eLEDCurrent = LED_100MA
-        print("  LED current restored to 100mA")
-
-        # 测试中断阈值边界值
-        print("Testing ALS interrupt threshold boundary...")
-        getattr(apds9960.als, "setInterruptThreshold")(high=0, low=1025, persistance=0)
-        print("  ALS threshold set to high=0, low=1025, persistance=0")
-
-        print("Testing proximity interrupt threshold boundary...")
-        getattr(apds9960.prox, "setInterruptThreshold")(high=0, low=255, persistance=0)
-        print("  Proximity threshold set to high=0, low=255, persistance=0")
-
-        print("--- Boundary parameter test complete ---")
+# ======================================== 功能函数 ============================================
 
 
-    def test_exception_params() -> None:
-        """
-        异常参数场景：测试非法参数是否触发正确的异常
-        此函数演示异常处理，可 REPL 手动调用
-        """
-        print("--- Testing exception parameters ---")
+def test_boundary_params() -> None:
+    """
+    边界参数场景：测试增益和中断阈值的极限值
+    此函数演示硬件极限参数的设置，可 REPL 手动调用
+    """
+    print("--- Testing boundary parameters ---")
 
-        # 测试 ALS 增益非法值
-        print("Testing ALS gain invalid value (99)...")
-        try:
-            apds9960.als.eLightGain = 99
-            print("  ERROR: Should have raised ValueError")
-        except ValueError as e:
-            print("  Correctly raised ValueError: %s" % e)
+    # 测试 ALS 增益边界值：最小值 0（1x）和最大值 3（64x）
+    print("Testing ALS gain min (0=1x)...")
+    apds9960.als.eLightGain = GAIN_1X
+    print("  ALS gain set to 1x")
+    getattr(time, "sleep_ms")(500)
 
-        # 测试 ALS 增益非法类型
-        print("Testing ALS gain invalid type (string)...")
-        try:
-            apds9960.als.eLightGain = "invalid"
-            print("  ERROR: Should have raised ValueError")
-        except ValueError as e:
-            print("  Correctly raised ValueError: %s" % e)
+    print("Testing ALS gain max (3=64x)...")
+    apds9960.als.eLightGain = GAIN_64X
+    print("  ALS gain set to 64x")
+    getattr(time, "sleep_ms")(500)
 
-        # 测试接近增益非法值
-        print("Testing proximity gain invalid value (-1)...")
-        try:
-            apds9960.prox.eProximityGain = -1
-            print("  ERROR: Should have raised ValueError")
-        except ValueError as e:
-            print("  Correctly raised ValueError: %s" % e)
+    # 恢复默认增益
+    apds9960.als.eLightGain = GAIN_1X
+    print("  ALS gain restored to 1x")
 
-        # 测试 LED 电流非法值
-        print("Testing LED current invalid value (10)...")
-        try:
-            apds9960.prox.eLEDCurrent = 10
-            print("  ERROR: Should have raised ValueError")
-        except ValueError as e:
-            print("  Correctly raised ValueError: %s" % e)
+    # 测试接近增益边界值
+    print("Testing proximity gain min (0=1x)...")
+    apds9960.prox.eProximityGain = PGAIN_1X
+    print("  Proximity gain set to 1x")
+    getattr(time, "sleep_ms")(500)
 
-        # 测试 enableSensor 非法类型
-        print("Testing enableSensor invalid type...")
-        try:
-            getattr(apds9960.als, "enableSensor")("yes")
-            print("  ERROR: Should have raised ValueError")
-        except ValueError as e:
-            print("  Correctly raised ValueError: %s" % e)
+    print("Testing proximity gain max (3=8x)...")
+    apds9960.prox.eProximityGain = PGAIN_8X
+    print("  Proximity gain set to 8x")
+    getattr(time, "sleep_ms")(500)
 
-        # 测试 powerOn 非法类型
-        print("Testing powerOn invalid type...")
-        try:
-            getattr(apds9960, "powerOn")(1)
-            print("  ERROR: Should have raised ValueError")
-        except ValueError as e:
-            print("  Correctly raised ValueError: %s" % e)
+    # 恢复默认增益
+    apds9960.prox.eProximityGain = PGAIN_1X
+    print("  Proximity gain restored to 1x")
 
-        print("--- Exception parameter test complete ---")
+    # 测试 LED 电流边界值
+    print("Testing LED current min (3=12.5mA)...")
+    apds9960.prox.eLEDCurrent = LED_12_5MA
+    print("  LED current set to 12.5mA")
+    getattr(time, "sleep_ms")(500)
 
+    print("Testing LED current max (0=100mA)...")
+    apds9960.prox.eLEDCurrent = LED_100MA
+    print("  LED current set to 100mA")
+    getattr(time, "sleep_ms")(500)
 
-    def switch_to_high_gain_mode() -> None:
-        """
-        切换到高增益模式（模式切换，默认注释调用，可 REPL 手动触发）
-        适用于暗光环境下的检测
-        """
-        apds9960.als.eLightGain = GAIN_64X
-        apds9960.prox.eProximityGain = PGAIN_8X
-        print("Switched to high-gain mode (ALS: 64x, Proximity: 8x)")
+    # 恢复默认电流
+    apds9960.prox.eLEDCurrent = LED_100MA
+    print("  LED current restored to 100mA")
+
+    # 测试中断阈值边界值
+    print("Testing ALS interrupt threshold boundary...")
+    getattr(apds9960.als, "setInterruptThreshold")(high=0, low=1025, persistance=0)
+    print("  ALS threshold set to high=0, low=1025, persistance=0")
+
+    print("Testing proximity interrupt threshold boundary...")
+    getattr(apds9960.prox, "setInterruptThreshold")(high=0, low=255, persistance=0)
+    print("  Proximity threshold set to high=0, low=255, persistance=0")
+
+    print("--- Boundary parameter test complete ---")
 
 
-    def switch_to_low_gain_mode() -> None:
-        """
-        切换到低增益模式（模式切换，默认注释调用，可 REPL 手动触发）
-        适用于强光环境下的检测
-        """
-        apds9960.als.eLightGain = GAIN_1X
-        apds9960.prox.eProximityGain = PGAIN_1X
-        print("Switched to low-gain mode (ALS: 1x, Proximity: 1x)")
+def test_exception_params() -> None:
+    """
+    异常参数场景：测试非法参数是否触发正确的异常
+    此函数演示异常处理，可 REPL 手动调用
+    """
+    print("--- Testing exception parameters ---")
+
+    # 测试 ALS 增益非法值
+    print("Testing ALS gain invalid value (99)...")
+    try:
+        apds9960.als.eLightGain = 99
+        print("  ERROR: Should have raised ValueError")
+    except ValueError as e:
+        print("  Correctly raised ValueError: %s" % e)
+
+    # 测试 ALS 增益非法类型
+    print("Testing ALS gain invalid type (string)...")
+    try:
+        apds9960.als.eLightGain = "invalid"
+        print("  ERROR: Should have raised ValueError")
+    except ValueError as e:
+        print("  Correctly raised ValueError: %s" % e)
+
+    # 测试接近增益非法值
+    print("Testing proximity gain invalid value (-1)...")
+    try:
+        apds9960.prox.eProximityGain = -1
+        print("  ERROR: Should have raised ValueError")
+    except ValueError as e:
+        print("  Correctly raised ValueError: %s" % e)
+
+    # 测试 LED 电流非法值
+    print("Testing LED current invalid value (10)...")
+    try:
+        apds9960.prox.eLEDCurrent = 10
+        print("  ERROR: Should have raised ValueError")
+    except ValueError as e:
+        print("  Correctly raised ValueError: %s" % e)
+
+    # 测试 enableSensor 非法类型
+    print("Testing enableSensor invalid type...")
+    try:
+        getattr(apds9960.als, "enableSensor")("yes")
+        print("  ERROR: Should have raised ValueError")
+    except ValueError as e:
+        print("  Correctly raised ValueError: %s" % e)
+
+    # 测试 powerOn 非法类型
+    print("Testing powerOn invalid type...")
+    try:
+        getattr(apds9960, "powerOn")(1)
+        print("  ERROR: Should have raised ValueError")
+    except ValueError as e:
+        print("  Correctly raised ValueError: %s" % e)
+
+    print("--- Exception parameter test complete ---")
 
 
-    def enable_interrupts() -> None:
-        """
-        启用硬件中断功能（模式切换，默认注释调用，可 REPL 手动触发）
-        """
-        getattr(apds9960.als, "setInterruptThreshold")(high=500, low=20, persistance=4)
-        getattr(apds9960.als, "enableInterrupt")(True)
-        getattr(apds9960.prox, "setInterruptThreshold")(high=100, low=20, persistance=4)
-        getattr(apds9960.prox, "enableInterrupt")(True)
-        print("Hardware interrupts enabled for ALS and Proximity")
+def switch_to_high_gain_mode() -> None:
+    """
+    切换到高增益模式（模式切换，默认注释调用，可 REPL 手动触发）
+    适用于暗光环境下的检测
+    """
+    apds9960.als.eLightGain = GAIN_64X
+    apds9960.prox.eProximityGain = PGAIN_8X
+    print("Switched to high-gain mode (ALS: 64x, Proximity: 8x)")
 
 
-    # ======================================== 自定义类 ============================================
-    # ======================================== 初始化配置 ==========================================
+def switch_to_low_gain_mode() -> None:
+    """
+    切换到低增益模式（模式切换，默认注释调用，可 REPL 手动触发）
+    适用于强光环境下的检测
+    """
+    apds9960.als.eLightGain = GAIN_1X
+    apds9960.prox.eProximityGain = PGAIN_1X
+    print("Switched to low-gain mode (ALS: 1x, Proximity: 1x)")
 
+
+def configure_alerts() -> None:
+    """
+    启用硬件中断功能（模式切换，默认注释调用，可 REPL 手动触发）
+    """
+    getattr(apds9960.als, "setInterruptThreshold")(high=500, low=20, persistance=4)
+    getattr(apds9960.als, "enableInterrupt")(True)
+    getattr(apds9960.prox, "setInterruptThreshold")(high=100, low=20, persistance=4)
+    getattr(apds9960.prox, "enableInterrupt")(True)
+    print("Hardware interrupts enabled for ALS and Proximity")
+
+
+# ======================================== 自定义类 ============================================
+# ======================================== 初始化配置 ==========================================
+
+
+async def _main_body():
+    global apds9960, i2c
     # 上电稳定延时
-    await asyncio.sleep(3)
+    await asyncio.sleep_ms(3000)
     print("FreakStudio: Testing APDS9960 driver module")
 
     # 创建硬件 I2C 实例（I2C0: SCL=GP5, SDA=GP4）
@@ -327,8 +331,10 @@ async def main():
     # 实例化 APDS9960 驱动
     print("Initializing APDS9960 driver (debug=False)...")
     apds9960 = APDS9960(i2c, debug=False)
+    await apds9960.initialize_async()
     last_print_time = time.ticks_ms()
     print("APDS9960 driver initialized successfully")
+    await apds9960.power_on_async(True)
 
     # 正常参数场景：启用所有传感器
     print("Enabling proximity sensor...")
@@ -345,8 +351,6 @@ async def main():
 
     # 读取初始化后的状态寄存器
     print("Initial status register: 0x%02X" % apds9960.statusRegister)
-
-    # ========================================  主程序  ===========================================
 
     try:
         while True:
@@ -376,7 +380,7 @@ async def main():
             # test_exception_params()       # 异常参数场景测试，REPL 中调用
             # switch_to_high_gain_mode()    # 切换到高增益模式（暗光环境）
             # switch_to_low_gain_mode()     # 切换到低增益模式（强光环境）
-            # enable_interrupts()           # 启用硬件中断功能
+            # configure_alerts()           # 启用硬件中断功能
 
             # 短延时避免占用 CPU
             await asyncio.sleep_ms(50)
@@ -388,14 +392,21 @@ async def main():
     except Exception as e:
         print("Unknown error: %s" % str(e))
     finally:
+        pass
+
+async def main():
+    global apds9960
+    try:
+        await _main_body()
+    finally:
         print("Cleaning up resources...")
         if apds9960 is not None:
-            apds9960.deinit()
-            del apds9960
+            await apds9960.aclose()
+            apds9960 = None
         print("Program exited")
 
-if __name__ == '__main__':
-    asyncio.run(main())
+# ======================================== 主程序 ==============================================
+asyncio.run(main())
 ```
 
 ## 异步设计与使用

@@ -28,6 +28,7 @@ async def main():
         for device in devices_list:
             if device in TARGET_DPS310_ADDRS:
                 sensor = DPS310Async(i2c=i2c_bus, address=device)
+                await sensor.initialize_async()
                 break
         if sensor is None:
             raise RuntimeError("No target sensor device found in I2C bus")

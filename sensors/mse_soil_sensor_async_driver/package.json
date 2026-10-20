@@ -12,8 +12,8 @@
   },
   "urls": [
     [
-      "modbus_rtu_async.py",
-      "code/modbus_rtu_async.py"
+      "mse_soil_modbus_rtu_async.py",
+      "code/mse_soil_modbus_rtu_async.py"
     ],
     [
       "mse_soil_sensor_async.py",

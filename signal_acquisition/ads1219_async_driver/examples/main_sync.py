@@ -77,7 +77,7 @@ for device in devices_list:
 else:
     # 未找到目标传感器时抛出异常，包含目标地址和已发现地址信息
     raise Exception(
-        f"No ADS1219 found! Target addresses: {[hex(addr) for addr in TARGET_SENSOR_ADDR_LIST]}, "
+        f"No ADS1219 found! Target addresses: {[hex(addr) for addr in TARGET_SENSOR_ADDR_LIST]}, " +
         f"Found addresses: {[hex(addr) for addr in devices_list]}"
     )
 

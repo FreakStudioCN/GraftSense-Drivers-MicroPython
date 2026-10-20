@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/hc08.py
+├── code/_gs_hc08_hc08.py
 ├── code/hc08_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -87,7 +87,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import UART, Pin
-    from hc08 import HC08
+    from _gs_hc08_hc08 import HC08
 
 
     # ======================================== 全局变量 ============================================

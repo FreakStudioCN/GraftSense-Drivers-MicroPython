@@ -13,7 +13,7 @@ try:
 except ImportError:
     import asyncio
 
-from icg20660 import ICG20660, acc_range_sensitivity, gyro_full_scale_sensitivity
+from _gs_icg20660_icg20660 import ICG20660, acc_range_sensitivity, gyro_full_scale_sensitivity
 
 
 # ======================================== 全局变量 ============================================

@@ -5,7 +5,7 @@ except ImportError:
     import asyncio
 
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
+from _gs_opt3001_sensor_pack_2.bus_service import I2cAdapter
 from opt3001mod_async import OPT3001Async
 
 # ======================================== 全局变量 ============================================

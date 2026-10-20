@@ -1,6 +1,6 @@
 # PR119 修复与验证记录
 
-更新：2026-10-20。首轮修复起点：`5cd8435c8be4c0b333d95a20e5333e45e41405c0`；全量复审与本轮修复起点：`812a40643d5df20d3d9687c18dd051daf542121a`。
+更新：2026-10-20。首轮修复起点：`5cd8435c8be4c0b333d95a20e5333e45e41405c0`；第一次全量复审起点：`812a40643d5df20d3d9687c18dd051daf542121a`；最终复审与修复起点：`c626db162551206f959559dea2f1428a74a760c5`。
 
 [PR118](https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython/pull/118) 已合并到 main，合并提交为 `8419ae862f5062f206ff8b62214a3af0a93b3acb`。本分支修复 [PR119](https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython/pull/119) 的已复现问题，供继续集成与验证；没有把 224 个包标记为已经完成硬件验收。
 
@@ -47,26 +47,22 @@
 
 修复前的逐包覆盖清单见 [pr119_review_812a406_packages.csv](pr119_review_812a406_packages.csv)，固定对应上述复审起点；各问题的原始位置、修复文件摘要和回归入口见 [pr119_review_fixes.json](pr119_review_fixes.json)。这些记录区分静态覆盖、主机执行与硬件验收。
 
-## 安装兼容
+## 后续全量复审与最终修复
 
-来源依赖已移到各包独立的 `_gs_<driver>_...` 模块名下，公开异步入口保持原名。包含 PR118 集成后的清单共涉及 89 个包、150 个顶层模块或包目录；内部导入、package.json 和示例同步修改。
+`c626db1` 全量复审追加确认 N01–N13：四个包的 26 处 property 内部属性访问、DPS310 无界同步等待、Modbus/INA/MER 混装覆盖、独立 MPU6500/APDS9960/SI1145 构造阻塞、LIS2MDL 复位等待，以及 AD8232 固件依赖声明。本轮逐项修复。
 
-具体对应关系见 [async_dependency_modules.json](async_dependency_modules.json)。仍共用安装路径的同步 Python 模块，由测试逐个对照来源 AST。已有设备升级后可能保留旧依赖文件；若之前被异步包覆盖过，应重新安装对应同步包恢复旧路径内容。
+实际执行修复路径时又发现并补齐私有类 const 的运行时属性、MicroPython 缺失的 TimeoutError/IOError 名称，以及部分位域/总线辅助方法对 int.bit_length 的依赖。LIS3MDL 的异步复位使用来源同值的整数位写入，避免目标固件的 bool/int 类型差异；LTR390UV 的复位重试保持原顺序和次数并改为协作等待。
 
-AS7341、BMA423、BH1750、LSM6DSOX 的异步实例现在需要先 `await ...initialize_async()`。同步类的构造和接口不受此变更影响。
+目标 1.23 编译追加修复 BMA220/ADS1219 三处相邻 f-string 示例语法；逐行复核补修 MPU9250 已有子对象缺少异步状态标记时的再次启动。补修后两轮验证重新计数，之前版本的一轮通过不计入最终两轮。
 
-## 验证
+安装检查扩展到全部同步包与异步包共同的目标目录，对不同 AST 的同名文件逐级隔离到依赖链稳定为止。公开入口变更和新增异步初始化要求见 [PR119_INSTALL_MIGRATION.md](PR119_INSTALL_MIGRATION.md)。手动示例、主机 feed 脚本、无作用的根 __init__.py 和 AD9833 未使用的占位依赖不再作为库文件安装；原文件保留供对照。
 
-- `python -m unittest discover -s tests -v`：36 项测试通过，包含多个驱动和输入组合；验证正常总线顺序、超时、心跳、取消、最终输出、安装清单以及全部异步包的私有 const 和对象分配边界。心跳测试使用零延时让出调度，避免依赖 Windows 的 1 ms 定时器精度。
-- 正常行为对照使用仓库中原同步包，不仅对照异步目录里的来源副本。
-- PR119 运行库/示例与 PR118 变更中的 1202 个 Python 文件均通过 mpy-cross v1.29.0 编译；21 个 native/viper 文件使用 armv7m 重试。
-- 官方 MicroPython v1.23.0 源码 `a61c446c0b34e82aeb54b9770250d267656f2b7f` 的 Windows 解释器执行 25 个包的修复路径通过，使用真实 const 编译、原生协程和官方 asyncio；硬件总线/引脚由替身注入。Windows 构建启用 asyncio/select，调整构建参数传递以适配长命令，未修改解释器 C 源码。Windows 已静态保留异常缓冲区，测试只为缺失的分配 API 提供空操作适配；私有 const 确实不导出亦有断言。
-- PR118 的 7 项主机回归通过；合并树与 GitHub 生成的合并树一致。
+## 最终验证记录
 
-主机替身不验证真实电气时序、芯片状态与无线对端，也没有执行 224 个包的全部公开 API。旧审查中的结构、语义、保真门禁结果不能作为本修复分支全部通过的证明。
+当前逐包源码覆盖见 [pr119_final_review_packages.csv](pr119_final_review_packages.csv)，包含 224 个包、1176 个 Python 文件和 10851 个函数定义；这是源码加载与审查覆盖，不代表执行全部 API。前面固定版本的历史清单分别保留。
 
-## 仍需完成的工作
+两轮检查的逐项结果见 [pr119_validation.json](pr119_validation.json)，修复对应关系见 [pr119_final_review_fixes.json](pr119_final_review_fixes.json)。检查包含全部异步包的安装目标、源码/常量/异常兼容边界、目标 1.23 与较新编译器、主机回归、实际 MicroPython 修复路径和正反顺序混装。每轮均从新的安装镜像开始；只将两轮都通过的同一份运行库内容计为完成。
 
-- 在目标 MicroPython 固件和真实硬件上验证本次 20 个包，重点检查复位脉宽、取消与重试、初始化、完整配置区和波形输出。
-- 对本轮 25 个包补充目标固件和真实硬件验证；LSM6DSOX 构造阻塞已修复，仍需检验真实芯片复位、配置与取消后重试。
-- 对新的私有依赖安装路径做板端混装、升级与重启验证。完成这些工作后再判断是否把 PR119 作为稳定安装源发布。
+## 仍需完成的硬件验收
+
+需要在实际目标固件、传感器和无线对端验证电气时序、复位/取消恢复、初始化、混装升级及完整业务流程。主机和 Windows MicroPython 替身不模拟全部硬件行为；没有执行 224 个包的全部公开 API。PR119 保留 Draft，不把本记录称作完整硬件交付验收。

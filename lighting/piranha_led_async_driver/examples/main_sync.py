@@ -12,7 +12,7 @@
 import time
 
 # 导入自定义食人鱼LED灯驱动模块
-from piranha_led import PiranhaLED, POLARITY_CATHODE, POLARITY_ANODE
+from _gs_piranha_led_piranha_led import PiranhaLED, POLARITY_CATHODE, POLARITY_ANODE
 
 # ======================================== 全局变量 ============================================
 

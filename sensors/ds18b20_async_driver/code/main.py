@@ -5,7 +5,7 @@ except ImportError:
     import asyncio
 
 from machine import Pin
-from onewire import OneWire
+from _gs_ds18b20_onewire import OneWire
 from ds18x20_async import DS18X20Async
 
 

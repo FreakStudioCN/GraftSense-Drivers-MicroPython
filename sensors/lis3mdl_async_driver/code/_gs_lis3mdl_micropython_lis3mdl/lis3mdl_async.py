@@ -8,6 +8,10 @@
 
 # ======================================== 导入相关模块 =========================================
 from .lis3mdl import LIS3MDL
+try:
+    import uasyncio as asyncio
+except ImportError:
+    import asyncio
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
@@ -15,7 +19,9 @@ class LIS3MDLAsync(LIS3MDL):
     """Explicit facade for bounded synchronous register transactions."""
     async def magnetic_async(self) -> tuple: return self.magnetic
     async def set_data_rate_async(self, value: int) -> None: self.data_rate = value
-    async def reset_async(self) -> None: self.reset()
+    async def reset_async(self) -> None:
+        self._reset = 1
+        await asyncio.sleep_ms(10)
     async def aclose(self) -> None:
         """The source owns no resources to release; the caller owns the bus."""
         return None

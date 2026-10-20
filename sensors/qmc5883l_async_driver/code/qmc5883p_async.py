@@ -1,10 +1,17 @@
 """Async QMC5883P operations with bounded cooperative startup polling."""
+
+# Preserve the documented exception contract on MicroPython.
+try:
+    IOError
+except NameError:
+    IOError = OSError
+
 try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
 
-from qmc5883p import QMC5883P, mag_base
+from _gs_qmc5883l_qmc5883p import QMC5883P, mag_base
 
 
 class mag_baseAsync(mag_base):

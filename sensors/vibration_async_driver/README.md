@@ -53,7 +53,7 @@
 ├── code/__pycache__/vibration_sensor.cpython-313.pyc
 ├── code/main.py
 ├── code/_gs_vibration_vibration_sensor.py
-├── code/vibration_sensor_async.py
+├── code/vibration_async.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -79,7 +79,7 @@ except ImportError:
     import asyncio
 
 from machine import Pin
-from vibration_sensor_async import VibrationSensorAsync
+from vibration_async import VibrationSensorAsync
 
 
 def vibration_callback():

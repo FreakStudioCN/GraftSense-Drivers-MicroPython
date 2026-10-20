@@ -2,8 +2,8 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from mer_async import MERAsync
-from modbus_rtu_async import ModbusRTUMasterAsync
+from mcp1081_mer_async import MERAsync
+from mcp1081_modbus_rtu_async import ModbusRTUMasterAsync
 
 async def main():
     host = sensor = None

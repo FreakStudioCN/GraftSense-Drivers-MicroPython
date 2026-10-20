@@ -54,9 +54,9 @@
 ├── code/__pycache__/adt7410.cpython-313.pyc
 ├── code/__pycache__/i2c_helpers.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/adt7410.py
+├── code/_gs_adt7410_adt7410.py
 ├── code/adt7410_async.py
-├── code/i2c_helpers.py
+├── code/_gs_adt7410_i2c_helpers.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -93,7 +93,7 @@ async def main():
 
     # ======================================== 导入相关模块 =========================================
     from machine import Pin, I2C
-    from adt7410 import (
+    from _gs_adt7410_adt7410 import (
         ADT7410,
         CONTINUOUS,
         ONE_SHOT,

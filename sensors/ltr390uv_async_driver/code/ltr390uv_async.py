@@ -9,6 +9,10 @@
 # ======================================== imports =============================================
 
 from _gs_ltr390uv_ltr390uv import LTR390UV
+try:
+    import uasyncio as asyncio
+except ImportError:
+    import asyncio
 
 # ======================================== globals =============================================
 
@@ -20,7 +24,24 @@ class LTR390UVAsync(LTR390UV):
     """Awaitable facade preserving LTR390UV method and property semantics."""
 
     async def get_id_async(self): return self.get_id()
-    async def soft_reset_async(self): return self.soft_reset()
+    async def soft_reset_async(self):
+        register = self.ctrl_reg
+        register['soft_reset'] = 1
+        try:
+            register.write()
+        except OSError as error:
+            raise RuntimeError('I2C write soft_reset failed') from error
+        for _ in range(3):
+            await asyncio.sleep_ms(10)
+            try:
+                register.read()
+                if not register['soft_reset']:
+                    break
+            except OSError as error:
+                if error.errno != 110:
+                    raise RuntimeError('I2C error during soft reset') from error
+        else:
+            raise RuntimeError('Soft reset did not complete within timeout')
     async def start_measurement_async(self, uv_mode, meas_rate=1, gain=3, enable=True):
         return self.start_measurement(uv_mode, meas_rate, gain, enable)
     async def get_conversion_cycle_time_async(self): return self.get_conversion_cycle_time()

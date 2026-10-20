@@ -5,7 +5,7 @@
   "author": "hogeiha",
   "license": "MIT",
   "chips": "all",
-  "fw": "all",
+  "fw": "ulab",
   "urls": [
     [
       "_gs_ad8232_ad8232.py",
@@ -30,10 +30,9 @@
     [
       "_gs_ad8232_master_data_flow_processor.py",
       "code/_gs_ad8232_master_data_flow_processor.py"
-    ],
-    [
-      "main.py",
-      "code/main.py"
     ]
-  ]
+  ],
+  "_comments": {
+    "fw": "Device ECG processing requires firmware with ulab.numpy and ulab.scipy; UART-only host usage does not."
+  }
 }

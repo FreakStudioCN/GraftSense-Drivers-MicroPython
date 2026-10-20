@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 import time
-from hc08 import HC08
+from _gs_hc08_hc08 import HC08
 
 
 class HC08Async(HC08):

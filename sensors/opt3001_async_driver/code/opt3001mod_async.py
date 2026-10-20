@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-from opt3001mod import OPT3001
+from _gs_opt3001_opt3001mod import OPT3001
 
 
 class OPT3001Async(OPT3001):

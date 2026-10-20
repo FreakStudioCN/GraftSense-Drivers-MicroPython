@@ -53,9 +53,9 @@
 ├── code/__pycache__/my18e20.cpython-313.pyc
 ├── code/__pycache__/onewire.cpython-313.pyc
 ├── code/main.py
-├── code/my18e20.py
+├── code/_gs_my18e20_my18e20.py
 ├── code/my18e20_async.py
-├── code/onewire.py
+├── code/_gs_my18e20_onewire.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -97,10 +97,10 @@ async def main():
     # 导入时间相关的模块
 
     # 导入单总线通信相关的模块
-    from onewire import OneWire
+    from _gs_my18e20_onewire import OneWire
 
     # 导入温度传感器类
-    from my18e20 import MY18E20
+    from _gs_my18e20_my18e20 import MY18E20
 
     # ======================================== 全局变量 ============================================
 

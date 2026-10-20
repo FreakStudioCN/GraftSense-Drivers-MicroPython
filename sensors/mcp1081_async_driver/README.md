@@ -60,7 +60,7 @@
 ├── code/_gs_mcp1081_mcp1081_umodbus/typing.py
 ├── code/_gs_mcp1081_mcp1081_umodbus/version.py
 ├── code/_gs_mcp1081_mer.py
-├── code/mer_async.py
+├── code/mcp1081_mer_async.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -95,7 +95,7 @@ except ImportError:
     import asyncio
 from machine import UART, Pin
 from _gs_mcp1081_mer import MER
-from mer_async import MERAsync
+from mcp1081_mer_async import MERAsync
 from _gs_mcp1081_mcp1081_umodbus.serial import Serial as ModbusRTUMaster
 
 # ======================================== 全局变量 ============================================

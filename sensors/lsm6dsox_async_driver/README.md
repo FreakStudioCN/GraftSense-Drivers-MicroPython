@@ -52,9 +52,9 @@
 ├── code/__pycache__/i2c_helpers.cpython-313.pyc
 ├── code/__pycache__/lsm6dsox.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/i2c_helpers.py
-├── code/i2c_helpers_async.py
-├── code/lsm6dsox.py
+├── code/_gs_lsm6dsox_i2c_helpers.py
+├── code/_gs_lsm6dsox_i2c_helpers_async.py
+├── code/_gs_lsm6dsox_lsm6dsox.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE

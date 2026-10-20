@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/opt3001mod.cpython-313.pyc
 ├── code/main.py
-├── code/opt3001mod.py
+├── code/_gs_opt3001_opt3001mod.py
 ├── code/opt3001mod_async.py
 ├── code/sensor_pack_2/__init__.py
 ├── code/sensor_pack_2/__pycache__/__init__.cpython-313.pyc
@@ -105,8 +105,8 @@ async def main():
     
     import time
     from machine import Pin, SoftI2C
-    from sensor_pack_2.bus_service import I2cAdapter
-    from opt3001mod import OPT3001
+    from _gs_opt3001_sensor_pack_2.bus_service import I2cAdapter
+    from _gs_opt3001_opt3001mod import OPT3001
     
     # ======================================== 全局变量 ============================================
     

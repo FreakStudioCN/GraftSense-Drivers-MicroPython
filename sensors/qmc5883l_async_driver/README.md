@@ -52,7 +52,7 @@
 ├── code/__pycache__/main.cpython-313.pyc
 ├── code/__pycache__/qmc5883p.cpython-313.pyc
 ├── code/main.py
-├── code/qmc5883p.py
+├── code/_gs_qmc5883l_qmc5883p.py
 ├── code/qmc5883p_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -89,7 +89,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
     import math
     from machine import I2C, Pin
-    from qmc5883p import QMC5883P
+    from _gs_qmc5883l_qmc5883p import QMC5883P
 
     # ======================================== 全局变量 ============================================
 

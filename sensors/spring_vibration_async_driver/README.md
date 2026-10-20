@@ -53,7 +53,7 @@
 ├── code/__pycache__/vibration_sensor.cpython-313.pyc
 ├── code/main.py
 ├── code/_gs_spring_vibration_vibration_sensor.py
-├── code/vibration_sensor_async.py
+├── code/spring_vibration_async.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -80,7 +80,7 @@ except ImportError:
 
 import time
 from machine import Pin
-from vibration_sensor_async import VibrationSensorAsync
+from spring_vibration_async import VibrationSensorAsync
 
 last_irq_time = 0
 THROTTLE_MS = 50

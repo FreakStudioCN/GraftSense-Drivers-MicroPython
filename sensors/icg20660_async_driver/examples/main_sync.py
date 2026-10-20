@@ -9,19 +9,7 @@
 # ======================================== 导入相关模块 =========================================
 import time
 from machine import Pin, I2C
-from icg20660 import (
-    ICG20660,
-    GYRO_DLPF_DISABLED,
-    GYRO_DLPF_ENABLED,
-    DLPF_CFG_0,
-    DLPF_CFG_1,
-    DLPF_CFG_2,
-    DLPF_CFG_7,
-    FS_125_DPS,
-    FS_500_DPS,
-    RANGE_2G,
-    RANGE_16G,
-)
+from _gs_icg20660_icg20660 import ICG20660, GYRO_DLPF_DISABLED, GYRO_DLPF_ENABLED, DLPF_CFG_0, DLPF_CFG_1, DLPF_CFG_2, DLPF_CFG_7, FS_125_DPS, FS_500_DPS, RANGE_2G, RANGE_16G
 
 # ======================================== 全局变量 ============================================
 print_interval = 2000  # 打印间隔（ms）

@@ -256,6 +256,7 @@ async def _main_body():
     # 实例化 APDS9960 驱动
     print("Initializing APDS9960 driver (debug=False)...")
     apds9960 = APDS9960(i2c, debug=False)
+    await apds9960.initialize_async()
     last_print_time = time.ticks_ms()
     print("APDS9960 driver initialized successfully")
     await apds9960.power_on_async(True)

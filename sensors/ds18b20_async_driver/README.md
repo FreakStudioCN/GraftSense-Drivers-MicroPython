@@ -49,10 +49,10 @@
 ## 文件结构
 
 ```text
-├── code/ds18x20.py
+├── code/_gs_ds18b20_ds18x20.py
 ├── code/ds18x20_async.py
 ├── code/main.py
-├── code/onewire.py
+├── code/_gs_ds18b20_onewire.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -78,7 +78,7 @@ except ImportError:
     import asyncio
 
 from machine import Pin
-from onewire import OneWire
+from _gs_ds18b20_onewire import OneWire
 from ds18x20_async import DS18X20Async
 
 

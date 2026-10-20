@@ -4,8 +4,8 @@ try:
 except ImportError:
     import asyncio
 from machine import UART, Pin
-from data_flow_processor import DataFlowProcessor
-from hc08 import HC08
+from _gs_r60amp1_data_flow_processor import DataFlowProcessor
+from _gs_r60amp1_hc08 import HC08
 from r60amp1 import format_time
 from r60amp1_async import R60AMP1Async
 

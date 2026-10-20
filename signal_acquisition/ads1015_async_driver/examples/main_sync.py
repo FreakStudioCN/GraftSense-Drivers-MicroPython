@@ -9,7 +9,7 @@
 
 import time
 from machine import I2C, Pin
-from ads1015 import ADS1015
+from _gs_ads1015_ads1015 import ADS1015
 
 # ======================================== 全局变量 ============================================
 

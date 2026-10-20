@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/ip5306.py
+├── code/_gs_ip5306_ip5306.py
 ├── code/ip5306_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -87,7 +87,7 @@ async def main():
     
     # ======================================== 导入相关模块 =========================================
     from machine import I2C, Pin
-    from ip5306 import IP5306
+    from _gs_ip5306_ip5306 import IP5306
     
     # ======================================== 全局变量 ============================================
     

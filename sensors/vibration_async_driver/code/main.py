@@ -5,7 +5,7 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin
-from vibration_sensor_async import VibrationSensorAsync
+from vibration_async import VibrationSensorAsync
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 def vibration_callback():

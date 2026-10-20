@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/cc1101.py
+├── code/_gs_cc1101_cc1101.py
 ├── code/cc1101_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -88,7 +88,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import Pin, SPI
-    from cc1101 import CC1101
+    from _gs_cc1101_cc1101 import CC1101
 
     # ======================================== 全局变量 ============================================
 

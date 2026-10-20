@@ -14,8 +14,8 @@
       "code/_gs_tmp117_micropython_tmp117/__init__.py"
     ],
     [
-      "i2c_helpers_async.py",
-      "code/i2c_helpers_async.py"
+      "_gs_tmp117_i2c_helpers_async.py",
+      "code/_gs_tmp117_i2c_helpers_async.py"
     ],
     [
       "tmp117_async.py",

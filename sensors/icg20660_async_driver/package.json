@@ -1,31 +1,31 @@
 {
-    "name":  "icg20660_async_driver",
-    "urls":  [
-                 [
-                     "i2c_helpers.py",
-                     "code/i2c_helpers.py"
-                 ],
-                 [
-                     "icg20660.py",
-                     "code/icg20660.py"
-                 ],
-                 [
-                     "i2c_helpers_async.py",
-                     "code/i2c_helpers_async.py"
-                 ],
-                 [
-                     "icg20660_async.py",
-                     "code/icg20660_async.py"
-                 ]
-             ],
-    "version":  "1.0.0",
-    "_comments":  {
-                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
-                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
-                  },
-    "description":  "A MicroPython library to control the TDK ICG20660 6-axis gyroscope/accelerometer sensor via I2C",
-    "author":  "Jose D. Montoya",
-    "license":  "MIT",
-    "chips":  "all",
-    "fw":  "all"
+  "name": "icg20660_async_driver",
+  "urls": [
+    [
+      "_gs_icg20660_i2c_helpers.py",
+      "code/_gs_icg20660_i2c_helpers.py"
+    ],
+    [
+      "_gs_icg20660_icg20660.py",
+      "code/_gs_icg20660_icg20660.py"
+    ],
+    [
+      "_gs_icg20660_i2c_helpers_async.py",
+      "code/_gs_icg20660_i2c_helpers_async.py"
+    ],
+    [
+      "icg20660_async.py",
+      "code/icg20660_async.py"
+    ]
+  ],
+  "version": "1.0.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "A MicroPython library to control the TDK ICG20660 6-axis gyroscope/accelerometer sensor via I2C",
+  "author": "Jose D. Montoya",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
 }

@@ -16,7 +16,7 @@ except ImportError:
     ticks_ms = lambda: int(time.time() * 1000)
     ticks_diff = lambda now, then: now - then
 
-from si4732 import SI4732
+from _gs_si4732_si4732 import SI4732
 
 
 

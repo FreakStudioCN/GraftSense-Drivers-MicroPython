@@ -9,7 +9,7 @@
 import math
 from machine import I2C, Pin
 import time
-from qmc5883p import QMC5883P
+from _gs_qmc5883l_qmc5883p import QMC5883P
 
 # ======================================== 全局变量 ============================================
 

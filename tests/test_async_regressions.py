@@ -53,7 +53,18 @@ def load_source(package, name):
     path = ROOT / package / 'code' / (name + '.py')
     spec = importlib.util.spec_from_file_location('_baseline_' + name, path)
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    directory = path.parent
+    roots = {p.stem for p in directory.iterdir() if p.suffix == '.py' or p.is_dir()}
+    saved = {key: value for key, value in sys.modules.items() if key.split('.')[0] in roots}
+    for key in saved: del sys.modules[key]
+    sys.path.insert(0, str(directory))
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.path.pop(0)
+        for key in list(sys.modules):
+            if key.split('.')[0] in roots: del sys.modules[key]
+        sys.modules.update(saved)
     return module
 
 class Pin:

@@ -326,5 +326,78 @@
   "sensors/sht45_async_driver": {
     "sht45": "_gs_sht45_sht45",
     "__init__": "_gs_sht45___init__"
+  },
+  "communication/hc08_async_driver": {
+    "hc08": "_gs_hc08_hc08"
+  },
+  "motor_drivers/bus_dc_motor_async_driver": {
+    "pca9685": "_gs_bus_dc_motor_pca9685",
+    "bus_dc_motor": "_gs_bus_dc_motor_bus_dc_motor"
+  },
+  "sensors/adt7410_async_driver": {
+    "i2c_helpers": "_gs_adt7410_i2c_helpers",
+    "adt7410": "_gs_adt7410_adt7410"
+  },
+  "sensors/ds18b20_async_driver": {
+    "onewire": "_gs_ds18b20_onewire",
+    "ds18x20": "_gs_ds18b20_ds18x20"
+  },
+  "sensors/hts221_async_driver": {
+    "i2c_helpers": "_gs_hts221_i2c_helpers",
+    "hts221": "_gs_hts221_hts221"
+  },
+  "sensors/icg20660_async_driver": {
+    "i2c_helpers": "_gs_icg20660_i2c_helpers",
+    "icg20660": "_gs_icg20660_icg20660"
+  },
+  "sensors/lsm6dsox_async_driver": {
+    "i2c_helpers": "_gs_lsm6dsox_i2c_helpers",
+    "lsm6dsox": "_gs_lsm6dsox_lsm6dsox"
+  },
+  "sensors/my18e20_async_driver": {
+    "onewire": "_gs_my18e20_onewire",
+    "my18e20": "_gs_my18e20_my18e20"
+  },
+  "sensors/opt3001_async_driver": {
+    "sensor_pack_2": "_gs_opt3001_sensor_pack_2",
+    "opt3001mod": "_gs_opt3001_opt3001mod"
+  },
+  "sensors/r60amp1_async_driver": {
+    "hc08": "_gs_r60amp1_hc08",
+    "data_flow_processor": "_gs_r60amp1_data_flow_processor"
+  },
+  "sensors/sgp40_async_driver": {
+    "sensor_pack_2": "_gs_sgp40_sensor_pack_2",
+    "sgp4Xmod": "_gs_sgp40_sgp4Xmod"
+  },
+  "communication/cc1101_async_driver": {
+    "cc1101": "_gs_cc1101_cc1101"
+  },
+  "communication/si4732_async_driver": {
+    "si4732": "_gs_si4732_si4732"
+  },
+  "input/cst328_async_driver": {
+    "cst328": "_gs_cst328_cst328"
+  },
+  "input/ft6336_async_driver": {
+    "ft6336": "_gs_ft6336_ft6336"
+  },
+  "misc/ip5306_async_driver": {
+    "ip5306": "_gs_ip5306_ip5306"
+  },
+  "sensors/mcp9808_async_driver": {
+    "mcp9808": "_gs_mcp9808_mcp9808"
+  },
+  "misc/dy-sv19t_async_driver": {
+    "dy_sv19t": "_gs_dy_sv19t_dy_sv19t"
+  },
+  "sensors/qmc5883l_async_driver": {
+    "qmc5883p": "_gs_qmc5883l_qmc5883p"
+  },
+  "signal_acquisition/ads1015_async_driver": {
+    "ads1015": "_gs_ads1015_ads1015"
+  },
+  "lighting/piranha_led_async_driver": {
+    "piranha_led": "_gs_piranha_led_piranha_led"
   }
 }

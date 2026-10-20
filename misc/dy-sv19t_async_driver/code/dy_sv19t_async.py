@@ -17,7 +17,7 @@ try:
 except ImportError:
     import asyncio
 import time
-from dy_sv19t import DYSV19T
+from _gs_dy_sv19t_dy_sv19t import DYSV19T
 
 # ======================================== 全局变量 ============================================
 _POLL_MS = 5

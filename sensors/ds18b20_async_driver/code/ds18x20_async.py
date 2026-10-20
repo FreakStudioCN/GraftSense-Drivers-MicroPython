@@ -12,7 +12,7 @@ try:
 except ImportError:
     import asyncio
 
-from ds18x20 import DS18X20
+from _gs_ds18b20_ds18x20 import DS18X20
 
 # ======================================== 全局变量 ============================================
 

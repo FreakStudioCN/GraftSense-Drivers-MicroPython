@@ -24,8 +24,8 @@
       "code/_gs_lis2mdl_micropython_lis2mdl/__init__.py"
     ],
     [
-      "i2c_helpers_async.py",
-      "code/i2c_helpers_async.py"
+      "_gs_lis2mdl_i2c_helpers_async.py",
+      "code/_gs_lis2mdl_i2c_helpers_async.py"
     ],
     [
       "_gs_lis2mdl_micropython_lis2mdl/lis2mdl_async.py",

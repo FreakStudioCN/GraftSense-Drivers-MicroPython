@@ -5,7 +5,7 @@ try:
 except ImportError:
     import asyncio
 
-from ft6336 import FT6336
+from _gs_ft6336_ft6336 import FT6336
 
 
 

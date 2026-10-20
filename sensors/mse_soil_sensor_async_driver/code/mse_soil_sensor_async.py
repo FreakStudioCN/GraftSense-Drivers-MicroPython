@@ -6,7 +6,7 @@
 # @Description : MSE soil sensor asynchronous Modbus API
 # @License : MIT
 # ======================================== 导入相关模块 =========================================
-from modbus_rtu_async import CDS1081Async
+from mse_soil_modbus_rtu_async import CDS1081Async
 # ======================================== 全局变量 ============================================
 __version__ = "0.1.0"
 __author__ = "hogeiha"

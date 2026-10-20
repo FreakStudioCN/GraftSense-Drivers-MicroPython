@@ -18,16 +18,16 @@ class DS1307Async(SyncAdapterMixin, DS1307):
     """Explicit accessors for bounded DS1307 I2C property transactions."""
 
     async def get_datetime_async(self):
-        return DS1307.datetime.fget(self)
+        return self.datetime
 
     async def set_datetime_async(self, value):
-        DS1307.datetime.fset(self, value)
+        self.datetime = value
 
     async def get_datetime_rtc_async(self):
-        return DS1307.datetimeRTC.fget(self)
+        return self.datetimeRTC
 
     async def get_disable_oscillator_async(self):
-        return DS1307.disable_oscillator.fget(self)
+        return self.disable_oscillator
 
     async def set_disable_oscillator_async(self, value):
-        DS1307.disable_oscillator.fset(self, value)
+        self.disable_oscillator = value

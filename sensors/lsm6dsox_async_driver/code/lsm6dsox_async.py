@@ -1,3 +1,13 @@
+
+# Preserve the documented exception contract on MicroPython.
+try:
+    TimeoutError
+except NameError:
+    try:
+        from uasyncio import TimeoutError
+    except ImportError:
+        from asyncio import TimeoutError
+
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/09/22
@@ -13,7 +23,7 @@ try:
 except ImportError:
     import asyncio
 import time
-from lsm6dsox import LSM6DSOX, acceleration_factor, acceleration_range_values, gyro_factor, gyro_range_values, RATE_104_HZ, RANGE_4G, RANGE_250_DPS
+from _gs_lsm6dsox_lsm6dsox import LSM6DSOX, acceleration_factor, acceleration_range_values, gyro_factor, gyro_range_values, RATE_104_HZ, RANGE_4G, RANGE_250_DPS
 
 # ======================================== globals =============================================
 

@@ -223,7 +223,7 @@ class CBits:
             raise TypeError("Value must be an integer")
 
         # 计算最大值
-        max_val = (1 << (self.bit_mask.bit_length() - self.star_bit)) - 1
+        max_val = self.bit_mask >> self.star_bit
         if value < 0 or value > max_val:
             raise ValueError(f"Value must be between 0 and {max_val}")
 

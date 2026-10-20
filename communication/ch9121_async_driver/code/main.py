@@ -1,3 +1,13 @@
+
+# Preserve the documented exception contract on MicroPython.
+try:
+    TimeoutError
+except NameError:
+    try:
+        from uasyncio import TimeoutError
+    except ImportError:
+        from asyncio import TimeoutError
+
 # Python env   : MicroPython v1.23.0
 # -*- coding: utf-8 -*-
 # @Time    : 2026/09/18

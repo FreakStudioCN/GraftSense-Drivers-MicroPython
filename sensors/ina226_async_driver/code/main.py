@@ -6,7 +6,7 @@ except ImportError:
 from machine import Pin, SoftI2C
 from _gs_ina226_sensor_pack_2.bus_service import I2cAdapter
 import _gs_ina226_ina_ti as ina_ti
-from ina_ti_async import INA226Async
+from ina226_async import INA226Async
 
 
 def show_header(info: str, width: int = 32):

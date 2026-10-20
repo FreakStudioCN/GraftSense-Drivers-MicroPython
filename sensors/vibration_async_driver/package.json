@@ -16,8 +16,8 @@
       "code/_gs_vibration_vibration_sensor.py"
     ],
     [
-      "vibration_sensor_async.py",
-      "code/vibration_sensor_async.py"
+      "vibration_async.py",
+      "code/vibration_async.py"
     ]
   ]
 }

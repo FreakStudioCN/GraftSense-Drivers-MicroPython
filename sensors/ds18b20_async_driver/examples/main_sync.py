@@ -14,10 +14,10 @@ from machine import Pin
 import time
 
 # 导入单总线通信相关的模块
-from onewire import OneWire
+from _gs_ds18b20_onewire import OneWire
 
 # 导入温度传感器类
-from ds18x20 import DS18X20
+from _gs_ds18b20_ds18x20 import DS18X20
 
 # ======================================== 全局变量 ============================================
 

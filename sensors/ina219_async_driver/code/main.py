@@ -5,7 +5,7 @@ except ImportError:
 import time
 from machine import I2C, Pin
 from _gs_ina219_sensor_pack_2.bus_service import I2cAdapter
-from ina_ti_async import INA219Async
+from ina219_async import INA219Async
 async def main():
     i2c = None; sensor = None
     try:

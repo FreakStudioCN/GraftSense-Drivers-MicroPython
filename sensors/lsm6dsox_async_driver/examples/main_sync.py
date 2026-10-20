@@ -9,7 +9,7 @@
 # ======================================== 导入相关模块 =========================================
 import time
 from machine import I2C, Pin
-from lsm6dsox import LSM6DSOX
+from _gs_lsm6dsox_lsm6dsox import LSM6DSOX
 
 # ======================================== 全局变量 ============================================
 # LSM6DSOX 默认 I2C 地址

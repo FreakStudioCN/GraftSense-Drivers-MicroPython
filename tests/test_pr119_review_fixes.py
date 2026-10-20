@@ -97,7 +97,7 @@ class InstalledImports(unittest.TestCase):
         for package, module in [
             ('sensors/dps310_async_driver', 'dps310_async'),
             ('sensors/icp10111_async_driver', 'icp10111_async'),
-            ('sensors/tmp117_async_driver', 'i2c_helpers_async'),
+            ('sensors/tmp117_async_driver', '_gs_tmp117_i2c_helpers_async'),
             ('input/ft6x06_async_driver', 'ft6x06_async'),
         ]:
             with self.subTest(package=package), tempfile.TemporaryDirectory() as folder:
@@ -122,7 +122,7 @@ class ReviewedAsyncFixes(unittest.IsolatedAsyncioTestCase):
     async def test_mpu9250_factory_and_start_keep_runtime_state(self):
         m = env.load('sensors/mpu9250_async_driver', 'ak8963_async')
         bus = Registers()
-        bus.registers.update({0x75:0x71,0x10:128,0x11:128,0x12:128})
+        bus.registers.update({0:0x48,0x75:0x71,0x10:128,0x11:128,0x12:128})
         with (patch.object(m.MPU6500, '__init__', side_effect=AssertionError('sync startup')),
               patch.object(m.AK8963, '__init__', side_effect=AssertionError('sync startup'))):
             sensor = await m.MPU9250Async.create_async(bus)
@@ -368,12 +368,23 @@ class ReviewedAsyncFixes(unittest.IsolatedAsyncioTestCase):
         sensor.measurement_async=measure
         stream=sensor.measurements_async(250)
         self.assertIs(stream.__aiter__(),stream)
-        started=time.monotonic(); values=[]
-        async for value in stream:
-            values.append(value)
-            if len(values)==2: break
+        # Check the source's 120 ms conversion interval without depending on
+        # Windows' early/coarse timer wakeups; the wait must still yield.
+        waits=[]
+        async def sleep_ms(ms):
+            waits.append(ms)
+            await asyncio.sleep(0)
+        async def consume():
+            values=[]
+            async for value in stream:
+                values.append(value)
+                if len(values)==2: break
+            return values
+        with patch.object(m.asyncio,'sleep_ms',sleep_ms):
+            values,beats=await env.heartbeat_during(consume)
         self.assertEqual(values,[123.0,123.0])
-        self.assertGreaterEqual(time.monotonic()-started,.119)
+        self.assertEqual(waits,[120])
+        self.assertGreaterEqual(beats,1)
         stream=sensor.measurements_async(1)
         self.assertEqual(await stream.__anext__(),123.0)
         with self.assertRaises(TimeoutError): await stream.__anext__()

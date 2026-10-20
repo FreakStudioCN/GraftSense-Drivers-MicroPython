@@ -12,7 +12,7 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-from adt7410 import ADT7410, CONTINUOUS, ONE_SHOT, SPS, SHUTDOWN
+from _gs_adt7410_adt7410 import ADT7410, CONTINUOUS, ONE_SHOT, SPS, SHUTDOWN
 
 # ======================================== 全局变量 ============================================
 _RESET_WAIT_MS = 1
@@ -40,10 +40,10 @@ class ADT7410Async(ADT7410):
         await asyncio.sleep_ms(_RESET_WAIT_MS)
 
     async def temperature_async(self) -> float:
-        return ADT7410.temperature.fget(self)
+        return self.temperature
 
     async def get_operation_mode_async(self) -> str:
-        return ADT7410.operation_mode.fget(self)
+        return self.operation_mode
 
     async def set_operation_mode_async(self, value: int) -> None:
         if not isinstance(value, int) or value not in OPERATION_MODE_VALUES:
@@ -52,43 +52,43 @@ class ADT7410Async(ADT7410):
         await asyncio.sleep_ms(_MODE_WAIT_MS)
 
     async def get_resolution_mode_async(self) -> str:
-        return ADT7410.resolution_mode.fget(self)
+        return self.resolution_mode
 
     async def set_resolution_mode_async(self, value: int) -> None:
-        ADT7410.resolution_mode.fset(self, value)
+        self.resolution_mode = value
 
     async def get_comparator_mode_async(self) -> str:
-        return ADT7410.comparator_mode.fget(self)
+        return self.comparator_mode
 
     async def set_comparator_mode_async(self, value: int) -> None:
-        ADT7410.comparator_mode.fset(self, value)
+        self.comparator_mode = value
 
     async def alert_status_async(self) -> object:
-        return ADT7410.alert_status.fget(self)
+        return self.alert_status
 
     async def get_high_temperature_async(self) -> int:
-        return ADT7410.high_temperature.fget(self)
+        return self.high_temperature
 
     async def set_high_temperature_async(self, value: int) -> None:
-        ADT7410.high_temperature.fset(self, value)
+        self.high_temperature = value
 
     async def get_low_temperature_async(self) -> int:
-        return ADT7410.low_temperature.fget(self)
+        return self.low_temperature
 
     async def set_low_temperature_async(self, value: int) -> None:
-        ADT7410.low_temperature.fset(self, value)
+        self.low_temperature = value
 
     async def get_critical_temperature_async(self) -> int:
-        return ADT7410.critical_temperature.fget(self)
+        return self.critical_temperature
 
     async def set_critical_temperature_async(self, value: int) -> None:
-        ADT7410.critical_temperature.fset(self, value)
+        self.critical_temperature = value
 
     async def get_hysteresis_temperature_async(self) -> int:
-        return ADT7410.hysteresis_temperature.fget(self)
+        return self.hysteresis_temperature
 
     async def set_hysteresis_temperature_async(self, value: int) -> None:
-        ADT7410.hysteresis_temperature.fset(self, value)
+        self.hysteresis_temperature = value
 
 # ======================================== 初始化配置 ==========================================
 # ======================================== 主程序 ==============================================

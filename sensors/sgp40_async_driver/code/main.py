@@ -12,7 +12,7 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
+from _gs_sgp40_sensor_pack_2.bus_service import I2cAdapter
 from sgp4x_async import SGP4XAsync
 
 TARGET_SENSOR_ADDRS = [0x59]

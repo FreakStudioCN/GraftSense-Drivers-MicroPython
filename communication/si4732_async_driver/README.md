@@ -50,7 +50,7 @@
 
 ```text
 ├── code/main.py
-├── code/si4732.py
+├── code/_gs_si4732_si4732.py
 ├── code/si4732_async.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -88,7 +88,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import I2C, Pin
-    from si4732 import SI4732
+    from _gs_si4732_si4732 import SI4732
 
     # ======================================== 全局变量 ============================================
 

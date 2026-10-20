@@ -107,7 +107,7 @@ async def main():
     assert sys.implementation.name == 'micropython'
     load('sensors/dps310_async_driver', 'dps310_async')
     load('sensors/icp10111_async_driver', 'icp10111_async')
-    load('sensors/tmp117_async_driver', 'i2c_helpers_async')
+    load('sensors/tmp117_async_driver', '_gs_tmp117_i2c_helpers_async')
 
     ft = load('input/ft6x06_async_driver', 'ft6x06_async')
     assert not hasattr(sys.modules['_gs_ft6x06_ft6x06'], '_REG_TD_STATUS')
@@ -134,7 +134,7 @@ async def main():
     assert await sensor.play_effect_async()
 
     mpu = load('sensors/mpu9250_async_driver', 'ak8963_async')
-    sensor = await mpu.MPU9250Async.create_async(Bus({0x75:0x71,0x10:128,0x11:128,0x12:128}))
+    sensor = await mpu.MPU9250Async.create_async(Bus({0:0x48,0x75:0x71,0x10:128,0x11:128,0x12:128}))
     await sensor.acceleration_async()
     await sensor.aclose()
 
@@ -271,4 +271,5 @@ async def main():
     print(json.dumps({'runtime':sys.version,'packages':len(loaded),'passed':True,'hardware_tested':False}))
 
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())

@@ -15,11 +15,7 @@ except ImportError:
 
 import time
 
-from hts221 import (
-    BDU_ENABLED,
-    HTS221,
-    RATE_12_5_HZ,
-)
+from _gs_hts221_hts221 import BDU_ENABLED, HTS221, RATE_12_5_HZ
 
 
 # ======================================== 全局变量 ============================================

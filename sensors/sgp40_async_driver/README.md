@@ -56,7 +56,7 @@
 ├── code/sensor_pack_2/bus_service.py
 ├── code/sensor_pack_2/crc_mod.py
 ├── code/sgp4x_async.py
-├── code/sgp4Xmod.py
+├── code/_gs_sgp40_sgp4Xmod.py
 ├── examples/main_sync.py
 ├── LICENSE
 └── package.json
@@ -89,7 +89,7 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
+from _gs_sgp40_sensor_pack_2.bus_service import I2cAdapter
 from sgp4x_async import SGP4XAsync
 
 TARGET_SENSOR_ADDRS = [0x59]

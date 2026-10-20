@@ -72,11 +72,12 @@
 
 ## 快速开始
 
-1. 按 `package.json.urls` 将运行时文件复制到设备；不要把 `examples/` 当作运行时依赖。
-2. 按上文硬件/运行环境配置总线、GPIO、网络或凭证。
-3. 使用包内真实 `code/main.py` 的 import 与构造方式运行。以下是当前文件逐字读取的异步入口；部署时请保留 `try/finally` 并调用对象实际提供的 `deinit()` 或 `aclose()`。
+构造 `DPS310Async` 只保存状态，不执行总线操作。使用前必须 `await sensor.initialize_async(timeout_ms=2000)`，或使用 `await DPS310Async.create_async(i2c)`。校准、温度和压力就绪检查共用截止时间；等待期间让出调度。失败或取消后可重试。计算公式和配置/校准顺序保留来源实现。
+
+以下与 `code/main.py` 一致：
 
 ```python
+# ======================================== 导入相关模块 =========================================
 try:
     import uasyncio as asyncio
 except ImportError:
@@ -88,37 +89,38 @@ from dps310_async import DPS310Async
 TARGET_DPS310_ADDRS = [0x76, 0x77]
 
 
+# ======================================== 全局变量 ============================================
+# ======================================== 功能函数 ============================================
+# ======================================== 自定义类 =============================================
+# ======================================== 初始化配置 ==========================================
 async def main():
+    i2c_bus = None
+    sensor = None
     await asyncio.sleep_ms(3000)
     print("FreakStudio: DPS310 Pressure Sensor I2C Auto Scan and Read")
-    i2c_bus = SoftI2C(sda=Pin(4), scl=Pin(5), freq=100_000)
-    devices_list = i2c_bus.scan()
-    print("START I2C SCANNER")
-    if len(devices_list) == 0:
-        print("No i2c device !")
-        raise SystemExit("I2C scan found no devices, program exited")
-    print(f"i2c devices found: {len(devices_list)}")
-    sensor = None
-    for device in devices_list:
-        if device in TARGET_DPS310_ADDRS:
-            print(f"I2c hexadecimal address: {hex(device)}")
-            try:
-                sensor = DPS310Async(i2c=i2c_bus, address=device)
-                print("Sensor initialization successful")
-                break
-            except Exception as error:
-                print(f"Sensor Initialization failed: {error}")
-    if sensor is None:
-        raise Exception("No target sensor device found in I2C bus")
     try:
+        i2c_bus = SoftI2C(sda=Pin(4), scl=Pin(5), freq=100_000)
+        devices_list = i2c_bus.scan()
+        print("START I2C SCANNER")
+        if not devices_list:
+            raise SystemExit("I2C scan found no devices, program exited")
+        for device in devices_list:
+            if device in TARGET_DPS310_ADDRS:
+                sensor = DPS310Async(i2c=i2c_bus, address=device)
+                await sensor.initialize_async()
+                break
+        if sensor is None:
+            raise RuntimeError("No target sensor device found in I2C bus")
         while True:
-            print(f"Pressure: {sensor.pressure}HPa")
-            print()
+            print("Pressure: %sHPa" % await sensor.get_pressure_async())
             await asyncio.sleep_ms(1000)
     finally:
-        await sensor.aclose()
-
-
+        if sensor is not None:
+            await sensor.aclose()
+        if i2c_bus is not None:
+            deinit = getattr(i2c_bus, "deinit", None)
+            if deinit is not None:
+                deinit()
 asyncio.run(main())
 ```
 

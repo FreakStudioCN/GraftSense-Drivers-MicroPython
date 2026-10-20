@@ -14,10 +14,10 @@ from machine import Pin, I2C
 import time
 
 # 导入自定义模块
-from pca9685 import PCA9685
+from _gs_bus_dc_motor_pca9685 import PCA9685
 
 # 导入直流电机控制模块
-from bus_dc_motor import BusDCMotor
+from _gs_bus_dc_motor_bus_dc_motor import BusDCMotor
 
 # ======================================== 全局变量 ============================================
 

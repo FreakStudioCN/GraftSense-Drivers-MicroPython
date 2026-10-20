@@ -10,6 +10,24 @@ from si1145 import *
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
 class SI1145Async(SI1145):
+    def __init__(self, i2c=None, addr=SI1145_ADDR):
+        if i2c is None:
+            raise ValueError('An I2C object is required.')
+        self._i2c, self._addr = i2c, addr
+        self._initialized = False
+        self._async_lock = asyncio.Lock()
+
+    async def initialize_async(self):
+        async with self._async_lock:
+            if not self._initialized:
+                await self._reset_async()
+                await self._load_calibration_async()
+                self._initialized = True
+            return self
+
+    @classmethod
+    async def create_async(cls, i2c, addr=SI1145_ADDR):
+        return await cls(i2c, addr).initialize_async()
     async def read_uv_async(self): return self.read_uv
     async def read_visible_async(self): return self.read_visible
     async def read_ir_async(self): return self.read_ir
@@ -23,14 +41,9 @@ class SI1145Async(SI1145):
         self._write8(SI1145_REG_HWKEY, 0x17)
         await asyncio.sleep_ms(10)
     async def _load_calibration_async(self):
-        for register, value in ((SI1145_REG_UCOEFF0, 0x7B), (SI1145_REG_UCOEFF1, 0x6B), (SI1145_REG_UCOEFF2, 0x01), (SI1145_REG_UCOEFF3, 0x00), (SI1145_REG_INTCFG, SI1145_REG_INTCFG_INTOE), (SI1145_REG_IRQEN, SI1145_REG_IRQEN_ALSEVERYSAMPLE), (SI1145_REG_MEASRATE0, 0xFF)):
-            self._write8(register, value)
-        self._write_param(SI1145_PARAM_CHLIST, SI1145_PARAM_CHLIST_ENUV | SI1145_PARAM_CHLIST_ENAUX | SI1145_PARAM_CHLIST_ENALSIR | SI1145_PARAM_CHLIST_ENALSVIS | SI1145_PARAM_CHLIST_ENPS1)
-        self._i2c.writeto_mem(SI1145_ADDR, SI1145_REG_PSLED21, b'0x03')
-        for parameter, value in ((SI1145_PARAM_PS1ADCMUX, SI1145_PARAM_ADCMUX_LARGEIR), (SI1145_PARAM_PSLED12SEL, SI1145_PARAM_PSLED12SEL_PS1LED1), (SI1145_PARAM_PSADCGAIN, 0), (SI1145_PARAM_PSADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK), (SI1145_PARAM_PSADCMISC, SI1145_PARAM_PSADCMISC_RANGE | SI1145_PARAM_PSADCMISC_PSMODE), (SI1145_PARAM_ALSIRADCMUX, SI1145_PARAM_ADCMUX_SMALLIR), (SI1145_PARAM_ALSIRADCGAIN, 0), (SI1145_PARAM_ALSIRADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK), (SI1145_PARAM_ALSIRADCMISC, SI1145_PARAM_ALSIRADCMISC_RANGE), (SI1145_PARAM_ALSVISADCGAIN, 0), (SI1145_PARAM_ALSVISADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK), (SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE)):
-            self._write_param(parameter, value)
-            await asyncio.sleep_ms(0)
-        self._write8(SI1145_REG_COMMAND, SI1145_PSALS_AUTO)
+        # This source method contains only bounded register transactions.
+        SI1145._load_calibration(self)
+        await asyncio.sleep_ms(0)
     async def aclose(self):
         deinit = getattr(self, "deinit", None)
         if deinit is not None: deinit()

@@ -1,5 +1,5 @@
 import uasyncio as asyncio
-from mer_async import MERAsync as MER
+from mcp_mer_async import MERAsync as MER
 
 
 async def main():

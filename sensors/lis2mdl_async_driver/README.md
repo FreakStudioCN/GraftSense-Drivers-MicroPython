@@ -50,7 +50,7 @@
 
 ```text
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/i2c_helpers_async.py
+├── code/_gs_lis2mdl_i2c_helpers_async.py
 ├── code/main.py
 ├── code/_gs_lis2mdl_micropython_lis2mdl/__init__.py
 ├── code/_gs_lis2mdl_micropython_lis2mdl/__pycache__/__init__.cpython-313.pyc

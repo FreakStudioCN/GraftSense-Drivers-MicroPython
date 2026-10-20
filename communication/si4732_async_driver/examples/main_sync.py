@@ -10,7 +10,7 @@
 
 import time
 from machine import I2C, Pin
-from si4732 import SI4732
+from _gs_si4732_si4732 import SI4732
 
 # ======================================== 全局变量 ============================================
 

@@ -42,7 +42,11 @@ class BusAdapter:
         Вызов его для сравнительно медленных шин - плохая идея!"""
         if 0 == count:
             return  # нет ничего
-        bl = val.bit_length()
+        # MicroPython does not expose int.bit_length().
+        remaining, bl = abs(val), 0
+        while remaining:
+            remaining >>= 1
+            bl += 1
         if bl > 8:
             raise ValueError(f"The value must take no more than 8 bits! Current: {bl}")
         _max = 16

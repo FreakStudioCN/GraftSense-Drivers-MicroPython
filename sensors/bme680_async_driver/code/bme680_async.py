@@ -111,11 +111,11 @@ class BME680_I2CAsync(source.BME680_I2C):
         self._async_sample_ready = True
         try:
             return (
-                source.BME680.temperature.fget(self),
-                source.BME680.humidity.fget(self),
-                source.BME680.pressure.fget(self),
-                source.BME680.gas.fget(self),
-                source.BME680.altitude.fget(self),
+                self.temperature,
+                self.humidity,
+                self.pressure,
+                self.gas,
+                self.altitude,
             )
         finally:
             self._async_sample_ready = False

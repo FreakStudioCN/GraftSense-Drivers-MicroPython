@@ -1,10 +1,20 @@
 """Cooperative single-shot adapters for ADS1015/ADS1115 conversions."""
+
+# Preserve the documented exception contract on MicroPython.
+try:
+    TimeoutError
+except NameError:
+    try:
+        from uasyncio import TimeoutError
+    except ImportError:
+        from asyncio import TimeoutError
+
 try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
 
-import ads1015 as _source
+import _gs_ads1015_ads1015 as _source
 
 REGISTER_CONVERT = 0x00
 REGISTER_CONFIG = 0x01

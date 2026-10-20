@@ -52,9 +52,9 @@
 ├── code/__pycache__/hts221.cpython-313.pyc
 ├── code/__pycache__/i2c_helpers.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/hts221.py
+├── code/_gs_hts221_hts221.py
 ├── code/hts221_async.py
-├── code/i2c_helpers.py
+├── code/_gs_hts221_i2c_helpers.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -91,7 +91,7 @@ async def main():
 
     # ======================================== 导入相关模块 =========================================
     from machine import I2C, Pin
-    from hts221 import HTS221
+    from _gs_hts221_hts221 import HTS221
 
     # ======================================== 全局变量 ============================================
     # HTS221 默认 I2C 地址

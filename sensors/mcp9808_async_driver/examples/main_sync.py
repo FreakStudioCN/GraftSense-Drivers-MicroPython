@@ -10,7 +10,7 @@
 import time
 from machine import I2C, Pin
 
-from mcp9808 import MCP9808, REG_DEVIDE_ID, REG_MANUFACTURER_ID, TEMP_RESOLUTION_MAX
+from _gs_mcp9808_mcp9808 import MCP9808, REG_DEVIDE_ID, REG_MANUFACTURER_ID, TEMP_RESOLUTION_MAX
 
 # ======================================== 全局变量 ============================================
 # Raspberry Pi Pico / RP2040 接线示例：

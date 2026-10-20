@@ -10,8 +10,8 @@
 
 import time
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
-from sgp4Xmod import SGP4X
+from _gs_sgp40_sensor_pack_2.bus_service import I2cAdapter
+from _gs_sgp40_sgp4Xmod import SGP4X
 
 # ======================================== 全局变量 ============================================
 

@@ -52,9 +52,9 @@
 ├── code/__pycache__/i2c_helpers.cpython-313.pyc
 ├── code/__pycache__/icg20660.cpython-313.pyc
 ├── code/__pycache__/main.cpython-313.pyc
-├── code/i2c_helpers.py
-├── code/i2c_helpers_async.py
-├── code/icg20660.py
+├── code/_gs_icg20660_i2c_helpers.py
+├── code/_gs_icg20660_i2c_helpers_async.py
+├── code/_gs_icg20660_icg20660.py
 ├── code/main.py
 ├── examples/main_sync.py
 ├── LICENSE
@@ -91,7 +91,7 @@ async def main():
 
     # ======================================== 导入相关模块 =========================================
     from machine import Pin, I2C
-    from icg20660 import (
+    from _gs_icg20660_icg20660 import (
         ICG20660,
         GYRO_DLPF_DISABLED,
         GYRO_DLPF_ENABLED,

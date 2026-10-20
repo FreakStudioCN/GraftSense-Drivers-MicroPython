@@ -7,7 +7,7 @@
 # @License : MIT
 
 # ======================================== 导入相关模块 =========================================
-from mer_async import MERAsync, uint16_to_int16
+from mcp1081_mer_async import MERAsync, uint16_to_int16
 
 # ======================================== 全局变量 ============================================
 MER = MERAsync

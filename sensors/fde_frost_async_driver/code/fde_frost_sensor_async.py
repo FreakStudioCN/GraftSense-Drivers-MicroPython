@@ -6,7 +6,7 @@
 # @Description : FDE Frost asynchronous Modbus RTU driver
 # @License : MIT
 # ======================================== 导入相关模块 =========================================
-from modbus_rtu_async import FDEFrostTransportAsync
+from fde_frost_modbus_rtu_async import FDEFrostTransportAsync
 # ======================================== 全局变量 ============================================
 __version__="0.1.0"
 __author__="hogeiha"

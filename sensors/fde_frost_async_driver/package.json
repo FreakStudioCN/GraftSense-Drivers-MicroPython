@@ -12,8 +12,8 @@
   },
   "urls": [
     [
-      "modbus_rtu_async.py",
-      "code/modbus_rtu_async.py"
+      "fde_frost_modbus_rtu_async.py",
+      "code/fde_frost_modbus_rtu_async.py"
     ],
     [
       "fde_frost_sensor_async.py",

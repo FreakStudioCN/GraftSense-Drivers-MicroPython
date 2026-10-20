@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-from bus_dc_motor import BusDCMotor
+from _gs_bus_dc_motor_bus_dc_motor import BusDCMotor
 
 class SyncAdapterMixin:
     """Expose explicit async entry points without hiding bus blocking."""

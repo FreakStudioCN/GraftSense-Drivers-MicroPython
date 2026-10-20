@@ -49,7 +49,7 @@
 ## 文件结构
 
 ```text
-├── code/ads1015.py
+├── code/_gs_ads1015_ads1015.py
 ├── code/ads1015_async.py
 ├── code/main.py
 ├── examples/main_sync.py
@@ -87,7 +87,7 @@ async def main():
     # ======================================== 导入相关模块 =========================================
 
     from machine import I2C, Pin
-    from ads1015 import ADS1015
+    from _gs_ads1015_ads1015 import ADS1015
 
     # ======================================== 全局变量 ============================================
 

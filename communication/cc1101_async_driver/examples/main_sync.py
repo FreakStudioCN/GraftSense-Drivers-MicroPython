@@ -10,7 +10,7 @@
 
 import time
 from machine import Pin, SPI
-from cc1101 import CC1101
+from _gs_cc1101_cc1101 import CC1101
 
 # ======================================== 全局变量 ============================================
 

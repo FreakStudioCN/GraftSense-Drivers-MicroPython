@@ -10,8 +10,8 @@
 
 import time
 from machine import Pin, SoftI2C
-from sensor_pack_2.bus_service import I2cAdapter
-from opt3001mod import OPT3001
+from _gs_opt3001_sensor_pack_2.bus_service import I2cAdapter
+from _gs_opt3001_opt3001mod import OPT3001
 
 # ======================================== 全局变量 ============================================
 

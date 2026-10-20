@@ -14,7 +14,7 @@ except ImportError:
 
 from machine import I2C, Pin
 from bus_dc_motor_async import BusDCMotorAsync
-from pca9685 import PCA9685
+from _gs_bus_dc_motor_pca9685 import PCA9685
 
 # ======================================== 全局变量 ============================================
 I2C_ID = 0

@@ -1,5 +1,15 @@
 """Async adapter for the MMC5603 source driver."""
 
+# Preserve the documented exception contract on MicroPython.
+try:
+    TimeoutError
+except NameError:
+    try:
+        from uasyncio import TimeoutError
+    except ImportError:
+        from asyncio import TimeoutError
+
+
 import time
 try:
     import uasyncio as asyncio

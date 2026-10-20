@@ -24,8 +24,8 @@
       "code/_gs_mmc5603_micropython_mmc5603/__init__.py"
     ],
     [
-      "i2c_helpers_async.py",
-      "code/i2c_helpers_async.py"
+      "_gs_mmc5603_i2c_helpers_async.py",
+      "code/_gs_mmc5603_i2c_helpers_async.py"
     ],
     [
       "mmc5603_async.py",

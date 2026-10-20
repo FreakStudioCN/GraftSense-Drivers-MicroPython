@@ -15,7 +15,7 @@ from machine import UART, Pin, Timer
 import time
 
 # 导入驱动与常量（DYSV19T、VOLUME_MAX、DISK_*、MODE_*、CH_* 等）
-from dy_sv19t import *
+from _gs_dy_sv19t_dy_sv19t import *
 
 # ======================================== 全局变量 ============================================
 

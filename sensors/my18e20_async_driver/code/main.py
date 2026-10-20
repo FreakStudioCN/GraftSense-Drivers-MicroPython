@@ -6,7 +6,7 @@ except ImportError:
 
 from machine import Pin
 from my18e20_async import MY18E20Async
-from onewire import OneWire
+from _gs_my18e20_onewire import OneWire
 
 # ======================================== 全局变量 ============================================
 ONEWIRE_PIN = 6

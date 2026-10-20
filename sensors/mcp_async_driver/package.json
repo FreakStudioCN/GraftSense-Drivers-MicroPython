@@ -12,8 +12,8 @@
       "code/_gs_mcp_mer.py"
     ],
     [
-      "mer_async.py",
-      "code/mer_async.py"
+      "mcp_mer_async.py",
+      "code/mcp_mer_async.py"
     ],
     [
       "_gs_mcp_umodbus/__init__.py",

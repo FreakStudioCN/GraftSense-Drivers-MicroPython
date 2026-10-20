@@ -6,7 +6,7 @@ except ImportError:
 
 import time
 from machine import I2C, Pin
-from hts221 import ONE_SHOT
+from _gs_hts221_hts221 import ONE_SHOT
 from hts221_async import HTS221Async
 
 # ======================================== 全局变量 ============================================

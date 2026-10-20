@@ -10,7 +10,7 @@
 
 import time
 from machine import I2C, Pin
-from ip5306 import IP5306
+from _gs_ip5306_ip5306 import IP5306
 
 # ======================================== 全局变量 ============================================
 

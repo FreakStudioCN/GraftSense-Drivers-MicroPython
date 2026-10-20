@@ -1,4 +1,14 @@
 """Cooperative ADS1115 adapter with a single I2C transaction lock."""
+
+# Preserve the documented exception contract on MicroPython.
+try:
+    TimeoutError
+except NameError:
+    try:
+        from uasyncio import TimeoutError
+    except ImportError:
+        from asyncio import TimeoutError
+
 try:
     import uasyncio as asyncio
 except ImportError:

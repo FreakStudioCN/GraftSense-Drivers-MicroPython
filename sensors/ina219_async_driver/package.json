@@ -30,8 +30,8 @@
       "code/_gs_ina219_sensor_pack_2/__init__.py"
     ],
     [
-      "ina_ti_async.py",
-      "code/ina_ti_async.py"
+      "ina219_async.py",
+      "code/ina219_async.py"
     ]
   ],
   "version": "1.0.0",

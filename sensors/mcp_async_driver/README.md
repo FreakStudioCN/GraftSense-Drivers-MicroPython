@@ -51,7 +51,7 @@
 ```text
 ├── code/main.py
 ├── code/_gs_mcp_mer.py
-├── code/mer_async.py
+├── code/mcp_mer_async.py
 ├── code/_gs_mcp_umodbus/__init__.py
 ├── code/_gs_mcp_umodbus/__pycache__/__init__.cpython-313.pyc
 ├── code/_gs_mcp_umodbus/__pycache__/common.cpython-313.pyc
@@ -90,7 +90,7 @@
 
 ```python
 import uasyncio as asyncio
-from mer_async import MERAsync as MER
+from mcp_mer_async import MERAsync as MER
 
 async def main():
     await asyncio.sleep(3)

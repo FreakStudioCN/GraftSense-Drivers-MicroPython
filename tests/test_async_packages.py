@@ -20,6 +20,15 @@ class WithoutDocstrings(ast.NodeTransformer):
 def program(path):
     return ast.dump(WithoutDocstrings().visit(ast.parse(path.read_bytes())), include_attributes=False)
 
+def installed_source(manifest, source):
+    """Resolve this repository's local and github: manifest sources alike."""
+    prefix = 'github:FreakStudioCN/GraftSense-Drivers-MicroPython/'
+    if source.startswith(prefix):
+        return ROOT / source[len(prefix):]
+    if source.startswith(('http:', 'https:', 'github:')):
+        raise AssertionError('Unresolved external install source: ' + source)
+    return manifest.parent / source
+
 class AsyncPackages(unittest.TestCase):
     def test_local_install_targets_exist(self):
         packages = list(ROOT.glob('*/*_async_driver/package.json'))
@@ -39,9 +48,9 @@ class AsyncPackages(unittest.TestCase):
             source = package.with_name(SOURCE_NAMES.get(package.name, package.name.replace('_async_driver', '_driver')))
             original_manifest = source / 'package.json'
             self.assertTrue(original_manifest.is_file(), package)
-            originals = {destination: source / path for destination, path in json.loads(original_manifest.read_text('utf-8-sig'))['urls']}
+            originals = {destination: installed_source(original_manifest, path) for destination, path in json.loads(original_manifest.read_text('utf-8-sig'))['urls']}
             for destination, path in json.loads(manifest.read_text('utf-8-sig'))['urls']:
-                candidate = package / path
+                candidate = installed_source(manifest, path)
                 baseline = originals.get(destination)
                 if baseline is not None and baseline.suffix == '.py' and baseline.is_file() and candidate.is_file():
                     self.assertEqual(program(candidate), program(baseline), (package.name, destination))

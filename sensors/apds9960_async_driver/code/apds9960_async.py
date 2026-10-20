@@ -54,10 +54,41 @@ class PROXAsync(_AsyncCloseMixin, PROX):
     async def proximity_level_async(self): return self.proximityLevel
 
 class APDS9960Async(_AsyncCloseMixin, APDS9960):
+    def __init__(self, i2c, debug=False):
+        I2CEX.__init__(self, i2c, self._ADDR, debug)
+        self.prox = self.als = None
+        self._initialized = False
+        self._async_lock = asyncio.Lock()
+
+    async def initialize_async(self):
+        async with self._async_lock:
+            if self._initialized:
+                return self
+            self.powerOn(False)
+            await asyncio.sleep_ms(50)
+            try:
+                self.powerOn(True)
+                self.prox = PROXAsync(self._i2c, self._debug)
+                self.als = ALSAsync(self._i2c, self._debug)
+                self._initialized = True
+            except BaseException as error:
+                try:
+                    self.powerOn(False)
+                except BaseException as cleanup_error:
+                    raise error from cleanup_error
+                raise
+            return self
+
+    @classmethod
+    async def create_async(cls, i2c, debug=False):
+        return await cls(i2c, debug).initialize_async()
+
     async def power_on_async(self, on=True): return self.powerOn(on)
     async def status_register_async(self): return self.statusRegister
     async def deinit_async(self):
-        self.deinit()
+        if self._initialized:
+            self.deinit()
+            self._initialized = False
         await asyncio.sleep_ms(0)
     async def aclose(self):
         await self.deinit_async()

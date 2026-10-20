@@ -628,8 +628,8 @@ async def main():
         if not sensor_initialized:
             # 抛出异常，提示未找到BMA220传感器
             raise Exception(
-                f"No BMA220 sensor found on I2C bus! "
-                f"Expected addresses: {[hex(addr) for addr in TARGET_SENSOR_ADDRS]}, "
+                f"No BMA220 sensor found on I2C bus! " +
+                f"Expected addresses: {[hex(addr) for addr in TARGET_SENSOR_ADDRS]}, " +
                 f"Scanned addresses: {[hex(addr) for addr in devices_list]}"
             )
         

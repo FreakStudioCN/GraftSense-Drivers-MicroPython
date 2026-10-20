@@ -13,7 +13,7 @@ try:
 except ImportError:
     import asyncio
 
-from piranha_led import POLARITY_ANODE, POLARITY_CATHODE
+from _gs_piranha_led_piranha_led import POLARITY_ANODE, POLARITY_CATHODE
 from piranha_led_async import PiranhaLEDAsync
 
 # ======================================== 全局变量 ============================================

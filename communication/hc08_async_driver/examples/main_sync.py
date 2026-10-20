@@ -9,7 +9,7 @@
 
 import time
 from machine import UART, Pin
-from hc08 import HC08
+from _gs_hc08_hc08 import HC08
 
 
 # ======================================== 全局变量 ============================================

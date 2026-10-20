@@ -5,8 +5,8 @@ except ImportError:
     import asyncio
 
 from machine import Pin
-from my18e20 import MY18E20
-from onewire import OneWire
+from _gs_my18e20_my18e20 import MY18E20
+from _gs_my18e20_onewire import OneWire
 
 
 class MY18E20Async(MY18E20):
