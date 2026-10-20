@@ -17,6 +17,24 @@ import struct
 # ======================================== 全局变量 ============================================
 IRQ_POLL_MS = 10
 
+
+async def _pulse_low_async(pin, delay_ms):
+    pin.value(0)
+    started = time.ticks_ms()
+    try:
+        await asyncio.sleep_ms(delay_ms)
+    finally:
+        try:
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+            while remaining > 0:
+                try:
+                    await asyncio.sleep_ms(remaining)
+                except asyncio.CancelledError:
+                    pass
+                remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        finally:
+            pin.value(1)
+
 # ======================================== 功能函数 ============================================
 
 # ======================================== 自定义类 =============================================
@@ -96,9 +114,7 @@ class SX1276Async:
     async def initialize_async(self):
         if self._initialized:
             return
-        self._rst_pin.off()
-        await asyncio.sleep_ms(10)
-        self._rst_pin.on()
+        await _pulse_low_async(self._rst_pin, 10)
         await asyncio.sleep_ms(10)
         self._cs_pin.on()
         await self.spi_write_async("RegOpMode", self.MODE["SLEEP"] | 0x80)
@@ -272,6 +288,8 @@ class SX1276Async:
             print("[SX1276] %s" % msg)
 
     async def deinit_async(self):
+        if self._spi is None:
+            return
         if self._dio0_pin is not None:
             self._dio0_pin.irq(handler=None)
         if self._dio1_pin is not None:

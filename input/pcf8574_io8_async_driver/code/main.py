@@ -125,6 +125,7 @@ async def main():
         io8 = PCF8574IO8(pcf)
         print(io8.ports_state())
         while True:
+            await pcf.dispatch_pending_async()
             print(io8.get_pin(0))
             io8.set_port(1, 2)
             await asyncio.sleep_ms(500)

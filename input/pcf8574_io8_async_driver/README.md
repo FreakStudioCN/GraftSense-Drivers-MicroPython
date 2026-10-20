@@ -67,11 +67,13 @@
 
 ## 快速开始
 
-1. 按 `package.json.urls` 将运行时文件复制到设备；不要把 `examples/` 当作运行时依赖。
-2. 按上文硬件/运行环境配置总线、GPIO、网络或凭证。
-3. 使用包内真实 `code/main.py` 的 import 与构造方式运行。以下是当前文件逐字读取的异步入口；部署时请保留 `try/finally` 并调用对象实际提供的 `deinit()` 或 `aclose()`。
+IRQ 只记录待处理状态，不在中断中访问 I2C 或调用用户回调。主循环必须周期性 `await pcf.dispatch_pending_async()`；有待处理事件时在任务中读取端口并调用 `callback(port)`，支持普通函数和协程回调，异常向调用任务传播。多个 IRQ 可以合并为一次当前端口读取；这不是逐边沿事件队列。调度队列满的标记也由该方法消费。结束时 `await pcf.aclose()`。
+
+按 `package.json.urls` 安装后，运行以下示例（与 `code/main.py` 一致）：
 
 ```python
+"""Preserved source demo follows; runnable async example is appended below."""
+"""
 try:
     import uasyncio as asyncio
 except ImportError:
@@ -93,10 +95,10 @@ async def main():
     # 导入时间模块
 
     # 导入PCF8574和PCF8574IO8模块
-    from _gs_pcf8574_io8_pcf8574 import PCF8574
+    from pcf8574 import PCF8574
 
     # 导入PCF8574IO8模块
-    from _gs_pcf8574_io8_pcf8574_io8 import PCF8574IO8
+    from pcf8574_io8 import PCF8574IO8
 
     # ======================================== 全局变量 ============================================
 
@@ -175,6 +177,42 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
+"""
+try:
+    import uasyncio as asyncio
+except ImportError:
+    import asyncio
+from machine import I2C, Pin
+from pcf8574_async import PCF8574Async
+from _gs_pcf8574_io8_pcf8574_io8 import PCF8574IO8
+
+
+async def main():
+    pcf = None
+    io8 = None
+    try:
+        i2c = I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
+        pcf = PCF8574Async(i2c, 0x20)
+        if not await pcf.check_async():
+            raise RuntimeError("PCF8574 not found")
+        io8 = PCF8574IO8(pcf)
+        print(io8.ports_state())
+        while True:
+            await pcf.dispatch_pending_async()
+            print(io8.get_pin(0))
+            io8.set_port(1, 2)
+            await asyncio.sleep_ms(500)
+            io8.set_port(1, 0)
+            await asyncio.sleep_ms(500)
+    finally:
+        if io8 is not None:
+            io8.deinit()
+        if pcf is not None:
+            await pcf.aclose()
+
+
+asyncio.run(main())
 ```
 
 ## 异步设计与使用
@@ -189,6 +227,7 @@ if __name__ == '__main__':
 | `PCF8574.pin` | `event_bridge` | IRQ/事件通知由协程消费；总线访问仍可能同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
 | `PCF8574.port` | `event_bridge` | IRQ/事件通知由协程消费；总线访问仍可能同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
 | `PCF8574.toggle` | `event_bridge` | IRQ/事件通知由协程消费；总线访问仍可能同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
+| `PCF8574Async.dispatch_pending_async` | `event_bridge` | 在任务中消费 IRQ 标记并调用回调 | 单次同步 I2C 读取 | 回调异常传播；无事件返回 False。 |
 | `PCF8574Async.check_async` | `event_bridge` | IRQ/事件通知由协程消费；总线访问仍可能同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
 | `PCF8574Async.pin_async` | `event_bridge` | IRQ/事件通知由协程消费；总线访问仍可能同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
 | `PCF8574Async.port_async` | `event_bridge` | IRQ/事件通知由协程消费；总线访问仍可能同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |

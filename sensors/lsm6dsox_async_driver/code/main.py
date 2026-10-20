@@ -46,6 +46,7 @@ async def main():
         if chip_id != LSM6DSOX_CHIP_ID:
             raise RuntimeError("Unexpected LSM6DSOX chip ID: expected 0x%02X, got 0x%02X" % (LSM6DSOX_CHIP_ID, chip_id))
         lsm = LSM6DSOXAsync(i2c, address=LSM6DSOX_I2C_ADDR, debug=False)
+        await lsm.initialize_async()
         last_print_time = time.ticks_ms()
         while True:
             current_time = time.ticks_ms()

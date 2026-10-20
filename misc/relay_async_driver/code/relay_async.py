@@ -4,6 +4,7 @@ try:
 except ImportError:
     import asyncio
 from machine import Pin
+import time
 
 
 class RelayControllerAsync:
@@ -17,33 +18,55 @@ class RelayControllerAsync:
         self.pin2 = Pin(pin2, Pin.OUT) if pin2 is not None else None
         if self.pin2 is not None: self.pin2.value(0)
         self._last_state = False; self._closed = False
+        self._lock = asyncio.Lock()
+
+    async def _set_state_locked(self, state):
+        if self._closed:
+            raise RuntimeError("relay is closed")
+        if self.relay_type == "normal":
+            self.pin1.value(int(state))
+            self._last_state = state
+            return
+        active, inactive = (self.pin1, self.pin2) if state else (self.pin2, self.pin1)
+        inactive.value(0)
+        active.value(1)
+        started = time.ticks_ms()
+        try:
+            await asyncio.sleep_ms(50)
+        finally:
+            try:
+                remaining = 50 - time.ticks_diff(time.ticks_ms(), started)
+                while remaining > 0:
+                    try:
+                        await asyncio.sleep_ms(remaining)
+                    except asyncio.CancelledError:
+                        pass
+                    remaining = 50 - time.ticks_diff(time.ticks_ms(), started)
+            finally:
+                self.pin1.value(0)
+                self.pin2.value(0)
+                self._last_state = state
 
     async def get_state_async(self):
         return bool(self.pin1.value()) if self.relay_type == "normal" else self._last_state
 
     async def on_async(self):
-        if self.relay_type == "normal": self.pin1.value(1)
-        else:
-            self.pin2.value(0); self.pin1.value(1); await asyncio.sleep_ms(50)
-            self.pin1.value(0); self.pin2.value(0)
-        self._last_state = True
+        async with self._lock:
+            await self._set_state_locked(True)
 
     async def off_async(self):
-        if self.relay_type == "normal": self.pin1.value(0)
-        else:
-            self.pin1.value(0); self.pin2.value(1); await asyncio.sleep_ms(50)
-            self.pin1.value(0); self.pin2.value(0)
-        self._last_state = False
+        async with self._lock:
+            await self._set_state_locked(False)
 
     async def toggle_async(self):
-        if self.relay_type == "normal":
-            self.pin1.value(not self.pin1.value()); self._last_state = bool(self.pin1.value())
-        elif self._last_state: await self.off_async()
-        else: await self.on_async()
+        async with self._lock:
+            state = bool(self.pin1.value()) if self.relay_type == "normal" else self._last_state
+            await self._set_state_locked(not state)
 
     async def aclose(self):
-        if self._closed: return
-        self._closed = True
-        self.pin1.value(0)
-        if self.pin2 is not None: self.pin2.value(0)
-        self._last_state = False
+        async with self._lock:
+            if self._closed: return
+            self._closed = True
+            self.pin1.value(0)
+            if self.pin2 is not None: self.pin2.value(0)
+            self._last_state = False

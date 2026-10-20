@@ -3,8 +3,16 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
-import ft5336 as _sync
 from ft5336 import FT5336
+from micropython import const
+
+# Source register values stay local: MicroPython does not export private consts.
+_TD_STATUS = const(2)
+_REG_NUMTOUCHES = const(2)
+_TOUCH1_XH = const(3)
+_TOUCH1_XL = const(4)
+_TOUCH1_YH = const(5)
+_TOUCH1_YL = const(6)
 
 
 class FT5336Async(FT5336):
@@ -20,13 +28,13 @@ class FT5336Async(FT5336):
                 if attempt == 2:
                     raise RuntimeError("I2C read failed when reading touch data block") from error
                 await asyncio.sleep_ms(10)
-        self._touches = buffer[_sync._TD_STATUS]
+        self._touches = buffer[_TD_STATUS]
         if self._touches > self.max_touches or self._touches == 0:
             self._touches = 0
             return
         for index in range(self._touches):
-            x = (buffer[_sync._TOUCH1_XH + index * 6] & 0x0F) << 8 | buffer[_sync._TOUCH1_XL + index * 6]
-            y = (buffer[_sync._TOUCH1_YH + index * 6] & 0x0F) << 8 | buffer[_sync._TOUCH1_YL + index * 6]
+            x = (buffer[_TOUCH1_XH + index * 6] & 0x0F) << 8 | buffer[_TOUCH1_XL + index * 6]
+            y = (buffer[_TOUCH1_YH + index * 6] & 0x0F) << 8 | buffer[_TOUCH1_YL + index * 6]
             if self._invert_x:
                 x = self._screen_width - 1 - x
             if self._invert_y:
@@ -35,7 +43,7 @@ class FT5336Async(FT5336):
                 x, y = y, x
             self._touch_x[index] = x
             self._touch_y[index] = y
-            self._touch_id[index] = buffer[_sync._TOUCH1_YH + index * 6] >> 4
+            self._touch_id[index] = buffer[_TOUCH1_YH + index * 6] >> 4
 
     async def touches_async(self):
         await self._read_data_async()
@@ -52,11 +60,11 @@ class FT5336Async(FT5336):
     async def touched_async(self):
         for attempt in range(3):
             try:
-                value = self.i2c.readfrom_mem(self.i2c_addr, _sync._REG_NUMTOUCHES, 1)[0]
+                value = self.i2c.readfrom_mem(self.i2c_addr, _REG_NUMTOUCHES, 1)[0]
                 return 0 if value > self.max_touches else value
             except OSError as error:
                 if attempt == 2:
-                    raise RuntimeError("I2C read failed at register 0x%02X" % _sync._REG_NUMTOUCHES) from error
+                    raise RuntimeError("I2C read failed at register 0x%02X" % _REG_NUMTOUCHES) from error
                 await asyncio.sleep_ms(10)
 
     async def points_async(self):

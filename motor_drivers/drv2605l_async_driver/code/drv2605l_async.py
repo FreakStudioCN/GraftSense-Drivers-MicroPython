@@ -4,8 +4,13 @@ try:
 except ImportError:
     import asyncio
 
-import drv2605l as _source
 from drv2605l import DRV2605, Effect, Pause
+from micropython import const
+
+_DRV2605_REG_GO = const(12)
+_GO_BIT = const(1)
+_DEFAULT_GO_TIMEOUT_MS = const(5000)
+_GO_POLL_INTERVAL_MS = const(10)
 
 class EffectAsync(Effect):
     async def get_raw_value_async(self): return self.raw_value
@@ -27,12 +32,12 @@ class DRV2605Async:
         return self._driver.play()
 
     async def play_effect_async(self, timeout_ms=None):
-        self._driver._write_u8(_source._DRV2605_REG_GO, 1)
+        self._driver._write_u8(_DRV2605_REG_GO, 1)
         if timeout_ms == 0: return True
-        if timeout_ms is None: timeout_ms = _source._DEFAULT_GO_TIMEOUT_MS
-        for _ in range((timeout_ms + _source._GO_POLL_INTERVAL_MS - 1) // _source._GO_POLL_INTERVAL_MS):
-            if not (self._driver._read_u8(_source._DRV2605_REG_GO) & _source._GO_BIT): return True
-            await asyncio.sleep_ms(_source._GO_POLL_INTERVAL_MS)
+        if timeout_ms is None: timeout_ms = _DEFAULT_GO_TIMEOUT_MS
+        for _ in range((timeout_ms + _GO_POLL_INTERVAL_MS - 1) // _GO_POLL_INTERVAL_MS):
+            if not (self._driver._read_u8(_DRV2605_REG_GO) & _GO_BIT): return True
+            await asyncio.sleep_ms(_GO_POLL_INTERVAL_MS)
         return False
 
     async def stop_async(self): return self._driver.stop()

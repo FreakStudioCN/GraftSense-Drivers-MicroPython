@@ -37,7 +37,7 @@ class JoystickAsync:
             self._sample()
             if self.callback is not None:
                 result = self.callback((self.x_value, self.y_value, self.sw_value))
-                if hasattr(result, "__await__"):
+                if hasattr(result, "send") or hasattr(result, "__await__"):
                     await result
             await asyncio.sleep_ms(period_ms)
 

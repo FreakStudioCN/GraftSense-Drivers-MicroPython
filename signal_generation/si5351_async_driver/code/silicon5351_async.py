@@ -7,11 +7,17 @@ import time
 
 from silicon5351 import *
 
+class _SI5351State(SI5351_I2C):
+    """Preserve source methods without running synchronous initialization."""
+    def __init__(self):
+        pass
+
+
 class SI5351_I2CAsync:
     """Async facade; each delegated call remains a short sync transaction."""
 
     def __init__(self, i2c, crystal, load=3, address=0x60):
-        self._driver = SI5351_I2C.__new__(SI5351_I2C)
+        self._driver = _SI5351State()
         self._driver.i2c, self._driver.crystal, self._driver.address = i2c, crystal, address
         self._driver.vco, self._driver.pll, self._driver.quadrature = {}, {}, {}
         self._driver.invert, self._driver.drive_strength, self._driver.div = {}, {}, {}

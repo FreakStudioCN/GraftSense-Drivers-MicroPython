@@ -102,7 +102,9 @@ async def heartbeat_during(operation):
     async def heartbeat():
         while True:
             beats.append(time.monotonic())
-            await asyncio.sleep(.001)
+            # Count scheduler opportunities without relying on Windows' timer
+            # resolution or a particular number of 1 ms timer wakeups.
+            await asyncio.sleep(0)
     task = asyncio.create_task(heartbeat())
     try:
         result = await operation()

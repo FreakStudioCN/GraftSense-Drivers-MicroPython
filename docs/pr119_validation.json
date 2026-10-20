@@ -4,20 +4,41 @@
   "passed": 1202,
   "failures": [],
   "arm_retries": 21,
-  "reused_unchanged": 1191,
+  "reused_unchanged": 1198,
+  "date": "2026-10-20",
+  "runtime_payload_sha256": "a3ca59a498d79966f329865cfac97ff1bbe3bb637df09f887d926d8d1047d29b",
   "host_unittest": {
     "command": "python -m unittest discover -s tests -v",
-    "passed": 18,
+    "passed": 36,
     "failed": 0
   },
   "scope": {
     "pr119_async_packages": 224,
-    "pr119_total_packages": 225,
-    "confirmed_packages_repaired": 20,
+    "reviewed_head": "812a40643d5df20d3d9687c18dd051daf542121a",
+    "reviewed_diff_files": 1870,
+    "reviewed_function_definitions": 10911,
+    "first_round_repaired_packages": 20,
+    "full_review_confirmed_findings": 22,
+    "additional_vm_findings": 4,
+    "current_round_findings_fixed": 26,
+    "current_round_affected_packages": 25,
     "isolated_dependency_packages": 89,
     "isolated_module_roots": 150,
+    "module_private_const_cross_references": 0,
     "hardware_tested": false,
     "all_public_apis_executed": false
   },
-  "main_integrated": "8419ae862f5062f206ff8b62214a3af0a93b3acb"
+  "main_integrated": "8419ae862f5062f206ff8b62214a3af0a93b3acb",
+  "micropython_vm_smoke": {
+    "packages": 25,
+    "runtime": "3.4.0; MicroPython v1.23.0-dirty on 2026-10-20",
+    "passed": true,
+    "hardware_tested": false,
+    "upstream_version": "v1.23.0",
+    "upstream_commit": "a61c446c0b34e82aeb54b9770250d267656f2b7f",
+    "port": "windows; built with asyncio/select enabled; injected peripherals",
+    "runtime_c_sources_modified": false,
+    "windows_build_argument_transport_modified": true,
+    "emergency_buffer_adapter": "allocator no-op on Windows static 256-byte buffer; real const/compiler preserved"
+  }
 }

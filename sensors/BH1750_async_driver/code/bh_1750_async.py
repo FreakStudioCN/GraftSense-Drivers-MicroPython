@@ -116,19 +116,35 @@ class BH1750Async(BH1750):
             return lux / 2
         return lux
 
-    async def measurements_async(self, timeout_ms=250):
-        while True:
-            yield await self.measurement_async(timeout_ms)
-            if self._measurement_mode == BH1750.MEASUREMENT_MODE_CONTINUOUSLY:
-                base = 16 if self._measurement_time == BH1750.RESOLUTION_LOW else 120
-                wait_ms = math.ceil(base * self._measurement_time / BH1750.MEASUREMENT_TIME_DEFAULT)
-                if wait_ms > timeout_ms:
-                    raise TimeoutError("BH1750 continuous conversion timeout")
-                await asyncio.sleep_ms(wait_ms)
+    def measurements_async(self, timeout_ms=250):
+        """Return an explicit async iterator supported by MicroPython 1.23."""
+        return _MeasurementsAsync(self, timeout_ms)
 
     async def aclose(self):
         deinit = getattr(self, "deinit", None)
         if deinit is not None:
             deinit()
+
+
+class _MeasurementsAsync:
+    def __init__(self, sensor, timeout_ms):
+        self._sensor = sensor
+        self._timeout_ms = timeout_ms
+        self._first = True
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        sensor = self._sensor
+        if not self._first and sensor._measurement_mode == BH1750.MEASUREMENT_MODE_CONTINUOUSLY:
+            base = 16 if sensor._measurement_time == BH1750.RESOLUTION_LOW else 120
+            wait_ms = math.ceil(base * sensor._measurement_time / BH1750.MEASUREMENT_TIME_DEFAULT)
+            if wait_ms > self._timeout_ms:
+                raise TimeoutError("BH1750 continuous conversion timeout")
+            await asyncio.sleep_ms(wait_ms)
+        value = await sensor.measurement_async(self._timeout_ms)
+        self._first = False
+        return value
 # ======================================== 初始化配置 ==========================================
 # ======================================== 主程序 ==============================================

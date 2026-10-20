@@ -77,9 +77,9 @@ class SMSAsync:
 class GPSAsync:
     def __init__(self, sim7600): self.sim7600 = sim7600
     async def disable_gps_async(self): return await self.sim7600.command_async("AT+CGPS=0")
-    async def set_satellite_beidou_async(self): return await self.sim7600.command_async("AT+CGPS=1,3")
+    async def set_satellite_beidou_async(self): return await self.sim7600.command_async("AT+CGPSNMEA=196608")
     async def enable_gps_async(self): return await self.sim7600.command_async("AT+CGPS=1")
-    async def start_search_satellite_async(self): return await self.sim7600.command_async("AT+CGPSINFO")
+    async def start_search_satellite_async(self): return await self.sim7600.command_async("AT+CGPSFTM=1")
     async def get_gps_info_async(self): return await self.sim7600.command_async("AT+CGPSINFO")
 
 
@@ -94,7 +94,7 @@ class LBSAsync:
 class HTTPAsync:
     def __init__(self, sim7600): self.sim7600 = sim7600
     async def set_apn_async(self, cid=1, pdp_type="IP", apn="CMNET"): return await self.sim7600.command_async('AT+CGDCONT={},"{}","{}"'.format(cid,pdp_type,apn))
-    async def get_ip_async(self): return await self.sim7600.command_async("AT+CGPADDR")
+    async def get_ip_async(self): return await self.sim7600.command_async("AT+CGCONTRDP")
     async def enable_http_async(self): return await self.sim7600.command_async("AT+HTTPINIT")
     async def disable_http_async(self): return await self.sim7600.command_async("AT+HTTPTERM")
     async def set_url_async(self, url): return await self.sim7600.command_async('AT+HTTPPARA="URL","{}"'.format(url))

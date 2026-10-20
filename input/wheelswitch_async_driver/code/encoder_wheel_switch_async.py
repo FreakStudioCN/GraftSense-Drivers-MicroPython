@@ -50,7 +50,7 @@ class EncoderWheelSwitchAsync:
                 self.last_up_state = state
                 if state != self.idle_state and self.callback_up:
                     result = self.callback_up()
-                    if hasattr(result, "__await__"):
+                    if hasattr(result, "send") or hasattr(result, "__await__"):
                         await result
         if down:
             await asyncio.sleep_ms(self.debounce_ms)
@@ -59,7 +59,7 @@ class EncoderWheelSwitchAsync:
                 self.last_down_state = state
                 if state != self.idle_state and self.callback_down:
                     result = self.callback_down()
-                    if hasattr(result, "__await__"):
+                    if hasattr(result, "send") or hasattr(result, "__await__"):
                         await result
         return up or down
 

@@ -62,7 +62,7 @@ class PCF8575Async(PCF8575):
         self._event_pending = False
         if self._async_callback is not None:
             result = self._async_callback(self)
-            if hasattr(result, "__await__"):
+            if hasattr(result, "send") or hasattr(result, "__await__"):
                 await result
         return True
 

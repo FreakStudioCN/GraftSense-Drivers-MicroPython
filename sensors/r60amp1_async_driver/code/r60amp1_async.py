@@ -14,6 +14,12 @@ except ImportError:
 import time
 from r60amp1 import R60AMP1
 
+
+class _R60AMP1State(R60AMP1):
+    """Allocate protocol state without the synchronous startup sequence."""
+    def __init__(self):
+        pass
+
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
@@ -36,7 +42,7 @@ class R60AMP1Async:
         self._latest_frame = None
         self._dropped_frames = 0
         self._configuration = configuration.copy()
-        self._state = R60AMP1.__new__(R60AMP1)
+        self._state = _R60AMP1State()
         self._state.data_processor = data_processor
         self._state._query_in_progress = False
         self._state._query_response_received = False

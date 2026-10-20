@@ -4,7 +4,7 @@ try:
 except ImportError:
     import asyncio
 
-from i2c_helpers import *
+from _gs_tmp117_micropython_tmp117.i2c_helpers import *
 
 class SyncAdapterMixin:
     """Expose explicit async entry points without hiding bus blocking."""

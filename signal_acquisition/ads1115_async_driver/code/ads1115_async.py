@@ -35,7 +35,7 @@ class ADS1115Async:
         self._alert_pending = False
         if self._alert_callback is not None:
             result = self._alert_callback(self._alert_pin)
-            if hasattr(result, "__await__"):
+            if hasattr(result, "send") or hasattr(result, "__await__"):
                 await result
 
     async def raw_to_v_async(self, raw):

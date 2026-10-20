@@ -106,8 +106,13 @@ class E22_900M22SAsync(SyncAdapterMixin, E22_900M22S):
                 SX126X_CMD_SET_TX_PARAMS,
                 bytes((output_power_dbm & 0xFF, SX126X_PA_RAMP_200_US)), "SetTxParams",
             )
-        except SX126XError:
-            await self._write_register_async(SX126X_REG_OCP_CONFIGURATION, ocp_value)
+        except BaseException as error:
+            # Cancellation must also restore the source OCP setting. Preserve
+            # the original failure if the cleanup transaction itself fails.
+            try:
+                await self._write_register_async(SX126X_REG_OCP_CONFIGURATION, ocp_value)
+            except BaseException as restore_error:
+                raise error from restore_error
             raise
         await self._write_register_async(SX126X_REG_OCP_CONFIGURATION, ocp_value)
 

@@ -4,7 +4,17 @@ try:
 except ImportError:
     import asyncio
 
-from _gs_ft6x06_ft6x06 import FT6x06, _DEFAULT_ADDR, _REG_TD_STATUS, _TOUCH_DATA_START, _TOUCH_DATA_SIZE, _TOUCH_EVENT_SHIFT, _COORD_HIGH_MASK, _AREA_SHIFT, _DEFAULT_RETRIES, _DEFAULT_RETRY_DELAY_MS, Pin
+from _gs_ft6x06_ft6x06 import FT6x06, _DEFAULT_RETRIES, _DEFAULT_RETRY_DELAY_MS, Pin
+from micropython import const
+
+# These private source consts are inlined and unavailable across module boundaries.
+_DEFAULT_ADDR = const(56)
+_REG_TD_STATUS = const(2)
+_TOUCH_DATA_START = const(3)
+_TOUCH_DATA_SIZE = const(6)
+_TOUCH_EVENT_SHIFT = const(6)
+_COORD_HIGH_MASK = const(7)
+_AREA_SHIFT = const(4)
 
 
 class FT6x06Async(FT6x06):

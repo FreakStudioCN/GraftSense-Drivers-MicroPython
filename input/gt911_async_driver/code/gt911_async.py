@@ -3,9 +3,28 @@ try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
+import time
 
 from _gs_gt911_gt911 import GT911, Pin
 from array import array
+
+
+async def _wait_ms_async(delay_ms, started=None):
+    """Finish a source timing interval even if its owner is cancelled."""
+    if started is None:
+        started = time.ticks_ms()
+    try:
+        remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        if remaining > 0:
+            await asyncio.sleep_ms(remaining)
+    finally:
+        remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
+        while remaining > 0:
+            try:
+                await asyncio.sleep_ms(remaining)
+            except asyncio.CancelledError:
+                pass
+            remaining = delay_ms - time.ticks_diff(time.ticks_ms(), started)
 
 
 class GT911Async(GT911):
@@ -53,14 +72,26 @@ class GT911Async(GT911):
         self._initialized = True
 
     async def reset_async(self):
+        self._initialized = False
         self.rst_pin = Pin(self.rst_pin_label, Pin.OUT, value=0)
-        int_pin = Pin(self.int_pin_label, Pin.OUT)
-        int_pin.value(0 if self.addr == 0x5D else 1)
-        await asyncio.sleep_ms(11)
-        self.rst_pin.value(1)
-        await asyncio.sleep_ms(55)
-        self.int_pin = Pin(self.int_pin_label, Pin.IN)
-        await asyncio.sleep_ms(100)
+        started = time.ticks_ms()
+        int_pin = None
+        try:
+            int_pin = Pin(self.int_pin_label, Pin.OUT)
+            int_pin.value(0 if self.addr == 0x5D else 1)
+            await _wait_ms_async(11, started)
+        finally:
+            try:
+                await _wait_ms_async(11, started)
+            finally:
+                self.rst_pin.value(1)
+                try:
+                    await _wait_ms_async(55)
+                finally:
+                    if int_pin is not None:
+                        int_pin.init(Pin.IN)
+                        self.int_pin = int_pin
+                    await _wait_ms_async(100)
 
     async def reflash_config_async(self):
         return GT911.reflash_config(self)

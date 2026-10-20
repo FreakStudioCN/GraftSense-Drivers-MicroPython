@@ -16,6 +16,8 @@ class LIS2MDLAsync(LIS2MDL):
     async def magnetic_async(self) -> tuple: return self.magnetic
     async def set_data_rate_async(self, value: int) -> None: self.data_rate = value
     async def reset_async(self) -> None: self.reset()
-    async def aclose(self) -> None: self.deinit()
+    async def aclose(self) -> None:
+        """The source owns no resources to release; the caller owns the bus."""
+        return None
 # ======================================== 初始化配置 ===========================================
 # ======================================== 主程序 ===============================================

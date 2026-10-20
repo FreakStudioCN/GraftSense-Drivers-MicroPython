@@ -14,6 +14,12 @@ except ImportError:
 import time
 from _gs_r60afd1_r60afd1 import R60AFD1
 
+
+class _R60AFD1State(R60AFD1):
+    """Allocate protocol state without the synchronous startup sequence."""
+    def __init__(self):
+        pass
+
 # ======================================== 全局变量 ============================================
 # ======================================== 功能函数 ============================================
 # ======================================== 自定义类 ============================================
@@ -37,7 +43,7 @@ class R60AFD1Async:
         self._dropped_frames = 0
         self._configuration = {"presence_enabled": True, "track_report_enabled": True, "energy_report_enabled": True, "height_ratio_enabled": True, "fall_detection_enabled": True, "static_stay_enabled": True, "static_distance": 30, "motion_distance": 30, "max_retries": 3, "retry_delay": 100, "init_timeout": 5000}
         self._configuration.update(configuration)
-        self._state = R60AFD1.__new__(R60AFD1)
+        self._state = _R60AFD1State()
         self._state.data_processor = data_processor
         self._state._query_in_progress = False
         self._state._query_response_received = False

@@ -76,13 +76,13 @@ class LIS3DH_I2CAsync(LIS3DH_I2C):
         """Return acceleration using the source driver's calculation and units."""
         return self.acceleration
 
-    async def read_adc_raw_async(self):
+    async def read_adc_raw_async(self, adc):
         """Return the source driver's ADC result after bounded bus reads."""
-        return self.read_adc_raw()
+        return self.read_adc_raw(adc)
 
-    async def read_adc_mV_async(self):
+    async def read_adc_mV_async(self, adc):
         """Return the source driver's ADC millivolt result."""
-        return self.read_adc_mV()
+        return self.read_adc_mV(adc)
 
     async def aclose(self):
         """The caller owns the I2C bus; no sensor-specific close is required."""

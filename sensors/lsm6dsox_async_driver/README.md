@@ -70,160 +70,79 @@
 
 ## 快速开始
 
-1. 按 `package.json.urls` 将运行时文件复制到设备；不要把 `examples/` 当作运行时依赖。
-2. 按上文硬件/运行环境配置总线、GPIO、网络或凭证。
-3. 使用包内真实 `code/main.py` 的 import 与构造方式运行。以下是当前文件逐字读取的异步入口；部署时请保留 `try/finally` 并调用对象实际提供的 `deinit()` 或 `aclose()`。
+构造 `LSM6DSOXAsync` 不执行总线操作。使用前必须 `await sensor.initialize_async()`，也可以 `await LSM6DSOXAsync.create_async(i2c)`。初始化保留来源的身份检查、复位、寄存器配置和两次 200 ms 稳定等待，等待期间让出调度；默认超时 1500 ms。失败或取消后保持未初始化，可重新初始化。读数和量程修改使用异步入口；结束时 `await sensor.aclose()`。
+
+按 `package.json.urls` 安装后，运行以下示例（与 `code/main.py` 一致）：
 
 ```python
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2026/09/22
+# @Author  : Jose D. Montoya
+# @File    : main.py
+# @Description : LSM6DSOX asynchronous demonstration
+# @License : MIT
+
+# ======================================== imports =============================================
+
 try:
     import uasyncio as asyncio
 except ImportError:
     import asyncio
+import time
+from machine import I2C, Pin
+from lsm6dsox_async import LSM6DSOXAsync
+
+# ======================================== globals =============================================
+
+LSM6DSOX_I2C_ADDR = 0x6A
+LSM6DSOX_CHIP_ID = 0x6C
+LSM6DSOX_WHO_AM_I_REG = 0x0F
+PRINT_INTERVAL = 2000
+
+# ======================================== functions ===========================================
+
+# ======================================== classes =============================================
+
+# ======================================== init ================================================
+
+# ======================================== main ================================================
 
 async def main():
-    # Python env   : MicroPython v1.23.0
-    # -*- coding: utf-8 -*-
-    # @Time    : 2026/07/19
-    # @Author  : Jose D. Montoya
-    # @File    : main.py
-    # @Description : 测试 LSM6DSOX 六轴IMU驱动类的代码
-    # @License : MIT
-
-    # ======================================== 导入相关模块 =========================================
-    from machine import I2C, Pin
-    from lsm6dsox import LSM6DSOX
-
-    # ======================================== 全局变量 ============================================
-    # LSM6DSOX 默认 I2C 地址
-    LSM6DSOX_I2C_ADDR = 0x6A
-    # LSM6DSOX WHO_AM_I 期望值
-    LSM6DSOX_CHIP_ID = 0x6C
-    # LSM6DSOX WHO_AM_I 寄存器地址
-    LSM6DSOX_WHO_AM_I_REG = 0x0F
-    # 打印间隔（ms）
-    PRINT_INTERVAL = 2000
-    # 上次打印时间戳
-    last_print_time = 0
+    """Preserve source scan, identity check and periodic IMU reads."""
+    i2c = None
     lsm = None
-
-
-    # ======================================== 功能函数 ============================================
-    def switch_gyro_range():
-        """
-        切换陀螺仪量程到 ±2000 dps（模式切换，默认注释调用，可 REPL 手动触发）
-        Switch gyro range to +/-2000 dps (mode switch, commented by default, can be triggered from REPL).
-        """
-        lsm.gyro_range = lsm.RANGE_2000_DPS
-        print("Gyro range switched to RANGE_2000_DPS")
-
-
-    def switch_accel_range():
-        """
-        切换加速度量程到 ±16g（模式切换，默认注释调用，可 REPL 手动触发）
-        Switch acceleration range to +/-16g (mode switch, commented by default, can be triggered from REPL).
-        """
-        lsm.acceleration_range = lsm.RANGE_16G
-        print("Accel range switched to RANGE_16G")
-
-
-    def switch_hpf():
-        """
-        切换高通滤波器模式（模式切换，默认注释调用，可 REPL 手动触发）
-        Switch high-pass filter mode (mode switch, commented by default, can be triggered from REPL).
-        """
-        lsm.high_pass_filter = lsm.HPF_DIV100
-        print("High-pass filter switched to HPF_DIV100")
-
-
-    def print_high_rate_data():
-        """
-        打印高频实时数据（高频，默认注释调用，可 REPL 手动调用）
-        Print high-rate realtime data (high frequency, commented by default, can be called from REPL).
-        """
-        acc_x, acc_y, acc_z = lsm.acceleration
-        print("Accel: x=%.3f, y=%.3f, z=%.3f" % (acc_x, acc_y, acc_z))
-        temp = lsm.temperature
-        print("Temp: %.2f C" % temp)
-
-
-    # ======================================== 自定义类 ============================================
-    # 无自定义类，直接使用 lsm6dsox.LSM6DSOX
-
-    # ======================================== 初始化配置 ==========================================
-    # 等待硬件就绪
-    await asyncio.sleep(3)
-    print("FreakStudio: Testing LSM6DSOX 6-axis IMU driver")
-
-    # 初始化 I2C 总线
-    # ESP32 示例引脚: scl=Pin(22), sda=Pin(21)
-    # Raspberry Pi Pico 示例引脚: scl=Pin(5), sda=Pin(4)
-    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
-
-    # I2C 设备扫描
-    print("Scanning I2C bus...")
-    devices = i2c.scan()
-    if not devices:
-        raise RuntimeError("No I2C device found on bus")
-    print("I2C devices found: %s" % [hex(d) for d in devices])
-
-    # 验证目标设备是否存在
-    if LSM6DSOX_I2C_ADDR not in devices:
-        raise RuntimeError("LSM6DSOX not found at expected address 0x%02X" % LSM6DSOX_I2C_ADDR)
-    print("LSM6DSOX found at 0x%02X" % LSM6DSOX_I2C_ADDR)
-
-    # 读取并验证 WHO_AM_I 芯片 ID
-    chip_id = i2c.readfrom_mem(LSM6DSOX_I2C_ADDR, LSM6DSOX_WHO_AM_I_REG, 1)[0]
-    if chip_id != LSM6DSOX_CHIP_ID:
-        raise RuntimeError("Unexpected LSM6DSOX chip ID: expected 0x%02X, got 0x%02X" % (LSM6DSOX_CHIP_ID, chip_id))
-    print("LSM6DSOX chip ID verified: 0x%02X" % chip_id)
-
-    # 创建 LSM6DSOX 传感器实例
-    lsm = LSM6DSOX(i2c, address=LSM6DSOX_I2C_ADDR, debug=False)
-    print("LSM6DSOX initialized successfully")
-
-    # ========================================  主程序  ===========================================
-    last_print_time = time.ticks_ms()
-
     try:
+        await asyncio.sleep_ms(3000)
+        print("FreakStudio: Testing LSM6DSOX 6-axis IMU driver")
+        i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+        devices = i2c.scan()
+        if LSM6DSOX_I2C_ADDR not in devices:
+            raise RuntimeError("LSM6DSOX not found at expected address 0x%02X" % LSM6DSOX_I2C_ADDR)
+        chip_id = i2c.readfrom_mem(LSM6DSOX_I2C_ADDR, LSM6DSOX_WHO_AM_I_REG, 1)[0]
+        if chip_id != LSM6DSOX_CHIP_ID:
+            raise RuntimeError("Unexpected LSM6DSOX chip ID: expected 0x%02X, got 0x%02X" % (LSM6DSOX_CHIP_ID, chip_id))
+        lsm = LSM6DSOXAsync(i2c, address=LSM6DSOX_I2C_ADDR, debug=False)
+        await lsm.initialize_async()
+        last_print_time = time.ticks_ms()
         while True:
             current_time = time.ticks_ms()
             if time.ticks_diff(current_time, last_print_time) >= PRINT_INTERVAL:
-                # 读取加速度值（低频核心 API，保留自动执行）
-                acc_x, acc_y, acc_z = lsm.acceleration
+                acc_x, acc_y, acc_z = await lsm.read_acceleration_async()
+                gyro_x, gyro_y, gyro_z = await lsm.read_gyro_async()
+                temp = await lsm.read_temperature_async()
                 print("Accel (m/s^2): x=%.3f, y=%.3f, z=%.3f" % (acc_x, acc_y, acc_z))
-
-                # 读取陀螺仪值（低频核心 API，保留自动执行）
-                gyro_x, gyro_y, gyro_z = lsm.gyro
                 print("Gyro (rad/s): x=%.3f, y=%.3f, z=%.3f" % (gyro_x, gyro_y, gyro_z))
-
-                # 读取温度值（低频核心 API，保留自动执行）
-                temp = lsm.temperature
                 print("Temperature: %.2f C" % temp)
-
-                # 打印当前配置状态（低频状态查询，保留自动执行）
-                print("Range: accel=%s, gyro=%s" % (lsm.acceleration_range, lsm.gyro_range))
-                print("Data rate: accel=%s, gyro=%s" % (lsm.acceleration_data_rate, lsm.gyro_data_rate))
-                print("HPF: %s" % lsm.high_pass_filter)
-                print("---")
                 last_print_time = current_time
-
-            # print_high_rate_data()   # 高频函数，注释默认执行，可 REPL 手动调用
-            # switch_gyro_range()      # 模式切换，注释默认执行，可 REPL 手动触发
-            # switch_accel_range()     # 模式切换，注释默认执行，可 REPL 手动触发
-            # switch_hpf()             # 模式切换，注释默认执行，可 REPL 手动触发
             await asyncio.sleep_ms(100)
-
-    except KeyboardInterrupt:
-        print("Program interrupted by user")
-    except OSError as e:
-        print("Hardware communication error: %s" % str(e))
-    except Exception as e:
-        print("Unknown error: %s" % str(e))
     finally:
-        print("Cleaning up resources...")
-        lsm.deinit()
-        lsm = None
-        print("Program exited")
+        if lsm is not None:
+            await lsm.aclose()
+        if i2c is not None:
+            deinit = getattr(i2c, "deinit", None)
+            if deinit is not None:
+                deinit()
 
 if __name__ == '__main__':
     asyncio.run(main())
@@ -235,35 +154,16 @@ if __name__ == '__main__':
 
 ## API Async Matrix
 
-| API | Level | Async strategy | Residual blocking | Timeout/cancellation |
-|---|---|---|---|---|
-| `LSM6DSOX.acceleration` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.acceleration_data_rate` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.acceleration_range` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.deinit` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.gyro` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.gyro_data_rate` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.gyro_range` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.high_pass_filter` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.reset` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `LSM6DSOX.temperature` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `SyncAdapterMixin.aclose` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `acceleration` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `acceleration_data_rate` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `acceleration_range` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `aclose` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `deinit` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `gyro` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `gyro_data_rate` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `gyro_range` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `high_pass_filter` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `main` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `print_high_rate_data` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `reset` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `switch_accel_range` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `switch_gyro_range` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `switch_hpf` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
-| `temperature` | `cooperative_nonblocking` | 等待阶段使用协程让出；底层总线调用仍同步 | 底层总线/同步临界区可能阻塞事件循环 | 请使用实现中已有 timeout 参数；取消后执行清理。 |
+| 异步入口 | 行为 |
+|---|---|
+| `initialize_async(timeout_ms=1500)` / `create_async(...)` | 有界复位与配置，保留来源顺序与稳定时间。 |
+| `reset_async(timeout_ms=1000)` | 复位并清除初始化状态；再次读数前重新初始化。 |
+| `read_acceleration_async()` / `read_gyro_async()` / `read_temperature_async()` | 初始化检查与实例锁内读取，返回来源单位与结构。 |
+| `set_acceleration_range_async(value)` / `set_gyro_range_async(value)` | 保留来源校验、寄存器与换算缓存更新顺序，协作等待 200 ms。 |
+| `set_high_pass_filter_async(value)` | 锁内执行来源设置。 |
+| `aclose()` | 关闭已初始化实例，可重复调用。 |
+
+继承的同步属性仍执行同步代码；协程调用方应使用上述异步入口。底层 I2C 操作仍是同步短事务。
 
 ## Source Demo to Async Demo Mapping
 
