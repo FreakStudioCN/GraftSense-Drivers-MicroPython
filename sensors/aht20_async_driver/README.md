@@ -1,5 +1,15 @@
 # AHT20 cooperative asynchronous temperature and humidity driver for MicroPython — MicroPython 异步驱动
 
+<!-- async-validation-status:start -->
+> **实验性异步版本：尚未完成实物验收。**
+>
+> 同步来源：[同步版本](../aht20_driver/)。维护者说明同步版本已验证；本次未逐包复测同步来源，适用硬件和固件范围以原有记录为准。
+>
+> 异步版本：本包 Python 源码及示例已通过 MicroPython 1.23 / 1.29 编译检查；软件回归只覆盖选定路径，不代表本包全部 API、实际器件及并发行为已验证。
+>
+> [仓库验证说明](../../README.md#异步驱动验证状态实验性) · [两轮软件检查](../../docs/pr119_validation.json) · [受限清单](../../docs/pr119_final_validation_limits.json) · [安装与初始化迁移](../../docs/PR119_INSTALL_MIGRATION.md)
+<!-- async-validation-status:end -->
+
 ## 目录
 
 - [简介](#简介)

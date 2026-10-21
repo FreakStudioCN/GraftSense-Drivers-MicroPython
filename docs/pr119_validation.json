@@ -277,7 +277,10 @@
   "status": {
     "draft": true,
     "merged": false,
-    "hardware_acceptance_pending": true
+    "hardware_acceptance_pending": true,
+    "snapshot_date": "2026-10-20",
+    "historical_snapshot": true,
+    "note": "Status at software validation time. The maintainer authorized experimental integration with README labels on 2026-10-21; see the root README and live PR for current merge status."
   },
   "discarded_earlier_round": {
     "artifact_run": 1,
