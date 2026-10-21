@@ -1,0 +1,10 @@
+{
+  "name": "ms5803-01ba_async_driver",
+  "version": "1.0.1",
+  "description": "Cooperative MicroPython MS5803-01BA I2C driver",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["MS5803.py", "code/MS5803.py"], ["MS5803_async.py", "code/MS5803_async.py"]]
+}

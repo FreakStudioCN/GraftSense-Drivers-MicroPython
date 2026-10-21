@@ -1,0 +1,60 @@
+# Python env   : MicroPython v1.23.0
+# -*- coding: utf-8 -*-
+# @Time    : 2025/09/17 16:35
+# @Author  : 侯钧瀚
+# @File    : main.py
+# @Description : 串口舵机控制示例
+# @License : MIT
+
+# ======================================== 导入相关模块 =========================================
+
+# micropython内部模块
+from machine import UART, Pin
+
+# 导入 time 提供延时与时间控制
+import time
+
+# 导入串口舵机控制版模块
+from serial_servo import SerialServo
+
+# ======================================== 全局变量 ============================================
+
+# ======================================== 功能函数 ============================================
+
+# ======================================== 自定义类 ============================================
+
+# ======================================== 初始化配置 ==========================================
+
+# 延时3s等待设备上电完毕
+time.sleep(3)
+# 打印调试消息
+print("FreakStudio:  Serial Servo Test ")
+# 配置UART串口
+uart = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
+
+# 初始化串口舵机控制类
+servo = SerialServo(uart)
+
+# ======================================== 主程序 ==========================================
+
+# 无限循环执行舵机的角度切换与状态查询逻辑
+while True:
+    # 控制4号舵机立即移动到0度位置，完成移动的耗时为1000毫秒
+    servo.move_servo_immediate(servo_id=4, angle=0.0, time_ms=1000)
+    # 暂停2秒，等待舵机完成0度位置的移动动作
+    time.sleep(2)
+
+    # 获取4号舵机当前设置的目标角度和移动耗时（即时移动模式）
+    angle, time_ms = servo.get_servo_move_immediate(servo_id=4)
+    # 打印4号舵机的ID、当前设置的目标角度和移动耗时，便于调试查看
+    print(f"Servo ID: 4, Angle: {angle}, Time: {time_ms}")
+
+    # 控制4号舵机立即移动到90度位置，完成移动的耗时为1000毫秒
+    servo.move_servo_immediate(servo_id=4, angle=90.0, time_ms=1000)
+    # 暂停2秒，等待舵机完成90度位置的移动动作
+    time.sleep(2)
+
+    # 获取4号舵机当前设置的目标角度和移动耗时（即时移动模式）
+    angle, time_ms = servo.get_servo_move_immediate(servo_id=4)
+    # 打印4号舵机的ID、当前设置的目标角度和移动耗时，便于调试查看
+    print(f"Servo ID: 4, Angle: {angle}, Time: {time_ms}")

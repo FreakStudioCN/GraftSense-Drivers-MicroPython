@@ -1,0 +1,27 @@
+{
+  "name": "hts221_async_driver",
+  "urls": [
+    [
+      "_gs_hts221_hts221.py",
+      "code/_gs_hts221_hts221.py"
+    ],
+    [
+      "_gs_hts221_i2c_helpers.py",
+      "code/_gs_hts221_i2c_helpers.py"
+    ],
+    [
+      "hts221_async.py",
+      "code/hts221_async.py"
+    ]
+  ],
+  "version": "1.1.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "MicroPython driver for the ST HTS221 capacitive temperature and humidity sensor over I2C",
+  "author": "Jose D. Montoya",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

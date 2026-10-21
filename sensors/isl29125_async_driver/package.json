@@ -1,0 +1,23 @@
+{
+  "name": "isl29125_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of isl29125_driver",
+  "urls": [
+    [
+      "_gs_isl29125_micropython_isl29125/i2c_helpers.py",
+      "code/_gs_isl29125_micropython_isl29125/i2c_helpers.py"
+    ],
+    [
+      "_gs_isl29125_micropython_isl29125/isl29125.py",
+      "code/_gs_isl29125_micropython_isl29125/isl29125.py"
+    ],
+    [
+      "_gs_isl29125_micropython_isl29125/__init__.py",
+      "code/_gs_isl29125_micropython_isl29125/__init__.py"
+    ],
+    [
+      "_gs_isl29125_micropython_isl29125/isl29125_async.py",
+      "code/_gs_isl29125_micropython_isl29125/isl29125_async.py"
+    ]
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "ip5306_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of ip5306_driver",
+  "urls": [
+    [
+      "_gs_ip5306_ip5306.py",
+      "code/_gs_ip5306_ip5306.py"
+    ],
+    [
+      "ip5306_async.py",
+      "code/ip5306_async.py"
+    ]
+  ]
+}

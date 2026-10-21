@@ -1,0 +1,15 @@
+{
+    "name":  "mma7660_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of mma7660_driver",
+    "urls":  [
+                 [
+                     "mma7660.py",
+                     "code/mma7660.py"
+                 ],
+                 [
+                     "mma7660_async.py",
+                     "code/mma7660_async.py"
+                 ]
+             ]
+}

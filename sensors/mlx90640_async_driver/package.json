@@ -1,0 +1,1 @@
+{"name":"mlx90640_async_driver","version":"1.0.0","description":"Cooperative MicroPython MLX90640 thermal camera driver","author":"缪贵成","license":"MIT","chips":"all","fw":"all","urls":[["mlx90640.py","code/mlx90640.py"],["mlx90640_async.py","code/mlx90640_async.py"]]}

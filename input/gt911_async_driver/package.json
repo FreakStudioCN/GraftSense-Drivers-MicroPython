@@ -1,0 +1,39 @@
+{
+  "name": "gt911_async_driver",
+  "version": "1.0.0",
+  "description": "A MicroPython library to control gt911 driver",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "_gs_gt911_gt911.py",
+      "code/_gs_gt911_gt911.py"
+    ],
+    [
+      "_gs_gt911_st7789.py",
+      "code/_gs_gt911_st7789.py"
+    ],
+    [
+      "_gs_gt911_vga1_16x16.py",
+      "code/_gs_gt911_vga1_16x16.py"
+    ],
+    [
+      "_gs_gt911_vga1_16x32.py",
+      "code/_gs_gt911_vga1_16x32.py"
+    ],
+    [
+      "_gs_gt911_vga1_8x8.py",
+      "code/_gs_gt911_vga1_8x8.py"
+    ],
+    [
+      "gt911_async.py",
+      "code/gt911_async.py"
+    ]
+  ]
+}

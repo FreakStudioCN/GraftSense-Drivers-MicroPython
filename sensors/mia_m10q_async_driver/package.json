@@ -1,0 +1,23 @@
+{
+    "name":  "mia_m10q_async_driver",
+    "urls":  [
+                 [
+                     "mia_m10q.py",
+                     "code/mia_m10q.py"
+                 ],
+                 [
+                     "mia_m10q_async.py",
+                     "code/mia_m10q_async.py"
+                 ]
+             ],
+    "version":  "1.0.0",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "description":  "A MicroPython NMEA parser wrapper suitable for MIA-M10Q GNSS UART output",
+    "author":  "inmcm, FreakStudio",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all"
+}

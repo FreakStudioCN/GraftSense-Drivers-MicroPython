@@ -1,0 +1,13 @@
+{
+  "name": "vl53l1x_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative async VL53L1X ToF distance sensor driver for MicroPython",
+  "author": "FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    ["vl53l1x.py", "code/vl53l1x.py"],
+    ["vl53l1x_async.py", "code/vl53l1x_async.py"]
+  ]
+}

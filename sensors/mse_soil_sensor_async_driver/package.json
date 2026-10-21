@@ -1,0 +1,63 @@
+{
+  "name": "mse_soil_sensor_async_driver",
+  "version": "0.1.0",
+  "description": "Async MicroPython driver package for MSE soil sensor",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "mse_soil_modbus_rtu_async.py",
+      "code/mse_soil_modbus_rtu_async.py"
+    ],
+    [
+      "mse_soil_sensor_async.py",
+      "code/mse_soil_sensor_async.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_mse_soil_sensor.py",
+      "code/_gs_mse_soil_sensor_mse_soil_sensor.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/__init__.py",
+      "code/_gs_mse_soil_sensor_umodbus/__init__.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/common.py",
+      "code/_gs_mse_soil_sensor_umodbus/common.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/const.py",
+      "code/_gs_mse_soil_sensor_umodbus/const.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/functions.py",
+      "code/_gs_mse_soil_sensor_umodbus/functions.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/modbus.py",
+      "code/_gs_mse_soil_sensor_umodbus/modbus.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/serial.py",
+      "code/_gs_mse_soil_sensor_umodbus/serial.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/tcp.py",
+      "code/_gs_mse_soil_sensor_umodbus/tcp.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/typing.py",
+      "code/_gs_mse_soil_sensor_umodbus/typing.py"
+    ],
+    [
+      "_gs_mse_soil_sensor_umodbus/version.py",
+      "code/_gs_mse_soil_sensor_umodbus/version.py"
+    ]
+  ]
+}

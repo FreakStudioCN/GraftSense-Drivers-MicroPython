@@ -1,0 +1,63 @@
+{
+  "name": "fde_frost_async_driver",
+  "version": "0.1.0",
+  "description": "Async MicroPython driver package for FDE Frost sensor",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "all",
+    "fw": "all"
+  },
+  "urls": [
+    [
+      "fde_frost_modbus_rtu_async.py",
+      "code/fde_frost_modbus_rtu_async.py"
+    ],
+    [
+      "fde_frost_sensor_async.py",
+      "code/fde_frost_sensor_async.py"
+    ],
+    [
+      "_gs_fde_frost_fde_frost_sensor.py",
+      "code/_gs_fde_frost_fde_frost_sensor.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/__init__.py",
+      "code/_gs_fde_frost_umodbus/__init__.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/common.py",
+      "code/_gs_fde_frost_umodbus/common.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/const.py",
+      "code/_gs_fde_frost_umodbus/const.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/functions.py",
+      "code/_gs_fde_frost_umodbus/functions.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/modbus.py",
+      "code/_gs_fde_frost_umodbus/modbus.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/serial.py",
+      "code/_gs_fde_frost_umodbus/serial.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/tcp.py",
+      "code/_gs_fde_frost_umodbus/tcp.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/typing.py",
+      "code/_gs_fde_frost_umodbus/typing.py"
+    ],
+    [
+      "_gs_fde_frost_umodbus/version.py",
+      "code/_gs_fde_frost_umodbus/version.py"
+    ]
+  ]
+}

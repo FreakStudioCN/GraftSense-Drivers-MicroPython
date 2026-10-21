@@ -1,0 +1,10 @@
+{
+  "name": "ms5611_async_driver",
+  "version": "1.0.1",
+  "description": "Cooperative MicroPython MS5611 I2C driver",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["ms5611.py", "code/ms5611.py"], ["ms5611_async.py", "code/ms5611_async.py"]]
+}

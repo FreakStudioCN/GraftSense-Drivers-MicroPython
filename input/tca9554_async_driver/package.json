@@ -1,0 +1,15 @@
+{
+  "name": "tca9554_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of tca9554_driver",
+  "urls": [
+    [
+      "_gs_tca9554_tca9554.py",
+      "code/_gs_tca9554_tca9554.py"
+    ],
+    [
+      "tca9554_async.py",
+      "code/tca9554_async.py"
+    ]
+  ]
+}

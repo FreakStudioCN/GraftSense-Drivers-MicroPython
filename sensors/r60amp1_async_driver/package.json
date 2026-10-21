@@ -1,0 +1,31 @@
+{
+  "name": "r60amp1_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython driver package for r60amp1",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "_gs_r60amp1_data_flow_processor.py",
+      "code/_gs_r60amp1_data_flow_processor.py"
+    ],
+    [
+      "_gs_r60amp1_hc08.py",
+      "code/_gs_r60amp1_hc08.py"
+    ],
+    [
+      "r60amp1.py",
+      "code/r60amp1.py"
+    ],
+    [
+      "r60amp1_async.py",
+      "code/r60amp1_async.py"
+    ]
+  ]
+}

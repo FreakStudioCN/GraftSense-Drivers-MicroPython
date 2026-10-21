@@ -1,0 +1,10 @@
+{
+  "name": "kt403a_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative MicroPython KT403A MP3 driver",
+  "author": "作者名",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["kt403a.py", "code/kt403a.py"], ["kt403a_async.py", "code/kt403a_async.py"]]
+}

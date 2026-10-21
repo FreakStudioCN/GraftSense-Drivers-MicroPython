@@ -1,0 +1,15 @@
+{
+    "name":  "pca9546_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of pca9546_driver",
+    "urls":  [
+                 [
+                     "pca9546adr.py",
+                     "code/pca9546adr.py"
+                 ],
+                 [
+                     "pca9546adr_async.py",
+                     "code/pca9546adr_async.py"
+                 ]
+             ]
+}

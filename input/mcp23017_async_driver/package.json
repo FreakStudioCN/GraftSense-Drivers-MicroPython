@@ -1,0 +1,15 @@
+{
+    "name":  "mcp23017_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of mcp23017_driver",
+    "urls":  [
+                 [
+                     "mcp23017.py",
+                     "code/mcp23017.py"
+                 ],
+                 [
+                     "mcp23017_async.py",
+                     "code/mcp23017_async.py"
+                 ]
+             ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "apa102_async_driver",
+  "version": "1.0.0-async.1",
+  "description": "Asynchronous MicroPython APA102/DotStar driver",
+  "author": "FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_apa102_apa102.py",
+      "code/_gs_apa102_apa102.py"
+    ],
+    [
+      "apa102_async.py",
+      "code/apa102_async.py"
+    ]
+  ]
+}

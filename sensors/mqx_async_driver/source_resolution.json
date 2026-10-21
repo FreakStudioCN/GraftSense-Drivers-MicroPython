@@ -1,0 +1,11 @@
+{
+  "output_package": "sensors/mqx_async_driver",
+  "canonical_source_package": "sensors/mqx_driver",
+  "historical_source_aliases": [
+    {
+      "package": "sensors/mqx_async_driver",
+      "status": "superseded_historical_async_source",
+      "resolution": "This historical source package is not an independent conversion target. Use this output package, derived from sensors/mqx_driver; do not create sensors/mqx_async_async_driver."
+    }
+  ]
+}

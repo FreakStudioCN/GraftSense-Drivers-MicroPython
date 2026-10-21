@@ -1,0 +1,15 @@
+{
+    "name":  "gp2y0e03_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of gp2y0e03_driver",
+    "urls":  [
+                 [
+                     "gp2y0e03.py",
+                     "code/gp2y0e03.py"
+                 ],
+                 [
+                     "gp2y0e03_async.py",
+                     "code/gp2y0e03_async.py"
+                 ]
+             ]
+}

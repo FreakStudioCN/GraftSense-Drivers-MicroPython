@@ -1,0 +1,23 @@
+{
+    "name":  "ft6206_async_driver",
+    "version":  "1.0.0",
+    "description":  "A MicroPython I2C driver for FT6206 capacitive touch controllers",
+    "author":  "hlf20010508, FreakStudio",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "urls":  [
+                 [
+                     "ft6206.py",
+                     "code/ft6206.py"
+                 ],
+                 [
+                     "ft6206_async.py",
+                     "code/ft6206_async.py"
+                 ]
+             ]
+}

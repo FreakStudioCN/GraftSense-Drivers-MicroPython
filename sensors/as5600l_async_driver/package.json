@@ -1,0 +1,15 @@
+{
+    "name":  "as5600l_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of as5600l_driver",
+    "urls":  [
+                 [
+                     "as5600.py",
+                     "code/as5600.py"
+                 ],
+                 [
+                     "as5600_async.py",
+                     "code/as5600_async.py"
+                 ]
+             ]
+}

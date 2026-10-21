@@ -1,0 +1,10 @@
+{
+  "name": "sht11_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative MicroPython SHT11 temperature and humidity GPIO driver.",
+  "author": "2black0",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["sht11.py", "code/sht11.py"], ["sht11_async.py", "code/sht11_async.py"]]
+}

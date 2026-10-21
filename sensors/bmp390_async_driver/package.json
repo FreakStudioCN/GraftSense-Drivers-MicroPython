@@ -1,0 +1,15 @@
+{
+    "name":  "bmp390_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of bmp390_driver",
+    "urls":  [
+                 [
+                     "bmp390.py",
+                     "code/bmp390.py"
+                 ],
+                 [
+                     "bmp390_async.py",
+                     "code/bmp390_async.py"
+                 ]
+             ]
+}

@@ -1,0 +1,23 @@
+{
+    "name":  "tdeck_trackball_async_driver",
+    "version":  "0.1.0",
+    "description":  "LILYGO T-Deck Plus onboard trackball GPIO polling driver (4x AN48841B Hall switches + TS-1187AB center button)",
+    "license":  "MIT",
+    "author":  "FreakStudio",
+    "platforms":  [
+                      "ESP32-S3"
+                  ],
+    "urls":  [
+                 [
+                     "tdeck_trackball.py",
+                     "code/tdeck_trackball.py"
+                 ],
+                 [
+                     "tdeck_trackball_async.py",
+                     "code/tdeck_trackball_async.py"
+                 ]
+             ],
+    "deps":  [
+
+             ]
+}

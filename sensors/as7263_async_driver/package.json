@@ -1,0 +1,10 @@
+{
+  "name": "as7263_async_driver",
+  "version": "1.0.1",
+  "description": "Cooperative MicroPython AS7263 I2C driver",
+  "author": "Roberto Colistete Jr.",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["as726x.py", "code/as726x.py"], ["as726x_async.py", "code/as726x_async.py"], ["as726x_microbit.py", "code/as726x_microbit.py"], ["as726x_microbit_lowmem.py", "code/as726x_microbit_lowmem.py"]]
+}

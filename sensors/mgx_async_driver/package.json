@@ -1,0 +1,19 @@
+{
+  "name": "mgx_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative asynchronous MicroPython driver for MG gas sensors",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_mgx_mgx.py",
+      "code/_gs_mgx_mgx.py"
+    ],
+    [
+      "mgx_async.py",
+      "code/mgx_async.py"
+    ]
+  ]
+}

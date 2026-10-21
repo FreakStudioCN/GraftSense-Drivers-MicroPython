@@ -1,0 +1,15 @@
+{
+    "name":  "gl5516_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of gl5516_driver",
+    "urls":  [
+                 [
+                     "gl5516.py",
+                     "code/gl5516.py"
+                 ],
+                 [
+                     "gl5516_async.py",
+                     "code/gl5516_async.py"
+                 ]
+             ]
+}

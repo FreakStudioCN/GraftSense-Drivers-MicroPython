@@ -1,0 +1,23 @@
+{
+    "name":  "es8311_async_driver",
+    "urls":  [
+                 [
+                     "es8311.py",
+                     "code/es8311.py"
+                 ],
+                 [
+                     "es8311_async.py",
+                     "code/es8311_async.py"
+                 ]
+             ],
+    "version":  "1.0.0",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "description":  "ES8311 audio codec I2C configuration driver for MicroPython",
+    "author":  "M5Stack Technology CO LTD, FreakStudio",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all"
+}

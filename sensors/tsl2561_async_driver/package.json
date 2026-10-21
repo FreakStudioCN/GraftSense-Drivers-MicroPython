@@ -1,0 +1,15 @@
+{
+    "name":  "tsl2561_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of tsl2561_driver",
+    "urls":  [
+                 [
+                     "tsl2561.py",
+                     "code/tsl2561.py"
+                 ],
+                 [
+                     "tsl2561_async.py",
+                     "code/tsl2561_async.py"
+                 ]
+             ]
+}

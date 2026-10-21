@@ -1,0 +1,10 @@
+{
+  "roles": {
+    "sim800/__init__.py": "sync_compatibility",
+    "sim800/core.py": "sync_compatibility",
+    "sim800/gprs.py": "sync_compatibility",
+    "sim800/sms.py": "sync_compatibility",
+    "sim800/tcpip.py": "sync_compatibility",
+    "sim800/utils.py": "sync_compatibility"
+  }
+}

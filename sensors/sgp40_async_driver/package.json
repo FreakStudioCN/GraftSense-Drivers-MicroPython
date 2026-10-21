@@ -1,0 +1,39 @@
+{
+  "name": "sgp40_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative async MicroPython driver for SGP40 and SGP41 sensors",
+  "author": "FreakStudio",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "sgp4x_async.py",
+      "code/sgp4x_async.py"
+    ],
+    [
+      "_gs_sgp40_sgp4Xmod.py",
+      "code/_gs_sgp40_sgp4Xmod.py"
+    ],
+    [
+      "_gs_sgp40_sensor_pack_2/__init__.py",
+      "code/_gs_sgp40_sensor_pack_2/__init__.py"
+    ],
+    [
+      "_gs_sgp40_sensor_pack_2/base_sensor.py",
+      "code/_gs_sgp40_sensor_pack_2/base_sensor.py"
+    ],
+    [
+      "_gs_sgp40_sensor_pack_2/bitfield.py",
+      "code/_gs_sgp40_sensor_pack_2/bitfield.py"
+    ],
+    [
+      "_gs_sgp40_sensor_pack_2/bus_service.py",
+      "code/_gs_sgp40_sensor_pack_2/bus_service.py"
+    ],
+    [
+      "_gs_sgp40_sensor_pack_2/crc_mod.py",
+      "code/_gs_sgp40_sensor_pack_2/crc_mod.py"
+    ]
+  ]
+}

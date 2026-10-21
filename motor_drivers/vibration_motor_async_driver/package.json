@@ -1,0 +1,1 @@
+{"name":"vibration_motor_async_driver","version":"1.0.0","description":"Async adapter MicroPython driver for PWM vibration motor","author":"leeqingshui","license":"MIT","chips":"all","fw":"all","urls":[["vibration_motor_async.py","code/vibration_motor_async.py"]]}

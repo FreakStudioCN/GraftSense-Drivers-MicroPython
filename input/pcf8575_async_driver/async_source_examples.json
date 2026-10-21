@@ -1,0 +1,23 @@
+{
+  "source_package": "input/pcf8575_driver",
+  "default_example": "code/pcf8575_led.py",
+  "examples": [
+    {
+      "source": "code/pcf8575_led.py",
+      "sync_baseline": "examples/pcf8575_led_sync.py",
+      "async_example": "code/main.py",
+      "role": "led_chaser"
+    },
+    {
+      "source": "code/pcf8575_menu.py",
+      "sync_baseline": "examples/pcf8575_menu_sync.py",
+      "async_example": "code/main.py",
+      "role": "five_way_menu"
+    }
+  ],
+  "source_example_inventory": [
+    {"source": "code/pcf8575_led.py", "disposition": "mapped"},
+    {"source": "code/pcf8575_menu.py", "disposition": "mapped"},
+    {"source": "code/main.py", "disposition": "excluded", "reason": "Library support entrypoint; no independent hardware scenario."}
+  ]
+}

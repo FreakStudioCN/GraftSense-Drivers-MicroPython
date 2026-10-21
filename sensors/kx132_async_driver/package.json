@@ -1,0 +1,26 @@
+{
+    "name":  "kx132_async_driver",
+    "version":  "1.0.1",
+    "description":  "MicroPython KX132 sync adapter driver",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all",
+    "urls":  [
+                 [
+                     "micropython_kx132/i2c_helpers.py",
+                     "code/micropython_kx132/i2c_helpers.py"
+                 ],
+                 [
+                     "micropython_kx132/kx132.py",
+                     "code/micropython_kx132/kx132.py"
+                 ],
+                 [
+                     "micropython_kx132/__init__.py",
+                     "code/micropython_kx132/__init__.py"
+                 ],
+                 [
+                     "micropython_kx132/kx132_async.py",
+                     "code/micropython_kx132/kx132_async.py"
+                 ]
+             ]
+}

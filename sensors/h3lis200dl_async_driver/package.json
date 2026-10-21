@@ -1,0 +1,23 @@
+{
+  "name": "h3lis200dl_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of h3lis200dl_driver",
+  "urls": [
+    [
+      "_gs_h3lis200dl_micropython_h3lis200dl/h3lis200dl.py",
+      "code/_gs_h3lis200dl_micropython_h3lis200dl/h3lis200dl.py"
+    ],
+    [
+      "_gs_h3lis200dl_micropython_h3lis200dl/i2c_helpers.py",
+      "code/_gs_h3lis200dl_micropython_h3lis200dl/i2c_helpers.py"
+    ],
+    [
+      "_gs_h3lis200dl_micropython_h3lis200dl/__init__.py",
+      "code/_gs_h3lis200dl_micropython_h3lis200dl/__init__.py"
+    ],
+    [
+      "h3lis200dl_async.py",
+      "code/h3lis200dl_async.py"
+    ]
+  ]
+}

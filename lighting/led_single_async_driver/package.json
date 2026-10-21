@@ -1,0 +1,15 @@
+{
+    "name":  "led_single_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of led_single_driver",
+    "urls":  [
+                 [
+                     "led_single_power.py",
+                     "code/led_single_power.py"
+                 ],
+                 [
+                     "led_single_power_async.py",
+                     "code/led_single_power_async.py"
+                 ]
+             ]
+}

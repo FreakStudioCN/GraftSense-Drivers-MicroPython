@@ -1,0 +1,15 @@
+{
+    "name":  "soil_moisture_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of soil_moisture_driver",
+    "urls":  [
+                 [
+                     "soil_moisture.py",
+                     "code/soil_moisture.py"
+                 ],
+                 [
+                     "soil_moisture_async.py",
+                     "code/soil_moisture_async.py"
+                 ]
+             ]
+}

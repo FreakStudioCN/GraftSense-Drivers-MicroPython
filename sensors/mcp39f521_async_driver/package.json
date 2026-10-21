@@ -1,0 +1,19 @@
+{
+  "name": "mcp39f521_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative MicroPython MCP39F521 power monitor driver",
+  "author": "Piotr Oniszczuk",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "MCP39F521.py",
+      "code/MCP39F521.py"
+    ],
+    [
+      "mcp39f521_async.py",
+      "code/mcp39f521_async.py"
+    ]
+  ]
+}

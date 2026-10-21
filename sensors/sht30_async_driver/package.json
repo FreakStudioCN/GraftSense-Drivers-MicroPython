@@ -1,0 +1,23 @@
+{
+  "name": "sht30_async_driver",
+  "urls": [
+    [
+      "_gs_sht30_sht30.py",
+      "code/_gs_sht30_sht30.py"
+    ],
+    [
+      "sht30_async.py",
+      "code/sht30_async.py"
+    ]
+  ],
+  "version": "0.2.1",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "SHT30 temperature and humidity sensor I2C driver for MicroPython",
+  "author": "Roberto Sánchez",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all"
+}

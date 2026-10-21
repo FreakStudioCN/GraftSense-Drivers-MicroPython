@@ -1,0 +1,31 @@
+{
+  "name": "mpu9250_async_driver",
+  "version": "0.4.0",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "description": "MicroPython I2C driver for MPU9250 9-axis motion tracking device (MPU6500 + AK8963)",
+  "author": "Mika Tuupola",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_mpu9250_ak8963.py",
+      "code/_gs_mpu9250_ak8963.py"
+    ],
+    [
+      "_gs_mpu9250_mpu6500.py",
+      "code/_gs_mpu9250_mpu6500.py"
+    ],
+    [
+      "_gs_mpu9250_mpu9250.py",
+      "code/_gs_mpu9250_mpu9250.py"
+    ],
+    [
+      "ak8963_async.py",
+      "code/ak8963_async.py"
+    ]
+  ]
+}

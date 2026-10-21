@@ -1,0 +1,28 @@
+{
+    "source_package":  "sensors/max30102_driver",
+    "default_example":  "code/basic_usage.py",
+    "examples":  [
+                     {
+                         "source":  "code/basic_usage.py",
+                         "sync_baseline":  "examples/basic_usage_sync.py",
+                         "async_example":  "code/main.py",
+                         "role":  "ppg_temperature"
+                     },
+                     {
+                         "source":  "code/heart_rate.py",
+                         "sync_baseline":  "examples/heart_rate_sync.py",
+                         "async_example":  "code/main.py",
+                         "role":  "heart_rate_monitor"
+                     }
+                 ],
+    "source_example_inventory":  [
+                                     {
+                                         "disposition":  "mapped",
+                                         "source":  "code/basic_usage.py"
+                                     },
+                                     {
+                                         "disposition":  "mapped",
+                                         "source":  "code/heart_rate.py"
+                                     }
+                                 ]
+}

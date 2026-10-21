@@ -1,0 +1,15 @@
+{
+    "name":  "mlx90614_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of mlx90614_driver",
+    "urls":  [
+                 [
+                     "mlx90614.py",
+                     "code/mlx90614.py"
+                 ],
+                 [
+                     "mlx90614_async.py",
+                     "code/mlx90614_async.py"
+                 ]
+             ]
+}

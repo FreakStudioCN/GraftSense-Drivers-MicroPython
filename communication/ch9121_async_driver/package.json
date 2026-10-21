@@ -1,0 +1,14 @@
+{
+  "name": "ch9121_async_driver",
+  "version": "1.0.0",
+  "description": "Timeout-bounded CH9121 UART async driver",
+  "author": "wybiral",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    ["ch9121_core.py", "code/ch9121_core.py"],
+    ["ch9121_safe.py", "code/ch9121_safe.py"],
+    ["ch9121_async.py", "code/ch9121_async.py"]
+  ]
+}

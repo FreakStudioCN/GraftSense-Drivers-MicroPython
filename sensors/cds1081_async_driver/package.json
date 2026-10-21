@@ -1,0 +1,59 @@
+{
+  "name": "cds1081_async_driver",
+  "version": "0.1.0",
+  "description": "Async MicroPython driver package for CDS1081 Modbus RTU sensor",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "_comments": {
+    "chips": "该包支持运行的芯片型号，all表示无芯片限制",
+    "fw": "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+  },
+  "urls": [
+    [
+      "cds1081_async.py",
+      "code/cds1081_async.py"
+    ],
+    [
+      "_gs_cds1081_cds1081.py",
+      "code/_gs_cds1081_cds1081.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/__init__.py",
+      "code/_gs_cds1081_umodbus/__init__.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/common.py",
+      "code/_gs_cds1081_umodbus/common.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/const.py",
+      "code/_gs_cds1081_umodbus/const.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/functions.py",
+      "code/_gs_cds1081_umodbus/functions.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/modbus.py",
+      "code/_gs_cds1081_umodbus/modbus.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/serial.py",
+      "code/_gs_cds1081_umodbus/serial.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/tcp.py",
+      "code/_gs_cds1081_umodbus/tcp.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/typing.py",
+      "code/_gs_cds1081_umodbus/typing.py"
+    ],
+    [
+      "_gs_cds1081_umodbus/version.py",
+      "code/_gs_cds1081_umodbus/version.py"
+    ]
+  ]
+}

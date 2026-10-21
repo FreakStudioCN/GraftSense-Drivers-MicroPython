@@ -1,0 +1,10 @@
+{
+  "name": "cc2530_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython CC2530 Zigbee UART driver",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["cc253x_ttl.py", "code/cc253x_ttl.py"], ["cc253x_ttl_async.py", "code/cc253x_ttl_async.py"]]
+}

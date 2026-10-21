@@ -1,0 +1,391 @@
+{
+  "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+  "date": "2026-10-20",
+  "scope": "N01-N13 are the fixed-head full review; N14-N21 are additional final repair review categories. Categories overlap in affected packages and are not summed with historical rounds.",
+  "hardware_tested": false,
+  "all_public_apis_executed": false,
+  "findings": [
+    {
+      "id": "N01",
+      "priority": "P1",
+      "packages": [
+        "misc/DS1307_async_driver"
+      ],
+      "problem": "使用 MicroPython property 不提供的 fget/fset 属性（5 处）。",
+      "impact": "日期读写、RTC 日期和振荡器读写直接触发 AttributeError；模块能导入、CPython 替身测试通过不能发现此错误。",
+      "fix": "通过实例属性访问和赋值复用来源逻辑；BME680 保留已采样缓存保护，避免重复同步采样。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "misc/DS1307_async_driver/code/ds1307_async.py",
+        "line": 21
+      }
+    },
+    {
+      "id": "N02",
+      "priority": "P1",
+      "packages": [
+        "misc/ip5306_async_driver"
+      ],
+      "problem": "使用 MicroPython property 不提供的 fget/fset 属性（1 处）。",
+      "impact": "电量读取直接触发 AttributeError；模块能导入、CPython 替身测试通过不能发现此错误。",
+      "fix": "通过实例属性访问和赋值复用来源逻辑；BME680 保留已采样缓存保护，避免重复同步采样。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "misc/ip5306_async_driver/code/ip5306_async.py",
+        "line": 5
+      }
+    },
+    {
+      "id": "N03",
+      "priority": "P1",
+      "packages": [
+        "sensors/adt7410_async_driver"
+      ],
+      "problem": "使用 MicroPython property 不提供的 fget/fset 属性（15 处）。",
+      "impact": "温度、模式、阈值等读写直接触发 AttributeError；模块能导入、CPython 替身测试通过不能发现此错误。",
+      "fix": "通过实例属性访问和赋值复用来源逻辑；BME680 保留已采样缓存保护，避免重复同步采样。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "sensors/adt7410_async_driver/code/adt7410_async.py",
+        "line": 43
+      }
+    },
+    {
+      "id": "N04",
+      "priority": "P1",
+      "packages": [
+        "sensors/bme680_async_driver"
+      ],
+      "problem": "使用 MicroPython property 不提供的 fget/fset 属性（5 处）。",
+      "impact": "联合测量结果读取直接触发 AttributeError；模块能导入、CPython 替身测试通过不能发现此错误。",
+      "fix": "通过实例属性访问和赋值复用来源逻辑；BME680 保留已采样缓存保护，避免重复同步采样。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "sensors/bme680_async_driver/code/bme680_async.py",
+        "line": 114
+      }
+    },
+    {
+      "id": "N05",
+      "priority": "P1",
+      "packages": [
+        "sensors/dps310_async_driver"
+      ],
+      "problem": "异步类继续继承同步构造；校准就绪轮询没有截止时间，也没有协程让出。",
+      "impact": "就绪位不置位会卡住调用任务所在事件循环；即使延迟后成功，就绪等待期间其他任务也无法运行。",
+      "fix": "引入异步初始化和统一超时，保留身份检查、寄存器配置、校准解码及算法顺序。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "sensors/dps310_async_driver/code/dps310_async.py",
+        "line": 17
+      }
+    },
+    {
+      "id": "N06",
+      "priority": "P1",
+      "packages": [
+        "sensors/fde_frost_async_driver",
+        "sensors/mcp1081_async_driver",
+        "sensors/mse_soil_sensor_async_driver"
+      ],
+      "problem": "三个包发布不同的 modbus_rtu_async.py 到同一安装目标，公开类互不兼容。",
+      "impact": "后安装者覆盖先安装者；FDEFrostTransportAsync、ModbusRTUMasterAsync、CDS1081Async 随顺序缺失。",
+      "fix": "分别隔离传输模块路径，并更新包清单、导入和示例；增加不同异步包的全局混装检查。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py:GlobalInstallation",
+        "tests/micropython_pr119_acceptance.py",
+        "docs/PR119_INSTALL_MIGRATION.md"
+      ],
+      "review_location": {
+        "file": "sensors/fde_frost_async_driver/code/fde_frost_sensor_async.py",
+        "line": 9
+      }
+    },
+    {
+      "id": "N07",
+      "priority": "P1",
+      "packages": [
+        "sensors/ina219_async_driver",
+        "sensors/ina226_async_driver"
+      ],
+      "problem": "两个包把不同的 ina_ti_async.py 发布到相同路径，分别只定义 INA219Async 和 INA226Async。",
+      "impact": "混装后其中一个公开类会消失；已隔离来源依赖仍不能保护冲突的公开入口。",
+      "fix": "为两个公开入口提供互不覆盖的模块路径；兼容入口的迁移方案需统一设计。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py:GlobalInstallation",
+        "tests/micropython_pr119_acceptance.py",
+        "docs/PR119_INSTALL_MIGRATION.md"
+      ],
+      "review_location": {
+        "file": "sensors/ina219_async_driver/package.json",
+        "line": 1
+      }
+    },
+    {
+      "id": "N08",
+      "priority": "P1",
+      "packages": [
+        "sensors/mcp1081_async_driver",
+        "sensors/mcp_async_driver"
+      ],
+      "problem": "两个包发布同名 mer_async.py，但 MERAsync 构造参数和串口所有权不同。",
+      "impact": "先装 MCP1081 再装 MCP 后，原 MCP1081 的 MERAsync(transport, slave_addr=1) 报重复参数 TypeError。",
+      "fix": "隔离各自 MERAsync 入口和依赖，补混装后的原有构造/API 回归。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py:GlobalInstallation",
+        "tests/micropython_pr119_acceptance.py",
+        "docs/PR119_INSTALL_MIGRATION.md"
+      ],
+      "review_location": {
+        "file": "sensors/mcp1081_async_driver/code/mer_async.py",
+        "line": 60
+      }
+    },
+    {
+      "id": "N09",
+      "priority": "P2",
+      "packages": [
+        "sensors/mpu9250_async_driver"
+      ],
+      "problem": "MPU6500Async 独立构造仍进入来源同步稳定等待。",
+      "impact": "来源至少 200 ms 的等待阻塞事件循环；已有其他异步初始化路径不能覆盖该公开构造入口。",
+      "fix": "按已修复包的模式提供非阻塞构造与显式异步初始化，更新公开用法并对照来源顺序。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "sensors/mpu9250_async_driver/code/ak8963_async.py",
+        "line": 46
+      }
+    },
+    {
+      "id": "N10",
+      "priority": "P2",
+      "packages": [
+        "sensors/apds9960_async_driver"
+      ],
+      "problem": "APDS9960Async 构造仍进入来源同步稳定等待。",
+      "impact": "来源至少 50 ms 的等待阻塞事件循环；已有其他异步初始化路径不能覆盖该公开构造入口。",
+      "fix": "按已修复包的模式提供非阻塞构造与显式异步初始化，更新公开用法并对照来源顺序。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "sensors/apds9960_async_driver/code/apds9960_async.py",
+        "line": 56
+      }
+    },
+    {
+      "id": "N11",
+      "priority": "P2",
+      "packages": [
+        "sensors/si1145_async_driver"
+      ],
+      "problem": "SI1145Async 构造仍进入来源同步稳定等待。",
+      "impact": "来源至少 20 ms 的等待阻塞事件循环；已有其他异步初始化路径不能覆盖该公开构造入口。",
+      "fix": "按已修复包的模式提供非阻塞构造与显式异步初始化，更新公开用法并对照来源顺序。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "sensors/si1145_async_driver/code/si1145_async.py",
+        "line": 12
+      }
+    },
+    {
+      "id": "N12",
+      "priority": "P2",
+      "packages": [
+        "sensors/lis2mdl_async_driver"
+      ],
+      "problem": "reset_async 直接调用含 time.sleep(0.010) 的同步 reset。",
+      "impact": "复位等待期间没有调度机会；这是复位稳定等待，不是需要保持连续执行的微秒总线波形。",
+      "fix": "保留复位位写入与最小 10 ms 稳定间隔，将稳定等待改为协作等待。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "review_location": {
+        "file": "sensors/lis2mdl_async_driver/code/_gs_lis2mdl_micropython_lis2mdl/lis2mdl_async.py",
+        "line": 18
+      }
+    },
+    {
+      "id": "N13",
+      "priority": "P2",
+      "packages": [
+        "sensors/ad8232_async_driver"
+      ],
+      "problem": "安装包声明 fw=all、README 依赖为无，但发布的设备端 ECG 处理器强制导入 ulab.numpy 和 ulab.scipy。",
+      "impact": "不含 ulab 的普通 MicroPython 固件无法运行设备端示例；该失败不能仅作为无关的主机环境差异忽略。",
+      "fix": "准确声明所需固件/ulab 组件与版本；区分仅 UART 主机端和需要数值库的设备端安装。",
+      "status": "fixed",
+      "reviewed_head": "c626db162551206f959559dea2f1428a74a760c5",
+      "verification": [
+        "tests/test_pr119_final_review.py:GlobalInstallation",
+        "tests/micropython_pr119_acceptance.py",
+        "docs/PR119_INSTALL_MIGRATION.md"
+      ],
+      "review_location": {
+        "file": "sensors/ad8232_async_driver/package.json",
+        "line": 7
+      }
+    },
+    {
+      "id": "N14",
+      "origin": "final_repair_review",
+      "status": "fixed",
+      "problem": "Private class const attributes disappear in MicroPython",
+      "fix": "Restore 57 original literal attributes across eight async source providers; validate each in the VM.",
+      "verification": [
+        "tests/test_pr119_final_review.py:GlobalInstallation.test_private_class_constants_used_as_attributes_are_retained"
+      ],
+      "packages": [
+        "communication/cc1101_async_driver",
+        "communication/si4732_async_driver",
+        "communication/sx1276_async_driver",
+        "input/cst328_async_driver",
+        "input/ft6336_async_driver",
+        "misc/ip5306_async_driver",
+        "sensors/adt7410_async_driver",
+        "sensors/mcp9808_async_driver"
+      ]
+    },
+    {
+      "id": "N15",
+      "origin": "final_repair_review",
+      "status": "fixed",
+      "problem": "int.bit_length is absent in MicroPython 1.23",
+      "fix": "Use equivalent mask bounds and magnitude/shift byte-width checks in four async helper copies; compare bus writes and rejected ranges with source.",
+      "verification": [
+        "tests/test_pr119_final_review.py:FinalAsyncFixes.test_portable_bit_ranges_and_constant_write_chunks_match_source"
+      ],
+      "packages": [
+        "sensors/adt7410_async_driver",
+        "sensors/mmc5603_async_driver",
+        "sensors/hscdtd008a_async_driver",
+        "sensors/rm3100_async_driver"
+      ]
+    },
+    {
+      "id": "N16",
+      "origin": "final_repair_review",
+      "status": "fixed",
+      "problem": "TimeoutError and IOError are not built-in names in MicroPython 1.23",
+      "fix": "Use asyncio.TimeoutError or OSError when the documented CPython built-in is absent.",
+      "verification": [
+        "tests/test_pr119_final_review.py:GlobalInstallation.test_timeout_and_io_exception_names_have_micropython_fallbacks",
+        "tests/micropython_pr119_acceptance.py"
+      ]
+    },
+    {
+      "id": "N17",
+      "origin": "final_repair_review",
+      "status": "fixed",
+      "problem": "LIS3MDL reset passes a bool to an integer-only descriptor",
+      "fix": "Write the same reset bit as integer 1 and await the source 10 ms interval.",
+      "verification": [
+        "tests/test_pr119_final_review.py:FinalAsyncFixes.test_magnetometer_reset_writes_integer_bit_and_yields",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "packages": [
+        "sensors/lis3mdl_async_driver"
+      ]
+    },
+    {
+      "id": "N18",
+      "origin": "final_repair_review",
+      "status": "fixed",
+      "problem": "LTR390UV reset runs synchronous retry waits",
+      "fix": "Keep source write/read order, errno 110 handling and three attempts, with cooperative 10 ms waits.",
+      "verification": [
+        "tests/test_pr119_final_review.py:FinalAsyncFixes.test_ltr390_reset_preserves_retries_and_allows_cancellation"
+      ],
+      "packages": [
+        "sensors/ltr390uv_async_driver"
+      ]
+    },
+    {
+      "id": "N19",
+      "origin": "final_repair_review",
+      "status": "fixed",
+      "problem": "Additional global installation collisions and application entry targets",
+      "fix": "Isolate incompatible modules to a stable dependency closure, including remote manifest sources and vibration entries; exclude application scripts, root __init__ and unused placeholders from library manifests.",
+      "verification": [
+        "tests/test_async_packages.py",
+        "tests/test_pr119_final_review.py:GlobalInstallation",
+        "docs/PR119_INSTALL_MIGRATION.md"
+      ]
+    },
+    {
+      "id": "N20",
+      "origin": "final_repair_review",
+      "status": "fixed",
+      "problem": "Three example files use adjacent f-strings unsupported by MicroPython 1.23",
+      "fix": "Use explicit string addition with identical message contents.",
+      "verification": [
+        "mpy-cross 1.23 and 1.29 full compilation in both rounds"
+      ],
+      "packages": [
+        "sensors/bma220_async_driver",
+        "signal_acquisition/ads1219_async_driver"
+      ]
+    },
+    {
+      "id": "N21",
+      "origin": "repair_delta_review",
+      "status": "fixed",
+      "problem": "MPU9250 start_async assumes injected previous source children have _initialized",
+      "fix": "Treat a missing async state flag as not initialized, preserving the existing staged replacement behavior; ready async children retain idempotent startup.",
+      "verification": [
+        "tests/test_pr119_final_review.py:FinalAsyncFixes.test_composite_start_accepts_previous_children_without_async_state",
+        "tests/micropython_pr119_acceptance.py"
+      ],
+      "packages": [
+        "sensors/mpu9250_async_driver"
+      ]
+    }
+  ]
+}

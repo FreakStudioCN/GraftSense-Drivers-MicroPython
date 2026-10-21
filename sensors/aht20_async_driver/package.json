@@ -1,0 +1,19 @@
+{
+  "name": "aht20_async_driver",
+  "version": "1.0.0",
+  "description": "AHT20 cooperative asynchronous temperature and humidity driver for MicroPython",
+  "author": "Andreas Bühl, Kattni Rembor",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_aht20_ahtx0.py",
+      "code/_gs_aht20_ahtx0.py"
+    ],
+    [
+      "ahtx0_async.py",
+      "code/ahtx0_async.py"
+    ]
+  ]
+}

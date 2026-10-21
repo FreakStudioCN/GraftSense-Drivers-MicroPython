@@ -1,0 +1,10 @@
+{
+  "name": "ccs811_async_driver",
+  "version": "1.0.1",
+  "description": "Cooperative MicroPython CCS811 I2C driver",
+  "author": "hogeiha",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["ccs811.py", "code/ccs811.py"], ["ccs811_async.py", "code/ccs811_async.py"]]
+}

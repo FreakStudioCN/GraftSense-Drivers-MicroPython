@@ -1,0 +1,10 @@
+{
+  "name": "serial_imu_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative asynchronous MicroPython driver for JY60/JY61 serial IMU sensors",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [["imu.py", "code/imu.py"], ["imu_async.py", "code/imu_async.py"]]
+}

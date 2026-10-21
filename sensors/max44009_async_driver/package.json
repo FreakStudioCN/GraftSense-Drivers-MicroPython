@@ -1,0 +1,15 @@
+{
+  "name": "max44009_async_driver",
+  "version": "1.0.0",
+  "description": "Async conversion of max44009_driver",
+  "urls": [
+    [
+      "_gs_max44009_max44009.py",
+      "code/_gs_max44009_max44009.py"
+    ],
+    [
+      "max44009_async.py",
+      "code/max44009_async.py"
+    ]
+  ]
+}

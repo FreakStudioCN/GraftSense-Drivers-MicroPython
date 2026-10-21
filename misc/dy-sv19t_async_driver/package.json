@@ -1,0 +1,19 @@
+{
+  "name": "dy-sv19t_async_driver",
+  "version": "1.0.0",
+  "description": "Cooperative async MicroPython driver for the DY-SV19T UART audio module",
+  "author": "leeqingshui",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "_gs_dy_sv19t_dy_sv19t.py",
+      "code/_gs_dy_sv19t_dy_sv19t.py"
+    ],
+    [
+      "dy_sv19t_async.py",
+      "code/dy_sv19t_async.py"
+    ]
+  ]
+}

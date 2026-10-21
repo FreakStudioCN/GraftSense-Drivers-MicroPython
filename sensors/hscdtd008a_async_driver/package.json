@@ -1,0 +1,51 @@
+{
+  "name": "hscdtd008a_async_driver",
+  "version": "1.0.0",
+  "description": "Async MicroPython driver package for HSCDTD008A",
+  "author": "goctaprog@gmail.com",
+  "license": "MIT",
+  "chips": "all",
+  "fw": "all",
+  "urls": [
+    [
+      "hscdtd008a_async.py",
+      "code/hscdtd008a_async.py"
+    ],
+    [
+      "_gs_hscdtd008a_hscdtd008a.py",
+      "code/_gs_hscdtd008a_hscdtd008a.py"
+    ],
+    [
+      "_gs_hscdtd008a_sensor_pack/__init__.py",
+      "code/_gs_hscdtd008a_sensor_pack/__init__.py"
+    ],
+    [
+      "_gs_hscdtd008a_sensor_pack/averager.py",
+      "code/_gs_hscdtd008a_sensor_pack/averager.py"
+    ],
+    [
+      "_gs_hscdtd008a_sensor_pack/base_sensor.py",
+      "code/_gs_hscdtd008a_sensor_pack/base_sensor.py"
+    ],
+    [
+      "_gs_hscdtd008a_sensor_pack/bitfield.py",
+      "code/_gs_hscdtd008a_sensor_pack/bitfield.py"
+    ],
+    [
+      "_gs_hscdtd008a_sensor_pack/bus_service.py",
+      "code/_gs_hscdtd008a_sensor_pack/bus_service.py"
+    ],
+    [
+      "_gs_hscdtd008a_sensor_pack/converter.py",
+      "code/_gs_hscdtd008a_sensor_pack/converter.py"
+    ],
+    [
+      "_gs_hscdtd008a_sensor_pack/crc_mod.py",
+      "code/_gs_hscdtd008a_sensor_pack/crc_mod.py"
+    ],
+    [
+      "_gs_hscdtd008a_sensor_pack/geosensmod.py",
+      "code/_gs_hscdtd008a_sensor_pack/geosensmod.py"
+    ]
+  ]
+}

@@ -1,0 +1,15 @@
+{
+    "name":  "lm75_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async conversion of lm75_driver",
+    "urls":  [
+                 [
+                     "lm75.py",
+                     "code/lm75.py"
+                 ],
+                 [
+                     "lm75_async.py",
+                     "code/lm75_async.py"
+                 ]
+             ]
+}

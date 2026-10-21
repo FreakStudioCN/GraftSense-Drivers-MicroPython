@@ -1,0 +1,23 @@
+{
+    "name":  "uv_matrix_async_driver",
+    "version":  "1.0.0",
+    "description":  "Async MicroPython driver package for UV matrix driver",
+    "author":  "leeqingshui",
+    "license":  "MIT",
+    "chips":  "all",
+    "fw":  "all",
+    "_comments":  {
+                      "chips":  "该包支持运行的芯片型号，all表示无芯片限制",
+                      "fw":  "该包依赖的特定固件如ulab、lvgl,all表示无固件依赖"
+                  },
+    "urls":  [
+                 [
+                     "uv_matrix.py",
+                     "code/uv_matrix.py"
+                 ],
+                 [
+                     "uv_matrix_async.py",
+                     "code/uv_matrix_async.py"
+                 ]
+             ]
+}
