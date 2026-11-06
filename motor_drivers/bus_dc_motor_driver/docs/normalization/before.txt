@@ -1,0 +1,97 @@
+[INFO] Found 8 .py files, starting check...
+
+	[DOING] Checking file:motor_drivers\bus_dc_motor_driver\code\main.py
+[PASS] motor_drivers\bus_dc_motor_driver\code\main.py: main.py Skip global variables check (main.py)
+[PASS] motor_drivers\bus_dc_motor_driver\code\main.py: Skip License comment check (main.py)
+[PASS] motor_drivers\bus_dc_motor_driver\code\main.py: No Chinese in raise/print messages
+[FAIL] motor_drivers\bus_dc_motor_driver\code\main.py: Init config section missing: time.sleep(3), print("FreakStudio: xxx")
+[FAIL] motor_drivers\bus_dc_motor_driver\code\main.py: No instance found in init config section (required)
+[PASS] motor_drivers\bus_dc_motor_driver\code\main.py: main.py while loop location is correct
+[PASS] motor_drivers\bus_dc_motor_driver\code\main.py: Skip type hint check (no init method)
+[PASS] motor_drivers\bus_dc_motor_driver\code\main.py: Skip method parameter validation check (main.py)
+--------------------------------------------------------------------------------
+	[DOING] Checking file:motor_drivers\bus_dc_motor_driver\code\motor_controller.py
+[FAIL] motor_drivers\bus_dc_motor_driver\code\motor_controller.py: Missing required global variables: __author__, __license__
+[FAIL] motor_drivers\bus_dc_motor_driver\code\motor_controller.py: Missing # @License : MIT comment
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor_controller.py: No Chinese in raise/print messages
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor_controller.py: Skip init config section check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor_controller.py: Skip instantiation location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor_controller.py: Skip while loop location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor_controller.py: Type hints exist in __init__ parameters
+[FAIL] motor_drivers\bus_dc_motor_driver\code\motor_controller.py: Methods missing parameter validation: MotorController.set_target_rpm, MotorController.set_pid, MotorController.start_motor, MotorController.stop_motor, MotorController.get_motor_rpm, MotorController.get_encoder_count, MotorController.get_encoder_direction, MotorController.update
+--------------------------------------------------------------------------------
+	[DOING] Checking file:motor_drivers\bus_dc_motor_driver\code\pid.py
+[FAIL] motor_drivers\bus_dc_motor_driver\code\pid.py: Missing required global variables: __author__, __license__
+[FAIL] motor_drivers\bus_dc_motor_driver\code\pid.py: Missing # @License : MIT comment
+[PASS] motor_drivers\bus_dc_motor_driver\code\pid.py: No Chinese in raise/print messages
+[PASS] motor_drivers\bus_dc_motor_driver\code\pid.py: Skip init config section check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\pid.py: Skip instantiation location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\pid.py: Skip while loop location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\pid.py: Type hints exist in __init__ parameters
+[FAIL] motor_drivers\bus_dc_motor_driver\code\pid.py: Methods missing parameter validation: PID.update, PID.set_target, PID.set_params, PID.set_enabled
+--------------------------------------------------------------------------------
+	[DOING] Checking file:motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py
+[FAIL] motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py: Missing required global variables: __platform__
+[FAIL] motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py: Missing # @License : MIT comment
+[PASS] motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py: No Chinese in raise/print messages
+[PASS] motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py: Skip init config section check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py: Skip instantiation location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py: Skip while loop location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py: Type hints exist in __init__ parameters
+[FAIL] motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py: Methods missing parameter validation: BusDCMotor._disable_pid, BusDCMotor.break_motor, BusDCMotor.set_target_rpm, BusDCMotor.start_motor, BusDCMotor.get_motor_rpm, BusDCMotor.get_encoder_count, BusDCMotor.get_encoder_direction
+--------------------------------------------------------------------------------
+	[DOING] Checking file:motor_drivers\bus_dc_motor_driver\code\pca9685.py
+[PASS] motor_drivers\bus_dc_motor_driver\code\pca9685.py: All 4 required global variables exist
+[PASS] motor_drivers\bus_dc_motor_driver\code\pca9685.py: # @License : MIT comment exists
+[PASS] motor_drivers\bus_dc_motor_driver\code\pca9685.py: No Chinese in raise/print messages
+[PASS] motor_drivers\bus_dc_motor_driver\code\pca9685.py: Skip init config section check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\pca9685.py: Skip instantiation location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\pca9685.py: Skip while loop location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\pca9685.py: Type hints exist in __init__ parameters
+[FAIL] motor_drivers\bus_dc_motor_driver\code\pca9685.py: Methods missing parameter validation: PCA9685.__init__, PCA9685._write, PCA9685._read, PCA9685.duty
+--------------------------------------------------------------------------------
+	[DOING] Checking file:motor_drivers\bus_dc_motor_driver\code\encoder.py
+[FAIL] motor_drivers\bus_dc_motor_driver\code\encoder.py: Missing required global variables: __author__, __license__
+[FAIL] motor_drivers\bus_dc_motor_driver\code\encoder.py: Missing # @License : MIT comment
+[PASS] motor_drivers\bus_dc_motor_driver\code\encoder.py: No Chinese in raise/print messages
+[PASS] motor_drivers\bus_dc_motor_driver\code\encoder.py: Skip init config section check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\encoder.py: Skip instantiation location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\encoder.py: Skip while loop location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\encoder.py: Type hints exist in __init__ parameters
+[FAIL] motor_drivers\bus_dc_motor_driver\code\encoder.py: Methods missing parameter validation: Encoder._irq, Encoder.get_rpm
+--------------------------------------------------------------------------------
+	[DOING] Checking file:motor_drivers\bus_dc_motor_driver\code\motor.py
+[FAIL] motor_drivers\bus_dc_motor_driver\code\motor.py: Missing required global variables: __author__, __license__
+[FAIL] motor_drivers\bus_dc_motor_driver\code\motor.py: Missing # @License : MIT comment
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor.py: No Chinese in raise/print messages
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor.py: Skip init config section check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor.py: Skip instantiation location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor.py: Skip while loop location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\motor.py: Type hints exist in __init__ parameters
+[FAIL] motor_drivers\bus_dc_motor_driver\code\motor.py: Methods missing parameter validation: DCMotor.set_speed
+--------------------------------------------------------------------------------
+	[DOING] Checking file:motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py
+[FAIL] motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py: Missing required global variables: __author__, __license__
+[FAIL] motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py: Missing # @License : MIT comment
+[PASS] motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py: No Chinese in raise/print messages
+[PASS] motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py: Skip init config section check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py: Skip instantiation location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py: Skip while loop location check (non-main.py file)
+[PASS] motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py: Type hints exist in __init__ parameters
+[FAIL] motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py: Methods missing parameter validation: VoltageMonitor.update
+--------------------------------------------------------------------------------
+
+[DONE] [SUMMARY] Check summary:
+Total files:8
+Passed:0
+Failed:8
+
+[FAIL] Files with failed checks:
+  - motor_drivers\bus_dc_motor_driver\code\main.py
+  - motor_drivers\bus_dc_motor_driver\code\motor_controller.py
+  - motor_drivers\bus_dc_motor_driver\code\pid.py
+  - motor_drivers\bus_dc_motor_driver\code\bus_dc_motor.py
+  - motor_drivers\bus_dc_motor_driver\code\pca9685.py
+  - motor_drivers\bus_dc_motor_driver\code\encoder.py
+  - motor_drivers\bus_dc_motor_driver\code\motor.py
+  - motor_drivers\bus_dc_motor_driver\code\voltage_monitor.py

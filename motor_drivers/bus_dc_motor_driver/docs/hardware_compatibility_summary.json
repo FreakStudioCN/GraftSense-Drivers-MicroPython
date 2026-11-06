@@ -1,0 +1,90 @@
+{
+  "steady_rpm": [
+    {
+      "stage": "single_pid_30",
+      "id": 1,
+      "target": 30.0,
+      "mean": 29.799,
+      "std": 3.804
+    },
+    {
+      "stage": "single_pid_30",
+      "id": 2,
+      "target": 0.0,
+      "mean": 0.0,
+      "std": 0.0
+    },
+    {
+      "stage": "single_pid_30",
+      "id": 3,
+      "target": 0.0,
+      "mean": 0.0,
+      "std": 0.0
+    },
+    {
+      "stage": "single_pid_30",
+      "id": 4,
+      "target": 0.0,
+      "mean": 0.0,
+      "std": 0.0
+    },
+    {
+      "stage": "single_pid_-30",
+      "id": 1,
+      "target": -30.0,
+      "mean": -30.047,
+      "std": 2.863
+    },
+    {
+      "stage": "single_pid_-30",
+      "id": 2,
+      "target": 0.0,
+      "mean": 0.0,
+      "std": 0.0
+    },
+    {
+      "stage": "single_pid_-30",
+      "id": 3,
+      "target": 0.0,
+      "mean": 0.0,
+      "std": 0.0
+    },
+    {
+      "stage": "single_pid_-30",
+      "id": 4,
+      "target": 0.0,
+      "mean": 0.0,
+      "std": 0.0
+    },
+    {
+      "stage": "four_pid",
+      "id": 1,
+      "target": 30.0,
+      "mean": 29.869,
+      "std": 3.804
+    },
+    {
+      "stage": "four_pid",
+      "id": 2,
+      "target": -40.0,
+      "mean": -40.401,
+      "std": 7.284
+    },
+    {
+      "stage": "four_pid",
+      "id": 3,
+      "target": 50.0,
+      "mean": 49.852,
+      "std": 7.472
+    },
+    {
+      "stage": "four_pid",
+      "id": 4,
+      "target": -60.0,
+      "mean": -60.202,
+      "std": 4.782
+    }
+  ],
+  "voltage_min": 7.818,
+  "voltage_max": 7.9775
+}

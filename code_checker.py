@@ -334,10 +334,25 @@ def check_method_param_validation(content: str, file_path: Path) -> bool:
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef):
             class_name = node.name
+            # IRQ handlers are firmware entry points; they must not raise for caller validation.
+            irq_handlers = set()
+            for call in ast.walk(node):
+                if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and call.func.attr == "irq":
+                    for keyword in call.keywords:
+                        handler = keyword.value
+                        if keyword.arg == "handler" and isinstance(handler, ast.Attribute) and isinstance(handler.value, ast.Name) and handler.value.id == "self":
+                            irq_handlers.add(handler.attr)
             # 遍历类中的所有方法
             for func in node.body:
                 if isinstance(func, ast.FunctionDef):
                     func_name = func.name
+                    if func_name in irq_handlers:
+                        blocking = {"sleep", "sleep_ms", "sleep_us", "print", "open", "read", "write", "readfrom", "writeto", "readfrom_mem", "writeto_mem"}
+                        unsafe = any(isinstance(stmt, (ast.Raise, ast.Await, ast.Yield, ast.YieldFrom)) or (isinstance(stmt, ast.Call) and ((isinstance(stmt.func, ast.Name) and stmt.func.id in blocking) or (isinstance(stmt.func, ast.Attribute) and stmt.func.attr in blocking))) for stmt in ast.walk(func))
+                        if unsafe:
+                            print(f"[FAIL] {file_path}: IRQ callback {class_name}.{func_name} contains raise or blocking operation")
+                            return False
+                        continue
                     # 获取方法参数（排除self/cls）
                     args = [arg.arg for arg in func.args.args if arg.arg not in ["self", "cls"]]
                     if not args:  # 无入口参数，跳过
