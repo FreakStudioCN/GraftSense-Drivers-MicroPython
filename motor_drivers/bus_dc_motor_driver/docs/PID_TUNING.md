@@ -1,6 +1,6 @@
 # 四路电机 PID 参数整定指南
 
-这份指南说明怎么调、怎么看结果，以及这套台架目前调到了什么程度。具体实测曲线见[细调记录](TUNING.md)，控制周期与 GC 等耗时见[实时性评估](REALTIME.md)。
+这份指南说明怎么调、怎么看结果，以及这套台架目前调到了什么程度。具体实测曲线见[云测试文档第五节](https://f1829ryac0m.feishu.cn/docx/Kee4dEPucoFTGTxnyE4cKEEGnce)，控制周期与 GC 等耗时见[云测试文档第六节](https://f1829ryac0m.feishu.cn/docx/Kee4dEPucoFTGTxnyE4cKEEGnce)。
 
 ## 1. 先弄清楚四个量
 
@@ -50,7 +50,7 @@ output = clamp(Kp * error + Ki * integral
 4. 每次测试前停止输出、清理旧控制器资源，避免旧积分或回调影响下一轮。
 5. 记录代码版本、各路参数、窗口、限幅、供电、目标、反馈和异常。输出饱和或保护停机的记录也要保留。
 
-本次台架使用 ESP32-C3、MicroPython v1.29.0、PCA9685 地址 0x4F，PWM 为 1000 Hz，控制周期为 20 ms。具体引脚见 [board_setup.py](../examples/board_setup.py)。换电机、减速比、供电或负载后，需要重新验证。
+本次台架使用 ESP32-C3、MicroPython v1.29.0、PCA9685 地址 0x4F，PWM 为 1000 Hz，控制周期为 20 ms。具体引脚见 [tuning_profile.py](../examples/tuning_profile.py)。换电机、减速比、供电或负载后，需要重新验证。
 
 ## 4. 按这个顺序调
 
@@ -99,7 +99,7 @@ P 大致合适后，逐步增加 I，观察目标附近的平均误差是否减�
 
 这组配置在五组正反转/低速复测中，20 个电机与工况组合满足后段平均误差、波动的基础标准，最大平均误差约 0.86 RPM。但仍有一次 M1 起步观测超调为 38.57%，首次达到目标 90% 约需 1.6～3.5 秒。它是“台架匀速基本可用”，还不是“整车已经丝滑”。
 
-配置文件：[recommended.json](tuning/recommended.json)。实际执行入口：[tuning_profile.py](../examples/tuning_profile.py)。通用运行库的默认参数没有被这组台架配置覆盖。
+参数直接保存在单文件测试的 MOTOR_PRESETS 等常量中。实际执行入口：[tuning_profile.py](../examples/tuning_profile.py)。通用运行库的默认参数没有被这组台架配置覆盖。
 
 ## 6. 用现有脚本重跑
 
@@ -107,7 +107,7 @@ P 大致合适后，逐步增加 I，观察目标附近的平均误差是否减�
 
 ```powershell
 pip install matplotlib numpy pillow pyserial mpremote
-python motor_drivers/bus_dc_motor_driver/tests/pc_live_plot.py --profile tuning_profile --port COM8 --baud 921600 --run --seconds 15 --out pid-tune-01
+python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile tuning_profile --port COM8 --baud 921600 --run --seconds 15 --out pid-tune-01
 ```
 
 输出目录必须是新目录。明确加 `--run` 后，脚本才会备份并上传库、倒计时并运行电机，不修改设备 `main.py`。COM8 是本次板子的 USB 串口，换板要改端口；921600 是主机请求值，不能据此认定 USB 链路一定同比提速。
@@ -142,7 +142,7 @@ abs(平均反馈 - 目标) <= max(abs(目标) * 5%, 2 RPM)
 启动超调尽量压到25%以内，超出的仍单独记录。
 ```
 
-这些是本项目的空载台架判断值，不是行业标准。PC 脚本 `summary.json` 的 `mean_tail_rpm/std_tail_rpm` 默认统计最后 **2 秒**；本次基础验收另从 CSV 计算最后 **5 秒**，结果保存在 [basic-acceptance.json](tuning/basic-acceptance.json)。二者不能直接混用。
+这些是本项目的空载台架判断值，不是行业标准。PC 脚本 `summary.json` 的 `mean_tail_rpm/std_tail_rpm` 默认统计最后 **2 秒**；本次基础验收另从 CSV 计算最后 **5 秒**，原始结果和复算工具保存在云测试文档的合并附件中。二者不能直接混用。
 
 ## 8. 常见现象怎么查
 
@@ -156,7 +156,7 @@ abs(平均反馈 - 目标) <= max(abs(目标) * 5%, 2 RPM)
 | 正转好，反转差 | 正反向死区和负载差异，分方向复测 |
 | 换一次参数后结果不可重复 | 停机/清积分、资源释放、供电和温度、测试版本、目标与统计区间是否一致 |
 
-计时工具已经包含微秒装饰器与直方图，见 [timing_audit.py](../examples/timing_audit.py) 和[实时性评估](REALTIME.md)。装饰器测到的是包含中断、GC和包装开销的墙钟时间；I2C、PID是整周期的子项，不能再与总耗时重复相加。
+计时工具已经包含微秒装饰器与直方图，见 [realtime_audit.py](../examples/realtime_audit.py) 和[云测试文档第六节](https://f1829ryac0m.feishu.cn/docx/Kee4dEPucoFTGTxnyE4cKEEGnce)。装饰器测到的是包含中断、GC和包装开销的墙钟时间；I2C、PID是整周期的子项，不能再与总耗时重复相加。
 
 ## 9. 每轮至少留这些记录
 
@@ -164,12 +164,6 @@ abs(平均反馈 - 目标) <= max(abs(目标) * 5%, 2 RPM)
 
 记录“改了什么、好在哪、坏在哪、下一轮只改什么”。结果已经基本可用时，可以保留明确的剩余问题收敛；不要把一次漂亮曲线当成所有方向、负载和供电条件都已调好。
 
-### 一键复算末五秒结果
+### 原始数据与复算
 
-在仓库根目录运行：
-
-```powershell
-python motor_drivers/bus_dc_motor_driver/tests/recompute_acceptance.py --csv motor_drivers/bus_dc_motor_driver/docs/tuning/samples.csv --check motor_drivers/bus_dc_motor_driver/docs/tuning/basic-acceptance.json
-```
-
-`--check` 会逐项比较均值、标准差、观测超调及通过标志，不一致时失败退出。换成自己的CSV并使用 `--output 结果.json` 可保存新结果；不足约五秒或后段目标变化的记录会报错，不会凑出一次通过。
+历史 CSV、统计 JSON、复算脚本和录屏统一保留在[云测试文档](https://f1829ryac0m.feishu.cn/docx/Kee4dEPucoFTGTxnyE4cKEEGnce)的合并附件中；库内不附带这些过程数据。每轮生成的新记录保存在PC工具的 --out 目录。末五秒验收与图窗默认末两秒摘要按各自定义比较。

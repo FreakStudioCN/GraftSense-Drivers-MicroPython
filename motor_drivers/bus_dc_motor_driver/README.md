@@ -69,9 +69,9 @@ bus_dc_motor_driver/
 | code/motor_controller.py | 多电机采样、独立闭环和统一遥测 |
 | code/voltage_monitor.py | ESP32 ADC 电源分压采样、缓存和校准 |
 | code/main.py | 开环/四路 PID 完整示例，默认不启动 |
-| examples/ | 单路/四路、原库兼容接口上机测试示例及共用配置 |
-| tests/ | 仅 PC 的模拟回归和 PID 自检 |
-| docs/VALIDATION.md | 已测条件、现象与未验证范围 |
+| examples/ | 每个测试项目一个独立文件；含单文件 PC 绘图工具 |
+| tests/test_driver.py | 单文件 PC 驱动与故障路径回归 |
+| docs/PID_TUNING.md | PID 参数整定方法与当前台架配置 |
 
 保持 package.json 与七个运行库同一版本；只更新 bus_dc_motor.py 而不更新 motor_controller.py 会缺少模式隔离接口。库安装不包含测试、示例或数据。
 
@@ -287,7 +287,7 @@ RPM = 本周期有符号计数增量 / (PPR × gear_ratio) × 60 / 实测周期�
 3. 需要旧接口测试时设置 `MODE="legacy"`；四路闭环设置 `MODE="pid"`。准备运行时显式设置 `ARM_MOTORS=True`。程序延时三秒后扫描 I2C；PID 模式检查电压、有限时长运行并打印 CSV。
 4. 应用结束先停止输出，再调用 `motor.deinit()` 注销自有 IRQ。由调用方另外释放其创建的 VoltageMonitor 和 I2C；不要关闭其他模块共享的总线。
 
-以 main.py 为完整调用示例，避免维护另一份与入口不一致的代码。其他单路/四路示例位于 examples/，需要额外上传 board_setup.py，且也默认禁用。
+以 main.py 为完整调用示例。examples/ 中每个板测文件均独立运行，只需额外安装 code/ 中的运行库；不需要上传其他测试脚本，默认禁止运动。
 
 PID 0.15/0.6/0 是现有电机低速短时测试的候选参数，不是所有电机/负载通用参数。构造默认输出范围为 ±100%，实机示例主动限制为 ±50%。积分限幅限制积分状态，实际积分输出还要乘 Ki。
 
@@ -326,19 +326,44 @@ PCA9685 通道共享频率。pwm_frequency 默认 1000，可指定 50；不能�
 
 ## 七、测试与迁移
 
-在仓库根目录运行：
+每个测试项目保留一个文件，板测脚本只依赖 `code/` 中的驱动。核对脚本内接线、供电和时长后，显式设置 `ARM_MOTORS=True`，每次只运行一个项目。
+
+| 文件 | 测试项目 |
+| --- | --- |
+| code/main.py | 旧开环或四路 PID 完整使用入口 |
+| examples/bus_dc_motor_demo.py | 旧接口、开环/PID隔离及停止/刹车兼容性 |
+| examples/single_motor_pid_demo.py | 指定一路电机正反转，其余停止 |
+| examples/four_motor_pid_demo.py | 四路不同目标和混合方向 |
+| examples/tuning_profile.py | 分路 PI、测速窗口与起步补偿整定 |
+| examples/performance_profile.py | 100/30/20ms 控制周期和缓存/窗口比较 |
+| examples/realtime_audit.py | 四路全周期、I2C、PID、ADC、GC 和输出完成时差 |
+| examples/i2c_benchmark.py | 400kHz/1MHz、预分配与批量写比较 |
+| examples/switch_benchmark.py | 正常单帧关断、急停与换向分段计时 |
+| examples/pc_live_plot.py | PC 实时四路曲线、指标、CSV 和录屏 |
+| tests/test_driver.py | PC 驱动参数、IRQ、停机异常、资源与安装依赖回归 |
+
+在仓库根目录运行 PC 回归：
 
 ```powershell
 python -m unittest discover -s motor_drivers/bus_dc_motor_driver/tests -p 'test_*.py'
-python motor_drivers/bus_dc_motor_driver/tests/validate_package.py
-python -m compileall -q motor_drivers/bus_dc_motor_driver/code motor_drivers/bus_dc_motor_driver/examples
 ```
 
-本包当前 63 项 PC 回归（含驱动、指标算法、计时工具和检查器）覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
+当前保留16项回归，不访问真实设备。检查范围包括运行库故障路径、单文件测试的默认禁止运动、安装依赖及分路窗口；不是实机测试的替代。
 
-examples/ 下的单路、四路及兼容验证示例需将 board_setup.py 也上传 /lib/。所有新增示例默认不启动，先按实物配置并显式启用，每次只运行一个入口。其他平台先更换接线，电压采样需支持相应 ADC API。
+PC 绘图工具也为单文件，上传时只上传所选项目及运行库：
 
-硬件结果、来源与升级边界见 [验证记录](docs/VALIDATION.md)；版本变化见 [CHANGELOG](CHANGELOG.md)。BusDCMotor 与 PCA9685 保留李清水署名，新增模块及示例按开发者确认署名赵岩松。规范化范围、检查器未通过项及兼容性例外见 [规范化记录](docs/normalization/REPORT.md)。
+```powershell
+pip install matplotlib numpy pillow pyserial mpremote
+python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile tuning_profile --port COM8 --baud 921600 --run --seconds 15 --out pid-results-01
+```
+
+可选项目为 `performance_profile`、`tuning_profile`、`realtime_audit`、`i2c_benchmark`、`switch_benchmark`。输出目录须不存在。明确 `--run` 后才上传并运行电机；先备份/校验，等待15秒，不改设备 main.py。运行错误或关图会通知设备停止并限时等待采集线程，结束状态写入本次输出目录。串口断线时不能把线程退出当成物理停机确认。
+
+性能、调参和总线优化均为独立台架实验，不替换七模块默认 API/参数。记录会保存到用户指定目录，组件仓库不收录 CSV、日志、统计 JSON、录屏及过程报告。完整历史记录和复算工具见[云测试文档](https://f1829ryac0m.feishu.cn/docx/Kee4dEPucoFTGTxnyE4cKEEGnce)，PID 调整方法见[整定指南](docs/PID_TUNING.md)。
+
+已完成 ESP32-C3 单路及四路 PID 台架测试，编码器读取与电压校准经开发者确认。分路细调后的后段均值/波动基础验收20/20通过，仍有启动超调；批量写和换向关断优化已有短时实机比较，不能据此推及带载整车或长期实时性。
+
+运行库执行仓库设备规范检查；独立设备测试执行格式、语法、默认禁用及依赖检查，PC工具和夹具执行格式与回归。实验工具不宣称满足运行库级全部双语API规范。BusDCMotor/PCA9685保留李清水署名，新增模块和测试署名赵岩松。
 
 ## 版本记录
 
@@ -353,40 +378,4 @@ GitHub 问题反馈：[当前 fork 的 Issues](https://github.com/yangcong-bit/G
 
 ## 许可与来源
 
-包根 [LICENSE](LICENSE) 保留原库 MIT 许可及 FreakStudio 版权声明。BusDCMotor 原库作者李清水的署名保留，PCA9685 保留其已有参考来源。新增模块来自现有四编码器电机项目，本次按兼容升级迁入本包；本次迁移的出处与行为差异见验证记录，不声明其他驱动包已回归。
-
-## PC实时曲线与控制周期试验
-
-见[大白话测试记录](docs/PERFORMANCE.md)：包含921600串口设置、四路曲线、超调/稳态规则、微秒计时与100/30/20ms实测对比。优化保留为独立测试入口，正式库默认行为不变。
-
-## PID参数怎么整定
-
-见[PID参数整定指南](docs/PID_TUNING.md)：调参顺序、测速窗口、起步补偿、重跑命令、指标定义和常见问题排查。
-
-## 这套台架的分路细调配置
-
-见[细调记录](docs/TUNING.md)。M1～M4分别配置PI和测速窗口，20ms控制周期，起步I项预置8% PWM贡献；五组正反转及低速复测的20个组合满足本轮后段均值/波动基础标准，M1仍有一次38.57%启动峰值。该配置在独立tuning_profile入口中显式启用，不覆盖通用库默认值。
-
-## 真车实时性评估
-
-见[全周期预算与动态响应](docs/REALTIME.md)。末段转速基础验收通过不等于整车已顺滑；补测了全周期分位数、GC、输出函数完成时差及轻量对照，当前仍需优化动态响应和余量。
-
-## 主机停止与验收复算
-
-PC采集主流程遇到画图、CSV或录像管道异常时，会请求取消、通知串口中断、限时等待非daemon worker进行停机清理，然后关闭录像器和图窗。结果写入输出目录的 `shutdown.json`；worker已退出不等于物理停机已证实，清理失败或超时会明确记录。上传前自动检查并创建设备 `/lib`，同名非目录会报错。
-
-在仓库根目录重算已提交的末五秒验收：
-
-```powershell
-python motor_drivers/bus_dc_motor_driver/tests/recompute_acceptance.py --csv motor_drivers/bus_dc_motor_driver/docs/tuning/samples.csv --check motor_drivers/bus_dc_motor_driver/docs/tuning/basic-acceptance.json
-```
-
-运行库与独立实验工具的检查边界见 [VALIDATION.md](docs/VALIDATION.md)。
-
-## I2C三项优化实测
-
-见[I2C优化对比](docs/I2C_OPTIMIZATION.md)：预分配缓冲单独使用没有明显收益，400kHz批量写入的改善较大，1MHz加批量进一步改善。正式运行库默认API和总线频率未改，六种组合及重复基线通过独立实验入口重跑。
-
-## 换向长尾分段实测
-
-见[换向分段计时](docs/SWITCH_TIMING.md)：软件禁用PID与硬件关断分开，正常关断16次写变成1次全关帧，成功回读后才允许反向；异常与急停保留8通道立即尽力关闭。8组四路实机对比记录每项最大值的设备时间与阶段，原始日志可用summarize_switch.py重新生成JSON。400kHz换向31.599→17.697ms，1MHz28.172→15.812ms；400kHz起步仍偶尔超过20ms。均为独立实验入口，默认运行库行为未改。
+包根 [LICENSE](LICENSE) 保留原库 MIT 许可及 FreakStudio 版权声明。BusDCMotor 原库作者李清水的署名保留，PCA9685 保留其已有参考来源。新增模块来自现有四编码器电机项目，本次按兼容升级迁入本包；测试证据与过程见上面的云测试文档，不声明其他驱动包已回归。

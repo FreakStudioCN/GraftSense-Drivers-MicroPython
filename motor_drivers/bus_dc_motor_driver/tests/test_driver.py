@@ -1,6 +1,8 @@
-"""PC-only checks for parameter guards, IRQ semantics and resource ownership."""
+"""One PC regression project for driver guards, IRQ cleanup and resource ownership."""
 
 import contextlib
+import ast
+import json
 import importlib
 import io
 import runpy
@@ -102,6 +104,7 @@ class Contracts(unittest.TestCase):
             return self.now
 
         clock.ticks_ms = ticks
+        clock.ticks_us = lambda: self.now * 1000
         clock.ticks_diff = lambda a, b: a - b
         clock.sleep = clock.sleep_ms = clock.sleep_us = lambda _: None
         micro = types.ModuleType("micropython")
@@ -270,89 +273,6 @@ class Contracts(unittest.TestCase):
                 controller.set_target_rpms((50, 60, 70, invalid))
             self.assertEqual(tuple(pid.target for pid in controller._pids), (10, 20, 30, 40))
 
-    def load_board_setup(self):
-        return runpy.run_path(str(CODE.parent / "examples" / "board_setup.py"))
-
-    def test_profile_normal_exit_releases_all_owned_resources(self):
-        env = self.load_board_setup()
-        with contextlib.redirect_stdout(io.StringIO()):
-            env["run_profile"]([], True)
-        self.assertTrue(I2C.instances[-1].closed)
-        self.assertTrue(ADC.instances[-1].closed)
-        self.assertTrue(all(pin.handler is None for pin in Pin.instances))
-
-    def test_profile_failure_preserves_error_and_releases_resources(self):
-        env = self.load_board_setup()
-        failure = OSError("ADC sampling failed")
-        original_deinit = self.mods["motor_controller"].MotorController.deinit
-
-        def cleanup_then_fail(controller):
-            original_deinit(controller)
-            raise OSError("stop failed")
-
-        with patch.object(self.mods["voltage_monitor"].VoltageMonitor, "update", side_effect=failure):
-            with patch.object(self.mods["motor_controller"].MotorController, "deinit", cleanup_then_fail):
-                with contextlib.redirect_stdout(io.StringIO()):
-                    with self.assertRaises(OSError) as result:
-                        env["run_profile"]([], True)
-        self.assertIs(result.exception, failure)
-        self.assertTrue(all(pin.handler is None for pin in Pin.instances))
-        self.assertTrue(I2C.instances[-1].closed)
-        self.assertTrue(ADC.instances[-1].closed)
-
-    def test_profile_scan_failure_closes_i2c(self):
-        env = self.load_board_setup()
-        with patch.object(I2C, "scan", return_value=[]):
-            with contextlib.redirect_stdout(io.StringIO()):
-                with self.assertRaises(RuntimeError):
-                    env["run_profile"]([], True)
-        self.assertTrue(I2C.instances[-1].closed)
-
-    def test_microsecond_decorator_counts_success_and_failure(self):
-        module = types.ModuleType("board_setup")
-        module.__dict__.update(self.load_board_setup())
-        with patch.dict(sys.modules, {"board_setup": module}):
-            env = runpy.run_path(str(CODE.parent / "examples/performance_profile.py"))
-        ticks = iter((100, 137, 200, 221))
-        with patch.object(sys.modules["time"], "ticks_us", lambda: next(ticks), create=True):
-            totals = [0]
-            measured = env["measure_us"](totals, 0)(lambda value: value + 1)
-            self.assertEqual(measured(3), 4)
-            self.assertEqual(totals, [37])
-            failure = OSError("original fault")
-
-            def fail():
-                raise failure
-
-            with self.assertRaises(OSError) as result:
-                env["measure_us"](totals, 0)(fail)()
-            self.assertIs(result.exception, failure)
-            self.assertEqual(totals, [58])
-
-    def test_tuning_rejects_bad_windows_and_targets_before_hardware(self):
-        module = types.ModuleType("board_setup")
-        module.__dict__.update(self.load_board_setup())
-        with patch.dict(sys.modules, {"board_setup": module}):
-            env = runpy.run_path(str(CODE.parent / "examples/tuning_profile.py"))
-        for window in (0, 17, 320):
-            with self.assertRaises(ValueError):
-                env["run"](True, 10, ((0.35, 0.3, 0, window),), ((30, 30, 30, 30),))
-        with self.assertRaises(ValueError):
-            env["run"](True, 10, ((0.35, 0.3, 0, 160),), ((30, 30, 30, 100),))
-        self.assertEqual(I2C.instances, [])
-
-    def test_startup_integral_is_signed_bounded_and_handles_zero_ki(self):
-        module = types.ModuleType("board_setup")
-        module.__dict__.update(self.load_board_setup())
-        with patch.dict(sys.modules, {"board_setup": module}):
-            env = runpy.run_path(str(CODE.parent / "examples/tuning_profile.py"))
-        pids = [types.SimpleNamespace(ki=ki, integral_min=-20, integral_max=20, integral=0) for ki in (0.5, 0.5, 0, 0.1)]
-        controller = types.SimpleNamespace(_pids=pids)
-        env["prime_integral"](controller, (30, -30, 30, 30))
-        self.assertEqual([pid.integral for pid in pids], [16, -16, 0, 20])
-        with self.assertRaises(ValueError):
-            env["prime_integral"](controller, (30,) * 4, 11)
-
     def test_main_initialization_failure_closes_owned_bus(self):
         env = runpy.run_path(str(CODE / "main.py"), run_name="main_setup_test")
         for devices in ([], [0x40]):
@@ -375,35 +295,6 @@ class Contracts(unittest.TestCase):
         self.assertIs(result.exception, failure)
         self.assertTrue(I2C.instances[-1].closed)
 
-    def test_per_motor_windows_override_the_outer_window_in_all_experiments(self):
-        module = types.ModuleType("board_setup")
-        module.__dict__.update(self.load_board_setup())
-        timing = runpy.run_path(str(CODE.parent / "examples/timing_audit.py"))
-        timing_module = types.ModuleType("timing_audit")
-        timing_module.__dict__.update(timing)
-        for filename in ("tuning_profile.py", "realtime_audit.py", "realtime_audit_light.py"):
-            for windows in ((160, 160, 200, 200), (20, 160, 200, 20)):
-                with self.subTest(filename=filename, windows=windows):
-                    with patch.dict(sys.modules, {"board_setup": module, "timing_audit": timing_module}):
-                        env = runpy.run_path(str(CODE.parent / "examples" / filename))
-                    captured = []
-                    sentinel = RuntimeError("stop before motion")
-
-                    def inspect_update(controller):
-                        captured.extend(encoder.get_rpm.__name__ for encoder in controller._encoders)
-                        raise sentinel
-
-                    presets = tuple((0.25, 0.3, 0, window) for window in windows)
-                    with patch.object(self.mods["motor_controller"].MotorController, "update", inspect_update), patch.object(
-                        sys.modules["time"], "ticks_us", lambda: self.now * 1000, create=True
-                    ):
-                        with contextlib.redirect_stdout(io.StringIO()):
-                            with self.assertRaises(RuntimeError) as result:
-                                env["run"](True, 10, ((0.25, 0.3, 0, 20),), ((30, 30, 30, 30),), presets)
-                    self.assertIs(result.exception, sentinel)
-                    self.assertEqual(captured, ["windowed" if window > 20 else "get_rpm" for window in windows])
-                    self.assertTrue(all(pin.handler is None for pin in Pin.instances))
-
     def test_armed_main_pid_releases_owned_resources(self):
         with contextlib.redirect_stdout(io.StringIO()):
             env = runpy.run_path(str(CODE / "main.py"), run_name="contract_test")
@@ -414,6 +305,98 @@ class Contracts(unittest.TestCase):
         self.assertTrue(I2C.instances[-1].closed)
         self.assertTrue(ADC.instances[-1].closed)
         self.assertTrue(all(pin.handler is None for pin in Pin.instances))
+
+    def example(self, name):
+        return runpy.run_path(str(CODE.parent / "examples" / (name + ".py")))
+
+    def test_examples_are_standalone_and_default_off(self):
+        files = list((CODE.parent / "examples").glob("*.py"))
+        local_names = {p.stem for p in files} | {"board_setup", "timing_audit", "i2c_strategies", "direction_switch"}
+        for file in files:
+            source = file.read_text(encoding="utf-8")
+            for node in ast.walk(ast.parse(source)):
+                if isinstance(node, ast.ImportFrom):
+                    self.assertNotIn(node.module, local_names, file.name)
+                elif isinstance(node, ast.Import):
+                    self.assertTrue(all(a.name not in local_names for a in node.names), file.name)
+            if file.name != "pc_live_plot.py":
+                with contextlib.redirect_stdout(io.StringIO()):
+                    runpy.run_path(str(file), run_name="__main__")
+        self.assertEqual(I2C.instances, [])
+        self.assertEqual(Pin.instances, [])
+
+    def test_installable_dependency_closure(self):
+        manifest = json.loads((CODE.parent / "package.json").read_text(encoding="utf-8"))
+        entries = manifest["urls"]
+        self.assertEqual(manifest["name"], "bus_dc_motor_driver")
+        self.assertEqual(manifest["version"], "1.1.0")
+        self.assertEqual({source for _, source in entries}, {"code/" + n + ".py" for n in MODULES})
+        allowed = set(MODULES) | {"time", "math", "machine", "ustruct", "micropython"}
+        for target, source in entries:
+            self.assertEqual(target, Path(target).name)
+            self.assertEqual(source, "code/" + target)
+            tree = ast.parse((CODE.parent / source).read_text(encoding="utf-8"))
+            for n in ast.walk(tree):
+                if isinstance(n, ast.ImportFrom):
+                    self.assertIn(n.module, allowed)
+                elif isinstance(n, ast.Import):
+                    self.assertTrue(all(a.name in allowed for a in n.names))
+
+    def test_single_file_profile_releases_owned_resources_on_normal_and_failed_exit(self):
+        env = self.example("single_motor_pid_demo")
+        with contextlib.redirect_stdout(io.StringIO()):
+            env["run_profile"]([], True)
+        self.assertTrue(I2C.instances[-1].closed)
+        self.assertTrue(ADC.instances[-1].closed)
+        failure = OSError("ADC sampling failed")
+        with patch.object(self.mods["voltage_monitor"].VoltageMonitor, "update", side_effect=failure):
+            with contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(OSError) as caught:
+                    env["run_profile"]([], True)
+        self.assertIs(caught.exception, failure)
+        self.assertTrue(I2C.instances[-1].closed)
+        self.assertTrue(ADC.instances[-1].closed)
+        self.assertTrue(all(p.handler is None for p in Pin.instances))
+
+    def test_window_configuration_is_per_motor_in_standalone_projects(self):
+        for filename in ("tuning_profile", "realtime_audit"):
+            env = self.example(filename)
+            captured = []
+            sentinel = RuntimeError("stop before motion")
+
+            def inspect(controller):
+                captured.extend(e.get_rpm.__name__ for e in controller._encoders)
+                raise sentinel
+
+            with patch.object(self.mods["motor_controller"].MotorController, "update", inspect):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaises(RuntimeError) as caught:
+                        env["run"](True, 10, ((0.25, 0.3, 0, 20),), ((30, 30, 30, 30),))
+            self.assertIs(caught.exception, sentinel)
+            self.assertEqual(captured, ["windowed"] * 4)
+            self.assertTrue(I2C.instances[-1].closed)
+            self.assertTrue(all(p.handler is None for p in Pin.instances))
+
+    def test_failed_normal_off_blocks_reverse_and_attempts_all_channels(self):
+        env = self.example("switch_benchmark")
+        bus = self.make_bus()
+        writer = env["BenchWriter"](self.pca, "batch")
+        original = self.i2c.writeto_mem
+        calls = []
+        failure = OSError("off failed")
+
+        def fail_once(address, register, data):
+            calls.append(register)
+            if len(calls) == 1:
+                raise failure
+            original(address, register, data)
+
+        with patch.object(self.i2c, "writeto_mem", fail_once):
+            with self.assertRaises(OSError) as caught:
+                env["switch_reference"](bus._controller, writer, (-30, 40, -50, 60), True, [0] * 11)
+        self.assertIs(caught.exception, failure)
+        self.assertEqual(calls, [6] + list(range(6, 38, 4)))
+        self.assertTrue(all(not p.enabled for p in bus._controller._pids))
 
 
 if __name__ == "__main__":

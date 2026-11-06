@@ -1,9 +1,5 @@
-"""Live USB-serial PID plots, measured timing, CSV and live-canvas recording.
-
-Install: pip install matplotlib numpy pyserial mpremote
-Run: python pc_live_plot.py --port COM8 --baud 921600 --run --seconds 10 --out results
-Explicit --run deploys the current package and moves the motors for a bounded test.
-USB CDC/JTAG baud is a host request, not a guarantee of UART bit rate.
+"""Standalone PC recorder. Install matplotlib numpy pillow pyserial mpremote.
+Uploads the library and selected single-file experiment; explicit --run moves motors.
 """
 
 import argparse
@@ -14,23 +10,129 @@ import subprocess
 import threading
 import time
 from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
-from pid_response_metrics import response_metrics, last_reference_segment
-from host_cleanup import capture_cleanup, ensure_lib
+from statistics import mean, pstdev
+from contextlib import contextmanager
 
 ROOT = Path(__file__).resolve().parents[1]
 COLUMNS = ["phase", "period_ms", "elapsed_ms"] + [f"target{i}" for i in range(1, 5)] + [f"rpm{i}" for i in range(1, 5)]
 COLUMNS += [f"pwm{i}" for i in range(1, 5)] + ["voltage", "loop_us", "i2c_us", "pid_us", "previous_print_us", "control_dt_ms"]
 
 
+def response_metrics(rows, motor):
+    active = [row for row in rows if row[3 + motor] != 0]
+    if not active:
+        return {}
+    target = active[0][3 + motor]
+    if any(row[3 + motor] != target for row in active):
+        raise ValueError("Expected one step from zero to a constant target")
+    times = [(row[2] - active[0][2]) / 1000 for row in active]
+    values = [row[7 + motor] for row in active]
+    band = abs(target) * 0.05
+    outside = [i for i, value in enumerate(values) if abs(value - target) > band]
+    candidate = outside[-1] + 1 if outside else 0
+    settling = times[candidate] if candidate < len(times) and times[-1] - times[candidate] >= 1 else None
+    direction = 1 if target > 0 else -1
+    tail = [value for t, value in zip(times, values) if t >= max(0, times[-1] - 2)]
+    return dict(
+        target=float(target),
+        overshoot_pct=round(max(0, max(direction * v for v in values) - abs(target)) / abs(target) * 100, 2),
+        settling_s=settling,
+        mean_tail_rpm=round(mean(tail), 3),
+        std_tail_rpm=round(pstdev(tail), 3),
+        band_rpm=band,
+    )
+
+
+def last_reference_segment(rows, motor):
+    """Select the latest contiguous constant-reference segment for step metrics."""
+    if not rows:
+        return []
+    target = rows[-1][3 + motor]
+    if not target:
+        return []
+    start = len(rows) - 1
+    while start > 0 and rows[start - 1][3 + motor] == target:
+        start -= 1
+    return rows[start:]
+
+
+@contextmanager
+def capture_cleanup(cancelled, worker, recorder, close_plot, interrupt, errors, status_path, join_timeout=5):
+    """Request stop on every exit; preserve a primary exception over cleanup errors.
+
+    A joined worker only confirms host cleanup finished, not physical motor state.
+    Serial disconnection or cleanup failure must remain visible in errors/status.
+    """
+    failed = False
+    try:
+        yield
+    except BaseException:
+        failed = True
+        raise
+    finally:
+        cancelled.set()
+        try:
+            interrupt()
+        except Exception as exc:
+            errors.append("Stop notification: " + str(exc))
+        try:
+            if worker.ident is not None:
+                worker.join(join_timeout)
+        except Exception as exc:
+            errors.append("Worker join: " + str(exc))
+        joined = not worker.is_alive()
+        if not joined:
+            errors.append("Worker stop cleanup timed out; device stop is unconfirmed")
+        try:
+            if recorder.stdin is not None:
+                recorder.stdin.close()
+        except Exception as exc:
+            errors.append("Video pipe close: " + str(exc))
+        try:
+            if recorder.wait(timeout=5) != 0:
+                errors.append("Video encoder failed")
+        except subprocess.TimeoutExpired:
+            try:
+                recorder.terminate()
+                recorder.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                try:
+                    recorder.kill()
+                    recorder.wait(timeout=2)
+                except Exception as exc:
+                    errors.append("Video kill: " + str(exc))
+            except Exception as exc:
+                errors.append("Video terminate: " + str(exc))
+        except Exception as exc:
+            errors.append("Video shutdown: " + str(exc))
+        finally:
+            try:
+                close_plot()
+            except Exception as exc:
+                errors.append("Plot shutdown: " + str(exc))
+            try:
+                status_path.write_text(json.dumps(dict(cancel_requested=True, worker_joined=joined, errors=list(errors)), indent=2), encoding="utf-8")
+            except Exception as exc:
+                errors.append("Shutdown status write: " + str(exc))
+        if errors and not failed:
+            raise RuntimeError(errors)
+
+
+def ensure_lib(transport):
+    if not transport.fs_exists("/lib"):
+        transport.fs_mkdir("/lib")
+    elif not transport.fs_isdir("/lib"):
+        raise NotADirectoryError("Device /lib exists but is not a directory")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--profile",
-        choices=("performance_profile", "tuning_profile", "realtime_audit", "realtime_audit_light", "i2c_benchmark", "switch_benchmark"),
+        choices=("performance_profile", "tuning_profile", "realtime_audit", "i2c_benchmark", "switch_benchmark"),
         default="performance_profile",
     )
     parser.add_argument("--reuse", action="store_true", help="reuse already verified device libraries; upload experiment scripts only")
@@ -105,21 +207,7 @@ def main():
                 backup.mkdir()
                 uploaded = args.out / "uploaded-source"
                 uploaded.mkdir()
-                sources = ([] if args.reuse else list((ROOT / "code").glob("*.py"))) + [
-                    ROOT / "examples" / n
-                    for n in (
-                        "board_setup.py",
-                        "performance_profile.py",
-                        "tuning_profile.py",
-                        "timing_audit.py",
-                        "realtime_audit.py",
-                        "realtime_audit_light.py",
-                        "i2c_strategies.py",
-                        "i2c_benchmark.py",
-                        "direction_switch.py",
-                        "switch_benchmark.py",
-                    )
-                ]
+                sources = ([] if args.reuse else list((ROOT / "code").glob("*.py"))) + [ROOT / "examples" / (args.profile + ".py")]
                 for source in sources:
                     if cancelled.is_set():
                         raise KeyboardInterrupt("Upload cancelled")

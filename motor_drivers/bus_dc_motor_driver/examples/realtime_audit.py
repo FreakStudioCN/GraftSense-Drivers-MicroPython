@@ -6,14 +6,25 @@
 # @Description : Bounded four-motor timing experiment, launched explicitly by PC.
 # @License : MIT
 
+# 单文件测试：除 code/ 中的驱动外，不依赖其他测试脚本。
+
 # ======================================== 导入相关模块 ========================================
 import time
 import gc
-from timing_audit import TimingHistogram
-from board_setup import create_pca, create_controller
+from array import array
+from machine import Pin, I2C
+from pca9685 import PCA9685
+from motor_controller import MotorController
 from voltage_monitor import VoltageMonitor
 
+
 # ======================================== 全局变量 ========================================
+BIN_COUNT = 256
+BIN_US = 100
+MOTOR_CONFIGS = ((0, 1, 5, 6), (2, 3, 7, 8), (4, 5, 3, 2), (6, 7, 1, 0))
+PID_PARAMS = ((0.15, 0.6, 0.0),) * 4
+PPR = 13
+GEAR_RATIO = 20
 ARM_MOTORS = False
 STARTUP_I_PERCENT = 8.0
 PROFILES = ((0.25, 0.30, 0.0, 160),) * 2
@@ -23,6 +34,58 @@ VALIDATION_TARGETS = ((30, -40, 50, -60), (-30, 40, -50, 60), (30, 30, 30, 30), 
 
 
 # ======================================== 功能函数 ========================================
+def create_pca() -> object:
+    """扫描设备，将全部电机通道关闭，再设置整片 PWM 为 1000 Hz。"""
+    i2c = I2C(0, scl=Pin(9), sda=Pin(10), freq=400000)
+    try:
+        devices = i2c.scan()
+        print("I2C devices:", [hex(x) for x in devices])
+        if not devices:
+            raise RuntimeError("No I2C device found")
+        if 0x4F not in devices:
+            raise RuntimeError("Device not found at expected address")
+        # 无固定芯片 ID；构造及频率设置通过寄存器读写验证响应。
+        pca = PCA9685(i2c, 0x4F)
+        # reset() 清除了自动递增位；pwm() 的四字节寄存器写入需要先启用它。
+        pca.i2c.writeto_mem(pca.address, 0x00, b"\x20")
+        for channel in range(8):
+            pca.duty(channel, 0)
+        pca.freq(1000)
+        return pca
+    except BaseException:
+        try:
+            if hasattr(i2c, "deinit"):
+                i2c.deinit()
+        except Exception:
+            pass
+        raise
+
+
+def create_controller(pca: object = None) -> object:
+    """只创建并停止四路，示例限幅为 ±50%，不改变正式入口配置。"""
+    owned = pca is None
+    if owned:
+        pca = create_pca()
+    try:
+        return MotorController(
+            pca,
+            MOTOR_CONFIGS,
+            PID_PARAMS,
+            ppr=PPR,
+            gear_ratio=GEAR_RATIO,
+            output_limit=(-50, 50),
+            integral_limit=(-50, 50),
+        )
+    except BaseException:
+        if owned:
+            try:
+                if hasattr(pca.i2c, "deinit"):
+                    pca.i2c.deinit()
+            except Exception:
+                pass
+        raise
+
+
 def measure_us(totals: list, slot: int) -> object:
     """Accumulate ticks_us time, including failed calls; never use in an IRQ."""
 
@@ -52,6 +115,36 @@ def prime_integral(controller: object, targets: tuple, percent: float = STARTUP_
 
 
 # ======================================== 自定义类 ========================================
+class TimingHistogram:
+    """100us histogram upper bounds, exact mean/max; last bin is overflow."""
+
+    def __init__(self) -> None:
+        self.bins = array("I", [0] * BIN_COUNT)
+        self.count = self.total = self.maximum = 0
+
+    def add(self, elapsed_us: int) -> None:
+        if elapsed_us < 0:
+            raise ValueError("Elapsed time must be nonnegative")
+        self.count += 1
+        self.total += elapsed_us
+        self.maximum = max(self.maximum, elapsed_us)
+        self.bins[min(elapsed_us // BIN_US, BIN_COUNT - 1)] += 1
+
+    def percentile(self, percent: int) -> int:
+        if not 1 <= percent <= 100:
+            raise ValueError("Percentile must be 1..100")
+        rank = (self.count * percent + 99) // 100
+        cumulative = 0
+        for index, count in enumerate(self.bins):
+            cumulative += count
+            if cumulative >= rank:
+                return min(self.maximum, (index + 1) * BIN_US) if index < BIN_COUNT - 1 else self.maximum
+        return 0
+
+    def result(self) -> tuple:
+        return (self.count, self.total // max(self.count, 1), self.percentile(95), self.percentile(99), self.maximum)
+
+
 class TimedI2C:
     """Borrowed bus: measure the actual I2C calls, not the whole PWM calculation."""
 
@@ -61,6 +154,8 @@ class TimedI2C:
 
 
 # ======================================== 初始化配置 ========================================
+
+
 # ======================================== 主程序 ========================================
 def run(armed: bool = False, seconds: int = 10, profiles: object = None, target_profiles: object = None, per_motor: object = MOTOR_PRESETS) -> None:
     """Compare PI candidates at 20ms with an explicit speed window; stop on exit."""

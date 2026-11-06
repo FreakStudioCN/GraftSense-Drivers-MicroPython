@@ -6,17 +6,78 @@
 # @Description : Bounded four-motor timing experiment, launched explicitly by PC.
 # @License : MIT
 
+# 单文件测试：除 code/ 中的驱动外，不依赖其他测试脚本。
+
 # ======================================== 导入相关模块 ========================================
 import time
-from board_setup import create_pca, create_controller
+from machine import Pin, I2C
+from pca9685 import PCA9685
+from motor_controller import MotorController
 from voltage_monitor import VoltageMonitor
 
+
 # ======================================== 全局变量 ========================================
+MOTOR_CONFIGS = ((0, 1, 5, 6), (2, 3, 7, 8), (4, 5, 3, 2), (6, 7, 1, 0))
+PID_PARAMS = ((0.15, 0.6, 0.0),) * 4
+PPR = 13
+GEAR_RATIO = 20
 ARM_MOTORS = False
 TARGETS = (30, -40, 50, -60)
 
 
 # ======================================== 功能函数 ========================================
+def create_pca() -> object:
+    """扫描设备，将全部电机通道关闭，再设置整片 PWM 为 1000 Hz。"""
+    i2c = I2C(0, scl=Pin(9), sda=Pin(10), freq=400000)
+    try:
+        devices = i2c.scan()
+        print("I2C devices:", [hex(x) for x in devices])
+        if not devices:
+            raise RuntimeError("No I2C device found")
+        if 0x4F not in devices:
+            raise RuntimeError("Device not found at expected address")
+        # 无固定芯片 ID；构造及频率设置通过寄存器读写验证响应。
+        pca = PCA9685(i2c, 0x4F)
+        # reset() 清除了自动递增位；pwm() 的四字节寄存器写入需要先启用它。
+        pca.i2c.writeto_mem(pca.address, 0x00, b"\x20")
+        for channel in range(8):
+            pca.duty(channel, 0)
+        pca.freq(1000)
+        return pca
+    except BaseException:
+        try:
+            if hasattr(i2c, "deinit"):
+                i2c.deinit()
+        except Exception:
+            pass
+        raise
+
+
+def create_controller(pca: object = None) -> object:
+    """只创建并停止四路，示例限幅为 ±50%，不改变正式入口配置。"""
+    owned = pca is None
+    if owned:
+        pca = create_pca()
+    try:
+        return MotorController(
+            pca,
+            MOTOR_CONFIGS,
+            PID_PARAMS,
+            ppr=PPR,
+            gear_ratio=GEAR_RATIO,
+            output_limit=(-50, 50),
+            integral_limit=(-50, 50),
+        )
+    except BaseException:
+        if owned:
+            try:
+                if hasattr(pca.i2c, "deinit"):
+                    pca.i2c.deinit()
+            except Exception:
+                pass
+        raise
+
+
 def measure_us(totals: list, slot: int) -> object:
     """Accumulate ticks_us time, including failed calls; never use in an IRQ."""
 
@@ -43,6 +104,8 @@ class TimedI2C:
 
 
 # ======================================== 初始化配置 ========================================
+
+
 # ======================================== 主程序 ========================================
 def run(armed: bool = False, seconds: int = 10) -> None:
     """Compare periods, cached PWM and an explicit 80 ms speed window; stop on exit."""

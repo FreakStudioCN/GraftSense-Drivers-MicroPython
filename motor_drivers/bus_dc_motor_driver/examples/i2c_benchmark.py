@@ -6,24 +6,274 @@
 # @Description : Fixed-PI 400kHz/1MHz stock, preallocated and batch comparison.
 # @License : MIT
 
+# 单文件测试：除 code/ 中的驱动外，不依赖其他测试脚本。
+
 # ======================================== 导入相关模块 ========================================
 import time
 import gc
 from machine import I2C, Pin
-from board_setup import create_pca, create_controller
-from tuning_profile import MOTOR_PRESETS, prime_integral, measure_us
+from pca9685 import PCA9685
+from motor_controller import MotorController
 from voltage_monitor import VoltageMonitor
-from timing_audit import TimingHistogram
-from i2c_strategies import BenchWriter
+from array import array
+import ustruct
+
 
 # ======================================== 全局变量 ========================================
+MOTOR_CONFIGS = ((0, 1, 5, 6), (2, 3, 7, 8), (4, 5, 3, 2), (6, 7, 1, 0))
+PID_PARAMS = ((0.15, 0.6, 0.0),) * 4
+PPR = 13
+GEAR_RATIO = 20
+MOTOR_PRESETS = ((0.25, 0.30, 0.0, 160), (0.25, 0.25, 0.0, 160), (0.30, 0.25, 0.0, 200), (0.15, 0.20, 0.0, 200))
+STARTUP_I_PERCENT = 8.0
+BIN_COUNT = 256
+BIN_US = 100
 ARM_MOTORS = False
 CASES = ((400000, "stock"), (400000, "prealloc"), (400000, "batch"), (1000000, "stock"), (1000000, "prealloc"), (1000000, "batch"), (400000, "stock"))
 TARGETS = (30, -40, 50, -60)
 
 
 # ======================================== 功能函数 ========================================
+def create_pca() -> object:
+    """扫描设备，将全部电机通道关闭，再设置整片 PWM 为 1000 Hz。"""
+    i2c = I2C(0, scl=Pin(9), sda=Pin(10), freq=400000)
+    try:
+        devices = i2c.scan()
+        print("I2C devices:", [hex(x) for x in devices])
+        if not devices:
+            raise RuntimeError("No I2C device found")
+        if 0x4F not in devices:
+            raise RuntimeError("Device not found at expected address")
+        # 无固定芯片 ID；构造及频率设置通过寄存器读写验证响应。
+        pca = PCA9685(i2c, 0x4F)
+        # reset() 清除了自动递增位；pwm() 的四字节寄存器写入需要先启用它。
+        pca.i2c.writeto_mem(pca.address, 0x00, b"\x20")
+        for channel in range(8):
+            pca.duty(channel, 0)
+        pca.freq(1000)
+        return pca
+    except BaseException:
+        try:
+            if hasattr(i2c, "deinit"):
+                i2c.deinit()
+        except Exception:
+            pass
+        raise
+
+
+def create_controller(pca: object = None) -> object:
+    """只创建并停止四路，示例限幅为 ±50%，不改变正式入口配置。"""
+    owned = pca is None
+    if owned:
+        pca = create_pca()
+    try:
+        return MotorController(
+            pca,
+            MOTOR_CONFIGS,
+            PID_PARAMS,
+            ppr=PPR,
+            gear_ratio=GEAR_RATIO,
+            output_limit=(-50, 50),
+            integral_limit=(-50, 50),
+        )
+    except BaseException:
+        if owned:
+            try:
+                if hasattr(pca.i2c, "deinit"):
+                    pca.i2c.deinit()
+            except Exception:
+                pass
+        raise
+
+
+def prime_integral(controller: object, targets: tuple, percent: float = STARTUP_I_PERCENT) -> None:
+    """Preload a small signed I contribution for this bench; retain each PID's limits."""
+    if type(percent) not in (int, float) or not 0 <= percent <= 10:
+        raise ValueError("Startup I contribution must be within 0..10 percent")
+    if len(targets) != len(controller._pids):
+        raise ValueError("One startup target per PID is required")
+    for pid, target in zip(controller._pids, targets):
+        signed = percent if target > 0 else -percent if target < 0 else 0
+        initial = signed / pid.ki if pid.ki else 0
+        pid.integral = max(pid.integral_min, min(pid.integral_max, initial))
+
+
+def measure_us(totals: list, slot: int) -> object:
+    """Accumulate ticks_us time, including failed calls; never use in an IRQ."""
+
+    def decorate(function: object) -> object:
+        def timed(*args: object, **kwargs: object) -> object:
+            start = time.ticks_us()
+            try:
+                return function(*args, **kwargs)
+            finally:
+                totals[slot] += time.ticks_diff(time.ticks_us(), start)
+
+        return timed
+
+    return decorate
+
+
+def pack_channel(buffer: bytearray, offset: int, value: int) -> None:
+    """Encode PCA full-on/off flags without allocating a new packed object."""
+    ustruct.pack_into("<HH", buffer, offset, 4096 if value == 4095 else 0, 4096 if value == 0 else value if value != 4095 else 0)
+
+
 # ======================================== 自定义类 ========================================
+class TimingHistogram:
+    """100us histogram upper bounds, exact mean/max; last bin is overflow."""
+
+    def __init__(self) -> None:
+        self.bins = array("I", [0] * BIN_COUNT)
+        self.count = self.total = self.maximum = 0
+
+    def add(self, elapsed_us: int) -> None:
+        if elapsed_us < 0:
+            raise ValueError("Elapsed time must be nonnegative")
+        self.count += 1
+        self.total += elapsed_us
+        self.maximum = max(self.maximum, elapsed_us)
+        self.bins[min(elapsed_us // BIN_US, BIN_COUNT - 1)] += 1
+
+    def percentile(self, percent: int) -> int:
+        if not 1 <= percent <= 100:
+            raise ValueError("Percentile must be 1..100")
+        rank = (self.count * percent + 99) // 100
+        cumulative = 0
+        for index, count in enumerate(self.bins):
+            cumulative += count
+            if cumulative >= rank:
+                return min(self.maximum, (index + 1) * BIN_US) if index < BIN_COUNT - 1 else self.maximum
+        return 0
+
+    def result(self) -> tuple:
+        return (self.count, self.total // max(self.count, 1), self.percentile(95), self.percentile(99), self.maximum)
+
+
+class BenchWriter:
+    """Own only CH0..7 during this experiment; all errors invalidate cached state.
+
+    Stock/prealloc retain immediate per-channel writes. Batch buffers until flush.
+    Reversal first commits all-off, waits 200us, then commits the requested frame.
+    This bench delay is not a universal H-bridge dead-time specification.
+    """
+
+    def __init__(self, pca: object, mode: str) -> None:
+        if mode not in ("stock", "prealloc", "batch"):
+            raise ValueError("Unknown bench writer")
+        self.pca = pca
+        self.mode = mode
+        self.original_duty = pca.duty
+        self.original_pwm = pca.pwm
+        self.single = bytearray(4)
+        self.frame = bytearray(32)
+        self.off = bytearray(32)
+        self.verify_buffer = bytearray(32)
+        self.levels = [0] * 8
+        self.committed = [0] * 8
+        self.cache = {}
+        self.pending = False
+        self.reversal_frames = 0
+        for channel in range(8):
+            pack_channel(self.off, channel * 4, 0)
+        if mode != "stock":
+            pca.pwm = self.pwm
+        pca.duty = self.duty
+
+    def pwm(self, index: int, on: int, off: int) -> None:
+        """Same register payload as PCA9685.pwm, with a reusable four-byte buffer."""
+        if not 0 <= index <= 15 or not 0 <= on <= 4096 or not 0 <= off <= 4096:
+            raise ValueError("PWM parameters outside PCA range")
+        ustruct.pack_into("<HH", self.single, 0, on, off)
+        self.pca.i2c.writeto_mem(self.pca.address, 6 + 4 * index, self.single)
+
+    def duty(self, index: int, value: int, invert: bool = False) -> int:
+        """Cache confirmed writes; only buffer in an explicitly opened batch frame."""
+        if type(index) is not int or not 0 <= index < 8 or type(value) is not int or not 0 <= value <= 4095:
+            raise ValueError("Bench duty must target CH0..7 with integer duty")
+        applied = 4095 - value if invert else value
+        self.levels[index] = applied
+        if self.mode == "batch" and self.pending:
+            return applied
+        key = (value, invert)
+        if self.cache.get(index) != key:
+            try:
+                self.original_duty(index, value, invert)
+            except BaseException:
+                self.cache.clear()
+                raise
+            self.cache[index] = key
+        self.committed[index] = applied
+        return applied
+
+    def begin(self) -> None:
+        self.pending = self.mode == "batch"
+
+    def flush(self) -> None:
+        """Commit a whole 32-byte frame on STOP; no Python per-channel transfers."""
+        if not self.pending:
+            return
+        self.pending = False
+        if self.levels == self.committed:
+            return
+        reversing = any((self.levels[i] and self.committed[i + 1]) or (self.levels[i + 1] and self.committed[i]) for i in range(0, 8, 2))
+        for channel in range(8):
+            pack_channel(self.frame, channel * 4, self.levels[channel])
+        try:
+            if reversing:
+                self.pca.i2c.writeto_mem(self.pca.address, 6, self.off)
+                for channel in range(8):
+                    self.committed[channel] = 0
+                self.reversal_frames += 1
+                time.sleep_us(200)
+            self.pca.i2c.writeto_mem(self.pca.address, 6, self.frame)
+            for channel in range(8):
+                self.committed[channel] = self.levels[channel]
+            self.cache.clear()
+        except BaseException:
+            self.cache.clear()
+            raise
+
+    def verify(self) -> None:
+        for channel in range(8):
+            pack_channel(self.verify_buffer, channel * 4, self.committed[channel])
+        actual = self.pca.i2c.readfrom_mem(self.pca.address, 6, 32)
+        if actual != self.verify_buffer:
+            raise RuntimeError("PCA PWM register readback mismatch")
+
+    def stop(self) -> None:
+        """Always attempt eight immediate writes; never defer emergency stopping."""
+        self.pending = False
+        self.cache.clear()
+        error = None
+        for channel in range(8):
+            try:
+                self.original_duty(channel, 0)
+                self.levels[channel] = self.committed[channel] = 0
+            except Exception as exc:
+                if error is None:
+                    error = exc
+        if error is not None:
+            raise error
+
+    def confirmed_off(self) -> None:
+        """One normal-stop burst plus exact readback; failures never permit reverse."""
+        self.pending = False
+        self.cache.clear()
+        self.pca.i2c.writeto_mem(self.pca.address, 6, self.off)
+        if self.pca.i2c.readfrom_mem(self.pca.address, 6, 32) != self.off:
+            raise RuntimeError("Normal off-frame readback mismatch")
+        for channel in range(8):
+            self.levels[channel] = self.committed[channel] = 0
+
+    def deinit(self) -> None:
+        try:
+            self.stop()
+        finally:
+            self.pca.duty = self.original_duty
+            self.pca.pwm = self.original_pwm
+
+
 class TimedBus:
     """Measure actual bus calls, count writes/bytes; borrowed bus ownership."""
 
@@ -44,6 +294,8 @@ class TimedBus:
 
 
 # ======================================== 初始化配置 ========================================
+
+
 # ======================================== 主程序 ========================================
 def run(armed: bool = False, seconds: int = 12) -> None:
     """Seven bounded cases with identical forward/reverse references and gains."""

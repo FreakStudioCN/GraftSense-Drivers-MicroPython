@@ -6,11 +6,15 @@
 # @Description : 电机驱动独立调用示例
 # @License : MIT
 
+# 单文件测试：除 code/ 中的驱动外，不依赖其他测试脚本。
+
 # ======================================== 导入相关模块 ========================================
 import time
 from bus_dc_motor import BusDCMotor
 from voltage_monitor import VoltageMonitor
-from board_setup import create_pca
+from machine import Pin, I2C
+from pca9685 import PCA9685
+
 
 # ======================================== 全局变量 ========================================
 ARM_MOTORS = False
@@ -19,6 +23,33 @@ PID_PARAMS = ((0.15, 0.6, 0),) * 4
 
 
 # ======================================== 功能函数 ========================================
+def create_pca() -> object:
+    """扫描设备，将全部电机通道关闭，再设置整片 PWM 为 1000 Hz。"""
+    i2c = I2C(0, scl=Pin(9), sda=Pin(10), freq=400000)
+    try:
+        devices = i2c.scan()
+        print("I2C devices:", [hex(x) for x in devices])
+        if not devices:
+            raise RuntimeError("No I2C device found")
+        if 0x4F not in devices:
+            raise RuntimeError("Device not found at expected address")
+        # 无固定芯片 ID；构造及频率设置通过寄存器读写验证响应。
+        pca = PCA9685(i2c, 0x4F)
+        # reset() 清除了自动递增位；pwm() 的四字节寄存器写入需要先启用它。
+        pca.i2c.writeto_mem(pca.address, 0x00, b"\x20")
+        for channel in range(8):
+            pca.duty(channel, 0)
+        pca.freq(1000)
+        return pca
+    except BaseException:
+        try:
+            if hasattr(i2c, "deinit"):
+                i2c.deinit()
+        except Exception:
+            pass
+        raise
+
+
 def read_pairs(pca: object) -> list:
     """读取八通道原始寄存器，验证 full-on/off 与 PWM 原值。"""
     result = []
@@ -29,7 +60,11 @@ def read_pairs(pca: object) -> list:
 
 
 # ======================================== 自定义类 ========================================
+
+
 # ======================================== 初始化配置 ========================================
+
+
 # ======================================== 主程序 ========================================
 def run() -> None:
     if not ARM_MOTORS:
@@ -39,6 +74,8 @@ def run() -> None:
     print("FreakStudio: BusDCMotor compatibility test")
     motor = None
     pca = None
+    voltage = None
+    failed = False
     try:
         pca = create_pca()
         # 原构造参数与默认全通道刹车保持兼容。
@@ -141,18 +178,29 @@ def run() -> None:
         assert motor.get_modes() == ("stopped",) * 4
         print("PASS: all outputs stopped; target RPMs cleared")
     except KeyboardInterrupt:
+        failed = True
         print("Interrupted")
         raise
     except OSError as exc:
+        failed = True
         print("Hardware communication error:", exc)
         raise
     except Exception as exc:
+        failed = True
         print("Compatibility test failed:", exc)
         raise
     finally:
-        if motor is not None:
-            motor.stop_all()
-        print("All configured motors stopped")
+        error = None
+        for resource in (motor, voltage, pca, pca.i2c if pca is not None else None):
+            if resource is not None and hasattr(resource, "deinit"):
+                try:
+                    resource.deinit()
+                except Exception as exc:
+                    if error is None:
+                        error = exc
+        if error is not None and not failed:
+            raise error
+        print("All configured motors stopped; owned resources released")
 
 
 if __name__ == "__main__":
