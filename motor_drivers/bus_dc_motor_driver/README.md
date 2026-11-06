@@ -116,15 +116,23 @@ def _prepare_hardware() -> tuple:
     time.sleep(3)
     print("FreakStudio: four-motor driver test")
     i2c = I2C(0, scl=Pin(SCL_PIN), sda=Pin(SDA_PIN), freq=400000)
-    devices = i2c.scan()
-    print("I2C devices:", [hex(a) for a in devices])
-    if not devices:
-        raise RuntimeError("No I2C device found")
-    if PCA_ADDRESS not in devices:
-        raise RuntimeError("Device not found at expected address")
-    # 该器件无固定芯片 ID；构造时写 MODE1 检查通信响应。
-    pca = PCA9685(i2c, PCA_ADDRESS)
-    return i2c, pca
+    try:
+        devices = i2c.scan()
+        print("I2C devices:", [hex(a) for a in devices])
+        if not devices:
+            raise RuntimeError("No I2C device found")
+        if PCA_ADDRESS not in devices:
+            raise RuntimeError("Device not found at expected address")
+        # 该器件无固定芯片 ID；构造时写 MODE1 检查通信响应。
+        pca = PCA9685(i2c, PCA_ADDRESS)
+        return i2c, pca
+    except BaseException:
+        try:
+            if hasattr(i2c, "deinit"):
+                i2c.deinit()
+        except Exception:
+            pass
+        raise
 
 
 # ======================================== 主程序 ========================================
@@ -326,7 +334,7 @@ python motor_drivers/bus_dc_motor_driver/tests/validate_package.py
 python -m compileall -q motor_drivers/bus_dc_motor_driver/code motor_drivers/bus_dc_motor_driver/examples
 ```
 
-本包当前 38 项 PC 回归（含驱动、指标算法、计时工具和检查器）覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
+本包当前 47 项 PC 回归（含驱动、指标算法、计时工具和检查器）覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
 
 examples/ 下的单路、四路及兼容验证示例需将 board_setup.py 也上传 /lib/。所有新增示例默认不启动，先按实物配置并显式启用，每次只运行一个入口。其他平台先更换接线，电压采样需支持相应 ADC API。
 
@@ -362,3 +370,15 @@ GitHub 问题反馈：[当前 fork 的 Issues](https://github.com/yangcong-bit/G
 ## 真车实时性评估
 
 见[全周期预算与动态响应](docs/REALTIME.md)。末段转速基础验收通过不等于整车已顺滑；补测了全周期分位数、GC、输出函数完成时差及轻量对照，当前仍需优化动态响应和余量。
+
+## 主机停止与验收复算
+
+PC采集主流程遇到画图、CSV或录像管道异常时，会请求取消、通知串口中断、限时等待非daemon worker进行停机清理，然后关闭录像器和图窗。结果写入输出目录的 `shutdown.json`；worker已退出不等于物理停机已证实，清理失败或超时会明确记录。上传前自动检查并创建设备 `/lib`，同名非目录会报错。
+
+在仓库根目录重算已提交的末五秒验收：
+
+```powershell
+python motor_drivers/bus_dc_motor_driver/tests/recompute_acceptance.py --csv motor_drivers/bus_dc_motor_driver/docs/tuning/samples.csv --check motor_drivers/bus_dc_motor_driver/docs/tuning/basic-acceptance.json
+```
+
+运行库与独立实验工具的检查边界见 [VALIDATION.md](docs/VALIDATION.md)。

@@ -323,10 +323,10 @@ class MotorController:
             motor_id: 从 1 开始的电机 ID / One-based motor ID.
 
         Returns:
-            float：RPM 或 PID 输出，单位见上述说明 / RPM or PID output as described.
+            float：带符号的输出轴转速，RPM / Signed output-shaft speed in RPM.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError：电机编号无效 / Invalid motor ID; no I2C operation.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -346,10 +346,10 @@ class MotorController:
             motor_id: 从 1 开始的电机 ID / One-based motor ID.
 
         Returns:
-            int：计数、方向或应用值，含义见上述说明 / Count, direction or applied value.
+            int：累计的有符号编码器脉冲数 / Accumulated signed encoder count.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError：电机编号无效 / Invalid motor ID; no I2C operation.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -369,10 +369,10 @@ class MotorController:
             motor_id: 从 1 开始的电机 ID / One-based motor ID.
 
         Returns:
-            int：计数、方向或应用值，含义见上述说明 / Count, direction or applied value.
+            int：最后计数方向，-1/0/1 / Last count direction: -1, 0 or 1.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError：电机编号无效 / Invalid motor ID; no I2C operation.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.

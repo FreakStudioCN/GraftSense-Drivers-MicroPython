@@ -9,7 +9,7 @@ import sys
 import types
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 CODE = Path(__file__).resolve().parents[1] / "code"
 MODULES = (
@@ -352,6 +352,57 @@ class Contracts(unittest.TestCase):
         self.assertEqual([pid.integral for pid in pids], [16, -16, 0, 20])
         with self.assertRaises(ValueError):
             env["prime_integral"](controller, (30,) * 4, 11)
+
+    def test_main_initialization_failure_closes_owned_bus(self):
+        env = runpy.run_path(str(CODE / "main.py"), run_name="main_setup_test")
+        for devices in ([], [0x40]):
+            with patch.object(I2C, "scan", return_value=devices):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaises(RuntimeError):
+                        env["_prepare_hardware"]()
+            self.assertTrue(I2C.instances[-1].closed)
+        failure = OSError("PCA setup failed")
+        original_close = I2C.deinit
+
+        def fail_close(bus):
+            original_close(bus)
+            raise OSError("cleanup failed")
+
+        with patch.object(I2C, "deinit", fail_close), patch.dict(env["_prepare_hardware"].__globals__, {"PCA9685": Mock(side_effect=failure)}):
+            with contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(OSError) as result:
+                    env["_prepare_hardware"]()
+        self.assertIs(result.exception, failure)
+        self.assertTrue(I2C.instances[-1].closed)
+
+    def test_per_motor_windows_override_the_outer_window_in_all_experiments(self):
+        module = types.ModuleType("board_setup")
+        module.__dict__.update(self.load_board_setup())
+        timing = runpy.run_path(str(CODE.parent / "examples/timing_audit.py"))
+        timing_module = types.ModuleType("timing_audit")
+        timing_module.__dict__.update(timing)
+        for filename in ("tuning_profile.py", "realtime_audit.py", "realtime_audit_light.py"):
+            for windows in ((160, 160, 200, 200), (20, 160, 200, 20)):
+                with self.subTest(filename=filename, windows=windows):
+                    with patch.dict(sys.modules, {"board_setup": module, "timing_audit": timing_module}):
+                        env = runpy.run_path(str(CODE.parent / "examples" / filename))
+                    captured = []
+                    sentinel = RuntimeError("stop before motion")
+
+                    def inspect_update(controller):
+                        captured.extend(encoder.get_rpm.__name__ for encoder in controller._encoders)
+                        raise sentinel
+
+                    presets = tuple((0.25, 0.3, 0, window) for window in windows)
+                    with patch.object(self.mods["motor_controller"].MotorController, "update", inspect_update), patch.object(
+                        sys.modules["time"], "ticks_us", lambda: self.now * 1000, create=True
+                    ):
+                        with contextlib.redirect_stdout(io.StringIO()):
+                            with self.assertRaises(RuntimeError) as result:
+                                env["run"](True, 10, ((0.25, 0.3, 0, 20),), ((30, 30, 30, 30),), presets)
+                    self.assertIs(result.exception, sentinel)
+                    self.assertEqual(captured, ["windowed" if window > 20 else "get_rpm" for window in windows])
+                    self.assertTrue(all(pin.handler is None for pin in Pin.instances))
 
     def test_armed_main_pid_releases_owned_resources(self):
         with contextlib.redirect_stdout(io.StringIO()):

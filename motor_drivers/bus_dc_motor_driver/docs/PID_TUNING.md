@@ -163,3 +163,13 @@ abs(平均反馈 - 目标) <= max(abs(目标) * 5%, 2 RPM)
 代码提交号、板卡/固件、供电、负载、每圈计数、控制周期、各路窗口、P/I/D、积分和输出限幅、起步预置、目标序列、CSV、统计区间、超调/响应时间、周期分位数，以及保护停机原因。
 
 记录“改了什么、好在哪、坏在哪、下一轮只改什么”。结果已经基本可用时，可以保留明确的剩余问题收敛；不要把一次漂亮曲线当成所有方向、负载和供电条件都已调好。
+
+### 一键复算末五秒结果
+
+在仓库根目录运行：
+
+```powershell
+python motor_drivers/bus_dc_motor_driver/tests/recompute_acceptance.py --csv motor_drivers/bus_dc_motor_driver/docs/tuning/samples.csv --check motor_drivers/bus_dc_motor_driver/docs/tuning/basic-acceptance.json
+```
+
+`--check` 会逐项比较均值、标准差、观测超调及通过标志，不一致时失败退出。换成自己的CSV并使用 `--output 结果.json` 可保存新结果；不足约五秒或后段目标变化的记录会报错，不会凑出一次通过。

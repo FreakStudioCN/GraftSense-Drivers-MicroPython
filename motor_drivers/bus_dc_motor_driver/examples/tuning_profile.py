@@ -126,21 +126,22 @@ def run(armed: bool = False, seconds: int = 10, profiles: object = None, target_
             time.sleep(3)
             cache.clear()
             pca.duty = cached_duty if cached else original_duty
-            if window_ms > period:
-                for motor_index, encoder in enumerate(controller._encoders):
-                    motor_window = per_motor[motor_index][3] if per_motor is not None else window_ms
-                    original_rpm = encoder.get_rpm
-                    history = []
+            for motor_index, encoder in enumerate(controller._encoders):
+                motor_window = per_motor[motor_index][3] if per_motor is not None else window_ms
+                if motor_window <= period:
+                    continue
+                original_rpm = encoder.get_rpm
+                history = []
 
-                    def windowed(
-                        delta: int, dt: float, original: object = original_rpm, samples: list = history, size: int = motor_window // period
-                    ) -> float:
-                        samples.append((delta, dt))
-                        if len(samples) > size:
-                            samples.pop(0)
-                        return original(sum(item[0] for item in samples), sum(item[1] for item in samples))
+                def windowed(
+                    delta: int, dt: float, original: object = original_rpm, samples: list = history, size: int = motor_window // period
+                ) -> float:
+                    samples.append((delta, dt))
+                    if len(samples) > size:
+                        samples.pop(0)
+                    return original(sum(item[0] for item in samples), sum(item[1] for item in samples))
 
-                    encoder.get_rpm = windowed
+                encoder.get_rpm = windowed
             controller.update()
             start = time.ticks_ms()
             deadline = time.ticks_add(start, period)

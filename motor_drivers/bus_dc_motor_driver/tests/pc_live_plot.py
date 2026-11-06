@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 from pid_response_metrics import response_metrics
+from host_cleanup import capture_cleanup, ensure_lib
 
 ROOT = Path(__file__).resolve().parents[1]
 COLUMNS = ["phase", "period_ms", "elapsed_ms"] + [f"target{i}" for i in range(1, 5)] + [f"rpm{i}" for i in range(1, 5)]
@@ -51,8 +52,9 @@ def main():
     configs = {}
     motor_configs = {}
     startup_i = {}
+    active_transport = {}
 
-    def worker():
+    def worker_body():
         from mpremote.transport_serial import SerialTransport
 
         transport = None
@@ -90,7 +92,9 @@ def main():
 
             try:
                 transport = SerialTransport(args.port, baudrate=args.baud)
+                transport.serial.write_timeout = 1
                 transport.enter_raw_repl(soft_reset=False)
+                ensure_lib(transport)
                 backup = args.out / "device-backup"
                 backup.mkdir()
                 uploaded = args.out / "uploaded-source"
@@ -107,6 +111,8 @@ def main():
                     )
                 ]
                 for source in sources:
+                    if cancelled.is_set():
+                        raise KeyboardInterrupt("Upload cancelled")
                     if source.name == "main.py":
                         continue
                     dest = "/lib/" + source.name
@@ -117,19 +123,20 @@ def main():
                     if transport.fs_readfile(dest) != source.read_bytes():
                         raise RuntimeError("Upload verify failed: " + source.name)
                 print("Upload verified. Starting in 15 seconds.", flush=True)
-                time.sleep(15)
-                if cancelled.is_set():
+                if cancelled.wait(15):
                     raise KeyboardInterrupt("Plot closed before motion")
                 code = "import sys\n"
                 code += "for n in ('board_setup','performance_profile','tuning_profile','realtime_audit','realtime_audit_light','timing_audit','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n if n in globals(): del globals()[n]\n"
                 code += "import gc; gc.collect()\n"
                 code += f"import {args.profile}\n{args.profile}.run(True,{args.seconds})\n"
-                _, error = transport.exec_raw(code, timeout=180, data_consumer=consume)
+                active_transport["running"] = transport
+                _, error = transport.exec_raw(code, timeout=10, data_consumer=consume)
                 if error:
                     raise RuntimeError(error.decode(errors="replace"))
             except BaseException as exc:
                 errors.append(str(exc))
             finally:
+                active_transport.pop("running", None)
                 if transport is not None:
                     try:
                         transport.serial.write(b"\x03\x03")
@@ -143,6 +150,19 @@ def main():
                     finally:
                         transport.close()
                 done.set()
+
+    def worker():
+        try:
+            worker_body()
+        except BaseException as exc:
+            errors.append("Worker: " + str(exc))
+        finally:
+            done.set()
+
+    def interrupt():
+        transport = active_transport.get("running")
+        if transport is not None:
+            transport.serial.write(b"\x03\x03")
 
     plt.rcParams.update({"font.size": 11})
     fig, axes = plt.subplots(2, 2, figsize=(14, 9), dpi=100)
@@ -191,121 +211,119 @@ def main():
         ],
         stdin=subprocess.PIPE,
     )
-    threading.Thread(target=worker, daemon=True).start()
-    plt.show(block=False)
-    count = 0
-    record_start = time.monotonic()
-    with (args.out / "samples.csv").open("w", newline="") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(COLUMNS)
-        while not done.is_set() or not events.empty():
-            tick = time.monotonic()
-            while not events.empty():
-                row = events.get_nowait()
-                rows.append(row)
-                writer.writerow(row)
-            csvfile.flush()
-            if not plt.fignum_exists(fig.number):
-                cancelled.set()
-                done.wait(2)
-                continue
-            if rows:
-                phase = rows[-1][0]
-                selected = [r for r in rows if r[0] == phase]
-                a = np.asarray(selected)
-                mode = (
-                    "cached PWM + explicit 80 ms speed window"
-                    if phase == 5
-                    else ("cached repeated PWM writes" if phase == 4 else "original PWM writes")
-                )
-                title.set_text(
-                    f"Phase {int(phase)}/5 | {a[-1, 1]:.0f} ms control | {mode}"
-                    if not configs
-                    else (
-                        f"Per-motor PI tuning: phase {int(phase)} | see gains in each panel"
-                        if motor_configs
-                        else f"PI tuning: phase {int(phase)} | Kp,Ki,Kd,window = {configs.get(int(phase))}"
+    worker_thread = threading.Thread(target=worker, daemon=False)
+    with capture_cleanup(cancelled, worker_thread, recorder, lambda: plt.close(fig), interrupt, errors, args.out / "shutdown.json"):
+        worker_thread.start()
+        plt.show(block=False)
+        count = 0
+        record_start = time.monotonic()
+        with (args.out / "samples.csv").open("w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(COLUMNS)
+            while not done.is_set() or not events.empty():
+                tick = time.monotonic()
+                while not events.empty():
+                    row = events.get_nowait()
+                    rows.append(row)
+                    writer.writerow(row)
+                csvfile.flush()
+                if not plt.fignum_exists(fig.number):
+                    cancelled.set()
+                    done.wait(2)
+                    continue
+                if rows:
+                    phase = rows[-1][0]
+                    selected = [r for r in rows if r[0] == phase]
+                    a = np.asarray(selected)
+                    mode = (
+                        "cached PWM + explicit 80 ms speed window"
+                        if phase == 5
+                        else ("cached repeated PWM writes" if phase == 4 else "original PWM writes")
                     )
-                )
-                for i, (target, actual) in enumerate(lines):
-                    target.set_data(a[:, 2] / 1000, a[:, 3 + i])
-                    actual.set_data(a[:, 2] / 1000, a[:, 7 + i])
-                    actual.set_label(
-                        f"Measured ({motor_configs.get(int(phase), {}).get(i + 1, configs[int(phase)])[3]:.0f}ms window)"
-                        if configs
-                        else ("Measured (80ms window)" if phase == 5 else "Measured (raw)")
-                    )
-                    axes.flat[i].get_legend().get_texts()[1].set_text(actual.get_label())
-                    m = response_metrics(selected, i)
-                    if m:
-                        steady = f"{m['settling_s']:.2f}s" if m["settling_s"] is not None else "not settled in +/-5% band"
-                        labels[i].set_text(
-                            f"Observed overshoot: {m['overshoot_pct']:.1f}%\nSettling: {steady}\n"
-                            + (
-                                f"P/I/D/window: {motor_configs[int(phase)][i + 1]}"
-                                if motor_configs
-                                else "Live estimate; final result uses full record"
-                            )
+                    title.set_text(
+                        f"Phase {int(phase)}/5 | {a[-1, 1]:.0f} ms control | {mode}"
+                        if not configs
+                        else (
+                            f"Per-motor PI tuning: phase {int(phase)} | see gains in each panel"
+                            if motor_configs
+                            else f"PI tuning: phase {int(phase)} | Kp,Ki,Kd,window = {configs.get(int(phase))}"
                         )
-                costs = np.mean(a[-min(50, len(a)) :, 16:20], axis=0) / 1000
-                info.set_text(
-                    f"USB serial requested: {args.baud} | I2C 400 kHz | Gains: see phase title / panel configuration\n"
-                    f"4-loop update {costs[0]:.3f} ms | I2C {costs[1]:.3f} ms | PID {costs[2]:.3f} ms | previous serial print {costs[3]:.3f} ms\n"
-                    "Phase 5 uses an explicit 80ms speed window; phases 1-4 use raw feedback. Timing includes profiling overhead."
-                    if not configs
-                    else "Tuning uses the explicitly labelled speed window in every phase. No derivative filtering is hidden."
+                    )
+                    for i, (target, actual) in enumerate(lines):
+                        target.set_data(a[:, 2] / 1000, a[:, 3 + i])
+                        actual.set_data(a[:, 2] / 1000, a[:, 7 + i])
+                        actual.set_label(
+                            f"Measured ({motor_configs.get(int(phase), {}).get(i + 1, configs[int(phase)])[3]:.0f}ms window)"
+                            if configs
+                            else ("Measured (80ms window)" if phase == 5 else "Measured (raw)")
+                        )
+                        axes.flat[i].get_legend().get_texts()[1].set_text(actual.get_label())
+                        m = response_metrics(selected, i)
+                        if m:
+                            steady = f"{m['settling_s']:.2f}s" if m["settling_s"] is not None else "not settled in +/-5% band"
+                            labels[i].set_text(
+                                f"Observed overshoot: {m['overshoot_pct']:.1f}%\nSettling: {steady}\n"
+                                + (
+                                    f"P/I/D/window: {motor_configs[int(phase)][i + 1]}"
+                                    if motor_configs
+                                    else "Live estimate; final result uses full record"
+                                )
+                            )
+                    costs = np.mean(a[-min(50, len(a)) :, 16:20], axis=0) / 1000
+                    info.set_text(
+                        f"USB serial requested: {args.baud} | I2C 400 kHz | Gains: see phase title / panel configuration\n"
+                        f"4-loop update {costs[0]:.3f} ms | I2C {costs[1]:.3f} ms | PID {costs[2]:.3f} ms | previous serial print {costs[3]:.3f} ms\n"
+                        "Phase 5 uses an explicit 80ms speed window; phases 1-4 use raw feedback. Timing includes profiling overhead."
+                        if not configs
+                        else "Tuning uses the explicitly labelled speed window in every phase. No derivative filtering is hidden."
+                    )
+                fig.canvas.draw()
+                w, h = fig.canvas.get_width_height(physical=True)
+                frame = Image.frombuffer("RGBA", (w, h), fig.canvas.buffer_rgba(), "raw", "RGBA", 0, 1)
+                payload = frame.resize((1400, 900)).tobytes()
+                target_frames = max(count + 1, int((time.monotonic() - record_start) * 5))
+                for _ in range(target_frames - count):
+                    recorder.stdin.write(payload)
+                count = target_frames
+                plt.pause(max(0.001, 0.2 - (time.monotonic() - tick)))
+        summary = {}
+        for phase in sorted({int(r[0]) for r in rows}):
+            selected = [r for r in rows if r[0] == phase]
+            a = np.asarray(selected)
+            summary[phase] = dict(period_ms=a[-1, 1], samples=len(a), motors=[response_metrics(selected, i) for i in range(4)])
+            summary[phase]["timing_ms"] = {
+                name: dict(mean=float(np.mean(a[:, col]) / 1000), p95=float(np.percentile(a[:, col], 95) / 1000), max=float(np.max(a[:, col]) / 1000))
+                for name, col in zip(COLUMNS[16:20], range(16, 20))
+            }
+            dt = a[:, 20]
+            summary[phase]["actual_period_ms"] = dict(mean=float(np.mean(dt)), p95=float(np.percentile(dt, 95)), max=float(np.max(dt)))
+            if phase in device_stats:
+                st = device_stats[phase]
+                summary[phase]["all_control_cycles"] = dict(
+                    count=st[0],
+                    loop_mean_ms=st[1] / st[0] / 1000,
+                    i2c_mean_ms=st[2] / st[0] / 1000,
+                    pid_mean_ms=st[3] / st[0] / 1000,
+                    loop_max_ms=st[4] / 1000,
+                    i2c_max_ms=st[5] / 1000,
+                    pid_max_ms=st[6] / 1000,
+                    actual_period_mean_ms=st[7] / st[0],
+                    actual_period_max_ms=st[8],
+                    late_cycles_over_2ms=st[9],
+                    print_mean_ms=st[10] / max(1, st[12]) / 1000,
+                    print_max_ms=st[11] / 1000,
                 )
-            fig.canvas.draw()
-            w, h = fig.canvas.get_width_height(physical=True)
-            frame = Image.frombuffer("RGBA", (w, h), fig.canvas.buffer_rgba(), "raw", "RGBA", 0, 1)
-            payload = frame.resize((1400, 900)).tobytes()
-            target_frames = max(count + 1, int((time.monotonic() - record_start) * 5))
-            for _ in range(target_frames - count):
-                recorder.stdin.write(payload)
-            count = target_frames
-            plt.pause(max(0.001, 0.2 - (time.monotonic() - tick)))
-    recorder.stdin.close()
-    if recorder.wait() != 0:
-        errors.append("Video encoder failed")
-    summary = {}
-    for phase in sorted({int(r[0]) for r in rows}):
-        selected = [r for r in rows if r[0] == phase]
-        a = np.asarray(selected)
-        summary[phase] = dict(period_ms=a[-1, 1], samples=len(a), motors=[response_metrics(selected, i) for i in range(4)])
-        summary[phase]["timing_ms"] = {
-            name: dict(mean=float(np.mean(a[:, col]) / 1000), p95=float(np.percentile(a[:, col], 95) / 1000), max=float(np.max(a[:, col]) / 1000))
-            for name, col in zip(COLUMNS[16:20], range(16, 20))
-        }
-        dt = a[:, 20]
-        summary[phase]["actual_period_ms"] = dict(mean=float(np.mean(dt)), p95=float(np.percentile(dt, 95)), max=float(np.max(dt)))
-        if phase in device_stats:
-            st = device_stats[phase]
-            summary[phase]["all_control_cycles"] = dict(
-                count=st[0],
-                loop_mean_ms=st[1] / st[0] / 1000,
-                i2c_mean_ms=st[2] / st[0] / 1000,
-                pid_mean_ms=st[3] / st[0] / 1000,
-                loop_max_ms=st[4] / 1000,
-                i2c_max_ms=st[5] / 1000,
-                pid_max_ms=st[6] / 1000,
-                actual_period_mean_ms=st[7] / st[0],
-                actual_period_max_ms=st[8],
-                late_cycles_over_2ms=st[9],
-                print_mean_ms=st[10] / max(1, st[12]) / 1000,
-                print_max_ms=st[11] / 1000,
-            )
-    (args.out / "summary.json").write_text(
-        json.dumps(
-            dict(phases=summary, configs=configs, motor_configs=motor_configs, startup_i_percent=startup_i, errors=errors, video_frames=count),
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-    fig.savefig(args.out / "last-phase.png")
-    print(json.dumps(summary), flush=True)
-    plt.close(fig)
-    if errors:
-        raise RuntimeError(errors)
+        (args.out / "summary.json").write_text(
+            json.dumps(
+                dict(phases=summary, configs=configs, motor_configs=motor_configs, startup_i_percent=startup_i, errors=errors, video_frames=count),
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        fig.savefig(args.out / "last-phase.png")
+        print(json.dumps(summary), flush=True)
+        if errors:
+            raise RuntimeError(errors)
 
 
 if __name__ == "__main__":

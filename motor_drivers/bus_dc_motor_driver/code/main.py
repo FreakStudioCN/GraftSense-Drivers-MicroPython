@@ -34,15 +34,23 @@ def _prepare_hardware() -> tuple:
     time.sleep(3)
     print("FreakStudio: four-motor driver test")
     i2c = I2C(0, scl=Pin(SCL_PIN), sda=Pin(SDA_PIN), freq=400000)
-    devices = i2c.scan()
-    print("I2C devices:", [hex(a) for a in devices])
-    if not devices:
-        raise RuntimeError("No I2C device found")
-    if PCA_ADDRESS not in devices:
-        raise RuntimeError("Device not found at expected address")
-    # 该器件无固定芯片 ID；构造时写 MODE1 检查通信响应。
-    pca = PCA9685(i2c, PCA_ADDRESS)
-    return i2c, pca
+    try:
+        devices = i2c.scan()
+        print("I2C devices:", [hex(a) for a in devices])
+        if not devices:
+            raise RuntimeError("No I2C device found")
+        if PCA_ADDRESS not in devices:
+            raise RuntimeError("Device not found at expected address")
+        # 该器件无固定芯片 ID；构造时写 MODE1 检查通信响应。
+        pca = PCA9685(i2c, PCA_ADDRESS)
+        return i2c, pca
+    except BaseException:
+        try:
+            if hasattr(i2c, "deinit"):
+                i2c.deinit()
+        except Exception:
+            pass
+        raise
 
 
 # ======================================== 主程序 ========================================
