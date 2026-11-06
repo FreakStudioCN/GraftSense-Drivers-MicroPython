@@ -23,17 +23,21 @@ import math
 
 
 class PID:
-    """可独立复用的离散 PID 控制器。
-
-    ==================
-    Reusable discrete PID controller.
-
+    """可独立复用的离散PID控制器。
     Attributes:
-        kp、ki、kd、target、dt 及 integral、output 保存配置与状态 / Gains, target, seconds and internal state.
+        kp、ki、kd、target、dt：增益、目标和秒单位间隔；integral、output：动态状态。
     Methods:
         update、set_target、set_params、set_enabled、reset、deinit。
     Notes:
-        默认停用；积分限幅限制乘 Ki 前状态；不访问硬件。 / Disabled initially; integral bounds apply before Ki; no hardware access.
+        默认停用；积分限幅作用于乘Ki前的状态；不访问硬件。
+    ==================
+    Reusable discrete PID controller.
+    Attributes:
+        kp, ki, kd, target, dt: gains, target and seconds; integral, output: dynamic state.
+    Methods:
+        update, set_target, set_params, set_enabled, reset, deinit.
+    Notes:
+        Initially disabled; integral bounds apply before Ki; no hardware is accessed.
     """
 
     def __init__(
@@ -64,7 +68,7 @@ class PID:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
+            ValueError：数值非有限、dt非正或限幅无效 / Non-finite values, nonpositive dt or invalid bounds.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.
@@ -123,7 +127,7 @@ class PID:
             float：限幅后的 PID 输出，电机应用单位为 PWM 百分比 / Bounded PWM percent.
 
         Raises:
-            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
+            ValueError：feedback或指定dt的类型无效或非有限 / Feedback or the supplied dt has an invalid type or is non-finite.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.
@@ -148,10 +152,10 @@ class PID:
 
         error = self.target - feedback
 
-        # P
+        # 比例项
         p = self.kp * error
 
-        # I
+        # 积分项
         self.integral += error * dt
 
         if self.integral > self.integral_max:
@@ -162,7 +166,7 @@ class PID:
 
         i = self.ki * self.integral
 
-        # D
+        # 微分项
         derivative = (error - self.last_error) / dt
 
         d = self.kd * derivative
@@ -198,7 +202,7 @@ class PID:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
+            ValueError：target类型无效或非有限 / Target has an invalid type or is non-finite.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.
@@ -224,7 +228,7 @@ class PID:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
+            ValueError：非None的增益类型无效或非有限 / A non-None gain has an invalid type or is non-finite.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.
@@ -256,7 +260,7 @@ class PID:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
+            ValueError：enabled不是布尔值或整数 / Enabled is neither a boolean nor an integer.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.

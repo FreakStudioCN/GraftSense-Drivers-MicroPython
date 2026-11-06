@@ -6,6 +6,11 @@
 # @Description : Timestamped stop/setup/log costs, legacy vs confirmed off-frame.
 # @License : MIT
 
+__version__ = "1.1.0"
+__author__ = "赵岩松"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.29.0 / ESP32-C3"
+
 # 单文件测试：除 code/ 中的驱动外，不依赖其他测试脚本。
 
 # ======================================== 导入相关模块 ========================================
@@ -405,7 +410,7 @@ def run(armed: bool = False, seconds: int = 12) -> None:
     try:
         pca = create_pca()
         bus = pca.i2c
-        # Update all PWM registers on STOP, preserving unrelated MODE2 bits.
+        # 在STOP时更新全部PWM寄存器，保留MODE2其他位。
         mode2 = bus.readfrom_mem(pca.address, 1, 1)[0]
         bus.writeto_mem(pca.address, 1, bytes((mode2 & ~8,)))
         if not bus.readfrom_mem(pca.address, 0, 1)[0] & 0x20:
@@ -439,7 +444,7 @@ def run(armed: bool = False, seconds: int = 12) -> None:
             print("BUS_CONFIG,%d,%d,%s,%s" % (phase, frequency, mode, bus))
             writer = BenchWriter(pca, "batch")
             writer.stop()
-            # No motion: repeated all-off burst writes and exact readback first.
+            # 先保持停机，重复写全关帧并逐字节回读核对。
             for _ in range(100):
                 bus.writeto_mem(pca.address, 6, writer.off)
                 if bus.readfrom_mem(pca.address, 6, 32) != writer.off:

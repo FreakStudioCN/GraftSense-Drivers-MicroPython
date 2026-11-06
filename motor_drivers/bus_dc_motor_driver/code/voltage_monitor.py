@@ -29,16 +29,20 @@ from machine import ADC, Pin
 
 class VoltageMonitor:
     """电机电源分压采样与校准缓存。
-
-    ==================
-    Sample, calibrate and cache divided motor-supply voltage.
-
     Attributes:
-        adc 为本实例创建的 ADC；ratio、samples、interval_ms 为采样配置 / Owned ADC and divider/sampling settings.
+        adc：自有ADC；ratio、samples、interval_ms：分压与采样配置。
     Methods:
         update、get_voltage、get_adc_voltage、deinit。
     Notes:
-        140k/20k 分压倍率 8；使用 read_uv 和 2.5 dB 衰减，不执行低压停机。 / Default divider ratio is 8; read_uv at 2.5 dB; no automatic undervoltage stop.
+        默认140kΩ/20kΩ分压，read_uv与2.5dB衰减；不自动停机。
+    ==================
+    Sample, calibrate and cache divided motor-supply voltage.
+    Attributes:
+        adc: owned ADC; ratio, samples, interval_ms: divider and sampling settings.
+    Methods:
+        update, get_voltage, get_adc_voltage, deinit.
+    Notes:
+        The default divider is 140k/20k; uses read_uv at 2.5dB; no automatic motor stop.
     """
 
     def __init__(
@@ -109,7 +113,7 @@ class VoltageMonitor:
             force: True 绕过采样间隔 / True bypasses the sampling interval.
 
         Returns:
-            bool：本次完成更新为 True，未到周期或 dt<=0 为 False / True if updated.
+            bool：完成采样为True，未到采样间隔为False / True if sampled; False if the interval has not elapsed.
 
         Raises:
             ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
@@ -164,7 +168,7 @@ class VoltageMonitor:
             无 / None.
 
         Returns:
-            float 或 None：缓存电压 V / Cached volts, or None before sampling.
+            float或None：分压后的ADC引脚电压V，采样前为None / Divided ADC-pin volts, or None before sampling.
 
         Raises:
             无主动抛出；不访问 I/O / No explicit exceptions; no I/O.

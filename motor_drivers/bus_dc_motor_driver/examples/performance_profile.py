@@ -6,6 +6,11 @@
 # @Description : Bounded four-motor timing experiment, launched explicitly by PC.
 # @License : MIT
 
+__version__ = "1.1.0"
+__author__ = "赵岩松"
+__license__ = "MIT"
+__platform__ = "MicroPython v1.29.0 / ESP32-C3"
+
 # 单文件测试：除 code/ 中的驱动外，不依赖其他测试脚本。
 
 # ======================================== 导入相关模块 ========================================
@@ -230,7 +235,7 @@ def run(armed: bool = False, seconds: int = 10) -> None:
         failed = True
         raise
     finally:
-        # Timed proxy borrows the original bus; close the original owned object.
+        # 计时代理借用原总线，退出时释放自有原始对象。
         error = None
         for resource in (controller, voltage, pca, raw_bus):
             if resource is not None and hasattr(resource, "deinit"):

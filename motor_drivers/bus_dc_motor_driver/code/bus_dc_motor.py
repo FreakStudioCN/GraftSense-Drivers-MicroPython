@@ -31,16 +31,20 @@ def _finite(value: float, name: str) -> float:
 # ======================================== 自定义类 ========================================
 class BusDCMotor:
     """原库兼容入口及可选闭环控制。
-
-    ==================
-    Backward-compatible PWM facade with optional encoder PID.
-
     Attributes:
-        pca9685、motor_count 为共享驱动与电机数 / Borrowed PWM driver and motor count.
+        pca9685、motor_count：共享PWM驱动和电机数。
     Methods:
         set_motor_speed、set_target_rpm、set_pid、update、stop_all、deinit。
     Notes:
-        只有 update 执行周期闭环；设置目标不自动启动。每路仅一种输出模式。 / Call update regularly; setting a target never starts output.
+        设置目标不启动输出；每路仅一种输出模式；调用方持有总线。
+    ==================
+    Backward-compatible PWM facade with optional encoder PID.
+    Attributes:
+        pca9685, motor_count: borrowed PWM driver and motor count.
+    Methods:
+        set_motor_speed, set_target_rpm, set_pid, update, stop_all, deinit.
+    Notes:
+        Targets do not start output; one mode per motor; the caller owns the bus.
     """
 
     def __init__(
@@ -82,7 +86,8 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -163,7 +168,8 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -203,7 +209,8 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -241,7 +248,8 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -272,7 +280,7 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            Exception：尝试停止所有电机后传播首个异常 / First failure after attempting every motor.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -301,7 +309,9 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -329,7 +339,9 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -359,10 +371,11 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
 
         Notes:
-            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅修改增益，不执行I2C操作 / Update gains only; no I2C operation.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
         if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
@@ -386,7 +399,9 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -414,7 +429,8 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -438,10 +454,11 @@ class BusDCMotor:
             motor_id: 从 1 开始的电机 ID / One-based motor ID.
 
         Returns:
-            float：RPM 或 PID 输出，单位见上述说明 / RPM or PID output as described.
+            float：最近采样的有符号输出轴转速，RPM / Latest signed output-shaft speed in RPM.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -462,10 +479,11 @@ class BusDCMotor:
             motor_id: 从 1 开始的电机 ID / One-based motor ID.
 
         Returns:
-            int：计数、方向或应用值，含义见上述说明 / Count, direction or applied value.
+            int：累计的有符号编码器计数 / Accumulated signed encoder count.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -486,10 +504,11 @@ class BusDCMotor:
             motor_id: 从 1 开始的电机 ID / One-based motor ID.
 
         Returns:
-            int：计数、方向或应用值，含义见上述说明 / Count, direction or applied value.
+            int：末次计数方向，−1/0/1 / Last count direction: -1, 0 or 1.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -513,7 +532,7 @@ class BusDCMotor:
             float 或 None：缓存电压 V / Cached volts, or None before sampling.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            RuntimeError：未注入电压监测器 / Voltage monitor is not configured.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -536,7 +555,7 @@ class BusDCMotor:
             list：每路 target,RPM,PWM,error,Kp,Ki,Kd,enabled，末尾全使能位 / Telemetry snapshot.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -561,7 +580,7 @@ class BusDCMotor:
             tuple：按电机 ID 排列的模式字符串 / Modes in motor-ID order.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            无主动抛出 / No explicit exceptions.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -579,10 +598,10 @@ class BusDCMotor:
             无 / None.
 
         Returns:
-            bool：本次完成更新为 True，未到周期或 dt<=0 为 False / True if updated.
+            bool：到达调度周期并完成更新为True，否则为False / True when a scheduled update completes.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception. RuntimeError：所需反馈/电压模块未配置 / Required feedback or voltage monitor is absent.
+            Exception：更新依赖失败；尽力停机后保留原异常 / Dependency update failed; preserve the error after stop attempts.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.

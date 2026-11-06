@@ -33,7 +33,7 @@
 
 已测目标为 ESP32-C3、MicroPython v1.29.0（2026-08-24）；固件无 machine.Encoder。当前版本已在该开发板完成单路及四路组合 PID、四个电机独立正反转 PID 实机测试。
 
-依赖为内置 machine、time、math、ustruct、micropython 和 package.json 中的七个本地模块，无第三方包依赖。VoltageMonitor 需要 ADC.read_uv 与 ATTN_2_5DB；其他平台先核实接口和 GPIO。PC 回归使用 Python unittest 及模拟对象，不在设备上运行。
+依赖为内置 machine、time、math、ustruct、micropython 和 package.json 中的七个本地模块，无第三方包依赖。VoltageMonitor 需要 ADC.read_uv 与 ATTN_2_5DB；其他平台先核实接口和 GPIO。PC 回归使用 CPython 3.10+、unittest 及模拟对象，不在设备上运行；PC绘图额外依赖matplotlib、numpy、Pillow、pyserial、mpremote和ffmpeg。
 
 ## 一、安装与文件
 
@@ -348,7 +348,7 @@ PCA9685 通道共享频率。pwm_frequency 默认 1000，可指定 50；不能�
 python -m unittest discover -s motor_drivers/bus_dc_motor_driver/tests -p 'test_*.py'
 ```
 
-当前保留16项回归，不访问真实设备。检查范围包括运行库故障路径、单文件测试的默认禁止运动、安装依赖及分路窗口；不是实机测试的替代。
+当前保留17项回归，不访问真实设备。检查范围包括运行库故障路径、单文件测试的默认禁止运动、安装依赖、分路窗口及规范化合同；不是实机测试的替代。
 
 PC 绘图工具也为单文件，上传时只上传所选项目及运行库：
 
@@ -363,7 +363,9 @@ python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile tuni
 
 已完成 ESP32-C3 单路及四路 PID 台架测试，编码器读取与电压校准经开发者确认。分路细调后的后段均值/波动基础验收20/20通过，仍有启动超调；批量写和换向关断优化已有短时实机比较，不能据此推及带载整车或长期实时性。
 
-运行库执行仓库设备规范检查；独立设备测试执行格式、语法、默认禁用及依赖检查，PC工具和夹具执行格式与回归。实验工具不宣称满足运行库级全部双语API规范。BusDCMotor/PCA9685保留李清水署名，新增模块和测试署名赵岩松。
+规范化按运行库、设备测试和PC工具分别验收：全部Python文件检查文件头、六分区和类型注解，运行库另检查双语API、资源所有权及仓库设备规范；PC工具保留CPython平台声明，不套用硬件类参数校验模板。BusDCMotor/PCA9685保留李清水署名，新增模块和测试署名赵岩松。
+
+兼容边界：保留现有GPIO编号接口、PID可调整状态和原始OSError语义；不为规范化改公共属性、添加阻止实验包装的slots、插入硬件重试或延后编码器B相采样。I2C由调用方注入并持有，ADC/IRQ按现有所有权释放。
 
 ## 版本记录
 

@@ -1,7 +1,20 @@
-"""Standalone PC recorder. Install matplotlib numpy pillow pyserial mpremote.
-Uploads the library and selected single-file experiment; explicit --run moves motors.
-"""
+# Python env   : CPython 3.10+ / PC
+# -*- coding: utf-8 -*-
+# @Time    : 2026/11/06
+# @Author  : 赵岩松
+# @File    : pc_live_plot.py
+# @Description : PC端四路实时曲线、指标统计与安全退出录屏工具
+# @License : MIT
 
+"""Standalone PC recorder. Install matplotlib numpy pillow pyserial mpremote.
+Uploads the library and selected single-file experiment; explicit --run moves motors."""
+
+__version__ = "1.1.0"
+__author__ = "赵岩松"
+__license__ = "MIT"
+__platform__ = "CPython 3.10+ / PC"
+
+# ======================================== 导入相关模块 ========================================
 import argparse
 import csv
 import json
@@ -16,12 +29,14 @@ from PIL import Image
 from statistics import mean, pstdev
 from contextlib import contextmanager
 
+# ======================================== 全局变量 ========================================
 ROOT = Path(__file__).resolve().parents[1]
 COLUMNS = ["phase", "period_ms", "elapsed_ms"] + [f"target{i}" for i in range(1, 5)] + [f"rpm{i}" for i in range(1, 5)]
 COLUMNS += [f"pwm{i}" for i in range(1, 5)] + ["voltage", "loop_us", "i2c_us", "pid_us", "previous_print_us", "control_dt_ms"]
 
 
-def response_metrics(rows, motor):
+# ======================================== 功能函数 ========================================
+def response_metrics(rows: list, motor: int) -> dict:
     active = [row for row in rows if row[3 + motor] != 0]
     if not active:
         return {}
@@ -46,7 +61,7 @@ def response_metrics(rows, motor):
     )
 
 
-def last_reference_segment(rows, motor):
+def last_reference_segment(rows: list, motor: int) -> list:
     """Select the latest contiguous constant-reference segment for step metrics."""
     if not rows:
         return []
@@ -60,7 +75,16 @@ def last_reference_segment(rows, motor):
 
 
 @contextmanager
-def capture_cleanup(cancelled, worker, recorder, close_plot, interrupt, errors, status_path, join_timeout=5):
+def capture_cleanup(
+    cancelled: object,
+    worker: object,
+    recorder: object,
+    close_plot: callable,
+    interrupt: callable,
+    errors: list,
+    status_path: Path,
+    join_timeout: float = 5,
+) -> object:
     """Request stop on every exit; preserve a primary exception over cleanup errors.
 
     A joined worker only confirms host cleanup finished, not physical motor state.
@@ -121,14 +145,17 @@ def capture_cleanup(cancelled, worker, recorder, close_plot, interrupt, errors, 
             raise RuntimeError(errors)
 
 
-def ensure_lib(transport):
+def ensure_lib(transport: object) -> None:
     if not transport.fs_exists("/lib"):
         transport.fs_mkdir("/lib")
     elif not transport.fs_isdir("/lib"):
         raise NotADirectoryError("Device /lib exists but is not a directory")
 
 
-def main():
+# ======================================== 自定义类 ========================================
+# ======================================== 初始化配置 ========================================
+# ======================================== 主程序 ========================================
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--profile",
@@ -159,14 +186,14 @@ def main():
     bus_configs = {}
     active_transport = {}
 
-    def worker_body():
+    def worker_body() -> None:
         from mpremote.transport_serial import SerialTransport
 
         transport = None
         pending = bytearray()
         with (args.out / "serial.log").open("wb") as log:
 
-            def consume(chunk):
+            def consume(chunk: bytes) -> None:
                 log.write(chunk)
                 log.flush()
                 pending.extend(chunk)
@@ -249,7 +276,7 @@ def main():
                         transport.close()
                 done.set()
 
-    def worker():
+    def worker() -> None:
         try:
             worker_body()
         except BaseException as exc:
@@ -257,7 +284,7 @@ def main():
         finally:
             done.set()
 
-    def interrupt():
+    def interrupt() -> None:
         transport = active_transport.get("running")
         if transport is not None:
             transport.serial.write(b"\x03\x03")

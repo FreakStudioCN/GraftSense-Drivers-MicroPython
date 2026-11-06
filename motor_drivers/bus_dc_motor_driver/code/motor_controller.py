@@ -11,10 +11,8 @@ __author__ = "赵岩松"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.29.0 / ESP32-C3"
 
-# Independent encoder motor loops. Call update() regularly from the application.
-#
-# Motor IDs are 1-based, in the order of motor_configs. Setting a target does
-# not start a motor: call start_motor()/start_all() explicitly.
+# 独立编码器速度环，由应用持续调用update()。
+# 电机ID从1开始，顺序与motor_configs一致；设置目标后须显式启动。
 
 # ======================================== 导入相关模块 ========================================
 
@@ -32,17 +30,21 @@ from pid import PID
 
 
 class MotorController:
-    """按 ID 管理独立编码器速度闭环。
-
-    ==================
-    Manage independent encoder speed loops by motor ID.
-
+    """按ID管理独立编码器速度闭环。
     Attributes:
-        _motors、_encoders、_pids 为本控制器管理的对象 / Managed motor, encoder and PID instances.
+        _motors、_encoders、_pids：本对象管理的电机、编码器和PID。
     Methods:
         set_target_rpm、set_pid、start_all、update、get_telemetry、deinit。
     Notes:
-        配置项为 (PWM_A,PWM_B,GPIO_A,GPIO_B)，ID 从 1 开始；不创建后台任务。 / Config entries map channels and GPIO; IDs start at 1; no background task.
+        ID从1开始；update由主循环调用，不创建后台任务。
+    ==================
+    Manage independent encoder speed loops by motor ID.
+    Attributes:
+        _motors, _encoders, _pids: managed motors, encoders and PID instances.
+    Methods:
+        set_target_rpm, set_pid, start_all, update, get_telemetry, deinit.
+    Notes:
+        IDs start at one; the application calls update; no background task is created.
     """
 
     def __init__(
@@ -75,7 +77,8 @@ class MotorController:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -150,10 +153,10 @@ class MotorController:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
 
         Notes:
-            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅更新目标，不启动电机 / Update the target without starting a motor.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
         if not isinstance(motor_id, int) or not 1 <= motor_id <= len(self._motors):
@@ -173,10 +176,10 @@ class MotorController:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
 
         Notes:
-            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            先验证整组目标，再赋值；不写PWM / Validate the entire group before assignment; no PWM writes.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
         if len(rpms) != len(self._pids):
@@ -203,10 +206,10 @@ class MotorController:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
 
         Notes:
-            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅修改增益，不执行I2C操作 / Update gains only; no I2C operation.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
         if not isinstance(motor_id, int) or not 1 <= motor_id <= len(self._motors):
@@ -226,10 +229,10 @@ class MotorController:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
 
         Notes:
-            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅启用对应PID，下次update才写PWM / Enable the PID; PWM is written by the next update.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
         if not isinstance(motor_id, int) or not 1 <= motor_id <= len(self._motors):
@@ -249,10 +252,10 @@ class MotorController:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            无主动抛出 / No explicit exceptions.
 
         Notes:
-            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅启用所有PID，下次update才写PWM / Enable all PIDs; the next update writes PWM.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
         for pid in self._pids:
@@ -271,7 +274,8 @@ class MotorController:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -297,7 +301,7 @@ class MotorController:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            Exception：尝试所有电机后传播首个停机异常 / First stop failure after all motor attempts.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -326,7 +330,7 @@ class MotorController:
             float：带符号的输出轴转速，RPM / Signed output-shaft speed in RPM.
 
         Raises:
-            ValueError：电机编号无效 / Invalid motor ID; no I2C operation.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -349,7 +353,7 @@ class MotorController:
             int：累计的有符号编码器脉冲数 / Accumulated signed encoder count.
 
         Raises:
-            ValueError：电机编号无效 / Invalid motor ID; no I2C operation.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -372,7 +376,7 @@ class MotorController:
             int：最后计数方向，-1/0/1 / Last count direction: -1, 0 or 1.
 
         Raises:
-            ValueError：电机编号无效 / Invalid motor ID; no I2C operation.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -392,7 +396,7 @@ class MotorController:
             motor_ids: None 写全部输出；ID 序列仅写所选路，仍采集全部反馈 / Output selection.
 
         Returns:
-            bool：本次完成更新为 True，未到周期或 dt<=0 为 False / True if updated.
+            bool：dt>0且完成本轮更新为True，否则为False / True when an update with positive dt completes.
 
         Raises:
             ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
@@ -446,7 +450,7 @@ class MotorController:
             list：每路 target,RPM,PWM,error,Kp,Ki,Kd,enabled，末尾全使能位 / Telemetry snapshot.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            无主动抛出 / No explicit exceptions.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.

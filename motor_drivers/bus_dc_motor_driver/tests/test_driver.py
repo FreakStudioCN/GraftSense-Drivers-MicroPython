@@ -1,10 +1,25 @@
+# Python env   : CPython 3.10+ / PC
+# -*- coding: utf-8 -*-
+# @Time    : 2026/11/06
+# @Author  : 赵岩松
+# @File    : test_driver.py
+# @Description : 驱动参数、资源释放、IRQ及安装依赖的单文件主机回归
+# @License : MIT
+
 """One PC regression project for driver guards, IRQ cleanup and resource ownership."""
 
+__version__ = "1.1.0"
+__author__ = "赵岩松"
+__license__ = "MIT"
+__platform__ = "CPython 3.10+ / PC"
+
+# ======================================== 导入相关模块 ========================================
 import contextlib
 import ast
 import json
 import importlib
 import io
+import re
 import runpy
 import struct
 import sys
@@ -13,6 +28,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch, Mock
 
+# ======================================== 全局变量 ========================================
 CODE = Path(__file__).resolve().parents[1] / "code"
 MODULES = (
     "pca9685",
@@ -25,22 +41,24 @@ MODULES = (
 )
 
 
+# ======================================== 功能函数 ========================================
+# ======================================== 自定义类 ========================================
 class Pin:
     IN = 0
     PULL_UP = 1
     IRQ_RISING = 2
     instances = []
 
-    def __init__(self, number, *args):
+    def __init__(self, number: int, *args: object) -> None:
         self.number = number
         self.level = 0
         self.handler = None
         self.instances.append(self)
 
-    def value(self):
+    def value(self) -> int:
         return self.level
 
-    def irq(self, handler=None, **kwargs):
+    def irq(self, handler: object = None, **kwargs: object) -> None:
         self.handler = handler
 
 
@@ -48,44 +66,44 @@ class ADC:
     ATTN_2_5DB = 1
     instances = []
 
-    def __init__(self, pin):
+    def __init__(self, pin: object) -> None:
         self.closed = False
         self.instances.append(self)
 
-    def atten(self, value):
+    def atten(self, value: object) -> None:
         pass
 
-    def read_uv(self):
+    def read_uv(self) -> int:
         return 925000
 
-    def deinit(self):
+    def deinit(self) -> None:
         self.closed = True
 
 
 class I2C:
     instances = []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: object, **kwargs: object) -> None:
         self.memory = {}
         self.closed = False
         self.instances.append(self)
 
-    def scan(self):
+    def scan(self) -> list:
         return [0x4F]
 
-    def writeto_mem(self, address, register, data):
+    def writeto_mem(self, address: int, register: int, data: object) -> None:
         for offset, value in enumerate(data):
             self.memory[register + offset] = value
 
-    def readfrom_mem(self, address, register, size):
+    def readfrom_mem(self, address: int, register: int, size: int) -> bytes:
         return bytes(self.memory.get(register + i, 0) for i in range(size))
 
-    def deinit(self):
+    def deinit(self) -> None:
         self.closed = True
 
 
 class Contracts(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         Pin.instances = []
         ADC.instances = []
         I2C.instances = []
@@ -99,7 +117,7 @@ class Contracts(unittest.TestCase):
         clock = types.ModuleType("time")
         self.now = 0
 
-        def ticks():
+        def ticks() -> int:
             self.now += 100
             return self.now
 
@@ -126,7 +144,7 @@ class Contracts(unittest.TestCase):
             sys.modules.pop(name, None)
         self.mods = {name: importlib.import_module(name) for name in MODULES}
 
-    def make_bus(self):
+    def make_bus(self) -> object:
         self.i2c = I2C()
         self.pca = self.mods["pca9685"].PCA9685(self.i2c, 0x4F)
         self.monitor = self.mods["voltage_monitor"].VoltageMonitor()
@@ -138,7 +156,7 @@ class Contracts(unittest.TestCase):
             startup_brake=False,
         )
 
-    def test_encoder_direction_resolution_and_cleanup(self):
+    def test_encoder_direction_resolution_and_cleanup(self) -> None:
         encoder = self.mods["encoder"].Encoder(5, 6)
         encoder.pin_b.level = 0
         encoder.pin_a.handler(encoder.pin_a)
@@ -157,7 +175,7 @@ class Contracts(unittest.TestCase):
         self.assertIsNone(encoder.pin_a.handler)
         self.assertEqual(self.buffers, [100])
 
-    def test_nonfinite_guard_does_not_mutate_outputs(self):
+    def test_nonfinite_guard_does_not_mutate_outputs(self) -> None:
         bus = self.make_bus()
         before = dict(self.i2c.memory)
         with self.assertRaises(ValueError):
@@ -173,7 +191,7 @@ class Contracts(unittest.TestCase):
         with self.assertRaises(ValueError):
             pid.set_params(kp=float("nan"))
 
-    def test_bus_cleanup_retains_borrowed_devices(self):
+    def test_bus_cleanup_retains_borrowed_devices(self) -> None:
         bus = self.make_bus()
         bus.set_target_rpm(1, 30)
         bus.start_all()
@@ -188,7 +206,7 @@ class Contracts(unittest.TestCase):
         self.monitor.deinit()
         self.assertTrue(self.monitor.adc.closed)
 
-    def test_controller_cleanup_continues_after_stop_failure(self):
+    def test_controller_cleanup_continues_after_stop_failure(self) -> None:
         bus = self.make_bus()
         controller = bus._controller
         controller._motors[0].stop = lambda: (_ for _ in ()).throw(OSError("injected write failure"))
@@ -197,7 +215,7 @@ class Contracts(unittest.TestCase):
         self.assertTrue(all(e.pin_a.handler is None for e in controller._encoders))
         self.assertTrue(all(not p.enabled for p in controller._pids))
 
-    def test_pid_cleanup_keeps_target_and_gains(self):
+    def test_pid_cleanup_keeps_target_and_gains(self) -> None:
         pid = self.mods["pid"].PID(1, 2, 3, target=30)
         pid.set_enabled(1)
         pid.update(0, 0.1)
@@ -205,12 +223,12 @@ class Contracts(unittest.TestCase):
         self.assertEqual((pid.kp, pid.ki, pid.kd, pid.target), (1, 2, 3, 30))
         self.assertEqual((pid.integral, pid.output, pid.enabled), (0, 0, False))
 
-    def test_partial_constructor_failure_detaches_created_irqs(self):
+    def test_partial_constructor_failure_detaches_created_irqs(self) -> None:
         pca = self.mods["pca9685"].PCA9685(I2C(), 0x4F)
         real_encoder = self.mods["encoder"].Encoder
         created = []
 
-        def fail_second(*args, **kwargs):
+        def fail_second(*args: object, **kwargs: object) -> object:
             if created:
                 raise OSError("injected encoder setup failure")
             encoder = real_encoder(*args, **kwargs)
@@ -224,7 +242,7 @@ class Contracts(unittest.TestCase):
         self.assertEqual(len(created), 1)
         self.assertIsNone(created[0].pin_a.handler)
 
-    def test_stop_attempts_both_inputs_after_transient_write_failure(self):
+    def test_stop_attempts_both_inputs_after_transient_write_failure(self) -> None:
         bus = self.make_bus()
         motor = bus._controller._motors[0]
         original = self.pca.duty
@@ -232,7 +250,7 @@ class Contracts(unittest.TestCase):
         failure = OSError("transient A write")
         calls = []
 
-        def fail_once(channel, value=None):
+        def fail_once(channel: int, value: object = None) -> int:
             calls.append(channel)
             if len(calls) == 1:
                 raise failure
@@ -247,12 +265,12 @@ class Contracts(unittest.TestCase):
             motor.stop()
         self.assertEqual(self.i2c.memory[6 + 3] & 0x10, 0x10)
 
-    def test_brake_constructor_failure_detaches_all_irqs(self):
+    def test_brake_constructor_failure_detaches_all_irqs(self) -> None:
         pca = self.mods["pca9685"].PCA9685(I2C(), 0x4F)
         original = pca.duty
         failure = OSError("startup brake failed")
 
-        def fail_brake(channel, value=None):
+        def fail_brake(channel: int, value: object = None) -> int:
             if value == 4095:
                 raise failure
             return original(channel, value)
@@ -264,7 +282,7 @@ class Contracts(unittest.TestCase):
         self.assertEqual(len(Pin.instances), 8)
         self.assertTrue(all(pin.handler is None for pin in Pin.instances))
 
-    def test_controller_target_sequence_is_atomic(self):
+    def test_controller_target_sequence_is_atomic(self) -> None:
         bus = self.make_bus()
         controller = bus._controller
         controller.set_target_rpms((10, 20, 30, 40))
@@ -273,7 +291,7 @@ class Contracts(unittest.TestCase):
                 controller.set_target_rpms((50, 60, 70, invalid))
             self.assertEqual(tuple(pid.target for pid in controller._pids), (10, 20, 30, 40))
 
-    def test_main_initialization_failure_closes_owned_bus(self):
+    def test_main_initialization_failure_closes_owned_bus(self) -> None:
         env = runpy.run_path(str(CODE / "main.py"), run_name="main_setup_test")
         for devices in ([], [0x40]):
             with patch.object(I2C, "scan", return_value=devices):
@@ -284,7 +302,7 @@ class Contracts(unittest.TestCase):
         failure = OSError("PCA setup failed")
         original_close = I2C.deinit
 
-        def fail_close(bus):
+        def fail_close(bus: object) -> None:
             original_close(bus)
             raise OSError("cleanup failed")
 
@@ -295,7 +313,7 @@ class Contracts(unittest.TestCase):
         self.assertIs(result.exception, failure)
         self.assertTrue(I2C.instances[-1].closed)
 
-    def test_armed_main_pid_releases_owned_resources(self):
+    def test_armed_main_pid_releases_owned_resources(self) -> None:
         with contextlib.redirect_stdout(io.StringIO()):
             env = runpy.run_path(str(CODE / "main.py"), run_name="contract_test")
             run = env["run"]
@@ -306,10 +324,10 @@ class Contracts(unittest.TestCase):
         self.assertTrue(ADC.instances[-1].closed)
         self.assertTrue(all(pin.handler is None for pin in Pin.instances))
 
-    def example(self, name):
+    def example(self, name: str) -> dict:
         return runpy.run_path(str(CODE.parent / "examples" / (name + ".py")))
 
-    def test_examples_are_standalone_and_default_off(self):
+    def test_examples_are_standalone_and_default_off(self) -> None:
         files = list((CODE.parent / "examples").glob("*.py"))
         local_names = {p.stem for p in files} | {"board_setup", "timing_audit", "i2c_strategies", "direction_switch"}
         for file in files:
@@ -325,7 +343,7 @@ class Contracts(unittest.TestCase):
         self.assertEqual(I2C.instances, [])
         self.assertEqual(Pin.instances, [])
 
-    def test_installable_dependency_closure(self):
+    def test_installable_dependency_closure(self) -> None:
         manifest = json.loads((CODE.parent / "package.json").read_text(encoding="utf-8"))
         entries = manifest["urls"]
         self.assertEqual(manifest["name"], "bus_dc_motor_driver")
@@ -342,7 +360,49 @@ class Contracts(unittest.TestCase):
                 elif isinstance(n, ast.Import):
                     self.assertTrue(all(a.name in allowed for a in n.names))
 
-    def test_single_file_profile_releases_owned_resources_on_normal_and_failed_exit(self):
+    def test_normalization_contract(self) -> None:
+        sections = ("导入相关模块", "全局变量", "功能函数", "自定义类", "初始化配置", "主程序")
+        files = [p for folder in (CODE, CODE.parent / "examples", CODE.parent / "tests") for p in folder.glob("*.py")]
+        for file in files:
+            source = file.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+            with self.subTest(file=file.name):
+                self.assertEqual(source.splitlines()[4], "# @File    : " + file.name)
+                self.assertEqual(source.splitlines()[6], "# @License : MIT")
+                self.assertEqual(tuple(re.findall(r"^# =+\s*(.*?)\s*=+\s*$", source, re.M)), sections)
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.FunctionDef):
+                        self.assertIsNotNone(node.returns, node.name)
+                        args = node.args.posonlyargs + node.args.args + node.args.kwonlyargs
+                        args += [a for a in (node.args.vararg, node.args.kwarg) if a is not None]
+                        for arg in args:
+                            if arg.arg not in ("self", "cls"):
+                                self.assertIsNotNone(arg.annotation, (node.name, arg.arg))
+                if file.name != "main.py":
+                    metadata = {
+                        node.targets[0].id: ast.literal_eval(node.value)
+                        for node in tree.body
+                        if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name) and node.targets[0].id.startswith("__")
+                    }
+                    self.assertEqual(metadata["__version__"], "1.1.0")
+                    self.assertEqual(metadata["__license__"], "MIT")
+                    self.assertIn(metadata["__author__"], ("李清水", "赵岩松"))
+                    self.assertTrue(metadata["__platform__"])
+                if file.parent == CODE and file.name != "main.py":
+                    for cls in (n for n in tree.body if isinstance(n, ast.ClassDef)):
+                        doc = ast.get_docstring(cls)
+                        self.assertTrue(all(doc.count(part) == 2 for part in ("Attributes:", "Methods:", "Notes:")))
+                        for method in (n for n in cls.body if isinstance(n, ast.FunctionDef)):
+                            if not method.name.startswith("_") or method.name == "__init__":
+                                doc = ast.get_docstring(method) or ""
+                                self.assertTrue(
+                                    all(part in doc for part in ("==================", "Args:", "Returns:", "Raises:", "Notes:", "ISR-safe"))
+                                )
+        readme = (CODE.parent / "README.md").read_text(encoding="utf-8")
+        main = (CODE / "main.py").read_text(encoding="utf-8")
+        self.assertIn("```python\n" + main.rstrip() + "\n```", readme)
+
+    def test_single_file_profile_releases_owned_resources_on_normal_and_failed_exit(self) -> None:
         env = self.example("single_motor_pid_demo")
         with contextlib.redirect_stdout(io.StringIO()):
             env["run_profile"]([], True)
@@ -358,13 +418,13 @@ class Contracts(unittest.TestCase):
         self.assertTrue(ADC.instances[-1].closed)
         self.assertTrue(all(p.handler is None for p in Pin.instances))
 
-    def test_window_configuration_is_per_motor_in_standalone_projects(self):
+    def test_window_configuration_is_per_motor_in_standalone_projects(self) -> None:
         for filename in ("tuning_profile", "realtime_audit"):
             env = self.example(filename)
             captured = []
             sentinel = RuntimeError("stop before motion")
 
-            def inspect(controller):
+            def inspect(controller: object) -> None:
                 captured.extend(e.get_rpm.__name__ for e in controller._encoders)
                 raise sentinel
 
@@ -377,7 +437,7 @@ class Contracts(unittest.TestCase):
             self.assertTrue(I2C.instances[-1].closed)
             self.assertTrue(all(p.handler is None for p in Pin.instances))
 
-    def test_failed_normal_off_blocks_reverse_and_attempts_all_channels(self):
+    def test_failed_normal_off_blocks_reverse_and_attempts_all_channels(self) -> None:
         env = self.example("switch_benchmark")
         bus = self.make_bus()
         writer = env["BenchWriter"](self.pca, "batch")
@@ -385,7 +445,7 @@ class Contracts(unittest.TestCase):
         calls = []
         failure = OSError("off failed")
 
-        def fail_once(address, register, data):
+        def fail_once(address: int, register: int, data: object) -> None:
             calls.append(register)
             if len(calls) == 1:
                 raise failure
@@ -399,5 +459,7 @@ class Contracts(unittest.TestCase):
         self.assertTrue(all(not p.enabled for p in bus._controller._pids))
 
 
+# ======================================== 初始化配置 ========================================
+# ======================================== 主程序 ========================================
 if __name__ == "__main__":
     unittest.main()

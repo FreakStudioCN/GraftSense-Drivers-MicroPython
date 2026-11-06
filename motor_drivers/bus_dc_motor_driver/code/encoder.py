@@ -11,34 +11,8 @@ __author__ = "赵岩松"
 __license__ = "MIT"
 __platform__ = "MicroPython v1.29.0 / ESP32-C3"
 
-# MG310P20 Hall AB Encoder Driver
-#
-# ESP32-C3 MicroPython
-#
-# Encoder:
-#
-# A -> GPIO5
-# B -> GPIO6
-#
-#
-# Motor:
-#
-# MG310P20_7.4V
-#
-# PPR:
-#     13
-#
-# Gear Ratio:
-#     20
-#
-#
-# Counting:
-#
-# A rising edge
-#
-# Count per output revolution:
-#
-# 13 * 20 = 260
+# MG310P20 AB霍尔编码器；ESP32-C3参考接线为A相GPIO5、B相GPIO6。
+# 7.4V电机、13脉冲/电机轴圈、减速比20，A相上升沿对应260计数/输出轴圈。
 
 # ======================================== 导入相关模块 ========================================
 
@@ -58,17 +32,21 @@ alloc_emergency_exception_buf(100)
 
 
 class Encoder:
-    """AB 编码器 A 相上升沿计数器。
-
-    ==================
-    AB encoder counter using A rising edges.
-
+    """AB编码器A相上升沿计数器。
     Attributes:
-        count 为累计计数；direction 为末次方向；count_per_rev 为输出轴每圈计数。 / Signed count, last direction and counts per output revolution.
+        count、direction、count_per_rev：累计计数、末次方向、每圈计数。
     Methods:
         get_count、get_direction、reset、get_rpm、deinit。
     Notes:
-        默认 13×20=260 次/输出轴圈，非四倍频。 / Default resolution is 260, not quadrature x4.
+        默认13×20=260计数/输出轴圈；IRQ同步采样B相，非四倍频。
+    ==================
+    AB encoder counter using A rising edges.
+    Attributes:
+        count, direction, count_per_rev: signed count, last direction and counts per output revolution.
+    Methods:
+        get_count, get_direction, reset, get_rpm, deinit.
+    Notes:
+        Default resolution is 260; the IRQ samples phase B synchronously, without quadrature x4.
     """
 
     def __init__(self, pin_a: int, pin_b: int, ppr: int = 13, gear_ratio: float = 20) -> None:
@@ -87,7 +65,8 @@ class Encoder:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             创建 GPIO 并注册 A 相 IRQ / Create GPIO and register A-rising IRQ.
@@ -121,7 +100,7 @@ class Encoder:
             无 / None.
 
         Returns:
-            int：计数、方向或应用值，含义见上述说明 / Count, direction or applied value.
+            int：累计的有符号编码器计数 / Accumulated signed encoder count.
 
         Raises:
             无主动抛出；不访问 I/O / No explicit exceptions; no I/O.
@@ -147,7 +126,7 @@ class Encoder:
             无 / None.
 
         Returns:
-            int：计数、方向或应用值，含义见上述说明 / Count, direction or applied value.
+            int：末次计数方向，−1/0/1 / Last count direction: -1, 0 or 1.
 
         Raises:
             无主动抛出；不访问 I/O / No explicit exceptions; no I/O.
@@ -176,7 +155,7 @@ class Encoder:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            无主动抛出 / No explicit exceptions.
 
         Notes:
             保护并修改计数状态；不写电机输出 / Protect and modify count state.
@@ -205,7 +184,7 @@ class Encoder:
             float：有符号输出轴 RPM；dt<=0 返回 0 / Signed output RPM; zero for dt<=0.
 
         Raises:
-            无主动抛出；不访问 I/O / No explicit exceptions; no I/O.
+            ValueError：计数增量不是整数或dt不是有限数 / Count delta is not an integer or dt is not finite.
 
         Notes:
             仅读取状态；不写硬件 / Read state only; no hardware writes.
@@ -225,8 +204,7 @@ class Encoder:
         return rpm
 
     def _irq(self, pin: object) -> None:
-        """
-        A相上升沿触发
+        """A相上升沿触发
 
         根据B相判断方向
 
@@ -259,7 +237,7 @@ class Encoder:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            OSError：底层IRQ注销失败 / The underlying IRQ detach operation failed.
 
         Notes:
             注销 A 相 IRQ；不改变 PWM 输出 / Detach A IRQ without changing PWM.

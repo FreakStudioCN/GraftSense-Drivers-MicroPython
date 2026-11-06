@@ -23,17 +23,21 @@ import math
 
 
 class DCMotor:
-    """两个 PCA 通道控制一个直流电机。
-
-    ==================
-    Drive one DC motor through two PCA channels.
-
+    """通过两个PCA通道驱动一个直流电机。
     Attributes:
-        pca、channel_a、channel_b 为共享驱动和双输入通道 / PWM driver and input channels.
+        pca、channel_a、channel_b：共享PWM驱动和双输入通道。
     Methods:
         set_speed、stop、deinit。
     Notes:
-        速度为带符号百分比而非 RPM；不拥有共享 PCA 对象。 / Speed means PWM percent, not RPM; PCA is borrowed.
+        速度是带符号PWM百分比；本对象不拥有PCA或I2C。
+    ==================
+    Drive one DC motor through two PCA channels.
+    Attributes:
+        pca, channel_a, channel_b: borrowed PWM driver and input channels.
+    Methods:
+        set_speed, stop, deinit.
+    Notes:
+        Speed is signed PWM percent; this object does not own the PCA or I2C bus.
     """
 
     def __init__(self, pca: object, channel_a: int, channel_b: int) -> None:
@@ -51,10 +55,10 @@ class DCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
 
         Notes:
-            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            只保存PWM驱动与通道，不执行I2C操作 / Store the PWM driver and channels without I2C access.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
         if type(channel_a) is not int or type(channel_b) is not int:
@@ -82,7 +86,8 @@ class DCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -127,7 +132,7 @@ class DCMotor:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            Exception：分别尝试关闭两个输入后传播首个异常 / First failure after attempting both inputs.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.

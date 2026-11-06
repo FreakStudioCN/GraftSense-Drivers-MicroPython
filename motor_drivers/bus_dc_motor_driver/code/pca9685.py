@@ -32,17 +32,21 @@ from machine import I2C
 
 
 class PCA9685:
-    """PCA9685 十六通道 PWM 驱动。
-
-    ==================
-    Sixteen-channel PCA9685 PWM driver.
-
+    """PCA9685十六通道PWM驱动。
     Attributes:
-        i2c、address 为调用方总线及设备地址 / Caller-owned bus and device address.
+        i2c、address：调用方持有的总线和设备地址。
     Methods:
         reset、freq、pwm、duty、deinit。
     Notes:
-        频率作用于整片，构造写 MODE1；deinit 不关闭共享总线或其他通道。 / Frequency is chip-wide; deinit leaves the shared bus and outputs intact.
+        频率作用于整片；deinit不关闭共享总线或通道。
+    ==================
+    Sixteen-channel PCA9685 PWM driver.
+    Attributes:
+        i2c, address: caller-owned bus and device address.
+    Methods:
+        reset, freq, pwm, duty, deinit.
+    Notes:
+        Frequency is chip-wide; deinit leaves the borrowed bus and outputs intact.
     """
 
     def __init__(self, i2c: I2C, address: int = 64) -> None:
@@ -59,7 +63,8 @@ class PCA9685:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -90,7 +95,7 @@ class PCA9685:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -112,7 +117,8 @@ class PCA9685:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -152,7 +158,8 @@ class PCA9685:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -181,7 +188,8 @@ class PCA9685:
             int：反相处理后的占空比值 / Applied duty after inversion.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
@@ -205,8 +213,7 @@ class PCA9685:
         return value
 
     def _write(self, address: int, value: int) -> None:
-        """
-        向指定地址写入一个字节数据
+        """向指定地址写入一个字节数据
 
         Args:
             address (int): 要写入的地址。
@@ -227,8 +234,7 @@ class PCA9685:
         self.i2c.writeto_mem(self.address, address, bytearray([value]))
 
     def _read(self, address: int) -> int:
-        """
-        从指定地址读取一个字节数据
+        """从指定地址读取一个字节数据
 
         Args:
             address (int): 要写入的地址。
