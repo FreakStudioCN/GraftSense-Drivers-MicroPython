@@ -1,0 +1,232 @@
+{
+  "realtime-audit-02": {
+    "1": {
+      "core": {
+        "count": 1049,
+        "mean_us": 11598,
+        "p95_upper_us": 18300,
+        "p99_upper_us": 18900,
+        "max_us": 19133
+      },
+      "i2c": {
+        "count": 1049,
+        "mean_us": 2360,
+        "p95_upper_us": 2600,
+        "p99_upper_us": 2700,
+        "max_us": 8461
+      },
+      "pid": {
+        "count": 1049,
+        "mean_us": 1508,
+        "p95_upper_us": 1700,
+        "p99_upper_us": 8100,
+        "max_us": 8439
+      },
+      "adc_real": {
+        "count": 101,
+        "mean_us": 1485,
+        "p95_upper_us": 2000,
+        "p99_upper_us": 2028,
+        "max_us": 2028
+      },
+      "tick_work": {
+        "count": 1049,
+        "mean_us": 17684,
+        "p95_upper_us": 24100,
+        "p99_upper_us": 28030,
+        "max_us": 28030
+      },
+      "period": {
+        "count": 1049,
+        "mean_us": 20000,
+        "p95_upper_us": 24100,
+        "p99_upper_us": 29000,
+        "max_us": 29000
+      },
+      "lateness": {
+        "count": 1049,
+        "mean_us": 661,
+        "p95_upper_us": 5100,
+        "p99_upper_us": 7100,
+        "max_us": 9000
+      },
+      "output_skew": {
+        "count": 1049,
+        "mean_us": 8376,
+        "p95_upper_us": 9100,
+        "p99_upper_us": 15500,
+        "max_us": 15792
+      },
+      "gc": {
+        "count": 0,
+        "mean_us": 0,
+        "p95_upper_us": 0,
+        "p99_upper_us": 0,
+        "max_us": 0
+      },
+      "budget": {
+        "work_over20ms": 84,
+        "skipped_slots": 0,
+        "min_heap_free": 24816
+      }
+    },
+    "2": {
+      "core": {
+        "count": 1049,
+        "mean_us": 11726,
+        "p95_upper_us": 17300,
+        "p99_upper_us": 19200,
+        "max_us": 19343
+      },
+      "i2c": {
+        "count": 1049,
+        "mean_us": 2349,
+        "p95_upper_us": 2600,
+        "p99_upper_us": 2700,
+        "max_us": 9142
+      },
+      "pid": {
+        "count": 1049,
+        "mean_us": 1494,
+        "p95_upper_us": 1700,
+        "p99_upper_us": 8100,
+        "max_us": 8343
+      },
+      "adc_real": {
+        "count": 101,
+        "mean_us": 1476,
+        "p95_upper_us": 2000,
+        "p99_upper_us": 2032,
+        "max_us": 2032
+      },
+      "tick_work": {
+        "count": 1049,
+        "mean_us": 17848,
+        "p95_upper_us": 24100,
+        "p99_upper_us": 28117,
+        "max_us": 28117
+      },
+      "period": {
+        "count": 1049,
+        "mean_us": 20002,
+        "p95_upper_us": 24100,
+        "p99_upper_us": 29000,
+        "max_us": 29000
+      },
+      "lateness": {
+        "count": 1049,
+        "mean_us": 762,
+        "p95_upper_us": 5100,
+        "p99_upper_us": 7100,
+        "max_us": 9000
+      },
+      "output_skew": {
+        "count": 1049,
+        "mean_us": 8618,
+        "p95_upper_us": 9300,
+        "p99_upper_us": 15900,
+        "max_us": 16114
+      },
+      "gc": {
+        "count": 10,
+        "mean_us": 6395,
+        "p95_upper_us": 6428,
+        "p99_upper_us": 6428,
+        "max_us": 6428
+      },
+      "budget": {
+        "work_over20ms": 92,
+        "skipped_slots": 0,
+        "min_heap_free": 24768
+      }
+    }
+  },
+  "realtime-audit-light": {
+    "1": {
+      "tick_work": {
+        "count": 1049,
+        "mean_us": 17428,
+        "p95_upper_us": 25300,
+        "p99_upper_us": 29042,
+        "max_us": 29042
+      },
+      "gc": {
+        "count": 0,
+        "mean_us": 0,
+        "p95_upper_us": 0,
+        "p99_upper_us": 0,
+        "max_us": 0
+      },
+      "budget": {
+        "work_over20ms": 89,
+        "skipped_slots": 0,
+        "min_heap_free": 24864
+      }
+    },
+    "2": {
+      "tick_work": {
+        "count": 1049,
+        "mean_us": 17622,
+        "p95_upper_us": 25400,
+        "p99_upper_us": 29477,
+        "max_us": 29477
+      },
+      "gc": {
+        "count": 10,
+        "mean_us": 7041,
+        "p95_upper_us": 7058,
+        "p99_upper_us": 7058,
+        "max_us": 7058
+      },
+      "budget": {
+        "work_over20ms": 105,
+        "skipped_slots": 0,
+        "min_heap_free": 24880
+      }
+    }
+  },
+  "realtime-audit-clean": {
+    "1": {
+      "tick_work": {
+        "count": 1049,
+        "mean_us": 16819,
+        "p95_upper_us": 19800,
+        "p99_upper_us": 21400,
+        "max_us": 23489
+      },
+      "gc": {
+        "count": 0,
+        "mean_us": 0,
+        "p95_upper_us": 0,
+        "p99_upper_us": 0,
+        "max_us": 0
+      },
+      "budget": {
+        "work_over20ms": 37,
+        "skipped_slots": 0,
+        "min_heap_free": 25200
+      }
+    },
+    "2": {
+      "tick_work": {
+        "count": 1049,
+        "mean_us": 16932,
+        "p95_upper_us": 19500,
+        "p99_upper_us": 22100,
+        "max_us": 24684
+      },
+      "gc": {
+        "count": 10,
+        "mean_us": 3770,
+        "p95_upper_us": 3829,
+        "p99_upper_us": 3829,
+        "max_us": 3829
+      },
+      "budget": {
+        "work_over20ms": 48,
+        "skipped_slots": 0,
+        "min_heap_free": 24912
+      }
+    }
+  }
+}

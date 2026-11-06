@@ -27,7 +27,9 @@ COLUMNS += [f"pwm{i}" for i in range(1, 5)] + ["voltage", "loop_us", "i2c_us", "
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--profile", choices=("performance_profile", "tuning_profile"), default="performance_profile")
+    parser.add_argument(
+        "--profile", choices=("performance_profile", "tuning_profile", "realtime_audit", "realtime_audit_light"), default="performance_profile"
+    )
     parser.add_argument("--reuse", action="store_true", help="reuse already verified device libraries; upload experiment scripts only")
     parser.add_argument("--port", default="COM8")
     parser.add_argument("--baud", type=int, default=921600)
@@ -94,7 +96,15 @@ def main():
                 uploaded = args.out / "uploaded-source"
                 uploaded.mkdir()
                 sources = ([] if args.reuse else list((ROOT / "code").glob("*.py"))) + [
-                    ROOT / "examples" / n for n in ("board_setup.py", "performance_profile.py", "tuning_profile.py")
+                    ROOT / "examples" / n
+                    for n in (
+                        "board_setup.py",
+                        "performance_profile.py",
+                        "tuning_profile.py",
+                        "timing_audit.py",
+                        "realtime_audit.py",
+                        "realtime_audit_light.py",
+                    )
                 ]
                 for source in sources:
                     if source.name == "main.py":
@@ -111,7 +121,8 @@ def main():
                 if cancelled.is_set():
                     raise KeyboardInterrupt("Plot closed before motion")
                 code = "import sys\n"
-                code += "for n in ('board_setup','performance_profile','tuning_profile','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n"
+                code += "for n in ('board_setup','performance_profile','tuning_profile','realtime_audit','realtime_audit_light','timing_audit','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n if n in globals(): del globals()[n]\n"
+                code += "import gc; gc.collect()\n"
                 code += f"import {args.profile}\n{args.profile}.run(True,{args.seconds})\n"
                 _, error = transport.exec_raw(code, timeout=180, data_consumer=consume)
                 if error:
