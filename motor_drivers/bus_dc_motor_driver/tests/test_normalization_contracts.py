@@ -308,6 +308,27 @@ class Contracts(unittest.TestCase):
                     env["run_profile"]([], True)
         self.assertTrue(I2C.instances[-1].closed)
 
+    def test_microsecond_decorator_counts_success_and_failure(self):
+        module = types.ModuleType("board_setup")
+        module.__dict__.update(self.load_board_setup())
+        with patch.dict(sys.modules, {"board_setup": module}):
+            env = runpy.run_path(str(CODE.parent / "examples/performance_profile.py"))
+        ticks = iter((100, 137, 200, 221))
+        with patch.object(sys.modules["time"], "ticks_us", lambda: next(ticks), create=True):
+            totals = [0]
+            measured = env["measure_us"](totals, 0)(lambda value: value + 1)
+            self.assertEqual(measured(3), 4)
+            self.assertEqual(totals, [37])
+            failure = OSError("original fault")
+
+            def fail():
+                raise failure
+
+            with self.assertRaises(OSError) as result:
+                env["measure_us"](totals, 0)(fail)()
+            self.assertIs(result.exception, failure)
+            self.assertEqual(totals, [58])
+
     def test_armed_main_pid_releases_owned_resources(self):
         with contextlib.redirect_stdout(io.StringIO()):
             env = runpy.run_path(str(CODE / "main.py"), run_name="contract_test")
