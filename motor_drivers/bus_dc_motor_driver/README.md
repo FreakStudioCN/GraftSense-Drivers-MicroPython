@@ -326,7 +326,7 @@ python motor_drivers/bus_dc_motor_driver/tests/validate_package.py
 python -m compileall -q motor_drivers/bus_dc_motor_driver/code motor_drivers/bus_dc_motor_driver/examples
 ```
 
-本包 20 项 PC 回归测试覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
+本包当前 38 项 PC 回归（含驱动、指标算法、计时工具和检查器）覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
 
 examples/ 下的单路、四路及兼容验证示例需将 board_setup.py 也上传 /lib/。所有新增示例默认不启动，先按实物配置并显式启用，每次只运行一个入口。其他平台先更换接线，电压采样需支持相应 ADC API。
 
@@ -350,6 +350,10 @@ GitHub 问题反馈：[当前 fork 的 Issues](https://github.com/yangcong-bit/G
 ## PC实时曲线与控制周期试验
 
 见[大白话测试记录](docs/PERFORMANCE.md)：包含921600串口设置、四路曲线、超调/稳态规则、微秒计时与100/30/20ms实测对比。优化保留为独立测试入口，正式库默认行为不变。
+
+## PID参数怎么整定
+
+见[PID参数整定指南](docs/PID_TUNING.md)：调参顺序、测速窗口、起步补偿、重跑命令、指标定义和常见问题排查。
 
 ## 这套台架的分路细调配置
 
