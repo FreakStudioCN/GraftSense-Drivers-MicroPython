@@ -188,9 +188,7 @@ class Contracts(unittest.TestCase):
     def test_controller_cleanup_continues_after_stop_failure(self):
         bus = self.make_bus()
         controller = bus._controller
-        controller._motors[0].stop = lambda: (_ for _ in ()).throw(
-            OSError("injected write failure")
-        )
+        controller._motors[0].stop = lambda: (_ for _ in ()).throw(OSError("injected write failure"))
         with self.assertRaises(OSError):
             controller.deinit()
         self.assertTrue(all(e.pin_a.handler is None for e in controller._encoders))
@@ -219,11 +217,96 @@ class Contracts(unittest.TestCase):
         controller_module = self.mods["motor_controller"]
         with patch.object(controller_module, "Encoder", fail_second):
             with self.assertRaises(OSError):
-                controller_module.MotorController(
-                    pca, ((0, 1, 5, 6), (2, 3, 7, 8)), ((1, 0, 0),) * 2
-                )
+                controller_module.MotorController(pca, ((0, 1, 5, 6), (2, 3, 7, 8)), ((1, 0, 0),) * 2)
         self.assertEqual(len(created), 1)
         self.assertIsNone(created[0].pin_a.handler)
+
+    def test_stop_attempts_both_inputs_after_transient_write_failure(self):
+        bus = self.make_bus()
+        motor = bus._controller._motors[0]
+        original = self.pca.duty
+        original(1, 2047)
+        failure = OSError("transient A write")
+        calls = []
+
+        def fail_once(channel, value=None):
+            calls.append(channel)
+            if len(calls) == 1:
+                raise failure
+            return original(channel, value)
+
+        with patch.object(self.pca, "duty", fail_once):
+            with self.assertRaises(OSError) as result:
+                motor.stop()
+            self.assertIs(result.exception, failure)
+            self.assertEqual(calls, [0, 1])
+            self.assertEqual(self.i2c.memory[6 + 4 + 3] & 0x10, 0x10)
+            motor.stop()
+        self.assertEqual(self.i2c.memory[6 + 3] & 0x10, 0x10)
+
+    def test_brake_constructor_failure_detaches_all_irqs(self):
+        pca = self.mods["pca9685"].PCA9685(I2C(), 0x4F)
+        original = pca.duty
+        failure = OSError("startup brake failed")
+
+        def fail_brake(channel, value=None):
+            if value == 4095:
+                raise failure
+            return original(channel, value)
+
+        with patch.object(pca, "duty", fail_brake):
+            with self.assertRaises(OSError) as result:
+                self.mods["bus_dc_motor"].BusDCMotor(pca, 4, encoder_pins=((5, 6), (7, 8), (3, 2), (1, 0)))
+        self.assertIs(result.exception, failure)
+        self.assertEqual(len(Pin.instances), 8)
+        self.assertTrue(all(pin.handler is None for pin in Pin.instances))
+
+    def test_controller_target_sequence_is_atomic(self):
+        bus = self.make_bus()
+        controller = bus._controller
+        controller.set_target_rpms((10, 20, 30, 40))
+        for invalid in (float("nan"), float("inf"), "bad"):
+            with self.assertRaises(ValueError):
+                controller.set_target_rpms((50, 60, 70, invalid))
+            self.assertEqual(tuple(pid.target for pid in controller._pids), (10, 20, 30, 40))
+
+    def load_board_setup(self):
+        return runpy.run_path(str(CODE.parent / "examples" / "board_setup.py"))
+
+    def test_profile_normal_exit_releases_all_owned_resources(self):
+        env = self.load_board_setup()
+        with contextlib.redirect_stdout(io.StringIO()):
+            env["run_profile"]([], True)
+        self.assertTrue(I2C.instances[-1].closed)
+        self.assertTrue(ADC.instances[-1].closed)
+        self.assertTrue(all(pin.handler is None for pin in Pin.instances))
+
+    def test_profile_failure_preserves_error_and_releases_resources(self):
+        env = self.load_board_setup()
+        failure = OSError("ADC sampling failed")
+        original_deinit = self.mods["motor_controller"].MotorController.deinit
+
+        def cleanup_then_fail(controller):
+            original_deinit(controller)
+            raise OSError("stop failed")
+
+        with patch.object(self.mods["voltage_monitor"].VoltageMonitor, "update", side_effect=failure):
+            with patch.object(self.mods["motor_controller"].MotorController, "deinit", cleanup_then_fail):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaises(OSError) as result:
+                        env["run_profile"]([], True)
+        self.assertIs(result.exception, failure)
+        self.assertTrue(all(pin.handler is None for pin in Pin.instances))
+        self.assertTrue(I2C.instances[-1].closed)
+        self.assertTrue(ADC.instances[-1].closed)
+
+    def test_profile_scan_failure_closes_i2c(self):
+        env = self.load_board_setup()
+        with patch.object(I2C, "scan", return_value=[]):
+            with contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(RuntimeError):
+                    env["run_profile"]([], True)
+        self.assertTrue(I2C.instances[-1].closed)
 
     def test_armed_main_pid_releases_owned_resources(self):
         with contextlib.redirect_stdout(io.StringIO()):

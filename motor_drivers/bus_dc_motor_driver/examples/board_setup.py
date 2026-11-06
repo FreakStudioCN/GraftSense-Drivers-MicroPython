@@ -25,33 +25,53 @@ PERIOD_MS = 100
 def create_pca() -> object:
     """扫描设备，将全部电机通道关闭，再设置整片 PWM 为 1000 Hz。"""
     i2c = I2C(0, scl=Pin(9), sda=Pin(10), freq=400000)
-    devices = i2c.scan()
-    print("I2C devices:", [hex(x) for x in devices])
-    if not devices:
-        raise RuntimeError("No I2C device found")
-    if 0x4F not in devices:
-        raise RuntimeError("Device not found at expected address")
-    # 无固定芯片 ID；构造及频率设置通过寄存器读写验证响应。
-    pca = PCA9685(i2c, 0x4F)
-    # reset() 清除了自动递增位；pwm() 的四字节寄存器写入需要先启用它。
-    pca.i2c.writeto_mem(pca.address, 0x00, b"\x20")
-    for channel in range(8):
-        pca.duty(channel, 0)
-    pca.freq(1000)
-    return pca
+    try:
+        devices = i2c.scan()
+        print("I2C devices:", [hex(x) for x in devices])
+        if not devices:
+            raise RuntimeError("No I2C device found")
+        if 0x4F not in devices:
+            raise RuntimeError("Device not found at expected address")
+        # 无固定芯片 ID；构造及频率设置通过寄存器读写验证响应。
+        pca = PCA9685(i2c, 0x4F)
+        # reset() 清除了自动递增位；pwm() 的四字节寄存器写入需要先启用它。
+        pca.i2c.writeto_mem(pca.address, 0x00, b"\x20")
+        for channel in range(8):
+            pca.duty(channel, 0)
+        pca.freq(1000)
+        return pca
+    except BaseException:
+        try:
+            if hasattr(i2c, "deinit"):
+                i2c.deinit()
+        except Exception:
+            pass
+        raise
 
 
-def create_controller() -> object:
+def create_controller(pca: object = None) -> object:
     """只创建并停止四路，示例限幅为 ±50%，不改变正式入口配置。"""
-    return MotorController(
-        create_pca(),
-        MOTOR_CONFIGS,
-        PID_PARAMS,
-        ppr=PPR,
-        gear_ratio=GEAR_RATIO,
-        output_limit=(-50, 50),
-        integral_limit=(-50, 50),
-    )
+    owned = pca is None
+    if owned:
+        pca = create_pca()
+    try:
+        return MotorController(
+            pca,
+            MOTOR_CONFIGS,
+            PID_PARAMS,
+            ppr=PPR,
+            gear_ratio=GEAR_RATIO,
+            output_limit=(-50, 50),
+            integral_limit=(-50, 50),
+        )
+    except BaseException:
+        if owned:
+            try:
+                if hasattr(pca.i2c, "deinit"):
+                    pca.i2c.deinit()
+            except Exception:
+                pass
+        raise
 
 
 def stop_all(controller: object) -> None:
@@ -79,8 +99,12 @@ def run_profile(stages: tuple, armed: bool = False) -> None:
     time.sleep(3)
     print("FreakStudio: independent PID profile")
     controller = None
+    pca = None
+    voltage = None
+    failed = False
     try:
-        controller = create_controller()
+        pca = create_pca()
+        controller = create_controller(pca)
         voltage = VoltageMonitor(pin=4, interval_ms=200)
         voltage.update()
         if not 6 < voltage.get_voltage() < 9:
@@ -112,12 +136,7 @@ def run_profile(stages: tuple, armed: bool = False) -> None:
                         pwm = telemetry[i * 8 + 2]
                         if abs(rpm) > 150 or rpm * target < -10 * abs(target):
                             raise RuntimeError("Unexpected encoder speed or direction")
-                        if (
-                            time.ticks_diff(now, start) > 3000
-                            and target
-                            and abs(rpm) < 1
-                            and abs(pwm) > 25
-                        ):
+                        if time.ticks_diff(now, start) > 3000 and target and abs(rpm) < 1 and abs(pwm) > 25:
                             raise RuntimeError("No encoder feedback under drive")
                         print(
                             "%d,%d,%d,%s,%s,%s,%d,%d,%s"
@@ -137,15 +156,27 @@ def run_profile(stages: tuple, armed: bool = False) -> None:
             stop_all(controller)
             time.sleep(3)
     except KeyboardInterrupt:
+        failed = True
         print("Interrupted")
         raise
     except OSError as exc:
+        failed = True
         print("Hardware communication error:", exc)
         raise
     except Exception as exc:
+        failed = True
         print("Profile failed:", exc)
         raise
     finally:
-        if controller is not None:
-            stop_all(controller)
-        print("All motors stopped; reset before another entry point")
+        error = None
+        resources = (controller, voltage, pca, pca.i2c if pca is not None else None)
+        for resource in resources:
+            if resource is not None and hasattr(resource, "deinit"):
+                try:
+                    resource.deinit()
+                except Exception as exc:
+                    if error is None:
+                        error = exc
+        if error is not None and not failed:
+            raise error
+        print("All motors stopped; owned resources released")

@@ -1,4 +1,5 @@
 """Static package checks for device code/examples; PC test fixtures are excluded."""
+
 import ast
 import json
 import re
@@ -15,7 +16,11 @@ for file in files:
     assert tuple(titles) == SECTIONS, (file.name, titles)
     assert source.splitlines()[6] == "# @License : MIT", file.name
     if file.parent.name == "code" and file.name != "main.py":
-        metadata = {n.targets[0].id: ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign) and isinstance(n.targets[0], ast.Name) and n.targets[0].id.startswith("__")}
+        metadata = {
+            n.targets[0].id: ast.literal_eval(n.value)
+            for n in tree.body
+            if isinstance(n, ast.Assign) and isinstance(n.targets[0], ast.Name) and n.targets[0].id.startswith("__")
+        }
         assert metadata["__version__"] == "1.1.0", file.name
         assert metadata["__author__"] in ("李清水", "赵岩松"), file.name
         assert metadata["__license__"] == "MIT", file.name

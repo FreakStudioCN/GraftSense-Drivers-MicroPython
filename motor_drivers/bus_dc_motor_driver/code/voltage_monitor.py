@@ -121,11 +121,7 @@ class VoltageMonitor:
         if force is None or not isinstance(force, bool):
             raise ValueError("force must be bool")
         now = time.ticks_ms()
-        if (
-            not force
-            and self._last_time is not None
-            and time.ticks_diff(now, self._last_time) < self.interval_ms
-        ):
+        if not force and self._last_time is not None and time.ticks_diff(now, self._last_time) < self.interval_ms:
             return False
         total_uv = 0
         for _ in range(self.samples):

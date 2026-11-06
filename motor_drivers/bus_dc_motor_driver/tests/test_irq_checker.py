@@ -1,4 +1,5 @@
 """Regression tests for registered IRQ callback validation."""
+
 import contextlib
 import importlib.util
 import io
@@ -9,9 +10,16 @@ spec = importlib.util.spec_from_file_location("repository_code_checker", Path(__
 checker = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(checker)
 
+
 class IRQCheckerTests(unittest.TestCase):
     def check(self, body, registered=True):
-        source = "class Device:\n    def __init__(self):\n        " + ("self.pin.irq(handler=self.callback)" if registered else "pass") + "\n    def callback(self, pin):\n        " + body + "\n"
+        source = (
+            "class Device:\n    def __init__(self):\n        "
+            + ("self.pin.irq(handler=self.callback)" if registered else "pass")
+            + "\n    def callback(self, pin):\n        "
+            + body
+            + "\n"
+        )
         with contextlib.redirect_stdout(io.StringIO()):
             return checker.check_method_param_validation(source, Path("driver.py"))
 

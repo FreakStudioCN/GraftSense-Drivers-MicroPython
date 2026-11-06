@@ -64,7 +64,7 @@ class PID:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.
@@ -77,10 +77,7 @@ class PID:
         for bounds in (output_limit, integral_limit):
             if not isinstance(bounds, (tuple, list)) or len(bounds) != 2:
                 raise ValueError("Limits must be a lower and upper pair")
-            if any(
-                type(value) not in (int, float) or not math.isfinite(value)
-                for value in bounds
-            ):
+            if any(type(value) not in (int, float) or not math.isfinite(value) for value in bounds):
                 raise ValueError("Limits must be finite")
         if dt <= 0:
             raise ValueError("Control interval must be positive")
@@ -111,9 +108,7 @@ class PID:
         # 安全启动位：默认禁止电机输出，必须显式 START=1 才闭环运行。
         self.enabled = False
 
-    def update(
-        self, feedback: float, dt: float = None, global_enabled: bool = True
-    ) -> float:
+    def update(self, feedback: float, dt: float = None, global_enabled: bool = True) -> float:
         """计算限幅 PID 输出；停用时清状态，dt<=0 时保留上次输出。
 
         ==================
@@ -128,7 +123,7 @@ class PID:
             float：限幅后的 PID 输出，电机应用单位为 PWM 百分比 / Bounded PWM percent.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.
@@ -203,7 +198,7 @@ class PID:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.
@@ -229,16 +224,14 @@ class PID:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
         for value in (kp, ki, kd):
-            if value is not None and (
-                type(value) not in (int, float) or not math.isfinite(value)
-            ):
+            if value is not None and (type(value) not in (int, float) or not math.isfinite(value)):
                 raise ValueError("PID gains must be finite or None")
 
         if kp is not None:
@@ -263,7 +256,7 @@ class PID:
             None：无返回值 / No return value.
 
         Raises:
-            ValueError/TypeError：参数无效；OSError：底层 I/O 失败，保持原类型。 / Invalid argument or unchanged I/O exception.
+            ValueError：非有限值或配置无效；TypeError：参数类型无效。 / Non-finite values, invalid configuration or argument types.
 
         Notes:
             修改 PID 内部状态；不访问硬件 / Modify PID state only.

@@ -7,13 +7,15 @@
 # ======================================== 导入相关模块 ========================================
 import sys
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"code"))
-from pid import PID
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "code"))
+from pid import PID  # noqa: E402 - local device module path selected above
+
+
 # ======================================== 全局变量 ========================================
 # ======================================== 功能函数 ========================================
 def check_pid() -> None:
-    pid = PID(kp=2, ki=1, kd=0, dt=0.1,
-              output_limit=(-10, 10), integral_limit=(-2, 2))
+    pid = PID(kp=2, ki=1, kd=0, dt=0.1, output_limit=(-10, 10), integral_limit=(-2, 2))
     pid.set_target(100)
     assert pid.update(0) == 0
     pid.set_enabled(True)
@@ -41,6 +43,8 @@ def check_pid() -> None:
     else:
         raise AssertionError("Invalid interval accepted")
     print("PASS: enable, target, gains, P/I/D, limits, dt and reset")
+
+
 # ======================================== 自定义类 ========================================
 # ======================================== 初始化配置 ========================================
 # ======================================== 主程序 ========================================

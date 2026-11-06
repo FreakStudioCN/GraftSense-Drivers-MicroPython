@@ -71,9 +71,7 @@ class Encoder:
         默认 13×20=260 次/输出轴圈，非四倍频。 / Default resolution is 260, not quadrature x4.
     """
 
-    def __init__(
-        self, pin_a: int, pin_b: int, ppr: int = 13, gear_ratio: float = 20
-    ) -> None:
+    def __init__(self, pin_a: int, pin_b: int, ppr: int = 13, gear_ratio: float = 20) -> None:
         """校验配置并创建实例。
 
         ==================
@@ -95,20 +93,9 @@ class Encoder:
             创建 GPIO 并注册 A 相 IRQ / Create GPIO and register A-rising IRQ.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
-        if (
-            type(pin_a) is not int
-            or type(pin_b) is not int
-            or min(pin_a, pin_b) < 0
-            or pin_a == pin_b
-        ):
-            raise ValueError(
-                "Encoder GPIO numbers must be distinct nonnegative integers"
-            )
-        if (
-            type(ppr) is not int
-            or type(gear_ratio) not in (int, float)
-            or not math.isfinite(gear_ratio)
-        ):
+        if type(pin_a) is not int or type(pin_b) is not int or min(pin_a, pin_b) < 0 or pin_a == pin_b:
+            raise ValueError("Encoder GPIO numbers must be distinct nonnegative integers")
+        if type(ppr) is not int or type(gear_ratio) not in (int, float) or not math.isfinite(gear_ratio):
             raise ValueError("Encoder resolution must be integer and gear ratio finite")
         if ppr <= 0 or gear_ratio <= 0:
             raise ValueError("Encoder resolution and gear ratio must be positive")

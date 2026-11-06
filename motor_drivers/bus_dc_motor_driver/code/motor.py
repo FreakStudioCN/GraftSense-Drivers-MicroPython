@@ -61,10 +61,7 @@ class DCMotor:
             raise ValueError("Motor channels must be integers")
         if not hasattr(pca, "duty"):
             raise TypeError("pca must provide duty()")
-        if (
-            not (0 <= channel_a <= 15 and 0 <= channel_b <= 15)
-            or channel_a == channel_b
-        ):
+        if not (0 <= channel_a <= 15 and 0 <= channel_b <= 15) or channel_a == channel_b:
             raise ValueError("Motor channels must be distinct and in range 0..15")
         self.pca = pca
 
@@ -137,9 +134,15 @@ class DCMotor:
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
 
-        self.pca.duty(self.channel_a, 0)
-
-        self.pca.duty(self.channel_b, 0)
+        error = None
+        for channel in (self.channel_a, self.channel_b):
+            try:
+                self.pca.duty(channel, 0)
+            except Exception as exc:
+                if error is None:
+                    error = exc
+        if error is not None:
+            raise error
 
     def deinit(self) -> None:
         """停止本电机，保留共享 PWM 驱动。

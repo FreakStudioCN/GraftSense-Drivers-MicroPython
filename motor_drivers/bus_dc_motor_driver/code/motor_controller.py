@@ -19,6 +19,7 @@ __platform__ = "MicroPython v1.29.0 / ESP32-C3"
 # ======================================== 导入相关模块 ========================================
 
 import time
+import math
 from motor import DCMotor
 from encoder import Encoder
 from pid import PID
@@ -82,15 +83,11 @@ class MotorController:
         """
         if not hasattr(pca, "duty"):
             raise ValueError("pca must provide duty()")
-        if not isinstance(motor_configs, (tuple, list)) or not isinstance(
-            pid_params, (tuple, list)
-        ):
+        if not isinstance(motor_configs, (tuple, list)) or not isinstance(pid_params, (tuple, list)):
             raise ValueError("Motor and PID configurations must be sequences")
         for config in motor_configs:
             if not isinstance(config, (tuple, list)) or len(config) != 4:
-                raise ValueError(
-                    "Motor configuration must contain two channels and two GPIOs"
-                )
+                raise ValueError("Motor configuration must contain two channels and two GPIOs")
         for params in pid_params:
             if not isinstance(params, (tuple, list)) or len(params) != 3:
                 raise ValueError("PID configuration must contain three gains")
@@ -112,9 +109,7 @@ class MotorController:
                 motor = DCMotor(pca, a, b)
                 self._motors.append(motor)
                 motor.stop()
-                self._encoders.append(
-                    Encoder(enc_a, enc_b, ppr=ppr, gear_ratio=gear_ratio)
-                )
+                self._encoders.append(Encoder(enc_a, enc_b, ppr=ppr, gear_ratio=gear_ratio))
                 kp, ki, kd = params
                 self._pids.append(
                     PID(
@@ -186,12 +181,13 @@ class MotorController:
         """
         if len(rpms) != len(self._pids):
             raise ValueError("One target per motor is required")
-        for pid, rpm in zip(self._pids, rpms):
+        targets = tuple(rpms)
+        if any(type(rpm) not in (int, float) or not math.isfinite(rpm) for rpm in targets):
+            raise ValueError("Targets must be finite numbers")
+        for pid, rpm in zip(self._pids, targets):
             pid.set_target(rpm)
 
-    def set_pid(
-        self, motor_id: int, kp: float = None, ki: float = None, kd: float = None
-    ) -> None:
+    def set_pid(self, motor_id: int, kp: float = None, ki: float = None, kd: float = None) -> None:
         """在线修改指定电机增益，None 保留原值。
 
         ==================
@@ -420,9 +416,7 @@ class MotorController:
         try:
             # 先采集所有计数，再执行 I2C 输出，减少各轮采样时间差。
             counts = [encoder.get_count() for encoder in self._encoders]
-            for index, (motor, encoder, pid) in enumerate(
-                zip(self._motors, self._encoders, self._pids)
-            ):
+            for index, (motor, encoder, pid) in enumerate(zip(self._motors, self._encoders, self._pids)):
                 rpm = encoder.get_rpm(counts[index] - self._last_counts[index], dt)
                 self._rpms[index] = rpm
                 if selected is None or index in selected:

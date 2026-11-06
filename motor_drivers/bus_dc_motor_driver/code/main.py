@@ -89,9 +89,7 @@ def run() -> None:
             motor.update()
             print("Supply voltage:", motor.get_voltage())
             if not 6 < motor.get_voltage() < 9:
-                raise RuntimeError(
-                    "Check supply; this example expects 7.4 V motor system"
-                )
+                raise RuntimeError("Check supply; this example expects 7.4 V motor system")
             motor.set_target_rpms(TARGET_RPMS)
             for i in range(1, 5):
                 motor.set_pid(i, 0.15, 0.6, 0)

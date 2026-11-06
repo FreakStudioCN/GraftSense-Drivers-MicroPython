@@ -60,9 +60,7 @@ def run() -> None:
         motor.update()
         if not 6 < motor.get_voltage() < 9:
             raise RuntimeError("Example requires motor supply within 6..9 V")
-        print(
-            "stage,elapsed_ms,id,target_rpm,actual_rpm,pwm,count,direction,voltage,mode"
-        )
+        print("stage,elapsed_ms,id,target_rpm,actual_rpm,pwm,count,direction,voltage,mode")
 
         def sample(stage: str, seconds: float) -> None:
             start = time.ticks_ms()
@@ -78,12 +76,8 @@ def run() -> None:
                         target = fields[i * 8]
                         if abs(rpm) > 600:
                             raise RuntimeError("Unexpected encoder speed")
-                        if modes[i] == "pid" and (
-                            rpm * target < -10 * abs(target) or abs(rpm) > 150
-                        ):
-                            raise RuntimeError(
-                                "Unexpected closed-loop direction or speed"
-                            )
+                        if modes[i] == "pid" and (rpm * target < -10 * abs(target) or abs(rpm) > 150):
+                            raise RuntimeError("Unexpected closed-loop direction or speed")
                         print(
                             "%s,%d,%d,%s,%s,%s,%d,%d,%s,%s"
                             % (

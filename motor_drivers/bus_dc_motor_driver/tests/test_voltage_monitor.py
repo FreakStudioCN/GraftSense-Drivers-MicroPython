@@ -27,9 +27,9 @@ class VoltageTest(unittest.TestCase):
     def test_conversion_interval_and_calibration(self):
         now = [0]
         machine = types.SimpleNamespace(ADC=FakeADC, Pin=lambda pin: pin)
-        with patch.dict(sys.modules, {"machine": machine}), patch.object(
-            time, "ticks_ms", lambda: now[0], create=True
-        ), patch.object(time, "ticks_diff", lambda a, b: a - b, create=True):
+        with patch.dict(sys.modules, {"machine": machine}), patch.object(time, "ticks_ms", lambda: now[0], create=True), patch.object(
+            time, "ticks_diff", lambda a, b: a - b, create=True
+        ):
             from voltage_monitor import VoltageMonitor
 
             monitor = VoltageMonitor()

@@ -90,10 +90,7 @@ class BusDCMotor:
         """
         if not isinstance(startup_brake, bool):
             raise ValueError("startup_brake must be bool")
-        if voltage_monitor is not None and (
-            not hasattr(voltage_monitor, "update")
-            or not hasattr(voltage_monitor, "get_voltage")
-        ):
+        if voltage_monitor is not None and (not hasattr(voltage_monitor, "update") or not hasattr(voltage_monitor, "get_voltage")):
             raise ValueError("voltage_monitor must provide update() and get_voltage()")
         if type(motor_count) is not int or not 1 <= motor_count <= 4:
             raise ValueError("Motor count must be 1..4")
@@ -103,14 +100,9 @@ class BusDCMotor:
             raise ValueError("Control period must be a positive integer")
         if not 24 <= _finite(pwm_frequency, "PWM frequency") <= 1526:
             raise ValueError("PWM frequency must be in range 24..1526 Hz")
-        if encoder_pins is not None and (
-            len(encoder_pins) != motor_count
-            or any(len(pins) != 2 for pins in encoder_pins)
-        ):
+        if encoder_pins is not None and (len(encoder_pins) != motor_count or any(len(pins) != 2 for pins in encoder_pins)):
             raise ValueError("One A/B pin pair per motor is required")
-        if pid_params is not None and (
-            encoder_pins is None or len(pid_params) != motor_count
-        ):
+        if pid_params is not None and (encoder_pins is None or len(pid_params) != motor_count):
             raise ValueError("PID parameters require matching encoder configuration")
         self.pca9685 = pca9685
         self.motor_count = motor_count
@@ -126,15 +118,8 @@ class BusDCMotor:
             if encoder_pins is not None:
                 from motor_controller import MotorController
 
-                configs = [
-                    (2 * i, 2 * i + 1, pins[0], pins[1])
-                    for i, pins in enumerate(encoder_pins)
-                ]
-                params = (
-                    pid_params
-                    if pid_params is not None
-                    else ((0.15, 0.6, 0),) * motor_count
-                )
+                configs = [(2 * i, 2 * i + 1, pins[0], pins[1]) for i, pins in enumerate(encoder_pins)]
+                params = pid_params if pid_params is not None else ((0.15, 0.6, 0),) * motor_count
                 self._controller = MotorController(
                     pca9685,
                     configs,
@@ -156,6 +141,11 @@ class BusDCMotor:
                 self.stop_all()
             except Exception:
                 pass
+            if self._controller is not None:
+                try:
+                    self._controller.deinit()
+                except Exception:
+                    pass
             raise
 
     def set_motor_speed(self, motor_id: int, speed: int, direction: int = 0) -> None:
@@ -353,9 +343,7 @@ class BusDCMotor:
         for i, rpm in enumerate(rpms, 1):
             self.set_target_rpm(i, rpm)
 
-    def set_pid(
-        self, motor_id: int, kp: float = None, ki: float = None, kd: float = None
-    ) -> None:
+    def set_pid(self, motor_id: int, kp: float = None, ki: float = None, kd: float = None) -> None:
         """在线修改指定电机增益，None 保留原值。
 
         ==================

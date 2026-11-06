@@ -43,17 +43,20 @@ MACHINE_INSTANCE_PATTERNS = [
 
 # ======================================== 功能函数 ============================================
 
+
 def strip_python_comments(code: str) -> str:
     """
     剥离Python代码中的所有注释，避免注释干扰检查
     """
     import re
+
     # 移除多行注释
     code = re.sub(r"'''[\s\S]*?'''", "", code)
     code = re.sub(r'"""[\s\S]*?"""', "", code)
     # 移除单行注释
     code = re.sub(r"#.*", "", code)
     return code.strip()
+
 
 def read_file_content(file_path: Path) -> str:
     """
@@ -65,6 +68,7 @@ def read_file_content(file_path: Path) -> str:
     except Exception as e:
         print(f"[FAIL] Error reading file {file_path}: {str(e)}")
         return ""
+
 
 def check_required_globals(content: str, file_path: Path) -> bool:
     """
@@ -142,8 +146,9 @@ def extract_section_content(content: str, marker: str) -> str:
     只匹配标题核心文字，彻底解决分隔符不一致导致的提取失败
     """
     import re
+
     # 提取标题核心文字（去掉所有=和空格）
-    target_title = re.sub(r'[=#\s]', '', marker)
+    target_title = re.sub(r"[=#\s]", "", marker)
 
     # 匹配所有分隔符行，提取标题
     lines = content.split("\n")
@@ -151,13 +156,13 @@ def extract_section_content(content: str, marker: str) -> str:
     section_end = -1
 
     for idx, line in enumerate(lines):
-        clean_line = re.sub(r'[=#\s]', '', line)
+        clean_line = re.sub(r"[=#\s]", "", line)
         # 找到目标分区
         if clean_line == target_title:
             section_start = idx + 1
             # 找到下一个分区作为结束
             for jdx in range(section_start, len(lines)):
-                next_clean = re.sub(r'[=#\s]', '', lines[jdx])
+                next_clean = re.sub(r"[=#\s]", "", lines[jdx])
                 if next_clean in ["全局变量", "初始化配置", "主程序"]:
                     section_end = jdx
                     break
@@ -245,10 +250,10 @@ def check_main_py_while_loop(content: str, file_path: Path) -> bool:
     # 🔥 模糊匹配主程序分隔符（无视=数量、空格）
     lines = content.split("\n")
     main_start_idx = -1
-    target_main = re.sub(r'[=#\s]', '', MAIN_SECTION_MARKER)
+    target_main = re.sub(r"[=#\s]", "", MAIN_SECTION_MARKER)
 
     for idx, line in enumerate(lines):
-        clean_line = re.sub(r'[=#\s]', '', line)
+        clean_line = re.sub(r"[=#\s]", "", line)
         if clean_line == target_main:
             main_start_idx = idx
             break
@@ -277,6 +282,7 @@ def check_main_py_while_loop(content: str, file_path: Path) -> bool:
 
     print(f"[PASS] {file_path}: main.py while loop location is correct")
     return True
+
 
 def check_type_hints_and_try_except(content: str, file_path: Path) -> bool:
     """
@@ -340,15 +346,42 @@ def check_method_param_validation(content: str, file_path: Path) -> bool:
                 if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and call.func.attr == "irq":
                     for keyword in call.keywords:
                         handler = keyword.value
-                        if keyword.arg == "handler" and isinstance(handler, ast.Attribute) and isinstance(handler.value, ast.Name) and handler.value.id == "self":
+                        if (
+                            keyword.arg == "handler"
+                            and isinstance(handler, ast.Attribute)
+                            and isinstance(handler.value, ast.Name)
+                            and handler.value.id == "self"
+                        ):
                             irq_handlers.add(handler.attr)
             # 遍历类中的所有方法
             for func in node.body:
                 if isinstance(func, ast.FunctionDef):
                     func_name = func.name
                     if func_name in irq_handlers:
-                        blocking = {"sleep", "sleep_ms", "sleep_us", "print", "open", "read", "write", "readfrom", "writeto", "readfrom_mem", "writeto_mem"}
-                        unsafe = any(isinstance(stmt, (ast.Raise, ast.Await, ast.Yield, ast.YieldFrom)) or (isinstance(stmt, ast.Call) and ((isinstance(stmt.func, ast.Name) and stmt.func.id in blocking) or (isinstance(stmt.func, ast.Attribute) and stmt.func.attr in blocking))) for stmt in ast.walk(func))
+                        blocking = {
+                            "sleep",
+                            "sleep_ms",
+                            "sleep_us",
+                            "print",
+                            "open",
+                            "read",
+                            "write",
+                            "readfrom",
+                            "writeto",
+                            "readfrom_mem",
+                            "writeto_mem",
+                        }
+                        unsafe = any(
+                            isinstance(stmt, (ast.Raise, ast.Await, ast.Yield, ast.YieldFrom))
+                            or (
+                                isinstance(stmt, ast.Call)
+                                and (
+                                    (isinstance(stmt.func, ast.Name) and stmt.func.id in blocking)
+                                    or (isinstance(stmt.func, ast.Attribute) and stmt.func.attr in blocking)
+                                )
+                            )
+                            for stmt in ast.walk(func)
+                        )
                         if unsafe:
                             print(f"[FAIL] {file_path}: IRQ callback {class_name}.{func_name} contains raise or blocking operation")
                             return False
@@ -482,13 +515,11 @@ def main():
         exit(1)
 
     # 批量检查所有.py文件
-    passed = True
     failed_files = []
     print(f"[INFO] Found {len(py_files)} .py files, starting check...\n")
     for file_path in py_files:
         print(f"	[DOING] Checking file:{file_path}")
         if not check_file(file_path):
-            passed = False
             failed_files.append(str(file_path))
         print("-" * 80)  # 分隔线
 
@@ -498,7 +529,7 @@ def main():
     print(f"Passed:{len(py_files) - len(failed_files)}")
     print(f"Failed:{len(failed_files)}")
     if failed_files:
-        print(f"\n[FAIL] Files with failed checks:")
+        print("\n[FAIL] Files with failed checks:")
         for f in failed_files:
             print(f"  - {f}")
         exit(1)
