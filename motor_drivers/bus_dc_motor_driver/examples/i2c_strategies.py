@@ -125,6 +125,16 @@ class BenchWriter:
         if error is not None:
             raise error
 
+    def confirmed_off(self) -> None:
+        """One normal-stop burst plus exact readback; failures never permit reverse."""
+        self.pending = False
+        self.cache.clear()
+        self.pca.i2c.writeto_mem(self.pca.address, 6, self.off)
+        if self.pca.i2c.readfrom_mem(self.pca.address, 6, 32) != self.off:
+            raise RuntimeError("Normal off-frame readback mismatch")
+        for channel in range(8):
+            self.levels[channel] = self.committed[channel] = 0
+
     def deinit(self) -> None:
         try:
             self.stop()

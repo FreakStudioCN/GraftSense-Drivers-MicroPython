@@ -30,7 +30,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--profile",
-        choices=("performance_profile", "tuning_profile", "realtime_audit", "realtime_audit_light", "i2c_benchmark"),
+        choices=("performance_profile", "tuning_profile", "realtime_audit", "realtime_audit_light", "i2c_benchmark", "switch_benchmark"),
         default="performance_profile",
     )
     parser.add_argument("--reuse", action="store_true", help="reuse already verified device libraries; upload experiment scripts only")
@@ -116,6 +116,8 @@ def main():
                         "realtime_audit_light.py",
                         "i2c_strategies.py",
                         "i2c_benchmark.py",
+                        "direction_switch.py",
+                        "switch_benchmark.py",
                     )
                 ]
                 for source in sources:
@@ -134,7 +136,7 @@ def main():
                 if cancelled.wait(15):
                     raise KeyboardInterrupt("Plot closed before motion")
                 code = "import sys\n"
-                code += "for n in ('i2c_strategies','i2c_benchmark','board_setup','performance_profile','tuning_profile','realtime_audit','realtime_audit_light','timing_audit','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n if n in globals(): del globals()[n]\n"
+                code += "for n in ('switch_benchmark','direction_switch','i2c_strategies','i2c_benchmark','board_setup','performance_profile','tuning_profile','realtime_audit','realtime_audit_light','timing_audit','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n if n in globals(): del globals()[n]\n"
                 code += "import gc; gc.collect()\n"
                 code += f"import {args.profile}\n{args.profile}.run(True,{args.seconds})\n"
                 active_transport["running"] = transport
@@ -258,7 +260,7 @@ def main():
                         )
                     )
                     if bus_configs:
-                        title.set_text(f"I2C case {int(phase)}/7 | {bus_configs[int(phase)]} | fixed per-motor PI")
+                        title.set_text(f"I2C case {int(phase)} | {bus_configs[int(phase)]} | fixed per-motor PI")
                     for i, (target, actual) in enumerate(lines):
                         target.set_data(a[:, 2] / 1000, a[:, 3 + i])
                         actual.set_data(a[:, 2] / 1000, a[:, 7 + i])

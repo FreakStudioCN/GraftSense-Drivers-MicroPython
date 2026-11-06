@@ -334,7 +334,7 @@ python motor_drivers/bus_dc_motor_driver/tests/validate_package.py
 python -m compileall -q motor_drivers/bus_dc_motor_driver/code motor_drivers/bus_dc_motor_driver/examples
 ```
 
-本包当前 53 项 PC 回归（含驱动、指标算法、计时工具和检查器）覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
+本包当前 63 项 PC 回归（含驱动、指标算法、计时工具和检查器）覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
 
 examples/ 下的单路、四路及兼容验证示例需将 board_setup.py 也上传 /lib/。所有新增示例默认不启动，先按实物配置并显式启用，每次只运行一个入口。其他平台先更换接线，电压采样需支持相应 ADC API。
 
@@ -386,3 +386,7 @@ python motor_drivers/bus_dc_motor_driver/tests/recompute_acceptance.py --csv mot
 ## I2C三项优化实测
 
 见[I2C优化对比](docs/I2C_OPTIMIZATION.md)：预分配缓冲单独使用没有明显收益，400kHz批量写入的改善较大，1MHz加批量进一步改善。正式运行库默认API和总线频率未改，六种组合及重复基线通过独立实验入口重跑。
+
+## 换向长尾分段实测
+
+见[换向分段计时](docs/SWITCH_TIMING.md)：软件禁用PID与硬件关断分开，正常关断16次写变成1次全关帧，成功回读后才允许反向；异常与急停保留8通道立即尽力关闭。8组四路实机对比记录每项最大值的设备时间与阶段，原始日志可用summarize_switch.py重新生成JSON。400kHz换向31.599→17.697ms，1MHz28.172→15.812ms；400kHz起步仍偶尔超过20ms。均为独立实验入口，默认运行库行为未改。
