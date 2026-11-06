@@ -1,7 +1,7 @@
 """Known responses validate sign handling, settling hold, and overshoot."""
 
 import unittest
-from pid_response_metrics import response_metrics
+from pid_response_metrics import response_metrics, last_reference_segment
 
 
 class ResponseMetricsTests(unittest.TestCase):
@@ -22,6 +22,16 @@ class ResponseMetricsTests(unittest.TestCase):
     def test_a_late_excursion_invalidates_settling(self):
         result = response_metrics(self.rows(30, [30, 30, 30, 30, 35]), 0)
         self.assertIsNone(result["settling_s"])
+
+    def test_latest_reference_segment_handles_reversal_and_zero(self):
+        forward = self.rows(30, [0, 15, 30])
+        reverse = self.rows(-30, [0, -15, -30, -30, -30, -30])
+        for row in reverse:
+            row[2] += 2000
+        selected = last_reference_segment(forward + reverse, 0)
+        self.assertEqual(selected, reverse)
+        self.assertEqual(response_metrics(selected, 0)["overshoot_pct"], 0)
+        self.assertEqual(last_reference_segment(forward + self.rows(0, [0]), 0), [])
 
     def test_short_record_does_not_claim_settling(self):
         self.assertIsNone(response_metrics(self.rows(30, [30, 30]), 0)["settling_s"])

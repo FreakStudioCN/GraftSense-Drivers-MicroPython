@@ -32,3 +32,16 @@ def response_metrics(rows, motor):
         std_tail_rpm=round(pstdev(tail), 3),
         band_rpm=band,
     )
+
+
+def last_reference_segment(rows, motor):
+    """Select the latest contiguous constant-reference segment for step metrics."""
+    if not rows:
+        return []
+    target = rows[-1][3 + motor]
+    if not target:
+        return []
+    start = len(rows) - 1
+    while start > 0 and rows[start - 1][3 + motor] == target:
+        start -= 1
+    return rows[start:]

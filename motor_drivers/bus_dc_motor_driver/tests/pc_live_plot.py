@@ -18,7 +18,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
-from pid_response_metrics import response_metrics
+from pid_response_metrics import response_metrics, last_reference_segment
 from host_cleanup import capture_cleanup, ensure_lib
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +29,9 @@ COLUMNS += [f"pwm{i}" for i in range(1, 5)] + ["voltage", "loop_us", "i2c_us", "
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--profile", choices=("performance_profile", "tuning_profile", "realtime_audit", "realtime_audit_light"), default="performance_profile"
+        "--profile",
+        choices=("performance_profile", "tuning_profile", "realtime_audit", "realtime_audit_light", "i2c_benchmark"),
+        default="performance_profile",
     )
     parser.add_argument("--reuse", action="store_true", help="reuse already verified device libraries; upload experiment scripts only")
     parser.add_argument("--port", default="COM8")
@@ -52,6 +54,7 @@ def main():
     configs = {}
     motor_configs = {}
     startup_i = {}
+    bus_configs = {}
     active_transport = {}
 
     def worker_body():
@@ -74,6 +77,9 @@ def main():
                         if len(values) == len(COLUMNS):
                             events.put(values)
                     elif text:
+                        if text.startswith("BUS_CONFIG,"):
+                            fields = text.split(",")
+                            bus_configs[int(fields[1])] = dict(frequency=int(fields[2]), mode=fields[3])
                         if text.startswith("STARTUP_I,"):
                             fields = text.split(",")
                             startup_i[int(fields[1])] = float(fields[2])
@@ -108,6 +114,8 @@ def main():
                         "timing_audit.py",
                         "realtime_audit.py",
                         "realtime_audit_light.py",
+                        "i2c_strategies.py",
+                        "i2c_benchmark.py",
                     )
                 ]
                 for source in sources:
@@ -126,7 +134,7 @@ def main():
                 if cancelled.wait(15):
                     raise KeyboardInterrupt("Plot closed before motion")
                 code = "import sys\n"
-                code += "for n in ('board_setup','performance_profile','tuning_profile','realtime_audit','realtime_audit_light','timing_audit','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n if n in globals(): del globals()[n]\n"
+                code += "for n in ('i2c_strategies','i2c_benchmark','board_setup','performance_profile','tuning_profile','realtime_audit','realtime_audit_light','timing_audit','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n if n in globals(): del globals()[n]\n"
                 code += "import gc; gc.collect()\n"
                 code += f"import {args.profile}\n{args.profile}.run(True,{args.seconds})\n"
                 active_transport["running"] = transport
@@ -249,6 +257,8 @@ def main():
                             else f"PI tuning: phase {int(phase)} | Kp,Ki,Kd,window = {configs.get(int(phase))}"
                         )
                     )
+                    if bus_configs:
+                        title.set_text(f"I2C case {int(phase)}/7 | {bus_configs[int(phase)]} | fixed per-motor PI")
                     for i, (target, actual) in enumerate(lines):
                         target.set_data(a[:, 2] / 1000, a[:, 3 + i])
                         actual.set_data(a[:, 2] / 1000, a[:, 7 + i])
@@ -258,7 +268,7 @@ def main():
                             else ("Measured (80ms window)" if phase == 5 else "Measured (raw)")
                         )
                         axes.flat[i].get_legend().get_texts()[1].set_text(actual.get_label())
-                        m = response_metrics(selected, i)
+                        m = response_metrics(last_reference_segment(selected, i), i)
                         if m:
                             steady = f"{m['settling_s']:.2f}s" if m["settling_s"] is not None else "not settled in +/-5% band"
                             labels[i].set_text(
@@ -270,12 +280,15 @@ def main():
                                 )
                             )
                     costs = np.mean(a[-min(50, len(a)) :, 16:20], axis=0) / 1000
-                    info.set_text(
-                        f"USB serial requested: {args.baud} | I2C 400 kHz | Gains: see phase title / panel configuration\n"
-                        f"4-loop update {costs[0]:.3f} ms | I2C {costs[1]:.3f} ms | PID {costs[2]:.3f} ms | previous serial print {costs[3]:.3f} ms\n"
+                    feedback_note = (
                         "Phase 5 uses an explicit 80ms speed window; phases 1-4 use raw feedback. Timing includes profiling overhead."
                         if not configs
-                        else "Tuning uses the explicitly labelled speed window in every phase. No derivative filtering is hidden."
+                        else "Tuning uses the explicitly labelled speed window in every phase."
+                    )
+                    info.set_text(
+                        f"USB serial requested: {args.baud} | I2C: see case title | Gains: see panel configuration\n"
+                        f"4-loop update {costs[0]:.3f} ms | I2C {costs[1]:.3f} ms | PID {costs[2]:.3f} ms | previous serial print {costs[3]:.3f} ms\n"
+                        + feedback_note
                     )
                 fig.canvas.draw()
                 w, h = fig.canvas.get_width_height(physical=True)
@@ -290,7 +303,9 @@ def main():
         for phase in sorted({int(r[0]) for r in rows}):
             selected = [r for r in rows if r[0] == phase]
             a = np.asarray(selected)
-            summary[phase] = dict(period_ms=a[-1, 1], samples=len(a), motors=[response_metrics(selected, i) for i in range(4)])
+            summary[phase] = dict(
+                period_ms=a[-1, 1], samples=len(a), motors=[response_metrics(last_reference_segment(selected, i), i) for i in range(4)]
+            )
             summary[phase]["timing_ms"] = {
                 name: dict(mean=float(np.mean(a[:, col]) / 1000), p95=float(np.percentile(a[:, col], 95) / 1000), max=float(np.max(a[:, col]) / 1000))
                 for name, col in zip(COLUMNS[16:20], range(16, 20))
@@ -315,7 +330,16 @@ def main():
                 )
         (args.out / "summary.json").write_text(
             json.dumps(
-                dict(phases=summary, configs=configs, motor_configs=motor_configs, startup_i_percent=startup_i, errors=errors, video_frames=count),
+                dict(
+                    phases=summary,
+                    configs=configs,
+                    bus_configs=bus_configs,
+                    response_metrics_scope="latest_constant_reference_segment",
+                    motor_configs=motor_configs,
+                    startup_i_percent=startup_i,
+                    errors=errors,
+                    video_frames=count,
+                ),
                 indent=2,
             ),
             encoding="utf-8",

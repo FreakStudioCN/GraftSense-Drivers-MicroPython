@@ -334,7 +334,7 @@ python motor_drivers/bus_dc_motor_driver/tests/validate_package.py
 python -m compileall -q motor_drivers/bus_dc_motor_driver/code motor_drivers/bus_dc_motor_driver/examples
 ```
 
-本包当前 47 项 PC 回归（含驱动、指标算法、计时工具和检查器）覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
+本包当前 53 项 PC 回归（含驱动、指标算法、计时工具和检查器）覆盖兼容接口、独立闭环、在线参数、模式隔离、I2C 故障停止、电压换算、频率寄存器与独立 PID 数学自检，使用模拟硬件，不代表板测。
 
 examples/ 下的单路、四路及兼容验证示例需将 board_setup.py 也上传 /lib/。所有新增示例默认不启动，先按实物配置并显式启用，每次只运行一个入口。其他平台先更换接线，电压采样需支持相应 ADC API。
 
@@ -382,3 +382,7 @@ python motor_drivers/bus_dc_motor_driver/tests/recompute_acceptance.py --csv mot
 ```
 
 运行库与独立实验工具的检查边界见 [VALIDATION.md](docs/VALIDATION.md)。
+
+## I2C三项优化实测
+
+见[I2C优化对比](docs/I2C_OPTIMIZATION.md)：预分配缓冲单独使用没有明显收益，400kHz批量写入的改善较大，1MHz加批量进一步改善。正式运行库默认API和总线频率未改，六种组合及重复基线通过独立实验入口重跑。
