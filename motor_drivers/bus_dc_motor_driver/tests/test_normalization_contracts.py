@@ -329,6 +329,30 @@ class Contracts(unittest.TestCase):
             self.assertIs(result.exception, failure)
             self.assertEqual(totals, [58])
 
+    def test_tuning_rejects_bad_windows_and_targets_before_hardware(self):
+        module = types.ModuleType("board_setup")
+        module.__dict__.update(self.load_board_setup())
+        with patch.dict(sys.modules, {"board_setup": module}):
+            env = runpy.run_path(str(CODE.parent / "examples/tuning_profile.py"))
+        for window in (0, 17, 320):
+            with self.assertRaises(ValueError):
+                env["run"](True, 10, ((0.35, 0.3, 0, window),), ((30, 30, 30, 30),))
+        with self.assertRaises(ValueError):
+            env["run"](True, 10, ((0.35, 0.3, 0, 160),), ((30, 30, 30, 100),))
+        self.assertEqual(I2C.instances, [])
+
+    def test_startup_integral_is_signed_bounded_and_handles_zero_ki(self):
+        module = types.ModuleType("board_setup")
+        module.__dict__.update(self.load_board_setup())
+        with patch.dict(sys.modules, {"board_setup": module}):
+            env = runpy.run_path(str(CODE.parent / "examples/tuning_profile.py"))
+        pids = [types.SimpleNamespace(ki=ki, integral_min=-20, integral_max=20, integral=0) for ki in (0.5, 0.5, 0, 0.1)]
+        controller = types.SimpleNamespace(_pids=pids)
+        env["prime_integral"](controller, (30, -30, 30, 30))
+        self.assertEqual([pid.integral for pid in pids], [16, -16, 0, 20])
+        with self.assertRaises(ValueError):
+            env["prime_integral"](controller, (30,) * 4, 11)
+
     def test_armed_main_pid_releases_owned_resources(self):
         with contextlib.redirect_stdout(io.StringIO()):
             env = runpy.run_path(str(CODE / "main.py"), run_name="contract_test")

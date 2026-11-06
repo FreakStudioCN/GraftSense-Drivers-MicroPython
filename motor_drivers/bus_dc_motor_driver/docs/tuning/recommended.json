@@ -1,0 +1,43 @@
+{
+  "period_ms": 20,
+  "output_limit": [
+    -50,
+    50
+  ],
+  "integral_limit": [
+    -150,
+    150
+  ],
+  "startup_i_percent": 8,
+  "motors": [
+    {
+      "id": 1,
+      "kp": 0.25,
+      "ki": 0.3,
+      "kd": 0,
+      "window_ms": 160
+    },
+    {
+      "id": 2,
+      "kp": 0.25,
+      "ki": 0.25,
+      "kd": 0,
+      "window_ms": 160
+    },
+    {
+      "id": 3,
+      "kp": 0.3,
+      "ki": 0.25,
+      "kd": 0,
+      "window_ms": 200
+    },
+    {
+      "id": 4,
+      "kp": 0.15,
+      "ki": 0.2,
+      "kd": 0,
+      "window_ms": 200
+    }
+  ],
+  "scope": "this unloaded bench, feedback windows explicit"
+}

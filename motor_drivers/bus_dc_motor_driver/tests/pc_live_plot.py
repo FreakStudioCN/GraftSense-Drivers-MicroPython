@@ -27,6 +27,8 @@ COLUMNS += [f"pwm{i}" for i in range(1, 5)] + ["voltage", "loop_us", "i2c_us", "
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--profile", choices=("performance_profile", "tuning_profile"), default="performance_profile")
+    parser.add_argument("--reuse", action="store_true", help="reuse already verified device libraries; upload experiment scripts only")
     parser.add_argument("--port", default="COM8")
     parser.add_argument("--baud", type=int, default=921600)
     parser.add_argument("--seconds", type=int, default=10)
@@ -44,6 +46,9 @@ def main():
     errors = []
     rows = []
     device_stats = {}
+    configs = {}
+    motor_configs = {}
+    startup_i = {}
 
     def worker():
         from mpremote.transport_serial import SerialTransport
@@ -65,6 +70,15 @@ def main():
                         if len(values) == len(COLUMNS):
                             events.put(values)
                     elif text:
+                        if text.startswith("STARTUP_I,"):
+                            fields = text.split(",")
+                            startup_i[int(fields[1])] = float(fields[2])
+                        if text.startswith("MOTOR_CONFIG,"):
+                            config = list(map(float, text.split(",")[1:]))
+                            motor_configs.setdefault(int(config[0]), {})[int(config[1])] = config[2:]
+                        if text.startswith("CONFIG,"):
+                            config = list(map(float, text.split(",")[1:]))
+                            configs[int(config[0])] = config[1:]
                         if text.startswith("TIMING,"):
                             data = list(map(int, text.split(",")[1:]))
                             device_stats[data[0]] = data[1:]
@@ -77,13 +91,18 @@ def main():
                 transport.enter_raw_repl(soft_reset=False)
                 backup = args.out / "device-backup"
                 backup.mkdir()
-                sources = list((ROOT / "code").glob("*.py")) + [ROOT / "examples" / n for n in ("board_setup.py", "performance_profile.py")]
+                uploaded = args.out / "uploaded-source"
+                uploaded.mkdir()
+                sources = ([] if args.reuse else list((ROOT / "code").glob("*.py"))) + [
+                    ROOT / "examples" / n for n in ("board_setup.py", "performance_profile.py", "tuning_profile.py")
+                ]
                 for source in sources:
                     if source.name == "main.py":
                         continue
                     dest = "/lib/" + source.name
                     if transport.fs_exists(dest):
                         (backup / source.name).write_bytes(transport.fs_readfile(dest))
+                    (uploaded / source.name).write_bytes(source.read_bytes())
                     transport.fs_writefile(dest, source.read_bytes())
                     if transport.fs_readfile(dest) != source.read_bytes():
                         raise RuntimeError("Upload verify failed: " + source.name)
@@ -92,8 +111,8 @@ def main():
                 if cancelled.is_set():
                     raise KeyboardInterrupt("Plot closed before motion")
                 code = "import sys\n"
-                code += "for n in ('board_setup','performance_profile','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n"
-                code += f"import performance_profile\nperformance_profile.run(True,{args.seconds})\n"
+                code += "for n in ('board_setup','performance_profile','tuning_profile','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n"
+                code += f"import {args.profile}\n{args.profile}.run(True,{args.seconds})\n"
                 _, error = transport.exec_raw(code, timeout=180, data_consumer=consume)
                 if error:
                     raise RuntimeError(error.decode(errors="replace"))
@@ -188,23 +207,42 @@ def main():
                     if phase == 5
                     else ("cached repeated PWM writes" if phase == 4 else "original PWM writes")
                 )
-                title.set_text(f"Phase {int(phase)}/5 | {a[-1, 1]:.0f} ms control | {mode}")
+                title.set_text(
+                    f"Phase {int(phase)}/5 | {a[-1, 1]:.0f} ms control | {mode}"
+                    if not configs
+                    else (
+                        f"Per-motor PI tuning: phase {int(phase)} | see gains in each panel"
+                        if motor_configs
+                        else f"PI tuning: phase {int(phase)} | Kp,Ki,Kd,window = {configs.get(int(phase))}"
+                    )
+                )
                 for i, (target, actual) in enumerate(lines):
                     target.set_data(a[:, 2] / 1000, a[:, 3 + i])
                     actual.set_data(a[:, 2] / 1000, a[:, 7 + i])
-                    actual.set_label("Measured (80ms window)" if phase == 5 else "Measured (raw)")
+                    actual.set_label(
+                        f"Measured ({motor_configs.get(int(phase), {}).get(i + 1, configs[int(phase)])[3]:.0f}ms window)"
+                        if configs
+                        else ("Measured (80ms window)" if phase == 5 else "Measured (raw)")
+                    )
                     axes.flat[i].get_legend().get_texts()[1].set_text(actual.get_label())
                     m = response_metrics(selected, i)
                     if m:
                         steady = f"{m['settling_s']:.2f}s" if m["settling_s"] is not None else "not settled in +/-5% band"
                         labels[i].set_text(
-                            f"Observed overshoot: {m['overshoot_pct']:.1f}%\nSettling: {steady}\nLive estimate; final result uses full record"
+                            f"Observed overshoot: {m['overshoot_pct']:.1f}%\nSettling: {steady}\n"
+                            + (
+                                f"P/I/D/window: {motor_configs[int(phase)][i + 1]}"
+                                if motor_configs
+                                else "Live estimate; final result uses full record"
+                            )
                         )
                 costs = np.mean(a[-min(50, len(a)) :, 16:20], axis=0) / 1000
                 info.set_text(
-                    f"USB serial requested: {args.baud} | I2C 400 kHz | PID gains 0.15 / 0.60 / 0\n"
+                    f"USB serial requested: {args.baud} | I2C 400 kHz | Gains: see phase title / panel configuration\n"
                     f"4-loop update {costs[0]:.3f} ms | I2C {costs[1]:.3f} ms | PID {costs[2]:.3f} ms | previous serial print {costs[3]:.3f} ms\n"
                     "Phase 5 uses an explicit 80ms speed window; phases 1-4 use raw feedback. Timing includes profiling overhead."
+                    if not configs
+                    else "Tuning uses the explicitly labelled speed window in every phase. No derivative filtering is hidden."
                 )
             fig.canvas.draw()
             w, h = fig.canvas.get_width_height(physical=True)
@@ -245,7 +283,13 @@ def main():
                 print_mean_ms=st[10] / max(1, st[12]) / 1000,
                 print_max_ms=st[11] / 1000,
             )
-    (args.out / "summary.json").write_text(json.dumps(dict(phases=summary, errors=errors, video_frames=count), indent=2), encoding="utf-8")
+    (args.out / "summary.json").write_text(
+        json.dumps(
+            dict(phases=summary, configs=configs, motor_configs=motor_configs, startup_i_percent=startup_i, errors=errors, video_frames=count),
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     fig.savefig(args.out / "last-phase.png")
     print(json.dumps(summary), flush=True)
     plt.close(fig)

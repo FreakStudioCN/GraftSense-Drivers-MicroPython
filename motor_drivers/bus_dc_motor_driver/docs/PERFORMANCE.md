@@ -60,3 +60,7 @@ live-plot-edited.mp4为真实实时图窗采集的精简回放，不是事后模
 `python motor_drivers/bus_dc_motor_driver/tests/pc_live_plot.py --port COM8 --baud 921600 --run --seconds 10 --out 新的输出目录`
 
 这会备份并上传当前包到板上/lib，运行有限时长测试，退出时关闭电机。默认不改设备main.py。按需改端口。输出CSV、JSON、串口日志、实时曲线录屏和截图。关图窗会请求停止；试验包括80ms窗口这一档，界面会明示。
+
+## 后续细调结果
+
+已继续按电机分别细调并复测，见[细调记录](TUNING.md)。本页保留细调前的性能对比，勿当作最新调参结果。
