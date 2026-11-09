@@ -1,233 +1,770 @@
-# Python env   : MicroPython v1.23.0
+# Python env   : MicroPython v1.29.0 / ESP32-C3
 # -*- coding: utf-8 -*-
-# @Time    : 2025/1/16 上午11:14
+# @Time    : 2026/11/06
 # @Author  : 李清水
 # @File    : bus_dc_motor.py
-# @Description : 总线直流电机驱动模块，使用PCA9685芯片控制电机驱动芯片
+# @Description : 兼容原接口的四路电机 PWM、编码器与 PID 入口
 # @License : MIT
 
-__version__ = "0.1.0"
+__version__ = "1.1.0"
 __author__ = "李清水"
 __license__ = "MIT"
-__platform__ = "MicroPython v1.23"
+__platform__ = "MicroPython v1.29.0 / ESP32-C3"
 
-# ======================================== 导入相关模块 =========================================
+# 原库来源：leezisheng/GraftSense-Drivers-MicroPython
+# 原库基线：59d748fb2529b73c302d73bb5fcd1f358b4151ff
 
-# 导入PCA9685模块
+# ======================================== 导入相关模块 ========================================
+import math
+import time
 from pca9685 import PCA9685
 
-# ======================================== 全局变量 ============================================
 
-# ======================================== 功能函数 ============================================
+# ======================================== 全局变量 ========================================
+# ======================================== 功能函数 ========================================
+def _finite(value: float, name: str) -> float:
+    if type(value) not in (int, float) or not math.isfinite(value):
+        raise ValueError(name + " must be finite")
+    return value
 
-# ======================================== 自定义类 ============================================
 
-
-# 自定义总线直流电机驱动类
+# ======================================== 自定义类 ========================================
 class BusDCMotor:
-    """
-    BusDCMotor类，用于控制直流电机的正转、反转和调速。
-
-    该类通过与PCA9685的接口交互，使用PWM信号控制四个电机的速度和转向。
-
+    """原库兼容入口及可选闭环控制。
     Attributes:
-        pca9685 (PCA9685): 用于控制PWM信号的PCA9685实例。
-        motor_count (int): 电机数量，这里假设最多控制4个电机。
-
+        pca9685、motor_count：共享PWM驱动和电机数。
     Methods:
-        set_motor_speed(motor_id: int, speed: int, direction: int = 0) -> None:
-            设置指定编号电机的速度和转向。
-        stop_motor(motor_id: int) -> None:
-            停止指定编号电机的转动。
-        break_motor(motor_id: int) -> None:
-            快速刹车，停止指定编号电机。
-
-        stop_motor 方法通过设置PWM为0平稳停止电机，break_motor 方法通过设置PWM为最大值快速刹车电机。
-
-    =============================================
-
-    BusDCMotor class for controlling the direction and speed of DC motors.
-
-    This class communicates with the PCA9685 to control the speed and direction of up to four motors via PWM signals.
-
+        set_motor_speed、set_target_rpm、update、stop_all、get_faults、clear_faults、deinit。
+    Notes:
+        设置目标不启动输出；每路仅一种输出模式；调用方持有总线。
+    ==================
+    Backward-compatible PWM facade with optional encoder PID.
     Attributes:
-        pca9685 (PCA9685): The PCA9685 instance for controlling PWM signals.
-        motor_count (int): Number of motors to control, assuming up to 4 motors.
-
+        pca9685, motor_count: borrowed PWM driver and motor count.
     Methods:
-        set_motor_speed(motor_id: int, speed: int, direction: int = 0) -> None:
-            Set the speed and direction of the specified motor.
-        stop_motor(motor_id: int) -> None:
-            Stop the specified motor.
-        break_motor(motor_id: int) -> None:
-            Brake the specified motor.
-
-        The stop_motor method smoothly stops the motor by setting PWM to 0, while the break_motor method quickly brakes the motor by setting PWM to the maximum value.
+        set_motor_speed, set_target_rpm, update, stop_all, get_faults, clear_faults, deinit.
+    Notes:
+        Targets do not start output; one mode per motor; the caller owns the bus.
     """
 
-    def __init__(self, pca9685: PCA9685, motor_count: int = 4):
-        """
-        构造函数，初始化电机控制类。
+    def __init__(
+        self,
+        pca9685: PCA9685,
+        motor_count: int = 4,
+        *,
+        encoder_pins: object = None,
+        pid_params: object = None,
+        voltage_monitor: object = None,
+        ppr: int = 13,
+        gear_ratio: float = 20,
+        control_period_ms: int = 100,
+        output_limit: tuple = (-100, 100),
+        integral_limit: tuple = (-50, 50),
+        startup_brake: bool = True,
+        pwm_frequency: float = 1000,
+        feedback_protection: object = None,
+    ) -> None:
+        """校验配置并创建实例。
+
+        ==================
+        Validate configuration and initialize the instance.
 
         Args:
-            pca9685 (PCA9685): PCA9685实例，用于控制PWM信号。
-            motor_count (int): 需要控制的电机数量。默认值为4个电机。
+            pca9685: 调用方提供的 PCA9685 实例 / Caller-owned PCA9685.
+            motor_count: 电机数量 1..4 / Number of motors, 1..4.
+            encoder_pins: 按 ID 排列的 GPIO A/B 对；None 禁用反馈 / Pin pairs, or None.
+            pid_params: 按 ID 排列的 (Kp, Ki, Kd) / Gain triples in motor-ID order.
+            voltage_monitor: 电压监测实例或 None；本类不拥有 ADC / Borrowed monitor or None.
+            ppr: A 相上升沿计数时电机轴每圈脉冲数 / A-rising counts per motor revolution.
+            gear_ratio: 电机轴到输出轴减速比 / Motor-to-output reduction ratio.
+            control_period_ms: 两次闭环更新最小间隔 ms / Minimum loop interval in ms.
+            output_limit: 输出下限、上限，PWM 百分比 / Output bounds in PWM percent.
+            integral_limit: 积分状态下限、上限；尚未乘 Ki / Integral-state bounds before Ki.
+            startup_brake: True 保留原库八通道全高刹车 / Legacy eight-channel brake if True.
+            pwm_frequency: 整片共用 PWM 频率，24..1526 Hz / Shared chip PWM frequency in Hz.
+            feedback_protection: 编码器模式默认保护，dict配置或False禁用 / Default encoder protection, configuration dict, or False.
+
+        Returns:
+            None：无返回值 / No return value.
 
         Raises:
-            ValueError: 如果电机数量超出范围（1-4）或传入的pca9685不是PCA9685实例。
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
-        ============================================
-
-        Constructor to initialize the motor control class.
-
-        Args:
-            pca9685 (PCA9685): PCA9685 instance to control PWM signals.
-            motor_count (int): Number of motors to control. Default is 4 motors.
-
-        Raise:
-            ValueError: If motor count is out of range (1-4) or pca9685 is not an instance of PCA9685.
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
-        # 电机数量不可能大于4个
-        if motor_count > 4 or motor_count < 1:
-            raise ValueError(f"Invalid motor_count: {motor_count}. Motor count must be between 1 and 4.")
-
-        # 判断pca9685是否为PCA9685实例
+        if not isinstance(startup_brake, bool):
+            raise ValueError("startup_brake must be bool")
+        if voltage_monitor is not None and (not hasattr(voltage_monitor, "update") or not hasattr(voltage_monitor, "get_voltage")):
+            raise ValueError("voltage_monitor must provide update() and get_voltage()")
+        if type(motor_count) is not int or not 1 <= motor_count <= 4:
+            raise ValueError("Motor count must be 1..4")
         if not isinstance(pca9685, PCA9685):
-            raise ValueError("Invalid pca9685. pca9685 must be an instance of PCA9685.")
-
+            raise ValueError("pca9685 must be a PCA9685 instance")
+        if type(control_period_ms) is not int or control_period_ms < 1:
+            raise ValueError("Control period must be a positive integer")
+        if not 24 <= _finite(pwm_frequency, "PWM frequency") <= 1526:
+            raise ValueError("PWM frequency must be in range 24..1526 Hz")
+        if encoder_pins is not None and (len(encoder_pins) != motor_count or any(len(pins) != 2 for pins in encoder_pins)):
+            raise ValueError("One A/B pin pair per motor is required")
+        if pid_params is not None and (encoder_pins is None or len(pid_params) != motor_count):
+            raise ValueError("PID parameters require matching encoder configuration")
+        if feedback_protection is not None and type(feedback_protection) is not bool and not isinstance(feedback_protection, dict):
+            raise ValueError("feedback_protection must be a dict, bool or None")
         self.pca9685 = pca9685
         self.motor_count = motor_count
+        self._controller = None
+        self._voltage = voltage_monitor
+        self._modes = ["stopped"] * motor_count
+        self._pwms = [0.0] * motor_count
+        self._period = control_period_ms
+        self._last_update = time.ticks_ms()
+        try:
+            # 保留原库整片频率设置，构造器不能与舵机频率独立共用。
+            self.pca9685.freq(pwm_frequency)
+            if encoder_pins is not None:
+                from motor_controller import MotorController
 
-        # 设定PWM信号频率为1000Hz
-        self.pca9685.freq(1000)
-        # 设定pca9685实例的8个PWM引脚占空比为4095，即刹车
-        for i in range(8):
-            self.pca9685.duty(i, 4095)
+                configs = [(2 * i, 2 * i + 1, pins[0], pins[1]) for i, pins in enumerate(encoder_pins)]
+                params = pid_params if pid_params is not None else ((0.15, 0.6, 0),) * motor_count
+                self._controller = MotorController(
+                    pca9685,
+                    configs,
+                    params,
+                    ppr=ppr,
+                    gear_ratio=gear_ratio,
+                    output_limit=output_limit,
+                    integral_limit=integral_limit,
+                    feedback_protection=feedback_protection,
+                )
+            if startup_brake:
+                # 原构造器即使 motor_count 小于四，也会将全部八通道置高。
+                for channel in range(8):
+                    self.pca9685.duty(channel, 4095)
+                self._modes = ["brake"] * motor_count
+            else:
+                self.stop_all()
+        except BaseException:
+            try:
+                self.stop_all()
+            except Exception:
+                pass
+            if self._controller is not None:
+                try:
+                    self._controller.deinit()
+                except Exception:
+                    pass
+            raise
 
     def set_motor_speed(self, motor_id: int, speed: int, direction: int = 0) -> None:
-        """
-        设置指定编号电机的速度和转向。
+        """按旧接口设置 PWM 原值与方向，并关闭该路 PID。
 
-        根据电机编号和方向，调整对应PWM引脚的占空比，以控制电机的转动方向和速度。
-
-        Args:
-            motor_id (int): 电机的编号（1至4）。
-            speed (int): 电机的速度，占空比范围为1900到4095。
-                         在5V供电的PWM控制芯片中，速度设置为1900时，PWM通道输出约为2.3V。
-                         大多数电机驱动芯片的逻辑高电平约为2.2V，因此将速度设置为1900可以确保PWM信号满足电机驱动芯片的输入要求。
-            direction (int, optional): 电机转向，0表示前进，1表示后退。默认为0（前进）。
-
-        Raises:
-            ValueError: 如果电机编号超出范围（1-4）或者速度值超出范围（1900-4095）。
-
-        =============================================
-
-        Set the speed and direction of the specified motor.
-
-        Adjust the PWM duty cycle of the corresponding pins based on motor ID and direction to control the motor's rotation direction and speed.
+        ==================
+        Apply legacy raw PWM and direction; disable that motor PID.
 
         Args:
-            motor_id (int): Motor ID (1 to 4).
-            speed (int): Motor speed, PWM duty cycle range from 1900 to 4095.
-                         In a PWM control chip with 5V supply, a speed of 1900 corresponds to a PWM channel output of about 2.3V.
-                         Most motor driver chips have a logic high voltage of about 2.2V, so setting the speed to 1900 ensures that the PWM signal meets the input requirements of the motor driver chip.
-            direction (int, optional): Motor direction, 0 for forward and 1 for backward. Default is 0 (forward).
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
+            speed: 旧接口 PWM 原值 1900..4095，非 RPM / Legacy raw PWM value, not RPM.
+            direction: 0 正转、1 反转 / 0 forward, 1 reverse.
+
+        Returns:
+            None：无返回值 / No return value.
 
         Raises:
-            ValueError: If motor ID is out of range (1-4) or speed is out of range (1900-4095).
-        """
-        if motor_id < 1 or motor_id > self.motor_count:
-            raise ValueError(f"Invalid motor_id: {motor_id}. Motor ID must be between 1 and {self.motor_count}.")
+            RuntimeError：保护故障锁存，须显式清除 / Protection fault is latched; explicit clearing is required.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        i = self._index(motor_id)
+        _finite(speed, "speed")
         if not 1900 <= speed <= 4095:
-            raise ValueError(f"Invalid speed: {speed}. Speed must be between 1900 and 4095.")
-
-        # 根据电机编号选择对应的PWM引脚
-        pwm_index = (motor_id - 1) * 2
-
-        # 设置前进（direction = 0）或后退（direction = 1）的方向
-        if direction == 0:
-            # 控制前进，FI引脚
-            self.pca9685.duty(pwm_index, speed)
-            print(pwm_index, speed)
-            # 设置后退BI引脚为0
-            self.pca9685.duty(pwm_index + 1, 0)
-            print(pwm_index + 1, 0)
-        elif direction == 1:
-            # 控制后退，BI引脚
-            self.pca9685.duty(pwm_index + 1, speed)
-            print(pwm_index + 1, speed)
-            # 设置前进FI引脚为0
-            self.pca9685.duty(pwm_index, 0)
-            print(pwm_index, 0)
-        else:
-            raise ValueError("Invalid direction. Use 0 for forward or 1 for backward.")
+            raise ValueError("Speed must be in range 1900..4095")
+        if type(direction) is not int or direction not in (0, 1):
+            raise ValueError("Direction must be 0 or 1")
+        if self._controller is not None:
+            self._controller._assert_can_drive(motor_id)
+        try:
+            self._disable_pid(motor_id)
+            # 换向先关闭不使用的输入，避免旧 PWM 与新方向短时重叠。
+            active = 2 * i + direction
+            inactive = 2 * i + 1 - direction
+            self.pca9685.duty(inactive, 0)
+            self.pca9685.duty(active, speed)
+            self._modes[i] = "open"
+            self._pwms[i] = speed * 100 / 4095 * (1 if direction == 0 else -1)
+        except BaseException:
+            self.stop_all()
+            raise
 
     def stop_motor(self, motor_id: int) -> None:
-        """
-        停止指定编号电机的转动，设置PWM信号为0。
-        平稳的停止，设置一个电机通道的两个PWM引脚为低电平。
+        """禁用指定 PID 并立即停止该路输出，保留目标。
+
+        ==================
+        Disable one PID and stop its output; retain the target.
 
         Args:
-            motor_id (int): 电机的编号（1至4）。
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
 
-        Raise:
-            ValueError: 如果电机编号超出范围（1-4）。
+        Returns:
+            None：无返回值 / No return value.
 
-        =============================================
+        Raises:
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
-        Stop the motor with the specified ID by setting the PWM duty cycle to 0.
-        To perform a smooth stop, set both PWM pins of the motor channel to low.
-
-        Args:
-            motor_id (int): Motor ID (1 to 4).
-
-        Raise:
-            ValueError: If motor ID is out of range (1-4).
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
-        if motor_id < 1 or motor_id > self.motor_count:
-            raise ValueError(f"Invalid motor_id: {motor_id}. Motor ID must be between 1 and {self.motor_count}.")
-
-        # 根据电机编号选择对应的PWM引脚
-        pwm_index = (motor_id - 1) * 2
-
-        # 将电机的两个方向引脚都设置为0，停止电机
-        self.pca9685.duty(pwm_index, 0)
-        self.pca9685.duty(pwm_index + 1, 0)
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        i = self._index(motor_id)
+        self._modes[i] = "stopped"
+        self._pwms[i] = 0
+        # 失败时也尝试两路输入关闭。
+        error = None
+        try:
+            self._disable_pid(motor_id)
+        except Exception as exc:
+            error = exc
+        for channel in (2 * i, 2 * i + 1):
+            try:
+                self.pca9685.duty(channel, 0)
+            except Exception as exc:
+                error = error or exc
+        if error is not None:
+            raise error
 
     def break_motor(self, motor_id: int) -> None:
-        """
-        刹车指定编号电机，设置PWM信号为最大占空比。
-        快速刹车，设置一个电机通道的两个PWM引脚为最大占空比。
+        """禁用 PID 后双输入置高刹车，保留原接口拼写。
+
+        ==================
+        Disable PID and brake with both inputs high; retain legacy spelling.
 
         Args:
-            motor_id (int): 电机的编号（1至4）。
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
 
-        Raise:
-            ValueError: 如果电机编号超出范围（1-4）。
+        Returns:
+            None：无返回值 / No return value.
 
-        =============================================
+        Raises:
+            RuntimeError：保护故障锁存，须显式清除 / Protection fault is latched; explicit clearing is required.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
-        Brake the motor with the specified ID by setting the PWM duty cycle to maximum.
-        To perform a quick brake, set both PWM pins of the motor channel to maximum duty cycle.
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        i = self._index(motor_id)
+        if self._controller is not None:
+            self._controller._assert_can_drive(motor_id)
+        try:
+            self.stop_motor(motor_id)
+            self.pca9685.duty(2 * i, 4095)
+            self.pca9685.duty(2 * i + 1, 4095)
+            self._modes[i] = "brake"
+        except BaseException:
+            self.stop_all()
+            raise
+
+    def stop_all(self) -> None:
+        """尝试停止全部电机；某路失败仍处理其他路，最后抛首个异常。
+
+        ==================
+        Attempt every motor stop and then raise the first failure.
 
         Args:
-            motor_id (int): Motor ID (1 to 4).
+            无 / None.
 
-        Raise:
-            ValueError: If motor ID is out of range (1-4).
+        Returns:
+            None：无返回值 / No return value.
+
+        Raises:
+            Exception：尝试停止所有电机后传播首个异常 / First failure after attempting every motor.
+
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
-        if motor_id < 1 or motor_id > self.motor_count:
-            raise ValueError(f"Invalid motor_id: {motor_id}. Motor ID must be between 1 and {self.motor_count}.")
+        error = None
+        for motor_id in range(1, self.motor_count + 1):
+            try:
+                self.stop_motor(motor_id)
+            except Exception as exc:
+                error = error or exc
+        if error is not None:
+            raise error
 
-        # 根据电机编号选择对应的PWM引脚
-        pwm_index = (motor_id - 1) * 2
+    def set_target_rpm(self, motor_id: int, rpm: float) -> None:
+        """设置带符号目标 RPM；不自动启动电机。
 
-        # 将电机的两个方向引脚都设置为最大占空比，进行刹车
-        self.pca9685.duty(pwm_index, 4095)
-        self.pca9685.duty(pwm_index + 1, 4095)
+        ==================
+        Set signed target RPM without starting the motor.
+
+        Args:
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
+            rpm: 带符号目标转速 RPM / Signed target RPM.
+
+        Returns:
+            None：无返回值 / No return value.
+
+        Raises:
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
+
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        i = self._index(motor_id)
+        _finite(rpm, "rpm")
+        controller = self._feedback()
+        if self._modes[i] in ("open", "brake"):
+            self.stop_motor(motor_id)
+        controller.set_target_rpm(motor_id, rpm)
+
+    def set_target_rpms(self, rpms: object) -> None:
+        """按 ID 顺序设置全部目标；不自动启动。
+
+        ==================
+        Set all targets in ID order without starting motors.
+
+        Args:
+            rpms: 按电机 ID 排列的目标 RPM 序列 / Target RPM sequence in ID order.
+
+        Returns:
+            None：无返回值 / No return value.
+
+        Raises:
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
+
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if len(rpms) != self.motor_count:
+            raise ValueError("One RPM target per motor is required")
+        for rpm in rpms:
+            _finite(rpm, "rpm")
+        self._feedback()
+        for i, rpm in enumerate(rpms, 1):
+            self.set_target_rpm(i, rpm)
+
+    def set_pid(self, motor_id: int, kp: float = None, ki: float = None, kd: float = None) -> None:
+        """在线修改指定电机增益，None 保留原值。
+
+        ==================
+        Change one motor gain set; None keeps the previous value.
+
+        Args:
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
+            kp: 比例增益；setter 中 None 保留原值 / Proportional gain; None keeps old value.
+            ki: 积分增益；setter 中 None 保留原值 / Integral gain; None keeps old value.
+            kd: 微分增益；setter 中 None 保留原值 / Derivative gain; None keeps old value.
+
+        Returns:
+            None：无返回值 / No return value.
+
+        Raises:
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+
+        Notes:
+            仅修改增益，不执行I2C操作 / Update gains only; no I2C operation.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        self._index(motor_id)
+        for value in (kp, ki, kd):
+            if value is not None and _finite(value, "PID gain") < 0:
+                raise ValueError("PID gains must be nonnegative")
+        self._feedback().set_pid(motor_id, kp, ki, kd)
+
+    def start_motor(self, motor_id: int) -> None:
+        """使能指定闭环，下次 update 更新输出。
+
+        ==================
+        Enable one loop for output on the next update.
+
+        Args:
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
+
+        Returns:
+            None：无返回值 / No return value.
+
+        Raises:
+            RuntimeError：保护故障锁存，须显式清除 / Protection fault is latched; explicit clearing is required.
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
+
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        i = self._index(motor_id)
+        controller = self._feedback()
+        controller._assert_can_drive(motor_id)
+        if self._modes[i] != "pid":
+            self.stop_motor(motor_id)
+        controller.start_motor(motor_id)
+        self._modes[i] = "pid"
+
+    def start_all(self) -> None:
+        """使能全部闭环，保留各自目标。
+
+        ==================
+        Enable all loops while retaining their targets.
+
+        Args:
+            无 / None.
+
+        Returns:
+            None：无返回值 / No return value.
+
+        Raises:
+            RuntimeError：保护故障锁存，须显式清除 / Protection fault is latched; explicit clearing is required.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+            OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
+
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        controller = self._feedback()
+        for motor_id in range(1, self.motor_count + 1):
+            controller._assert_can_drive(motor_id)
+        try:
+            for motor_id in range(1, self.motor_count + 1):
+                self.start_motor(motor_id)
+        except BaseException:
+            self.stop_all()
+            raise
+
+    def get_motor_rpm(self, motor_id: int) -> float:
+        """读取最近一次更新得到的带符号 RPM。
+
+        ==================
+        Read signed RPM from the latest update.
+
+        Args:
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
+
+        Returns:
+            float：最近采样的有符号输出轴转速，RPM / Latest signed output-shaft speed in RPM.
+
+        Raises:
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+
+        Notes:
+            仅读取状态；不写硬件 / Read state only; no hardware writes.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        self._index(motor_id)
+        return self._feedback().get_motor_rpm(motor_id)
+
+    def get_encoder_count(self, motor_id: int) -> int:
+        """读取实时累计有符号脉冲计数。
+
+        ==================
+        Read the current signed accumulated pulse count.
+
+        Args:
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
+
+        Returns:
+            int：累计的有符号编码器计数 / Accumulated signed encoder count.
+
+        Raises:
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+
+        Notes:
+            仅读取状态；不写硬件 / Read state only; no hardware writes.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        self._index(motor_id)
+        return self._feedback().get_encoder_count(motor_id)
+
+    def get_encoder_direction(self, motor_id: int) -> int:
+        """读取最后一个脉冲的方向，停止后可能保持旧值。
+
+        ==================
+        Read the last pulse direction, which may persist after stopping.
+
+        Args:
+            motor_id: 从 1 开始的电机 ID / One-based motor ID.
+
+        Returns:
+            int：末次计数方向，−1/0/1 / Last count direction: -1, 0 or 1.
+
+        Raises:
+            ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+
+        Notes:
+            仅读取状态；不写硬件 / Read state only; no hardware writes.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        self._index(motor_id)
+        return self._feedback().get_encoder_direction(motor_id)
+
+    def get_voltage(self) -> object:
+        """读取缓存的电机供电电压，首次采样前为 None。
+
+        ==================
+        Read cached supply volts, or None before the first sample.
+
+        Args:
+            无 / None.
+
+        Returns:
+            float 或 None：缓存电压 V / Cached volts, or None before sampling.
+
+        Raises:
+            RuntimeError：未注入电压监测器 / Voltage monitor is not configured.
+
+        Notes:
+            仅读取状态；不写硬件 / Read state only; no hardware writes.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        if self._voltage is None:
+            raise RuntimeError("Supply voltage monitor not configured")
+        return self._voltage.get_voltage()
+
+    def get_telemetry(self) -> list:
+        """读取每路八字段及末尾全使能位的遥测快照。
+
+        ==================
+        Read eight fields per motor followed by the all-enabled flag.
+
+        Args:
+            无 / None.
+
+        Returns:
+            list：每路 target,RPM,PWM,error,Kp,Ki,Kd,enabled，末尾全使能位 / Telemetry snapshot.
+
+        Raises:
+            RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
+
+        Notes:
+            仅读取状态；不写硬件 / Read state only; no hardware writes.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        data = self._feedback().get_telemetry()
+        for i, mode in enumerate(self._modes):
+            if mode != "pid":
+                data[8 * i + 2] = self._pwms[i]
+        return data
+
+    def get_modes(self) -> tuple:
+        """读取每路 stopped/open/pid/brake 模式。
+
+        ==================
+        Read each motor mode: stopped, open, pid or brake.
+
+        Args:
+            无 / None.
+
+        Returns:
+            tuple：按电机 ID 排列的模式字符串 / Modes in motor-ID order.
+
+        Raises:
+            无主动抛出 / No explicit exceptions.
+
+        Notes:
+            仅读取状态；不写硬件 / Read state only; no hardware writes.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        return tuple(self._modes)
+
+    def update(self) -> bool:
+        """到达周期后采集反馈，仅更新 PID 模式输出及电压缓存。
+
+        ==================
+        Update feedback, PID-mode outputs and voltage when the period elapses.
+
+        Args:
+            无 / None.
+
+        Returns:
+            bool：到达调度周期并完成更新为True，否则为False / True when a scheduled update completes.
+
+        Raises:
+            Exception：更新依赖失败；尽力停机后保留原异常 / Dependency update failed; preserve the error after stop attempts.
+
+        Notes:
+            可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
+            仅供主循环调用，不可在中断中调用 / Not ISR-safe.
+        """
+        now = time.ticks_ms()
+        if time.ticks_diff(now, self._last_update) < self._period:
+            return False
+        try:
+            if self._controller is not None:
+                ids = [i + 1 for i, mode in enumerate(self._modes) if mode == "pid"]
+                self._controller.update(motor_ids=ids)
+                self._sync_fault_modes()
+                fields = self._controller.get_telemetry()
+                for motor_id in ids:
+                    if self._modes[motor_id - 1] == "pid":
+                        self._pwms[motor_id - 1] = fields[(motor_id - 1) * 8 + 2]
+            if self._voltage is not None:
+                self._voltage.update()
+            self._last_update = now
+            return True
+        except BaseException:
+            try:
+                self.stop_all()
+            except Exception:
+                pass
+            raise
+
+    def configure_feedback_protection(self, **settings: object) -> None:
+        """通过统一入口配置保护，故障仍需单独清除。
+        ==================
+        Configure protection through the facade without clearing faults.
+        Args:
+            settings: startup_grace_ms、timeout_ms、pwm_threshold、stop_policy、enabled / Controller protection settings.
+        Returns:
+            None：无返回值 / No return value.
+        Raises:
+            RuntimeError：未配置编码器；ValueError/TypeError：配置无效 / Missing encoders or invalid settings.
+        Notes:
+            不写输出，不自动启动；非ISR-safe / No output write or automatic start; not ISR-safe.
+        """
+        self._feedback().configure_feedback_protection(**settings)
+
+    def get_feedback_protection(self) -> dict:
+        """读取无反馈保护配置副本。
+        ==================
+        Read a copy of the no-feedback protection configuration.
+        Args:
+            无 / None.
+        Returns:
+            dict：配置副本 / Configuration snapshot.
+        Raises:
+            RuntimeError：未配置编码器 / Encoders are not configured.
+        Notes:
+            不访问I2C；非ISR-safe / No I2C access; not ISR-safe.
+        """
+        return self._feedback().get_feedback_protection()
+
+    def get_faults(self) -> tuple:
+        """读取故障ID、原因、时刻和关断尝试状态。
+        ==================
+        Read fault IDs, reasons, detection times and stop-attempt status.
+        Args:
+            无 / None.
+        Returns:
+            tuple：锁存故障快照；纯开环配置返回空元组 / Latched faults; empty for configurations without encoders.
+        Raises:
+            无主动抛出 / No explicit exceptions.
+        Notes:
+            stop_writes_ok不代表物理关断确认；非ISR-safe / Stop-write success is not physical confirmation; not ISR-safe.
+        """
+        return () if self._controller is None else self._controller.get_faults()
+
+    def clear_faults(self, motor_id: object = None) -> None:
+        """显式清故障，保持停止，随后仍须显式启动。
+        ==================
+        Clear faults explicitly while remaining stopped until a separate start.
+        Args:
+            motor_id: 一路ID或None表示全部 / One motor ID or None for all.
+        Returns:
+            None：无返回值 / No return value.
+        Raises:
+            ValueError：ID无效；RuntimeError：无编码器；Exception：关断失败 / Invalid ID, absent encoders or failed shutdown.
+        Notes:
+            清除前再次尝试关断，失败保留故障；非ISR-safe / Retry shutdown first; retain faults on failure; not ISR-safe.
+        """
+        if motor_id is not None and (type(motor_id) is not int or not 1 <= motor_id <= self.motor_count):
+            raise ValueError("Invalid motor ID")
+        controller = self._feedback()
+        try:
+            controller.clear_faults(motor_id)
+        finally:
+            self._sync_fault_modes()
+
+    def _sync_fault_modes(self) -> None:
+        controller = self._controller
+        for index in range(self.motor_count):
+            if controller._all_faulted or controller._faults[index] is not None:
+                self._modes[index] = "stopped"
+                self._pwms[index] = 0
+
+    def _index(self, motor_id: int) -> int:
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        return motor_id - 1
+
+    def _feedback(self) -> object:
+        if self._controller is None:
+            raise RuntimeError("Configure encoder_pins for RPM/PID interfaces")
+        return self._controller
+
+    def _disable_pid(self, motor_id: int) -> None:
+        if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
+            raise ValueError("Invalid motor ID")
+        if self._controller is not None:
+            self._controller.stop_motor(motor_id)
+
+    def deinit(self) -> None:
+        """停止电机并注销自有编码器 IRQ；保留共享 PCA 和电压监测器。
+
+        ==================
+        Stop motors and detach owned encoder IRQs; leave borrowed devices intact.
+
+        Args:
+            无 / None.
+        Returns:
+            None.
+        Raises:
+            Exception: 清理后传播首个底层异常 / First cleanup failure.
+        Notes:
+            即使停止失败也尝试注销 IRQ；调用方仍须处置输出故障。
+            Attempts IRQ cleanup after a stop failure; caller handles failed outputs.
+            不关闭调用方总线或 ADC；不可在 ISR 中调用 / Not ISR-safe.
+        """
+        error = None
+        try:
+            self.stop_all()
+        except Exception as exc:
+            error = exc
+        if self._controller is not None:
+            try:
+                self._controller.deinit()
+            except Exception as exc:
+                error = error or exc
+        if error is not None:
+            raise error
 
 
-# ======================================== 初始化配置 ==========================================
-
-# ========================================  主程序  ===========================================
+# ======================================== 初始化配置 ========================================
+# ======================================== 主程序 ========================================

@@ -1,7 +1,7 @@
 {
   "name": "bus_dc_motor_driver",
-  "version": "1.0.0",
-  "description": "A MicroPython library to control bus DC motor driver",
+  "version": "1.1.0",
+  "description": "Backward-compatible four-channel DC motor driver with optional encoder RPM, independent PID control and supply voltage monitoring",
   "author": "leeqingshui",
   "license": "MIT",
   "chips": "all",
@@ -18,6 +18,26 @@
     [
       "pca9685.py",
       "code/pca9685.py"
+    ],
+    [
+      "motor.py",
+      "code/motor.py"
+    ],
+    [
+      "encoder.py",
+      "code/encoder.py"
+    ],
+    [
+      "pid.py",
+      "code/pid.py"
+    ],
+    [
+      "motor_controller.py",
+      "code/motor_controller.py"
+    ],
+    [
+      "voltage_monitor.py",
+      "code/voltage_monitor.py"
     ]
   ]
 }

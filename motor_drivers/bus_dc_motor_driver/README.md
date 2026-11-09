@@ -1,155 +1,426 @@
-# GraftSense-I2C 总线直流电机驱动模块（MicroPython）
+# GraftSense I2C 四路直流电机驱动（MicroPython）
 
-# GraftSense-I2C 总线直流电机驱动模块（MicroPython）
+兼容原 `BusDCMotor` 开环接口，新增可选编码器计数、方向、RPM、四路独立 PID 和电机电源电压查询。硬件基于 PCA9685 与 SS6285L，每路电机使用两个 PWM 通道。
 
-# GraftSense I2C 总线直流电机驱动模块
-
----
+版本：**1.1.0**。本次板测依据为 ESP32-C3 SuperMini、MicroPython v1.29.0（2026-08-24），其他平台需自行验证；原开环使用方式不强制初始化编码器或 ADC。
 
 ## 目录
 
-- [简介](#简介)
-- [主要功能](#主要功能)
-- [硬件要求](#硬件要求)
-- [文件说明](#文件说明)
-- [软件设计核心思想](#软件设计核心思想)
-- [使用说明](#使用说明)
-- [示例程序](#示例程序)
-- [注意事项](#注意事项)
+- [简介与主要功能](#简介与主要功能)
+- [软件环境](#软件环境)
+- [文件结构与说明](#一安装与文件)
+- [旧接口兼容](#二保留的旧接口)
+- [硬件要求与参数](#三esp32-c3-接线与参数)
+- [快速开始](#四完整闭环调用)
+- [统一接口与调度](#五统一接口与调度)
+- [注意事项与频率](#六pwm-频率与兼容变化)
+- [测试与迁移](#七测试与迁移)
+- [版本记录](#版本记录)
 - [联系方式](#联系方式)
-- [许可协议](#许可协议)
+- [许可与来源](#许可与来源)
 
----
+## 简介与主要功能
 
-## 简介
+面向已有 PCA9685 总线电机板提供四路独立速度闭环，供应用层周期调用。保留原开环接口，闭环、电压监测按配置启用。
 
-本项目是 **FreakStudio GraftSense I2C 总线直流电机驱动模块** 的 MicroPython 驱动库，基于 PCA9685 芯片与 SS6285L-SO-TP 驱动阵列实现，支持对 4 路直流电机的灵活控制。模块通过 I2C 接口与主控通信，可广泛应用于电子 DIY 电机控制实验、机器人运动演示等场景。
+- 单边沿 AB 编码器累计计数、方向及输出轴 RPM 换算。
+- 独立 PID、在线目标和增益设置、输出与积分限幅。
+- 单电机、四电机启停与模式隔离，统一遥测。
+- ADC 电源电压换算、校准与缓存。
+- 显式 deinit 清理；共享 I2C、PCA 和注入的电压监测器归调用方管理。
 
----
+## 软件环境
 
-## 主要功能
+已测目标为 ESP32-C3、MicroPython v1.29.0（2026-08-24）；固件无 machine.Encoder。当前版本已在该开发板完成单路及四路组合 PID、四个电机独立正反转 PID 实机测试。
 
-- 支持 **最多 4 个直流电机独立控制**，兼容标准 I2C 通信协议
-- 提供 **正转、反转** 两种方向控制，支持 PWM 调速（占空比 1900~4095）
-- 内置 **平稳停止** 和 **快速刹车** 两种停止模式，满足不同场景需求
-- 通道独立控制，每个电机对应 2 路 PWM 输出，可灵活配置驱动参数
-- 支持多模块级联，通过地址选择引脚（A0~A3）配置 I2C 地址，满足多电机协同驱动场景
-- 模块集成了 PWM 输出使能按键，方便调试与安全控制
+依赖为内置 machine、time、math、ustruct、micropython 和 package.json 中的七个本地模块，无第三方包依赖。VoltageMonitor 需要 ADC.read_uv 与 ATTN_2_5DB；其他平台先核实接口和 GPIO。PC 回归使用 CPython 3.10+、unittest 及模拟对象，不在设备上运行；PC绘图额外依赖matplotlib、numpy、Pillow、pyserial、mpremote和ffmpeg。
 
----
+## 一、安装与文件
 
-## 硬件要求
+```text
+bus_dc_motor_driver/
+├── code/
+│   ├── bus_dc_motor.py
+│   ├── pca9685.py
+│   ├── motor.py
+│   ├── encoder.py
+│   ├── pid.py
+│   ├── motor_controller.py
+│   ├── voltage_monitor.py
+│   └── main.py
+├── examples/
+├── tests/
+├── docs/
+├── package.json
+├── CHANGELOG.md
+├── README.md
+└── LICENSE
+```
 
-- **主控板**:支持 MicroPython 的开发板（如 Raspberry Pi Pico、ESP32 等）
-- **驱动模块**:GraftSense I2C 总线直流电机驱动模块（基于 PCA9685 + SS6285L-SO-TP）
-- **直流电机**:普通直流电机（如 TT 马达、减速电机等）
-- **供电**:5V 外部电源（通过模块 VIN 接口输入，I2C 接口电源与电机电源分离）
-- **通信引脚**:I2C 总线（SDA、SCL），模块支持双 I2C 通信接口，兼容 Grove 接口标准
+安装本目录的 package.json，或将 code/ 下七个运行库文件上传到设备 /lib/。main.py 是独立示例，不纳入库安装清单。
 
----
+| 文件 | 功能 |
+| --- | --- |
+| code/bus_dc_motor.py | 原库兼容入口及开环/PID/刹车模式隔离 |
+| code/pca9685.py | I2C、PWM 输出及共享频率配置 |
+| code/motor.py | 带符号百分比的底层电机输出 |
+| code/encoder.py | A 相上升沿中断计数，B 相判方向及 RPM 换算 |
+| code/pid.py | 可独立使用的 PID 类，输出及积分状态限幅 |
+| code/motor_controller.py | 多电机采样、独立闭环和统一遥测 |
+| code/voltage_monitor.py | ESP32 ADC 电源分压采样、缓存和校准 |
+| code/main.py | 开环/四路 PID 完整示例，默认不启动 |
+| examples/ | 每个测试项目一个独立文件；含单文件 PC 绘图工具 |
+| tests/test_driver.py | 单文件 PC 驱动与故障路径回归 |
+| docs/PID_TUNING.md | PID 参数整定方法与当前台架配置 |
 
-## 文件说明
+保持 package.json 与七个运行库同一版本；只更新 bus_dc_motor.py 而不更新 motor_controller.py 会缺少模式隔离接口。库安装不包含测试、示例或数据。
 
-| 文件名            | 功能描述                                                            |
-| ----------------- | ------------------------------------------------------------------- |
-| `bus_dc_motor.py` | 核心驱动类，封装直流电机控制逻辑，支持调速、转向、停止与刹车功能    |
-| `main.py`         | 示例程序，演示直流电机初始化、调速、转向及停止流程                  |
-| `pca9685.py`      | PCA9685 芯片底层驱动，实现 I2C 通信、频率设置、占空比控制等基础功能 |
+### 可复制测试入口
 
----
-
-## 软件设计核心思想
-
-1. **分层封装**:将 PCA9685 的底层 PWM 操作与直流电机控制逻辑分离，降低耦合度，提升可维护性。
-2. **模式抽象**:通过方向（正转/反转）和停止模式（平稳停止/快速刹车）的抽象，统一控制接口，屏蔽底层实现差异。
-3. **安全机制**:内置参数合法性检查与异常处理，防止非法操作导致硬件损坏。
-4. **可扩展性**:支持最多 4 个电机独立控制，通过 I2C 地址级联实现多模块扩展。
-
----
-
-## 使用说明
-
-### 1. 导入模块
-
-### 2. 初始化 I2C 与 PCA9685
-
-### 3. 创建直流电机控制器
-
-### 4. 电机控制
-
----
-
-## 示例程序
-
-以下为 `main.py` 中的核心演示代码:
+以下为完整的 code/main.py；默认禁止运动，确认配置后才启用。
 
 ```python
+# Python env   : MicroPython v1.29.0 / ESP32-C3
+# -*- coding: utf-8 -*-
+# @Time    : 2026/11/06
+# @Author  : 赵岩松
+# @File    : main.py
+# @Description : 四路电机兼容开环与编码器闭环测试入口
+# @License : MIT
+
+# ======================================== 导入相关模块 ========================================
 import time
 from machine import Pin, I2C
 from pca9685 import PCA9685
 from bus_dc_motor import BusDCMotor
 
-# 初始化I2C
-i2c = I2C(id=0, sda=Pin(4), scl=Pin(5), freq=400000)
-devices = i2c.scan()
-addr = devices[0]
-pca9685 = PCA9685(i2c, addr)
+# ======================================== 全局变量 ========================================
+ARM_MOTORS = False
+MODE = "pid"
+SCL_PIN = 9
+SDA_PIN = 10
+PCA_ADDRESS = 0x4F
+PWM_FREQUENCY = 1000
+ENCODER_PINS = ((5, 6), (7, 8), (3, 2), (1, 0))
+PID_PARAMS = ((0.15, 0.6, 0),) * 4
+TARGET_RPMS = (30, -40, 50, -60)
+VOLTAGE_PIN = 4
+RUN_SECONDS = 10
+FEEDBACK_PROTECTION = {"startup_grace_ms": 4000, "timeout_ms": 2500, "pwm_threshold": 25, "stop_policy": "all"}
+# ======================================== 功能函数 ========================================
+# ======================================== 自定义类 ========================================
+# ======================================== 初始化配置 ========================================
 
-# 创建直流电机控制器
-motor = BusDCMotor(pca9685, 4)
 
-# 演示电机控制
-print("Motor 4 started: Speed = 4000, Direction = 0")
-motor.set_motor_speed(4, 4000, 0)
-time.sleep(10)
-motor.stop_motor(4)
-print("Motor 4 stopped successfully")
+def _prepare_hardware() -> tuple:
+    """显式启用后延时、扫描并创建本示例硬件 / Prepare hardware only when armed."""
+    time.sleep(3)
+    print("FreakStudio: four-motor driver test")
+    i2c = I2C(0, scl=Pin(SCL_PIN), sda=Pin(SDA_PIN), freq=400000)
+    try:
+        devices = i2c.scan()
+        print("I2C devices:", [hex(a) for a in devices])
+        if not devices:
+            raise RuntimeError("No I2C device found")
+        if PCA_ADDRESS not in devices:
+            raise RuntimeError("Device not found at expected address")
+        # 该器件无固定芯片 ID；构造时写 MODE1 检查通信响应。
+        pca = PCA9685(i2c, PCA_ADDRESS)
+        return i2c, pca
+    except BaseException:
+        try:
+            if hasattr(i2c, "deinit"):
+                i2c.deinit()
+        except Exception:
+            pass
+        raise
+
+
+# ======================================== 主程序 ========================================
+def run() -> None:
+    """执行有限时长测试；默认禁用，不创建硬件 / Run a bounded test only when armed."""
+    if not ARM_MOTORS:
+        print("FreakStudio: motors disabled; review wiring and set ARM_MOTORS=True")
+        return
+    if MODE not in ("legacy", "pid") or not 0 < RUN_SECONDS <= 30:
+        raise ValueError("Check MODE and duration (0,30] seconds")
+    i2c, pca = _prepare_hardware()
+    motor = None
+    voltage_monitor = None
+    try:
+        if MODE == "legacy":
+            # 旧位置参数仍可用；新示例选择默认低电平停止，避免默认全高刹车。
+            motor = BusDCMotor(pca, 4, startup_brake=False, pwm_frequency=PWM_FREQUENCY)
+            motor.set_motor_speed(1, 1900, 0)
+            time.sleep(2)
+            motor.stop_motor(1)
+            time.sleep(2)
+            motor.set_motor_speed(1, 1900, 1)
+            time.sleep(2)
+            motor.break_motor(1)
+            time.sleep(1)
+        else:
+            # 仅闭环/电压模式导入相关依赖，旧开环用法不占编码器与 ADC GPIO。
+            from voltage_monitor import VoltageMonitor
+
+            voltage_monitor = VoltageMonitor(pin=VOLTAGE_PIN)
+            motor = BusDCMotor(
+                pca,
+                4,
+                encoder_pins=ENCODER_PINS,
+                pid_params=PID_PARAMS,
+                voltage_monitor=voltage_monitor,
+                ppr=13,
+                gear_ratio=20,
+                startup_brake=False,
+                pwm_frequency=PWM_FREQUENCY,
+                output_limit=(-50, 50),
+                feedback_protection=FEEDBACK_PROTECTION,
+            )
+            time.sleep_ms(100)
+            motor.update()
+            print("Supply voltage:", motor.get_voltage())
+            if not 6 < motor.get_voltage() < 9:
+                raise RuntimeError("Check supply; this example expects 7.4 V motor system")
+            motor.set_target_rpms(TARGET_RPMS)
+            for i in range(1, 5):
+                motor.set_pid(i, 0.15, 0.6, 0)
+            motor.start_all()
+            start = time.ticks_ms()
+            print("elapsed_ms,id,target_rpm,actual_rpm,pwm,count,direction,voltage")
+            while time.ticks_diff(time.ticks_ms(), start) < RUN_SECONDS * 1000:
+                if motor.update():
+                    faults = motor.get_faults()
+                    if faults:
+                        print("Latched motor fault:", faults)
+                        break
+                    voltage = motor.get_voltage()
+                    if not 6 < voltage < 9:
+                        raise RuntimeError("Supply outside example range")
+                    fields = motor.get_telemetry()
+                    for i in range(1, 5):
+                        print(
+                            "%d,%d,%s,%s,%s,%d,%d,%s"
+                            % (
+                                time.ticks_diff(time.ticks_ms(), start),
+                                i,
+                                TARGET_RPMS[i - 1],
+                                motor.get_motor_rpm(i),
+                                fields[(i - 1) * 8 + 2],
+                                motor.get_encoder_count(i),
+                                motor.get_encoder_direction(i),
+                                voltage,
+                            )
+                        )
+                time.sleep_ms(5)
+    except KeyboardInterrupt:
+        print("Interrupted")
+        raise
+    except OSError as exc:
+        print("Hardware communication error:", exc)
+        raise
+    except Exception as exc:
+        print("Motor example failed:", exc)
+        raise
+    finally:
+        try:
+            if motor is not None:
+                try:
+                    motor.stop_all()
+                    if MODE == "pid":
+                        motor.set_target_rpms((0, 0, 0, 0))
+                finally:
+                    motor.deinit()
+        finally:
+            # 本示例拥有 ADC；驱动兼容入口不释放调用方注入的监测器。
+            try:
+                if voltage_monitor is not None:
+                    voltage_monitor.deinit()
+            finally:
+                pca.deinit()
+                if hasattr(i2c, "deinit"):
+                    i2c.deinit()
+        print("All configured motors stopped; resources released")
+
+
+if __name__ == "__main__":
+    run()
 ```
 
----
+## 二、保留的旧接口
 
-## 注意事项
+```python
+from bus_dc_motor import BusDCMotor
+motor = BusDCMotor(pca9685, 4)
+motor.set_motor_speed(1, 1900, 0)  # 原始 PWM 数值、方向 0 正转
+motor.stop_motor(1)
+motor.set_motor_speed(1, 1900, 1)  # 方向 1 反转
+motor.break_motor(1)               # 保留原拼写：两输入置高刹车
+motor.stop_all()
+```
 
-1. **供电安全**:模块 I2C 接口电源与电机电源分离，电机需通过 VIN 接口接入 5V 外部电源，避免直接从主控板取电导致过载。
-2. **I2C 地址**:通过模块上的 A0/A1/A2/A3 引脚配置地址，避免与其他 I2C 设备冲突，支持多模块级联。
-3. **速度范围**:电机速度（占空比）需设置在 1900~4095 之间，以确保 PWM 信号满足电机驱动芯片的输入要求。
-4. **使能按键**:模块上的 PWM 输出使能按键，按下时 PWM 输出失能，松开时使能，可用于紧急停止或调试。
-5. **版本兼容**:本库基于 MicroPython v1.23 开发，低版本可能存在兼容性问题。
+上例会实际运行电机，先核对接线和负载。motor_id 为 1～motor_count，motor_count 为 1～4。
 
----
+为兼容原库，构造默认将整片频率设为 1000 Hz，并将 CH0～CH7 全部置高刹车，即使 motor_count 小于四也如此。新应用推荐 `BusDCMotor(pca9685, 4, startup_brake=False)`，让所配置电机默认置低停转。原调速的调试 print 不再保留，非法类型校验更严格，换向先关闭非工作输入；最终输出与原接口语义一致。
+
+旧 speed 范围保留 **1900～4095**，不是 RPM 或百分比。它是旧 API 的约束，不是“低于此值就没有足够逻辑高电平”的硬件结论；PWM 占空比与高电平幅值不同。新增 PID 可以输出更低占空比。
+
+## 三、ESP32-C3 接线与参数
+
+| 电机 ID | PCA 通道 A/B | 编码器 GPIO A/B |
+| --- | --- | --- |
+| 1 | 0 / 1 | 5 / 6 |
+| 2 | 2 / 3 | 7 / 8 |
+| 3 | 4 / 5 | 3 / 2 |
+| 4 | 6 / 7 | 1 / 0 |
+
+本板 I2C SCL=GPIO9、SDA=GPIO10，400 kHz，地址 0x4F。以上仅为已测板接线，不适用于任意主控。编码器与 I2C 信号电平须适合主控 GPIO。电机独立供电并共地，电源电压/电流按电机与板级规格选择，不能仅由驱动芯片上限决定。
+
+本项目电机额定 7.4 V；电源监测分压 GPIO4，上端 140 kΩ、下端 20 kΩ，换算倍率 8。默认使用 ADC 2.5 dB 衰减、read_uv、16 次平均、约 200 ms 更新；已使用可调电源和万用表完成校准验证。
+
+当前实机 machine.Encoder 不存在，采用 GPIO 软件中断；PPR=13、减速比=20、A 相上升沿计数，暂按 260 次/输出轴圈：
+
+```text
+RPM = 本周期有符号计数增量 / (PPR × gear_ratio) × 60 / 实测周期秒数
+```
+
+需要按实际电机标定 PPR、减速比与符号，不能把其他计数方式的四倍频分辨率直接填入。
+
+## 四、完整闭环调用
+
+1. 将 `code/` 下七个库文件上传到设备 `/lib/`，将 [code/main.py](code/main.py) 上传为 `/main.py`。首次保留 `ARM_MOTORS=False`，运行后仅提示禁用，不初始化硬件。
+2. 按上表确认接线、电机额定电压、编码器分辨率及四路方向。查看 main.py 的 GPIO、PCA 地址、目标转速和运行时长配置。
+3. 需要旧接口测试时设置 `MODE="legacy"`；四路闭环设置 `MODE="pid"`。准备运行时显式设置 `ARM_MOTORS=True`。程序延时三秒后扫描 I2C；PID 模式检查电压、有限时长运行并打印 CSV。
+4. 应用结束先停止输出，再调用 `motor.deinit()` 注销自有 IRQ。由调用方另外释放其创建的 VoltageMonitor 和 I2C；不要关闭其他模块共享的总线。
+
+以 main.py 为完整调用示例。examples/ 中每个板测文件均独立运行，只需额外安装 code/ 中的运行库；不需要上传其他测试脚本，默认禁止运动。
+
+PID 0.15/0.6/0 是现有电机低速短时测试的候选参数，不是所有电机/负载通用参数。构造默认输出范围为 ±100%，实机示例主动限制为 ±50%。积分限幅限制积分状态，实际积分输出还要乘 Ki。
+
+## 五、统一接口与调度
+
+| 接口 | 功能与约束 |
+| --- | --- |
+| set_target_rpm(id,rpm) | 带符号目标 RPM；不自动启动 |
+| set_target_rpms(rpms) | 按 ID 设置全部目标 |
+| set_pid(id,kp,ki,kd) | 在线独立设置；None 保留原值 |
+| start_motor(id) / start_all() | 显式启用闭环，下次 update 更新输出 |
+| get_motor_rpm(id) | 最近一次更新采样的实际 RPM |
+| get_encoder_count(id) | 累计有符号计数 |
+| get_encoder_direction(id) | 最近脉冲方向；停止后可能保留旧方向 |
+| stop_motor(id) / stop_all() | 立即停止并禁用 PID，保留目标供显式重启 |
+| break_motor(id) | 禁用该路 PID，双输入置高刹车；后续 update 不覆盖 |
+| get_voltage() | 返回注入监测器的缓存电压 V，首次 update 前可能为 None |
+| get_modes() | 每路 stopped/open/pid/brake 状态 |
+| get_telemetry() | 每路 target/RPM/PWM/error/Kp/Ki/Kd/enabled 八字段，末尾全 PID 启动位 |
+| deinit() | 停止输出、注销本对象拥有的编码器 IRQ；不释放注入的 PCA、I2C 或电压监测器 |
+| update() | 协作式调度，默认内部限为至少 100 ms 一次；应用仍须持续调用 |
+| configure_feedback_protection(**settings) | 配置启动/换向宽限、无计数超时、输出阈值、停机策略与使能 |
+| get_feedback_protection() | 返回保护配置副本 |
+| get_faults() | 返回锁存故障快照；纯开环无编码器时返回空元组 |
+| clear_faults(id=None) | 再次关断成功后显式清故障；仍须单独start，不自动恢复 |
+
+未提供 encoder_pins 时，旧开环功能可独立使用；调用闭环或反馈接口会明确报错。未注入 voltage_monitor 时 get_voltage 报错，不默认抢占未知主控的 ADC GPIO。
+
+每个电机一次只能处于一种模式。调用旧开环 API 会关闭该路 PID；从开环或刹车设置 RPM 先停止输出，须显式 start 才进入 PID。处于 PID 模式时可在线修改目标和参数。stop 不等于清目标，如不希望以后恢复旧目标，应另设 RPM=0。
+
+不要让第二个控制器同时操作相同通道。MotorController 的选择更新会继续采集全部编码器，但仅写 PID 模式的输出，防止开环和刹车被覆盖。应用长时间阻塞时没有后台线程补偿；硬件异常时尽力停机，但通信故障可能使某路无法关闭，应保留外部断电手段。
+
+底层两种换向均先关闭旧方向输入，成功后才写新方向PWM：负转正先B=0再A=PWM，正转负先A=0再B=PWM。关旧方向失败不会继续开新方向，更新异常路径仍尽力关闭全部通道并保留原异常。这里不等待转子机械停稳，也不加入通用200µs延时；特定H桥是否需要额外间隔须按其规格配置和验证。软件写入顺序不等同于已经测得物理PWM边沿无重叠。
+
+### 无反馈保护与显式恢复
+
+配置编码器后，正式 `MotorController` 与 `BusDCMotor` 路径默认启用无反馈保护；纯开环无编码器的旧调用保持原样。构造参数 `feedback_protection` 接受配置字典，`None` 使用默认配置，`False` 为应用显式禁用检测；禁用检测不会清除已有故障。
+
+```python
+# 本台架参考值，换电机/负载后需要配置。
+motor.configure_feedback_protection(
+    startup_grace_ms=4000, timeout_ms=2500,
+    pwm_threshold=25, stop_policy="all", enabled=True,
+)
+faults = motor.get_faults()
+# 查明原因后，先再次关断并清故障，再单独启动。
+if faults:
+    motor.clear_faults()
+    # 由应用决定何时重新启动：motor.start_all()
+```
+
+检测仅针对本次被选中更新的PID输出：PID已使能、目标非零、实际计算的PWM绝对值严格大于阈值时，持续无计数达到超时，且启动/换向宽限已结束，才锁存 `no_feedback`。脉冲变化或输出降到阈值以下会重置连续无反馈计时；重复start或重复设置同方向目标不会重开宽限，反向/零到非零、正常停止后再启动会重新建立检测状态。宽限和超时并行计时，不是简单相加；时间比较用ticks_diff，配置必须小于该计时器半周期。若输出限幅不超过阈值，检测条件不会成立，应调整阈值。
+
+故障原因叫“无反馈”，不直接断言堵转：断线、接线错误或机械问题都可能表现为无计数。默认 `stop_policy="all"` 会禁用全部PID、清积分/输出并尽力关闭全部配置通道，包括兼容入口中同时运行的开环电机；`"motor"` 只停故障路；若更新或停机过程出现异常，则升级为尽力全停并锁住故障范围。故障后持续update、改目标或恢复脉冲都不会自行恢复；故障范围内的start、开环驱动和刹车调用会拒绝，须先clear_faults再显式start。普通stop不会清故障。
+
+`get_faults()`返回副本，含motor_id、reason、latched、detected_ms、触发时目标/PWM/计数、stop_policy、stop_attempted、stop_writes_ok、stop_attempts、stop_error、last_stop_attempt_ms及exception_stop_all。`stop_writes_ok=True`仅表示停机写调用无异常，物理关断仍需寄存器回读或实物确认；写失败会保留首个异常和故障，继续尝试其余通道，并在后续update重试。clear_faults的再次关断失败时也保留故障。
+
+保护随update执行，不覆盖未配置编码器的电机、零目标、停止状态或开环自身的反馈缺失；all策略的故障停机仍会关闭其他模式。主循环不再调度、外设实现延后写入或I2C完全失联时，软件不能保证物理输出已关闭。当前保护以固件正常运行和周期调用为前提。
+
+## 六、PWM 频率与兼容变化
+
+PCA9685 通道共享频率。pwm_frequency 默认 1000，可指定 50；不能独立让电机通道 1000 Hz、剩余通道 50 Hz。调用构造器会配置整片频率，必须由一个调度入口管理。
+
+本次修正 PRE_SCALE 缺少 -1 的公式：1000 Hz 设定读回 5，按标称 25 MHz 时钟约 1017.25 Hz；50 Hz 读回 121，计算约 50.03 Hz。旧错误公式的 1000 Hz 设定对应约 871.93 Hz，升级后可能需要重新核对控制表现。数值是分频计算，不是波形仪器实测频率。
+
+50 Hz 实机能驱动电机，但同组 PID 下部分瞬时 RPM 与 ADC 电压读数波动更大，不作为默认推荐或供电验收通过。当前版本不包含舵机、机械臂、底盘距离/转角控制、Wi-Fi 或网页端。
+
+## 七、测试与迁移
+
+每个测试项目保留一个文件，板测脚本只依赖 `code/` 中的驱动。核对脚本内接线、供电和时长后，显式设置 `ARM_MOTORS=True`，每次只运行一个项目。
+
+| 文件 | 测试项目 |
+| --- | --- |
+| code/main.py | 旧开环或四路 PID 完整使用入口 |
+| examples/bus_dc_motor_demo.py | 旧接口、开环/PID隔离及停止/刹车兼容性 |
+| examples/single_motor_pid_demo.py | 正式BusDCMotor单路30/60RPM在线改速、重复正反转、零目标及停止重启 |
+| examples/four_motor_pid_demo.py | 正式BusDCMotor四路不同目标、混合方向、同时在线换向及停止重启 |
+| examples/tuning_profile.py | 分路 PI、测速窗口与起步补偿整定 |
+| examples/performance_profile.py | 100/30/20ms 控制周期和缓存/窗口比较 |
+| examples/realtime_audit.py | 四路全周期、I2C、PID、ADC、GC 和输出完成时差 |
+| examples/i2c_benchmark.py | 400kHz/1MHz、预分配与批量写比较 |
+| examples/switch_benchmark.py | 正常单帧关断、急停与换向分段计时 |
+| examples/pc_live_plot.py | PC 实时四路曲线、指标、CSV 和录屏 |
+| tests/test_driver.py | PC 驱动参数、IRQ、停机异常、资源与安装依赖回归 |
+
+在仓库根目录运行 PC 回归：
+
+```powershell
+python -m unittest discover -s motor_drivers/bus_dc_motor_driver/tests -p 'test_*.py'
+```
+
+当前保留36项回归，不访问真实设备。检查范围包括逐次换向写入顺序、换向异常停机、公开示例在线改速/显式恢复、运行库故障路径、单文件测试的默认禁止运动、安装依赖、分路窗口及规范化合同；不是实机测试的替代。
+
+普通调用示例只导入正式安装库，不重写PID、不替换底层方法、不读取控制器私有状态。沿用上表C3接线、MicroPython v1.29.0、7.4V额定电机和空载台架；PID仅粗调0.15/0.6/0、输出限幅±50%，保护参数见文件顶部。先把七模块放到`/lib/`，选择一个示例上传后运行；默认`ARM_MOTORS=False`，核对接线与供电后再显式开启。在线阶段直接改目标并持续update，阶段之间不stop；零目标、先停再启动另列阶段。正常结束和异常退出均清理电机、IRQ、ADC及自有I2C。
+
+故障恢复用示例中的`recover_after_check(motor, confirmed=True)`：应用先查询`get_faults()`、查明并排除原因，再显式确认。函数依次`clear_faults()`、确认仍停止、`start_all()`；不确认会拒绝，也不会自动重试运行。普通示例发现故障后报告并退出，故障注入属于独立测试，不能拿它替代正常示例。
+
+PC 绘图工具也为单文件，上传时只上传所选项目及运行库：
+
+```powershell
+pip install matplotlib numpy pillow pyserial mpremote
+python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile tuning_profile --port COM8 --baud 921600 --run --seconds 15 --out pid-results-01
+python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile single_motor_pid_demo --port COM8 --baud 921600 --run --seconds 6 --out single-reversal-01
+python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile four_motor_pid_demo --port COM8 --baud 921600 --run --seconds 6 --out four-reversal-01
+```
+
+可选项目还包括 `performance_profile`、`tuning_profile`、`realtime_audit`、`i2c_benchmark`、`switch_benchmark`。端口以本机实际枚举为准，输出目录须不存在；PC需安装ffmpeg并加入PATH。明确 `--run` 后才上传并运行电机；先备份/读回校验并保存提交号和源码散列，等待15秒，不改设备 main.py。输出串口日志、100ms原始反馈CSV和四路曲线录屏；普通示例的OBS行还记录累计计数/方向、电压、模式与故障。`loop_us`是正式update的墙钟耗时，I2C/PID未分别计时时CSV为-1、摘要为null，不作为有效耗时。阶段起点取首条新目标遥测，有一个遥测周期的定位误差。运行错误或关图会通知设备停止并限时等待采集线程，结束状态写入本次输出目录；退出时另尝试全关并回读。串口断线或回读失败时不能把线程退出当成物理停机确认。
+
+性能、调参和总线优化均为独立台架实验，不替换七模块默认 API/参数。记录会保存到用户指定目录，组件仓库不收录 CSV、日志、统计 JSON、录屏及过程报告。完整历史记录和复算工具见[云测试文档](https://f1829ryac0m.feishu.cn/docx/Kee4dEPucoFTGTxnyE4cKEEGnce)，PID 调整方法见[整定指南](docs/PID_TUNING.md)。
+
+已完成 ESP32-C3 单路及四路 PID 台架测试，编码器读取与电压校准经开发者确认。分路细调后的后段均值/波动基础验收20/20通过，仍有启动超调；批量写和换向关断优化已有短时实机比较，不能据此推及带载整车或长期实时性。
+
+规范化按运行库、设备测试和PC工具分别验收：全部Python文件检查文件头、六分区和类型注解，运行库另检查双语API、资源所有权及仓库设备规范；PC工具保留CPython平台声明，不套用硬件类参数校验模板。BusDCMotor/PCA9685保留李清水署名，新增模块和测试署名赵岩松。
+
+兼容边界：保留现有GPIO编号接口、PID可调整状态和原始OSError语义；不为规范化改公共属性、添加阻止实验包装的slots、插入硬件重试或延后编码器B相采样。I2C由调用方注入并持有，ADC/IRQ按现有所有权释放。
+
+## 版本记录
+
+| 版本 | 日期 | 作者 | 修改说明 |
+| --- | --- | --- | --- |
+| 1.1.0 | 2026-11-06 | 赵岩松；原库署名保留 | 四路 PID、编码器、电压接口及规范化；已完成实机 PID 测试 |
+| 1.0.0 | 原库未标明日期 | 李清水 | 原始总线直流电机接口 |
 
 ## 联系方式
 
-如有任何问题或需要帮助，请通过以下方式联系开发者:
+GitHub 问题反馈：[当前 fork 的 Issues](https://github.com/yangcong-bit/GraftSense-Drivers-MicroPython/issues)。原库：[FreakStudioCN/GraftSense-Drivers-MicroPython](https://github.com/FreakStudioCN/GraftSense-Drivers-MicroPython)。来源文件未提供联系邮箱，暂未填写。
 
-📧 **邮箱**:liqinghsui@freakstudio.cn
+## 许可与来源
 
-💻 **GitHub**:[https://github.com/FreakStudioCN](https://github.com/FreakStudioCN)
-
----
-
-## 许可协议
-
-```
-MIT License
-
-Copyright (c) 2026 FreakStudio
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+包根 [LICENSE](LICENSE) 保留原库 MIT 许可及 FreakStudio 版权声明。BusDCMotor 原库作者李清水的署名保留，PCA9685 保留其已有参考来源。新增模块来自现有四编码器电机项目，本次按兼容升级迁入本包；测试证据与过程见上面的云测试文档，不声明其他驱动包已回归。
