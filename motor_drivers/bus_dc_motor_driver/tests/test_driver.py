@@ -187,6 +187,67 @@ class Contracts(unittest.TestCase):
         for channel in range(8):
             self.assertEqual(self.i2c.memory[6 + channel * 4 + 3] & 0x10, 0x10)
 
+    def test_motor_direction_writes_disable_opposite_input_before_driving(self) -> None:
+        calls = []
+        values = [0, 0]
+
+        def duty(channel: int, value: int) -> None:
+            calls.append((channel, value))
+            values[channel] = value
+            self.assertFalse(values[0] and values[1], "Intermediate double PWM command")
+
+        motor = self.mods["motor"].DCMotor(types.SimpleNamespace(duty=duty), 0, 1)
+        for speed in (-30, 30, -60, 60, -120, 120):
+            calls.clear()
+            motor.set_speed(speed)
+            value = int(min(100, abs(speed)) * 4095 / 100)
+            self.assertEqual(calls, [(1, 0), (0, value)] if speed > 0 else [(0, 0), (1, value)])
+        calls.clear()
+        motor.set_speed(0)
+        self.assertEqual(calls, [(0, 0), (1, 0)])
+        calls.clear()
+        motor.stop()
+        self.assertEqual(calls, [(0, 0), (1, 0)])
+
+    def test_public_pid_reversal_write_failures_preserve_error_and_stop_all(self) -> None:
+        for old_sign in (-1, 1):
+            for fail_old_off in (True, False):
+                with self.subTest(old_sign=old_sign, fail_old_off=fail_old_off):
+                    bus = self.controlled_bus(enabled=False)
+                    bus.set_target_rpms((old_sign * 40, 30, -30, 20))
+                    bus.start_all()
+                    self.advance(bus)
+                    bus.set_target_rpm(1, -old_sign * 40)
+                    old_channel = 0 if old_sign > 0 else 1
+                    new_channel = 1 - old_channel
+                    failure = OSError("old off failed" if fail_old_off else "new drive failed")
+                    calls = []
+                    original = self.pca.duty
+
+                    def fail_write(channel: int, value: int, invert: bool = False) -> int:
+                        calls.append((channel, value))
+                        if (fail_old_off and channel == old_channel and value == 0) or (not fail_old_off and channel == new_channel and value > 0):
+                            raise failure
+                        return original(channel, value, invert)
+
+                    with patch.object(self.pca, "duty", fail_write):
+                        with self.assertRaises(OSError) as caught:
+                            self.advance(bus)
+                    self.assertIs(caught.exception, failure)
+                    self.assertEqual(calls[0], (old_channel, 0))
+                    if fail_old_off:
+                        self.assertFalse(any(channel == new_channel and value > 0 for channel, value in calls))
+                    else:
+                        self.assertEqual(calls[1][0], new_channel)
+                        self.assertGreater(calls[1][1], 0)
+                    self.assertTrue(all((channel, 0) in calls for channel in range(8)))
+                    self.assertTrue(all(not pid.enabled and pid.integral == 0 for pid in bus._controller._pids))
+                    self.assertEqual(bus.get_modes(), ("stopped",) * 4)
+                    # 持续故障只能证明尽力关断；恢复通信后再确认所有输出关闭。
+                    bus.stop_all()
+                    self.assert_all_off(bus)
+                    bus.deinit()
+
     def test_iterable_selection_preserves_none_empty_list_tuple_and_iterator(self) -> None:
         bus = self.controlled_bus(enabled=False)
         c = bus._controller
@@ -760,6 +821,60 @@ class Contracts(unittest.TestCase):
         self.assertTrue(I2C.instances[-1].closed)
         self.assertTrue(ADC.instances[-1].closed)
         self.assertTrue(all(p.handler is None for p in Pin.instances))
+
+    def test_public_examples_change_targets_without_stopping_between_online_stages(self) -> None:
+        for name in ("single_motor_pid_demo", "four_motor_pid_demo"):
+            env = self.example(name)
+            Bus = self.mods["bus_dc_motor"].BusDCMotor
+            changes = []
+            original = Bus.set_target_rpm
+
+            def record(bus: object, motor_id: int, rpm: float) -> None:
+                if motor_id == 1:
+                    changes.append((rpm, bus.get_modes()[0]))
+                original(bus, motor_id, rpm)
+
+            with patch.object(Bus, "set_target_rpm", record), contextlib.redirect_stdout(io.StringIO()):
+                env["run_profile"]((((30, -30, 40, -40), 0.3, False), ((-30, 30, -40, 40), 0.3, False), ((30, -30, 40, -40), 0.3, False)), True)
+            self.assertEqual(changes, [(30, "stopped"), (-30, "pid"), (30, "pid")])
+            self.assertTrue(I2C.instances[-1].closed)
+            self.assertTrue(ADC.instances[-1].closed)
+            self.assertTrue(all(pin.handler is None for pin in Pin.instances))
+            tree = ast.parse((CODE.parent / "examples" / (name + ".py")).read_text(encoding="utf-8"))
+            self.assertFalse(any(isinstance(n, ast.Attribute) and n.attr.startswith("_") for n in ast.walk(tree)))
+            self.assertFalse(any(isinstance(n, ast.ImportFrom) and n.module in ("motor_controller", "pid", "motor") for n in ast.walk(tree)))
+
+    def test_public_example_recovery_requires_confirmation_clear_then_explicit_start(self) -> None:
+        recover = self.example("single_motor_pid_demo")["recover_after_check"]
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=200, pwm_threshold=5)
+        bus.set_target_rpm(1, 30)
+        bus.start_motor(1)
+        for _ in range(3):
+            self.advance(bus)
+        self.assertTrue(bus.get_faults())
+        with self.assertRaises(RuntimeError):
+            recover(bus)
+        self.assert_all_off(bus)
+        events = []
+        clear = bus.clear_faults
+        start = bus.start_all
+
+        def record_clear() -> None:
+            clear()
+            self.assert_all_off(bus)
+            events.append("cleared_and_still_off")
+
+        def record_start() -> None:
+            self.assertFalse(bus.get_faults())
+            events.append("explicit_start")
+            start()
+
+        with patch.object(bus, "clear_faults", record_clear), patch.object(bus, "start_all", record_start):
+            with contextlib.redirect_stdout(io.StringIO()):
+                recover(bus, True)
+        self.assertEqual(events, ["cleared_and_still_off", "explicit_start"])
+        self.advance(bus, pulses=(1, 1, 1, 1))
+        self.assertFalse(bus.get_faults())
 
     def test_window_configuration_is_per_motor_in_standalone_projects(self) -> None:
         for filename in ("tuning_profile", "realtime_audit"):

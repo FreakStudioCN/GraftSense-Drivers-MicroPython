@@ -16,6 +16,7 @@ __platform__ = "CPython 3.10+ / PC"
 
 # ======================================== 导入相关模块 ========================================
 import argparse
+import hashlib
 import csv
 import json
 import queue
@@ -159,7 +160,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--profile",
-        choices=("performance_profile", "tuning_profile", "realtime_audit", "i2c_benchmark", "switch_benchmark"),
+        choices=(
+            "performance_profile",
+            "tuning_profile",
+            "realtime_audit",
+            "i2c_benchmark",
+            "switch_benchmark",
+            "single_motor_pid_demo",
+            "four_motor_pid_demo",
+        ),
         default="performance_profile",
     )
     parser.add_argument("--reuse", action="store_true", help="reuse already verified device libraries; upload experiment scripts only")
@@ -169,6 +178,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path("pid-results"))
     parser.add_argument("--run", action="store_true", help="deploy and move motors; required")
     args = parser.parse_args()
+    public_example = args.profile in ("single_motor_pid_demo", "four_motor_pid_demo")
     if not 5 <= args.seconds <= 20:
         parser.error("Duration must be 5..20 seconds")
     if not args.run:
@@ -221,7 +231,8 @@ def main() -> None:
                         if text.startswith("TIMING,"):
                             data = list(map(int, text.split(",")[1:]))
                             device_stats[data[0]] = data[1:]
-                        print(text, flush=True)
+                        if not text.startswith("OBS,"):
+                            print(text, flush=True)
                 if cancelled.is_set():
                     raise KeyboardInterrupt("Plot closed")
 
@@ -247,11 +258,20 @@ def main() -> None:
                     transport.fs_writefile(dest, source.read_bytes())
                     if transport.fs_readfile(dest) != source.read_bytes():
                         raise RuntimeError("Upload verify failed: " + source.name)
+                commit = None
+                try:
+                    revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+                    if revision.returncode == 0:
+                        commit = revision.stdout.strip()
+                except OSError:
+                    pass  # 独立下载示例时无需安装Git；仍保留逐文件上传散列。
+                manifest = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in uploaded.glob("*.py")}
+                (args.out / "source-manifest.json").write_text(json.dumps({"commit": commit, "uploaded_sha256": manifest}, indent=2))
                 print("Upload verified. Starting in 15 seconds.", flush=True)
                 if cancelled.wait(15):
                     raise KeyboardInterrupt("Plot closed before motion")
                 code = "import sys\n"
-                code += "for n in ('switch_benchmark','direction_switch','i2c_strategies','i2c_benchmark','board_setup','performance_profile','tuning_profile','realtime_audit','realtime_audit_light','timing_audit','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n if n in globals(): del globals()[n]\n"
+                code += "for n in ('single_motor_pid_demo','four_motor_pid_demo','switch_benchmark','direction_switch','i2c_strategies','i2c_benchmark','board_setup','performance_profile','tuning_profile','realtime_audit','realtime_audit_light','timing_audit','pca9685','motor','encoder','pid','motor_controller','voltage_monitor','bus_dc_motor'):\n if n in sys.modules: del sys.modules[n]\n if n in globals(): del globals()[n]\n"
                 code += "import gc; gc.collect()\n"
                 code += f"import {args.profile}\n{args.profile}.run(True,{args.seconds})\n"
                 active_transport["running"] = transport
@@ -267,7 +287,7 @@ def main() -> None:
                         transport.serial.write(b"\x03\x03")
                         transport.enter_raw_repl(soft_reset=False)
                         transport.exec(
-                            "from machine import I2C,Pin\ni=I2C(0,scl=Pin(9),sda=Pin(10),freq=400000)\ni.writeto_mem(0x4f,0,b'\\x20')\nfor c in range(8): i.writeto_mem(0x4f,6+4*c,b'\\x00\\x00\\x00\\x10')\nprint('OUTPUTS_OFF')",
+                            "from machine import I2C,Pin\ni=I2C(0,scl=Pin(9),sda=Pin(10),freq=400000)\ntry:\n i.writeto_mem(0x4f,0,b'\\x20')\n for c in range(8): i.writeto_mem(0x4f,6+4*c,b'\\x00\\x00\\x00\\x10')\n print('OUTPUTS_OFF_READBACK',i.readfrom_mem(0x4f,6,32)==b'\\x00\\x00\\x00\\x10'*8)\nfinally:\n i.deinit()",
                             data_consumer=lambda b: log.write(b),
                         )
                     except BaseException as exc:
@@ -376,6 +396,8 @@ def main() -> None:
                     )
                     if bus_configs:
                         title.set_text(f"I2C case {int(phase)} | {bus_configs[int(phase)]} | fixed per-motor PI")
+                    if public_example:
+                        title.set_text(f"BusDCMotor public example: {args.profile} | stage {int(phase)} | online reversal")
                     for i, (target, actual) in enumerate(lines):
                         target.set_data(a[:, 2] / 1000, a[:, 3 + i])
                         actual.set_data(a[:, 2] / 1000, a[:, 7 + i])
@@ -384,6 +406,8 @@ def main() -> None:
                             if configs
                             else ("Measured (80ms window)" if phase == 5 else "Measured (raw)")
                         )
+                        if public_example:
+                            actual.set_label("Measured (raw 100ms)")
                         axes.flat[i].get_legend().get_texts()[1].set_text(actual.get_label())
                         m = response_metrics(last_reference_segment(selected, i), i)
                         if m:
@@ -407,6 +431,12 @@ def main() -> None:
                         f"4-loop update {costs[0]:.3f} ms | I2C {costs[1]:.3f} ms | PID {costs[2]:.3f} ms | previous serial print {costs[3]:.3f} ms\n"
                         + feedback_note
                     )
+                    if public_example:
+                        info.set_text(
+                            f"Public BusDCMotor.update wall time {costs[0]:.3f} ms | previous print {costs[3]:.3f} ms | requested baud {args.baud}\n"
+                            "Raw 100ms feedback; I2C/PID not separately profiled (-1 in CSV means unmeasured).\n"
+                            "Online target reversal preserves motion between stages; zero/explicit-stop stages are separate cases."
+                        )
                 fig.canvas.draw()
                 w, h = fig.canvas.get_width_height(physical=True)
                 frame = Image.frombuffer("RGBA", (w, h), fig.canvas.buffer_rgba(), "raw", "RGBA", 0, 1)
@@ -424,7 +454,11 @@ def main() -> None:
                 period_ms=a[-1, 1], samples=len(a), motors=[response_metrics(last_reference_segment(selected, i), i) for i in range(4)]
             )
             summary[phase]["timing_ms"] = {
-                name: dict(mean=float(np.mean(a[:, col]) / 1000), p95=float(np.percentile(a[:, col], 95) / 1000), max=float(np.max(a[:, col]) / 1000))
+                name: (
+                    dict(mean=float(np.mean(a[:, col]) / 1000), p95=float(np.percentile(a[:, col], 95) / 1000), max=float(np.max(a[:, col]) / 1000))
+                    if np.all(a[:, col] >= 0)
+                    else None
+                )
                 for name, col in zip(COLUMNS[16:20], range(16, 20))
             }
             dt = a[:, 20]

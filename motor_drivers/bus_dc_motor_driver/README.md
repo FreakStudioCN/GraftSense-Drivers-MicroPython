@@ -326,6 +326,8 @@ PID 0.15/0.6/0 是现有电机低速短时测试的候选参数，不是所有�
 
 不要让第二个控制器同时操作相同通道。MotorController 的选择更新会继续采集全部编码器，但仅写 PID 模式的输出，防止开环和刹车被覆盖。应用长时间阻塞时没有后台线程补偿；硬件异常时尽力停机，但通信故障可能使某路无法关闭，应保留外部断电手段。
 
+底层两种换向均先关闭旧方向输入，成功后才写新方向PWM：负转正先B=0再A=PWM，正转负先A=0再B=PWM。关旧方向失败不会继续开新方向，更新异常路径仍尽力关闭全部通道并保留原异常。这里不等待转子机械停稳，也不加入通用200µs延时；特定H桥是否需要额外间隔须按其规格配置和验证。软件写入顺序不等同于已经测得物理PWM边沿无重叠。
+
 ### 无反馈保护与显式恢复
 
 配置编码器后，正式 `MotorController` 与 `BusDCMotor` 路径默认启用无反馈保护；纯开环无编码器的旧调用保持原样。构造参数 `feedback_protection` 接受配置字典，`None` 使用默认配置，`False` 为应用显式禁用检测；禁用检测不会清除已有故障。
@@ -367,8 +369,8 @@ PCA9685 通道共享频率。pwm_frequency 默认 1000，可指定 50；不能�
 | --- | --- |
 | code/main.py | 旧开环或四路 PID 完整使用入口 |
 | examples/bus_dc_motor_demo.py | 旧接口、开环/PID隔离及停止/刹车兼容性 |
-| examples/single_motor_pid_demo.py | 指定一路电机正反转，其余停止 |
-| examples/four_motor_pid_demo.py | 四路不同目标和混合方向 |
+| examples/single_motor_pid_demo.py | 正式BusDCMotor单路30/60RPM在线改速、重复正反转、零目标及停止重启 |
+| examples/four_motor_pid_demo.py | 正式BusDCMotor四路不同目标、混合方向、同时在线换向及停止重启 |
 | examples/tuning_profile.py | 分路 PI、测速窗口与起步补偿整定 |
 | examples/performance_profile.py | 100/30/20ms 控制周期和缓存/窗口比较 |
 | examples/realtime_audit.py | 四路全周期、I2C、PID、ADC、GC 和输出完成时差 |
@@ -383,16 +385,22 @@ PCA9685 通道共享频率。pwm_frequency 默认 1000，可指定 50；不能�
 python -m unittest discover -s motor_drivers/bus_dc_motor_driver/tests -p 'test_*.py'
 ```
 
-当前保留32项回归，不访问真实设备。检查范围包括运行库故障路径、单文件测试的默认禁止运动、安装依赖、分路窗口及规范化合同；不是实机测试的替代。
+当前保留36项回归，不访问真实设备。检查范围包括逐次换向写入顺序、换向异常停机、公开示例在线改速/显式恢复、运行库故障路径、单文件测试的默认禁止运动、安装依赖、分路窗口及规范化合同；不是实机测试的替代。
+
+普通调用示例只导入正式安装库，不重写PID、不替换底层方法、不读取控制器私有状态。沿用上表C3接线、MicroPython v1.29.0、7.4V额定电机和空载台架；PID仅粗调0.15/0.6/0、输出限幅±50%，保护参数见文件顶部。先把七模块放到`/lib/`，选择一个示例上传后运行；默认`ARM_MOTORS=False`，核对接线与供电后再显式开启。在线阶段直接改目标并持续update，阶段之间不stop；零目标、先停再启动另列阶段。正常结束和异常退出均清理电机、IRQ、ADC及自有I2C。
+
+故障恢复用示例中的`recover_after_check(motor, confirmed=True)`：应用先查询`get_faults()`、查明并排除原因，再显式确认。函数依次`clear_faults()`、确认仍停止、`start_all()`；不确认会拒绝，也不会自动重试运行。普通示例发现故障后报告并退出，故障注入属于独立测试，不能拿它替代正常示例。
 
 PC 绘图工具也为单文件，上传时只上传所选项目及运行库：
 
 ```powershell
 pip install matplotlib numpy pillow pyserial mpremote
 python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile tuning_profile --port COM8 --baud 921600 --run --seconds 15 --out pid-results-01
+python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile single_motor_pid_demo --port COM8 --baud 921600 --run --seconds 6 --out single-reversal-01
+python motor_drivers/bus_dc_motor_driver/examples/pc_live_plot.py --profile four_motor_pid_demo --port COM8 --baud 921600 --run --seconds 6 --out four-reversal-01
 ```
 
-可选项目为 `performance_profile`、`tuning_profile`、`realtime_audit`、`i2c_benchmark`、`switch_benchmark`。输出目录须不存在。明确 `--run` 后才上传并运行电机；先备份/校验，等待15秒，不改设备 main.py。运行错误或关图会通知设备停止并限时等待采集线程，结束状态写入本次输出目录。串口断线时不能把线程退出当成物理停机确认。
+可选项目还包括 `performance_profile`、`tuning_profile`、`realtime_audit`、`i2c_benchmark`、`switch_benchmark`。端口以本机实际枚举为准，输出目录须不存在；PC需安装ffmpeg并加入PATH。明确 `--run` 后才上传并运行电机；先备份/读回校验并保存提交号和源码散列，等待15秒，不改设备 main.py。输出串口日志、100ms原始反馈CSV和四路曲线录屏；普通示例的OBS行还记录累计计数/方向、电压、模式与故障。`loop_us`是正式update的墙钟耗时，I2C/PID未分别计时时CSV为-1、摘要为null，不作为有效耗时。阶段起点取首条新目标遥测，有一个遥测周期的定位误差。运行错误或关图会通知设备停止并限时等待采集线程，结束状态写入本次输出目录；退出时另尝试全关并回读。串口断线或回读失败时不能把线程退出当成物理停机确认。
 
 性能、调参和总线优化均为独立台架实验，不替换七模块默认 API/参数。记录会保存到用户指定目录，组件仓库不收录 CSV、日志、统计 JSON、录屏及过程报告。完整历史记录和复算工具见[云测试文档](https://f1829ryac0m.feishu.cn/docx/Kee4dEPucoFTGTxnyE4cKEEGnce)，PID 调整方法见[整定指南](docs/PID_TUNING.md)。
 

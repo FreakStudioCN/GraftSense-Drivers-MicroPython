@@ -90,6 +90,7 @@ class DCMotor:
             OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
         Notes:
+            先关闭非工作输入，成功后才开启工作输入；不附加通用换向延时 / Disable the opposite input before driving; no generic dead time.
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
@@ -101,15 +102,14 @@ class DCMotor:
 
         if speed > 0:
 
-            # 正转
+            # 先关闭旧反向输入；写失败直接传播，不能继续开启新方向。
+            self.pca.duty(self.channel_b, 0)
 
             self.pca.duty(self.channel_a, duty)
 
-            self.pca.duty(self.channel_b, 0)
-
         elif speed < 0:
 
-            # 反转
+            # 先关闭旧正向输入；由控制器异常路径继续尽力全停。
 
             self.pca.duty(self.channel_a, 0)
 
