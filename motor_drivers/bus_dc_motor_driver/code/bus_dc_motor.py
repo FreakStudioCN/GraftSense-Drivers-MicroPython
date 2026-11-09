@@ -34,7 +34,7 @@ class BusDCMotor:
     Attributes:
         pca9685、motor_count：共享PWM驱动和电机数。
     Methods:
-        set_motor_speed、set_target_rpm、set_pid、update、stop_all、deinit。
+        set_motor_speed、set_target_rpm、update、stop_all、get_faults、clear_faults、deinit。
     Notes:
         设置目标不启动输出；每路仅一种输出模式；调用方持有总线。
     ==================
@@ -42,7 +42,7 @@ class BusDCMotor:
     Attributes:
         pca9685, motor_count: borrowed PWM driver and motor count.
     Methods:
-        set_motor_speed, set_target_rpm, set_pid, update, stop_all, deinit.
+        set_motor_speed, set_target_rpm, update, stop_all, get_faults, clear_faults, deinit.
     Notes:
         Targets do not start output; one mode per motor; the caller owns the bus.
     """
@@ -61,7 +61,8 @@ class BusDCMotor:
         output_limit: tuple = (-100, 100),
         integral_limit: tuple = (-50, 50),
         startup_brake: bool = True,
-        pwm_frequency: float = 1000
+        pwm_frequency: float = 1000,
+        feedback_protection: object = None,
     ) -> None:
         """校验配置并创建实例。
 
@@ -81,6 +82,7 @@ class BusDCMotor:
             integral_limit: 积分状态下限、上限；尚未乘 Ki / Integral-state bounds before Ki.
             startup_brake: True 保留原库八通道全高刹车 / Legacy eight-channel brake if True.
             pwm_frequency: 整片共用 PWM 频率，24..1526 Hz / Shared chip PWM frequency in Hz.
+            feedback_protection: 编码器模式默认保护，dict配置或False禁用 / Default encoder protection, configuration dict, or False.
 
         Returns:
             None：无返回值 / No return value.
@@ -109,6 +111,8 @@ class BusDCMotor:
             raise ValueError("One A/B pin pair per motor is required")
         if pid_params is not None and (encoder_pins is None or len(pid_params) != motor_count):
             raise ValueError("PID parameters require matching encoder configuration")
+        if feedback_protection is not None and type(feedback_protection) is not bool and not isinstance(feedback_protection, dict):
+            raise ValueError("feedback_protection must be a dict, bool or None")
         self.pca9685 = pca9685
         self.motor_count = motor_count
         self._controller = None
@@ -133,6 +137,7 @@ class BusDCMotor:
                     gear_ratio=gear_ratio,
                     output_limit=output_limit,
                     integral_limit=integral_limit,
+                    feedback_protection=feedback_protection,
                 )
             if startup_brake:
                 # 原构造器即使 motor_count 小于四，也会将全部八通道置高。
@@ -168,6 +173,7 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
+            RuntimeError：保护故障锁存，须显式清除 / Protection fault is latched; explicit clearing is required.
             ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
             OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
@@ -183,6 +189,8 @@ class BusDCMotor:
             raise ValueError("Speed must be in range 1900..4095")
         if type(direction) is not int or direction not in (0, 1):
             raise ValueError("Direction must be 0 or 1")
+        if self._controller is not None:
+            self._controller._assert_can_drive(motor_id)
         try:
             self._disable_pid(motor_id)
             # 换向先关闭不使用的输入，避免旧 PWM 与新方向短时重叠。
@@ -248,6 +256,7 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
+            RuntimeError：保护故障锁存，须显式清除 / Protection fault is latched; explicit clearing is required.
             ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
             OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
@@ -258,6 +267,8 @@ class BusDCMotor:
         if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:
             raise ValueError("Invalid motor ID")
         i = self._index(motor_id)
+        if self._controller is not None:
+            self._controller._assert_can_drive(motor_id)
         try:
             self.stop_motor(motor_id)
             self.pca9685.duty(2 * i, 4095)
@@ -399,6 +410,7 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
+            RuntimeError：保护故障锁存，须显式清除 / Protection fault is latched; explicit clearing is required.
             ValueError/TypeError：参数类型、范围或结构无效 / Invalid argument type, range or structure.
             RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
             OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
@@ -411,6 +423,7 @@ class BusDCMotor:
             raise ValueError("Invalid motor ID")
         i = self._index(motor_id)
         controller = self._feedback()
+        controller._assert_can_drive(motor_id)
         if self._modes[i] != "pid":
             self.stop_motor(motor_id)
         controller.start_motor(motor_id)
@@ -429,6 +442,7 @@ class BusDCMotor:
             None：无返回值 / No return value.
 
         Raises:
+            RuntimeError：保护故障锁存，须显式清除 / Protection fault is latched; explicit clearing is required.
             RuntimeError：未配置编码器反馈 / Encoder feedback is not configured.
             OSError：底层硬件操作失败，保持原异常 / Hardware operation failed; the original exception is retained.
 
@@ -436,7 +450,9 @@ class BusDCMotor:
             可能配置 PWM 或更改控制状态；共享总线由调用方持有 / May configure PWM or change control state; bus is borrowed.
             仅供主循环调用，不可在中断中调用 / Not ISR-safe.
         """
-        self._feedback()
+        controller = self._feedback()
+        for motor_id in range(1, self.motor_count + 1):
+            controller._assert_can_drive(motor_id)
         try:
             for motor_id in range(1, self.motor_count + 1):
                 self.start_motor(motor_id)
@@ -614,9 +630,11 @@ class BusDCMotor:
             if self._controller is not None:
                 ids = [i + 1 for i, mode in enumerate(self._modes) if mode == "pid"]
                 self._controller.update(motor_ids=ids)
+                self._sync_fault_modes()
                 fields = self._controller.get_telemetry()
                 for motor_id in ids:
-                    self._pwms[motor_id - 1] = fields[(motor_id - 1) * 8 + 2]
+                    if self._modes[motor_id - 1] == "pid":
+                        self._pwms[motor_id - 1] = fields[(motor_id - 1) * 8 + 2]
             if self._voltage is not None:
                 self._voltage.update()
             self._last_update = now
@@ -627,6 +645,79 @@ class BusDCMotor:
             except Exception:
                 pass
             raise
+
+    def configure_feedback_protection(self, **settings: object) -> None:
+        """通过统一入口配置保护，故障仍需单独清除。
+        ==================
+        Configure protection through the facade without clearing faults.
+        Args:
+            settings: startup_grace_ms、timeout_ms、pwm_threshold、stop_policy、enabled / Controller protection settings.
+        Returns:
+            None：无返回值 / No return value.
+        Raises:
+            RuntimeError：未配置编码器；ValueError/TypeError：配置无效 / Missing encoders or invalid settings.
+        Notes:
+            不写输出，不自动启动；非ISR-safe / No output write or automatic start; not ISR-safe.
+        """
+        self._feedback().configure_feedback_protection(**settings)
+
+    def get_feedback_protection(self) -> dict:
+        """读取无反馈保护配置副本。
+        ==================
+        Read a copy of the no-feedback protection configuration.
+        Args:
+            无 / None.
+        Returns:
+            dict：配置副本 / Configuration snapshot.
+        Raises:
+            RuntimeError：未配置编码器 / Encoders are not configured.
+        Notes:
+            不访问I2C；非ISR-safe / No I2C access; not ISR-safe.
+        """
+        return self._feedback().get_feedback_protection()
+
+    def get_faults(self) -> tuple:
+        """读取故障ID、原因、时刻和关断尝试状态。
+        ==================
+        Read fault IDs, reasons, detection times and stop-attempt status.
+        Args:
+            无 / None.
+        Returns:
+            tuple：锁存故障快照；纯开环配置返回空元组 / Latched faults; empty for configurations without encoders.
+        Raises:
+            无主动抛出 / No explicit exceptions.
+        Notes:
+            stop_writes_ok不代表物理关断确认；非ISR-safe / Stop-write success is not physical confirmation; not ISR-safe.
+        """
+        return () if self._controller is None else self._controller.get_faults()
+
+    def clear_faults(self, motor_id: object = None) -> None:
+        """显式清故障，保持停止，随后仍须显式启动。
+        ==================
+        Clear faults explicitly while remaining stopped until a separate start.
+        Args:
+            motor_id: 一路ID或None表示全部 / One motor ID or None for all.
+        Returns:
+            None：无返回值 / No return value.
+        Raises:
+            ValueError：ID无效；RuntimeError：无编码器；Exception：关断失败 / Invalid ID, absent encoders or failed shutdown.
+        Notes:
+            清除前再次尝试关断，失败保留故障；非ISR-safe / Retry shutdown first; retain faults on failure; not ISR-safe.
+        """
+        if motor_id is not None and (type(motor_id) is not int or not 1 <= motor_id <= self.motor_count):
+            raise ValueError("Invalid motor ID")
+        controller = self._feedback()
+        try:
+            controller.clear_faults(motor_id)
+        finally:
+            self._sync_fault_modes()
+
+    def _sync_fault_modes(self) -> None:
+        controller = self._controller
+        for index in range(self.motor_count):
+            if controller._all_faulted or controller._faults[index] is not None:
+                self._modes[index] = "stopped"
+                self._pwms[index] = 0
 
     def _index(self, motor_id: int) -> int:
         if type(motor_id) is not int or not 1 <= motor_id <= self.motor_count:

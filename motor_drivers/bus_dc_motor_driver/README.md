@@ -106,6 +106,7 @@ PID_PARAMS = ((0.15, 0.6, 0),) * 4
 TARGET_RPMS = (30, -40, 50, -60)
 VOLTAGE_PIN = 4
 RUN_SECONDS = 10
+FEEDBACK_PROTECTION = {"startup_grace_ms": 4000, "timeout_ms": 2500, "pwm_threshold": 25, "stop_policy": "all"}
 # ======================================== 功能函数 ========================================
 # ======================================== 自定义类 ========================================
 # ======================================== 初始化配置 ========================================
@@ -174,6 +175,7 @@ def run() -> None:
                 startup_brake=False,
                 pwm_frequency=PWM_FREQUENCY,
                 output_limit=(-50, 50),
+                feedback_protection=FEEDBACK_PROTECTION,
             )
             time.sleep_ms(100)
             motor.update()
@@ -188,6 +190,10 @@ def run() -> None:
             print("elapsed_ms,id,target_rpm,actual_rpm,pwm,count,direction,voltage")
             while time.ticks_diff(time.ticks_ms(), start) < RUN_SECONDS * 1000:
                 if motor.update():
+                    faults = motor.get_faults()
+                    if faults:
+                        print("Latched motor fault:", faults)
+                        break
                     voltage = motor.get_voltage()
                     if not 6 < voltage < 9:
                         raise RuntimeError("Supply outside example range")
@@ -309,12 +315,41 @@ PID 0.15/0.6/0 是现有电机低速短时测试的候选参数，不是所有�
 | get_telemetry() | 每路 target/RPM/PWM/error/Kp/Ki/Kd/enabled 八字段，末尾全 PID 启动位 |
 | deinit() | 停止输出、注销本对象拥有的编码器 IRQ；不释放注入的 PCA、I2C 或电压监测器 |
 | update() | 协作式调度，默认内部限为至少 100 ms 一次；应用仍须持续调用 |
+| configure_feedback_protection(**settings) | 配置启动/换向宽限、无计数超时、输出阈值、停机策略与使能 |
+| get_feedback_protection() | 返回保护配置副本 |
+| get_faults() | 返回锁存故障快照；纯开环无编码器时返回空元组 |
+| clear_faults(id=None) | 再次关断成功后显式清故障；仍须单独start，不自动恢复 |
 
 未提供 encoder_pins 时，旧开环功能可独立使用；调用闭环或反馈接口会明确报错。未注入 voltage_monitor 时 get_voltage 报错，不默认抢占未知主控的 ADC GPIO。
 
 每个电机一次只能处于一种模式。调用旧开环 API 会关闭该路 PID；从开环或刹车设置 RPM 先停止输出，须显式 start 才进入 PID。处于 PID 模式时可在线修改目标和参数。stop 不等于清目标，如不希望以后恢复旧目标，应另设 RPM=0。
 
 不要让第二个控制器同时操作相同通道。MotorController 的选择更新会继续采集全部编码器，但仅写 PID 模式的输出，防止开环和刹车被覆盖。应用长时间阻塞时没有后台线程补偿；硬件异常时尽力停机，但通信故障可能使某路无法关闭，应保留外部断电手段。
+
+### 无反馈保护与显式恢复
+
+配置编码器后，正式 `MotorController` 与 `BusDCMotor` 路径默认启用无反馈保护；纯开环无编码器的旧调用保持原样。构造参数 `feedback_protection` 接受配置字典，`None` 使用默认配置，`False` 为应用显式禁用检测；禁用检测不会清除已有故障。
+
+```python
+# 本台架参考值，换电机/负载后需要配置。
+motor.configure_feedback_protection(
+    startup_grace_ms=4000, timeout_ms=2500,
+    pwm_threshold=25, stop_policy="all", enabled=True,
+)
+faults = motor.get_faults()
+# 查明原因后，先再次关断并清故障，再单独启动。
+if faults:
+    motor.clear_faults()
+    # 由应用决定何时重新启动：motor.start_all()
+```
+
+检测仅针对本次被选中更新的PID输出：PID已使能、目标非零、实际计算的PWM绝对值严格大于阈值时，持续无计数达到超时，且启动/换向宽限已结束，才锁存 `no_feedback`。脉冲变化或输出降到阈值以下会重置连续无反馈计时；重复start或重复设置同方向目标不会重开宽限，反向/零到非零、正常停止后再启动会重新建立检测状态。宽限和超时并行计时，不是简单相加；时间比较用ticks_diff，配置必须小于该计时器半周期。若输出限幅不超过阈值，检测条件不会成立，应调整阈值。
+
+故障原因叫“无反馈”，不直接断言堵转：断线、接线错误或机械问题都可能表现为无计数。默认 `stop_policy="all"` 会禁用全部PID、清积分/输出并尽力关闭全部配置通道，包括兼容入口中同时运行的开环电机；`"motor"` 只停故障路；若更新或停机过程出现异常，则升级为尽力全停并锁住故障范围。故障后持续update、改目标或恢复脉冲都不会自行恢复；故障范围内的start、开环驱动和刹车调用会拒绝，须先clear_faults再显式start。普通stop不会清故障。
+
+`get_faults()`返回副本，含motor_id、reason、latched、detected_ms、触发时目标/PWM/计数、stop_policy、stop_attempted、stop_writes_ok、stop_attempts、stop_error、last_stop_attempt_ms及exception_stop_all。`stop_writes_ok=True`仅表示停机写调用无异常，物理关断仍需寄存器回读或实物确认；写失败会保留首个异常和故障，继续尝试其余通道，并在后续update重试。clear_faults的再次关断失败时也保留故障。
+
+保护随update执行，不覆盖未配置编码器的电机、零目标、停止状态或开环自身的反馈缺失；all策略的故障停机仍会关闭其他模式。主循环不再调度、外设实现延后写入或I2C完全失联时，软件不能保证物理输出已关闭。当前保护以固件正常运行和周期调用为前提。
 
 ## 六、PWM 频率与兼容变化
 
@@ -348,7 +383,7 @@ PCA9685 通道共享频率。pwm_frequency 默认 1000，可指定 50；不能�
 python -m unittest discover -s motor_drivers/bus_dc_motor_driver/tests -p 'test_*.py'
 ```
 
-当前保留17项回归，不访问真实设备。检查范围包括运行库故障路径、单文件测试的默认禁止运动、安装依赖、分路窗口及规范化合同；不是实机测试的替代。
+当前保留32项回归，不访问真实设备。检查范围包括运行库故障路径、单文件测试的默认禁止运动、安装依赖、分路窗口及规范化合同；不是实机测试的替代。
 
 PC 绘图工具也为单文件，上传时只上传所选项目及运行库：
 

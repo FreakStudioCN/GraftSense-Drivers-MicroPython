@@ -24,6 +24,7 @@ PID_PARAMS = ((0.15, 0.6, 0),) * 4
 TARGET_RPMS = (30, -40, 50, -60)
 VOLTAGE_PIN = 4
 RUN_SECONDS = 10
+FEEDBACK_PROTECTION = {"startup_grace_ms": 4000, "timeout_ms": 2500, "pwm_threshold": 25, "stop_policy": "all"}
 # ======================================== 功能函数 ========================================
 # ======================================== 自定义类 ========================================
 # ======================================== 初始化配置 ========================================
@@ -92,6 +93,7 @@ def run() -> None:
                 startup_brake=False,
                 pwm_frequency=PWM_FREQUENCY,
                 output_limit=(-50, 50),
+                feedback_protection=FEEDBACK_PROTECTION,
             )
             time.sleep_ms(100)
             motor.update()
@@ -106,6 +108,10 @@ def run() -> None:
             print("elapsed_ms,id,target_rpm,actual_rpm,pwm,count,direction,voltage")
             while time.ticks_diff(time.ticks_ms(), start) < RUN_SECONDS * 1000:
                 if motor.update():
+                    faults = motor.get_faults()
+                    if faults:
+                        print("Latched motor fault:", faults)
+                        break
                     voltage = motor.get_voltage()
                     if not 6 < voltage < 9:
                         raise RuntimeError("Supply outside example range")

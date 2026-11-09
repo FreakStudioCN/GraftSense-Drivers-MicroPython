@@ -124,6 +124,7 @@ class Contracts(unittest.TestCase):
         clock.ticks_ms = ticks
         clock.ticks_us = lambda: self.now * 1000
         clock.ticks_diff = lambda a, b: a - b
+        clock.ticks_add = lambda a, b: (a + b) % (1 << 30)
         clock.sleep = clock.sleep_ms = clock.sleep_us = lambda _: None
         micro = types.ModuleType("micropython")
         self.buffers = []
@@ -144,7 +145,7 @@ class Contracts(unittest.TestCase):
             sys.modules.pop(name, None)
         self.mods = {name: importlib.import_module(name) for name in MODULES}
 
-    def make_bus(self) -> object:
+    def make_bus(self, **settings: object) -> object:
         self.i2c = I2C()
         self.pca = self.mods["pca9685"].PCA9685(self.i2c, 0x4F)
         self.monitor = self.mods["voltage_monitor"].VoltageMonitor()
@@ -154,7 +155,349 @@ class Contracts(unittest.TestCase):
             encoder_pins=((5, 6), (7, 8), (3, 2), (1, 0)),
             voltage_monitor=self.monitor,
             startup_brake=False,
+            **settings,
         )
+
+    def controlled_bus(self, **guard: object) -> object:
+        self.now = 0
+        sys.modules["time"].ticks_ms = lambda: self.now
+        bus = self.make_bus(control_period_ms=20, feedback_protection=guard)
+        for motor_id in range(1, 5):
+            bus.set_pid(motor_id, 1, 0, 0)
+        self.writes = []
+        original = self.i2c.writeto_mem
+
+        def record(address: int, register: int, data: object) -> None:
+            self.writes.append((register, bytes(data)))
+            original(address, register, data)
+
+        self.i2c.writeto_mem = record
+        return bus
+
+    def advance(self, bus: object, milliseconds: int = 100, pulses: object = None) -> bool:
+        self.now = (self.now + milliseconds) % (1 << 30)
+        if pulses is not None:
+            for encoder, delta in zip(bus._controller._encoders, pulses):
+                encoder.count += delta
+        return bus.update()
+
+    def assert_all_off(self, bus: object) -> None:
+        self.assertEqual(bus.get_modes(), ("stopped",) * 4)
+        self.assertTrue(all(not p.enabled and p.integral == 0 and p.output == 0 for p in bus._controller._pids))
+        for channel in range(8):
+            self.assertEqual(self.i2c.memory[6 + channel * 4 + 3] & 0x10, 0x10)
+
+    def test_iterable_selection_preserves_none_empty_list_tuple_and_iterator(self) -> None:
+        bus = self.controlled_bus(enabled=False)
+        c = bus._controller
+        c.set_target_rpms((30, 30, 30, 30))
+        c.start_all()
+
+        class SequenceSlot:
+            def __getitem__(self, index: int) -> int:
+                return (1, 3)[index]
+
+        slot = SequenceSlot()
+        self.assertFalse(hasattr(slot, "__iter__"))
+        for selected, expected in ((None, 8), ([], 0), ([1], 2), ((2, 4), 4), (iter([3]), 2), (slot, 4)):
+            self.writes.clear()
+            self.now += 100
+            c._encoders[0].count += 1
+            self.assertTrue(c.update(selected))
+            self.assertEqual(len(self.writes), expected)
+            self.assertGreater(c.get_motor_rpm(1), 0)
+
+    def test_selection_fully_validated_before_any_feedback_or_output(self) -> None:
+        bus = self.controlled_bus(enabled=False)
+        c = bus._controller
+        for invalid in (3, [0], [5], [1, 2, "bad"], iter([1, 8])):
+            self.writes.clear()
+            with patch.object(c._encoders[0], "get_count", side_effect=AssertionError("Premature feedback read")):
+                with self.assertRaises(ValueError):
+                    c.update(invalid)
+            self.assertEqual(self.writes, [])
+
+    def test_public_facade_mixed_and_stopped_updates_do_not_overwrite_open_output(self) -> None:
+        bus = self.controlled_bus(enabled=False)
+        bus.set_motor_speed(1, 1900)
+        bus.set_target_rpm(2, 30)
+        bus.start_motor(2)
+        before = bytes(self.i2c.memory[i] for i in range(6, 14))
+        self.writes.clear()
+        self.advance(bus, pulses=(3, 2, 0, 0))
+        self.assertEqual(bytes(self.i2c.memory[i] for i in range(6, 14)), before)
+        self.assertEqual(len(self.writes), 2)
+        self.assertGreater(bus.get_motor_rpm(1), 0)
+        bus.stop_all()
+        self.writes.clear()
+        self.advance(bus, pulses=(1, 1, 1, 1))
+        self.assertEqual(self.writes, [])
+        self.assertGreater(bus.get_motor_rpm(4), 0)
+
+    def test_no_count_start_latches_all_motors_and_does_not_self_restart(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=400, timeout_ms=250, pwm_threshold=25)
+        bus.set_target_rpms((30, -40, 50, -60))
+        bus.start_all()
+        for _ in range(3):
+            self.advance(bus)
+            self.assertEqual(bus.get_faults(), ())
+        self.advance(bus)
+        faults = bus.get_faults()
+        self.assertEqual(len(faults), 1)
+        self.assertEqual((faults[0]["motor_id"], faults[0]["reason"], faults[0]["detected_ms"]), (1, "no_feedback", 400))
+        self.assertTrue(faults[0]["latched"] and faults[0]["stop_attempted"] and faults[0]["stop_writes_ok"])
+        self.assert_all_off(bus)
+        for _ in range(8):
+            bus.set_target_rpms((40, 30, 20, 10))
+            self.advance(bus, pulses=(2, 2, 2, 2))
+            self.assert_all_off(bus)
+        for action in (lambda: bus.start_motor(1), bus.start_all, lambda: bus.set_motor_speed(2, 1900), lambda: bus.break_motor(3)):
+            with self.assertRaises(RuntimeError):
+                action()
+        bus.configure_feedback_protection(enabled=False)
+        with self.assertRaises(RuntimeError):
+            bus.start_all()
+        bus.clear_faults()
+        self.assertEqual(bus.get_faults(), ())
+        self.assert_all_off(bus)
+        bus.start_all()
+        self.advance(bus)
+        self.assertTrue(all(pid.enabled for pid in bus._controller._pids))
+
+    def test_moving_then_frozen_counts_uses_elapsed_time_not_cycle_count(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=250, pwm_threshold=5)
+        bus.set_target_rpm(1, 60)
+        bus.start_motor(1)
+        for _ in range(5):
+            self.advance(bus, pulses=(1, 0, 0, 0))
+        self.assertFalse(bus.get_faults())
+        self.advance(bus, 120)
+        self.advance(bus, 100)
+        self.assertFalse(bus.get_faults())
+        self.advance(bus, 40)
+        self.assertEqual(bus.get_faults()[0]["detected_ms"], 760)
+        self.assert_all_off(bus)
+
+    def test_sparse_pulses_and_repeated_start_or_target_do_not_bypass_timeout(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=300, pwm_threshold=5)
+        bus.set_target_rpm(1, 60)
+        bus.start_motor(1)
+        for i in range(20):
+            self.advance(bus, pulses=(1 if i % 2 else 0, 0, 0, 0))
+        self.assertFalse(bus.get_faults())
+        for _ in range(4):
+            if bus.get_faults():
+                break
+            bus.start_motor(1)
+            bus.set_target_rpm(1, 60)
+            self.advance(bus)
+        self.assertTrue(bus.get_faults())
+
+    def test_reversal_grace_zero_target_stop_and_restart_are_distinct(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=400, timeout_ms=250, pwm_threshold=5)
+        bus.set_target_rpm(1, 60)
+        bus.start_motor(1)
+        for _ in range(8):
+            self.advance(bus, pulses=(1, 0, 0, 0))
+        bus.set_target_rpm(1, -60)
+        for _ in range(4):
+            self.advance(bus)
+        self.assertFalse(bus.get_faults())
+        self.advance(bus)
+        self.assertTrue(bus.get_faults())
+        bus.clear_faults()
+        bus.set_target_rpm(1, 0)
+        bus.start_motor(1)
+        for _ in range(10):
+            self.advance(bus)
+        self.assertFalse(bus.get_faults())
+        bus.set_target_rpm(1, 60)
+        self.advance(bus)
+        bus.stop_motor(1)
+        for _ in range(10):
+            self.advance(bus)
+        self.assertFalse(bus.get_faults())
+        bus.start_motor(1)
+        self.advance(bus)
+        self.assertFalse(bus.get_faults())
+
+    def test_output_threshold_requires_continuous_qualified_output(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=200, pwm_threshold=25)
+        bus.set_target_rpm(1, 25)
+        bus.start_motor(1)
+        for _ in range(10):
+            self.advance(bus)
+        self.assertFalse(bus.get_faults())
+        bus.set_target_rpm(1, 30)
+        self.advance(bus)
+        bus.set_target_rpm(1, 20)
+        self.advance(bus)
+        bus.set_target_rpm(1, 30)
+        self.advance(bus)
+        self.advance(bus)
+        self.assertFalse(bus.get_faults())
+        self.advance(bus)
+        self.assertTrue(bus.get_faults())
+
+    def test_single_motor_stop_policy_keeps_other_pid_and_open_motor_running(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=250, pwm_threshold=5, stop_policy="motor")
+        bus.set_motor_speed(3, 1900)
+        bus.set_target_rpms((60, 60, 0, 0))
+        # 设置第三路目标会退出其开环状态，再显式恢复开环。
+        bus.set_motor_speed(3, 1900)
+        bus.start_motor(1)
+        bus.start_motor(2)
+        for _ in range(4):
+            self.advance(bus, pulses=(0, 1, 0, 0))
+        self.assertEqual(bus.get_faults()[0]["motor_id"], 1)
+        self.assertEqual(bus.get_modes(), ("stopped", "pid", "open", "stopped"))
+        self.assertFalse(bus._controller._pids[0].enabled)
+        self.assertTrue(bus._controller._pids[1].enabled)
+        with self.assertRaises(RuntimeError):
+            bus.start_all()
+        bus.clear_faults(1)
+        bus.start_motor(1)
+        self.advance(bus, pulses=(1, 1, 0, 0))
+        self.assertFalse(bus.get_faults())
+
+    def test_fault_shutdown_attempts_remaining_channels_and_preserves_first_error(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=200, pwm_threshold=5)
+        bus.set_target_rpms((60, 60, 60, 60))
+        bus.start_all()
+        self.advance(bus)
+        self.advance(bus)
+        original = self.pca.duty
+        calls = []
+        failure = OSError("channel zero off failed")
+
+        def fail_zero(channel: int, value: int, invert: bool = False) -> int:
+            calls.append((channel, value))
+            if channel == 0 and value == 0:
+                raise failure
+            return original(channel, value, invert)
+
+        with patch.object(self.pca, "duty", fail_zero):
+            with self.assertRaises(OSError) as caught:
+                self.advance(bus)
+            self.assertIs(caught.exception, failure)
+            self.assertTrue(all((channel, 0) in calls for channel in range(8)))
+            fault = bus.get_faults()[0]
+            self.assertEqual(fault["reason"], "no_feedback")
+            self.assertTrue(fault["stop_attempted"])
+            self.assertFalse(fault["stop_writes_ok"])
+            self.assertEqual(fault["stop_error"], str(failure))
+            with self.assertRaises(OSError):
+                bus.clear_faults()
+            self.assertTrue(bus.get_faults())
+        self.advance(bus)
+        self.assertTrue(bus.get_faults()[0]["stop_writes_ok"])
+        self.assertEqual(bus.get_faults()[0]["stop_error"], str(failure))
+        self.assert_all_off(bus)
+
+    def test_guard_handles_tick_wrap_and_configuration_is_atomic(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=250, pwm_threshold=5)
+        clock = sys.modules["time"]
+        clock.ticks_diff = lambda a, b: ((a - b + (1 << 29)) % (1 << 30)) - (1 << 29)
+        self.now = (1 << 30) - 150
+        bus._last_update = bus._controller._last_time = self.now
+        bus.set_target_rpm(1, 60)
+        bus.start_motor(1)
+        for _ in range(4):
+            self.advance(bus)
+        self.assertTrue(bus.get_faults())
+        settings = bus.get_feedback_protection()
+        for bad in (
+            {"timeout_ms": 0},
+            {"startup_grace_ms": -1},
+            {"timeout_ms": 1 << 29},
+            {"pwm_threshold": float("nan")},
+            {"pwm_threshold": 100},
+            {"stop_policy": "bad"},
+            {"enabled": 1},
+        ):
+            with self.assertRaises(ValueError):
+                bus.configure_feedback_protection(**bad)
+            self.assertEqual(bus.get_feedback_protection(), settings)
+        faults = bus.get_faults()
+        faults[0]["reason"] = "changed copy"
+        self.assertEqual(bus.get_faults()[0]["reason"], "no_feedback")
+
+    def test_io_exception_escalates_single_fault_policy_to_all_stop(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=200, pwm_threshold=5, stop_policy="motor")
+        bus.set_target_rpms((60, 60, 60, 60))
+        bus.start_all()
+        for _ in range(3):
+            self.advance(bus, pulses=(0, 1, 1, 1))
+        self.assertEqual(bus.get_modes()[1:], ("pid", "pid", "pid"))
+        original = self.pca.duty
+        failure = OSError("healthy motor write failed")
+
+        def fail_drive(channel: int, value: int, invert: bool = False) -> int:
+            if channel == 2 and value > 0:
+                raise failure
+            return original(channel, value, invert)
+
+        with patch.object(self.pca, "duty", fail_drive):
+            with self.assertRaises(OSError) as caught:
+                self.advance(bus, pulses=(0, 1, 1, 1))
+        self.assertIs(caught.exception, failure)
+        self.assert_all_off(bus)
+        fault = bus.get_faults()[0]
+        self.assertEqual(fault["reason"], "no_feedback")
+        self.assertTrue(fault["exception_stop_all"])
+        with self.assertRaises(RuntimeError):
+            bus.start_motor(2)
+
+    def test_clear_and_restart_rearms_the_same_guard_for_repeated_faults(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=200, pwm_threshold=5)
+        detected = []
+        for _ in range(2):
+            bus.set_target_rpm(1, 60)
+            bus.start_motor(1)
+            for _ in range(3):
+                self.advance(bus)
+            detected.append(bus.get_faults()[0]["detected_ms"])
+            self.assert_all_off(bus)
+            bus.clear_faults()
+            self.assertEqual(bus.get_faults(), ())
+            self.assert_all_off(bus)
+        self.assertEqual(detected, [300, 600])
+
+    def test_clear_shutdown_failure_preserves_fault_and_escalates_to_all_stop(self) -> None:
+        bus = self.controlled_bus(startup_grace_ms=0, timeout_ms=200, pwm_threshold=5, stop_policy="motor")
+        bus.set_target_rpms((60, 60, 60, 60))
+        bus.start_all()
+        for _ in range(3):
+            self.advance(bus, pulses=(0, 1, 1, 1))
+        failure = OSError("explicit clear shutdown failed")
+        original = self.pca.duty
+
+        def fail_off(channel: int, value: int, invert: bool = False) -> int:
+            if channel == 0 and value == 0:
+                raise failure
+            return original(channel, value, invert)
+
+        with patch.object(self.pca, "duty", fail_off):
+            with self.assertRaises(OSError) as caught:
+                bus.clear_faults(1)
+        self.assertIs(caught.exception, failure)
+        fault = bus.get_faults()[0]
+        self.assertEqual(fault["reason"], "no_feedback")
+        self.assertTrue(fault["exception_stop_all"])
+        self.assertFalse(fault["stop_writes_ok"])
+        self.assertTrue(all(not p.enabled for p in bus._controller._pids))
+        with self.assertRaises(RuntimeError):
+            bus.start_motor(2)
+
+    def test_default_protection_and_explicit_disable_do_not_change_legacy_only_api(self) -> None:
+        bus = self.controlled_bus()
+        self.assertEqual(
+            bus.get_feedback_protection(), dict(startup_grace_ms=4000, timeout_ms=2500, pwm_threshold=25.0, stop_policy="all", enabled=True)
+        )
+        legacy = self.mods["bus_dc_motor"].BusDCMotor(self.pca, 4, startup_brake=False)
+        legacy.set_motor_speed(1, 1900)
+        self.assertEqual(legacy.get_faults(), ())
+        legacy.stop_all()
 
     def test_encoder_direction_resolution_and_cleanup(self) -> None:
         encoder = self.mods["encoder"].Encoder(5, 6)

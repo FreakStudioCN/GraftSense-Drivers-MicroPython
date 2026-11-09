@@ -108,6 +108,9 @@ def run() -> None:
             start = time.ticks_ms()
             while time.ticks_diff(time.ticks_ms(), start) < seconds * 1000:
                 if motor.update():
+                    faults = motor.get_faults()
+                    if faults:
+                        raise RuntimeError("Latched motor fault: %s" % (faults,))
                     fields = motor.get_telemetry()
                     modes = motor.get_modes()
                     supply = motor.get_voltage()
